@@ -49,7 +49,18 @@ em{font-style:italic;font-family:Georgia,"Noto Serif JP",serif}
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 336px;gap:22px;align-items:start;padding-top:24px;padding-bottom:30px}
 .stage{min-width:0}
 #cv{display:block;width:100%;height:auto;aspect-ratio:880/660;background:#f8f6f1;
-  border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+  border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);cursor:pointer}
+.cv-wrap{position:relative}
+.start-overlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;background:rgba(248,246,241,.62);
+  border:1px solid var(--line);border-radius:12px;cursor:pointer;z-index:2}
+.start-cap{font-size:11px;letter-spacing:.22em;color:var(--ink-soft);text-transform:uppercase}
+.start-btn{font-family:inherit;display:inline-flex;align-items:center;gap:12px;
+  background:var(--accent);color:#fff;border:1px solid var(--accent);border-radius:999px;
+  font-size:20px;font-weight:600;letter-spacing:.1em;padding:15px 38px;cursor:pointer;
+  box-shadow:0 8px 22px -10px rgba(23,32,52,.5);transition:background .18s,border-color .18s,transform .12s}
+.start-btn:hover{background:var(--accent-2);border-color:var(--gold)}
+.start-btn:active{transform:translateY(1px)}
 .notes{margin-top:14px;font-size:12.5px;line-height:1.85;color:#59606b;border-left:2px solid rgba(176,138,62,.55);padding-left:12px}
 
 .panel{display:flex;flex-direction:column;gap:14px}
@@ -132,7 +143,13 @@ select:focus{outline:1px solid var(--gold);outline-offset:1px}
 
 <main class="wrap layout">
   <section class="stage">
-    <canvas id="cv"></canvas>
+    <div class="cv-wrap">
+      <canvas id="cv"></canvas>
+      <div id="startOverlay" class="start-overlay">
+        <span class="start-cap" id="startCap">クリックで開始</span>
+        <button class="start-btn" id="startBtn">&#9654; <span id="startLabel">スタート</span></button>
+      </div>
+    </div>
     <p class="notes" id="note-galton">各釘を左右に散乱させる確率を <em>p</em> とすると、左から <em>k</em> 番目のビン（右へ <em>k</em> 回散乱）の度数は二項分布 Bin(<em>n</em>, <em>p</em>) に従い、<em>n</em>&nbsp;&rarr;&nbsp;&infin; で N(<em>np</em>, <em>np</em>(1&minus;<em>p</em>)) に収束する（中心極限定理・ド・モアブル&ndash;ラプラスの定理）。実測柱と理論曲線の一致、および <em>p</em>&nbsp;&ne;&nbsp;1/2 における分布の歪みを観察されたい。</p>
     <p class="notes hidden" id="note-rw">全粒子が中心から出発し、各粒子は互いに独立なランダムウォークを行う。時刻 <em>t</em> における位置分布は中心極限定理により N(<em>&mu;t</em>, &sigma;&sup2;<em>t</em>) へ収束する（分散はステップ分散の加法性により &sigma;&sup2;<em>t</em> で増大する）。ステップ分布としてコーシー分布を選ぶと平均・分散が存在しないため正規収束せず、裾の重い分布（重尾分布）の対比例となる。なお反射壁は箱型領域による有限化のためであり、&sigma;&radic;<em>t</em> が領域幅と同程度になると境界の影響が現れる。</p>
   </section>
@@ -141,7 +158,7 @@ select:focus{outline:1px solid var(--gold);outline-offset:1px}
     <div class="card">
       <div class="card-head">
         <span class="card-title">実行制御</span>
-        <button class="btn small" id="runBtn" data-act="toggleRun">停止</button>
+        <button class="btn small" id="runBtn" data-act="toggleRun">スタート</button>
       </div>
       <div class="pane" id="ctl-galton">
         <label class="ctl">
@@ -568,7 +585,7 @@ var G={
 G.rows=UI.galton.rows;G.p=UI.galton.p;G.spawnRate=UI.galton.spawnRate;G.timeScale=UI.galton.timeScale;G.ballSize=UI.galton.ballSize;
 
 var R={
-  N:800,sigma:1,mu:0,dist:'normal',speed:30,t:0,acc:0,
+  N:800,sigma:1,mu:0,dist:'normal',speed:30,t:0,acc:0,seeded:false,
   parts:[],counts:[],nBins:81,binW:10,x0:44,x1:836,top:0,floorY:0,cx:440,
   build:function(keep){
     this.cx=W/2;
@@ -581,9 +598,11 @@ var R={
     if(!keep){
       this.t=0;this.acc=0;
       this.parts=[];
-      var cxp=this.cx,cyp=(20+this.floorY-94)/2;
-      for(var i=0;i<this.N;i++){
-        this.parts.push({x:cxp+(Math.random()*2-1)*1.5,y:cyp+(Math.random()*2-1)*1.5});
+      if(this.seeded){
+        var cxp=this.cx,cyp=(20+this.floorY-94)/2;
+        for(var i=0;i<this.N;i++){
+          this.parts.push({x:cxp+(Math.random()*2-1)*1.5,y:cyp+(Math.random()*2-1)*1.5});
+        }
       }
       this.hist();
     }else{
@@ -898,7 +917,7 @@ function drawRW(){
   }
 }
 
-var active='galton',running=true;
+var active='galton',running=false,started=false;
 var lastStat=0;
 
 function setTab(k){
@@ -957,11 +976,27 @@ $$('[data-act]').forEach(function(btn){
     if(act==='reset'){if(active==='galton')G.build(false);else R.build(false);}
     else if(act==='dropAll'){if(active==='galton')G.drain=true;}
     else if(act==='toggleRun'){
-      running=!running;
-      $('#runBtn').textContent=running?'停止':'再開';
+      setRun(!running);
     }
   });
 });
+
+var startOverlay=$('#startOverlay');
+function setRun(on){
+  running=on;
+  if(on&&!started){
+    started=true;
+    G.build(false);
+    R.seeded=true;
+    R.build(false);
+  }
+  startOverlay.classList.toggle('hidden',on);
+  $('#runBtn').textContent=on?'停止':(started?'再開':'スタート');
+  $('#startLabel').textContent=started?'再開':'スタート';
+  $('#startCap').textContent=started?'クリックで再開':'クリックで開始';
+}
+startOverlay.addEventListener('click',function(){setRun(true);});
+$('#cv').addEventListener('click',function(){setRun(!running);});
 
 function T(id,v){document.getElementById(id).textContent=v;}
 
