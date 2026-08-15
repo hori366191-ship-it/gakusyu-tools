@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学習ツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', system-ui, sans-serif;
+    background: #ffffff;
+    color: #1f2933;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(15, 23, 42, .032) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, .032) 1px, transparent 1px);
+    background-size: 28px 28px;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* ---- ヒーロー ---- */
+  .hero {
+    position: relative;
+    text-align: center;
+    padding: 96px 20px 84px;
+    overflow: hidden;
+    background: #1e2a4a;
+  }
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, .045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, .045) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .hero__kicker, .hero__title, .hero__sub { position: relative; z-index: 2; }
+  .hero__kicker {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .38em;
+    color: #a5b4fc;
+    text-transform: uppercase;
+  }
+  .hero__title {
+    margin: 16px 0 16px;
+    font-size: clamp(38px, 8vw, 60px);
+    font-weight: 900;
+    letter-spacing: .05em;
+    color: #ffffff;
+  }
+  .hero__sub {
+    margin: 0;
+    font-size: clamp(14px, 2.4vw, 16px);
+    font-weight: 500;
+    color: #dce4f0;
+  }
+
+  /* ---- カード ---- */
+  .cards {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 48px 20px 64px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 900px) {
+    .cards { grid-template-columns: 1fr; max-width: 520px; }
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #ffffff;
+    border: 1px solid #e6e8ee;
+    border-radius: 14px;
+    padding: 22px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 16px rgba(15, 23, 42, .05);
+    transition: transform .22s ease, box-shadow .22s ease;
+    animation: rise .5s ease both;
+  }
+  .card:nth-child(1) { animation-delay: .05s; }
+  .card:nth-child(2) { animation-delay: .12s; }
+  .card:nth-child(3) { animation-delay: .19s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(15, 23, 42, .05), 0 14px 28px rgba(15, 23, 42, .10); }
+  .card:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+
+  .card__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .card__icon svg { height: 58%; width: auto; }
+  .card--blue .card__icon { background: linear-gradient(135deg, #005a9c, #00457a); }
+  .card--green .card__icon { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+  .card--navy .card__icon { background: linear-gradient(135deg, #2a4a7f, #1f3a5f); }
+
+  .card__title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 900;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .card__badge {
+    font-size: 11px;
+    font-weight: 700;
+    background: #eef2ff;
+    color: #4f46e5;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: .03em;
+  }
+  .card__desc {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #6b7280;
+    flex: 1;
+  }
+  .card__btn {
+    align-self: flex-start;
+    padding: 7px 18px;
+    border-radius: 999px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: filter .2s ease, transform .2s ease, box-shadow .2s ease;
+  }
+  .card--blue .card__btn { background: linear-gradient(135deg, #005a9c, #00457a); }
+  .card--green .card__btn { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+  .card--navy .card__btn { background: linear-gradient(135deg, #2a4a7f, #1f3a5f); }
+  .card:hover .card__btn {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(30, 41, 59, .14);
+  }
+
+  /* ---- フッター ---- */
+  .footer {
+    text-align: center;
+    padding: 24px 20px 48px;
+    font-size: 12px;
+    color: #9aa3ae;
+    line-height: 1.9;
+  }
+  .footer b { color: #6b7280; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card { animation: none; }
+    .card:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <canvas class="hero-canvas" id="hero-canvas" aria-hidden="true"></canvas>
+    <p class="hero__kicker">Learning Tools</p>
+    <h1 class="hero__title">学習ツール</h1>
+    <p class="hero__sub">教室長自作の学習ツール</p>
+  </header>
+
+  <main class="cards">
+
+    <a class="card card--blue" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbzMNC1_ffakw1_1-zuYFNIhHj__NogqtjF--Yil-J4fRIW1i5BLYTF29dCNgkSCC2M2bg/exec" target="_blank" rel="noopener">
+      <div class="card__icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="13" y="6" width="38" height="52" rx="5" />
+          <text x="19" y="30" fill="#ffffff" stroke="none" font-family="inherit" font-size="17" font-weight="800">#</text>
+          <line x1="19" y1="40" x2="45" y2="40" />
+          <line x1="19" y1="48" x2="37" y2="48" />
+        </svg>
+      </div>
+      <h2 class="card__title">公式ビューア</h2>
+      <p class="card__desc">公式や暗記項目を、ブラウザでいつでも閲覧できるビューアです。<br>※少し起動に時間がかかります。</p>
+      <span class="card__btn">開く&nbsp;↗</span>
+    </a>
+
+    <a class="card card--green" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbxvoXt6H0_I1K5HOHCSYIPKR9PyoM-k8iXDNRPsxs3DsF0mtwE7AXgGNlxRE5d7eXZ4DA/exec" target="_blank" rel="noopener">
+      <div class="card__icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M32 16 C26 10 16 8 8 10 L8 50 C16 48 26 50 32 56 C38 50 48 48 56 50 L56 10 C48 8 38 10 32 16 Z" />
+          <line x1="32" y1="16" x2="32" y2="56" />
+        </svg>
+      </div>
+      <h2 class="card__title">英語長文 多読リーダー<span class="card__badge">教室タブレット限定</span></h2>
+      <p class="card__desc">英検レベル別の英語長文を読める多読リーダーです。教室タブレットでのみ利用できます。</p>
+      <span class="card__btn">開く&nbsp;↗</span>
+    </a>
+
+    <a class="card card--navy" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbw8YE3GKPq4kYm9eC5Hs9L0F6iDwP9qa3iOJZcYMboE0PQkHvXYbI74nTAjuuPUDyNahg/exec" target="_blank" rel="noopener">
+      <div class="card__icon">
+        <svg viewBox="0 0 80 60" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="10" y1="52" x2="72" y2="52" />
+          <line x1="12" y1="52" x2="12" y2="8" />
+          <path d="M14 52 C 22 52, 27 12, 40 12 C 53 12, 58 52, 66 52" stroke-width="3" />
+          <line x1="40" y1="52" x2="40" y2="14" />
+          <line x1="30" y1="52" x2="30" y2="38" stroke-dasharray="3 3" />
+          <line x1="50" y1="52" x2="50" y2="38" stroke-dasharray="3 3" />
+          <text x="36" y="34" fill="#ffffff" stroke="none" font-family="inherit" font-size="10" font-weight="700">μ</text>
+          <text x="18" y="34" fill="#ffffff" stroke="none" font-family="inherit" font-size="8.5">μ−σ</text>
+          <text x="50" y="34" fill="#ffffff" stroke="none" font-family="inherit" font-size="8.5">μ+σ</text>
+        </svg>
+      </div>
+      <h2 class="card__title">正規分布 シミュレーター</h2>
+      <p class="card__desc">正規分布の性質を視覚的に体験できる物理シミュレーション。</p>
+      <span class="card__btn">開く&nbsp;↗</span>
+    </a>
+
+  </main>
+
+  <footer class="footer">
+    <b>学習ツール</b> ・ 教室長自作の学習ツールのポータル<br>
+    多読リーダーは教室タブレットでのみ利用できます。
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+      var canvas = document.getElementById('hero-canvas');
+      if (!canvas || !canvas.getContext) return;
+      var ctx = canvas.getContext('2d');
+      var hero = canvas.parentElement;
+      var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // ---- 正多面体の定義（頂点は正規化し、辺は最短距離ペアから自動生成） ----
+      function makePoly(verts) {
+        var n = verts.map(function (v) {
+          var l = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+          return [v[0] / l, v[1] / l, v[2] / l];
+        });
+        var pairs = [];
+        for (var i = 0; i < n.length; i++) {
+          for (var j = i + 1; j < n.length; j++) {
+            var d = Math.hypot(n[i][0] - n[j][0], n[i][1] - n[j][1], n[i][2] - n[j][2]);
+            pairs.push([d, i, j]);
+          }
+        }
+        pairs.sort(function (a, b) { return a[0] - b[0]; });
+        var min = pairs[0][0];
+        return {
+          vs: n,
+          es: pairs.filter(function (p) { return p[0] < min * 1.05; }).map(function (p) { return [p[1], p[2]]; })
+        };
+      }
+
+      var phi = (1 + Math.sqrt(5)) / 2;
+      var icosa = makePoly([
+        [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
+        [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
+        [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
+      ]);
+      var cube = makePoly([
+        [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1],
+        [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]
+      ]);
+      var tetra = makePoly([
+        [1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]
+      ]);
+      var octa = makePoly([
+        [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]
+      ]);
+
+      // x, y: ヒーロー内の相対位置(-0.5〜0.5)。scale: 描画サイズ
+      var shapes = [
+        { poly: icosa, x: -0.30, y: 0.10, scale: 100, rx: 0.0040, ry: 0.0060, amp: 8, phase: 0.0, alpha: 0.50 },
+        { poly: cube,   x: 0.31, y: -0.14, scale: 56,  rx: 0.0060, ry: 0.0040, amp: 6, phase: 1.2, alpha: 0.42 },
+        { poly: tetra,  x: -0.36, y: -0.18, scale: 42, rx: 0.0070, ry: 0.0050, amp: 5, phase: 2.1, alpha: 0.38 },
+        { poly: octa,   x: 0.38, y: 0.20, scale: 30,  rx: 0.0050, ry: 0.0070, amp: 4, phase: 0.6, alpha: 0.34 }
+      ];
+
+      var W = 0, H = 0, dpr = 1;
+
+      function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = hero.clientWidth;
+        H = hero.clientHeight;
+        canvas.width = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function rotate(v, rx, ry) {
+        var c = Math.cos(ry), s = Math.sin(ry);
+        var x = v[0] * c + v[2] * s;
+        var z = -v[0] * s + v[2] * c;
+        var y = v[1];
+        var c2 = Math.cos(rx), s2 = Math.sin(rx);
+        var y2 = y * c2 - z * s2;
+        var z2 = y * s2 + z * c2;
+        return [x, y2, z2];
+      }
+
+      function draw(time) {
+        ctx.clearRect(0, 0, W, H);
+        var mobile = W < 640;
+        var s = mobile ? 0.55 : (W < 900 ? 0.8 : 1);
+
+        shapes.forEach(function (sh, idx) {
+          var cx = (0.5 + sh.x * (mobile ? 0.85 : 1)) * W;
+          var cy = (0.5 + sh.y * 0.9) * H;
+          var sc = sh.scale * s * (mobile ? 1.25 : 1);
+          var t = time * 0.001;
+          var ax = t * sh.rx + idx;
+          var ay = t * sh.ry + idx * 1.7;
+          var floatY = reduceMotion ? 0 : Math.sin(t * 0.8 + sh.phase) * sh.amp;
+
+          var proj = [];
+          for (var i = 0; i < sh.poly.vs.length; i++) {
+            var r = rotate(sh.poly.vs[i], ax, ay);
+            var z = r[2] + 3.2;
+            var f = 220 / z;
+            proj.push([cx + r[0] * f * sc / 100, cy + (r[1] * f * sc / 100) + floatY, 1 / z]);
+          }
+          // 奥行きでソートしてから描画
+          var es = sh.poly.es.map(function (e) { return [e, (proj[e[0]][2] + proj[e[1]][2]) / 2]; });
+          es.sort(function (a, b) { return a[1] - b[1]; });
+
+          ctx.beginPath();
+          ctx.strokeStyle = '#c7d2fe';
+          ctx.globalAlpha = sh.alpha;
+          ctx.lineWidth = 1.3;
+          for (var k = 0; k < es.length; k++) {
+            var p0 = proj[es[k][0][0]];
+            var p1 = proj[es[k][0][1]];
+            ctx.moveTo(p0[0], p0[1]);
+            ctx.lineTo(p1[0], p1[1]);
+          }
+          ctx.stroke();
+        });
+        ctx.globalAlpha = 1;
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
+      if (reduceMotion) {
+        draw(0);
+      } else {
+        (function loop(t) { draw(t); requestAnimationFrame(loop); })(0);
+      }
+    })();
+  </script>
+</body>
+</html>

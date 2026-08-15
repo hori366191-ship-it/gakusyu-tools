@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>公式ビューア</title>
+
+    <script>
+        // 画面がスマホサイズ（幅が768px以下）かどうかを判定
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global',
+                // スマホ表示では数式のスケールを少し小さくする
+                scale: isMobile ? 0.7 : 1.0
+            }
+        };
+    </script>
+
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js">
+        </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        /* ページ全体の高さを100%にするための設定 */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        /* ページ全体の基本設定 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", Meiryo, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+
+        /* 左側メニューコンテナ */
+        #menu-container {
+            width: 240px;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #f0f0f0;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* メニュー自体のスタイル（リスト部分） */
+        .side-menu {
+            padding: 20px 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .side-menu h3 {
+            font-size: 1.1em;
+            color: #005a9c;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+            margin: 0 0 15px 0;
+        }
+
+        .side-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .side-menu li a {
+            display: block;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: #333;
+            border-radius: 5px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            font-weight: 500;
+        }
+
+        .side-menu li a:hover {
+            background-color: #e9e9e9;
+        }
+
+.side-menu li a.active {
+    background-color: #005a9c;
+    color: white;
+    font-weight: bold;
+}
+
+/* 更新ボタン */
+#refresh-button {
+    margin-top: 10px;
+    padding: 8px 20px;
+    background-color: #005a9c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+#refresh-button:hover {
+    background-color: #00457a;
+}
+
+#refresh-button:disabled {
+    background-color: #999;
+    cursor: default;
+}
+
+/* マニアックタグ（発展・入試対策用の公式に付ける） */
+.tag-maniac {
+    display: inline-block;
+    background-color: #ff9800;
+    color: white;
+    font-size: 0.72em;
+    font-weight: bold;
+    padding: 1px 8px;
+    border-radius: 10px;
+    margin-left: 6px;
+    vertical-align: middle;
+    line-height: 1.5;
+}
+
+        /* QRコードコンテナ */
+        #qrcode-container {
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+
+        #qrcode-image {
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        #qrcode-image img {
+            display: block;
+            margin: 0 auto;
+            background: #fff;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .qrcode-caption {
+            font-size: 0.8em;
+            color: #666;
+            margin: 0;
+        }
+
+        .license-text {
+            display: block;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .license-text a {
+            color: #005a9c;
+            text-decoration: none;
+        }
+
+        .license-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* 右側メインコンテンツ */
+        #main-content {
+            margin-left: 240px;
+            padding: 0 40px;
+            max-width: 800px;
+        }
+
+        #main-content h1,
+        #main-content h2,
+        #main-content h3 {
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 8px;
+            margin-top: 40px;
+        }
+
+        #main-content h1 {
+            text-align: center;
+            border-bottom: 3px solid #555;
+            font-size: 2em;
+        }
+
+        #main-content h2 {
+            background-color: #e9e9e9;
+            padding: 10px;
+            border-left: 5px solid #555;
+            font-size: 1.6em;
+        }
+
+        #main-content h3 {
+            border-bottom: 1px dotted #aaa;
+            font-size: 1.3em;
+            margin-top: 30px;
+        }
+
+        #main-content ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        #main-content li {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+        }
+
+        #main-content strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #005a9c;
+        }
+
+        /* 表のスタイル */
+        #main-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        #main-content th,
+        #main-content td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        #main-content th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        #main-content tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* ▼▼▼▼▼ レスポンシブ対応（スマホ表示）のためのスタイル ▼▼▼▼▼ */
+
+        /* --- ハンバーガーボタン --- */
+        #menu-toggle-button {
+            display: none;
+            /* PCでは非表示 */
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 2000;
+            /* 最前面に表示 */
+            width: 44px;
+            height: 44px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- オーバーレイ --- */
+        #menu-overlay {
+            display: none;
+            /* PCでは非表示 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            /* メニューのすぐ下 */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #menu-overlay.is-open {
+            display: block;
+            opacity: 1;
+        }
+
+        /* --- 画面幅が768px以下の場合に適用 --- */
+        @media (max-width: 768px) {
+
+            /* ハンバーガーボタンを表示 */
+            #menu-toggle-button {
+                display: block;
+            }
+
+            /* メインコンテンツのマージンをなくす */
+            #main-content {
+                margin-left: 0;
+                padding: 0 15px;
+                /* スマホ用に余白を調整 */
+            }
+
+            /* メニューを画面外に隠す */
+            #menu-container {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            }
+
+            /* is-openクラスがついたらメニューを表示 */
+            #menu-container.is-open {
+                transform: translateX(0);
+            }
+        }
+
+        /* ▼▼▼▼▼ 暗記モード用のスタイル ▼▼▼▼▼ */
+
+        /* フローティングボタンのスタイル */
+        #memorize-toggle-button {
+            position: fixed;
+            /* 画面に固定 */
+            top: 20px;
+            right: 20px;
+            z-index: 1500;
+            /* 他の要素より手前に表示 */
+
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            /* 円形にする */
+
+            background-color: white;
+            color: #005a9c;
+            border: 1px solid #ddd;
+
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+
+            /* 影をつけて立体感を出す */
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+            /* アニメーション効果 */
+            transition: all 0.2s ease-in-out;
+
+            /* 中の文字を中央揃えにする */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #memorize-toggle-button:hover {
+            transform: scale(1.05);
+            /* 少し大きくする */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 暗記モードがONの時のボタンスタイル */
+        body.memorize-mode-on #memorize-toggle-button {
+            background-color: #005a9c;
+            color: white;
+            border: none;
+        }
+
+        /* 数式などを隠すためのスタイル */
+        .memorize-target {
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* 暗記モードONの時、かつ、まだ表示されていないターゲットのスタイル */
+        body.memorize-mode-on .memorize-target:not(.is-revealed) {
+            background-color: #d0d0d0;
+            color: #d0d0d0;
+            user-select: none;
+            /* テキスト選択を無効に */
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 0 0.2em;
+        }
+
+        /* MathJaxで生成された数式も隠す */
+        body.memorize-mode-on .memorize-target:not(.is-revealed) mjx-container {
+            opacity: 0;
+        }
+
+        /* ▼▼▼▼▼ 検索機能用のスタイル ▼▼▼▼▼ */
+
+        /* 検索トグルボタン（暗記ボタンの下に配置） */
+        #search-toggle-button {
+            position: fixed;
+            top: 90px;
+            /* 暗記ボタン(top:20px, height:56px)の下 */
+            right: 20px;
+            z-index: 1500;
+
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+
+            background-color: white;
+            color: #333;
+            border: 1px solid #ddd;
+
+            font-size: 1.5em;
+            /* 絵文字サイズ調整 */
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease-in-out;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #search-toggle-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 検索バーコンテナ */
+        #search-container {
+            position: fixed;
+            top: 20px;
+            right: 90px;
+            /* ボタンの左側に配置 */
+            z-index: 1500;
+
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            /* 丸みを持たせる */
+            padding: 5px 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #search-container.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px);
+        }
+
+        /* モバイル対応：検索バーの配置調整 */
+        @media (max-width: 600px) {
+            #search-container {
+                top: 85px;
+                /* ボタンの横ではなく下に回すなど調整 */
+                right: 85px;
+                /* または画面幅いっぱいに */
+                /* シンプルに左上に配置しなおす案 */
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 80%;
+                max-width: 300px;
+                justify-content: space-between;
+            }
+
+            #search-container.hidden {
+                transform: translate(-50%, -10px);
+            }
+        }
+
+        #search-input {
+            border: none;
+            outline: none;
+            font-size: 1em;
+            padding: 5px;
+            width: 120px;
+        }
+
+        #search-count {
+            font-size: 0.9em;
+            color: #666;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        #search-container button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #555;
+            padding: 0 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        #search-container button:hover {
+            background-color: #f0f0f0;
+            color: #005a9c;
+        }
+
+        /* ハイライトのスタイル */
+        .search-highlight {
+            background-color: #fffacd;
+            /* 薄い黄色 */
+            color: black;
+        }
+
+        .search-highlight.active {
+            background-color: #ff8c00;
+            /* オレンジ */
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <button id="menu-toggle-button" aria-label="メニューを開閉">☰</button>
+    <div id="menu-overlay"></div>
+
+    <div id="menu-container">
+        <div class="side-menu">
+            <p style="padding: 20px; text-align: center;">メニューを読込中...</p>
+        </div>
+    </div>
+
+    <button id="memorize-toggle-button" title="暗記モード ON/OFF">暗</button>
+    <button id="search-toggle-button" title="検索を開く">🔍</button>
+
+    <div id="search-container" class="hidden">
+        <input type="text" id="search-input" placeholder="検索...">
+        <span id="search-count">0/0</span>
+        <button id="search-prev-button" title="前へ">▲</button>
+        <button id="search-next-button" title="次へ">▼</button>
+        <button id="search-close-button" title="閉じる">×</button>
+    </div>
+
+    <main id="main-content">
+        <div id="content-body">
+            <h1>公式ビューア</h1>
+            <p style="text-align: center; color: #555;">左のメニューから表示したい項目を選択してください。</p>
+        </div>
+    </main>
+
+    <script>
+        // ▼▼▼▼▼ GAS Web App のURL（自動取得） ▼▼▼▼▼
+        const GAS_WEB_APP_URL = '<?= ScriptApp.getService().getUrl() ?>';
+        // ▲▲▲▲▲
+
+        // ▼▼▼▼▼ サーバーサイドで埋め込まれたバンドル（一覧+全コンテンツ） ▼▼▼▼▼
+        // ページロードの1回の実行で全データを取得し、コンテンツ切り替えをブラウザ内で完結させる
+        const INITIAL_BUNDLE = <?!= JSON.stringify(getBundle()).replace(/</g, '\\u003c') ?>;
+        // ▲▲▲▲▲
+
+        /**
+         * グローバル変数
+         */
+        let markdownFiles = []; // 取得したファイルリストを保持する配列
+        let isMemorizeMode = false; // 暗記モードの状態
+        let currentBundle = null; // 現在保持しているバンドル（一覧+全コンテンツ）
+        let currentContentId = null; // 現在表示中のコンテンツID
+
+        /**
+         * ページの読み込みが完了したら実行されるメイン処理
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            // ハンバーガーメニューのセットアップ
+            setupHamburgerMenu();
+            // MathJaxの動的スケール調整機能のセットアップ
+            setupDynamicMathScale();
+            // バンドルからメニューを構築
+            initMenu();
+            // 暗記モードのセットアップ
+            setupMemorizeMode();
+            // 検索機能のセットアップ
+            setupSearch();
+            // 更新ボタンのセットアップ
+            setupRefreshButton();
+        });
+
+        /**
+         * バンドルからサイドメニューを構築する
+         */
+        function initMenu() {
+            const menuContainer = document.getElementById('menu-container');
+
+            // サーバー埋め込みバンドルがあれば即座に使用
+            if (INITIAL_BUNDLE && Array.isArray(INITIAL_BUNDLE.files) && INITIAL_BUNDLE.files.length > 0) {
+                currentBundle = INITIAL_BUNDLE;
+                buildMenuHtml(INITIAL_BUNDLE.files);
+                setLocalBundle(INITIAL_BUNDLE);
+                return;
+            }
+
+            // 埋め込み失敗時のフォールバック: ローカル保存のバンドル → API取得
+            const local = getLocalBundle();
+            if (local && Array.isArray(local.files) && local.files.length > 0) {
+                currentBundle = local;
+                buildMenuHtml(local.files);
+            }
+
+            fetchBundle(false)
+                .then(bundle => {
+                    if (bundle && Array.isArray(bundle.files) && bundle.files.length > 0) {
+                        currentBundle = bundle;
+                        buildMenuHtml(bundle.files);
+                        setLocalBundle(bundle);
+                    }
+                })
+                .catch(error => {
+                    console.error('メニューの読み込みに失敗しました:', error);
+                    if (!currentBundle) {
+                        menuContainer.innerHTML = '<div class="side-menu"><p style="padding: 15px; color: red;">メニューの読み込みに失敗しました。</p></div>';
+                    }
+                });
+        }
+
+        /**
+         * 更新ボタンのクリックイベントを設定する
+         */
+        function setupRefreshButton() {
+            const refreshButton = document.getElementById('refresh-button');
+            if (!refreshButton) return;
+
+            refreshButton.addEventListener('click', () => {
+                refreshButton.disabled = true;
+                refreshButton.textContent = '更新中...';
+
+                fetchBundle(true)
+                    .then(bundle => {
+                        if (!bundle || !Array.isArray(bundle.files)) {
+                            throw new Error('更新に失敗しました。');
+                        }
+                        currentBundle = bundle;
+                        setLocalBundle(bundle);
+
+                        // 一覧に変更があればメニューを再構築
+                        if (!isSameFileList(bundle.files)) {
+                            buildMenuHtml(bundle.files);
+                        }
+                        // 表示中のコンテンツが更新されていれば再表示
+                        if (currentContentId) {
+                            renderFromBundle(currentContentId);
+                        }
+
+                        refreshButton.textContent = '✓ 更新完了';
+                        setTimeout(() => {
+                            refreshButton.textContent = '更新';
+                            refreshButton.disabled = false;
+                        }, 1500);
+                    })
+                    .catch(error => {
+                        console.error('更新に失敗:', error);
+                        refreshButton.textContent = '更新失敗';
+                        setTimeout(() => {
+                            refreshButton.textContent = '更新';
+                            refreshButton.disabled = false;
+                        }, 2000);
+                    });
+            });
+        }
+
+        /**
+         * バンドルをAPIから取得する
+         * @param {boolean} force - true ならサーバーのキャッシュを無視して最新を取得
+         * @returns {Promise<{files: Array, updatedAt: string}>}
+         */
+        function fetchBundle(force) {
+            const url = `${GAS_WEB_APP_URL}?action=getBundle${force ? '&refresh=1' : ''}`;
+            return fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('ネットワークの応答が正しくありません。');
+                    }
+                    return response.json();
+                });
+        }
+
+        /**
+         * 現在表示中のメニューと新しいファイルリストが同じかどうかを比較する
+         * @param {Array} files - {id, name} の配列
+         * @returns {boolean} 同じならtrue
+         */
+        function isSameFileList(files) {
+            const menuLinks = document.querySelectorAll('#menu-container a[data-id]');
+            if (menuLinks.length !== files.length) return false;
+
+            const ids = Array.from(menuLinks).map(link => link.dataset.id);
+            return files.every(file => ids.includes(file.id));
+        }
+
+        /**
+         * ファイルリストからサイドメニューのHTMLを構築して表示する
+         * @param {Array} files - {id, name} の配列
+         */
+        function buildMenuHtml(files) {
+            const menuContainer = document.getElementById('menu-container');
+
+            markdownFiles = files;
+
+            const menuHtml = `
+                <nav class="side-menu">
+                    <h3>公式一覧</h3>
+                    <ul>
+                        ${files.map(file => `
+                            <li>
+                                <a href="#" data-id="${file.id}">
+                                    ${file.name.replace(/\.md$/, '')}
+                                </a>
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <p>足りないものや間違っているものがあったら、先生に教えてください！この科目が欲しい！などのリクエストも待ってます。</p>
+                    <p style="text-align: center;">
+                        <button id="refresh-button" type="button">更新</button>
+                    </p>
+                </nav>
+                <div id="qrcode-container">
+                    <div id="qrcode-image"></div>
+                    <p class="qrcode-caption">
+                        このページのQRコード
+                        <span class="license-text">
+                            Powered by <a href="https://github.com/davidshimjs/qrcodejs" target="_blank" rel="noopener">QRCode.js</a> (MIT)
+                        </span>
+                    </p>
+                </div>
+            `;
+            menuContainer.innerHTML = menuHtml;
+
+            setupMenuClickHandlers();
+            setupRefreshButton();
+
+            generateQRCode();
+        }
+
+        /**
+         * メニューのクリックイベントを設定する関数
+         */
+        function setupMenuClickHandlers() {
+            const menuContainer = document.getElementById('menu-container');
+            menuContainer.addEventListener('click', (event) => {
+                const link = event.target.closest('a');
+                if (!link) {
+                    return;
+                }
+                event.preventDefault();
+
+                const fileId = link.dataset.id;
+                if (fileId) {
+                    loadMarkdownContent(fileId);
+                    activateCurrentMenuLink(fileId);
+                }
+            });
+        }
+
+        // ▼▼▼▼▼ コンテンツ読み込みの競合対策 ▼▼▼▼▼
+        // 最新のリクエストだけが表示を更新できるようにするための連番
+        let contentRequestSeq = 0;
+        // 現在実行中のコンテンツfetch（新しい読み込み開始時にキャンセルする）
+        let currentContentController = null;
+        // ▲▲▲▲▲
+
+        // ▼▼▼▼▼ localStorage バンドルキャッシュ（再表示の高速化） ▼▼▼▼▼
+        const LOCAL_BUNDLE_KEY = 'mdv1_bundle';
+        // ローカルバンドルの有効時間
+        const LOCAL_BUNDLE_TTL_MS = 60 * 60 * 1000; // 1時間
+
+        /**
+         * ローカル保存のバンドルを取得する（有効期限切れなら null）
+         * @returns {{files: Array, updatedAt: string}|null}
+         */
+        function getLocalBundle() {
+            try {
+                const raw = localStorage.getItem(LOCAL_BUNDLE_KEY);
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                if (Date.now() - data.ts > LOCAL_BUNDLE_TTL_MS) return null;
+                return data.bundle;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        /**
+         * バンドルをローカル保存する
+         * @param {{files: Array, updatedAt: string}} bundle
+         */
+        function setLocalBundle(bundle) {
+            try {
+                localStorage.setItem(LOCAL_BUNDLE_KEY,
+                    JSON.stringify({ ts: Date.now(), bundle: bundle }));
+            } catch (e) {
+                // 容量超過・プライベートモード等は無視する
+            }
+        }
+        // ▲▲▲▲▲
+
+        /**
+         * 指定されたIDのMarkdownコンテンツを読み込んで表示する
+         * @param {string} fileId - Google DriveのファイルID
+         */
+        function loadMarkdownContent(fileId) {
+            const contentBody = document.getElementById('content-body');
+
+            // HTMLの更新が正しく行われているか念のため確認
+            if (!contentBody) {
+                console.error('【エラー】HTML内に id="content-body" が見つかりません。Index.html の内容をもう一度確認してください。');
+                alert('ページのHTML構造にエラーがあり、コンテンツを読み込めません。');
+                return;
+            }
+
+            currentContentId = fileId;
+
+            // ナビゲーション時に、進行中のAPIリクエストを無効化する
+            contentRequestSeq++;
+
+            // ページ切り替え時に検索状態をリセット
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) searchInput.value = '';
+            clearSearch();
+            updateSearchCount();
+
+            // バンドル内にあればブラウザ内で即座に表示（通信なし）
+            if (renderFromBundle(fileId)) {
+                return;
+            }
+
+            // バンドルに無ければAPIから取得する（競合ガード付き）
+            fetchContentFromApi(fileId);
+        }
+
+        /**
+         * バンドル内のコンテンツをブラウザ内でレンダリングする
+         * @param {string} fileId
+         * @returns {boolean} 表示できたら true
+         */
+        async function renderFromBundle(fileId) {
+            const contentBody = document.getElementById('content-body');
+            const item = currentBundle && currentBundle.files.find(f => f.id === fileId);
+            if (!item || !item.content) {
+                return false;
+            }
+
+            contentBody.innerHTML = marked.parse(item.content);
+            // MathJaxに数式を処理させる（失敗しても本文は消さない）
+            if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+                try {
+                    await MathJax.typesetPromise([contentBody]);
+                } catch (e) {
+                    // 数式処理の失敗は無視する
+                }
+            }
+            // 数式処理後に暗記モード用の前処理を実行
+            processContentForMemorization();
+            return true;
+        }
+
+        /**
+         * コンテンツをAPIから取得して表示する（バンドルに無い場合のフォールバック）
+         * @param {string} fileId - Google DriveのファイルID
+         */
+        function fetchContentFromApi(fileId) {
+            const contentBody = document.getElementById('content-body');
+
+            // この読み込みを「最新」として登録（古いリクエストは以後の結果を破棄する）
+            const seq = ++contentRequestSeq;
+
+            // 前のリクエストが残っていればキャンセルする
+            if (currentContentController) {
+                currentContentController.abort();
+            }
+            const controller = new AbortController();
+            currentContentController = controller;
+
+            contentBody.innerHTML = '<p style="text-align:center; padding: 40px;">読み込み中...</p>';
+
+            fetch(`${GAS_WEB_APP_URL}?action=getMdContent&id=${fileId}`, { signal: controller.signal })
+                .then(response => response.json())
+                .then(data => {
+                    // 古いリクエストの結果は無視する
+                    if (seq !== contentRequestSeq) return;
+
+                    if (data && data.content) {
+                        contentBody.innerHTML = marked.parse(data.content);
+                        // MathJaxに新しいコンテンツ内の数式を処理させる（失敗しても本文は消さない）
+                        if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+                            return MathJax.typesetPromise([contentBody]).catch(() => {});
+                        }
+                    } else {
+                        throw new Error('有効なコンテンツがありません。');
+                    }
+                })
+                .then(() => {
+                    // 数式処理後に暗記モード用の前処理を実行
+                    if (seq === contentRequestSeq) {
+                        processContentForMemorization();
+                    }
+                })
+                .catch(error => {
+                    // キャンセル・古いリクエストは無視する
+                    if (seq !== contentRequestSeq) return;
+                    if (error && error.name === 'AbortError') return;
+
+                    console.error('コンテンツの読み込みに失敗:', error);
+                    contentBody.innerHTML = '<p style="text-align:center; color:red; padding:40px;">コンテンツの読み込みに失敗しました。</p>';
+                });
+        }
+
+        /**
+         * 現在表示しているコンテンツに対応するメニューリンクをハイライトする
+         * @param {string} currentId - 現在のファイルID
+         */
+        function activateCurrentMenuLink(currentId) {
+            const menuLinks = document.querySelectorAll('#menu-container a');
+            menuLinks.forEach(link => {
+                link.classList.remove('active');
+                if (currentId && link.dataset.id === currentId) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        /**
+         * QRコードを生成または更新する
+         */
+        function generateQRCode() {
+            const qrcodeImage = document.getElementById('qrcode-image');
+            if (qrcodeImage && typeof QRCode !== 'undefined') {
+                qrcodeImage.innerHTML = ''; // 既存のQRコードをクリア
+                new QRCode(qrcodeImage, {
+                    text: GAS_WEB_APP_URL, // 固定のWebアプリURL（iframe内の一時URLではない）
+                    width: 128,
+                    height: 128,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        }
+
+        /**
+         * ハンバーガーメニューのクリックイベントを設定する
+         */
+        function setupHamburgerMenu() {
+            const menu = document.getElementById('menu-container');
+            const toggleButton = document.getElementById('menu-toggle-button');
+            const overlay = document.getElementById('menu-overlay');
+
+            if (toggleButton && menu && overlay) {
+                const closeMenu = () => {
+                    menu.classList.remove('is-open');
+                    overlay.classList.remove('is-open');
+                };
+
+                toggleButton.addEventListener('click', () => {
+                    menu.classList.toggle('is-open');
+                    overlay.classList.toggle('is-open');
+                });
+                overlay.addEventListener('click', closeMenu);
+                menu.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'A') {
+                        closeMenu();
+                    }
+                });
+            }
+        }
+
+        /**
+         * MathJaxのスケールを画面幅に応じて動的に変更するリスナーを設定
+         */
+        function setupDynamicMathScale() {
+            if (typeof MathJax === 'undefined' || !MathJax.startup) {
+                setTimeout(setupDynamicMathScale, 100);
+                return;
+            }
+
+            MathJax.startup.promise.then(() => {
+                const mediaQuery = window.matchMedia('(max-width: 768px)');
+                const handleScaleChange = (e) => {
+                    const newScale = e.matches ? 0.7 : 1.0;
+                    if (MathJax.config.svg.scale !== newScale) {
+                        MathJax.config.svg.scale = newScale;
+                        MathJax.startup.document.rerender();
+                    }
+                };
+                mediaQuery.addEventListener('change', handleScaleChange);
+            });
+        }
+
+        /**
+         * 暗記モード関連のセットアップ
+         */
+        function setupMemorizeMode() {
+            const toggleButton = document.getElementById('memorize-toggle-button');
+            const mainContent = document.getElementById('main-content');
+
+            // 暗記モードの ON/OFF を切り替える
+            toggleButton.addEventListener('click', () => {
+                isMemorizeMode = !isMemorizeMode;
+                document.body.classList.toggle('memorize-mode-on', isMemorizeMode);
+
+                // モードをOFFにしたら、全ての表示状態をリセットする
+                if (!isMemorizeMode) {
+                    mainContent.querySelectorAll('.memorize-target.is-revealed').forEach(el => {
+                        el.classList.remove('is-revealed');
+                    });
+                }
+            });
+
+            // 隠された要素をクリックしたら表示/非表示を切り替える
+            mainContent.addEventListener('click', (event) => {
+                if (!isMemorizeMode) return;
+
+                const target = event.target.closest('.memorize-target');
+                // ▼▼▼▼▼ 変更点 ▼▼▼▼▼
+                // .is-revealedクラスの有無を確認するのではなく、有無を切り替える(toggle)ように変更
+                if (target) {
+                    target.classList.toggle('is-revealed');
+                }
+                // ▲▲▲▲▲ 変更ここまで ▲▲▲▲▲
+            });
+        }
+
+        /**
+         * コンテンツを暗記モード用に前処理する関数
+         */
+        function processContentForMemorization() {
+            // --- リストの処理 ---
+            const listItems = document.querySelectorAll('#content-body li');
+            listItems.forEach(li => {
+                // このliが、内側に別のリスト(ul, ol)を持っているか確認
+                const hasNestedList = li.querySelector('ul, ol');
+                // 内側にリストを持つ「外側のli」なら、処理せずスキップ
+                if (hasNestedList) {
+                    return;
+                }
+                // 既に処理済みの場合はスキップ
+                if (li.dataset.processed === 'true') {
+                    return;
+                }
+                const fragment = document.createDocumentFragment();
+                let currentWrapper = document.createElement('span');
+                currentWrapper.className = 'memorize-target';
+                while (li.firstChild) {
+                    fragment.appendChild(li.firstChild);
+                }
+                while (fragment.firstChild) {
+                    const node = fragment.firstChild;
+                    if (node.nodeName === 'STRONG') {
+                        if (currentWrapper.childNodes.length > 0) {
+                            li.appendChild(currentWrapper);
+                        }
+                        li.appendChild(node);
+                        currentWrapper = document.createElement('span');
+                        currentWrapper.className = 'memorize-target';
+                    } else {
+                        currentWrapper.appendChild(node);
+                    }
+                }
+                if (currentWrapper.childNodes.length > 0) {
+                    li.appendChild(currentWrapper);
+                }
+                li.dataset.processed = 'true';
+            });
+
+            // --- テーブルの処理 ---
+            const tables = document.querySelectorAll('#content-body table:not([data-processed-table="true"])');
+            tables.forEach(table => {
+                // tbody内の各行(tr)に対してループ
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    // 各行の2番目以降のセル(td)を取得して処理
+                    const cellsToHide = row.querySelectorAll('td:not(:first-child)');
+                    cellsToHide.forEach(cell => {
+                        // 既に処理済み、またはセルが空ならスキップ
+                        if (cell.dataset.processed === 'true' || cell.innerHTML.trim() === '') {
+                            return;
+                        }
+                        const wrapper = document.createElement('span');
+                        wrapper.className = 'memorize-target';
+                        while (cell.firstChild) {
+                            wrapper.appendChild(cell.firstChild);
+                        }
+                        cell.appendChild(wrapper);
+                        cell.dataset.processed = 'true';
+                    });
+                });
+                // テーブル全体を処理済みとしてマーク
+                table.dataset.processedTable = 'true';
+            });
+        }
+
+        // ▼▼▼▼▼ 検索機能の実装 ▼▼▼▼▼
+
+        let searchMatches = [];     // 検索ヒットした要素(markタグなど)のリスト
+        let currentMatchIndex = -1; // 現在選択中のヒット項目のインデックス
+
+        /**
+         * 検索機能をセットアップする
+         */
+        function setupSearch() {
+            const toggleBtn = document.getElementById('search-toggle-button');
+            const container = document.getElementById('search-container');
+            const input = document.getElementById('search-input');
+            const prevBtn = document.getElementById('search-prev-button');
+            const nextBtn = document.getElementById('search-next-button');
+            const closeBtn = document.getElementById('search-close-button');
+
+            // 検索トグル
+            toggleBtn.addEventListener('click', () => {
+                container.classList.toggle('hidden');
+                if (!container.classList.contains('hidden')) {
+                    // 表示されたら入力欄にフォーカス
+                    setTimeout(() => input.focus(), 100);
+                }
+            });
+
+            // 閉じるボタン
+            closeBtn.addEventListener('click', () => {
+                container.classList.add('hidden');
+                clearSearch();
+                input.value = '';
+                updateSearchCount();
+            });
+
+            // 入力イベント（リアルタイム検索）
+            input.addEventListener('input', () => {
+                const text = input.value;
+                if (text) {
+                    performSearch(text);
+                } else {
+                    clearSearch();
+                    updateSearchCount();
+                }
+            });
+
+            // Enterキーでの移動
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        navigateSearch(-1); // Shift+Enterで前へ
+                    } else {
+                        navigateSearch(1);  // Enterで次へ
+                    }
+                }
+            });
+
+            // 前へ・次へボタン
+            prevBtn.addEventListener('click', () => navigateSearch(-1));
+            nextBtn.addEventListener('click', () => navigateSearch(1));
+        }
+
+        /**
+         * 検索を実行してハイライトする
+         */
+        function performSearch(searchText) {
+            // 一旦クリア
+            clearSearch();
+
+            if (!searchText) return;
+
+            const contentBody = document.getElementById('content-body');
+            if (!contentBody) return;
+
+            // テキストノードを探索
+            const walker = document.createTreeWalker(contentBody, NodeFilter.SHOW_TEXT, null, false);
+            const nodes = [];
+            while (walker.nextNode()) {
+                nodes.push(walker.currentNode);
+            }
+
+            const regex = new RegExp(searchText, 'gi'); // 大文字小文字区別なし
+
+            nodes.forEach(node => {
+                // 親が style, script, .search-highlight 自身ならスキップ
+                if (node.parentNode.nodeName === 'STYLE' ||
+                    node.parentNode.nodeName === 'SCRIPT' ||
+                    node.parentNode.classList.contains('search-highlight')) {
+                    return;
+                }
+
+                const text = node.textContent;
+                if (!text.match(regex)) return;
+
+                // マッチ箇所があるノード。分割してspanで囲む。
+                const fragment = document.createDocumentFragment();
+                let lastLastIndex = 0;
+                let match;
+
+                while ((match = regex.exec(text)) !== null) {
+                    // マッチ前のテキスト
+                    if (match.index > lastLastIndex) {
+                        fragment.appendChild(document.createTextNode(text.substring(lastLastIndex, match.index)));
+                    }
+
+                    // マッチしたテキスト（ハイライト）
+                    const span = document.createElement('span');
+                    span.className = 'search-highlight';
+                    span.textContent = match[0];
+                    fragment.appendChild(span);
+
+                    searchMatches.push(span);
+
+                    lastLastIndex = regex.lastIndex;
+                }
+
+                // 残りのテキスト
+                if (lastLastIndex < text.length) {
+                    fragment.appendChild(document.createTextNode(text.substring(lastLastIndex)));
+                }
+
+                // 元のノードを置換
+                node.parentNode.replaceChild(fragment, node);
+            });
+
+            if (searchMatches.length > 0) {
+                currentMatchIndex = 0;
+                updateActiveHighlight();
+            } else {
+                currentMatchIndex = -1;
+            }
+            updateSearchCount();
+        }
+
+        /**
+         * 検索結果をクリアする
+         */
+        function clearSearch() {
+            searchMatches.forEach(span => {
+                if (span.parentNode) {
+                    const text = document.createTextNode(span.textContent);
+                    span.parentNode.replaceChild(text, span);
+                }
+            });
+
+            searchMatches = [];
+            currentMatchIndex = -1;
+        }
+
+        /**
+         * 次・前の検索結果へ移動
+         */
+        function navigateSearch(direction) {
+            if (searchMatches.length === 0) return;
+
+            currentMatchIndex += direction;
+
+            // ループさせる
+            if (currentMatchIndex >= searchMatches.length) {
+                currentMatchIndex = 0;
+            } else if (currentMatchIndex < 0) {
+                currentMatchIndex = searchMatches.length - 1;
+            }
+
+            updateActiveHighlight();
+        }
+
+        /**
+         * アクティブなハイライトの表示を更新し、スクロールする
+         */
+        function updateActiveHighlight() {
+            // 全てのactiveクラスを外す
+            searchMatches.forEach(el => el.classList.remove('active'));
+
+            if (currentMatchIndex >= 0 && searchMatches[currentMatchIndex]) {
+                const target = searchMatches[currentMatchIndex];
+                target.classList.add('active');
+
+                // スムーズスクロール
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                updateSearchCount();
+            }
+        }
+
+        /**
+         * 検索件数表示を更新
+         */
+        function updateSearchCount() {
+            const countSpan = document.getElementById('search-count');
+            if (!countSpan) return;
+
+            if (searchMatches.length === 0) {
+                countSpan.textContent = "0/0";
+            } else {
+                countSpan.textContent = `${currentMatchIndex + 1}/${searchMatches.length}`;
+            }
+        }
+    </script>
+
+</body>
+
+</html>

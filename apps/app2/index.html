@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>英語長文多読リーダー</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://unpkg.com/compromise@13.11.3/builds/compromise.min.js"></script>
+  <style>
+    html,
+    body {
+      overscroll-behavior-y: contain;
+      overscroll-behavior-x: contain;
+      touch-action: pan-x pan-y;
+      height: 100dvh;
+      min-height: 100dvh;
+      width: 100vw;
+      max-width: 100vw;
+      overflow-x: hidden;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      font-size: clamp(16px, 2vw, 20px);
+    }
+
+    body {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100dvh;
+      font-family: 'Kiwi Maru', 'Courier New', monospace;
+      background-color: #e5e5e5;
+      color: #007700;
+    }
+
+    button {
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    button:hover {
+      opacity: 1;
+    }
+
+    #controlButtons {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 1001;
+    }
+
+    #zoomLabel {
+      position: absolute;
+      top: 50%;
+      right: 168px;
+      transform: translateY(-50%);
+      font-size: 0.75em;
+      color: #007700;
+      white-space: nowrap;
+    }
+
+    #form-container {
+      width: 300px;
+      overflow: auto;
+      border-right: 2px solid #00ff00;
+      padding: 10px;
+      background-color: #ffffff;
+      box-sizing: border-box;
+    }
+
+    #preview-container {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+      min-width: 0;
+    }
+
+    #preview-container h1 {
+      position: relative;
+      margin: 0;
+      padding: 10px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      flex-direction: column;
+      text-align: left;
+      border-bottom: 2px solid #00ff00;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 1em;
+      color: #007700;
+    }
+
+    #form-container h1 {
+      font-size: 1em;
+      color: #007700;
+      border-bottom: 1px solid #00ff00;
+      padding-bottom: 4px;
+    }
+
+    #form-container h1.sec {
+      margin-top: 24px;
+    }
+
+    #preview-title {
+      margin: 0;
+      padding: 0;
+      padding-right: 190px;
+      text-align: left;
+      width: 100%;
+      box-sizing: border-box;
+      word-break: break-all;
+    }
+
+    #preview-subtitle {
+      font-size: 0.7em;
+      color: #777777;
+      width: 100%;
+      text-align: left;
+      margin-top: 4px;
+      padding-right: 190px;
+      box-sizing: border-box;
+      line-height: 1.5;
+    }
+
+    #backButton,
+    #zoomInButton,
+    #zoomOutButton {
+      background: #ffffff;
+      color: #007700;
+      border: 1px solid #00ff00;
+      font-size: 1.1em;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    #backButton:hover,
+    #zoomInButton:hover,
+    #zoomOutButton:hover {
+      background: #00ff00;
+      color: #000000;
+    }
+
+    #backButton {
+      display: none;
+    }
+
+    #spinner {
+      position: fixed;
+      top: 95%;
+      left: 95%;
+      transform: translate(-95%, -95%);
+      display: none;
+      z-index: 10003;
+      color: #007700;
+      font-size: 32px;
+    }
+
+    #spinner-text {
+      position: fixed;
+      min-width: 0;
+      bottom: 20px;
+      right: 20px;
+      font-size: 1.2em;
+      color: #007700;
+      white-space: nowrap;
+    }
+
+    #spinner-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100dvh;
+      background: rgba(255, 255, 255, 0.85);
+      z-index: 10002;
+      display: none;
+    }
+
+    #dict-overlay-fixed {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      max-width: 30%;
+      background: rgba(255, 255, 255, 0.97);
+      color: #007700;
+      border: 1px solid #00ff00;
+      box-shadow: 0 2px 6px rgba(0, 204, 0, 0.3);
+      padding: 8px;
+      font-size: 1em;
+      display: none;
+      z-index: 10000;
+    }
+
+    #toaster {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #00ff00;
+      color: #000000;
+      padding: 8px 12px;
+      border-radius: 4px;
+      display: none;
+      z-index: 10000;
+    }
+
+    .dict-popup {
+      position: absolute;
+      background: #ffffff;
+      color: #007700;
+      border: 1px solid #00ff00;
+      box-shadow: 0 2px 6px rgba(0, 204, 0, 0.3);
+      font-size: 14px;
+      line-height: 1.4;
+      z-index: 10001;
+    }
+
+    .dict-popup h4 {
+      margin: 4px 0;
+      font-size: 16px;
+    }
+
+    .dict-popup .entry {
+      margin-bottom: 6px;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 20px;
+    }
+
+    li {
+      cursor: pointer;
+      margin: 6px 0;
+      padding: 6px 4px;
+      color: #00a000;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    li.saved-item {
+      padding: 8px;
+      border: 1px solid #ccffcc;
+      background: #f7fff7;
+    }
+
+    li.saved-item .saved-title {
+      color: #008000;
+      font-weight: bold;
+      word-break: break-all;
+    }
+
+    li.saved-item .saved-meta {
+      font-size: 0.75em;
+      color: #777777;
+      margin-top: 2px;
+    }
+
+    li.file.active {
+      background-color: #00ff00;
+      color: #000000;
+      font-weight: bold;
+      border-radius: 4px;
+      padding-left: 4px;
+    }
+
+    #textViewer {
+      width: 100%;
+      padding: 10px;
+      overflow: auto;
+      white-space: pre-wrap;
+      line-height: 3;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8em;
+      color: #007700;
+      margin-bottom: 4px;
+    }
+
+    .field select,
+    .field textarea {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: 'Kiwi Maru', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #005500;
+      background: #ffffff;
+      border: 1px solid #99e699;
+      border-radius: 4px;
+      padding: 6px;
+    }
+
+    .field select:disabled {
+      color: #888888;
+      background: #f2f2f2;
+    }
+
+    .gen-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 1.1em;
+      font-weight: bold;
+      font-family: 'Kiwi Maru', 'Courier New', monospace;
+      background: #00ff00;
+      color: #000000;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .delete-saved-btn {
+      float: right;
+      background: none;
+      border: 1px solid #cc9999;
+      color: #990000;
+      font-size: 0.85em;
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 2px 8px;
+    }
+
+    #credit {
+      margin-top: 20px;
+      font-size: 0.5em;
+      color: #999999;
+      line-height: 1.5;
+      border-top: 1px solid #ccffcc;
+      padding-top: 8px;
+    }
+
+    #credit a {
+      color: #999999;
+    }
+
+    @media (orientation: portrait) {
+      html,
+      body {
+        height: 100dvh;
+        width: 100vw;
+        min-width: 0;
+        max-width: 100vw;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        overflow-x: hidden;
+        box-sizing: border-box;
+        flex-direction: column;
+        font-size: clamp(18px, 3vw, 22px);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      #form-container,
+      #preview-container {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100vw !important;
+        flex: 1 0 auto;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        height: 100dvh;
+        overflow: auto;
+        border-right: none;
+      }
+
+      #form-container {
+        border-bottom: 2px solid #00ff00;
+        font-size: 1.3em;
+      }
+
+      #form-container h1,
+      #preview-container h1 {
+        font-size: 1.3em;
+        color: #007700;
+        border-bottom: 1px solid #00ff00;
+      }
+
+      #preview-container {
+        display: none;
+        font-size: 1em;
+      }
+
+      body.mobile-preview #form-container {
+        display: none;
+      }
+
+      body.mobile-preview #preview-container {
+        display: flex;
+      }
+
+      #dict-overlay-fixed {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        max-width: 90%;
+        font-size: 1em;
+      }
+
+      #backButton {
+        display: none;
+      }
+
+      body.mobile-preview #backButton {
+        display: block;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="spinner-overlay"></div>
+  <div id="spinner">
+    <div id="spinner-text">生成中<span id="dot-anim"></span></div>
+  </div>
+  <div id="dict-overlay-fixed"></div>
+
+  <div id="form-container">
+    <h1>生成設定</h1>
+
+    <div class="field">
+      <label for="fLevel">難易度（英検レベル）</label>
+      <select id="fLevel">
+        <option>7級</option>
+        <option>6級</option>
+        <option>5級</option>
+        <option>4級</option>
+        <option selected>3級</option>
+        <option>準2級</option>
+        <option>準2級プラス</option>
+        <option>2級</option>
+        <option>準1級</option>
+        <option>1級</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fWords">単語量</label>
+      <select id="fWords">
+        <option>100</option>
+        <option>200</option>
+        <option selected>300</option>
+        <option>400</option>
+        <option>500</option>
+        <option>600</option>
+        <option>700</option>
+        <option>800</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fWorld">世界設定</label>
+      <select id="fWorld">
+        <option selected>現代日本</option>
+        <option>現代外国</option>
+        <option>中世ヨーロッパ</option>
+        <option>ファンタジー</option>
+        <option>SF</option>
+        <option>サイバーパンク</option>
+        <option>かわいい世界</option>
+        <option>童話の世界</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fStyle">文体</label>
+      <select id="fStyle" disabled>
+        <option selected>現代英語</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fTextType">文の種類</label>
+      <select id="fTextType">
+        <option selected>物語文</option>
+        <option>説明文</option>
+        <option>エッセイ</option>
+        <option>会話文</option>
+        <option>手紙・メールのやり取り</option>
+        <option>商品・施設・イベントの広告文</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fGenre">ジャンル</label>
+      <select id="fGenre">
+        <option selected>日常</option>
+        <option>冒険</option>
+        <option>恋愛</option>
+        <option>戦時下</option>
+        <option>ミステリー</option>
+        <option>ホラー</option>
+        <option>ドラマ</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fDevelopment">展開の仕方</label>
+      <select id="fDevelopment">
+        <option>淡々とした展開</option>
+        <option selected>変化のとんだ展開</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fEnding">終わり方</label>
+      <select id="fEnding">
+        <option>淡々とした終わり方</option>
+        <option>驚くような終わり方</option>
+        <option>考えさせられる終わり方</option>
+        <option selected>ハッピーエンド</option>
+        <option>悲しい終わり方</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fPrompt">プロンプト（任意・自由記入）</label>
+      <textarea id="fPrompt" rows="3" placeholder="例：主人公は料理が得意な小学生にしてください"></textarea>
+    </div>
+
+    <button id="genBtn" class="gen-btn">英語長文を生成</button>
+
+    <h1 class="sec">過去の生成物</h1>
+    <ul id="savedList"></ul>
+
+    <div id="credit">
+      This app uses:<br>
+      - compromise.js by Spencer Kelly (MIT License) → <a href="https://github.com/spencermountain/compromise" target="_blank">source</a><br>
+      - Font Awesome Free (CC BY 4.0) → <a href="https://fontawesome.com" target="_blank">fontawesome.com</a><br>
+      - Kiwi Maru Font by MOTOYA (SIL Open Font License 1.1) → <a href="https://fonts.google.com/specimen/Kiwi+Maru" target="_blank">Google Fonts</a><br>
+      Vocabulary data from:<br>
+      - NGSL (CC BY 4.0) / Wiktionary (CC BY-SA 3.0) / WordNet (Princeton University)
+    </div>
+  </div>
+
+  <div id="preview-container">
+    <h1>
+      <span id="preview-title">テキストプレビュー</span>
+      <span id="preview-subtitle"></span>
+      <span id="zoomLabel"></span>
+      <div id="controlButtons">
+        <button id="backButton" title="戻る">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <button id="zoomInButton" title="拡大">
+          <i class="fas fa-search-plus"></i>
+        </button>
+        <button id="zoomOutButton" title="縮小">
+          <i class="fas fa-search-minus"></i>
+        </button>
+      </div>
+    </h1>
+
+    <div id="textViewer" style="padding:10px; overflow:auto; white-space:pre-wrap; color:#007700; background:#ffffff;">
+      <div id="textContentArea"></div>
+      <div style="display: flex; width: 100%; margin-top: 20px; border-top: 1px solid #00ff00; color: #007700; line-height: 0.7;">
+        <div style="flex: 1; padding-right: 20px;">
+          <div style="font-weight: bold; margin-bottom: 4px; color:#007700;">調べた単語：</div>
+          <div id="historyList" style="font-weight: bold; color:#007700;"></div>
+        </div>
+        <div style="flex: 1; border-left: 2px solid #00ff00; padding-left: 20px;">
+          <div style="font-weight: bold; margin-bottom: 4px; color:#666666;">削除した単語：</div>
+          <div id="deletedList" style="font-weight: bold; color:#666666;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toaster"></div>
+
+  <script>
+    const IS_GAS = true;
+    const GAS_APP_URL = '';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const viewer = document.getElementById('textViewer');
+      const spinner = document.getElementById('spinner');
+      const overlay = document.getElementById('spinner-overlay');
+      const backBtn = document.getElementById('backButton');
+      const toaster = document.getElementById('toaster');
+      const viewedWords = new Set();
+      const deletedWords = new Set();
+      let textScale = 1.0;
+      let FORM_MAP = null;
+      let INV = null;
+      let currentRecord = null;
+
+      const dotEl = document.getElementById('dot-anim');
+      let frame = 0;
+      setInterval(() => {
+        const frames = ['', '.', '. .', '. . .'];
+        dotEl.textContent = ' ' + frames[frame % frames.length];
+        frame++;
+      }, 500);
+
+      function showSpinner() {
+        spinner.style.display = 'block';
+        overlay.style.display = 'block';
+      }
+      function hideSpinner() {
+        spinner.style.display = 'none';
+        overlay.style.display = 'none';
+      }
+      function showToast(msg) {
+        toaster.textContent = msg;
+        toaster.style.display = 'block';
+        setTimeout(() => toaster.style.display = 'none', 4000);
+      }
+
+      const SERVER = {
+        generateText: { path: '/api/generateText', method: 'POST', gas: 'generateText' },
+        getSavedTexts: { path: '/api/getSavedTexts', method: 'GET', gas: 'getSavedTexts' },
+        deleteText: { path: '/api/deleteText', method: 'DELETE', gas: 'deleteText' },
+        getDICTIONARY: { path: '/api/getDICTIONARY', method: 'GET', gas: 'getDICTIONARY' },
+        getFormMap: { path: '/api/getFormMap', method: 'GET', gas: 'getFormMap' },
+      };
+
+      function gasCall(name, payload) {
+        return new Promise((resolve, reject) => {
+          google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(e => reject(new Error((e && e.message) ? e.message : String(e))))
+            [name](payload);
+        });
+      }
+
+      async function callServer(name, payload) {
+        const cfg = SERVER[name];
+        if (IS_GAS) {
+          return gasCall(cfg.gas, payload);
+        }
+        const opt = { method: cfg.method, headers: { 'Content-Type': 'application/json' } };
+        if (payload !== undefined) opt.body = JSON.stringify(payload);
+        const res = await fetch(cfg.path, opt);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
+        return data;
+      }
+
+      function loadFormMap() {
+        if (FORM_MAP) return Promise.resolve();
+        return callServer('getFormMap').then(d => { FORM_MAP = d; }).catch(() => { FORM_MAP = {}; });
+      }
+      function loadInvert() {
+        if (INV) return Promise.resolve();
+        return callServer('getDICTIONARY').then(d => { INV = d; }).catch(() => { INV = {}; });
+      }
+
+      function getWordAtPoint(x, y) {
+        const range = document.caretRangeFromPoint ? document.caretRangeFromPoint(x, y) : null;
+        if (!range || range.startContainer.nodeType !== Node.TEXT_NODE) return '';
+        const txt = range.startContainer.textContent;
+        const idx = range.startOffset;
+        const char = txt[idx];
+        if (!char || [' ', '\t', '\n', '\r'].includes(char)) return '';
+        const l = txt.slice(0, idx).search(/[^\s\-]+$/);
+        const r = txt.slice(idx).search(/[\s\-]/);
+        const s = l < 0 ? 0 : l;
+        const e = r < 0 ? txt.length : idx + r;
+        const full = txt.slice(s, e);
+        const segments = full.split('-');
+        let offset = s;
+        for (let segment of segments) {
+          const start = offset;
+          const end = offset + segment.length;
+          if (idx >= start && idx <= end) {
+            return segment.replace(/^[_\W]+|[_\W]+$/g, '');
+          }
+          offset = end + 1;
+        }
+        return '';
+      }
+
+      function normalize(w) {
+        const lower = w.toLowerCase();
+        if (FORM_MAP && FORM_MAP[lower]) return FORM_MAP[lower];
+        try {
+          const lemma = nlp(lower).verbs().toInfinitive().out('text');
+          return lemma || lower;
+        } catch (e) {
+          return lower;
+        }
+      }
+
+      function updateHistoryDisplay() {
+        const historyEl = document.getElementById('historyList');
+        const deletedEl = document.getElementById('deletedList');
+        if (!historyEl || !deletedEl) return;
+        const sortedHistory = Array.from(viewedWords).sort();
+        const sortedDeleted = Array.from(deletedWords).sort();
+        historyEl.innerHTML = sortedHistory.map(w => `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>${w}</span>
+            <button class="delete-word-btn" data-word="${w}" style="
+              background: none; border: none; color: #990000; font-size: 0.9em;
+              cursor: pointer; margin-left: 8px;
+            ">×</button>
+          </div>
+        `).join('');
+        deletedEl.innerHTML = sortedDeleted.map(w => `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>${w}</span>
+            <button class="restore-word-btn" data-word="${w}" style="
+              background: none; border: none; color: #0044ff; font-size: 0.9em;
+              cursor: pointer; margin-left: 8px;
+            ">↩</button>
+          </div>
+        `).join('');
+        document.querySelectorAll('.delete-word-btn').forEach(btn => {
+          btn.addEventListener('click', e => {
+            const word = e.target.getAttribute('data-word');
+            viewedWords.delete(word);
+            deletedWords.add(word);
+            updateHistoryDisplay();
+          });
+        });
+        document.querySelectorAll('.restore-word-btn').forEach(btn => {
+          btn.addEventListener('click', e => {
+            const word = e.target.getAttribute('data-word');
+            deletedWords.delete(word);
+            viewedWords.add(word);
+            updateHistoryDisplay();
+          });
+        });
+      }
+
+      function readForm() {
+        const val = id => document.getElementById(id).value;
+        return {
+          level: val('fLevel'),
+          wordCount: parseInt(val('fWords'), 10),
+          world: val('fWorld'),
+          style: '現代英語',
+          textType: val('fTextType'),
+          genre: val('fGenre'),
+          development: val('fDevelopment'),
+          ending: val('fEnding'),
+          prompt: document.getElementById('fPrompt').value.trim(),
+        };
+      }
+
+      function settingsSummary(s) {
+        const parts = [s.level, s.wordCount + '語', s.world, s.textType, s.genre, s.development, s.ending];
+        if (s.prompt) parts.push('追加指示あり');
+        return parts.join('・');
+      }
+
+      function formatDate(iso) {
+        const d = new Date(iso);
+        const p = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+      }
+
+      function renderRecord(rec) {
+        currentRecord = rec;
+        document.getElementById('preview-title').textContent = rec.title || '生成結果';
+        document.getElementById('preview-subtitle').textContent = settingsSummary(rec.settings || {});
+        document.getElementById('textContentArea').textContent =
+          (rec.title ? rec.title + '\n\n' : '') + rec.text;
+        viewedWords.clear();
+        deletedWords.clear();
+        updateHistoryDisplay();
+      }
+
+      async function generate() {
+        const settings = readForm();
+        showSpinner();
+        try {
+          const res = await callServer('generateText', settings);
+          renderRecord(res.item || res);
+          loadSavedList();
+          if (window.innerWidth < window.innerHeight) {
+            document.body.classList.add('mobile-preview');
+            document.getElementById('dict-overlay-fixed').style.display = 'none';
+          }
+        } catch (e) {
+          showToast(e.message || '生成に失敗しました');
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      document.getElementById('genBtn').addEventListener('click', generate);
+
+      function renderSavedList(items) {
+        const ul = document.getElementById('savedList');
+        ul.innerHTML = '';
+        if (!items.length) {
+          ul.innerHTML = '<li style="cursor:default; color:#999999;">まだ生成履歴がありません</li>';
+          return;
+        }
+        for (const it of items) {
+          const li = document.createElement('li');
+          li.className = 'saved-item';
+          const delBtn = document.createElement('button');
+          delBtn.className = 'delete-saved-btn';
+          delBtn.textContent = '削除';
+          delBtn.addEventListener('click', async e => {
+            e.stopPropagation();
+            if (!window.confirm('この生成物を削除しますか？')) return;
+            try {
+              await callServer('deleteText', { id: it.id });
+              loadSavedList();
+            } catch (err) {
+              showToast(err.message || '削除に失敗しました');
+            }
+          });
+          const titleEl = document.createElement('div');
+          titleEl.className = 'saved-title';
+          titleEl.textContent = it.title || '(タイトルなし)';
+          const metaEl = document.createElement('div');
+          metaEl.className = 'saved-meta';
+          metaEl.textContent = formatDate(it.createdAt) + '　' + settingsSummary(it.settings || {});
+          li.appendChild(delBtn);
+          li.appendChild(titleEl);
+          li.appendChild(metaEl);
+          li.addEventListener('click', () => {
+            renderRecord(it);
+            if (window.innerWidth < window.innerHeight) {
+              document.body.classList.add('mobile-preview');
+              document.getElementById('dict-overlay-fixed').style.display = 'none';
+            }
+          });
+          ul.appendChild(li);
+        }
+      }
+
+      async function loadSavedList() {
+        try {
+          const res = await callServer('getSavedTexts');
+          renderSavedList((res && res.items) || []);
+        } catch (e) {
+          showToast(e.message || '履歴の読み込みに失敗しました');
+        }
+      }
+
+      viewer.addEventListener('click', async e => {
+        const raw = getWordAtPoint(e.clientX, e.clientY);
+        if (!raw || !/^[a-zA-Z\-']+$/.test(raw)) return;
+        const dictDiv = document.getElementById('dict-overlay-fixed');
+        dictDiv.style.display = 'block';
+        dictDiv.innerHTML = `<h4>${raw}</h4><p>読み込み中…</p>`;
+        try {
+          await Promise.all([loadFormMap(), loadInvert()]);
+          const normalized = normalize(raw);
+          const defs = (INV && INV[normalized]) || [];
+          let html = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <h4 style="margin: 4px 0;">${raw}${normalized !== raw.toLowerCase() ? ' → ' + normalized : ''}</h4>
+              <button id="close-dict-btn" style="
+                background: #ffffff; color: #007700; border: 1px solid #00ff00;
+                padding: 2px 6px; border-radius: 4px; font-size: 0.8em;
+                cursor: pointer; margin-left: 8px;
+              ">閉じる</button>
+            </div>
+          `;
+          if (defs.length) defs.forEach((d, i) => { html += `<div class='entry'><strong>${i + 1}.</strong> ${d}</div>`; });
+          else html += '<p>登録なし</p>';
+          const encoded = encodeURIComponent(raw) + ' 意味';
+          html += `<div style="margin-top: 8px; font-size: 0.9em;">
+                    <i class="fas fa-magnifying-glass" style="margin-right: 4px;"></i>
+                    <a href="https://www.google.com/search?q=${encoded}" target="_blank" style="color:#007700;">
+                      「${raw}」をGoogleで検索
+                    </a>
+                  </div>`;
+          viewedWords.add(raw.toLowerCase());
+          updateHistoryDisplay();
+          dictDiv.innerHTML = html;
+          document.getElementById('close-dict-btn').addEventListener('click', () => {
+            dictDiv.style.display = 'none';
+          });
+        } catch (err) {
+          console.error(err);
+          dictDiv.innerHTML = '<p>辞書の読み込みに失敗しました</p>';
+        }
+      });
+
+      function applyZoom() {
+        viewer.style.fontSize = textScale + 'em';
+        document.getElementById('zoomLabel').textContent = textScale.toFixed(1) + 'x';
+      }
+      document.getElementById('zoomInButton').addEventListener('click', () => {
+        textScale = Math.min(textScale * 1.2, 5.0);
+        applyZoom();
+      });
+      document.getElementById('zoomOutButton').addEventListener('click', () => {
+        textScale = Math.max(textScale / 1.2, 0.4);
+        applyZoom();
+      });
+
+      backBtn.addEventListener('click', () => {
+        document.body.classList.remove('mobile-preview');
+        document.getElementById('dict-overlay-fixed').style.display = 'none';
+      });
+
+      viewer.addEventListener('touchstart', e => {
+        if (e.touches.length > 1) e.preventDefault();
+      }, { passive: false });
+
+      document.getElementById('textContentArea').textContent =
+        '左のパネルで設定を選び、［英語長文を生成］を押してください。\n\n単語をタップすると辞書を表示します。';
+
+      applyZoom();
+      loadSavedList();
+    });
+  </script>
+</body>
+
+</html>
