@@ -1,10 +1,12 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Code.gs ― GAS 版 英語長文多読リーダー
-// ・特定の Google アカウントのみアクセス可（Script Properties: ALLOWED_EMAILS）
+// ・サイト閲覧は Google アカウントがあれば誰でも可（デプロイ設定: 実行ユーザー=アクセスしているユーザー / アクセス=Google アカウントでログイン）
+// ・AI 生成は許可ユーザーのみ（Script Properties: ALLOWED_EMAILS）
+// ・生成物の削除はオーナーのみ（Script Properties: OWNER_EMAIL）
 // ・AI 生成（Script Properties: OPENCODE_API_KEY）
 // ・生成物は共有フォルダに保存（Script Properties: FOLDER_ID。未設定なら「生成済み長文」を自動作成）
-// ・デプロイ設定: 実行ユーザー=アクセスしているユーザー / アクセス=Google アカウントでログイン
-// ・辞書ファイル（DICTIONARY_ID / MAP_ID）は許可ユーザーに共有しておくこと
+// ・生成物フォルダ（FOLDER_ID）は全員に閲覧可 + 許可ユーザーに編集可で共有しておくこと
+// ・辞書ファイル（DICTIONARY_ID / MAP_ID）は全員に閲覧可で共有しておくこと
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 var DICTIONARY_ID = '13G_bvPbBaoFx-XC9qJAaJTBP66G_-EdK';
@@ -53,23 +55,23 @@ function isAllowedUser_() {
   return list.length > 0 && list.indexOf(normalizeEmail_(email)) >= 0;
 }
 
+function isOwner_() {
+  var email = normalizeEmail_(Session.getActiveUser().getEmail());
+  if (!email) return false;
+  var owner = normalizeEmail_(PropertiesService.getScriptProperties().getProperty('OWNER_EMAIL') || '');
+  return !!owner && owner === email;
+}
+
 /**
- * Web アプリ表示（アクセス制限付き）
+ * Web アプリ表示（閲覧は Google アカウントがあれば誰でも可）
+ * フロントエンドに IS_ALLOWED（AI生成可否）と IS_OWNER（削除可否）を渡す
  */
 function doGet() {
-  if (!isAllowedUser_()) {
-    var denied = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>アクセス不可</title></head>' +
-      '<body style="font-family:sans-serif;text-align:center;padding-top:80px;color:#444;">' +
-      '<h1>アクセスが許可されていません</h1>' +
-      '<p>このアプリは特定の Google アカウントのみ利用できます。</p>' +
-      '<p>ログイン中のアカウントを確認してください。</p></body></html>';
-    return HtmlService.createHtmlOutput(denied)
-      .setTitle('アクセス不可')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-  }
   var html = HtmlService.createTemplateFromFile('index').evaluate().getContent();
   var url = ScriptApp.getService().getUrl();
   html = html.replace("const GAS_APP_URL = '';", "const GAS_APP_URL = '" + url + "';");
+  html = html.replace("const IS_ALLOWED = false;", "const IS_ALLOWED = " + (isAllowedUser_() ? 'true' : 'false') + ";");
+  html = html.replace("const IS_OWNER = false;", "const IS_OWNER = " + (isOwner_() ? 'true' : 'false') + ";");
   return HtmlService.createHtmlOutput(html)
     .setSandboxMode(HtmlService.SandboxMode.IFRAME)
     .setTitle('英語長文多読リーダー')
@@ -105,6 +107,7 @@ function jsonOut_(obj) {
  * AI で英語長文を生成し、Drive に保存して返す
  */
 function generateText(settings) {
+  if (!isAllowedUser_()) throw new Error('AI生成は許可されたアカウントのみ利用できます');
   var key = getApiKey_();
   if (!key) throw new Error('OPENCODE_API_KEY が設定されていません');
   var retryHint = '重要な指示：思考プロセス・ユーザーへの言及・指示の書き写し・見出しの転記を出力に含めてはならない。必ずタイトル（1行目）・空行・本文のみを出力すること。前回の応答は形式違反のため無効とする。';
@@ -248,6 +251,7 @@ function getSavedTexts() {
  * 保存済み生成物の削除（payload: { id: "tadoku-..." }）
  */
 function deleteText(payload) {
+  if (!isOwner_()) throw new Error('削除はオーナーのみ実行できます');
   var id = (payload && payload.id) || '';
   if (!/^tadoku-\d+$/.test(id)) throw new Error('対象が見つかりません');
   var files = getFolder_().getFilesByName(id + '.json');

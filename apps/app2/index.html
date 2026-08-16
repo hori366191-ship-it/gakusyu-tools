@@ -436,7 +436,8 @@
   <div id="dict-overlay-fixed"></div>
 
   <div id="form-container">
-    <h1>生成設定</h1>
+    <div id="genSection">
+      <h1>生成設定</h1>
 
     <div class="field">
       <label for="fLevel">難易度（英検レベル）</label>
@@ -539,6 +540,7 @@
     </div>
 
     <button id="genBtn" class="gen-btn">英語長文を生成</button>
+    </div>
 
     <h1 class="sec">過去の生成物</h1>
     <ul id="savedList"></ul>
@@ -591,6 +593,8 @@
   <script>
     const IS_GAS = true;
     const GAS_APP_URL = '';
+    const IS_ALLOWED = false;
+    const IS_OWNER = false;
 
     window.addEventListener('DOMContentLoaded', () => {
       const viewer = document.getElementById('textViewer');
@@ -812,26 +816,28 @@
         for (const it of items) {
           const li = document.createElement('li');
           li.className = 'saved-item';
-          const delBtn = document.createElement('button');
-          delBtn.className = 'delete-saved-btn';
-          delBtn.textContent = '削除';
-          delBtn.addEventListener('click', async e => {
-            e.stopPropagation();
-            if (!window.confirm('この生成物を削除しますか？')) return;
-            try {
-              await callServer('deleteText', { id: it.id });
-              loadSavedList();
-            } catch (err) {
-              showToast(err.message || '削除に失敗しました');
-            }
-          });
+          if (IS_OWNER) {
+            const delBtn = document.createElement('button');
+            delBtn.className = 'delete-saved-btn';
+            delBtn.textContent = '削除';
+            delBtn.addEventListener('click', async e => {
+              e.stopPropagation();
+              if (!window.confirm('この生成物を削除しますか？')) return;
+              try {
+                await callServer('deleteText', { id: it.id });
+                loadSavedList();
+              } catch (err) {
+                showToast(err.message || '削除に失敗しました');
+              }
+            });
+            li.appendChild(delBtn);
+          }
           const titleEl = document.createElement('div');
           titleEl.className = 'saved-title';
           titleEl.textContent = it.title || '(タイトルなし)';
           const metaEl = document.createElement('div');
           metaEl.className = 'saved-meta';
           metaEl.textContent = formatDate(it.createdAt) + '　' + settingsSummary(it.settings || {});
-          li.appendChild(delBtn);
           li.appendChild(titleEl);
           li.appendChild(metaEl);
           li.addEventListener('click', () => {
@@ -917,11 +923,18 @@
         if (e.touches.length > 1) e.preventDefault();
       }, { passive: false });
 
-      document.getElementById('textContentArea').textContent =
-        '左のパネルで設定を選び、［英語長文を生成］を押してください。\n\n単語をタップすると辞書を表示します。';
+      if (!IS_ALLOWED) {
+        document.getElementById('genSection').style.display = 'none';
+        document.getElementById('textContentArea').textContent =
+          '左のパネルで過去の生成物を選択してください。\n\n単語をタップすると辞書を表示します。';
+      } else {
+        document.getElementById('textContentArea').textContent =
+          '左のパネルで設定を選び、［英語長文を生成］を押してください。\n\n単語をタップすると辞書を表示します。';
+      }
 
       applyZoom();
       loadSavedList();
+      Promise.all([loadFormMap(), loadInvert()]).catch(() => {});
     });
   </script>
 </body>
