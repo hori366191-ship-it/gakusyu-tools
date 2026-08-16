@@ -11,6 +11,8 @@ apps/
 ├── app1/   公式ビューア      (scriptId: YOUR_SCRIPT_ID_app1)
 ├── app2/   英語長文 多読リーダー (scriptId: YOUR_SCRIPT_ID_app2)
 ├── app3/   正規分布シミュレーター (scriptId: YOUR_SCRIPT_ID_app3)
+├── app4/   立体図形ビューア   (scriptId: YOUR_SCRIPT_ID_app4)
+├── app5/   原子・周期表ツール (scriptId: YOUR_SCRIPT_ID_app5)
 └── portal/ 学習ツール ポータル (scriptId: YOUR_SCRIPT_ID_portal)
 ```
 

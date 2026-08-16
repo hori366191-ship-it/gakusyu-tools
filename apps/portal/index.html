@@ -130,6 +130,7 @@
   .card:nth-child(1) { animation-delay: .05s; }
   .card:nth-child(2) { animation-delay: .12s; }
   .card:nth-child(3) { animation-delay: .19s; }
+  .card:nth-child(4) { animation-delay: .26s; }
   @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
   .card:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(15, 23, 42, .05), 0 14px 28px rgba(15, 23, 42, .10); }
   .card:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
@@ -147,6 +148,7 @@
   .card--blue .card__icon { background: linear-gradient(135deg, #005a9c, #00457a); }
   .card--green .card__icon { background: linear-gradient(135deg, #4caf50, #2e7d32); }
   .card--navy .card__icon { background: linear-gradient(135deg, #2a4a7f, #1f3a5f); }
+  .card--violet .card__icon { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
 
   .card__title {
     margin: 0;
@@ -190,6 +192,7 @@
   .card--blue .card__btn { background: linear-gradient(135deg, #005a9c, #00457a); }
   .card--green .card__btn { background: linear-gradient(135deg, #4caf50, #2e7d32); }
   .card--navy .card__btn { background: linear-gradient(135deg, #2a4a7f, #1f3a5f); }
+  .card--violet .card__btn { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
   .card:hover .card__btn {
     filter: brightness(1.07);
     transform: translateY(-1px);
@@ -268,6 +271,18 @@
       </div>
       <h2 class="card__title">正規分布 シミュレーター</h2>
       <p class="card__desc">正規分布の性質を視覚的に体験できる物理シミュレーション。</p>
+      <span class="card__btn">開く&nbsp;↗</span>
+    </a>
+
+    <a class="card card--violet" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbwoxjIDz7eumas4ucv_NI1iq3L1XY35CEh8qK2eE84k2wDdpwKyRPg75rto2OqrJLFuDA/exec" target="_blank" rel="noopener">
+      <div class="card__icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M32 6 L55 18 L55 46 L32 58 L9 46 L9 18 Z" />
+          <path d="M32 6 L32 58 M9 18 L55 46 M55 18 L9 46" opacity=".55" />
+        </svg>
+      </div>
+      <h2 class="card__title">立体図形ビューア</h2>
+      <p class="card__desc">立体を回転させて観察したり、面をパタパタ開いて展開図を見たりできるビューアです。立方体の展開図は11通りすべて選べます。</p>
       <span class="card__btn">開く&nbsp;↗</span>
     </a>
 
