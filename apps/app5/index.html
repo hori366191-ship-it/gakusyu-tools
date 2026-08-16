@@ -277,6 +277,7 @@ select:focus{outline:1px solid var(--gold);outline-offset:1px}
           <button class="btn active" data-mode="stick">ボール&スティック</button>
           <button class="btn" data-mode="space">実半径</button>
           <button class="btn" data-mode="cut">単位格子切断</button>
+          <button class="btn hidden" data-mode="diag">対角線断面</button>
         </div>
       </label>
       <div class="toggles">
@@ -303,6 +304,7 @@ select:focus{outline:1px solid var(--gold);outline-offset:1px}
       <div class="tex-row" id="ciCountTex"></div>
       <div class="stat"><span class="lbl">充填率</span><span class="val" id="ciRatio">&mdash;</span></div>
       <div class="tex-row" id="ciRatioTex"></div>
+      <div class="tex-row hidden" id="ciDiagTex"></div>
       <p class="notes" id="ciDesc"></p>
     </div>
 
@@ -1142,8 +1144,9 @@ var CRY_DATA={
         }
         return false;
       }
-      for(var m=-3;m<=3;m++){
-        for(var n=-3;n<=3;n++){
+      var RN=expanded?4:3;
+      for(var m=-RN;m<=RN;m++){
+        for(var n=-RN;n<=RN;n++){
           for(var l=-1;l<=3;l++){
             var px=m*a1[0]+n*a2[0],py=m*a1[1]+n*a2[1],pz=l*c;
             var bx=px+a1[0]/3+a2[0]/3,by=py+a1[1]/3+a2[1]/3;
@@ -1236,8 +1239,9 @@ var CRY_DATA={
         }
         return false;
       }
-      for(var m=-3;m<=3;m++){
-        for(var n=-3;n<=3;n++){
+      var RN=expanded?4:3;
+      for(var m=-RN;m<=RN;m++){
+        for(var n=-RN;n<=RN;n++){
           for(var l=-1;l<=4;l++){
             var px=m*a1[0]+n*a2[0],py=m*a1[1]+n*a2[1],pz=l*c;
             var bx=px+off1[0],by=py+off1[1];
@@ -1274,6 +1278,13 @@ function buildCry(){
 function setCry(id){
   CRY_STRUCT=id;
   $('#crySel').value=id;
+  var diagBtn=$('#cryMode .btn[data-mode="diag"]');
+  diagBtn.classList.toggle('hidden',id!=='BCC'&&id!=='CsCl');
+  if(cryState.mode==='diag'&&id!=='BCC'&&id!=='CsCl'){
+    cryState.mode='stick';
+    $$('#cryMode .btn').forEach(function(x){x.classList.toggle('active',x.dataset.mode==='stick');});
+    $$('#cryCellMode .btn').forEach(function(x){x.classList.toggle('disabled',false);});
+  }
   buildCryMesh();
   renderCryInfo();
 }
@@ -1286,7 +1297,7 @@ $('#crySel').innerHTML=(function(){
 $('#crySel').addEventListener('change',function(){setCry(this.value);});
 $$('#cryCellMode .btn').forEach(function(b){
   b.addEventListener('click',function(){
-    if(cryState.mode==='cut')return;
+    if(cryState.mode==='cut'||cryState.mode==='diag')return;
     $$('#cryCellMode .btn').forEach(function(x){x.classList.remove('active');});
     b.classList.add('active');
     cryState.expanded=b.dataset.cell==='exp';
@@ -1298,12 +1309,14 @@ $$('#cryMode .btn').forEach(function(b){
     $$('#cryMode .btn').forEach(function(x){x.classList.remove('active');});
     b.classList.add('active');
     cryState.mode=b.dataset.mode;
-    $$('#cryCellMode .btn').forEach(function(x){x.classList.toggle('disabled',cryState.mode==='cut');});
-    if(cryState.mode==='cut'&&cryState.expanded){
+    var lock=(cryState.mode==='cut'||cryState.mode==='diag');
+    $$('#cryCellMode .btn').forEach(function(x){x.classList.toggle('disabled',lock);});
+    if(lock&&cryState.expanded){
       cryState.expanded=false;
       $$('#cryCellMode .btn').forEach(function(x){x.classList.toggle('active',x.dataset.cell==='unit');});
     }
     buildCryMesh();
+    renderCryInfo();
   });
 });
 $('#cryAuto').addEventListener('change',function(){cryState.auto=this.checked;});
@@ -1354,6 +1367,17 @@ function renderCryInfo(){
   $('#ciDesc').innerHTML=info.desc;
   renderTex($('#ciCountTex'),info.countTex);
   renderTex($('#ciRatioTex'),info.ratioTex);
+  var diagTex=$('#ciDiagTex');
+  if(cryState.mode==='diag'){
+    var tex=CRY_STRUCT==='BCC'
+      ?'4r=\\sqrt{3}\\,a\\;\\Rightarrow\\; r=\\frac{\\sqrt{3}}{4}\\,a'
+      :'r_{+}+r_{-}=\\frac{\\sqrt{3}}{2}\\,a';
+    diagTex.classList.remove('hidden');
+    renderTex(diagTex,tex);
+  }else{
+    diagTex.classList.add('hidden');
+    renderTex(diagTex,'');
+  }
 }
 
 function project(p,S,P,cx,cy){
@@ -1363,14 +1387,68 @@ function project(p,S,P,cx,cy){
   if(f>10)f=10;
   return [cx+q[0]*S*f,cy-q[1]*S*f,f,q[2]];
 }
+function drawDiag(){
+  var W=CW,H=CH;
+  ctxC.clearRect(0,0,W,H);
+  if(!cryMesh)return;
+  var L=2;
+  var uMax=Math.SQRT2*L,vMax=L;
+  var S2=Math.min(W,H)*0.72/Math.max(uMax,vMax)*cryState.zoom;
+  var cx0=W/2,cy0=H/2;
+  function toX(u){return cx0+(u-uMax/2)*S2;}
+  function toY(v){return cy0-(v-vMax/2)*S2;}
+  var rectX=toX(0),rectY=toY(vMax),rectW=uMax*S2,rectH=vMax*S2;
+  var atoms=cryMesh.atoms;
+  ctxC.save();
+  ctxC.beginPath();
+  ctxC.rect(rectX,rectY,rectW,rectH);
+  ctxC.clip();
+  for(var i=0;i<atoms.length;i++){
+    var at=atoms[i];
+    var d=Math.abs(at.x-at.y)/Math.SQRT2;
+    if(d>at.r)continue;
+    var rho=Math.sqrt(Math.max(0,at.r*at.r-d*d));
+    if(rho<0.02)continue;
+    var X=toX((at.x+at.y)/Math.SQRT2),Y=toY(at.z);
+    var R=rho*S2;
+    ctxC.beginPath();
+    ctxC.arc(X,Y,R,0,Math.PI*2);
+    ctxC.fillStyle=shade(at.col,18);
+    ctxC.fill();
+    ctxC.strokeStyle='rgba(23,32,52,.5)';
+    ctxC.lineWidth=1.5;
+    ctxC.stroke();
+  }
+  ctxC.restore();
+  ctxC.strokeStyle='#27496f';
+  ctxC.lineWidth=2;
+  ctxC.strokeRect(rectX,rectY,rectW,rectH);
+  ctxC.strokeStyle='rgba(176,138,62,.85)';
+  ctxC.lineWidth=1.3;
+  ctxC.setLineDash([6,4]);
+  ctxC.beginPath();
+  ctxC.moveTo(toX(0),toY(0));
+  ctxC.lineTo(toX(uMax),toY(vMax));
+  ctxC.stroke();
+  ctxC.setLineDash([]);
+  ctxC.fillStyle='rgba(32,36,44,.55)';
+  ctxC.font='12px "Noto Serif JP",serif';
+  ctxC.textAlign='left';
+  ctxC.textBaseline='alphabetic';
+  ctxC.fillText(STRUCT_JP[CRY_STRUCT]+' · 対角線断面 (x=y 面)',14,CH-14);
+}
 function drawCry(now){
   var W=CW,H=CH;
   ctxC.clearRect(0,0,W,H);
   if(!cryMesh)return;
+  var mode=cryState.mode;
+  if(mode==='diag'){
+    drawDiag();
+    return;
+  }
   var dt=Math.min((now-lastCryT)/1000,0.05);
   lastCryT=now;
   if(cryState.auto)viewM=ortho(matMul(matRotY(dt*0.4),viewM));
-  var mode=cryState.mode;
   var atoms=cryMesh.atoms;
   var ext=cryMesh.ext;
   var cx=W/2,cy=H/2;
@@ -1696,7 +1774,7 @@ function frame(now){
 
 renderMath();
 resetView();
-buildCryMesh();
+setCry('BCC');
 resize();
 requestAnimationFrame(frame);
 })();
