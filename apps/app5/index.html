@@ -1055,22 +1055,6 @@ function cubeMesh(atoms,bonds,L,expanded){
   for(var c=0;c<8;c++)verts.push([CORNER[c][0]*L,CORNER[c][1]*L,CORNER[c][2]*L]);
   return {atoms:atoms,bonds:bonds,lines:lines,expanded:expanded,clip:clipBox(L),verts:verts};
 }
-function cross2(o,a,b){return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);}
-function convexHull2D(pts){
-  pts=pts.slice().sort(function(a,b){return a[0]-b[0]||a[1]-b[1];});
-  var lower=[];
-  for(var i=0;i<pts.length;i++){
-    while(lower.length>=2&&cross2(lower[lower.length-2],lower[lower.length-1],pts[i])<=0)lower.pop();
-    lower.push(pts[i]);
-  }
-  var upper=[];
-  for(var i2=pts.length-1;i2>=0;i2--){
-    while(upper.length>=2&&cross2(upper[upper.length-2],upper[upper.length-1],pts[i2])<=0)upper.pop();
-    upper.push(pts[i2]);
-  }
-  lower.pop();upper.pop();
-  return lower.concat(upper);
-}
 function clipPoly3D(poly,planes){
   var out=poly;
   for(var p=0;p<planes.length;p++){
@@ -1094,6 +1078,22 @@ function clipPoly3D(poly,planes){
     out=next;
   }
   return out;
+}
+function cross2(o,a,b){return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);}
+function convexHull2D(pts){
+  pts=pts.slice().sort(function(a,b){return a[0]-b[0]||a[1]-b[1];});
+  var lower=[];
+  for(var i=0;i<pts.length;i++){
+    while(lower.length>=2&&cross2(lower[lower.length-2],lower[lower.length-1],pts[i])<=0)lower.pop();
+    lower.push(pts[i]);
+  }
+  var upper=[];
+  for(var i2=pts.length-1;i2>=0;i2--){
+    while(upper.length>=2&&cross2(upper[upper.length-2],upper[upper.length-1],pts[i2])<=0)upper.pop();
+    upper.push(pts[i2]);
+  }
+  lower.pop();upper.pop();
+  return lower.concat(upper);
 }
 
 var CORNER=[[0,0,0],[1,0,0],[0,1,0],[0,0,1],[1,1,0],[1,0,1],[0,1,1],[1,1,1]];
@@ -1418,15 +1418,6 @@ function drawCry(now){
   }
   sorted.sort(function(a,b){return a.d-b.d;});
   var planes=cutMode?(cryMesh.clip||[]):null;
-  var cellPoly=null;
-  if(cutMode&&cryMesh.verts&&cryMesh.verts.length>2){
-    var vp=[];
-    for(var v0=0;v0<cryMesh.verts.length;v0++){
-      var pv=project(cryMesh.verts[v0],S,P,cx,cy);
-      vp.push([pv[0],pv[1]]);
-    }
-    cellPoly=convexHull2D(vp);
-  }
   for(var i4=0;i4<sorted.length;i4++){
     var s=sorted[i4];
     if(s.r<0.6)continue;
@@ -1455,23 +1446,87 @@ function drawCry(now){
       cutPlanes.push({n:pl.n,d:pl.d,g:gM});
     }
     if(skip)continue;
-    ctxC.save();
-    ctxC.beginPath();
-    ctxC.arc(s.x,s.y,s.r,0,Math.PI*2);
-    ctxC.clip();
-    if(cellPoly){
-      ctxC.beginPath();
-      ctxC.moveTo(cellPoly[0][0],cellPoly[0][1]);
-      for(var k1=1;k1<cellPoly.length;k1++)ctxC.lineTo(cellPoly[k1][0],cellPoly[k1][1]);
-      ctxC.closePath();
-      ctxC.clip();
+    var cq=matVec(viewM,[mx-c0[0],my-c0[1],mz-c0[2]]);
+    var rS=s.atom.r;
+    var viewPlanes=[];
+    for(var kp=0;kp<cutPlanes.length;kp++){
+      var cp0=cutPlanes[kp];
+      viewPlanes.push({
+        n:matVec(viewM,cp0.n),
+        d:cp0.d-(cp0.n[0]*c0[0]+cp0.n[1]*c0[1]+cp0.n[2]*c0[2])
+      });
     }
-    var g3=ctxC.createRadialGradient(s.x-s.r*0.35,s.y-s.r*0.35,s.r*0.1,s.x,s.y,s.r);
+    function projV(q){
+      var f=P/(P-q[2]);
+      if(f>10)f=10;
+      return [cx+q[0]*S*f,cy-q[1]*S*f];
+    }
+    var hullPts=[];
+    var ns=[cq[0],cq[1],cq[2]-P];
+    var D=Math.hypot(ns[0],ns[1],ns[2]);
+    if(D<1e-9){ns=[0,0,-1];D=1;}
+    ns=[ns[0]/D,ns[1]/D,ns[2]/D];
+    var rD=rS*rS/D;
+    var silC=[cq[0]-ns[0]*rD,cq[1]-ns[1]*rD,cq[2]-ns[2]*rD];
+    var silR=rS*Math.sqrt(Math.max(0,1-rS*rS/(D*D)));
+    var e1s=v3norm(v3cross(ns,[0,0,1]));
+    if(Math.hypot(e1s[0],e1s[1])<1e-6)e1s=[1,0,0];
+    var e2s=v3cross(ns,e1s);
+    var sil=[];
+    for(var sk=0;sk<48;sk++){
+      var ths=sk*(Math.PI*2/48);
+      sil.push([silC[0]+silR*(Math.cos(ths)*e1s[0]+Math.sin(ths)*e2s[0]),
+                silC[1]+silR*(Math.cos(ths)*e1s[1]+Math.sin(ths)*e2s[1]),
+                silC[2]+silR*(Math.cos(ths)*e1s[2]+Math.sin(ths)*e2s[2])]);
+    }
+    sil=clipPoly3D(sil,viewPlanes);
+    for(var si2=0;si2<sil.length;si2++)hullPts.push(projV(sil[si2]));
+    for(var cli2=0;cli2<cutPlanes.length;cli2++){
+      var cl2=cutPlanes[cli2];
+      var g4=cl2.g;
+      var rho=Math.sqrt(Math.max(0,rS*rS-g4*g4));
+      if(rho<0.05)continue;
+      var nv2=viewPlanes[cli2].n;
+      var fcv=[cq[0]+nv2[0]*g4,cq[1]+nv2[1]*g4,cq[2]+nv2[2]*g4];
+      var e1=v3norm(v3cross(nv2,[0,0,1]));
+      if(Math.hypot(e1[0],e1[1])<1e-6)e1=[1,0,0];
+      var e2=v3cross(nv2,e1);
+      var others=[];
+      for(var oj=0;oj<viewPlanes.length;oj++){
+        if(oj===cli2)continue;
+        others.push(viewPlanes[oj]);
+      }
+      var facePoly=[];
+      var K=40;
+      for(var kk=0;kk<K;kk++){
+        var th=kk*(Math.PI*2/K);
+        facePoly.push([fcv[0]+rho*(Math.cos(th)*e1[0]+Math.sin(th)*e2[0]),
+                       fcv[1]+rho*(Math.cos(th)*e1[1]+Math.sin(th)*e2[1]),
+                       fcv[2]+rho*(Math.cos(th)*e1[2]+Math.sin(th)*e2[2])]);
+      }
+      facePoly=clipPoly3D(facePoly,others);
+      if(facePoly.length<3)continue;
+      for(var fp=0;fp<facePoly.length;fp++)hullPts.push(projV(facePoly[fp]));
+    }
+    if(hullPts.length<3)continue;
+    var hull=convexHull2D(hullPts);
+    if(hull.length<3)continue;
+    var maxD=1;
+    for(var md=0;md<hull.length;md++){
+      var ddx=hull[md][0]-s.x,ddy=hull[md][1]-s.y;
+      var dd=Math.sqrt(ddx*ddx+ddy*ddy);
+      if(dd>maxD)maxD=dd;
+    }
+    var g3=ctxC.createRadialGradient(s.x-s.r*0.35,s.y-s.r*0.35,s.r*0.1,s.x,s.y,maxD);
     g3.addColorStop(0,'#ffffff');
     g3.addColorStop(0.3,s.base);
     g3.addColorStop(1,shade(s.base,-42));
     ctxC.beginPath();
-    ctxC.arc(s.x,s.y,s.r,0,Math.PI*2);
+    for(var hl=0;hl<hull.length;hl++){
+      if(hl===0)ctxC.moveTo(hull[hl][0],hull[hl][1]);
+      else ctxC.lineTo(hull[hl][0],hull[hl][1]);
+    }
+    ctxC.closePath();
     ctxC.fillStyle=g3;
     ctxC.fill();
     for(var cli2=0;cli2<cutPlanes.length;cli2++){
@@ -1513,7 +1568,6 @@ function drawCry(now){
       ctxC.lineWidth=0.8;
       ctxC.stroke();
     }
-    ctxC.restore();
   }
   if(cutMode&&cryState.cell){
     ctxC.strokeStyle='rgba(31,58,95,.62)';
