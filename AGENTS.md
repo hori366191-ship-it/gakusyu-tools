@@ -94,3 +94,10 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 - ポータルのカード追加: `apps/portal/index.html` の `.cards` 内にカード1ブロックを追加(リンクは`/a/`形式)
 - 変更後は必ずヘッドレス検証 → `clasp push` → ユーザーにUIでのデプロイ更新を依頼
 - Gmailアカウント(REDACTED_EMAIL)の別アプリが存在するが、このリポジトリでは管理対象外(共有URLは`/a/*/`形式を使用)
+
+### gitバックアップ(Drive同期)
+
+- コミット時フック(`scripts/hooks/post-commit`、`core.hooksPath=scripts/hooks`)とTask Scheduler(毎日18時 `GitBackupGakusyuTool`、`StartWhenAvailable`有効=PC電源OFFで見逃した場合は次回ログオン時に即実行)で、`E:\hori-shotaDrive\開発\学習ツール` に `backup-YYYYMMDD-HHmm.bundle` を自動作成(最新30個保持)
+- 手動実行: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\backup.ps1`
+- 復元: `git clone "E:\hori-shotaDrive\開発\学習ツール\backup-<最新>.bundle" <復元先>`
+- 注意: bundleはコミット済み履歴のみ。未コミット変更(例: `ロードマップ.md`)は含まれない
