@@ -1,2 +1,5 @@
 # git bundle のバックアップファイル(Drive 同期フォルダへ移動後の残骸対策)
 backup-*.bundle
+
+# clasp の認証トークン(ホームディレクトリにあるが誤混入防止のため)
+.clasprc.json
