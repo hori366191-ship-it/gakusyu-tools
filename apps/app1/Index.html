@@ -619,6 +619,10 @@
                         currentBundle = bundle;
                         buildMenuHtml(bundle.files);
                         setLocalBundle(bundle);
+                    } else if (bundle && Array.isArray(bundle.files)) {
+                        // サーバー上にファイルが無い場合は明示メッセージを表示
+                        currentBundle = null;
+                        menuContainer.innerHTML = '<div class="side-menu"><h3>公式一覧</h3><p style="padding: 15px;">公式ファイルが見つかりません。<br>先生に確認してください。</p></div>';
                     }
                 })
                 .catch(error => {

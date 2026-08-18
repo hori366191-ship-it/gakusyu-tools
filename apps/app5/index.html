@@ -136,7 +136,7 @@ select:focus{outline:1px solid var(--gold);outline-offset:1px}
 .site-footer .wrap{display:flex;flex-wrap:wrap;gap:18px 40px;justify-content:center;align-items:center;padding-top:16px;padding-bottom:18px;font-size:17px;color:var(--accent)}
 .site-footer .cap{font-size:10.5px;letter-spacing:.2em;color:var(--ink-soft);text-transform:uppercase}
 
-@media (max-width:1020px){
+@media (orientation: portrait){
   .layout{grid-template-columns:1fr}
   .panel{order:2}
   .stage{order:1}
@@ -215,6 +215,7 @@ select:focus{outline:1px solid var(--gold);outline-offset:1px}
       <div class="stat"><span class="lbl">最外殻電子数</span><span class="val" id="detOuter">&mdash;</span></div>
       <div class="stat"><span class="lbl">価電子数</span><span class="val" id="detVal">&mdash;</span></div>
       <div class="stat"><span class="lbl">主なイオン</span><span class="val" id="detIons">&mdash;</span></div>
+      <div class="stat"><span class="lbl">イオンの説明</span><span class="val use-val" id="detIonNote" style="display:none"></span></div>
       <div class="cfg-line" id="detCfg">&mdash;</div>
       <div class="stat"><span class="lbl">殻ごとの電子数</span><span class="val" id="detShells">&mdash;</span></div>
       <div class="stat"><span class="lbl">主な用途</span><span class="val use-val" id="detUse">&mdash;</span></div>
@@ -256,6 +257,7 @@ select:focus{outline:1px solid var(--gold);outline-offset:1px}
       <div class="stat"><span class="lbl">電子数 e</span><span class="val" id="aiE">&mdash;</span></div>
       <div class="stat"><span class="lbl">電荷</span><span class="val" id="aiQ">&mdash;</span></div>
       <div class="stat"><span class="lbl">殻ごとの電子数</span><span class="val" id="aiShells">&mdash;</span></div>
+      <div class="stat"><span class="lbl">イオンの説明</span><span class="val use-val" id="aiIonNote" style="display:none"></span></div>
     </div>
 
     <div class="card hidden" data-tab="crystal" id="ctl-cry">
@@ -356,14 +358,14 @@ var ELEM_STR=[
 'K,カリウム,39.098,0,3,BCC,1+',
 'Ca,カルシウム,40.078,1,3,,2+',
 'Sc,スカンジウム,44.956,2,3,,',
-'Ti,チタン,47.867,2,3,HCP,',
+'Ti,チタン,47.867,2,3,HCP,4+',
 'V,バナジウム,50.942,2,3,,',
 'Cr,クロム,51.996,2,3,BCC,3+',
 'Mn,マンガン,54.938,2,3,,2+',
-'Fe,鉄,55.845,2,3,BCC,2+,3+',
-'Co,コバルト,58.933,2,3,,',
+'Fe,鉄,55.845,2,3,BCC,2+;3+',
+'Co,コバルト,58.933,2,3,,2+',
 'Ni,ニッケル,58.693,2,3,,2+',
-'Cu,銅,63.546,2,3,FCC,1+,2+',
+'Cu,銅,63.546,2,3,FCC,2+;1+',
 'Zn,亜鉛,65.38,2,3,HCP,2+',
 'Ga,ガリウム,69.723,3,3,,',
 'Ge,ゲルマニウム,72.630,4,3,,',
@@ -384,7 +386,7 @@ var ELEM_STR=[
 'Ag,銀,107.87,2,3,FCC,1+',
 'Cd,カドミウム,112.41,2,3,,2+',
 'In,インジウム,114.82,3,3,,',
-'Sn,スズ,118.71,3,3,,2+,4+',
+'Sn,スズ,118.71,3,3,,2+;4+',
 'Sb,アンチモン,121.76,4,3,,',
 'Te,テルル,127.60,4,3,,2-',
 'I,ヨウ素,126.90,6,3,,1-',
@@ -413,10 +415,10 @@ var ELEM_STR=[
 'Os,オスミウム,190.23,2,3,,',
 'Ir,イリジウム,192.22,2,3,,',
 'Pt,白金,195.08,2,3,FCC,',
-'Au,金,196.97,2,3,FCC,',
-'Hg,水銀,200.59,2,2,,1+,2+',
-'Tl,タリウム,204.38,3,3,,1+,3+',
-'Pb,鉛,207.2,3,3,FCC,2+,4+',
+'Au,金,196.97,2,3,FCC,3+',
+'Hg,水銀,200.59,2,2,,2+;1+',
+'Tl,タリウム,204.38,3,3,,1+;3+',
+'Pb,鉛,207.2,3,3,FCC,2+;4+',
 'Bi,ビスマス,208.98,3,3,,3+',
 'Po,ポロニウム,[209],3,3,,',
 'At,アスタチン,[210],6,3,,',
@@ -510,6 +512,21 @@ var NAT=[null,
 'ウラン鉱石中に極微量(放射性)','ウラン鉱として産出(放射性)','天然にはほぼ存在しない(原子炉で生成)','天然にはほぼ存在しない(極微量はウラン鉱に)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)',
 '天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)',
 '天然にはほぼ存在しない(人工元素・日本で発見)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)'
+];
+
+var ION_NOTE=[null,
+'','','','','','','','','','',
+'','','','','','','','','','',
+'','Ti⁴⁺(酸化チタンTiO₂など)が主ですが、高校化学ではほとんど扱いません。','','Cr は [Ar]3d⁵4s¹ という特別な電子配置(3dが半閉殻で安定)をとります。主なイオンは Cr³⁺ です。','Mn²⁺ は 3d⁵ の半閉殻配置で特に安定です。','遷移元素は最外殻の4s軌道と内側の3d軌道のエネルギー差が小さく、電子を失いやすいため複数の価数をとります。Fe²⁺(4s²を失う)と Fe³⁺(さらに3dを1個失う)があります。','Co²⁺ が主です。','','Cu は 3d¹⁰4s¹。4sの電子を失って Cu⁺(3d¹⁰)に、さらに3dの電子を失って Cu²⁺(3d⁹)になります。水溶液中では Cu²⁺ が安定なため、銅の主なイオンは Cu²⁺ です。','',
+'','','','','','','','','','',
+'','','','','','','','','','Sn²⁺ と Sn⁴⁺。6s² の電子対が安定なため(不活性電子対効果)、Sn²⁺ も存在します。',
+'','','','','','','','','','',
+'','','','','','','','','','',
+'','','','','','','','','Au³⁺ が主ですが、高校化学ではほとんど扱いません。','主なイオンは Hg²⁺(水銀(II))。Hg⁺ と書かれることもありますが、実際には Hg₂²⁺ という2個の水銀が結合した形で存在します。',
+'Tl⁺ と Tl³⁺(高校化学ではほとんど扱いません)。','Pb²⁺ と Pb⁴⁺。6s² の電子対が安定なため(不活性電子対効果)、Pb²⁺ がより安定で主なイオンです。','','','','','','','','',
+'','','','','','','','','','',
+'','','','','','','','','','',
+'','','','','','','',''
 ];
 
 function parseConfig(cfg){
@@ -683,8 +700,10 @@ function selectElement(n){
   $('#detBlk').textContent=BLK_JP[BLOCK[n]];
   $('#detOuter').textContent=sh[sh.length-1];
   $('#detVal').textContent=VALENCE[n];
-  var ionTxt=e.ions?e.ions.split(',').map(function(x){return ionLabel(e.sym,x);}).join('・'):'—';
+  var ionTxt=e.ions?e.ions.split(';').map(function(x){return ionLabel(e.sym,x);}).join('・'):'—';
   $('#detIons').textContent=ionTxt;
+  $('#detIonNote').textContent=ION_NOTE[n]||'';
+  $('#detIonNote').style.display=ION_NOTE[n]?'':'none';
   $('#detCfg').textContent=formatCfg(CFG[n]);
   var sn=['K','L','M','N','O','P','Q'];
   $('#detShells').textContent=sh.map(function(v,i){return sn[i]+':'+v;}).join(' ');
@@ -731,7 +750,7 @@ $('#atomEl').value='11';
 function ionOpts(n){
   var e=ELEMS[n],o='<option value="0">原子(中性)</option>';
   if(e.ions){
-    e.ions.split(',').forEach(function(x){
+    e.ions.split(';').forEach(function(x){
       o+='<option value="'+x+'">'+ionLabel(e.sym,x)+'</option>';
     });
   }
@@ -916,6 +935,8 @@ function updateAtomInfo(){
   $('#aiQ').textContent=q===0?'0':(q>0?'+'+q:''+q);
   var sn=['K','L','M','N','O','P','Q'];
   $('#aiShells').textContent=sh.map(function(v,i){return sn[i]+':'+Math.round(v);}).join(' ');
+  $('#aiIonNote').textContent=ION_NOTE[n]||'';
+  $('#aiIonNote').style.display=ION_NOTE[n]?'':'none';
 }
 setAtom(11,true);
 updateAtomInfo();
