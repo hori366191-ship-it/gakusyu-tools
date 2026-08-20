@@ -478,11 +478,13 @@ function drawOrbitMoon(){
   ctxO.strokeStyle='rgba(31,47,70,.14)'; ctxO.lineWidth=1; ctxO.setLineDash([6,6]);
   ctxO.beginPath(); ctxO.arc(cx,cy,orbitR,0,Math.PI*2); ctxO.stroke();
   ctxO.setLineDash([]);
-  ctxO.fillStyle='rgba(31,47,70,.42)'; ctxO.font='11px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  ctxO.fillText('北', cx, cy - orbitR -10);
-  ctxO.fillText('南', cx, cy + orbitR +16);
-  ctxO.fillText('西', cx - orbitR -16, cy+4);
-  ctxO.fillText('東', cx + orbitR +16, cy+4);
+  // cardinal with halo
+  ['北','南','西','東'].forEach(function(lbl,i){
+    var pos=[ [cx, cy-orbitR-10], [cx, cy+orbitR+16], [cx-orbitR-16, cy+4], [cx+orbitR+16, cy+4] ][i];
+    ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='700 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.strokeText(lbl, pos[0], pos[1]);
+    ctxO.fillStyle='rgba(31,47,70,.88)'; ctxO.fillText(lbl, pos[0], pos[1]);
+  });
   ctxO.strokeStyle='rgba(31,47,70,.32)'; ctxO.lineWidth=1.1;
   ctxO.beginPath(); ctxO.arc(cx,cy,orbitR+10, -Math.PI*0.82, -Math.PI*0.68); ctxO.stroke();
   ctxO.beginPath(); ctxO.moveTo(cx+ orbitR*Math.cos(-Math.PI*0.68), cy+ orbitR*Math.sin(-Math.PI*0.68)); ctxO.lineTo(cx+ orbitR*Math.cos(-Math.PI*0.68)-5, cy+ orbitR*Math.sin(-Math.PI*0.68)-6); ctxO.stroke();
@@ -502,6 +504,13 @@ function drawOrbitMoon(){
   ctxO.fillStyle=gradE; ctxO.fillRect(cx-6, cy-earthR, 12, earthR*2);
   ctxO.restore();
   ctxO.strokeStyle='#1f2f46'; ctxO.lineWidth=1.4; ctxO.beginPath(); ctxO.arc(cx,cy,earthR,0,Math.PI*2); ctxO.stroke();
+  // Earth's axis — north pole up
+  ctxO.strokeStyle='rgba(239,68,68,.5)'; ctxO.lineWidth=1.1; ctxO.setLineDash([3,3]);
+  ctxO.beginPath(); ctxO.moveTo(cx, cy-earthR-5); ctxO.lineTo(cx, cy+earthR+5); ctxO.stroke();
+  ctxO.setLineDash([]);
+  ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(cx, cy-earthR, 2.8,0,Math.PI*2); ctxO.fill();
+  ctxO.fillStyle='#ef4444'; ctxO.font='700 8px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillText('北極', cx, cy-earthR-7);
   var obsAng = (360 - state.time*15) * Math.PI/180;
   var obsX = cx + earthR*Math.cos(obsAng), obsY = cy + earthR*Math.sin(obsAng);
   ctxO.fillStyle='#b45309';
@@ -676,7 +685,17 @@ function drawOrbitConst(){
   // observer is on earth rim, but earth is small, so observer position relative to earth center
   var obsX = ex + (earthR-2)*Math.cos(obsAngEarth), obsY = ey + (earthR-2)*Math.sin(obsAngEarth);
   ctxO.fillStyle='#b45309'; ctxO.beginPath(); ctxO.arc(obsX,obsY,3,0,Math.PI*2); ctxO.fill();
-  // compass arrows from observer — absolute screen north is up (270°), so north points to Earth's north pole (top of screen)
+  // compass arrows from observer — absolute directions (north is top of screen, toward Earth's north pole)
+  // Show Earth's axis for clarity
+  ctxO.strokeStyle='rgba(239,68,68,.55)'; ctxO.lineWidth=1.2; ctxO.setLineDash([4,3]);
+  ctxO.beginPath(); ctxO.moveTo(ex, ey-earthR-6); ctxO.lineTo(ex, ey+earthR+6); ctxO.stroke();
+  ctxO.setLineDash([]);
+  ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(ex, ey-earthR, 3.5,0,Math.PI*2); ctxO.fill();
+  ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
+  ctxO.fillStyle='#ef4444'; ctxO.font='700 9px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillText('北極', ex, ey-earthR-8);
+  ctxO.fillStyle='rgba(31,47,70,.55)'; ctxO.font='9px "Noto Serif JP",serif';
+  ctxO.fillText('地軸', ex+14, ey);
   var len=22;
   var dirs=[
     {ang:270, label:'北', col:'#ef4444'},
@@ -908,17 +927,16 @@ function drawSkyConst(){
     ctxS.shadowColor=s.col; ctxS.shadowBlur= r>1.8? 6:0;
     ctxS.beginPath(); ctxS.arc(x,y,r,0,Math.PI*2); ctxS.fill();
     ctxS.shadowBlur=0;
-    // label for 1st mag — with halo for readability
-    if(s.mag<1.2){
-      ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 10px "Noto Serif JP",serif'; ctxS.textAlign='center';
-      ctxS.strokeText(s.name, x, y-8);
-      ctxS.fillStyle='#ffffff'; ctxS.fillText(s.name, x, y-8);
+    // star name — small, less prominent than constellation name
+    if(s.mag<0.5){
+      ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font='500 8px "Noto Serif JP",serif'; ctxS.textAlign='center';
+      ctxS.fillText(s.name, x, y-7);
     }
   });
-  // constellation lines
+  // constellation lines — thicker for visibility
   if(state.showLines){
     CONST_LINES.forEach(function(c){
-      ctxS.strokeStyle=c.col; ctxS.lineWidth=1.1;
+      ctxS.strokeStyle=c.col; ctxS.lineWidth=1.6;
       ctxS.beginPath();
       var started=false;
       for(var i=0;i<c.pts.length-1;i++){
@@ -935,6 +953,26 @@ function drawSkyConst(){
         ctxS.lineTo(x2,y2);
       }
       ctxS.stroke();
+    });
+    // constellation names — prominent, at centroid of visible stars
+    CONST_LINES.forEach(function(c){
+      var sumX=0,sumY=0,cnt=0;
+      c.pts.forEach(function(id){
+        var s=STARS[id]; if(!s) return;
+        var p=raDecToAltAz(s.ra,s.dec,lst,LAT);
+        if(p.alt<0) return;
+        var rel=((p.az-state.viewAz+540)%360)-180;
+        if(Math.abs(rel)>92) return;
+        var x=SW*0.5+rel/90*SW*0.38, y=groundY-8 - p.alt/90*(groundY*0.68);
+        sumX+=x; sumY+=y; cnt++;
+      });
+      if(cnt===0) return;
+      var cx=sumX/cnt, cy=sumY/cnt - 14;
+      // halo
+      ctxS.strokeStyle='rgba(15,23,42,.92)'; ctxS.lineWidth=4; ctxS.font='700 12px "Noto Serif JP",serif'; ctxS.textAlign='center';
+      ctxS.strokeText(c.name, cx, cy);
+      ctxS.fillStyle=c.col.includes('250,204')? '#facc15' : '#93c5fd';
+      ctxS.fillText(c.name, cx, cy);
     });
   }
   // ecliptic
