@@ -156,6 +156,21 @@ input[type=range]{width:100%;accent-color:var(--accent);height:22px;cursor:point
       <div class="notes">毎日約50分遅れます。新月は昼に昇り夜に沈むため、夜空には見えません。<br>満月は日没ごろ昇り、夜通し見えます。</div>
     </div>
     <div class="card">
+      <div class="card-head"><div class="card-title">時刻・観測者の位置</div></div>
+      <div class="ctl">
+        <div class="ctl-head"><span>時刻</span><span class="ctl-val" id="timeVal">19:00</span></div>
+        <input type="range" id="timeSlider" min="0" max="24" step="0.25" value="19">
+      </div>
+      <div class="stat"><span class="lbl">観測者の向き</span><span class="val" id="dirVal">南</span></div>
+      <div class="stat"><span class="lbl">月の位置（時角）</span><span class="val" id="hourAngleVal">—</span></div>
+      <div class="stat"><span class="lbl">見え方</span><span class="val" id="visibilityVal">—</span></div>
+      <div class="row-btns sm">
+        <button class="btn ghost sm" id="btnTransit">南中で見る</button>
+        <button class="btn ghost sm" id="btnEvening">19時で見る</button>
+      </div>
+      <div class="notes" style="margin-top:10px">時刻を動かすと地球上の観測者（宇宙図の橙点）が移動し、空の月の位置（東→南→西）が変わります。<br>時角が±6時間以内で地平線の上、以外で下に沈みます。</div>
+    </div>
+    <div class="card">
       <div class="card-head"><div class="card-title">表示</div></div>
       <label class="toggle"><input type="checkbox" id="chkSpin" checked> 月の自転（同じ面を向ける）を表示</label>
       <label class="toggle"><input type="checkbox" id="chkGhost"> 8つの月相を軌道に薄く表示</label>
@@ -193,7 +208,7 @@ var PHASES=[
   {age:22.1,name:'下弦の月',   sub:'',          yomi:'かげん'},
   {age:25.8,name:'有明月',     sub:'',          yomi:'ありあけづき'}
 ];
-var state={age:14.8, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false};
+var state={age:14.8, time:19, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false};
 var cvOrbit, ctxO, cvSky, ctxS, W,H, SW,SH, DPR=1;
 
 // ---------- helpers ----------
@@ -221,6 +236,19 @@ function phaseOf(age){
   return best;
 }
 function transitHour(age){ return (12 + age*24/SYNODIC) % 24; }
+function hourAngle(age, time){
+  var tr=transitHour(age);
+  var ha = time - tr;
+  // normalize to -12..12
+  ha = ((ha+12)%24)-12;
+  // handle JS negative modulo
+  if(ha<-12) ha+=24; if(ha>12) ha-=24;
+  return ha;
+}
+function fmtHourAngle(ha){
+  var sign = ha>=0? '+':'';
+  return sign+ha.toFixed(1)+'h';
+}
 
 // ---------- build phase buttons ----------
 function buildPhaseGrid(){
@@ -324,21 +352,32 @@ function drawOrbit(){
   ctxO.restore();
   // earth outline
   ctxO.strokeStyle='#1f2f46'; ctxO.lineWidth=1.4; ctxO.beginPath(); ctxO.arc(cx,cy,earthR,0,Math.PI*2); ctxO.stroke();
-  // observer at south edge (facing south)
-  var obsX = cx, obsY = cy + earthR;
+  // observer position depends on time (earth rotation)
+  var obsAng = (360 - state.time*15) * Math.PI/180; // 12h=180° west, 18h=90° south, 0h=0° east
+  var obsX = cx + earthR*Math.cos(obsAng), obsY = cy + earthR*Math.sin(obsAng);
+  // observer dot
   ctxO.fillStyle='#b45309';
   ctxO.beginPath(); ctxO.arc(obsX, obsY, 3.5,0,Math.PI*2); ctxO.fill();
+  // label offset outward from earth
+  var labelR = earthR+14;
+  var labX = cx + labelR*Math.cos(obsAng), labY = cy + labelR*Math.sin(obsAng);
   ctxO.fillStyle='#1f2f46'; ctxO.font='600 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  ctxO.fillText('観測者', obsX, obsY+14);
+  // adjust label to avoid overlap with earth
+  var off = 10;
+  ctxO.fillText('観測者', labX + Math.cos(obsAng)*off, labY + Math.sin(obsAng)*off +4);
+  // direction arrow outward (local south is outward for mid-lat observer? simplified: outward = local zenith, south is tangent)
+  // draw small person triangle pointing outward
   ctxO.strokeStyle='#b45309'; ctxO.lineWidth=1;
-  ctxO.beginPath(); ctxO.moveTo(obsX, obsY+2); ctxO.lineTo(obsX, obsY+10); ctxO.stroke();
-  ctxO.beginPath(); ctxO.moveTo(obsX-4, obsY+6); ctxO.lineTo(obsX, obsY+10); ctxO.lineTo(obsX+4, obsY+6); ctxO.stroke();
-  // south arrow
-  ctxO.strokeStyle='rgba(180,83,9,.9)'; ctxO.setLineDash([3,3]);
-  ctxO.beginPath(); ctxO.moveTo(obsX, obsY+10); ctxO.lineTo(obsX, obsY+34); ctxO.stroke();
-  ctxO.setLineDash([]);
-  ctxO.fillStyle='rgba(180,83,9,.9)'; ctxO.font='10px "Noto Serif JP",serif';
-  ctxO.fillText('南', obsX, obsY+44);
+  var ax = Math.cos(obsAng), ay=Math.sin(obsAng);
+  // stem outward
+  ctxO.beginPath(); ctxO.moveTo(obsX+ax*2, obsY+ay*2); ctxO.lineTo(obsX+ax*10, obsY+ay*10); ctxO.stroke();
+  ctxO.beginPath(); ctxO.moveTo(obsX+ax*6 - ay*4, obsY+ay*6 + ax*4); ctxO.lineTo(obsX+ax*10, obsY+ay*10); ctxO.lineTo(obsX+ax*6 + ay*4, obsY+ay*6 - ax*4); ctxO.stroke();
+  // show local time near observer
+  ctxO.fillStyle='rgba(180,83,9,.9)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillText(fmtTime(state.time), labX + ax*22, labY + ay*22 +3);
+  // cardinal hint for observer facing south: show south outward? For north-hemisphere mid-lat, south is roughly outward*? keep simple
+  // draw small compass: indicate which way is south from observer (tangent)
+  // tangent direction is obsAng+90° (east) and obsAng-90° (west), south is +90° from west? For observer at south, tangent east is left? Keep simple: show N/S/E/W at orbit rim already
 
   // earth label
   ctxO.fillStyle='#1f2f46'; ctxO.font='600 12px "Noto Serif JP",serif'; ctxO.textAlign='center';
@@ -348,7 +387,7 @@ function drawOrbit(){
   if(state.ghost){
     PHASES.forEach(function(p){
       var th=p.age/SYNODIC*2*Math.PI;
-      var al=Math.PI+th;
+      var al=Math.PI - th;
       var mx=cx+orbitR*Math.cos(al), my=cy+orbitR*Math.sin(al);
       ctxO.save();
       ctxO.globalAlpha=0.18;
@@ -360,18 +399,20 @@ function drawOrbit(){
     });
   }
 
-  // current moon position
-  var ang = Math.PI + theta; // new at left
+  // current moon position (new at left/west)
+  var ang = Math.PI - theta;
   var mx = cx + orbitR*Math.cos(ang), my = cy + orbitR*Math.sin(ang);
   // line earth-moon
   ctxO.save();
   ctxO.strokeStyle='rgba(176,138,62,.55)'; ctxO.lineWidth=1; ctxO.setLineDash([5,4]);
   ctxO.beginPath(); ctxO.moveTo(cx,cy); ctxO.lineTo(mx,my); ctxO.stroke();
   ctxO.setLineDash([]);
-  // angle arc near earth
+  // angle arc near earth (phase angle)
   ctxO.strokeStyle='rgba(176,138,62,.85)'; ctxO.lineWidth=1.2;
   var arcR=34;
-  ctxO.beginPath(); ctxO.arc(cx,cy,arcR, Math.PI, ang, false); ctxO.stroke();
+  var ccw = theta < Math.PI;
+  // normalize ang to -PI..PI for arc, but canvas handles
+  ctxO.beginPath(); ctxO.arc(cx,cy,arcR, Math.PI, ang, ccw); ctxO.stroke();
   // arrow head at moon direction
   var ahx=cx+arcR*Math.cos(ang), ahy=cy+arcR*Math.sin(ang);
   var perp = ang + Math.PI/2;
@@ -502,25 +543,50 @@ function drawSky(){
   ctxS.fillStyle='rgba(255,255,255,.42)'; ctxS.font='10px "Noto Serif JP",serif';
   ctxS.fillText('地平線（南を向いた空）', SW*0.5, groundY+28);
 
-  // moon in sky
+  // moon in sky — position depends on time (hour angle)
   var moonR = Math.min(SW,SH)*0.16;
   if(SW<500) moonR = Math.min(SW,SH)*0.18;
-  var mx = SW*0.5, my = SH*0.38;
-  // glow behind moon for full
-  if(ill>0.92){
+  var trSky = transitHour(state.age);
+  var haSky = hourAngle(state.age, state.time);
+  var isAbove = Math.abs(haSky) <= 6.05;
+  var groundYForMoon = groundY;
+  var mx, my;
+  if(isAbove){
+    mx = SW*0.5 + (haSky/6)*(SW*0.34);
+    // altitude: highest at transit (ha=0), lowest at rise/set (±6h)
+    var altFactor = Math.cos(haSky/6 * Math.PI/2); // 1 at transit, 0 at horizon
+    my = groundYForMoon - 32 - altFactor* (SH*0.22);
+  } else {
+    // below horizon — place below ground for hide, but keep for glow calc
+    mx = SW*0.5 + (haSky>0? SW*0.42 : -SW*0.42);
+    my = groundYForMoon + 18;
+  }
+  // glow behind moon for full (only if above)
+  if(isAbove && ill>0.92){
     ctxS.save();
     var g=ctxS.createRadialGradient(mx,my,moonR*0.9, mx,my,moonR*2.2);
     g.addColorStop(0,'rgba(254,249,195,.38)'); g.addColorStop(1,'transparent');
     ctxS.fillStyle=g; ctxS.beginPath(); ctxS.arc(mx,my,moonR*2.2,0,Math.PI*2); ctxS.fill();
     ctxS.restore();
   }
-  // draw moon phase via scanline fill (robust)
-  drawMoonPhase(ctxS, mx, my, moonR, theta);
-  // moon outline
-  ctxS.strokeStyle='rgba(176,138,62,.9)'; ctxS.lineWidth=1.4;
-  ctxS.beginPath(); ctxS.arc(mx,my,moonR,0,Math.PI*2); ctxS.stroke();
-  // crater dots on sky moon (same face)
-  if(state.spin){
+  if(isAbove){
+    // draw moon phase via scanline fill (robust)
+    drawMoonPhase(ctxS, mx, my, moonR, theta);
+    // moon outline
+    ctxS.strokeStyle='rgba(176,138,62,.9)'; ctxS.lineWidth=1.4;
+    ctxS.beginPath(); ctxS.arc(mx,my,moonR,0,Math.PI*2); ctxS.stroke();
+  } else {
+    // below horizon — dashed outline at horizon
+    ctxS.save();
+    ctxS.setLineDash([4,4]); ctxS.strokeStyle='rgba(176,138,62,.35)'; ctxS.lineWidth=1.1;
+    ctxS.beginPath(); ctxS.arc(SW*0.5 + (haSky>0? SW*0.34 : -SW*0.34), groundYForMoon+10, moonR*0.9,0,Math.PI*2); ctxS.stroke();
+    ctxS.setLineDash([]);
+    ctxS.fillStyle='rgba(255,255,255,.45)'; ctxS.font='11px "Noto Serif JP",serif'; ctxS.textAlign='center';
+    ctxS.fillText('地平線の下', SW*0.5, groundYForMoon - 10);
+    ctxS.restore();
+  }
+  // crater dots on sky moon (same face) — only when above horizon
+  if(state.spin && isAbove){
     // crater at center slightly towards bright side? For simplicity keep at center offset towards bright
     var isWaxing = theta < Math.PI;
     var offset = (isWaxing ? 0.12 : -0.12)*moonR; // slight shift to bright side so visible
@@ -591,6 +657,13 @@ function drawSky(){
     ctxS.fillText(m.lbl, x, barY-6);
     ctxS.fillText(fmtTime(m.h), x, barY+22);
   });
+  // current time marker
+  var curX = scale(state.time);
+  ctxS.fillStyle='rgba(255,255,255,.95)';
+  ctxS.beginPath(); ctxS.moveTo(curX, barY-7); ctxS.lineTo(curX-5, barY-13); ctxS.lineTo(curX+5, barY-13); ctxS.closePath(); ctxS.fill();
+  ctxS.strokeStyle='rgba(15,31,58,.9)'; ctxS.lineWidth=0.8; ctxS.stroke();
+  ctxS.fillStyle='rgba(255,255,255,.95)'; ctxS.font='600 9px "Noto Serif JP",serif'; ctxS.textAlign='center';
+  ctxS.fillText('今 '+fmtTime(state.time), curX, barY-15);
 }
 
 // scanline moon phase draw
@@ -662,6 +735,34 @@ function updateStats(){
   $('riseVal').textContent = fmtTime(ri);
   $('transitVal').textContent = fmtTime(tr);
   $('setVal').textContent = fmtTime(st);
+  // time / observer
+  if($('timeVal')){
+    $('timeVal').textContent = fmtTime(state.time);
+    var ha = hourAngle(state.age, state.time);
+    // direction from observer angle
+    var obsDeg = (360 - state.time*15)%360;
+    var dir = '—';
+    if(obsDeg>=315||obsDeg<45) dir='東（昼）';
+    else if(obsDeg>=45&&obsDeg<135) dir='北';
+    else if(obsDeg>=135&&obsDeg<225) dir='西';
+    else dir='南';
+    // refine: observer at south is 90°, at north 270°, etc. Map to cardinal for label
+    // Use time-based textual: 12h西, 18h南, 0h東, 6h北
+    var t=Math.round(state.time)%24;
+    if(t>=11&&t<13) dir='西を向く（昼）';
+    else if(t>=17&&t<19) dir='南を向く';
+    else if((t>=23||t<1)) dir='東を向く（夜）';
+    else if(t>=5&&t<7) dir='北を向く';
+    else dir = fmtTime(state.time)+'の位置';
+    $('dirVal').textContent = dir;
+    $('hourAngleVal').textContent = fmtHourAngle(ha) + (Math.abs(ha)<=6? '（上）':'（下）');
+    var vis=$('visibilityVal');
+    if(Math.abs(ha)<=6.05){
+      vis.textContent='見える（地平線の上）'; vis.className='val ok';
+    } else {
+      vis.textContent='沈んでいる（地平線の下）'; vis.className='val bad';
+    }
+  }
   updatePhaseGridActive();
 }
 function resize(){
@@ -696,6 +797,18 @@ function setupEvents(){
   $('ageSlider').addEventListener('input',function(){
     state.age=parseFloat(this.value); updateStats();
   });
+  var ts=$('timeSlider');
+  if(ts){
+    ts.addEventListener('input',function(){
+      state.time=parseFloat(this.value); updateStats();
+    });
+    $('btnTransit').addEventListener('click',function(){
+      state.time=transitHour(state.age); ts.value=state.time; updateStats();
+    });
+    $('btnEvening').addEventListener('click',function(){
+      state.time=19; ts.value=19; updateStats();
+    });
+  }
   $('btnPlay').addEventListener('click',function(){
     state.playing=!state.playing;
     this.textContent = state.playing ? '■ 停止' : '▶ アニメ';
