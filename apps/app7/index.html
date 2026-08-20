@@ -646,8 +646,9 @@ function drawOrbitConst(){
   seasons.forEach(function(s){
     var a=(s.ang-90)*Math.PI/180;
     var x=cx+orbitR*Math.cos(a), y=cy+orbitR*Math.sin(a);
-    ctxO.fillStyle='rgba(31,47,70,.45)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-    ctxO.fillText(s.label, x, y + (s.ang===90? 16: s.ang===270? -10: 4));
+    ctxO.strokeStyle='rgba(251,250,247,.9)'; ctxO.lineWidth=3; ctxO.font='700 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.strokeText(s.label, x, y + (s.ang===90? 16: s.ang===270? -10: 4));
+    ctxO.fillStyle='rgba(31,47,70,.88)'; ctxO.fillText(s.label, x, y + (s.ang===90? 16: s.ang===270? -10: 4));
   });
   // earth on orbit
   var earthAng = (sunRA(state.date))*Math.PI/180; // 0 at spring, increase clockwise?
@@ -675,13 +676,13 @@ function drawOrbitConst(){
   // observer is on earth rim, but earth is small, so observer position relative to earth center
   var obsX = ex + (earthR-2)*Math.cos(obsAngEarth), obsY = ey + (earthR-2)*Math.sin(obsAngEarth);
   ctxO.fillStyle='#b45309'; ctxO.beginPath(); ctxO.arc(obsX,obsY,3,0,Math.PI*2); ctxO.fill();
-  // compass arrows from observer
+  // compass arrows from observer — absolute screen north is up (270°), so north points to Earth's north pole (top of screen)
   var len=22;
   var dirs=[
-    {ang:0, label:'北', col:'#ef4444'},
-    {ang:90, label:'東', col:'#22c55e'},
-    {ang:180, label:'南', col:'#eab308'},
-    {ang:270, label:'西', col:'#3b82f6'}
+    {ang:270, label:'北', col:'#ef4444'},
+    {ang:0,   label:'東', col:'#22c55e'},
+    {ang:90,  label:'南', col:'#eab308'},
+    {ang:180, label:'西', col:'#3b82f6'}
   ];
   dirs.forEach(function(d){
     var a = d.ang*Math.PI/180;
@@ -690,8 +691,10 @@ function drawOrbitConst(){
     ctxO.beginPath(); ctxO.moveTo(obsX,obsY); ctxO.lineTo(x2,y2); ctxO.stroke();
     ctxO.beginPath(); ctxO.moveTo(x2,y2); ctxO.lineTo(x2-6*Math.cos(a-0.4), y2-6*Math.sin(a-0.4)); ctxO.stroke();
     ctxO.beginPath(); ctxO.moveTo(x2,y2); ctxO.lineTo(x2-6*Math.cos(a+0.4), y2-6*Math.sin(a+0.4)); ctxO.stroke();
-    ctxO.fillStyle=d.col; ctxO.font='700 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-    ctxO.fillText(d.label, x2+Math.cos(a)*8, y2+Math.sin(a)*8+3);
+    var lx=x2+Math.cos(a)*8, ly=y2+Math.sin(a)*8+3;
+    ctxO.strokeStyle='rgba(255,255,255,.95)'; ctxO.lineWidth=3; ctxO.font='700 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.strokeText(d.label, lx, ly);
+    ctxO.fillStyle=d.col; ctxO.fillText(d.label, lx, ly);
   });
   ctxO.fillStyle='rgba(180,83,9,.9)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
   ctxO.fillText(fmtTime(state.time), obsX, obsY-10);
@@ -704,11 +707,14 @@ function drawOrbitConst(){
     var ang=(i*30-90)*Math.PI/180;
     var x=cx+beltR*Math.cos(ang), y=cy+beltR*Math.sin(ang);
     var isSun = Math.abs(((sunRA(state.date)-i*30+360)%360))<15;
-    ctxO.fillStyle= isSun? 'rgba(234,179,8,.95)':'rgba(31,47,70,.38)';
-    ctxO.font= isSun?'600 9px "Noto Serif JP",serif':'9px "Noto Serif JP",serif';
-    ctxO.textAlign='center'; ctxO.fillText(name, x, y+3);
+    // halo for readability
+    ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font= isSun?'700 10px "Noto Serif JP",serif':'500 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.strokeText(name, x, y+3);
+    ctxO.fillStyle= isSun? 'rgba(180,83,9,1)':'rgba(31,47,70,.88)';
+    ctxO.fillText(name, x, y+3);
     if(isSun){
-      ctxO.fillStyle='rgba(234,179,8,.9)'; ctxO.beginPath(); ctxO.arc(x,y-8,3,0,Math.PI*2); ctxO.fill();
+      ctxO.fillStyle='rgba(234,179,8,.95)'; ctxO.beginPath(); ctxO.arc(x,y-10,3.5,0,Math.PI*2); ctxO.fill();
+      ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
     }
   });
   // highlight current season constellations
@@ -750,21 +756,27 @@ function drawSkyMoon(){
   ctxS.lineTo(SW*0.85, groundY-18); ctxS.lineTo(SW, groundY-6); ctxS.lineTo(SW, groundY); ctxS.closePath(); ctxS.fill();
   ctxS.strokeStyle='rgba(176,138,62,.9)'; ctxS.lineWidth=1.2;
   ctxS.beginPath(); ctxS.moveTo(0, groundY+0.5); ctxS.lineTo(SW, groundY+0.5); ctxS.stroke();
-  // azimuth ticks
   var viewAz = state.viewAz;
-  // draw compass ticks at top
-  ctxS.save();
-  ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font='10px "Noto Serif JP",serif'; ctxS.textAlign='center';
-  for(var a=-180;a<=180;a+=45){
-    var rel=(a - (viewAz-180) +540)%360 -180; // not needed for static
-  }
-  ctxS.restore();
-  ctxS.fillStyle='rgba(255,255,255,.78)'; ctxS.font='600 11px "Noto Serif JP",serif'; ctxS.textAlign='center';
-  // show current view direction
-  var dirName = (viewAz===180?'南': viewAz===0?'北': viewAz===90?'東': viewAz===270?'西': viewAz+'°');
-  // we will compute dir name more accurately in updateStats, but show here
-  ctxS.fillStyle='rgba(255,255,255,.42)'; ctxS.font='10px "Noto Serif JP",serif';
-  ctxS.fillText('地平線（'+azName(viewAz)+'を中心に '+fmtTime(state.time)+'）', SW*0.5, groundY+28);
+  // ground compass bar — prominent
+  ctxS.fillStyle='rgba(255,255,255,.06)'; ctxS.fillRect(SW*0.04, groundY+10, SW*0.92, 30);
+  ctxS.strokeStyle='rgba(255,255,255,.12)'; ctxS.lineWidth=1; ctxS.strokeRect(SW*0.04, groundY+10, SW*0.92, 30);
+  [0,90,180,270].forEach(function(az){
+    var rel=((az - viewAz +540)%360)-180;
+    if(Math.abs(rel)>88) return;
+    var x=SW*0.5 + rel/90*SW*0.38;
+    var isCenter=Math.abs(rel)<12;
+    ctxS.strokeStyle= isCenter? 'rgba(250,204,21,.95)' : 'rgba(255,255,255,.35)';
+    ctxS.lineWidth= isCenter? 2:1;
+    ctxS.beginPath(); ctxS.moveTo(x, groundY+12); ctxS.lineTo(x, groundY+24); ctxS.stroke();
+    var name=azName(az);
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font=isCenter?'700 13px "Noto Serif JP",serif':'600 11px "Noto Serif JP",serif'; ctxS.textAlign='center';
+    ctxS.strokeText(name, x, groundY+34);
+    ctxS.fillStyle=isCenter? '#facc15':'rgba(255,255,255,.92)';
+    ctxS.fillText(name, x, groundY+34);
+  });
+  ctxS.fillStyle='rgba(250,204,21,.95)'; ctxS.beginPath(); ctxS.moveTo(SW*0.5, groundY+10); ctxS.lineTo(SW*0.5-6, groundY+4); ctxS.lineTo(SW*0.5+6, groundY+4); ctxS.closePath(); ctxS.fill();
+  ctxS.fillStyle='rgba(255,255,255,.9)'; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='center';
+  ctxS.fillText('正面：'+azName(viewAz), SW*0.5, groundY+8);
   var moonR = Math.min(SW,SH)*0.16;
   if(SW<500) moonR = Math.min(SW,SH)*0.18;
   var trSky = transitHour(state.age);
@@ -811,29 +823,37 @@ function drawSkyMoon(){
   }
   var ph = phaseOf(state.age);
   ctxS.save();
-  ctxS.fillStyle='rgba(255,255,255,.92)'; ctxS.textAlign='left';
-  ctxS.font='600 14px "Noto Serif JP",serif';
-  ctxS.fillText(ph.name, 12, 22);
-  ctxS.font='11px "Noto Serif JP",serif'; ctxS.fillStyle='rgba(255,255,255,.72)';
-  ctxS.fillText('輝面率 '+fmtPct(ill)+' ・ '+ph.yomi, 12, 38);
+  ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.textAlign='left';
+  ctxS.font='700 14px "Noto Serif JP",serif'; ctxS.strokeText(ph.name, 12, 22);
+  ctxS.fillStyle='#ffffff'; ctxS.fillText(ph.name, 12, 22);
+  ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font='600 11px "Noto Serif JP",serif';
+  ctxS.strokeText('輝面率 '+fmtPct(ill)+' ・ '+ph.yomi, 12, 38);
+  ctxS.fillStyle='rgba(255,255,255,.88)'; ctxS.fillText('輝面率 '+fmtPct(ill)+' ・ '+ph.yomi, 12, 38);
   var isWaxing = theta < Math.PI && ill>0.02 && ill<0.98;
   var isWaning = theta >= Math.PI && ill>0.02 && ill<0.98;
+  ctxS.textAlign='right';
   if(isWaxing){
-    ctxS.fillStyle='rgba(254,249,195,.9)'; ctxS.font='11px "Noto Serif JP",serif'; ctxS.textAlign='right';
-    ctxS.fillText('右側が光る →', SW-12, 22);
-    ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font='10px "Noto Serif JP",serif';
-    ctxS.fillText('太陽は西（右）側', SW-12, 38);
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeText('右側が光る →', SW-12, 22);
+    ctxS.fillStyle='#fef9c3'; ctxS.fillText('右側が光る →', SW-12, 22);
+    ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif';
+    ctxS.strokeText('太陽は西（右）側', SW-12, 38);
+    ctxS.fillStyle='rgba(255,255,255,.88)'; ctxS.fillText('太陽は西（右）側', SW-12, 38);
   } else if(isWaning){
-    ctxS.fillStyle='rgba(254,249,195,.9)'; ctxS.textAlign='right';
-    ctxS.fillText('← 左側が光る', SW-12, 22);
-    ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font='10px "Noto Serif JP",serif';
-    ctxS.fillText('太陽は東（左）側', SW-12, 38);
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeText('← 左側が光る', SW-12, 22);
+    ctxS.fillStyle='#fef9c3'; ctxS.fillText('← 左側が光る', SW-12, 22);
+    ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif';
+    ctxS.strokeText('太陽は東（左）側', SW-12, 38);
+    ctxS.fillStyle='rgba(255,255,255,.88)'; ctxS.fillText('太陽は東（左）側', SW-12, 38);
   } else if(ill<0.02){
-    ctxS.fillStyle='rgba(255,255,255,.65)'; ctxS.textAlign='right'; ctxS.font='11px "Noto Serif JP",serif';
-    ctxS.fillText('見えない（太陽と同じ方向）', SW-12, 22);
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeText('見えない（太陽と同じ方向）', SW-12, 22);
+    ctxS.fillStyle='rgba(255,255,255,.9)'; ctxS.fillText('見えない（太陽と同じ方向）', SW-12, 22);
   } else if(ill>0.98){
-    ctxS.fillStyle='rgba(254,249,195,.95)'; ctxS.textAlign='right';
-    ctxS.fillText('全体が光る', SW-12, 22);
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeText('全体が光る', SW-12, 22);
+    ctxS.fillStyle='#fef9c3'; ctxS.fillText('全体が光る', SW-12, 22);
   }
   ctxS.restore();
   var barY = SH*0.86, barH=3, barW=SW*0.72, barX=(SW-barW)/2;
@@ -888,10 +908,11 @@ function drawSkyConst(){
     ctxS.shadowColor=s.col; ctxS.shadowBlur= r>1.8? 6:0;
     ctxS.beginPath(); ctxS.arc(x,y,r,0,Math.PI*2); ctxS.fill();
     ctxS.shadowBlur=0;
-    // label for 1st mag
+    // label for 1st mag — with halo for readability
     if(s.mag<1.2){
-      ctxS.fillStyle='rgba(255,255,255,.78)'; ctxS.font='600 9px "Noto Serif JP",serif'; ctxS.textAlign='center';
-      ctxS.fillText(s.name, x, y-8);
+      ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 10px "Noto Serif JP",serif'; ctxS.textAlign='center';
+      ctxS.strokeText(s.name, x, y-8);
+      ctxS.fillStyle='#ffffff'; ctxS.fillText(s.name, x, y-8);
     }
   });
   // constellation lines
@@ -968,7 +989,7 @@ function drawSkyConst(){
       ctxS.fillText(alt+'°', SW*0.92+4, y+3);
     }
   }
-  // ground
+  // ground — with prominent compass
   ctxS.fillStyle='#0f1a12'; ctxS.fillRect(0, groundY, SW, SH-groundY);
   ctxS.fillStyle='#16232e';
   ctxS.beginPath(); ctxS.moveTo(0, groundY);
@@ -977,21 +998,47 @@ function drawSkyConst(){
   ctxS.lineTo(SW*0.85, groundY-14); ctxS.lineTo(SW, groundY-4); ctxS.lineTo(SW, groundY); ctxS.closePath(); ctxS.fill();
   ctxS.strokeStyle='rgba(176,138,62,.9)'; ctxS.lineWidth=1.2;
   ctxS.beginPath(); ctxS.moveTo(0, groundY+0.5); ctxS.lineTo(SW, groundY+0.5); ctxS.stroke();
-  ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font='10px "Noto Serif JP",serif'; ctxS.textAlign='center';
-  ctxS.fillText('地平線（'+azName(state.viewAz)+'を中心に 180°）', SW*0.5, groundY+16);
-  // compass at top
-  ctxS.fillStyle='rgba(255,255,255,.72)'; ctxS.font='600 11px "Noto Serif JP",serif'; ctxS.textAlign='left';
-  ctxS.fillText(azName(state.viewAz)+'の空', 12, 22);
-  ctxS.fillStyle='rgba(255,255,255,.45)'; ctxS.font='10px "Noto Serif JP",serif';
-  ctxS.fillText('ドラッグで全方位を見回せます', 12, 38);
+  // ground compass bar — shows which cardinal is at center
+  ctxS.fillStyle='rgba(255,255,255,.06)'; ctxS.fillRect(SW*0.04, groundY+10, SW*0.92, 30);
+  ctxS.strokeStyle='rgba(255,255,255,.12)'; ctxS.lineWidth=1; ctxS.strokeRect(SW*0.04, groundY+10, SW*0.92, 30);
+  // cardinal ticks within ground bar
+  [0,90,180,270].forEach(function(az){
+    var rel=((az - state.viewAz +540)%360)-180;
+    if(Math.abs(rel)>88) return;
+    var x=SW*0.5 + rel/90*SW*0.38;
+    var isCenter = Math.abs(rel)<12;
+    // tick
+    ctxS.strokeStyle= isCenter? 'rgba(250,204,21,.95)' : 'rgba(255,255,255,.35)';
+    ctxS.lineWidth= isCenter? 2:1;
+    ctxS.beginPath(); ctxS.moveTo(x, groundY+12); ctxS.lineTo(x, groundY+24); ctxS.stroke();
+    // label with halo
+    var name=azName(az);
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font=isCenter?'700 13px "Noto Serif JP",serif':'600 11px "Noto Serif JP",serif'; ctxS.textAlign='center';
+    ctxS.strokeText(name, x, groundY+34);
+    ctxS.fillStyle= isCenter? '#facc15' : 'rgba(255,255,255,.92)';
+    ctxS.fillText(name, x, groundY+34);
+  });
+  // center indicator
+  ctxS.fillStyle='rgba(250,204,21,.95)'; ctxS.beginPath(); ctxS.moveTo(SW*0.5, groundY+10); ctxS.lineTo(SW*0.5-6, groundY+4); ctxS.lineTo(SW*0.5+6, groundY+4); ctxS.closePath(); ctxS.fill();
+  ctxS.fillStyle='rgba(255,255,255,.72)'; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='center';
+  ctxS.fillText('正面：'+azName(state.viewAz), SW*0.5, groundY+8);
+  // compass at top — more visible
+  ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 12px "Noto Serif JP",serif'; ctxS.textAlign='left';
+  ctxS.strokeText(azName(state.viewAz)+'の空', 12, 22);
+  ctxS.fillStyle='#ffffff'; ctxS.fillText(azName(state.viewAz)+'の空', 12, 22);
+  ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif';
+  ctxS.strokeText('ドラッグで全方位（360°）を見回せます', 12, 38);
+  ctxS.fillStyle='rgba(255,255,255,.85)'; ctxS.fillText('ドラッグで全方位（360°）を見回せます', 12, 38);
   // info: visible count
-  ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font='10px "Noto Serif JP",serif'; ctxS.textAlign='right';
-  ctxS.fillText('視界内の星 '+visibleCount, SW-12, 22);
+  ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='right';
+  ctxS.strokeText('視界内の星 '+visibleCount, SW-12, 22);
+  ctxS.fillStyle='rgba(255,255,255,.9)'; ctxS.fillText('視界内の星 '+visibleCount, SW-12, 22);
   // north star hint if view includes north
   var polarAlt = raDecToAltAz(STARS[0].ra, STARS[0].dec, lst, LAT).alt;
   if(Math.abs(((0-state.viewAz+540)%360)-180)<95 && polarAlt>5){
-    ctxS.fillStyle='rgba(96,165,250,.9)'; ctxS.font='10px "Noto Serif JP",serif'; ctxS.textAlign='right';
-    ctxS.fillText('北極星 高度≈'+Math.round(polarAlt)+'°', SW-12, 38);
+    ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='right';
+    ctxS.strokeText('北極星 高度≈'+Math.round(polarAlt)+'°', SW-12, 38);
+    ctxS.fillStyle='#93c5fd'; ctxS.fillText('北極星 高度≈'+Math.round(polarAlt)+'°', SW-12, 38);
   }
 }
 
