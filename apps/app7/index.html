@@ -504,15 +504,20 @@ function drawOrbitMoon(){
   ctxO.fillStyle=gradE; ctxO.fillRect(cx-6, cy-earthR, 12, earthR*2);
   ctxO.restore();
   ctxO.strokeStyle='#1f2f46'; ctxO.lineWidth=1.4; ctxO.beginPath(); ctxO.arc(cx,cy,earthR,0,Math.PI*2); ctxO.stroke();
-  // Earth's axis — north pole up
-  ctxO.strokeStyle='rgba(239,68,68,.5)'; ctxO.lineWidth=1.1; ctxO.setLineDash([3,3]);
-  ctxO.beginPath(); ctxO.moveTo(cx, cy-earthR-5); ctxO.lineTo(cx, cy+earthR+5); ctxO.stroke();
+  // Earth's north pole — top view, pole at center, latitude circles
+  var latRad = 35*Math.PI/180;
+  var latR = earthR * Math.cos(latRad);
+  ctxO.strokeStyle='rgba(239,68,68,.18)'; ctxO.lineWidth=1; ctxO.setLineDash([3,3]);
+  ctxO.beginPath(); ctxO.arc(cx,cy,latR,0,Math.PI*2); ctxO.stroke();
   ctxO.setLineDash([]);
-  ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(cx, cy-earthR, 2.8,0,Math.PI*2); ctxO.fill();
+  ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(cx, cy, 3.2,0,Math.PI*2); ctxO.fill();
+  ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
   ctxO.fillStyle='#ef4444'; ctxO.font='700 8px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  ctxO.fillText('北極', cx, cy-earthR-7);
+  ctxO.fillText('北極', cx, cy-6);
+  ctxO.fillStyle='rgba(239,68,68,.65)'; ctxO.font='8px "Noto Serif JP",serif';
+  ctxO.fillText('緯度35°', cx+latR+6, cy+4);
   var obsAng = (360 - state.time*15) * Math.PI/180;
-  var obsX = cx + earthR*Math.cos(obsAng), obsY = cy + earthR*Math.sin(obsAng);
+  var obsX = cx + latR*Math.cos(obsAng), obsY = cy + latR*Math.sin(obsAng);
   ctxO.fillStyle='#b45309';
   ctxO.beginPath(); ctxO.arc(obsX, obsY, 3.5,0,Math.PI*2); ctxO.fill();
   var labelR = earthR+14;
@@ -680,20 +685,25 @@ function drawOrbitConst(){
   var midNightAng = nightAng;
   var lx=ex+orbitR*0.32*Math.cos(midNightAng), ly=ey+orbitR*0.32*Math.sin(midNightAng);
   ctxO.fillText('夜に見える空', lx, ly);
-  // observer on earth
-  var obsAngEarth = (360 - state.time*15)*Math.PI/180;
-  // observer is on earth rim, but earth is small, so observer position relative to earth center
-  var obsX = ex + (earthR-2)*Math.cos(obsAngEarth), obsY = ey + (earthR-2)*Math.sin(obsAngEarth);
-  ctxO.fillStyle='#b45309'; ctxO.beginPath(); ctxO.arc(obsX,obsY,3,0,Math.PI*2); ctxO.fill();
-  // compass arrows from observer — rotate with time (north = toward north pole, south = outward, east/west = tangential)
-  // Show Earth's axis for clarity
-  ctxO.strokeStyle='rgba(239,68,68,.45)'; ctxO.lineWidth=1.1; ctxO.setLineDash([4,3]);
-  ctxO.beginPath(); ctxO.moveTo(ex, ey-earthR-6); ctxO.lineTo(ex, ey+earthR+6); ctxO.stroke();
+  // observer on earth — correct for top view (north pole at Earth's center, latitude 35°)
+  var latRad = 35*Math.PI/180;
+  var latR = earthR * Math.cos(latRad);
+  // latitude circle
+  ctxO.strokeStyle='rgba(239,68,68,.18)'; ctxO.lineWidth=1; ctxO.setLineDash([3,3]);
+  ctxO.beginPath(); ctxO.arc(ex,ey,latR,0,Math.PI*2); ctxO.stroke();
   ctxO.setLineDash([]);
-  ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(ex, ey-earthR, 3,0,Math.PI*2); ctxO.fill();
+  // north pole at Earth's center
+  ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(ex,ey,2.8,0,Math.PI*2); ctxO.fill();
   ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
   ctxO.fillStyle='#ef4444'; ctxO.font='700 8px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  ctxO.fillText('北極', ex, ey-earthR-8);
+  ctxO.fillText('北極', ex, ey-7);
+  ctxO.fillStyle='rgba(239,68,68,.55)'; ctxO.font='8px "Noto Serif JP",serif';
+  ctxO.fillText('緯度35°', ex+latR+6, ey+4);
+  var obsAngEarth = (360 - state.time*15)*Math.PI/180;
+  var obsX = ex + latR*Math.cos(obsAngEarth), obsY = ey + latR*Math.sin(obsAngEarth);
+  ctxO.fillStyle='#b45309'; ctxO.beginPath(); ctxO.arc(obsX,obsY,3.2,0,Math.PI*2); ctxO.fill();
+  ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
+  // compass arrows from observer — north toward north pole (center), south outward
   // local directions: north = toward center (north pole projection), south = opposite, east/west = 90° from north
   var dxN = ex - obsX, dyN = ey - obsY;
   var nlen = Math.hypot(dxN, dyN) || 1;
