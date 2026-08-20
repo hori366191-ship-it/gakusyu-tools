@@ -685,27 +685,32 @@ function drawOrbitConst(){
   // observer is on earth rim, but earth is small, so observer position relative to earth center
   var obsX = ex + (earthR-2)*Math.cos(obsAngEarth), obsY = ey + (earthR-2)*Math.sin(obsAngEarth);
   ctxO.fillStyle='#b45309'; ctxO.beginPath(); ctxO.arc(obsX,obsY,3,0,Math.PI*2); ctxO.fill();
-  // compass arrows from observer — absolute directions (north is top of screen, toward Earth's north pole)
+  // compass arrows from observer — rotate with time (north = toward north pole, south = outward, east/west = tangential)
   // Show Earth's axis for clarity
-  ctxO.strokeStyle='rgba(239,68,68,.55)'; ctxO.lineWidth=1.2; ctxO.setLineDash([4,3]);
+  ctxO.strokeStyle='rgba(239,68,68,.45)'; ctxO.lineWidth=1.1; ctxO.setLineDash([4,3]);
   ctxO.beginPath(); ctxO.moveTo(ex, ey-earthR-6); ctxO.lineTo(ex, ey+earthR+6); ctxO.stroke();
   ctxO.setLineDash([]);
-  ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(ex, ey-earthR, 3.5,0,Math.PI*2); ctxO.fill();
+  ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(ex, ey-earthR, 3,0,Math.PI*2); ctxO.fill();
   ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
-  ctxO.fillStyle='#ef4444'; ctxO.font='700 9px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillStyle='#ef4444'; ctxO.font='700 8px "Noto Serif JP",serif'; ctxO.textAlign='center';
   ctxO.fillText('北極', ex, ey-earthR-8);
-  ctxO.fillStyle='rgba(31,47,70,.55)'; ctxO.font='9px "Noto Serif JP",serif';
-  ctxO.fillText('地軸', ex+14, ey);
-  var len=22;
+  // local directions: north = toward center (north pole projection), south = opposite, east/west = 90° from north
+  var dxN = ex - obsX, dyN = ey - obsY;
+  var nlen = Math.hypot(dxN, dyN) || 1;
+  var nx = dxN/nlen, ny = dyN/nlen;
+  var sx = -nx, sy = -ny;
+  var exx = -ny, eyx = nx; // east = (-ny, nx) = 90° clockwise from north in screen coords
+  var wxx = ny, wyx = -nx;
+  var len=20;
   var dirs=[
-    {ang:270, label:'北', col:'#ef4444'},
-    {ang:0,   label:'東', col:'#22c55e'},
-    {ang:90,  label:'南', col:'#eab308'},
-    {ang:180, label:'西', col:'#3b82f6'}
+    {x:nx, y:ny, label:'北', col:'#ef4444'},
+    {x:exx, y:eyx, label:'東', col:'#22c55e'},
+    {x:sx, y:sy, label:'南', col:'#eab308'},
+    {x:wxx, y:wyx, label:'西', col:'#3b82f6'}
   ];
   dirs.forEach(function(d){
-    var a = d.ang*Math.PI/180;
-    var x2=obsX+len*Math.cos(a), y2=obsY+len*Math.sin(a);
+    var x2=obsX + d.x*len, y2=obsY + d.y*len;
+    var a=Math.atan2(d.y, d.x);
     ctxO.strokeStyle=d.col; ctxO.lineWidth=1.3;
     ctxO.beginPath(); ctxO.moveTo(obsX,obsY); ctxO.lineTo(x2,y2); ctxO.stroke();
     ctxO.beginPath(); ctxO.moveTo(x2,y2); ctxO.lineTo(x2-6*Math.cos(a-0.4), y2-6*Math.sin(a-0.4)); ctxO.stroke();
