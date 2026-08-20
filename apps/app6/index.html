@@ -297,7 +297,7 @@ var FUNCS={
 
 var state={tab:'diff',func:'quad',params:{},rectMode:'mid',anim:null,x0:0,h:0.5,a:-3,b:3,n:8};
 var cvMain,ctxM,cvSub,ctxS,W,H,SW,SH,DPR=1;
-var mainRange=null,subRange=null,lastK=1;
+var DAMP=0.15;
 
 function niceStep(raw){
   var mag=Math.pow(10,Math.floor(Math.log10(raw)));
@@ -336,9 +336,28 @@ function sampleRange(f,xa,xb){
   var pad=(hi-lo)*0.12;if(pad<1e-6)pad=1;
   return {lo:lo-pad,hi:hi+pad};
 }
-function lerpRange(cur,target,k){
-  if(!cur)return {lo:target.lo,hi:target.hi};
-  return {lo:cur.lo+(target.lo-cur.lo)*k,hi:cur.hi+(target.hi-cur.hi)*k};
+function getInitMain(fn){
+  if(fn._initMain) return fn._initMain;
+  var p={}; fn.params.forEach(function(pm){p[pm.key]=pm.def;});
+  fn._initMain = sampleRange(function(x){return fn.f(p,x);}, fn.xmin, fn.xmax);
+  return fn._initMain;
+}
+function getInitSubDiff(fn){
+  if(fn._initSubDiff) return fn._initSubDiff;
+  var p={}; fn.params.forEach(function(pm){p[pm.key]=pm.def;});
+  fn._initSubDiff = sampleRange(function(x){return fn.df(p,x);}, fn.xmin, fn.xmax);
+  return fn._initSubDiff;
+}
+function getInitSubInteg(fn){
+  if(fn._initSubInteg) return fn._initSubInteg;
+  var p={}; fn.params.forEach(function(pm){p[pm.key]=pm.def;});
+  var d=fn.defs(); var a0=d.a;
+  var xa=Math.max(a0,fn.xmin); if(fn.domain) xa=Math.max(xa,fn.domain.xMin+1e-4);
+  fn._initSubInteg = sampleRange(function(x){return fn.F(p,x)-fn.F(p,a0);}, xa, fn.xmax);
+  return fn._initSubInteg;
+}
+function dampedRange(target, init){
+  return {lo: init.lo + (target.lo - init.lo)*DAMP, hi: init.hi + (target.hi - init.hi)*DAMP};
 }
 function drawGrid(c,xa,xb,ya,yb,w,h){
   c.save();
@@ -424,8 +443,7 @@ function drawMain(){
   state.xmin=fn.xmin;state.xmax=fn.xmax;
   ctxM.clearRect(0,0,W,H);
   var target=sampleRange(function(x){return fn.f(state.params,x);},fn.xmin,fn.xmax);
-  mainRange=lerpRange(mainRange,target,lastK);
-  var r=mainRange;
+  var r=dampedRange(target, getInitMain(fn));
   state.ymin=r.lo;state.ymax=r.hi;
   drawGrid(ctxM,fn.xmin,fn.xmax,r.lo,r.hi,W,H);
   plotFunc(ctxM,function(x){return fn.f(state.params,x);},fn.xmin,fn.xmax,r,C_FN,2.2);
@@ -480,8 +498,7 @@ function drawSub(){
   if(state.tab==='diff'){
     var fD=function(x){return fn.df(state.params,x);};
     var t=sampleRange(fD,fn.xmin,fn.xmax);
-    subRange=lerpRange(subRange,t,lastK);
-    var r=subRange;
+    var r=dampedRange(t, getInitSubDiff(fn));
     drawGrid(ctxS,fn.xmin,fn.xmax,r.lo,r.hi,SW,SH);
     plotFuncSub(ctxS,fD,fn.xmin,fn.xmax,r,C_DER,2);
     var x0=state.x0,v=fn.df(state.params,x0);
@@ -500,8 +517,7 @@ function drawSub(){
     var xa=clamp(a,fn.xmin,fn.xmax),xb=fn.xmax;
     if(fn.domain){xa=Math.max(xa,fn.domain.xMin+1e-4);}
     var t=sampleRange(S,xa,xb);
-    subRange=lerpRange(subRange,t,lastK);
-    var r=subRange;
+    var r=dampedRange(t, getInitSubInteg(fn));
     drawGrid(ctxS,xa,xb,r.lo,r.hi,SW,SH);
     plotFuncSub(ctxS,S,xa,xb,r,C_AFN,2.2);
     var b=state.b;
@@ -621,7 +637,6 @@ function updateSubCap(){
 function setTab(t){
   state.anim=null;updateAnimBtns();
   state.tab=t;
-  subRange=null;
   $$('[data-tab-group="mode"] button').forEach(function(b){b.classList.toggle('active',b.dataset.tab===t);});
   $('diffCard').classList.toggle('hidden',t!=='diff');
   $('integCard').classList.toggle('hidden',t!=='integ');
@@ -637,7 +652,6 @@ var last=performance.now();
 function frame(now){
   requestAnimationFrame(frame);
   var dt=Math.min((now-last)/1000,0.05);last=now;
-  lastK=1-Math.exp(-dt/0.22);
   if(state.anim==='h'){
     state.h-=dt*state.h*2.2;
     if(state.h<=0.02){state.h=0.02;state.anim=null;updateAnimBtns();}
