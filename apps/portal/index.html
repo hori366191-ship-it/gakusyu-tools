@@ -131,6 +131,9 @@
   .card:nth-child(2) { animation-delay: .12s; }
   .card:nth-child(3) { animation-delay: .19s; }
   .card:nth-child(4) { animation-delay: .26s; }
+  .card:nth-child(5) { animation-delay: .33s; }
+  .card:nth-child(6) { animation-delay: .40s; }
+  .card:nth-child(7) { animation-delay: .47s; }
   @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
   .card:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(15, 23, 42, .05), 0 14px 28px rgba(15, 23, 42, .10); }
   .card:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
@@ -151,6 +154,7 @@
   .card--violet .card__icon { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
   .card--gold .card__icon { background: linear-gradient(135deg, #d4a24c, #b08a3e); }
   .card--rose .card__icon { background: linear-gradient(135deg, #c62828, #7f1d1d); }
+  .card--slate .card__icon { background: linear-gradient(135deg, #334155, #0f172a); }
 
   .card__title {
     margin: 0;
@@ -197,6 +201,7 @@
   .card--violet .card__btn { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
   .card--gold .card__btn { background: linear-gradient(135deg, #d4a24c, #b08a3e); }
   .card--rose .card__btn { background: linear-gradient(135deg, #c62828, #7f1d1d); }
+  .card--slate .card__btn { background: linear-gradient(135deg, #334155, #0f172a); }
   .card:hover .card__btn {
     filter: brightness(1.07);
     transform: translateY(-1px);
@@ -316,6 +321,20 @@
       </div>
       <h2 class="card__title">微分積分ビジュアライザー</h2>
       <p class="card__desc">接線が動く様子や h→0 の極限、定積分の面積・リーマン和・面積関数を視覚的に確認できるツールです。</p>
+      <span class="card__btn">開く&nbsp;↗</span>
+    </a>
+
+    <a class="card card--slate" href="https://script.google.com/a/macros/hori-shota.com/s/REPLACE_WITH_MOON_DEPLOY_ID/exec" target="_blank" rel="noopener">
+      <div class="card__icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="32" cy="32" r="14" fill="rgba(255,255,255,.12)" stroke="#ffffff" />
+          <path d="M32 18 A14 14 0 0 0 32 46 A9 14 0 0 1 32 18" fill="#ffffff" stroke="none" />
+          <circle cx="28" cy="26" r="1.6" fill="#0f172a" opacity=".55" />
+          <circle cx="34" cy="30" r="1" fill="#0f172a" opacity=".45" />
+        </svg>
+      </div>
+      <h2 class="card__title">月の満ち欠けシミュレーター</h2>
+      <p class="card__desc">太陽・地球・月の位置関係で満ち欠けが起こるしくみや、8つの月相・出と入りの時刻を視覚的に確認できます。</p>
       <span class="card__btn">開く&nbsp;↗</span>
     </a>
 
