@@ -718,8 +718,8 @@ function drawOrbitConst(){
   var curSeason=SEASON_MAP.reduce(function(a,b){ var da=Math.abs(state.date-b.d); if(da>182) da=365-da; var aa=Math.abs(state.date-a.d); if(aa>182) aa=365-aa; return da<aa?b:a; });
   ctxO.fillStyle='#1f2f46'; ctxO.font='600 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
   ctxO.fillText(curSeason.name+'の星座: '+curSeason.consts, W*0.5, H-10);
-  ctxO.fillStyle='rgba(31,47,70,.55)'; ctxO.font='9px "Noto Serif JP",serif';
-  ctxO.fillText('※ 星座の位置・方角は学習用の簡易表示です。', W*0.5, H-24);
+  ctxO.fillStyle='rgba(31,47,70,.58)'; ctxO.font='8.5px "Noto Serif JP",serif'; ctxO.textAlign='right';
+  ctxO.fillText('※ 星座の位置・方角は学習用の簡易表示です。', W-8, H-8);
   ctxO.restore();
 }
 
