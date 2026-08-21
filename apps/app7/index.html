@@ -709,7 +709,7 @@ function drawOrbitConst(){
   // draw 12 zodiac-ish markers
   var zodiacs=['おひつじ','おうし','ふたご','かに','しし','おとめ','てんびん','さそり','いて','やぎ','みずがめ','うお'];
   zodiacs.forEach(function(name,i){
-    var ang=(-i*30+90)*Math.PI/180;
+    var ang=(-i*30+30)*Math.PI/180;
     var x=cx+beltR*Math.cos(ang), y=cy+beltR*Math.sin(ang);
     var isSun = Math.abs(((sunRA(state.date)-i*30+360)%360))<15;
     // halo for readability
