@@ -627,7 +627,7 @@ function drawOrbitConst(){
   ctxO.fillText('黄道', cx+orbitR+14, cy+4);
   ctxO.fillText('公転軌道', cx, cy - orbitR -10);
   // season labels on orbit
-  var seasons=[{d:80,label:'春分',ang:0},{d:172,label:'夏至',ang:90},{d:266,label:'秋分',ang:180},{d:356,label:'冬至',ang:270}];
+  var seasons=[{d:80,label:'春分',ang:0},{d:172,label:'夏至',ang:270},{d:266,label:'秋分',ang:180},{d:356,label:'冬至',ang:90}];
   seasons.forEach(function(s){
     var a=(s.ang-90)*Math.PI/180;
     var x=cx+orbitR*Math.cos(a), y=cy+orbitR*Math.sin(a);
@@ -635,9 +635,9 @@ function drawOrbitConst(){
     ctxO.strokeText(s.label, x, y + (s.ang===90? 16: s.ang===270? -10: 4));
     ctxO.fillStyle='rgba(31,47,70,.88)'; ctxO.fillText(s.label, x, y + (s.ang===90? 16: s.ang===270? -10: 4));
   });
-  // earth on orbit — corrected: Earth at season label (spring=north, summer=east, etc.) => earthTheta = sunRA -90
+  // earth on orbit — textbook: top=spring, left=summer, bottom=autumn, right=winter (counterclockwise)
   var sunRAVal = sunRA(state.date);
-  var earthTheta = (sunRAVal - 90 + 360)%360 *Math.PI/180;
+  var earthTheta = (-sunRAVal - 90 + 720)%360 *Math.PI/180;
   var ex=cx+orbitR*Math.cos(earthTheta), ey=cy+orbitR*Math.sin(earthTheta);
   // earth
   ctxO.fillStyle='#60a5fa'; ctxO.beginPath(); ctxO.arc(ex,ey,earthR,0,Math.PI*2); ctxO.fill();
@@ -669,7 +669,7 @@ function drawOrbitConst(){
   ctxO.fillText('北極', ex, ey-7);
   ctxO.fillStyle='rgba(239,68,68,.55)'; ctxO.font='8px "Noto Serif JP",serif';
   ctxO.fillText('緯度35°', ex+latR+6, ey+4);
-  var sunDir = (sunRAVal + 90) %360; // direction Earth->Sun (toward center)
+  var sunDir = (-sunRAVal + 90 + 720)%360; // direction Earth->Sun (toward center)
   var obsAngEarth = (sunDir + (state.time-12)*15) *Math.PI/180;
   var obsX = ex + latR*Math.cos(obsAngEarth), obsY = ey + latR*Math.sin(obsAngEarth);
   ctxO.fillStyle='#b45309'; ctxO.beginPath(); ctxO.arc(obsX,obsY,3.2,0,Math.PI*2); ctxO.fill();
@@ -709,7 +709,7 @@ function drawOrbitConst(){
   // draw 12 zodiac-ish markers
   var zodiacs=['おひつじ','おうし','ふたご','かに','しし','おとめ','てんびん','さそり','いて','やぎ','みずがめ','うお'];
   zodiacs.forEach(function(name,i){
-    var ang=(i*30+90)*Math.PI/180;
+    var ang=(-i*30+90)*Math.PI/180;
     var x=cx+beltR*Math.cos(ang), y=cy+beltR*Math.sin(ang);
     var isSun = Math.abs(((sunRA(state.date)-i*30+360)%360))<15;
     // halo for readability
