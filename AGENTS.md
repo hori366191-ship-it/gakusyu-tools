@@ -14,7 +14,7 @@ apps/
 ├── app4/   立体図形ビューア   (scriptId: YOUR_SCRIPT_ID_app4)
 ├── app5/   原子・周期表ツール (scriptId: YOUR_SCRIPT_ID_app5)
 ├── app6/   微分積分ビジュアライザー (scriptId: YOUR_SCRIPT_ID_app6)
-├── app7/   月と星座シミュレーター (scriptId: REPLACE_WITH_SCRIPT_ID)
+├── app7/   月と星座シミュレーター (scriptId: YOUR_SCRIPT_ID_app7)
 └── portal/ 学習ツール ポータル (scriptId: YOUR_SCRIPT_ID_portal)
 ```
 
