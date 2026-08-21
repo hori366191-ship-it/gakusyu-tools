@@ -272,72 +272,43 @@ var PHASES=[
   {age:22.1,name:'下弦の月',   sub:'',          yomi:'かげん'},
   {age:25.8,name:'有明月',     sub:'',          yomi:'ありあけづき'}
 ];
-// ---- constellation data ----
+// ---- constellation data ---- 12星座（黄道十二星座）のみ
 var LAT=35; // Tokyo, fixed
 var STARS=[
-  // Polaris and circumpolar
-  {id:0, name:'北極星', ra:37.9, dec:89.3, mag:2.0, col:'#ffffff'},
-  {id:1, name:'北斗1', ra:165.9, dec:61.8, mag:1.8, col:'#ffffff'},
-  {id:2, name:'北斗2', ra:165.5, dec:56.4, mag:2.4, col:'#ffffff'},
-  {id:3, name:'北斗3', ra:178.5, dec:53.7, mag:2.4, col:'#ffffff'},
-  {id:4, name:'北斗4', ra:183.9, dec:57.0, mag:3.3, col:'#ffffff'},
-  {id:5, name:'北斗5', ra:193.5, dec:56.0, mag:1.8, col:'#ffffff'},
-  {id:6, name:'北斗6', ra:201.0, dec:54.9, mag:2.2, col:'#ffffff'},
-  {id:7, name:'北斗7', ra:206.9, dec:49.3, mag:1.9, col:'#ffffff'},
-  {id:8, name:'カシオペヤα', ra:10.1, dec:56.5, mag:2.2, col:'#ffffff'},
-  {id:9, name:'カシオペヤβ', ra:2.3, dec:59.2, mag:2.3, col:'#ffffff'},
-  {id:10,name:'カシオペヤγ', ra:14.2, dec:60.7, mag:2.5, col:'#ffffff'},
-  {id:11,name:'カシオペヤδ', ra:20.6, dec:60.2, mag:2.7, col:'#ffffff'},
-  {id:12,name:'カシオペヤε', ra:27.1, dec:63.7, mag:3.4, col:'#ffffff'},
-  // Leo
-  {id:13,name:'レグルス', ra:152.1, dec:12.0, mag:1.4, col:'#ffffff'},
-  {id:14,name:'デネボラ', ra:177.3, dec:14.6, mag:2.1, col:'#ffffff'},
-  {id:15,name:'アルギエバ', ra:155.0, dec:19.8, mag:2.0, col:'#ffd27a'},
-  // Scorpius
-  {id:16,name:'アンタレス', ra:247.3, dec:-26.4, mag:1.1, col:'#ff7b4a'},
-  {id:17,name:'さそりβ', ra:241.0, dec:-19.8, mag:2.6, col:'#ffffff'},
-  // Summer triangle
-  {id:18,name:'デネブ', ra:310.4, dec:45.3, mag:1.3, col:'#ffffff'},
-  {id:19,name:'ベガ', ra:279.2, dec:38.8, mag:0.0, col:'#a8d8ff'},
-  {id:20,name:'アルタイル', ra:297.7, dec:8.9, mag:0.8, col:'#ffffff'},
-  // Pegasus
-  {id:21,name:'マルカブ', ra:346.2, dec:15.2, mag:2.5, col:'#ffffff'},
-  {id:22,name:'シェアト', ra:345.0, dec:28.1, mag:2.4, col:'#ffffff'},
-  {id:23,name:'アルゲニブ', ra:3.3, dec:15.2, mag:2.8, col:'#ffffff'},
-  {id:24,name:'アルフェラッツ', ra:2.1, dec:29.1, mag:2.1, col:'#ffffff'},
-  // Orion
-  {id:25,name:'ベテルギウス', ra:88.8, dec:7.4, mag:0.5, col:'#ff7b4a'},
-  {id:26,name:'ベラトリクス', ra:81.3, dec:6.3, mag:1.6, col:'#a8d8ff'},
-  {id:27,name:'リゲル', ra:78.6, dec:-8.2, mag:0.1, col:'#a8d8ff'},
-  {id:28,name:'サイフ', ra:86.9, dec:-9.7, mag:2.1, col:'#a8d8ff'},
-  {id:29,name:'アルニタク', ra:85.2, dec:-1.9, mag:1.7, col:'#ffffff'},
-  {id:30,name:'アルニラム', ra:84.1, dec:-1.2, mag:1.7, col:'#ffffff'},
-  {id:31,name:'ミンタカ', ra:83.0, dec:-0.3, mag:2.2, col:'#ffffff'},
-  // Sirius etc winter
-  {id:32,name:'シリウス', ra:101.3, dec:-16.7, mag:-1.5, col:'#a8d8ff'},
-  {id:33,name:'プロキオン', ra:114.8, dec:5.2, mag:0.4, col:'#ffffff'},
-  {id:34,name:'ポルックス', ra:116.3, dec:28.0, mag:1.1, col:'#ffd27a'},
-  {id:35,name:'カストル', ra:113.7, dec:31.9, mag:1.6, col:'#ffffff'}
+  {id:0, name:'おひつじ座', ra:31.8, dec:23.5, mag:2.0, col:'#ffffff'},
+  {id:1, name:'おうし座', ra:68.9, dec:16.5, mag:0.9, col:'#ffd27a'},
+  {id:2, name:'ふたご座', ra:116.3, dec:28.0, mag:1.1, col:'#ffffff'},
+  {id:3, name:'かに座', ra:130.0, dec:19.0, mag:3.5, col:'#ffffff'},
+  {id:4, name:'しし座', ra:152.1, dec:12.0, mag:1.4, col:'#ffffff'},
+  {id:5, name:'おとめ座', ra:201.3, dec:-11.2, mag:1.0, col:'#a8d8ff'},
+  {id:6, name:'てんびん座', ra:220.3, dec:-9.4, mag:2.6, col:'#ffffff'},
+  {id:7, name:'さそり座', ra:247.3, dec:-26.4, mag:1.1, col:'#ff7b4a'},
+  {id:8, name:'いて座', ra:276.0, dec:-34.4, mag:1.8, col:'#ffffff'},
+  {id:9, name:'やぎ座', ra:329.0, dec:-16.1, mag:2.8, col:'#ffffff'},
+  {id:10,name:'みずがめ座', ra:322.9, dec:-0.3, mag:3.0, col:'#ffffff'},
+  {id:11,name:'うお座', ra:30.1, dec:2.8, mag:3.8, col:'#ffffff'},
+  // 北極星は常時表示の基準
+  {id:12,name:'北極星', ra:37.9, dec:89.3, mag:2.0, col:'#ffffff'}
 ];
 var CONST_LINES=[
-  {name:'北斗七星', pts:[1,2,3,4,5,6,7], col:'rgba(96,165,250,.95)'},
-  {name:'カシオペヤ座', pts:[9,8,10,11,12], col:'rgba(96,165,250,.95)'},
-  {name:'しし座', pts:[13,15,14], col:'rgba(96,165,250,.85)'},
-  {name:'はくちょう座', pts:[18,22,21], col:'rgba(96,165,250,.85)'},
-  {name:'こと座', pts:[19], col:'rgba(96,165,250,.85)'},
-  {name:'わし座', pts:[20], col:'rgba(96,165,250,.85)'},
-  {name:'ペガスス座', pts:[21,22,24,23,21], col:'rgba(96,165,250,.85)'},
-  {name:'オリオン座', pts:[25,26,27,28,25,29,30,31,26], col:'rgba(96,165,250,.95)'},
-  {name:'おおいぬ座', pts:[32], col:'rgba(96,165,250,.85)'},
-  {name:'ふたご座', pts:[34,35], col:'rgba(96,165,250,.85)'},
-  {name:'夏の大三角', pts:[18,19,20,18], col:'rgba(250,204,21,.85)'},
-  {name:'冬の大三角', pts:[25,32,33,25], col:'rgba(250,204,21,.85)'}
+  {name:'おひつじ座', pts:[0], col:'rgba(96,165,250,.9)'},
+  {name:'おうし座', pts:[1], col:'rgba(96,165,250,.9)'},
+  {name:'ふたご座', pts:[2], col:'rgba(96,165,250,.9)'},
+  {name:'かに座', pts:[3], col:'rgba(96,165,250,.9)'},
+  {name:'しし座', pts:[4], col:'rgba(96,165,250,.9)'},
+  {name:'おとめ座', pts:[5], col:'rgba(96,165,250,.9)'},
+  {name:'てんびん座', pts:[6], col:'rgba(96,165,250,.9)'},
+  {name:'さそり座', pts:[7], col:'rgba(96,165,250,.9)'},
+  {name:'いて座', pts:[8], col:'rgba(96,165,250,.9)'},
+  {name:'やぎ座', pts:[9], col:'rgba(96,165,250,.9)'},
+  {name:'みずがめ座', pts:[10], col:'rgba(96,165,250,.9)'},
+  {name:'うお座', pts:[11], col:'rgba(96,165,250,.9)'}
 ];
 var SEASON_MAP=[
-  {d:80,  name:'春', label:'3/21 春分',  consts:'しし座・おおぐま座',  desc:'春の南にしし座'},
-  {d:172, name:'夏', label:'6/21 夏至', consts:'はくちょう座・さそり座・こと座', desc:'夏は天の川と夏の大三角'},
-  {d:266, name:'秋', label:'9/23 秋分', consts:'ペガスス座・カシオペヤ座', desc:'秋は四辺形が高く'},
-  {d:356, name:'冬', label:'12/21 冬至',consts:'オリオン座・おおいぬ座・ふたご座', desc:'冬はオリオンと冬の大三角'}
+  {d:80,  name:'春', label:'3/21 春分',  consts:'しし座・おとめ座',  desc:'春の夜はしし座が見える（太陽と反対側）'},
+  {d:172, name:'夏', label:'6/21 夏至', consts:'さそり座・いて座', desc:'夏の夜はさそり座・いて座が見える'},
+  {d:266, name:'秋', label:'9/23 秋分', consts:'みずがめ座・うお座', desc:'秋の夜はみずがめ座・うお座が見える'},
+  {d:356, name:'冬', label:'12/21 冬至',consts:'おうし座・ふたご座', desc:'冬の夜はおうし座・ふたご座が見える'}
 ];
 
 var state={mode:'moon', age:14.8, time:18, date:80, viewAz:180, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false, playYear:false, playDay:false, showLines:true, showEcliptic:true, showEquator:false, showGrid:false};
@@ -738,7 +709,7 @@ function drawOrbitConst(){
   // draw 12 zodiac-ish markers
   var zodiacs=['おひつじ','おうし','ふたご','かに','しし','おとめ','てんびん','さそり','いて','やぎ','みずがめ','うお'];
   zodiacs.forEach(function(name,i){
-    var ang=(i*30-90)*Math.PI/180;
+    var ang=(i*30+90)*Math.PI/180;
     var x=cx+beltR*Math.cos(ang), y=cy+beltR*Math.sin(ang);
     var isSun = Math.abs(((sunRA(state.date)-i*30+360)%360))<15;
     // halo for readability
@@ -969,25 +940,34 @@ function drawSkyConst(){
       }
       ctxS.stroke();
     });
-    // constellation names — prominent, at centroid of visible stars
+    // constellation names — all 12 always visible (even below horizon, dimmed at ground)
     CONST_LINES.forEach(function(c){
-      var sumX=0,sumY=0,cnt=0;
-      c.pts.forEach(function(id){
-        var s=STARS[id]; if(!s) return;
-        var p=raDecToAltAz(s.ra,s.dec,lst,LAT);
-        if(p.alt<0) return;
-        var rel=((p.az-state.viewAz+540)%360)-180;
-        if(Math.abs(rel)>92) return;
-        var x=SW*0.5+rel/90*SW*0.38, y=groundY-8 - p.alt/90*(groundY*0.68);
-        sumX+=x; sumY+=y; cnt++;
-      });
-      if(cnt===0) return;
-      var cx=sumX/cnt, cy=sumY/cnt - 14;
-      // halo
+      var s=STARS[c.pts[0]]; if(!s) return;
+      var p=raDecToAltAz(s.ra,s.dec,lst,LAT);
+      var rel=((p.az-state.viewAz+540)%360)-180;
+      var isVisible = p.alt>0 && Math.abs(rel)<=92;
+      var x,y;
+      if(isVisible){
+        x=SW*0.5+rel/90*SW*0.38;
+        y=groundY-8 - p.alt/90*(groundY*0.68) - 14;
+      } else {
+        // show at horizon, dimmed, clamped to view
+        var clampedRel = Math.max(-88, Math.min(88, rel));
+        // if far behind, wrap to edge
+        if(Math.abs(rel)>150) clampedRel = rel>0? 88 : -88;
+        x=SW*0.5+clampedRel/90*SW*0.38;
+        y=groundY+22;
+      }
+      ctxS.globalAlpha = isVisible? 1 : 0.42;
       ctxS.strokeStyle='rgba(15,23,42,.92)'; ctxS.lineWidth=4; ctxS.font='700 12px "Noto Serif JP",serif'; ctxS.textAlign='center';
-      ctxS.strokeText(c.name, cx, cy);
-      ctxS.fillStyle=c.col.includes('250,204')? '#facc15' : '#93c5fd';
-      ctxS.fillText(c.name, cx, cy);
+      ctxS.strokeText(c.name, x, y);
+      ctxS.fillStyle= isVisible? (c.col.includes('250,204')? '#facc15' : '#93c5fd') : 'rgba(148,163,184,.85)';
+      ctxS.fillText(c.name, x, y);
+      ctxS.globalAlpha=1;
+      // small dot at actual star position if visible, already drawn as star; if not visible, draw faint dot at horizon
+      if(!isVisible){
+        ctxS.fillStyle='rgba(255,255,255,.18)'; ctxS.beginPath(); ctxS.arc(x, groundY+8, 1.2,0,Math.PI*2); ctxS.fill();
+      }
     });
   }
   // ecliptic
