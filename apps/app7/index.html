@@ -197,7 +197,6 @@ input[type=range]{width:100%;accent-color:var(--accent);height:22px;cursor:point
         <div class="legend">
           <div class="lg"><span class="sw dot" style="background:#fff"></span>1等星</div>
           <div class="lg"><span class="sw" style="background:rgba(96,165,250,.9)"></span>星座線</div>
-          <div class="lg"><span class="sw" style="background:rgba(234,179,8,.7)"></span>黄道</div>
           <div class="lg"><span class="sw" style="background:rgba(148,163,184,.7)"></span>天の赤道</div>
         </div>
         <div class="notes">下の空をドラッグで全方位に回せます。北を見ると北極星中心に回る星の動きが分かります。</div>
@@ -235,7 +234,6 @@ input[type=range]{width:100%;accent-color:var(--accent);height:22px;cursor:point
       </div>
       <div id="constDisplayToggles" class="hidden">
         <label class="toggle"><input type="checkbox" id="chkLines" checked> 星座線を表示</label>
-        <label class="toggle"><input type="checkbox" id="chkEcliptic" checked> 黄道を表示</label>
         <label class="toggle"><input type="checkbox" id="chkEquator"> 天の赤道を表示</label>
         <label class="toggle"><input type="checkbox" id="chkGrid"> 方位グリッドを表示</label>
       </div>
@@ -311,7 +309,7 @@ var SEASON_MAP=[
   {d:356, name:'冬', label:'12/21 冬至',consts:'おうし座・ふたご座', desc:'冬の夜はおうし座・ふたご座が見える'}
 ];
 
-var state={mode:'moon', age:14.8, time:18, date:80, viewAz:180, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false, playYear:false, playDay:false, showLines:true, showEcliptic:true, showEquator:false, showGrid:false};
+var state={mode:'moon', age:14.8, time:18, date:80, viewAz:180, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false, playYear:false, playDay:false, showLines:true, showEquator:false, showGrid:false};
 var cvOrbit, ctxO, cvSky, ctxS, W,H, SW,SH, DPR=1;
 
 // ---------- helpers ----------
@@ -624,7 +622,6 @@ function drawOrbitConst(){
   ctxO.beginPath(); ctxO.arc(cx,cy,orbitR,0,Math.PI*2); ctxO.stroke();
   ctxO.setLineDash([]);
   ctxO.fillStyle='rgba(180,130,0,.55)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  ctxO.fillText('黄道', cx+orbitR+14, cy+4);
   ctxO.fillText('公転軌道', cx, cy - orbitR -10);
   // season labels on orbit
   var seasons=[{d:80,label:'春分',ang:0},{d:172,label:'夏至',ang:270},{d:266,label:'秋分',ang:180},{d:356,label:'冬至',ang:90}];
@@ -711,16 +708,11 @@ function drawOrbitConst(){
   zodiacs.forEach(function(name,i){
     var ang=(-i*30+30)*Math.PI/180;
     var x=cx+beltR*Math.cos(ang), y=cy+beltR*Math.sin(ang);
-    var isSun = Math.abs(((sunRA(state.date)-i*30+360)%360))<15;
-    // halo for readability
-    ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font= isSun?'700 10px "Noto Serif JP",serif':'500 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    // halo for readability — uniform (no sun highlight)
+    ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='500 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
     ctxO.strokeText(name, x, y+3);
-    ctxO.fillStyle= isSun? 'rgba(180,83,9,1)':'rgba(31,47,70,.88)';
+    ctxO.fillStyle='rgba(31,47,70,.88)';
     ctxO.fillText(name, x, y+3);
-    if(isSun){
-      ctxO.fillStyle='rgba(234,179,8,.95)'; ctxO.beginPath(); ctxO.arc(x,y-10,3.5,0,Math.PI*2); ctxO.fill();
-      ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
-    }
   });
   // highlight current season constellations
   var curSeason=SEASON_MAP.reduce(function(a,b){ var da=Math.abs(state.date-b.d); if(da>182) da=365-da; var aa=Math.abs(state.date-a.d); if(aa>182) aa=365-aa; return da<aa?b:a; });
@@ -970,24 +962,6 @@ function drawSkyConst(){
       }
     });
   }
-  // ecliptic
-  if(state.showEcliptic){
-    ctxS.strokeStyle='rgba(234,179,8,.55)'; ctxS.lineWidth=1.2; ctxS.setLineDash([6,4]);
-    ctxS.beginPath();
-    var started=false;
-    for(var lam=0; lam<=360; lam+=4){
-      var raE=lam, decE=23.4*Math.sin(lam*Math.PI/180);
-      var p=raDecToAltAz(raE, decE, lst, LAT);
-      if(p.alt<0){ started=false; continue; }
-      var rel=((p.az-state.viewAz+540)%360)-180;
-      if(Math.abs(rel)>92){ started=false; continue; }
-      var x=SW*0.5+rel/90*SW*0.38, y=groundY-8 - p.alt/90*(groundY*0.68);
-      if(!started){ ctxS.moveTo(x,y); started=true; } else ctxS.lineTo(x,y);
-    }
-    ctxS.stroke(); ctxS.setLineDash([]);
-    ctxS.fillStyle='rgba(234,179,8,.85)'; ctxS.font='10px "Noto Serif JP",serif'; ctxS.textAlign='left';
-    ctxS.fillText('黄道', SW*0.5+10, 18);
-  }
   if(state.showEquator){
     ctxS.strokeStyle='rgba(148,163,184,.45)'; ctxS.lineWidth=1; ctxS.setLineDash([3,4]);
     ctxS.beginPath();
@@ -1228,11 +1202,11 @@ function setMode(m){
   var isConst = m==='const';
   $('constTimeStat').classList.toggle('hidden', !isConst);
   $('constTimeBtns').classList.toggle('hidden', !isConst);
-  $('capOrbit').textContent = isConst? '宇宙から見た図（黄道・公転）' : '宇宙から見た図（北極側から）';
+  $('capOrbit').textContent = isConst? '宇宙から見た図（公転）' : '宇宙から見た図（北極側から）';
   $('capSky').textContent = isConst? '観測者から見た星空（ドラッグで全方位）' : '地球から見た月（南の空）';
   $('timeNotes').innerHTML = isConst? '時刻で日周運動、日付で年周運動が分かります。ドラッグで東西南北すべて見渡せます。' : '時刻を動かすと地球上の観測者（宇宙図の橙点）が移動し、空の月の位置（東→南→西）が変わります。';
-  $('displayNotes').innerHTML = isConst? '北極星は動かず、周りの星が回ります。黄道は太陽の通り道です。' : '月は自転周期＝公転周期のため、常に同じ面を地球に向けています。<br>地球の影が欠けの原因ではありません（影は月食のときだけ）。';
-  $('learnNotes').innerHTML = isConst? '・北極星の高度≒緯度。周極星は沈みません。<br>・同じ時刻で1ヶ月後は星座が30°西へずれます。<br>・黄道付近に見える星座は季節で変わります。' : '・満ち欠けは <b>太陽に照らされた半分</b>のうち、地球から見える割合で決まります。<br>・上弦は右半分が光る（12時出→18時南中→0時入り）、下弦は左半分が光ります。<br>・距離は誇張しています（実際は月まで地球30個分）。';
+  $('displayNotes').innerHTML = isConst? '北極星は動かず、周りの星が回ります。' : '月は自転周期＝公転周期のため、常に同じ面を地球に向けています。<br>地球の影が欠けの原因ではありません（影は月食のときだけ）。';
+  $('learnNotes').innerHTML = isConst? '・北極星の高度≒緯度。周極星は沈みません。<br>・同じ時刻で1ヶ月後は星座が30°西へずれます。<br>・見える星座は季節で変わります。' : '・満ち欠けは <b>太陽に照らされた半分</b>のうち、地球から見える割合で決まります。<br>・上弦は右半分が光る（12時出→18時南中→0時入り）、下弦は左半分が光ります。<br>・距離は誇張しています（実際は月まで地球30個分）。';
   document.title = isConst? '星座シミュレーター — 月と星座' : '月と星座シミュレーター';
   cvSky.style.cursor = isConst? 'grab' : 'grab';
   updateStats();
@@ -1289,7 +1263,6 @@ function setupEvents(){
   $('chkGhost').addEventListener('change',function(){ state.ghost=this.checked; });
   $('chkEclipse').addEventListener('change',function(){ state.eclipse=this.checked; });
   $('chkLines').addEventListener('change',function(){ state.showLines=this.checked; });
-  $('chkEcliptic').addEventListener('change',function(){ state.showEcliptic=this.checked; });
   $('chkEquator').addEventListener('change',function(){ state.showEquator=this.checked; });
   $('chkGrid').addEventListener('change',function(){ state.showGrid=this.checked; });
   // drag for sky viewAz (const mode only, but allow in both for moon? restrict to const)
