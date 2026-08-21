@@ -309,7 +309,7 @@ var SEASON_MAP=[
   {d:356, name:'冬', label:'12/21 冬至',consts:'おうし座・ふたご座', desc:'冬の夜はおうし座・ふたご座が見える'}
 ];
 
-var state={mode:'moon', age:14.8, time:18, date:80, viewAz:180, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false, playYear:false, playDay:false, showLines:true, showEquator:false, showGrid:false};
+var state={mode:'moon', age:14.8, time:0, date:80, viewAz:180, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false, playYear:false, playDay:false, showLines:true, showEquator:false, showGrid:false};
 var cvOrbit, ctxO, cvSky, ctxS, W,H, SW,SH, DPR=1;
 
 // ---------- helpers ----------
@@ -1225,7 +1225,7 @@ function setupEvents(){
   if(ts){
     ts.addEventListener('input',function(){ state.time=parseFloat(this.value); updateStats(); });
     $('btnTransit').addEventListener('click',function(){ state.time=transitHour(state.age); ts.value=state.time; updateStats(); });
-    $('btnEvening').addEventListener('click',function(){ state.time=18; ts.value=18; updateStats(); });
+    $('btnEvening').addEventListener('click',function(){ state.time=0; ts.value=0; updateStats(); });
   }
   // const date
   var ds=$('dateSlider');
