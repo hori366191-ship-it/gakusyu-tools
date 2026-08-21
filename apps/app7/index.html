@@ -208,8 +208,8 @@ input[type=range]{width:100%;accent-color:var(--accent);height:22px;cursor:point
     <div class="card">
       <div class="card-head"><div class="card-title">時刻・観測者の位置</div></div>
       <div class="ctl">
-        <div class="ctl-head"><span>時刻</span><span class="ctl-val" id="timeVal">19:00</span></div>
-        <input type="range" id="timeSlider" min="0" max="24" step="0.25" value="19">
+        <div class="ctl-head"><span>時刻</span><span class="ctl-val" id="timeVal">18:00</span></div>
+        <input type="range" id="timeSlider" min="0" max="24" step="0.25" value="18">
       </div>
       <div class="stat"><span class="lbl">観測者の向き</span><span class="val" id="dirVal">南</span></div>
       <div class="stat"><span class="lbl">月の位置（時角）</span><span class="val" id="hourAngleVal">—</span></div>
@@ -217,7 +217,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:22px;cursor:point
       <div class="stat"><span class="lbl">見え方</span><span class="val" id="visibilityVal">—</span></div>
       <div class="row-btns sm">
         <button class="btn ghost sm" id="btnTransit">南中で見る</button>
-        <button class="btn ghost sm" id="btnEvening">19時で見る</button>
+        <button class="btn ghost sm" id="btnEvening">18時で見る</button>
       </div>
       <div id="constTimeBtns" class="row-btns sm hidden">
         <button class="btn sm" id="btnPlayDay">▶ 日周アニメ</button>
@@ -340,7 +340,7 @@ var SEASON_MAP=[
   {d:356, name:'冬', label:'12/21 冬至',consts:'オリオン座・おおいぬ座・ふたご座', desc:'冬はオリオンと冬の大三角'}
 ];
 
-var state={mode:'moon', age:14.8, time:19, date:80, viewAz:180, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false, playYear:false, playDay:false, showLines:true, showEcliptic:true, showEquator:false, showGrid:false};
+var state={mode:'moon', age:14.8, time:18, date:80, viewAz:180, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false, playYear:false, playDay:false, showLines:true, showEcliptic:true, showEquator:false, showGrid:false};
 var cvOrbit, ctxO, cvSky, ctxS, W,H, SW,SH, DPR=1;
 
 // ---------- helpers ----------
@@ -664,10 +664,9 @@ function drawOrbitConst(){
     ctxO.strokeText(s.label, x, y + (s.ang===90? 16: s.ang===270? -10: 4));
     ctxO.fillStyle='rgba(31,47,70,.88)'; ctxO.fillText(s.label, x, y + (s.ang===90? 16: s.ang===270? -10: 4));
   });
-  // earth on orbit
-  var earthAng = (sunRA(state.date))*Math.PI/180; // 0 at spring, increase clockwise?
-  // sunRA 0 at spring, earth opposite? Actually earth position is sunRA+180
-  var earthTheta = (sunRA(state.date)+180)%360 *Math.PI/180;
+  // earth on orbit — corrected: Earth at season label (spring=north, summer=east, etc.) => earthTheta = sunRA -90
+  var sunRAVal = sunRA(state.date);
+  var earthTheta = (sunRAVal - 90 + 360)%360 *Math.PI/180;
   var ex=cx+orbitR*Math.cos(earthTheta), ey=cy+orbitR*Math.sin(earthTheta);
   // earth
   ctxO.fillStyle='#60a5fa'; ctxO.beginPath(); ctxO.arc(ex,ey,earthR,0,Math.PI*2); ctxO.fill();
@@ -699,7 +698,8 @@ function drawOrbitConst(){
   ctxO.fillText('北極', ex, ey-7);
   ctxO.fillStyle='rgba(239,68,68,.55)'; ctxO.font='8px "Noto Serif JP",serif';
   ctxO.fillText('緯度35°', ex+latR+6, ey+4);
-  var obsAngEarth = (360 - state.time*15)*Math.PI/180;
+  var sunDir = (sunRAVal + 90) %360; // direction Earth->Sun (toward center)
+  var obsAngEarth = (sunDir + (state.time-12)*15) *Math.PI/180;
   var obsX = ex + latR*Math.cos(obsAngEarth), obsY = ey + latR*Math.sin(obsAngEarth);
   ctxO.fillStyle='#b45309'; ctxO.beginPath(); ctxO.arc(obsX,obsY,3.2,0,Math.PI*2); ctxO.fill();
   ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
@@ -1269,7 +1269,7 @@ function setupEvents(){
   if(ts){
     ts.addEventListener('input',function(){ state.time=parseFloat(this.value); updateStats(); });
     $('btnTransit').addEventListener('click',function(){ state.time=transitHour(state.age); ts.value=state.time; updateStats(); });
-    $('btnEvening').addEventListener('click',function(){ state.time=19; ts.value=19; updateStats(); });
+    $('btnEvening').addEventListener('click',function(){ state.time=18; ts.value=18; updateStats(); });
   }
   // const date
   var ds=$('dateSlider');
