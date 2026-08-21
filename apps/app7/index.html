@@ -207,8 +207,8 @@ input[type=range]{width:100%;accent-color:var(--accent);height:22px;cursor:point
     <div class="card">
       <div class="card-head"><div class="card-title">時刻・観測者の位置</div></div>
       <div class="ctl">
-        <div class="ctl-head"><span>時刻</span><span class="ctl-val" id="timeVal">18:00</span></div>
-        <input type="range" id="timeSlider" min="0" max="24" step="0.25" value="18">
+        <div class="ctl-head"><span>時刻</span><span class="ctl-val" id="timeVal">00:00</span></div>
+        <input type="range" id="timeSlider" min="0" max="24" step="0.25" value="0">
       </div>
       <div class="stat"><span class="lbl">観測者の向き</span><span class="val" id="dirVal">南</span></div>
       <div class="stat"><span class="lbl">月の位置（時角）</span><span class="val" id="hourAngleVal">—</span></div>
@@ -216,7 +216,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:22px;cursor:point
       <div class="stat"><span class="lbl">見え方</span><span class="val" id="visibilityVal">—</span></div>
       <div class="row-btns sm">
         <button class="btn ghost sm" id="btnTransit">南中で見る</button>
-        <button class="btn ghost sm" id="btnEvening">18時で見る</button>
+        <button class="btn ghost sm" id="btnEvening">0時で見る</button>
       </div>
       <div id="constTimeBtns" class="row-btns sm hidden">
         <button class="btn sm" id="btnPlayDay">▶ 日周アニメ</button>
