@@ -233,7 +233,9 @@ input[type=range]{width:100%;accent-color:var(--accent);height:22px;cursor:point
         <label class="toggle"><input type="checkbox" id="chkEclipse"> 食の説明を表示（一直線のときだけ）</label>
       </div>
       <div id="constDisplayToggles" class="hidden">
+        <!-- 厳密星座方角モードは物理的に誤解を招くため一時停止（恒星は無限遠のため方向は固定されるべき）
         <label class="toggle"><input type="checkbox" id="chkStrict"> 厳密な星座の方角（地球から12方向の矢印）</label>
+        -->
         <label class="toggle"><input type="checkbox" id="chkLines" checked> 星座線を表示</label>
         <label class="toggle"><input type="checkbox" id="chkEquator"> 天の赤道を表示</label>
         <label class="toggle"><input type="checkbox" id="chkGrid"> 方位グリッドを表示</label>
@@ -423,10 +425,10 @@ function drawOrbitMoon(){
   ctxO.fillStyle=grd; ctxO.fillRect(0,0,W,H);
   ctxO.restore();
   var cx = W*0.52, cy = H*0.52;
-  var orbitR = Math.min(W,H)*0.24;
-  if(W<500) orbitR = Math.min(W,H)*0.20;
-  var earthR = 20;
-  var moonR = 13;
+  var orbitR = Math.min(W,H)*0.15;
+  if(W<500) orbitR = Math.min(W,H)*0.13;
+  var earthR = 18;
+  var moonR = 11;
   var sunX = 56, sunY = cy, sunR=22;
   ctxO.save();
   ctxO.shadowColor='rgba(234,179,8,.35)'; ctxO.shadowBlur=14;
@@ -604,10 +606,12 @@ function drawOrbitConst(){
   grd.addColorStop(0,'rgba(176,138,62,.05)'); grd.addColorStop(1,'transparent');
   ctxO.fillStyle=grd; ctxO.fillRect(0,0,W,H);
   var cx=W*0.5, cy=H*0.52;
-  var orbitR=Math.min(W,H)*0.22;
-  if(W<500) orbitR=Math.min(W,H)*0.18;
-  var earthR=18;
-  var sunR=14;
+  var orbitR=Math.min(W,H)*0.12;
+  if(W<500) orbitR=Math.min(W,H)*0.10;
+  var earthR=14;
+  var sunR=10;
+  // 星座帯の円は描画領域いっぱいに（恒星は無限遠という物理的事実の表現）
+  var beltR=Math.min(W,H)*0.46;
   // sun at center for constellation mode
   ctxO.save();
   ctxO.shadowColor='rgba(234,179,8,.32)'; ctxO.shadowBlur=12;
@@ -644,14 +648,15 @@ function drawOrbitConst(){
   ctxO.fillText('地球', ex, ey+4);
   // night side fan (visible sky direction opposite sun)
   var nightAng = earthTheta; // direction from earth away from sun (earth-sun vector)
+  var fanR = (beltR - orbitR)*0.42;
   ctxO.fillStyle='rgba(15,31,58,.10)';
-  ctxO.beginPath(); ctxO.moveTo(ex,ey); ctxO.arc(ex,ey,orbitR*0.55, nightAng-Math.PI/2, nightAng+Math.PI/2); ctxO.closePath(); ctxO.fill();
+  ctxO.beginPath(); ctxO.moveTo(ex,ey); ctxO.arc(ex,ey,fanR, nightAng-Math.PI/2, nightAng+Math.PI/2); ctxO.closePath(); ctxO.fill();
   ctxO.strokeStyle='rgba(15,31,58,.18)'; ctxO.setLineDash([4,4]); ctxO.lineWidth=1;
-  ctxO.beginPath(); ctxO.moveTo(ex,ey); ctxO.arc(ex,ey,orbitR*0.55, nightAng-Math.PI/2, nightAng+Math.PI/2); ctxO.closePath(); ctxO.stroke();
+  ctxO.beginPath(); ctxO.moveTo(ex,ey); ctxO.arc(ex,ey,fanR, nightAng-Math.PI/2, nightAng+Math.PI/2); ctxO.closePath(); ctxO.stroke();
   ctxO.setLineDash([]);
   ctxO.fillStyle='rgba(15,31,58,.55)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
   var midNightAng = nightAng;
-  var lx=ex+orbitR*0.32*Math.cos(midNightAng), ly=ey+orbitR*0.32*Math.sin(midNightAng);
+  var lx=ex+(fanR*0.62)*Math.cos(midNightAng), ly=ey+(fanR*0.62)*Math.sin(midNightAng);
   ctxO.fillText('夜に見える空', lx, ly);
   // observer on earth — correct for top view (north pole at Earth's center, latitude 35°)
   var latRad = 35*Math.PI/180;
@@ -701,7 +706,11 @@ function drawOrbitConst(){
   });
   ctxO.fillStyle='rgba(180,83,9,.9)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
   ctxO.fillText(fmtTime(state.time), obsX, obsY-10);
-  // constellations belt outside — simple (uniform 30°) or strict (real RA arrows from Earth)
+  // constellations belt outside — simple (uniform 30°) only
+  // 【一時停止】厳密モード: 恒星は無限遠のため方向は固定されるべきだが、
+  // 矢印の起点が動くことで方位が回転して見え、物理的に誤解を招くため保留。
+  // 復活時は state.strictZodiac / chkStrict / 下記 if ブロックを戻すこと。
+  /*
   if(state.strictZodiac){
     // strict mode: full-canvas arrows from Earth's current position to each zodiac direction
     var arrowLen = Math.min(W,H)*0.46;
@@ -739,7 +748,8 @@ function drawOrbitConst(){
     ctxO.fillStyle='rgba(31,47,70,.58)'; ctxO.font='8.5px "Noto Serif JP",serif'; ctxO.textAlign='right';
     ctxO.fillText('※ 実際の赤経に基づく厳密な方角です。濃い矢印が夜に見える方向。', W-8, H-8);
   } else {
-    var beltR=orbitR+38;
+  */
+  {
     ctxO.strokeStyle='rgba(96,165,250,.12)'; ctxO.lineWidth=1; ctxO.beginPath(); ctxO.arc(cx,cy,beltR,0,Math.PI*2); ctxO.stroke();
     // draw 12 zodiac-ish markers
     var zodiacs=['おひつじ','おうし','ふたご','かに','しし','おとめ','てんびん','さそり','いて','やぎ','みずがめ','うお'];
@@ -747,10 +757,10 @@ function drawOrbitConst(){
       var ang=(-i*30+30)*Math.PI/180;
       var x=cx+beltR*Math.cos(ang), y=cy+beltR*Math.sin(ang);
       // halo for readability — uniform (no sun highlight)
-      ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='500 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-      ctxO.strokeText(name, x, y+3);
+      ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='500 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+      ctxO.strokeText(name, x, y+4);
       ctxO.fillStyle='rgba(31,47,70,.88)';
-      ctxO.fillText(name, x, y+3);
+      ctxO.fillText(name, x, y+4);
     });
     // highlight current season constellations
     var curSeason=SEASON_MAP.reduce(function(a,b){ var da=Math.abs(state.date-b.d); if(da>182) da=365-da; var aa=Math.abs(state.date-a.d); if(aa>182) aa=365-aa; return da<aa?b:a; });
@@ -1304,7 +1314,8 @@ function setupEvents(){
   $('chkGhost').addEventListener('change',function(){ state.ghost=this.checked; });
   $('chkEclipse').addEventListener('change',function(){ state.eclipse=this.checked; });
   $('chkLines').addEventListener('change',function(){ state.showLines=this.checked; });
-  $('chkStrict').addEventListener('change',function(){ state.strictZodiac=this.checked; });
+  // 厳密星座方角モードは一時停止（下記 drawOrbitConst 内の strictZodiac ブロックも参照）
+  // $('chkStrict').addEventListener('change',function(){ state.strictZodiac=this.checked; });
   $('chkEquator').addEventListener('change',function(){ state.showEquator=this.checked; });
   $('chkGrid').addEventListener('change',function(){ state.showGrid=this.checked; });
   // drag for sky viewAz (const mode only, but allow in both for moon? restrict to const)
