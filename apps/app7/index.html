@@ -233,6 +233,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:22px;cursor:point
         <label class="toggle"><input type="checkbox" id="chkEclipse"> 食の説明を表示（一直線のときだけ）</label>
       </div>
       <div id="constDisplayToggles" class="hidden">
+        <label class="toggle"><input type="checkbox" id="chkStrict"> 厳密な星座の方角（地球から12方向の矢印）</label>
         <label class="toggle"><input type="checkbox" id="chkLines" checked> 星座線を表示</label>
         <label class="toggle"><input type="checkbox" id="chkEquator"> 天の赤道を表示</label>
         <label class="toggle"><input type="checkbox" id="chkGrid"> 方位グリッドを表示</label>
@@ -309,7 +310,7 @@ var SEASON_MAP=[
   {d:356, name:'冬', label:'12/21 冬至',consts:'おうし座・ふたご座', desc:'冬の夜はおうし座・ふたご座が見える'}
 ];
 
-var state={mode:'moon', age:14.8, time:0, date:80, viewAz:180, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false, playYear:false, playDay:false, showLines:true, showEquator:false, showGrid:false};
+var state={mode:'moon', age:14.8, time:0, date:80, viewAz:180, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false, playYear:false, playDay:false, showLines:true, showEquator:false, showGrid:false, strictZodiac:false};
 var cvOrbit, ctxO, cvSky, ctxS, W,H, SW,SH, DPR=1;
 
 // ---------- helpers ----------
@@ -422,10 +423,10 @@ function drawOrbitMoon(){
   ctxO.fillStyle=grd; ctxO.fillRect(0,0,W,H);
   ctxO.restore();
   var cx = W*0.52, cy = H*0.52;
-  var orbitR = Math.min(W,H)*0.33;
-  if(W<500) orbitR = Math.min(W,H)*0.30;
-  var earthR = 26;
-  var moonR = 16;
+  var orbitR = Math.min(W,H)*0.24;
+  if(W<500) orbitR = Math.min(W,H)*0.20;
+  var earthR = 20;
+  var moonR = 13;
   var sunX = 56, sunY = cy, sunR=22;
   ctxO.save();
   ctxO.shadowColor='rgba(234,179,8,.35)'; ctxO.shadowBlur=14;
@@ -603,8 +604,8 @@ function drawOrbitConst(){
   grd.addColorStop(0,'rgba(176,138,62,.05)'); grd.addColorStop(1,'transparent');
   ctxO.fillStyle=grd; ctxO.fillRect(0,0,W,H);
   var cx=W*0.5, cy=H*0.52;
-  var orbitR=Math.min(W,H)*0.34;
-  if(W<500) orbitR=Math.min(W,H)*0.30;
+  var orbitR=Math.min(W,H)*0.22;
+  if(W<500) orbitR=Math.min(W,H)*0.18;
   var earthR=18;
   var sunR=14;
   // sun at center for constellation mode
@@ -700,26 +701,64 @@ function drawOrbitConst(){
   });
   ctxO.fillStyle='rgba(180,83,9,.9)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
   ctxO.fillText(fmtTime(state.time), obsX, obsY-10);
-  // constellations belt outside
-  var beltR=orbitR+38;
-  ctxO.strokeStyle='rgba(96,165,250,.12)'; ctxO.lineWidth=1; ctxO.beginPath(); ctxO.arc(cx,cy,beltR,0,Math.PI*2); ctxO.stroke();
-  // draw 12 zodiac-ish markers
-  var zodiacs=['おひつじ','おうし','ふたご','かに','しし','おとめ','てんびん','さそり','いて','やぎ','みずがめ','うお'];
-  zodiacs.forEach(function(name,i){
-    var ang=(-i*30+30)*Math.PI/180;
-    var x=cx+beltR*Math.cos(ang), y=cy+beltR*Math.sin(ang);
-    // halo for readability — uniform (no sun highlight)
-    ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='500 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-    ctxO.strokeText(name, x, y+3);
-    ctxO.fillStyle='rgba(31,47,70,.88)';
-    ctxO.fillText(name, x, y+3);
-  });
-  // highlight current season constellations
-  var curSeason=SEASON_MAP.reduce(function(a,b){ var da=Math.abs(state.date-b.d); if(da>182) da=365-da; var aa=Math.abs(state.date-a.d); if(aa>182) aa=365-aa; return da<aa?b:a; });
-  ctxO.fillStyle='#1f2f46'; ctxO.font='600 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  ctxO.fillText(curSeason.name+'の星座: '+curSeason.consts, W*0.5, H-10);
-  ctxO.fillStyle='rgba(31,47,70,.58)'; ctxO.font='8.5px "Noto Serif JP",serif'; ctxO.textAlign='right';
-  ctxO.fillText('※ 星座の位置・方角は学習用の簡易表示です。', W-8, H-8);
+  // constellations belt outside — simple (uniform 30°) or strict (real RA arrows from Earth)
+  if(state.strictZodiac){
+    // strict mode: full-canvas arrows from Earth's current position to each zodiac direction
+    var arrowLen = Math.min(W,H)*0.46;
+    var nightCenterAng = earthTheta; // screen angle of the anti-sun direction
+    ctxO.save();
+    STARS.forEach(function(s){
+      if(s.id>=12) return; // zodiac only
+      var ang=(-sunRAVal + 270 - s.ra)*Math.PI/180;
+      var dx=Math.cos(ang), dy=Math.sin(ang);
+      var x2=ex+arrowLen*dx, y2=ey+arrowLen*dy;
+      var isNight = Math.abs(((ang-nightCenterAng+540)%360)-180) < 90;
+      // arrow line
+      ctxO.strokeStyle = isNight? 'rgba(96,165,250,.8)' : 'rgba(148,163,184,.30)';
+      ctxO.lineWidth = isNight? 1.8 : 1;
+      ctxO.beginPath(); ctxO.moveTo(ex,ey); ctxO.lineTo(x2,y2); ctxO.stroke();
+      // arrow head
+      ctxO.beginPath(); ctxO.moveTo(x2,y2); ctxO.lineTo(x2-9*Math.cos(ang-0.32), y2-9*Math.sin(ang-0.32)); ctxO.stroke();
+      ctxO.beginPath(); ctxO.moveTo(x2,y2); ctxO.lineTo(x2-9*Math.cos(ang+0.32), y2-9*Math.sin(ang+0.32)); ctxO.stroke();
+      // label at tip with halo
+      var lx=x2+dx*10, ly=y2+dy*10+4;
+      // clamp label inside canvas
+      lx=Math.max(34,Math.min(W-34,lx));
+      ly=Math.max(14,Math.min(H-8,ly));
+      ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3.5;
+      ctxO.font=(isNight?'700 ':'500 ')+'11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+      ctxO.strokeText(s.name, lx, ly);
+      ctxO.fillStyle= isNight? '#1d4ed8' : 'rgba(100,116,139,.75)';
+      ctxO.fillText(s.name, lx, ly);
+    });
+    ctxO.restore();
+    // note text differs in strict mode
+    var curSeasonS=SEASON_MAP.reduce(function(a,b){ var da=Math.abs(state.date-b.d); if(da>182) da=365-da; var aa=Math.abs(state.date-a.d); if(aa>182) aa=365-aa; return da<aa?b:a; });
+    ctxO.fillStyle='#1f2f46'; ctxO.font='600 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.fillText(curSeasonS.name+'の星座: '+curSeasonS.consts, W*0.5, H-10);
+    ctxO.fillStyle='rgba(31,47,70,.58)'; ctxO.font='8.5px "Noto Serif JP",serif'; ctxO.textAlign='right';
+    ctxO.fillText('※ 実際の赤経に基づく厳密な方角です。濃い矢印が夜に見える方向。', W-8, H-8);
+  } else {
+    var beltR=orbitR+38;
+    ctxO.strokeStyle='rgba(96,165,250,.12)'; ctxO.lineWidth=1; ctxO.beginPath(); ctxO.arc(cx,cy,beltR,0,Math.PI*2); ctxO.stroke();
+    // draw 12 zodiac-ish markers
+    var zodiacs=['おひつじ','おうし','ふたご','かに','しし','おとめ','てんびん','さそり','いて','やぎ','みずがめ','うお'];
+    zodiacs.forEach(function(name,i){
+      var ang=(-i*30+30)*Math.PI/180;
+      var x=cx+beltR*Math.cos(ang), y=cy+beltR*Math.sin(ang);
+      // halo for readability — uniform (no sun highlight)
+      ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='500 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+      ctxO.strokeText(name, x, y+3);
+      ctxO.fillStyle='rgba(31,47,70,.88)';
+      ctxO.fillText(name, x, y+3);
+    });
+    // highlight current season constellations
+    var curSeason=SEASON_MAP.reduce(function(a,b){ var da=Math.abs(state.date-b.d); if(da>182) da=365-da; var aa=Math.abs(state.date-a.d); if(aa>182) aa=365-aa; return da<aa?b:a; });
+    ctxO.fillStyle='#1f2f46'; ctxO.font='600 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.fillText(curSeason.name+'の星座: '+curSeason.consts, W*0.5, H-10);
+    ctxO.fillStyle='rgba(31,47,70,.58)'; ctxO.font='8.5px "Noto Serif JP",serif'; ctxO.textAlign='right';
+    ctxO.fillText('※ 星座の位置・方角は学習用の簡易表示です。', W-8, H-8);
+  }
   ctxO.restore();
 }
 
@@ -1265,6 +1304,7 @@ function setupEvents(){
   $('chkGhost').addEventListener('change',function(){ state.ghost=this.checked; });
   $('chkEclipse').addEventListener('change',function(){ state.eclipse=this.checked; });
   $('chkLines').addEventListener('change',function(){ state.showLines=this.checked; });
+  $('chkStrict').addEventListener('change',function(){ state.strictZodiac=this.checked; });
   $('chkEquator').addEventListener('change',function(){ state.showEquator=this.checked; });
   $('chkGrid').addEventListener('change',function(){ state.showGrid=this.checked; });
   // drag for sky viewAz (const mode only, but allow in both for moon? restrict to const)
