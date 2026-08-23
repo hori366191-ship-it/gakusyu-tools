@@ -117,6 +117,9 @@ header .sub{font-size:12px;opacity:.75;font-weight:500}
 .c-verb {background:#fee2e2;color:#b91c1c;border:1.5px solid #fca5a5}
 .c-aux  {background:#fef3c7;color:#b45309;border:1.5px solid #fcd34d}
 .c-other{background:#f1f5f9;color:#334155;border:1.5px solid #cbd5e1}
+.suffix-badge{display:inline-block;font-size:.62em;font-weight:900;line-height:1;padding:1px 5px;margin-left:5px;border-radius:6px;vertical-align:2px;letter-spacing:.04em}
+.c-verb .suffix-badge{background:#fff;border:1.5px solid #fca5a5;color:#b91c1c}
+.c-verb.stem-only .suffix-badge{opacity:.95}
 .ja-line{margin-top:10px;font-size:13px;color:var(--mut)}
 .ja-line b{color:#475569;font-weight:700}
 
@@ -198,7 +201,7 @@ footer{
 <header>
   <div class="header-in">
     <h1>英文法ビジュアライザー</h1>
-    <div class="sub">肯定文がどう「変わる」か、アニメーションで見て学ぶ ／ 初級編</div>
+    <div class="sub">肯定文がどう「変わる」か、アニメーションで見て学ぶ ／ 初級＋三単現・過去形</div>
   </div>
 </header>
 
@@ -218,8 +221,9 @@ footer{
       <div class="tg">
         <div class="tg-title">幹｜時制・主語</div>
         <div class="tg-nodes">
-          <button class="tnode locked-chip">三単現</button>
-          <button class="tnode locked-chip">過去形</button>
+          <button class="tnode" data-node="third">三単現</button>
+          <button class="tnode" data-node="pastBe">過去形(be)</button>
+          <button class="tnode" data-node="pastVerb">過去形(一般)</button>
         </div>
       </div>
       <div class="tsep"></div>
@@ -277,8 +281,8 @@ footer{
   </main>
 
   <footer>
-    学習範囲：初級編（be動詞の文・一般動詞の文 × 否定文・疑問文）<br>
-    三単現・過去形・Wh疑問詞・助動詞・進行形・現在完了 は準備中です
+    学習範囲：初級＋三単現・過去形（be / 一般 × 否定文・疑問文 / 三単現 / be過去 / 一般過去）<br>
+    Wh疑問詞・助動詞・進行形・現在完了 は準備中です
   </footer>
 </div>
 
@@ -330,8 +334,8 @@ const NODES = [
     id:'verb',
     name:'一般動詞の文',
     explain:{
-      neg:"主語と動詞の間に don't（= do not）を入れるだけ！ 動詞はそのまま原形",
-      q:'文頭に Do を置くだけ！ 動詞はそのまま原形'
+      neg:"主語と動詞の間に do + not → don't が割り込む！ 動詞はそのまま原形",
+      q:'文頭に Do が割り込む！ 動詞はそのまま原形'
     },
     sentences:[
       {
@@ -351,6 +355,90 @@ const NODES = [
           {t:'at school', role:'other'}
         ],
         ja:{pos:'私たちは学校で英語を勉強します。', neg:'私たちは学校で英語を勉強しません。', q:'私たちは学校で英語を勉強しますか。'}
+      }
+    ]
+  },
+  {
+    id:'third',
+    name:'三単現の文',
+    explain:{
+      neg:"主語と動詞の間に does + not → doesn't が割り込み、動詞の s が剥がれて原形に戻る",
+      q:'文頭に Does が割り込み、動詞の s が剥がれて原形に戻る'
+    },
+    sentences:[
+      {
+        cards:[
+          {t:'Ken', role:'subj', proper:true},
+          {t:'plays', role:'verb', stem:'play', suffix:'s'},
+          {t:'tennis', role:'other'},
+          {t:'after school', role:'other'}
+        ],
+        ja:{pos:'ケンは放課後にテニスをします。', neg:'ケンは放課後にテニスをしません。', q:'ケンは放課後にテニスをしますか。'}
+      },
+      {
+        cards:[
+          {t:'She', role:'subj'},
+          {t:'watches', role:'verb', stem:'watch', suffix:'es'},
+          {t:'TV', role:'other'},
+          {t:'every day', role:'other'}
+        ],
+        ja:{pos:'彼女は毎日テレビを見ます。', neg:'彼女は毎日テレビを見ません。', q:'彼女は毎日テレビを見ますか。'}
+      }
+    ]
+  },
+  {
+    id:'pastBe',
+    name:'be動詞の過去形',
+    explain:{
+      neg:'was / were のすぐうしろに not が入る！ was + not → wasn\'t / were + not → weren\'t に短縮',
+      q:'was / were が主語の前に出るだけ！ 文頭は大文字、文末は ? に'
+    },
+    sentences:[
+      {
+        cards:[
+          {t:'Ken', role:'subj', proper:true},
+          {t:'was', role:'verb', be:true, past:true, negContract:"wasn't"},
+          {t:'busy', role:'other'},
+          {t:'yesterday', role:'other'}
+        ],
+        ja:{pos:'ケンは昨日忙しかったです。', neg:'ケンは昨日忙しくありませんでした。', q:'ケンは昨日忙しかったですか。'}
+      },
+      {
+        cards:[
+          {t:'They', role:'subj'},
+          {t:'were', role:'verb', be:true, past:true, negContract:"weren't"},
+          {t:'happy', role:'other'},
+          {t:'last night', role:'other'}
+        ],
+        ja:{pos:'彼らは昨夜幸せでした。', neg:'彼らは昨夜幸せではありませんでした。', q:'彼らは昨夜幸せでしたか。'}
+      }
+    ]
+  },
+  {
+    id:'pastVerb',
+    name:'一般動詞の過去形',
+    explain:{
+      neg:"主語と動詞の間に did + not → didn't が割り込み、動詞の過去印（-ed / 不規則）が剥がれて原形に戻る",
+      q:'文頭に Did が割り込み、動詞の過去印が剥がれて原形に戻る'
+    },
+    sentences:[
+      {
+        cards:[
+          {t:'We', role:'subj'},
+          {t:'played', role:'verb', stem:'play', suffix:'ed', past:true},
+          {t:'soccer', role:'other'},
+          {t:'yesterday', role:'other'}
+        ],
+        ja:{pos:'私たちは昨日サッカーをしました。', neg:'私たちは昨日サッカーをしませんでした。', q:'私たちは昨日サッカーをしましたか。'}
+      },
+      {
+        cards:[
+          {t:'I', role:'subj'},
+          {t:'went', role:'verb', stem:'go', past:true, irregular:true},
+          {t:'to Kyoto', role:'other'},
+          {t:'last year', role:'other'}
+        ],
+        ja:{pos:'私は去年京都へ行きました。', neg:'私は去年京都へ行きませんでした。', q:'私は去年京都へ行きましたか。'}
       }
     ]
   }
@@ -384,7 +472,18 @@ function lowText(t){
 function makeCard(def){
   const el = document.createElement('span');
   el.className = 'card c-' + def.role;
-  el.textContent = def.t;
+  if (def.suffix){
+    const base = def.stem || def.t.slice(0, -def.suffix.length);
+    el.textContent = base;
+    const badge = document.createElement('span');
+    badge.className = 'suffix-badge';
+    badge.textContent = def.suffix;
+    // ies形は y→ies のヒントとして元をtitleに残す
+    if (def.suffixFrom) badge.title = def.suffixFrom + ' → ' + def.suffix;
+    el.appendChild(badge);
+  } else {
+    el.textContent = def.t;
+  }
   return el;
 }
 function makePunct(p){
@@ -409,6 +508,37 @@ function shakeLocked(el){
     [{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},
      {transform:'translateX(-3px)'},{transform:'translateX(0)'}],
     {duration:280});
+}
+
+/* s / ed バッジを剥がす（助け舟が入った後に動詞が原形に戻る演出） */
+async function peelSuffix(row, verbIdx){
+  const card = row.children[verbIdx];
+  if (!card) return;
+  const badge = card.querySelector('.suffix-badge');
+  const verbDef = NODES[curNode].sentences[curSent].cards.find(c=>c.stem);
+  if (badge && verbDef){
+    badge.style.overflow = 'hidden';
+    badge.style.display = 'inline-block';
+    const bw = badge.getBoundingClientRect().width;
+    badge.style.width = bw + 'px';
+    await anim(badge,
+      [{width:bw+'px', marginLeft:'5px', opacity:1, transform:'scale(1)'},
+       {width:'0px', marginLeft:'0px', opacity:0, transform:'scale(.4)'}],
+      {duration:280, easing:'ease-in'});
+    card.firstChild.textContent = verbDef.stem;
+    badge.remove();
+    await anim(card, [{transform:'scale(1)'},{transform:'scale(1.08)',offset:.4},{transform:'scale(1)'}], {duration:260, easing:'ease-out'});
+    pulse(card);
+  } else if (verbDef && verbDef.irregular){
+    const wa = card.getBoundingClientRect().width;
+    card.style.width = wa + 'px';
+    card.style.overflow = 'hidden';
+    card.textContent = verbDef.stem;
+    const w2 = (()=>{ card.style.width='auto'; const w=card.getBoundingClientRect().width; card.style.width=wa+'px'; return w; })();
+    await anim(card, [{width:wa+'px'},{width:w2+'px'}], {duration:260, easing:'cubic-bezier(.22,.9,.26,1)'});
+    card.style.width=''; card.style.overflow='';
+    pulse(card);
+  }
 }
 
 /* ---------------- animation primitives ---------------- */
@@ -600,8 +730,20 @@ async function playNeg(){
       await mergeTwo(row, beIdx, beIdx + 1, beDef.negContract);
     }
   } else {
-    // 一般動詞 + don't
-    await insertIntoRow(row, 1, {t:"don't", role:'aux'});
+    // 一般動詞：do/does/did + not → don't/doesn't/didn't ＋ s/ed剥離
+    let auxBase, auxContract;
+    if (node.id === 'third'){ auxBase='does'; auxContract="doesn't"; }
+    else if (node.id === 'pastVerb'){ auxBase='did'; auxContract="didn't"; }
+    else { auxBase='do'; auxContract="don't"; }
+    await insertIntoRow(row, 1, {t:auxBase, role:'aux'});
+    await insertIntoRow(row, 2, {t:'not', role:'aux'});
+    await wait(80);
+    await mergeTwo(row, 1, 2, auxContract);
+    // 動詞は合体後 idx 2 に詰まる
+    if (node.id === 'third' || node.id === 'pastVerb'){
+      await wait(90);
+      await peelSuffix(row, 2);
+    }
   }
   finishSlot('neg', sent);
 }
@@ -624,14 +766,21 @@ async function playQ(){
     });
     await reorderFlip(row, defs, beIdx);
   } else {
-    // Do を文頭へ
-    await insertIntoRow(row, 0, {t:'Do', role:'aux'});
-    const subjEl = row.querySelectorAll('.card')[1]; // Do の次＝主語
+    let auxCap;
+    if (node.id === 'third') auxCap='Does';
+    else if (node.id === 'pastVerb') auxCap='Did';
+    else auxCap='Do';
+    await insertIntoRow(row, 0, {t:auxCap, role:'aux'});
+    const subjEl = row.querySelectorAll('.card')[1]; // aux の次＝主語
     const subjDef = sent.cards[0];
     if (!subjDef.proper){
       await swapText(subjEl, lowText(subjDef.t));
     } else {
       pulse(subjEl);
+    }
+    if (node.id === 'third' || node.id === 'pastVerb'){
+      await wait(80);
+      await peelSuffix(row, 2);
     }
   }
   await swapPunct(row);
