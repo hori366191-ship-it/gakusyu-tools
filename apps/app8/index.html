@@ -538,17 +538,25 @@ async function copyPhase(bodyEl, sent){
   bodyEl.appendChild(dstRow);
 
   const srcs = [...srcRow.children], dsts = [...dstRow.children];
-  dsts.forEach((el, i) => {
+  // 各カードの着地タイミングで、そのカード自身のインラインスタイルを先にクリアしてから
+  // アニメをキャンセルする（遅延分の時間差があるため、一括クリアだと先行カードが
+  // 出発位置のインラインスタイルにスナップバックして点滅して見える）
+  await Promise.all(dsts.map((el, i) => {
     const s = srcs[i].getBoundingClientRect(), d = el.getBoundingClientRect();
+    if (RM){ return Promise.resolve(); }
     el.style.transform = `translate(${s.left-d.left}px, ${s.top-d.top}px)`;
     el.style.opacity = '.55';
-  });
-  await Promise.all(dsts.map((el, i) =>
-    anim(el,
-      [{transform:el.style.transform, opacity:.55},
+    const a = el.animate(
+      [{transform:`translate(${s.left-d.left}px, ${s.top-d.top}px)`, opacity:.55},
        {transform:'none', opacity:1}],
-      {duration:620, delay:i*45, easing:'cubic-bezier(.22,.8,.25,1)'})));
-  dsts.forEach(el => { el.style.transform=''; el.style.opacity=''; });
+      {duration:620, delay:i*45, easing:'cubic-bezier(.22,.8,.25,1)', fill:'both'});
+    a.finished.then(() => {
+      el.style.transform = '';
+      el.style.opacity = '';
+      try { a.cancel(); } catch (e) {}
+    }).catch(() => {});
+    return a.finished;
+  }));
 }
 
 /* ---------------- slot control ---------------- */
