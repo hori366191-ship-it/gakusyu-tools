@@ -615,6 +615,36 @@ function drawOrbitMoon(){
     ctxO.restore();
   }
 }
+// 星座名ラベルの重なり回避（文字のみ移動。目盛線は実際の角度のまま）
+// 1) 縦に重なる近接ペアは内側=上／外側=下に分離  2) 下部の注記行と被るラベルは上へ逃がす
+function spreadBeltLabels(labs){
+  var LH=13;
+  for(var i=0;i<labs.length-1;i++){
+    var A=labs[i], B=labs[i+1];
+    var wA=A.name.length*11+4, wB=B.name.length*11+4;
+    if(Math.abs(A.x-B.x)<(wA+wB)/2 && Math.abs(A.y-B.y)<LH){
+      var mid=(A.y+B.y)/2;
+      if(A.outer){ A.y=mid+LH/2+0.5; B.y=mid-LH/2-0.5; }
+      else       { A.y=mid-LH/2-0.5; B.y=mid+LH/2+0.5; }
+    }
+  }
+  for(var round=0;round<4;round++){
+    var moved=false;
+    labs.forEach(function(L){
+      var w=L.name.length*11+4, guard=0;
+      function blocked(){
+        if(L.y>H-37 && L.x-w/2<310) return true;
+        for(var k=0;k<labs.length;k++){
+          var M=labs[k];
+          if(M!==L && Math.abs(M.x-L.x)<(w+M.name.length*11+4)/2 && Math.abs(M.y-L.y)<LH) return true;
+        }
+        return false;
+      }
+      while(blocked()&&guard++<40){ L.y-=2; moved=true; }
+    });
+    if(!moved) break;
+  }
+}
 function drawOrbitConst(){
   ctxO.clearRect(0,0,W,H);
   ctxO.fillStyle='#fbfaf7'; ctxO.fillRect(0,0,W,H);
@@ -642,18 +672,6 @@ function drawOrbitConst(){
   ctxO.strokeStyle='rgba(234,179,8,.28)'; ctxO.lineWidth=1.2; ctxO.setLineDash([7,5]);
   ctxO.beginPath(); ctxO.arc(cx,cy,orbitR,0,Math.PI*2); ctxO.stroke();
   ctxO.setLineDash([]);
-  ctxO.fillStyle='rgba(180,130,0,.55)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  ctxO.fillText('公転軌道', cx, cy - orbitR -10);
-  // season labels on orbit — canvas角度で直接指定（夏至=180°左, 冬至=0°右, 春分=270°上, 秋分=90°下）
-  var seasons=[{d:80,label:'春分',deg:270},{d:172,label:'夏至',deg:180},{d:266,label:'秋分',deg:90},{d:356,label:'冬至',deg:0}];
-  seasons.forEach(function(s){
-    var a=s.deg*Math.PI/180;
-    var x=cx+orbitR*Math.cos(a), y=cy+orbitR*Math.sin(a);
-    var oy=(s.deg===90? 16: s.deg===270? -10: 4);
-    ctxO.strokeStyle='rgba(251,250,247,.9)'; ctxO.lineWidth=3; ctxO.font='700 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-    ctxO.strokeText(s.label, x, y + oy);
-    ctxO.fillStyle='rgba(31,47,70,.88)'; ctxO.fillText(s.label, x, y + oy);
-  });
   // earth on orbit — textbook: top=spring, left=summer, bottom=autumn, right=winter (counterclockwise)
   var sunRAVal = sunRA(state.date);
   var earthTheta = (-sunRAVal - 90 + 720)%360 *Math.PI/180;
@@ -671,24 +689,12 @@ function drawOrbitConst(){
   ctxO.strokeStyle='rgba(15,31,58,.18)'; ctxO.setLineDash([4,4]); ctxO.lineWidth=1;
   ctxO.beginPath(); ctxO.moveTo(ex,ey); ctxO.arc(ex,ey,fanR, nightAng-Math.PI/2, nightAng+Math.PI/2); ctxO.closePath(); ctxO.stroke();
   ctxO.setLineDash([]);
-  ctxO.fillStyle='rgba(15,31,58,.55)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  var midNightAng = nightAng;
-  var lx=ex+(fanR*0.62)*Math.cos(midNightAng), ly=ey+(fanR*0.62)*Math.sin(midNightAng);
-  ctxO.fillText('夜に見える空', lx, ly);
   // observer on earth — correct for top view (north pole at Earth's center, latitude 35°)
   var latRad = 35*Math.PI/180;
   var latR = earthR * Math.cos(latRad);
-  // latitude circle
-  ctxO.strokeStyle='rgba(239,68,68,.18)'; ctxO.lineWidth=1; ctxO.setLineDash([3,3]);
-  ctxO.beginPath(); ctxO.arc(ex,ey,latR,0,Math.PI*2); ctxO.stroke();
-  ctxO.setLineDash([]);
   // north pole at Earth's center
   ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(ex,ey,2.8,0,Math.PI*2); ctxO.fill();
   ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
-  ctxO.fillStyle='#ef4444'; ctxO.font='700 8px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  ctxO.fillText('北極', ex, ey-7);
-  ctxO.fillStyle='rgba(239,68,68,.55)'; ctxO.font='8px "Noto Serif JP",serif';
-  ctxO.fillText('緯度35°', ex+latR+6, ey+4);
   var sunDir = (-sunRAVal + 90 + 720)%360; // direction Earth->Sun (toward center)
   var obsAngEarth = (sunDir + (state.time-12)*15) *Math.PI/180;
   var obsX = ex + latR*Math.cos(obsAngEarth), obsY = ey + latR*Math.sin(obsAngEarth);
@@ -731,7 +737,7 @@ function drawOrbitConst(){
     ctxO.strokeStyle='rgba(96,165,250,.16)'; ctxO.lineWidth=1; ctxO.beginPath(); ctxO.arc(cx,cy,beltR,0,Math.PI*2); ctxO.stroke();
     // 近接する星座名の重なり回避: 角度順にソートし、間隔が狭い場合は帯の外側に交互に逃がす
     var items=[];
-    STARS.forEach(function(s){ if(s.id<12){ items.push({s:s, ang:(45-s.ra+720)%360}); } });
+    STARS.forEach(function(s){ if(s.id<12){ items.push({s:s, ang:(90-s.ra+720)%360}); } });
     items.sort(function(a,b){ return a.ang-b.ang; });
     var prevAng=-999, ring=0;
     items.forEach(function(it){
@@ -744,20 +750,25 @@ function drawOrbitConst(){
       prevAng=it.ang;
     });
     items.forEach(function(it){
-      var s=it.s;
       var a=it.ang*Math.PI/180;
-      var x=cx+it.r*Math.cos(a), y=cy+it.r*Math.sin(a);
-      // 目盛線（内側4px）
+      // 目盛線（内側4px）— 実際の角度のまま
       ctxO.strokeStyle='rgba(96,165,250,.35)'; ctxO.lineWidth=1;
       ctxO.beginPath();
       ctxO.moveTo(cx+(beltR-5)*Math.cos(a), cy+(beltR-5)*Math.sin(a));
       ctxO.lineTo(cx+(beltR+1)*Math.cos(a), cy+(beltR+1)*Math.sin(a));
       ctxO.stroke();
+    });
+    var labs=items.map(function(it){
+      var a=it.ang*Math.PI/180;
+      return {name:it.s.name, x:cx+it.r*Math.cos(a), y:cy+it.r*Math.sin(a)+4, outer:it.r>beltR+0.5};
+    });
+    spreadBeltLabels(labs);
+    labs.forEach(function(L){
       // 名前（白縁）
       ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='500 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
-      ctxO.strokeText(s.name, x, y+4);
+      ctxO.strokeText(L.name, L.x, L.y);
       ctxO.fillStyle='rgba(31,47,70,.88)';
-      ctxO.fillText(s.name, x, y+4);
+      ctxO.fillText(L.name, L.x, L.y);
     });
     ctxO.fillStyle='#1f2f46'; ctxO.font='600 11px "Noto Serif JP",serif'; ctxO.textAlign='left';
     ctxO.fillText(curSeason.name+'の星座: '+curSeason.consts, 10, H-10);
@@ -767,13 +778,16 @@ function drawOrbitConst(){
     // 簡易モード: 等間隔30°
     ctxO.strokeStyle='rgba(96,165,250,.12)'; ctxO.lineWidth=1; ctxO.beginPath(); ctxO.arc(cx,cy,beltR,0,Math.PI*2); ctxO.stroke();
     var zodiacs=['おひつじ','おうし','ふたご','かに','しし','おとめ','てんびん','さそり','いて','やぎ','みずがめ','うお'];
-    zodiacs.forEach(function(name,i){
-      var ang=(-i*30+30)*Math.PI/180;
-      var x=cx+beltR*Math.cos(ang), y=cy+beltR*Math.sin(ang);
+    var labs=zodiacs.map(function(name,i){
+      var ang=(45-i*30)*Math.PI/180; // 各季節の深夜0時に扇中心へ来る2星座が下側の星空（LST）と一致するよう調整
+      return {name:name, x:cx+beltR*Math.cos(ang), y:cy+beltR*Math.sin(ang)+4, outer:false};
+    });
+    spreadBeltLabels(labs);
+    labs.forEach(function(L){
       ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='500 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
-      ctxO.strokeText(name, x, y+4);
+      ctxO.strokeText(L.name, L.x, L.y);
       ctxO.fillStyle='rgba(31,47,70,.88)';
-      ctxO.fillText(name, x, y+4);
+      ctxO.fillText(L.name, L.x, L.y);
     });
     ctxO.fillStyle='#1f2f46'; ctxO.font='600 11px "Noto Serif JP",serif'; ctxO.textAlign='left';
     ctxO.fillText(curSeason.name+'の星座: '+curSeason.consts, 10, H-10);
@@ -781,6 +795,19 @@ function drawOrbitConst(){
     ctxO.fillText('※ 星座の位置・方角は学習用の簡易表示です。', 10, H-24);
   }
   ctxO.restore();
+  // 「公転軌道」＋季節ラベル — 地球や注釈に隠れないよう最前面に描画（キャプションは軌道内側・太陽ラベルの下）
+  ctxO.strokeStyle='rgba(251,250,247,.9)'; ctxO.lineWidth=3; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.strokeText('公転軌道', cx, cy + sunR + 28);
+  ctxO.fillStyle='rgba(180,130,0,.55)'; ctxO.fillText('公転軌道', cx, cy + sunR + 28);
+  var seasons=[{d:80,label:'春分',deg:270},{d:172,label:'夏至',deg:180},{d:266,label:'秋分',deg:90},{d:356,label:'冬至',deg:0}];
+  seasons.forEach(function(s){
+    var a=s.deg*Math.PI/180;
+    var lr=orbitR+30;
+    var x=cx+lr*Math.cos(a), y=cy+lr*Math.sin(a);
+    ctxO.strokeStyle='rgba(251,250,247,.9)'; ctxO.lineWidth=3; ctxO.font='700 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.strokeText(s.label, x, y + 4);
+    ctxO.fillStyle='rgba(31,47,70,.88)'; ctxO.fillText(s.label, x, y + 4);
+  });
 }
 
 // ---------- drawing: sky view dispatcher ----------
