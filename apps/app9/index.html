@@ -369,6 +369,32 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     }
     window.addEventListener('message', onMsg);
     form.submit();
+    setStatus('送信中(保存確認中…)');
+    pollForFile(name, 0);
+
+    function pollForFile(n, attempt) {
+      if (done) return;
+      if (attempt >= 20) {
+        finish({ ok: false, error: '保存を確認できませんでした(pdfdropステータスページのlast_errorを確認)' });
+        return;
+      }
+      var s = document.createElement('script');
+      window.__genkoPoll = function (res) {
+        s.remove();
+        if (done) return;
+        if (res && res.genkoPoll && res.found && res.name === n) finish({ ok: true, name: n });
+        else setTimeout(function () { pollForFile(n, attempt + 1); }, 3000);
+      };
+      s.onerror = function () {
+        s.remove();
+        setTimeout(function () { pollForFile(n, attempt + 1); }, 3000);
+      };
+      s.src = CLASSROOM.url + '?poll=' + encodeURIComponent(n)
+        + '&token=' + encodeURIComponent(CLASSROOM.token)
+        + '&callback=__genkoPoll&t=' + Date.now();
+      document.head.appendChild(s);
+    }
+
     function finish(res) {
       if (done) return;
       done = true;
