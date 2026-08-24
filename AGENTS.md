@@ -16,8 +16,8 @@ apps/
 ├── app6/   微分積分ビジュアライザー (scriptId: YOUR_SCRIPT_ID_app6)
 ├── app7/   月と星座シミュレーター (scriptId: YOUR_SCRIPT_ID_app7)
 ├── app8/   英文法ビジュアライザー (scriptId: YOUR_SCRIPT_ID_app8、デプロイ: AKfycbyuW_7Y4-VTF3zEudXis_ptWsa_YoQzl1Csu40pfWdl_0s5-w42pcM4LIMj6pz7-2ZcAQ)
-├── app9/   原稿用紙作成 (scriptId: YOUR_SCRIPT_ID_app9)
-├── pdfdrop/ PDF受信アプリ (scriptId: YOUR_SCRIPT_ID_pdfdrop、ポータル非掲載)
+├── app9/   原稿用紙作成 (scriptId: YOUR_SCRIPT_ID_app9、デプロイ: AKfycbxj4WNLi7qiQ9q1J1ynTDN1MiJ6IgVndQ0LHpOPFZObKSi88hIU6uOKMmCUUADQr2vs)
+├── pdfdrop/ PDF受信アプリ (scriptId: YOUR_SCRIPT_ID_pdfdrop、デプロイ: AKfycbxP6klWI4L5wnTl2wTO5PmrDMf6z4Fmu3Qh3zFwfCf0KUa91idOINv6w8PxoY3Ke-oN、ポータル非掲載)
 ├── portal/ 学習ツール ポータル (scriptId: YOUR_SCRIPT_ID_portal)
 └── その他/  実験・非公開アプリの開発場所
 ```
@@ -120,9 +120,10 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 ### pdfdrop(PDF受信アプリ)
 
 - 汎用PDFドロップ先。クライアントから隠しiframeフォームPOST(`text/plain`)を受け、Driveフォルダへ保存するだけの最小構成。ポータルには載せない
-- ガード: Script Properties `DROP_TOKEN`(必須) + `ALLOWED_EMAILS`(空ならemailゲートOFF、トークンのみ)。app2と同じ`Session.getActiveUser()`方式
+- ガード: `DROP_TOKEN`必須 + email可視アカウントは`ALLOWED_EMAILS`照合 / email不可視(Gmail系等、GAS仕様でemailが取れない)はトークンのみで許可。`MAX_PER_DAY`(既定200)の日次上限は保存成功時のみ消費
+- 診断: `LAST_ERROR`/`LAST_OK`をScript Propertiesに記録しステータスページ(doGet)に表示。障害時はまずここを見る
 - 保存先: Script Properties `DROP_FOLDER_ID` のフォルダ(印刷監視対象=別アカウントのDriveフォルダをスクリプトオーナーに編集者共有して使用)
-- 送信側: app9の `CLASSROOM.url`(受信アプリの`/a/`形式URL)と `CLASSROOM.token` に同じ値を埋め込む。レスポンスはpostMessageで返る
+- 送信側: app9の `CLASSROOM.url`(受信アプリの`/a/`形式URL)と `CLASSROOM.token` に同じ値を埋め込む。着弾確認は **doGet `?poll=<名>&token=&callback=` のJSONP**(3秒×20回)。postMessage(top+parent二重送信)は副経路(Googleサンドボックス多段iframe内では親へ届かない環境があるため主経路にしないこと)
 - デプロイ: アクセス「Googleアカウントでログイン」/ 実行「自分」(UI操作)
 - 初期トークン: `e6135dfd707ab9a6916635fa`(漏洩時は両側で再生成)
 
