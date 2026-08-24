@@ -15,7 +15,7 @@ apps/
 ├── app5/   原子・周期表ツール (scriptId: YOUR_SCRIPT_ID_app5)
 ├── app6/   微分積分ビジュアライザー (scriptId: YOUR_SCRIPT_ID_app6)
 ├── app7/   月と星座シミュレーター (scriptId: YOUR_SCRIPT_ID_app7)
-├── app8/   英文法ビジュアライザー初級編 (開発中・未デプロイ)
+├── app8/   英文法ビジュアライザー (scriptId: YOUR_SCRIPT_ID_app8、デプロイ: AKfycbyuW_7Y4-VTF3zEudXis_ptWsa_YoQzl1Csu40pfWdl_0s5-w42pcM4LIMj6pz7-2ZcAQ)
 ├── app9/   原稿用紙作成 (scriptId: YOUR_SCRIPT_ID_app9)
 ├── pdfdrop/ PDF受信アプリ (scriptId: YOUR_SCRIPT_ID_pdfdrop、ポータル非掲載)
 ├── portal/ 学習ツール ポータル (scriptId: YOUR_SCRIPT_ID_portal)
