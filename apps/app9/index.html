@@ -58,7 +58,7 @@ input[type=color] {
 }
 #printBtn { background: #2e7d63; }
 #printBtn:hover { background: #276a54; }
-#classroomBtn { background: #b0713a; display: none; }
+#classroomBtn { background: #b0713a; }
 #classroomBtn:hover:not([disabled]) { background: #96602f; }
 #classroomBtn[disabled] { opacity: .6; cursor: default; }
 .sendStatus { font-size: 13px; color: #555; }
@@ -105,8 +105,8 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     <div class="row">
       <fieldset class="dirs">
         <legend>書き方向</legend>
-        <span class="radio"><label><input type="radio" name="dir" value="tate" checked>縦書き</label></span>
-        <span class="radio"><label><input type="radio" name="dir" value="yoko">横書き</label></span>
+        <span class="radio"><label><input type="radio" name="dir" value="tate">縦書き</label></span>
+        <span class="radio"><label><input type="radio" name="dir" value="yoko" checked>横書き</label></span>
       </fieldset>
       <span class="field">1行のマス数 <input type="number" id="masu" value="20" min="1" max="50"></span>
       <span class="field">行数 <input type="number" id="gyo" value="20" min="1" max="50"></span>
@@ -139,7 +139,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
 
     <div class="actions">
       <button id="printBtn">印刷する</button>
-      <button id="classroomBtn">教室タブレットで印刷</button>
+      <button id="classroomBtn" style="display:none">教室タブレットで印刷</button>
       <span class="sendStatus" id="sendStatus"></span>
     </div>
     <p class="hint">印刷ダイアログの保存先で「PDFに保存」を選ぶとPDFファイルも作成できます。どのサイズでも必ずA4用紙1枚に収まります。設定はこのブラウザに自動保存され、次回開いたときに復元されます。</p>
@@ -152,8 +152,8 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
 
 <script>
 (function () {
-  var KEY = 'genkoshi-settings';
-  var DEFAULTS = { dir: 'tate', n: 20, l: 20, header: true, color: '#bcd0c6' };
+  var KEY = 'genkoshi-settings-v2';
+  var DEFAULTS = { dir: 'yoko', n: 20, l: 20, header: true, color: '#bcd0c6' };
   var sheet = document.getElementById('sheet');
   var nIn = document.getElementById('masu');
   var lIn = document.getElementById('gyo');
