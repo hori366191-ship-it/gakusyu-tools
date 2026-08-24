@@ -104,7 +104,15 @@ header .sub{font-size:12px;opacity:.75;font-weight:500}
 .pick-chip.active{background:var(--navy);color:#fff}
 
 /* affirmative row */
-.affirm-block{padding:14px 16px;border:1.5px solid var(--line);border-radius:14px;background:#fbfcfe}
+.affirm-block{position:relative;padding:14px 16px;border:1.5px solid var(--line);border-radius:14px;background:#fbfcfe}
+.sentence-line{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px}
+.sentence-line .row{flex:0 1 auto}
+.note-tag{display:inline-flex;align-items:center;gap:4px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:11px;font-weight:900;letter-spacing:.04em;line-height:1;padding:4px 10px;border-radius:999px;box-shadow:0 1px 4px rgba(251,146,60,.18);white-space:nowrap}
+.note-tag--after-row{flex:0 0 auto;align-self:flex-end;margin-bottom:2px;opacity:0;transform:translateY(4px);transition:opacity .35s,transform .35s}
+.note-tag--after-row.show{opacity:1;transform:none}
+.note-tag--inline{font-size:10.5px;padding:2px 8px;box-shadow:0 1px 4px rgba(251,146,60,.14);vertical-align:middle}
+.note-tag--point{margin-left:8px;vertical-align:middle;transform:translateY(-1px)}
+.note-icon{font-size:12px;line-height:1}
 .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;row-gap:10px;position:relative}
 .card{
   display:inline-block;font-size:17px;font-weight:900;line-height:1.25;
@@ -128,6 +136,10 @@ header .sub{font-size:12px;opacity:.75;font-weight:500}
 
 /* action buttons */
 .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:18px 0 6px}
+.actions--wh{display:none;gap:10px}
+.actions--wh.show{display:flex}
+.act-btn--wh{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 4px 12px rgba(245,158,11,.28);padding:11px 18px;font-size:14px}
+.act-btn--wh:hover:not(:disabled){transform:translateY(-2px)}
 .act-btn{
   font-size:15px;font-weight:700;color:#fff;
   background:linear-gradient(135deg,#2563eb,#1d4ed8);
@@ -156,6 +168,11 @@ header .sub{font-size:12px;opacity:.75;font-weight:500}
 }
 .slot.neg .slot-tag{background:#fee2e2;color:#b91c1c}
 .slot.q   .slot-tag{background:#e0f2fe;color:#0369a1}
+.slot.slot-wh-where .slot-tag{background:#dbeafe;color:#1d4ed8}
+.slot.slot-wh-what  .slot-tag{background:#dcfce7;color:#15803d}
+.slot.slot-wh-who   .slot-tag{background:#ede9fe;color:#6d28d9}
+.slot.slot-wh-when  .slot-tag{background:#fef3c7;color:#92400e}
+.slot.slot-yesno .slot-tag{background:#e0f2fe;color:#0369a1}
 .slot-empty{
   min-height:64px;display:flex;align-items:center;justify-content:center;
   text-align:center;color:#94a3b8;font-size:13px;padding:8px 0;
@@ -198,7 +215,7 @@ footer{
 <header>
   <div class="header-in">
     <h1>英文法ビジュアライザー</h1>
-    <div class="sub">肯定文がどう「変わる」か、アニメーションで見て学ぶ ／ 初級＋三単現・過去形</div>
+    <div class="sub">肯定文がどう「変わる」か、アニメーションで見て学ぶ ／ 初級＋三単現・過去形・Wh</div>
   </div>
 </header>
 
@@ -227,7 +244,7 @@ footer{
       <div class="tg">
         <div class="tg-title">枝｜パーツ追加</div>
         <div class="tg-nodes">
-          <button class="tnode locked-chip">Wh疑問詞</button>
+          <button class="tnode" data-node="wh">Wh疑問詞</button>
           <button class="tnode locked-chip">助動詞</button>
           <button class="tnode locked-chip">進行形</button>
           <button class="tnode locked-chip">現在完了</button>
@@ -244,7 +261,10 @@ footer{
     <div class="picker" id="picker"></div>
 
     <div class="affirm-block">
-      <div class="row" id="affirmRow"></div>
+      <div class="sentence-line">
+        <div class="row" id="affirmRow"></div>
+        <span class="note-tag note-tag--after-row show"><span class="note-icon">✎</span> ノートに書こう！</span>
+      </div>
       <div class="ja-line"><b>訳：</b><span id="affirmJa"></span></div>
       <div class="legend">
         <span><i class="l-subj"></i>主語</span>
@@ -255,13 +275,20 @@ footer{
     </div>
 
     <span class="sec-label" style="margin-top:22px">Step 2｜ボタンをおして変化を見る</span>
-    <div class="actions">
+    <div class="actions" id="actions-normal">
       <button class="act-btn" data-act="neg">否定文にする</button>
       <button class="act-btn q" data-act="q">疑問文にする</button>
       <span class="hint">もう一度おすと、最初から再生されるよ</span>
     </div>
+    <div class="actions actions--wh" id="actions-wh">
+      <button class="act-btn act-btn--wh" data-wh="where">Whereで尋ねる</button>
+      <button class="act-btn act-btn--wh" data-wh="what">Whatで尋ねる</button>
+      <button class="act-btn act-btn--wh" data-wh="who">Whoで尋ねる</button>
+      <button class="act-btn act-btn--wh" data-wh="when">Whenで尋ねる</button>
+      <span class="hint">肯定文→Yes/No→Wh の順に変化するよ</span>
+    </div>
 
-    <div class="slots">
+    <div class="slots" id="slots-normal">
       <section class="slot neg" id="slot-neg">
         <span class="slot-tag">否定文</span>
         <div class="slot-body" id="body-neg">
@@ -275,11 +302,43 @@ footer{
         </div>
       </section>
     </div>
+    <div class="slots slots--wh" id="slots-wh" style="display:none">
+      <section class="slot slot-yesno" id="slot-yesno">
+        <span class="slot-tag">Yes/No</span>
+        <div class="slot-body" id="body-yesno">
+          <div class="slot-empty">「Where」などを押すと、まず Yes/No 疑問文がここに作られるよ</div>
+        </div>
+      </section>
+      <section class="slot slot-wh-where" id="slot-where">
+        <span class="slot-tag">Where</span>
+        <div class="slot-body" id="body-where">
+          <div class="slot-empty">Where の疑問文がここに作られるよ</div>
+        </div>
+      </section>
+      <section class="slot slot-wh-what" id="slot-what">
+        <span class="slot-tag">What</span>
+        <div class="slot-body" id="body-what">
+          <div class="slot-empty">What の疑問文がここに作られるよ</div>
+        </div>
+      </section>
+      <section class="slot slot-wh-who" id="slot-who">
+        <span class="slot-tag">Who</span>
+        <div class="slot-body" id="body-who">
+          <div class="slot-empty">Who の疑問文がここに作られるよ</div>
+        </div>
+      </section>
+      <section class="slot slot-wh-when" id="slot-when">
+        <span class="slot-tag">When</span>
+        <div class="slot-body" id="body-when">
+          <div class="slot-empty">When の疑問文がここに作られるよ</div>
+        </div>
+      </section>
+    </div>
   </main>
 
   <footer>
-    学習範囲：初級＋三単現・過去形（be / 一般 × 否定文・疑問文 / 三単現 / be過去 / 一般過去）<br>
-    Wh疑問詞・助動詞・進行形・現在完了 は準備中です
+    学習範囲：初級＋三単現・過去形・Wh（be / 一般 × 否定・疑問 / 三単現 / be過去 / 一般過去 / Wh）<br>
+    助動詞・進行形・現在完了 は準備中です
   </footer>
 </div>
 
@@ -438,6 +497,73 @@ const NODES = [
         ja:{pos:'私は去年京都へ行きました。', neg:'私は去年京都へ行きませんでした。', q:'私は去年京都へ行きましたか。'}
       }
     ]
+  },
+  {
+    id:'wh',
+    name:'Wh疑問詞',
+    explain:{
+      yesno:'助け舟を文頭に（Does/Did が割り込み、be動詞は主語の前に出る）Yes/No 疑問文に',
+      where:'場所が消えて Where が先頭に。骨組み Does/Did ... はそのまま',
+      what:'目的語が消えて What が先頭に',
+      who:'主語が Who に置き換わる（Does/Didは使わない）',
+      when:'時が消えて When が先頭に'
+    },
+    sentences:[
+      {
+        cards:[
+          {t:'Ken', role:'subj', proper:true},
+          {t:'plays', role:'verb', stem:'play'},
+          {t:'tennis', role:'obj'},
+          {t:'in the park', role:'place'}
+        ],
+        ja:{pos:'ケンは公園でテニスをします。', yesno:'ケンは公園でテニスをしますか。', whWhere:'ケンはどこでテニスをしますか。', whWhat:'ケンは公園で何をしますか。', whWho:'誰が公園でテニスをしますか。', whWhen:'ケンはいつ公園でテニスをしますか。'}
+      },
+      {
+        cards:[
+          {t:'She', role:'subj'},
+          {t:'watches', role:'verb', stem:'watch'},
+          {t:'TV', role:'obj'},
+          {t:'every day', role:'time'}
+        ],
+        ja:{pos:'彼女は毎日テレビを見ます。', yesno:'彼女は毎日テレビを見ますか。', whWhere:'彼女はどこでテレビを見ますか。', whWhat:'彼女は毎日何を見ますか。', whWho:'誰が毎日テレビを見ますか。', whWhen:'彼女はいつテレビを見ますか。'}
+      },
+      {
+        cards:[
+          {t:'We', role:'subj'},
+          {t:'played', role:'verb', stem:'play', past:true},
+          {t:'soccer', role:'obj'},
+          {t:'at school', role:'place'},
+          {t:'yesterday', role:'time'}
+        ],
+        ja:{pos:'私たちは昨日学校でサッカーをしました。', yesno:'私たちは昨日学校でサッカーをしましたか。', whWhere:'私たちは昨日どこでサッカーをしましたか。', whWhat:'私たちは昨日学校で何をしましたか。', whWho:'誰が昨日学校でサッカーをしましたか。', whWhen:'私たちはいつ学校でサッカーをしましたか。'}
+      },
+      {
+        cards:[
+          {t:'I', role:'subj'},
+          {t:'went', role:'verb', stem:'go', past:true, irregular:true},
+          {t:'to Kyoto', role:'place'},
+          {t:'last year', role:'time'}
+        ],
+        ja:{pos:'私は去年京都へ行きました。', yesno:'私は去年京都へ行きましたか。', whWhere:'私は去年どこへ行きましたか。', whWhat:'私は去年京都で何をしましたか。', whWho:'誰が去年京都へ行きましたか。', whWhen:'私はいつ京都へ行きましたか。'}
+      },
+      {
+        cards:[
+          {t:'Ken', role:'subj', proper:true},
+          {t:'is', role:'verb', be:true},
+          {t:'in the park', role:'place'}
+        ],
+        ja:{pos:'ケンは公園にいます。', yesno:'ケンは公園にいますか。', whWhere:'ケンはどこにいますか。', whWhat:'ケンは公園で何をしていますか。', whWho:'誰が公園にいますか。', whWhen:'ケンはいつ公園にいますか。'}
+      },
+      {
+        cards:[
+          {t:'They', role:'subj'},
+          {t:'were', role:'verb', be:true, past:true},
+          {t:'at school', role:'place'},
+          {t:'yesterday', role:'time'}
+        ],
+        ja:{pos:'彼らは昨日学校にいました。', yesno:'彼らは昨日学校にいましたか。', whWhere:'彼らは昨日どこにいましたか。', whWhat:'彼らは昨日学校で何をしていましたか。', whWho:'誰が昨日学校にいましたか。', whWhen:'彼らはいつ学校にいましたか。'}
+      }
+    ]
   }
 ];
 
@@ -469,6 +595,8 @@ function lowText(t){
 function makeCard(def){
   const el = document.createElement('span');
   el.className = 'card c-' + def.role;
+  el.dataset.role = def.role;
+  if (def.proper) el.dataset.proper='1';
   el.textContent = def.t;
   return el;
 }
@@ -494,6 +622,69 @@ function shakeLocked(el){
     [{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},
      {transform:'translateX(-3px)'},{transform:'translateX(0)'}],
     {duration:280});
+}
+
+const WH_WORD = {where:'Where', what:'What', who:'Who', when:'When'};
+const WH_ROLE = {where:'place', what:'obj', who:'subj', when:'time'};
+
+function findTargetIdx(row, role){
+  const cards=[...row.children].filter(el=>el.classList.contains('card'));
+  for (let i=0;i<cards.length;i++){ if (cards[i].dataset.role===role) return [...row.children].indexOf(cards[i]); }
+  return -1;
+}
+async function highlightTarget(row, idx){
+  const el=row.children[idx];
+  if(!el) return;
+  el.style.outline='2px solid #f59e0b';
+  el.style.outlineOffset='2px';
+  pulse(el);
+  await wait(380);
+  el.style.outline='';
+  el.style.outlineOffset='';
+}
+async function fadeOutTarget(row, idx){
+  const el=row.children[idx];
+  if(!el) return;
+  const w=el.getBoundingClientRect().width;
+  el.style.width=w+'px';
+  el.style.overflow='hidden';
+  await anim(el, [{width:w+'px', marginLeft:'0px', opacity:1},{width:'0px', marginLeft:'-8px', opacity:0}], {duration:300, easing:'ease-in'});
+  el.remove();
+}
+
+/* 任意の行をコピーしてスロットへ降下（コピー元を行要素で指定） */
+async function copyRowToBody(srcRow, dstBody){
+  const wrapper=document.createElement('div');
+  wrapper.className='sentence-line';
+  const dstRow=document.createElement('div');
+  dstRow.className='row';
+  // srcRowのカード群を複製（punct除く→後で付与）
+  const srcCards=[...srcRow.children].filter(el=>el.classList.contains('card'));
+  const srcPunct=srcRow.querySelector('.punct');
+  srcCards.forEach(c=>{
+    const def={t:c.textContent, role:c.dataset.role||'other'};
+    // proper/stem は見た目には不要だが copy では t のみでよい
+    dstRow.appendChild(makeCard(def));
+  });
+  dstRow.appendChild(makePunct(srcPunct?srcPunct.textContent:'.'));
+  const note=document.createElement('span');
+  note.className='note-tag note-tag--after-row';
+  note.innerHTML='<span class="note-icon">✎</span> ノートに書こう！';
+  wrapper.appendChild(dstRow);
+  wrapper.appendChild(note);
+  dstBody.innerHTML='';
+  dstBody.appendChild(wrapper);
+  // FLIP降下
+  const srcs=[...srcRow.children], dsts=[...dstRow.children];
+  await Promise.all(dsts.map((el,i)=>{
+    const s=srcs[i]?.getBoundingClientRect(), d=el.getBoundingClientRect();
+    if(!s||RM) return Promise.resolve();
+    el.style.transform=`translate(${s.left-d.left}px, ${s.top-d.top}px)`;
+    el.style.opacity='.55';
+    const a=el.animate([{transform:`translate(${s.left-d.left}px, ${s.top-d.top}px)`, opacity:.55},{transform:'none', opacity:1}], {duration:620, delay:i*45, easing:'cubic-bezier(.22,.8,.25,1)', fill:'both'});
+    a.finished.then(()=>{ el.style.transform=''; el.style.opacity=''; try{a.cancel();}catch(e){} }).catch(()=>{});
+    return a.finished;
+  }));
 }
 
 /* 動詞を原形に戻す（s / ed が剥がれて原形に戻る演出） */
@@ -631,12 +822,19 @@ async function swapText(el, newText){
 /** 肯定文の複製フェーズ：上段からスロットへカードが降りてくる */
 async function copyPhase(bodyEl, sent){
   const srcRow = $('#affirmRow');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'sentence-line';
   const dstRow = document.createElement('div');
   dstRow.className = 'row';
   sent.cards.forEach(c => dstRow.appendChild(makeCard(c)));
   dstRow.appendChild(makePunct('.'));
+  const note = document.createElement('span');
+  note.className = 'note-tag note-tag--after-row';
+  note.innerHTML = '<span class="note-icon">✎</span> ノートに書こう！';
+  wrapper.appendChild(dstRow);
+  wrapper.appendChild(note);
   bodyEl.innerHTML = '';
-  bodyEl.appendChild(dstRow);
+  bodyEl.appendChild(wrapper);
 
   const srcs = [...srcRow.children], dsts = [...dstRow.children];
   // 各カードの着地タイミングで、そのカード自身のインラインスタイルを先にクリアしてから
@@ -663,24 +861,74 @@ async function copyPhase(bodyEl, sent){
 /* ---------------- slot control ---------------- */
 function resetSlot(kind){
   const body = $('#body-' + kind);
+  if (!body) return;
   body.innerHTML = '<div class="slot-empty">ここに「もとの文」がコピーされて、<br>' +
     (kind === 'neg' ? '否定文' : '疑問文') + 'へと変化するよ</div>';
-  $('#slot-' + kind).classList.remove('filled');
+  const slot=$('#slot-' + kind);
+  if (slot) slot.classList.remove('filled');
 }
-function clearAllSlots(){ resetSlot('neg'); resetSlot('q'); }
+function resetWhSlot(kind){
+  const body = document.getElementById('body-'+kind);
+  if (!body) return;
+  const msgs={yesno:'「Where」などを押すと、まず Yes/No 疑問文がここに作られるよ', where:'Where の疑問文がここに作られるよ', what:'What の疑問文がここに作られるよ', who:'Who の疑問文がここに作られるよ', when:'When の疑問文がここに作られるよ'};
+  body.innerHTML='<div class="slot-empty">'+ (msgs[kind]||'ここに文が作られるよ') +'</div>';
+  const slot=document.getElementById(kind==='yesno'?'slot-yesno':'slot-'+kind);
+  if (slot) slot.classList.remove('filled');
+}
+function clearAllSlots(){
+  if (NODES[curNode].id==='wh'){
+    ['yesno','where','what','who','when'].forEach(k=>resetWhSlot(k));
+  } else {
+    resetSlot('neg'); resetSlot('q');
+  }
+}
+function clearWhOnly(){
+  ['where','what','who','when'].forEach(k=>resetWhSlot(k));
+}
 
 function finishSlot(kind, sent){
   const slot = $('#slot-' + kind);
   const body = $('#body-' + kind);
+  if (!slot||!body) return;
   const foot = document.createElement('div');
   foot.className = 'slot-foot';
+  // POINTのノートタグは文末に配置
   foot.innerHTML =
     '<span class="point-badge">POINT</span>' +
     '<span class="point-text">' + NODES[curNode].explain[kind] + '</span>' +
+    '<span class="note-tag note-tag--inline note-tag--point"><span class="note-icon">✎</span> ノートに書こう！</span>' +
     '<div class="slot-ja"><b>訳：</b>' + sent.ja[kind] + '</div>';
   body.appendChild(foot);
   requestAnimationFrame(() => requestAnimationFrame(() => foot.classList.add('show')));
   slot.classList.add('filled');
+  // 英語文直後のタグを表示
+  const englishNote = body.querySelector('.sentence-line .note-tag--after-row');
+  if (englishNote) requestAnimationFrame(() => requestAnimationFrame(() => englishNote.classList.add('show')));
+}
+function finishSlotWh(kind, sent, didRemove){
+  const slotId = kind==='yesno' ? 'slot-yesno' : 'slot-'+kind;
+  const bodyId = kind==='yesno' ? 'body-yesno' : 'body-'+kind;
+  const slot=document.getElementById(slotId);
+  const body=document.getElementById(bodyId);
+  if (!slot||!body) return;
+  const explainKey = kind==='yesno' ? 'yesno' : kind;
+  let explainText = NODES[curNode].explain[explainKey] || '';
+  // 条件付き：消すものがなかった場合は消滅に触れない（Where/When/Whatで didRemove===false のとき）
+  if (!didRemove && (kind==='where'||kind==='when'||kind==='what')){
+    // aid: 元のexplainは「場所が消えて Where が…」のように消滅を語るが、なしのときは「Where が先頭に割り込む」に置換
+    const shortMap={where:'Where が先頭に割り込む。骨組み Does/Did ... はそのまま', what:'What が先頭に割り込む。骨組みはそのまま', when:'When が先頭に割り込む。骨組みはそのまま'};
+    explainText = shortMap[kind] || explainText;
+  }
+  const jaKey = kind==='yesno' ? 'yesno' : 'wh'+kind.charAt(0).toUpperCase()+kind.slice(1);
+  const jaText = sent.ja[jaKey] || sent.ja.pos;
+  const foot=document.createElement('div');
+  foot.className='slot-foot';
+  foot.innerHTML='<span class="point-badge">POINT</span><span class="point-text">'+explainText+'</span><span class="note-tag note-tag--inline note-tag--point"><span class="note-icon">✎</span> ノートに書こう！</span><div class="slot-ja"><b>訳：</b>'+jaText+'</div>';
+  body.appendChild(foot);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>foot.classList.add('show')));
+  slot.classList.add('filled');
+  const englishNote=body.querySelector('.sentence-line .note-tag--after-row');
+  if (englishNote) requestAnimationFrame(()=>requestAnimationFrame(()=>englishNote.classList.add('show')));
 }
 
 /* ---------------- transform patterns ---------------- */
@@ -758,6 +1006,92 @@ async function playQ(){
   finishSlot('q', sent);
 }
 
+/* ensure Yes/No slot exists for Wh derivations */
+async function ensureYesNo(){
+  const body=document.getElementById('body-yesno');
+  if (!body) return null;
+  if (body.querySelector('.slot-foot')) return body.querySelector('.row');
+  const sent=NODES[curNode].sentences[curSent];
+  await copyPhase(body, sent);
+  const row=body.querySelector('.row');
+  const verbDef=sent.cards.find(c=>c.role==='verb');
+  const beIdx=sent.cards.findIndex(c=>c.be);
+  if (beIdx>=0){
+    // be動詞は主語の前に出る
+    const defs=sent.cards.map((c,i)=>{
+      let t=c.t;
+      if (i===0 && !c.proper) t=lowText(t);
+      if (i===beIdx) t=capText(t);
+      return Object.assign({}, c, {t});
+    });
+    await reorderFlip(row, defs, beIdx);
+  } else {
+    const isPast=!!sent.cards.find(c=>c.past);
+    const auxCap=isPast?'Did':'Does';
+    await insertIntoRow(row,0,{t:auxCap, role:'aux'});
+    const subjEl=row.querySelectorAll('.card')[1];
+    const subjDef=sent.cards[0];
+    if (subjDef && !subjDef.proper){ await swapText(subjEl, lowText(subjDef.t)); } else if(subjEl) pulse(subjEl);
+    if (verbDef && verbDef.stem) await peelSuffix(row, 2);
+  }
+  await swapPunct(row);
+  finishSlotWh('yesno', sent, false);
+  return row;
+}
+async function playWh(kind){
+  const sent=NODES[curNode].sentences[curSent];
+  const whWord=WH_WORD[kind];
+  // StepA: Yes/No を確保（Whoでも参考として残す）
+  await ensureYesNo();
+  await wait(250);
+  const body=document.getElementById('body-'+kind);
+  if (!body) return;
+  const whRole=WH_ROLE[kind];
+  if (kind==='who'){
+    // Whoは肯定文から直接：主語を置換、Does/Didは使わない
+    await copyPhase(body, sent);
+    const row=body.querySelector('.row');
+    const subjIdx=findTargetIdx(row,'subj');
+    if (subjIdx>=0){
+      await highlightTarget(row, subjIdx);
+      await fadeOutTarget(row, subjIdx);
+      await insertIntoRow(row, 0, {t:'Who', role:'subj'});
+    } else {
+      await insertIntoRow(row, 0, {t:'Who', role:'subj'});
+    }
+    await swapPunct(row);
+    finishSlotWh(kind, sent, subjIdx>=0);
+    return;
+  }
+  // Where/What/When は Yes/No行をコピーして Wh を先頭へ
+  const yesNoRow=document.querySelector('#body-yesno .row');
+  if (!yesNoRow){
+    await copyPhase(body, sent);
+  } else {
+    await copyRowToBody(yesNoRow, body);
+  }
+  const row=body.querySelector('.row');
+  const targetIdx=findTargetIdx(row, whRole);
+  let didRemove=false;
+  if (targetIdx>=0){
+    await highlightTarget(row, targetIdx);
+    await fadeOutTarget(row, targetIdx);
+    didRemove=true;
+  } else {
+    pulse(row);
+    await wait(180);
+  }
+  await insertIntoRow(row, 0, {t:whWord, role:'aux'});
+  // 文頭でなくなった助け舟（Does/Did/be動詞）を小文字へ
+  const lowerTargets=['Does','Did','Is','Are','Was','Were'];
+  const cards=[...row.querySelectorAll('.card')];
+  if (cards[1] && lowerTargets.includes(cards[1].textContent)){
+    await swapText(cards[1], lowText(cards[1].textContent));
+  }
+  // punctは Yes/No の ? を引き継ぐ
+  finishSlotWh(kind, sent, didRemove);
+}
+
 /* ---------------- rendering & events ---------------- */
 function renderPicker(){
   const node = NODES[curNode];
@@ -796,11 +1130,19 @@ function setTreeActive(){
     b.classList.toggle('active', b.dataset.node === NODES[curNode].id);
   });
 }
+function updateModeUI(){
+  const isWh = NODES[curNode].id==='wh';
+  document.getElementById('actions-normal').style.display = isWh ? 'none' : '';
+  document.getElementById('actions-wh').classList.toggle('show', isWh);
+  document.getElementById('slots-normal').style.display = isWh ? 'none' : '';
+  document.getElementById('slots-wh').style.display = isWh ? '' : 'none';
+}
 
 async function switchNode(idx){
   curNode = idx;
   curSent = 0;
   setTreeActive();
+  updateModeUI();
   const stage = $('#stage');
   stage.classList.remove('fade-swap');
   void stage.offsetWidth;
@@ -822,6 +1164,9 @@ function guard(fn, allowSame){
 document.querySelectorAll('[data-act]').forEach(btn => {
   btn.addEventListener('click', () => guard(btn.dataset.act === 'neg' ? playNeg : playQ));
 });
+document.querySelectorAll('[data-wh]').forEach(btn=>{
+  btn.addEventListener('click', ()=> guard(()=>playWh(btn.dataset.wh)));
+});
 document.querySelectorAll('.tnode[data-node]').forEach(btn => {
   btn.addEventListener('click', () => guard(() => {
     const idx = NODES.findIndex(n => n.id === btn.dataset.node);
@@ -836,6 +1181,7 @@ document.querySelectorAll('.locked-chip').forEach(btn => {
 renderPicker();
 renderAffirmative(false);
 setTreeActive();
+updateModeUI();
 </script>
 </body>
 </html>
