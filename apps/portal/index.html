@@ -13,7 +13,7 @@
   body {
     margin: 0;
     font-family: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', system-ui, sans-serif;
-    background: #ffffff;
+    background: #fdfcf8;
     color: #1f2933;
     min-height: 100vh;
   }
@@ -38,7 +38,8 @@
     text-align: center;
     padding: 96px 20px 22px;
     overflow: hidden;
-    background: #1e2a4a;
+    background: linear-gradient(180deg, #fefdf9 0%, #f8f1de 100%);
+    border-bottom: 1px solid #efe6cf;
   }
   .hero-canvas {
     position: absolute;
@@ -53,8 +54,8 @@
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(to right, rgba(255, 255, 255, .045) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, .045) 1px, transparent 1px);
+      linear-gradient(to right, rgba(30, 42, 74, .07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(30, 42, 74, .07) 1px, transparent 1px);
     background-size: 28px 28px;
     pointer-events: none;
     z-index: 1;
@@ -65,7 +66,7 @@
     font-size: 12px;
     font-weight: 700;
     letter-spacing: .38em;
-    color: #a5b4fc;
+    color: #4338ca;
     text-transform: uppercase;
   }
   .hero__title {
@@ -73,13 +74,13 @@
     font-size: clamp(38px, 8vw, 60px);
     font-weight: 900;
     letter-spacing: .05em;
-    color: #ffffff;
+    color: #1e2a4a;
   }
   .hero__sub {
     margin: 0;
     font-size: clamp(14px, 2.4vw, 16px);
     font-weight: 500;
-    color: #dce4f0;
+    color: #52607a;
   }
 
   /* ---- ヒーロー内 QRコード(最終行の下・右下寄せ) ---- */
@@ -98,22 +99,62 @@
     font-size: 12px;
     font-weight: 700;
     letter-spacing: .12em;
-    color: #dce4f0;
+    color: #52607a;
+  }
+
+  /* ---- メイン & セクション ---- */
+  .main {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 48px 20px 64px;
+  }
+  .section + .section { margin-top: 40px; }
+  @media (max-width: 900px) {
+    .main { max-width: 520px; }
+  }
+  .section__head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .section__bar {
+    align-self: center;
+    width: 6px;
+    height: 24px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  .sec--math .section__bar { background: linear-gradient(180deg, #85b8ec, #4a7fc1); }
+  .sec--eng  .section__bar { background: linear-gradient(180deg, #93d3a5, #4d9e68); }
+  .sec--sci  .section__bar { background: linear-gradient(180deg, #b7a6ee, #8464c8); }
+  .sec--tool .section__bar { background: linear-gradient(180deg, #d3b491, #a67c52); }
+  .section__title {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 900;
+    letter-spacing: .06em;
+    color: #1f2933;
+  }
+  .section__en {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: #adb8c4;
   }
 
   /* ---- カード ---- */
   .cards {
-    max-width: 1060px;
-    margin: 0 auto;
-    padding: 48px 20px 64px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
   @media (max-width: 900px) {
-    .cards { grid-template-columns: 1fr; max-width: 520px; }
+    .cards { grid-template-columns: 1fr; }
   }
   .card {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -148,15 +189,10 @@
     flex-shrink: 0;
   }
   .card__icon svg { height: 58%; width: auto; }
-  .card--blue .card__icon { background: linear-gradient(135deg, #005a9c, #00457a); }
-  .card--green .card__icon { background: linear-gradient(135deg, #4caf50, #2e7d32); }
-  .card--navy .card__icon { background: linear-gradient(135deg, #2a4a7f, #1f3a5f); }
-  .card--violet .card__icon { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
-  .card--gold .card__icon { background: linear-gradient(135deg, #d4a24c, #b08a3e); }
-  .card--rose .card__icon { background: linear-gradient(135deg, #c62828, #7f1d1d); }
-  .card--slate .card__icon { background: linear-gradient(135deg, #334155, #0f172a); }
-  .card--teal .card__icon { background: linear-gradient(135deg, #0d9488, #0f766e); }
-  .card--orange .card__icon { background: linear-gradient(135deg, #f59e0b, #b45309); }
+  .subj--math .card__icon { background: linear-gradient(135deg, #85b8ec, #4a7fc1); }
+  .subj--eng  .card__icon { background: linear-gradient(135deg, #93d3a5, #4d9e68); }
+  .subj--sci  .card__icon { background: linear-gradient(135deg, #b7a6ee, #8464c8); }
+  .subj--tool .card__icon { background: linear-gradient(135deg, #d3b491, #a67c52); }
 
   .card__title {
     margin: 0;
@@ -168,14 +204,19 @@
     gap: 8px;
     flex-wrap: wrap;
   }
-  .card__badge {
+  .card__grade {
+    position: absolute;
+    top: 16px;
+    right: 16px;
     font-size: 11px;
     font-weight: 700;
-    background: #eef2ff;
-    color: #4f46e5;
-    padding: 3px 10px;
+    background: #f4f6f9;
+    border: 1px solid #dde3ea;
+    color: #55627a;
+    padding: 3px 11px;
     border-radius: 999px;
-    letter-spacing: .03em;
+    letter-spacing: .05em;
+    line-height: 1.5;
   }
   .card__desc {
     margin: 0;
@@ -197,15 +238,10 @@
     gap: 5px;
     transition: filter .2s ease, transform .2s ease, box-shadow .2s ease;
   }
-  .card--blue .card__btn { background: linear-gradient(135deg, #005a9c, #00457a); }
-  .card--green .card__btn { background: linear-gradient(135deg, #4caf50, #2e7d32); }
-  .card--navy .card__btn { background: linear-gradient(135deg, #2a4a7f, #1f3a5f); }
-  .card--violet .card__btn { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
-  .card--gold .card__btn { background: linear-gradient(135deg, #d4a24c, #b08a3e); }
-  .card--rose .card__btn { background: linear-gradient(135deg, #c62828, #7f1d1d); }
-  .card--slate .card__btn { background: linear-gradient(135deg, #334155, #0f172a); }
-.card--teal .card__btn { background: linear-gradient(135deg, #0d9488, #0f766e); }
-  .card--orange .card__btn { background: linear-gradient(135deg, #f59e0b, #b45309); }
+  .subj--math .card__btn { background: linear-gradient(135deg, #85b8ec, #4a7fc1); }
+  .subj--eng  .card__btn { background: linear-gradient(135deg, #93d3a5, #4d9e68); }
+  .subj--sci  .card__btn { background: linear-gradient(135deg, #b7a6ee, #8464c8); }
+  .subj--tool .card__btn { background: linear-gradient(135deg, #d3b491, #a67c52); }
   .card:hover .card__btn {
     filter: brightness(1.07);
     transform: translateY(-1px);
@@ -287,136 +323,193 @@
     </div>
   </header>
 
-  <main class="cards">
+  <main class="main">
 
-    <a class="card card--blue" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbzMNC1_ffakw1_1-zuYFNIhHj__NogqtjF--Yil-J4fRIW1i5BLYTF29dCNgkSCC2M2bg/exec" target="_blank" rel="noopener">
-      <div class="card__icon">
-        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="13" y="6" width="38" height="52" rx="5" />
-          <text x="19" y="30" fill="#ffffff" stroke="none" font-family="inherit" font-size="17" font-weight="800">#</text>
-          <line x1="19" y1="40" x2="45" y2="40" />
-          <line x1="19" y1="48" x2="37" y2="48" />
-        </svg>
+    <!-- ===== ツール ===== -->
+    <section class="section sec--tool">
+      <div class="section__head">
+        <span class="section__bar" aria-hidden="true"></span>
+        <h2 class="section__title">ツール</h2>
+        <span class="section__en" aria-hidden="true">Tools</span>
       </div>
-      <h2 class="card__title">公式ビューア</h2>
-      <p class="card__desc">公式や暗記項目を、ブラウザでいつでも閲覧できるビューアです。<br>※少し起動に時間がかかります。</p>
-      <span class="card__btn">開く&nbsp;↗</span>
-    </a>
+      <div class="cards">
 
-    <a class="card card--green" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbxvoXt6H0_I1K5HOHCSYIPKR9PyoM-k8iXDNRPsxs3DsF0mtwE7AXgGNlxRE5d7eXZ4DA/exec" target="_blank" rel="noopener">
-      <div class="card__icon">
-        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M32 16 C26 10 16 8 8 10 L8 50 C16 48 26 50 32 56 C38 50 48 48 56 50 L56 10 C48 8 38 10 32 16 Z" />
-          <line x1="32" y1="16" x2="32" y2="56" />
-        </svg>
-      </div>
-      <h2 class="card__title">英語長文 多読リーダー</h2>
-      <p class="card__desc">英検レベル別の英語長文を読める多読リーダーです。<strong>AIによる長文生成は教室タブレットでのみ利用できます。</strong></p>
-      <span class="card__btn">開く&nbsp;↗</span>
-    </a>
+        <a class="card subj--tool" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbzMNC1_ffakw1_1-zuYFNIhHj__NogqtjF--Yil-J4fRIW1i5BLYTF29dCNgkSCC2M2bg/exec" target="_blank" rel="noopener">
+          <span class="card__grade">中学生以上</span>
+          <div class="card__icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="13" y="6" width="38" height="52" rx="5" />
+              <text x="19" y="30" fill="#ffffff" stroke="none" font-family="inherit" font-size="17" font-weight="800">#</text>
+              <line x1="19" y1="40" x2="45" y2="40" />
+              <line x1="19" y1="48" x2="37" y2="48" />
+            </svg>
+          </div>
+          <h3 class="card__title">公式ビューア</h3>
+          <p class="card__desc">公式や暗記項目を、ブラウザでいつでも閲覧できるビューアです。<br>※少し起動に時間がかかります。</p>
+          <span class="card__btn">開く&nbsp;↗</span>
+        </a>
 
-    <a class="card card--navy" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbw8YE3GKPq4kYm9eC5Hs9L0F6iDwP9qa3iOJZcYMboE0PQkHvXYbI74nTAjuuPUDyNahg/exec" target="_blank" rel="noopener">
-      <div class="card__icon">
-        <svg viewBox="0 0 80 60" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="10" y1="52" x2="72" y2="52" />
-          <line x1="12" y1="52" x2="12" y2="8" />
-          <path d="M14 52 C 22 52, 27 12, 40 12 C 53 12, 58 52, 66 52" stroke-width="3" />
-          <line x1="40" y1="52" x2="40" y2="14" />
-          <line x1="30" y1="52" x2="30" y2="38" stroke-dasharray="3 3" />
-          <line x1="50" y1="52" x2="50" y2="38" stroke-dasharray="3 3" />
-          <text x="36" y="34" fill="#ffffff" stroke="none" font-family="inherit" font-size="10" font-weight="700">μ</text>
-          <text x="18" y="34" fill="#ffffff" stroke="none" font-family="inherit" font-size="8.5">μ−σ</text>
-          <text x="50" y="34" fill="#ffffff" stroke="none" font-family="inherit" font-size="8.5">μ+σ</text>
-        </svg>
-      </div>
-      <h2 class="card__title">正規分布 シミュレーター</h2>
-      <p class="card__desc">正規分布の性質を視覚的に体験できる物理シミュレーション。</p>
-      <span class="card__btn">開く&nbsp;↗</span>
-    </a>
+        <a class="card subj--tool" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj4WNLi7qiQ9q1J1ynTDN1MiJ6IgVndQ0LHpOPFZObKSi88hIU6uOKMmCUUADQr2vs/exec" target="_blank" rel="noopener">
+          <span class="card__grade">高校生以上</span>
+          <div class="card__icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="14" y="8" width="36" height="48" rx="4" />
+              <line x1="26" y1="8" x2="26" y2="56" />
+              <line x1="38" y1="8" x2="38" y2="56" />
+              <line x1="14" y1="24" x2="50" y2="24" />
+              <line x1="14" y1="40" x2="50" y2="40" />
+            </svg>
+          </div>
+          <h3 class="card__title">原稿用紙メーカー</h3>
+          <p class="card__desc">行数・マス数を指定して原稿用紙を作成し、そのまま印刷やPDF保存ができるツールです。縦書き・横書き、罫線の色選択、教室タブレットからの直接プリント送信にも対応しています。</p>
+          <span class="card__btn">開く&nbsp;↗</span>
+        </a>
 
-    <a class="card card--violet" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbwoxjIDz7eumas4ucv_NI1iq3L1XY35CEh8qK2eE84k2wDdpwKyRPg75rto2OqrJLFuDA/exec" target="_blank" rel="noopener">
-      <div class="card__icon">
-        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M32 6 L55 18 L55 46 L32 58 L9 46 L9 18 Z" />
-          <path d="M32 6 L32 58 M9 18 L55 46 M55 18 L9 46" opacity=".55" />
-        </svg>
       </div>
-      <h2 class="card__title">立体図形ビューア</h2>
-      <p class="card__desc">立体を回転させて観察したり、面をパタパタ開いて展開図を見たりできるビューアです。立方体の展開図は11通りすべて選べます。</p>
-      <span class="card__btn">開く&nbsp;↗</span>
-    </a>
+    </section>
 
-    <a class="card card--gold" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbxm4owoBi8v9w_XDfcM5smWuWUNpfu1VgX0s4OupEW_6uxxwfGvT168cdvkCI8GFs3Y1w/exec" target="_blank" rel="noopener">
-      <div class="card__icon">
-        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="32" cy="32" r="7" fill="#ffffff" stroke="none" />
-          <ellipse cx="32" cy="32" rx="26" ry="9.5" />
-          <ellipse cx="32" cy="32" rx="26" ry="9.5" transform="rotate(60 32 32)" />
-          <ellipse cx="32" cy="32" rx="26" ry="9.5" transform="rotate(-60 32 32)" />
-        </svg>
+    <!-- ===== 英語 ===== -->
+    <section class="section sec--eng">
+      <div class="section__head">
+        <span class="section__bar" aria-hidden="true"></span>
+        <h2 class="section__title">英語</h2>
+        <span class="section__en" aria-hidden="true">English</span>
       </div>
-      <h2 class="card__title">原子・周期表ツール</h2>
-      <p class="card__desc">周期表で元素の詳細を見たり、原子モデルや結晶構造(体心立方・面心立方・六方最密充填など)を3Dで観察できるツールです。単位格子の切断面や対角線断面にも対応。</p>
-      <span class="card__btn">開く&nbsp;↗</span>
-    </a>
+      <div class="cards">
 
-    <a class="card card--rose" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbzkQRlKcO56aKij3mWDa6cwzdU4h5v3LpmfH8V5G3hQT6b1ALtVCnJ9Ebur5TiZ_gc8Nw/exec" target="_blank" rel="noopener">
-      <div class="card__icon">
-        <svg viewBox="0 0 80 60" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="10" y1="52" x2="72" y2="52" />
-          <line x1="14" y1="52" x2="14" y2="8" />
-          <path d="M16 52 C 26 52, 30 8, 44 8 C 58 8, 60 52, 70 52" stroke-width="3" />
-          <line x1="14" y1="52" x2="66" y2="10" stroke-dasharray="4 4" opacity=".8" />
-        </svg>
-      </div>
-      <h2 class="card__title">微分積分ビジュアライザー</h2>
-      <p class="card__desc">接線が動く様子や h→0 の極限、定積分の面積・リーマン和・面積関数を視覚的に確認できるツールです。</p>
-      <span class="card__btn">開く&nbsp;↗</span>
-    </a>
+        <a class="card subj--eng" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbxvoXt6H0_I1K5HOHCSYIPKR9PyoM-k8iXDNRPsxs3DsF0mtwE7AXgGNlxRE5d7eXZ4DA/exec" target="_blank" rel="noopener">
+          <span class="card__grade">小学生以上</span>
+          <div class="card__icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M32 16 C26 10 16 8 8 10 L8 50 C16 48 26 50 32 56 C38 50 48 48 56 50 L56 10 C48 8 38 10 32 16 Z" />
+              <line x1="32" y1="16" x2="32" y2="56" />
+            </svg>
+          </div>
+          <h3 class="card__title">英語長文 多読リーダー</h3>
+          <p class="card__desc">英検レベル別の英語長文を読める多読リーダーです。<strong>AIによる長文生成は教室タブレットでのみ利用できます。</strong></p>
+          <span class="card__btn">開く&nbsp;↗</span>
+        </a>
 
-    <a class="card card--slate" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbzK8bwWnRjeQfVUrKkuQrsLy1vjVk0Ico1-odRUhVPnoZ2v94rYLncOLeRjmMptfkJH/exec" target="_blank" rel="noopener">
-      <div class="card__icon">
-        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="32" cy="32" r="14" fill="rgba(255,255,255,.12)" stroke="#ffffff" />
-          <path d="M32 18 A14 14 0 0 0 32 46 A9 14 0 0 1 32 18" fill="#ffffff" stroke="none" />
-          <circle cx="28" cy="26" r="1.6" fill="#0f172a" opacity=".55" />
-          <circle cx="34" cy="30" r="1" fill="#0f172a" opacity=".45" />
-        </svg>
-      </div>
-      <h2 class="card__title">月と星座シミュレーター</h2>
-      <p class="card__desc">月モードで満ち欠けと出・南中・入りを、星座モードで12星座（四季・日周／年周運動）を同じ2画面で確認できます。空はドラッグで全方位を見回せます。</p>
-      <span class="card__btn">開く&nbsp;↗</span>
-    </a>
+        <a class="card subj--eng" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbyuW_7Y4-VTF3zEudXis_ptWsa_YoQzl1Csu40pfWdl_0s5-w42pcM4LIMj6pz7-2ZcAQ/exec" target="_blank" rel="noopener">
+          <span class="card__grade">中学生以上</span>
+          <div class="card__icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="10" y="10" width="44" height="44" rx="5" />
+              <line x1="18" y1="22" x2="38" y2="22" />
+              <line x1="18" y1="32" x2="46" y2="32" />
+              <line x1="18" y1="42" x2="30" y2="42" />
+              <path d="M40 44 L52 32 L56 36 L44 48 L38 50 Z" fill="#ffffff" stroke="none" />
+            </svg>
+          </div>
+          <h3 class="card__title">英文法ビジュアライザー</h3>
+          <p class="card__desc">肯定文がコピーされて否定文・疑問文・Wh疑問文へと変化するようすを、アニメーションで観察できる教材です。be動詞・一般動詞・三単現・過去形・Wh疑問詞に対応。</p>
+          <span class="card__btn">開く&nbsp;↗</span>
+        </a>
 
-    <a class="card card--teal" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj4WNLi7qiQ9q1J1ynTDN1MiJ6IgVndQ0LHpOPFZObKSi88hIU6uOKMmCUUADQr2vs/exec" target="_blank" rel="noopener">
-      <div class="card__icon">
-        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="14" y="8" width="36" height="48" rx="4" />
-          <line x1="26" y1="8" x2="26" y2="56" />
-          <line x1="38" y1="8" x2="38" y2="56" />
-          <line x1="14" y1="24" x2="50" y2="24" />
-          <line x1="14" y1="40" x2="50" y2="40" />
-        </svg>
       </div>
-      <h2 class="card__title">原稿用紙メーカー</h2>
-      <p class="card__desc">行数・マス数を指定して原稿用紙を作成し、そのまま印刷やPDF保存ができるツールです。縦書き・横書き、罫線の色選択、教室タブレットからの直接プリント送信にも対応しています。</p>
-      <span class="card__btn">開く&nbsp;↗</span>
-    </a>
+    </section>
 
-    <a class="card card--orange" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbyuW_7Y4-VTF3zEudXis_ptWsa_YoQzl1Csu40pfWdl_0s5-w42pcM4LIMj6pz7-2ZcAQ/exec" target="_blank" rel="noopener">
-      <div class="card__icon">
-        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="10" y="10" width="44" height="44" rx="5" />
-          <line x1="18" y1="22" x2="38" y2="22" />
-          <line x1="18" y1="32" x2="46" y2="32" />
-          <line x1="18" y1="42" x2="30" y2="42" />
-          <path d="M40 44 L52 32 L56 36 L44 48 L38 50 Z" fill="#ffffff" stroke="none" />
-        </svg>
+    <!-- ===== 数学 ===== -->
+    <section class="section sec--math">
+      <div class="section__head">
+        <span class="section__bar" aria-hidden="true"></span>
+        <h2 class="section__title">数学</h2>
+        <span class="section__en" aria-hidden="true">Mathematics</span>
       </div>
-      <h2 class="card__title">英文法ビジュアライザー</h2>
-      <p class="card__desc">肯定文がコピーされて否定文・疑問文・Wh疑問文へと変化するようすを、アニメーションで観察できる教材です。be動詞・一般動詞・三単現・過去形・Wh疑問詞に対応。</p>
-      <span class="card__btn">開く&nbsp;↗</span>
-    </a>
+      <div class="cards">
+
+        <a class="card subj--math" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbw8YE3GKPq4kYm9eC5Hs9L0F6iDwP9qa3iOJZcYMboE0PQkHvXYbI74nTAjuuPUDyNahg/exec" target="_blank" rel="noopener">
+          <span class="card__grade">高校生以上</span>
+          <div class="card__icon">
+            <svg viewBox="0 0 80 60" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="10" y1="52" x2="72" y2="52" />
+              <line x1="12" y1="52" x2="12" y2="8" />
+              <path d="M14 52 C 22 52, 27 12, 40 12 C 53 12, 58 52, 66 52" stroke-width="3" />
+              <line x1="40" y1="52" x2="40" y2="14" />
+              <line x1="30" y1="52" x2="30" y2="38" stroke-dasharray="3 3" />
+              <line x1="50" y1="52" x2="50" y2="38" stroke-dasharray="3 3" />
+              <text x="36" y="34" fill="#ffffff" stroke="none" font-family="inherit" font-size="10" font-weight="700">μ</text>
+              <text x="18" y="34" fill="#ffffff" stroke="none" font-family="inherit" font-size="8.5">μ−σ</text>
+              <text x="50" y="34" fill="#ffffff" stroke="none" font-family="inherit" font-size="8.5">μ+σ</text>
+            </svg>
+          </div>
+          <h3 class="card__title">正規分布 シミュレーター</h3>
+          <p class="card__desc">正規分布の性質を視覚的に体験できる物理シミュレーション。</p>
+          <span class="card__btn">開く&nbsp;↗</span>
+        </a>
+
+        <a class="card subj--math" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbwoxjIDz7eumas4ucv_NI1iq3L1XY35CEh8qK2eE84k2wDdpwKyRPg75rto2OqrJLFuDA/exec" target="_blank" rel="noopener">
+          <span class="card__grade">中学生以上</span>
+          <div class="card__icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M32 6 L55 18 L55 46 L32 58 L9 46 L9 18 Z" />
+              <path d="M32 6 L32 58 M9 18 L55 46 M55 18 L9 46" opacity=".55" />
+            </svg>
+          </div>
+          <h3 class="card__title">立体図形ビューア</h3>
+          <p class="card__desc">立体を回転させて観察したり、面をパタパタ開いて展開図を見たりできるビューアです。立方体の展開図は11通りすべて選べます。</p>
+          <span class="card__btn">開く&nbsp;↗</span>
+        </a>
+
+        <a class="card subj--math" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbzkQRlKcO56aKij3mWDa6cwzdU4h5v3LpmfH8V5G3hQT6b1ALtVCnJ9Ebur5TiZ_gc8Nw/exec" target="_blank" rel="noopener">
+          <span class="card__grade">高校生以上</span>
+          <div class="card__icon">
+            <svg viewBox="0 0 80 60" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="10" y1="52" x2="72" y2="52" />
+              <line x1="14" y1="52" x2="14" y2="8" />
+              <path d="M16 52 C 26 52, 30 8, 44 8 C 58 8, 60 52, 70 52" stroke-width="3" />
+              <line x1="14" y1="52" x2="66" y2="10" stroke-dasharray="4 4" opacity=".8" />
+            </svg>
+          </div>
+          <h3 class="card__title">微分積分ビジュアライザー</h3>
+          <p class="card__desc">接線が動く様子や h→0 の極限、定積分の面積・リーマン和・面積関数を視覚的に確認できるツールです。</p>
+          <span class="card__btn">開く&nbsp;↗</span>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ===== 理科 ===== -->
+    <section class="section sec--sci">
+      <div class="section__head">
+        <span class="section__bar" aria-hidden="true"></span>
+        <h2 class="section__title">理科</h2>
+        <span class="section__en" aria-hidden="true">Science</span>
+      </div>
+      <div class="cards">
+
+        <a class="card subj--sci" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbxm4owoBi8v9w_XDfcM5smWuWUNpfu1VgX0s4OupEW_6uxxwfGvT168cdvkCI8GFs3Y1w/exec" target="_blank" rel="noopener">
+          <span class="card__grade">高校生以上</span>
+          <div class="card__icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="32" cy="32" r="7" fill="#ffffff" stroke="none" />
+              <ellipse cx="32" cy="32" rx="26" ry="9.5" />
+              <ellipse cx="32" cy="32" rx="26" ry="9.5" transform="rotate(60 32 32)" />
+              <ellipse cx="32" cy="32" rx="26" ry="9.5" transform="rotate(-60 32 32)" />
+            </svg>
+          </div>
+          <h3 class="card__title">原子・周期表ツール</h3>
+          <p class="card__desc">周期表で元素の詳細を見たり、原子モデルや結晶構造(体心立方・面心立方・六方最密充填など)を3Dで観察できるツールです。単位格子の切断面や対角線断面にも対応。</p>
+          <span class="card__btn">開く&nbsp;↗</span>
+        </a>
+
+        <a class="card subj--sci" href="https://script.google.com/a/macros/hori-shota.com/s/AKfycbzK8bwWnRjeQfVUrKkuQrsLy1vjVk0Ico1-odRUhVPnoZ2v94rYLncOLeRjmMptfkJH/exec" target="_blank" rel="noopener">
+          <span class="card__grade">中学生以上</span>
+          <div class="card__icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="32" cy="32" r="14" fill="rgba(255,255,255,.12)" stroke="#ffffff" />
+              <path d="M32 18 A14 14 0 0 0 32 46 A9 14 0 0 1 32 18" fill="#ffffff" stroke="none" />
+              <circle cx="28" cy="26" r="1.6" fill="#0f172a" opacity=".55" />
+              <circle cx="34" cy="30" r="1" fill="#0f172a" opacity=".45" />
+            </svg>
+          </div>
+          <h3 class="card__title">月と星座シミュレーター</h3>
+          <p class="card__desc">月モードで満ち欠けと出・南中・入りを、星座モードで12星座（四季・日周／年周運動）を同じ2画面で確認できます。空はドラッグで全方位を見回せます。</p>
+          <span class="card__btn">開く&nbsp;↗</span>
+        </a>
+
+      </div>
+    </section>
 
   </main>
 
@@ -462,7 +555,7 @@
       for (var r = 0; r < n; r++) {
         for (var c = 0; c < n; c++) {
           if (qr.isDark(r, c)) {
-            svg += '<rect x="' + (m + c * cell) + '" y="' + (m + r * cell) + '" width="' + cell + '" height="' + cell + '" fill="#ffffff"/>';
+            svg += '<rect x="' + (m + c * cell) + '" y="' + (m + r * cell) + '" width="' + cell + '" height="' + cell + '" fill="#1e293b"/>';
           }
         }
       }
@@ -573,7 +666,7 @@
           es.sort(function (a, b) { return a[1] - b[1]; });
 
           ctx.beginPath();
-          ctx.strokeStyle = '#c7d2fe';
+          ctx.strokeStyle = 'rgba(30, 42, 74, 0.55)';
           ctx.globalAlpha = sh.alpha;
           ctx.lineWidth = 1.3;
           for (var k = 0; k < es.length; k++) {
