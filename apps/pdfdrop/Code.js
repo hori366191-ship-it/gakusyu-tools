@@ -159,9 +159,9 @@ function doPost(e) {
     if (!bytes.length) throw Error('empty payload');
     if (bytes.length > MAX_BYTES) throw Error('too large (' + bytes.length + ' bytes)');
     if (bytes[0] !== 0x25 || bytes[1] !== 0x50) throw Error('not a pdf');
-    bumpUsage_();
     cleanupOldCounts_();
-    DriveApp.getFolderById(folderId).createBlob(Utilities.newBlob(bytes, 'application/pdf', name));
+    DriveApp.getFolderById(folderId).createFile(Utilities.newBlob(bytes, 'application/pdf', name));
+    bumpUsage_();
     console.log('doPost saved: ' + name);
     noteOk_(name);
     return respond_({ ok: true, name: name });
