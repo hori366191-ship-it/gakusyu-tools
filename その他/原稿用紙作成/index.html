@@ -39,6 +39,17 @@ input[type=number] {
   padding: 6px 12px; font-size: 14px; cursor: pointer;
 }
 .presets button:hover { background: #e2eae6; }
+.swatches { display: flex; align-items: center; gap: 10px; }
+.swatch {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1px solid rgba(0,0,0,.15); cursor: pointer; padding: 0;
+}
+.swatch.active { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #2e7d63; }
+input[type=color] {
+  width: 36px; height: 30px; padding: 2px;
+  border: 1px solid #bbb; border-radius: 6px; background: #fff; cursor: pointer;
+}
+.custom-label { font-size: 13px; color: #666; }
 .chk { font-size: 15px; display: flex; gap: 8px; align-items: center; cursor: pointer; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
 .actions button {
@@ -47,8 +58,6 @@ input[type=number] {
 }
 #printBtn { background: #2e7d63; }
 #printBtn:hover { background: #276a54; }
-#pdfBtn { background: #5a6d80; }
-#pdfBtn:hover { background: #4c5d6e; }
 .hint { font-size: 12.5px; color: #777; margin: 10px 0 0; }
 
 .page-wrap { overflow: auto; padding: 18px 0 48px; }
@@ -69,7 +78,7 @@ input[type=number] {
 .dh-row.name .dh-line { flex: 0 0 58mm; }
 
 table.grid { border-collapse: collapse; table-layout: fixed; margin: 0 auto; }
-table.grid td { border: 0.25mm solid #94a89e; padding: 0; }
+table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
 
 @media print {
   @page { size: A4 portrait; margin: 10mm; }
@@ -108,14 +117,26 @@ table.grid td { border: 0.25mm solid #94a89e; padding: 0; }
     </div>
 
     <div class="row">
+      <span class="field">罫線の色</span>
+      <div class="swatches">
+        <button class="swatch" data-color="#bcd0c6" title="緑(定番)" style="background:#bcd0c6"></button>
+        <button class="swatch" data-color="#c8c8c8" title="グレー" style="background:#c8c8c8"></button>
+        <button class="swatch" data-color="#bccde2" title="青" style="background:#bccde2"></button>
+        <button class="swatch" data-color="#ecd0da" title="ピンク" style="background:#ecd0da"></button>
+        <button class="swatch" data-color="#e3d6bf" title="ベージュ" style="background:#e3d6bf"></button>
+        <input type="color" id="customColor" value="#bcd0c6" title="カスタムカラー">
+        <span class="custom-label">カスタム</span>
+      </div>
+    </div>
+
+    <div class="row">
       <label class="chk"><input type="checkbox" id="headerChk" checked>題名・氏名欄を付ける</label>
     </div>
 
     <div class="actions">
       <button id="printBtn">印刷する</button>
-      <button id="pdfBtn">PDFとして保存</button>
     </div>
-    <p class="hint">「PDFとして保存」は印刷ダイアログの保存先で「PDFに保存」を選択してください。どのサイズでも必ずA4用紙1枚に収まります。</p>
+    <p class="hint">印刷ダイアログの保存先で「PDFに保存」を選ぶとPDFファイルも作成できます。どのサイズでも必ずA4用紙1枚に収まります。設定はこのブラウザに自動保存され、次回開いたときに復元されます。</p>
   </div>
 </div>
 
@@ -125,13 +146,18 @@ table.grid td { border: 0.25mm solid #94a89e; padding: 0; }
 
 <script>
 (function () {
+  var KEY = 'genkoshi-settings';
+  var DEFAULTS = { dir: 'tate', n: 20, l: 20, header: true, color: '#bcd0c6' };
   var sheet = document.getElementById('sheet');
   var nIn = document.getElementById('masu');
   var lIn = document.getElementById('gyo');
   var countLbl = document.getElementById('count');
   var headerChk = document.getElementById('headerChk');
   var dirRadios = document.querySelectorAll('input[name="dir"]');
+  var swatches = document.querySelectorAll('.swatch');
+  var customColor = document.getElementById('customColor');
   var MIN = 1, MAX = 50;
+  var lastColor = DEFAULTS.color;
 
   function clamp(v) { return Math.min(MAX, Math.max(MIN, v)); }
   function readNum(el, dflt) {
@@ -143,10 +169,58 @@ table.grid td { border: 0.25mm solid #94a89e; padding: 0; }
     return 'tate';
   }
 
+  function currentState() {
+    return {
+      dir: getDir(),
+      n: readNum(nIn, DEFAULTS.n),
+      l: readNum(lIn, DEFAULTS.l),
+      header: headerChk.checked,
+      color: lastColor
+    };
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return null;
+      var s = JSON.parse(raw);
+      if (!s || typeof s !== 'object') return null;
+      var st = {};
+      st.dir = s.dir === 'yoko' || s.dir === 'tate' ? s.dir : DEFAULTS.dir;
+      st.n = Number.isFinite(parseInt(s.n, 10)) ? clamp(parseInt(s.n, 10)) : DEFAULTS.n;
+      st.l = Number.isFinite(parseInt(s.l, 10)) ? clamp(parseInt(s.l, 10)) : DEFAULTS.l;
+      st.header = typeof s.header === 'boolean' ? s.header : DEFAULTS.header;
+      st.color = /^#[0-9a-fA-F]{6}$/.test(String(s.color)) ? String(s.color).toLowerCase() : DEFAULTS.color;
+      return st;
+    } catch (e) { return null; }
+  }
+
+  function saveState() {
+    try { localStorage.setItem(KEY, JSON.stringify(currentState())); } catch (e) {}
+  }
+
+  function setColor(c, persist) {
+    lastColor = String(c).toLowerCase();
+    sheet.style.setProperty('--line-color', lastColor);
+    customColor.value = lastColor;
+    Array.prototype.forEach.call(swatches, function (b) {
+      b.classList.toggle('active', b.getAttribute('data-color').toLowerCase() === lastColor);
+    });
+    if (persist) saveState();
+  }
+
+  function applyState(st) {
+    document.querySelector('input[name="dir"][value="' + st.dir + '"]').checked = true;
+    nIn.value = st.n;
+    lIn.value = st.l;
+    headerChk.checked = st.header;
+    setColor(st.color, false);
+  }
+
   function render() {
     var dir = getDir();
-    var n = readNum(nIn, 20);
-    var l = readNum(lIn, 20);
+    var n = readNum(nIn, DEFAULTS.n);
+    var l = readNum(lIn, DEFAULTS.l);
     countLbl.textContent = (n * l) + '字';
 
     var headerOn = headerChk.checked;
@@ -187,23 +261,34 @@ table.grid td { border: 0.25mm solid #94a89e; padding: 0; }
     sheet.style.zoom = z < 1 ? z : 1;
   }
 
-  nIn.addEventListener('input', render);
-  lIn.addEventListener('input', render);
-  nIn.addEventListener('change', function () { nIn.value = readNum(nIn, 20); });
-  lIn.addEventListener('change', function () { lIn.value = readNum(lIn, 20); });
-  for (var i = 0; i < dirRadios.length; i++) dirRadios[i].addEventListener('change', render);
-  headerChk.addEventListener('change', render);
+  nIn.addEventListener('input', function () { render(); saveState(); });
+  lIn.addEventListener('input', function () { render(); saveState(); });
+  nIn.addEventListener('change', function () { nIn.value = readNum(nIn, DEFAULTS.n); });
+  lIn.addEventListener('change', function () { lIn.value = readNum(lIn, DEFAULTS.l); });
+  Array.prototype.forEach.call(dirRadios, function (r) {
+    r.addEventListener('change', function () { render(); saveState(); });
+  });
+  headerChk.addEventListener('change', function () { render(); saveState(); });
   Array.prototype.forEach.call(document.querySelectorAll('.presets button'), function (b) {
     b.addEventListener('click', function () {
       nIn.value = b.getAttribute('data-n');
       lIn.value = b.getAttribute('data-l');
       render();
+      saveState();
     });
+  });
+  Array.prototype.forEach.call(swatches, function (b) {
+    b.addEventListener('click', function () {
+      setColor(b.getAttribute('data-color'), true);
+    });
+  });
+  customColor.addEventListener('input', function () {
+    if (/^#[0-9a-fA-F]{6}$/.test(customColor.value)) setColor(customColor.value, true);
   });
   window.addEventListener('resize', fitZoom);
   document.getElementById('printBtn').addEventListener('click', function () { window.print(); });
-  document.getElementById('pdfBtn').addEventListener('click', function () { window.print(); });
 
+  applyState(loadState() || DEFAULTS);
   render();
 })();
 </script>
