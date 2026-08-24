@@ -2,6 +2,8 @@ var PROP_TOKEN = 'DROP_TOKEN';
 var PROP_FOLDER_ID = 'DROP_FOLDER_ID';
 var PROP_EMAILS = 'ALLOWED_EMAILS';
 var PROP_MAX_DAY = 'MAX_PER_DAY';
+var PROP_LAST_ERROR = 'LAST_ERROR';
+var PROP_LAST_OK = 'LAST_OK';
 var DEFAULT_MAX_DAY = 200;
 var MAX_BYTES = 10 * 1024 * 1024;
 
@@ -78,18 +80,37 @@ function maskEmail_(email) {
   return email.slice(0, 2) + '***' + email.slice(i);
 }
 
-function doGet() {
+function stamp_() {
+  var tz = Session.getScriptTimeZone() || 'Asia/Tokyo';
+  return Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd HH:mm:ss');
+}
+
+function noteOk_(detail) {
+  PropertiesService.getScriptProperties().setProperty(PROP_LAST_OK, stamp_() + ' | ' + detail);
+}
+
+function noteErr_(msg) {
+  PropertiesService.getScriptProperties().setProperty(PROP_LAST_ERROR, stamp_() + ' | ' + msg);
+  console.error(msg);
+}
+
+function doGet(e) {
+  var params = (e && e.parameter) || {};
+  if (params.poll) return handlePoll_(params);
   var email = getEmail_();
   cleanupOldCounts_();
+  var props = PropertiesService.getScriptProperties();
   var html = HtmlService.createHtmlOutput(
     '<body style="font-family:sans-serif;padding:16px">'
     + '<h2 style="margin:0 0 8px">pdfdrop status</h2>'
     + '<pre style="background:#f4f4f4;padding:12px;border-radius:8px;line-height:1.6">'
-    + 'identity  : ' + (email ? maskEmail_(email) : '(invisible)')
-    + '\ngate      : ' + gateLabel_(email)
-    + '\ntoken     : ' + (getToken_() ? 'set' : 'NOT SET')
-    + '\nfolder    : ' + (getFolderId_() ? 'set' : 'NOT SET')
-    + '\nlimit     : ' + getTodayCount_() + '/' + getMaxDay_()
+    + 'identity   : ' + (email ? maskEmail_(email) : '(invisible)')
+    + '\ngate       : ' + gateLabel_(email)
+    + '\ntoken      : ' + (getToken_() ? 'set' : 'NOT SET')
+    + '\nfolder     : ' + (getFolderId_() ? 'set' : 'NOT SET')
+    + '\nlimit      : ' + getTodayCount_() + '/' + getMaxDay_()
+    + '\nlast_ok    : ' + (props.getProperty(PROP_LAST_OK) || '(none)')
+    + '\nlast_error : ' + (props.getProperty(PROP_LAST_ERROR) || '(none)')
     + '</pre></body>'
   );
   html.setTitle('pdfdrop');
@@ -97,27 +118,58 @@ function doGet() {
   return html;
 }
 
+function handlePoll_(p) {
+  var cb = String(p.callback || '');
+  if (!/^[A-Za-z0-9_.]{1,64}$/.test(cb)) {
+    return ContentService.createTextOutput('/*bad callback*/').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  var result;
+  var token = getToken_();
+  if (!token || p.token !== token) {
+    result = { genkoPoll: true, found: false, error: 'bad token' };
+  } else if (!getFolderId_()) {
+    result = { genkoPoll: true, found: false, error: 'folder not configured' };
+  } else {
+    var name = sanitizeName_(p.poll);
+    try {
+      var found = DriveApp.getFolderById(getFolderId_()).getFilesByName(name).hasNext();
+      result = { genkoPoll: true, found: found, name: name };
+    } catch (err) {
+      result = { genkoPoll: true, found: false, error: String(err && err.message || err) };
+    }
+  }
+  return ContentService.createTextOutput(cb + '(' + JSON.stringify(result) + ')')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+}
+
 function doPost(e) {
+  var name = '';
   try {
     if (!e || !e.parameter || !e.parameter.data) throw Error('no data');
     var req = JSON.parse(e.parameter.data);
+    name = sanitizeName_(req.name);
+    console.log('doPost begin: ' + name);
     var token = getToken_();
     if (!token || String(req.token) !== token) throw Error('bad token');
     var email = getEmail_();
-    if (!isAllowed_(email)) throw Error('not allowed (' + maskEmail_(email) + ')');
+    if (!isAllowed_(email)) throw Error('not allowed (' + (email ? maskEmail_(email) : 'identity invisible') + ')');
     var folderId = getFolderId_();
     if (!folderId) throw Error('folder not configured');
     var bytes = Utilities.base64Decode(String(req.b64));
     if (!bytes.length) throw Error('empty payload');
-    if (bytes.length > MAX_BYTES) throw Error('too large');
+    if (bytes.length > MAX_BYTES) throw Error('too large (' + bytes.length + ' bytes)');
     if (bytes[0] !== 0x25 || bytes[1] !== 0x50) throw Error('not a pdf');
     bumpUsage_();
     cleanupOldCounts_();
-    var name = sanitizeName_(req.name);
     DriveApp.getFolderById(folderId).createBlob(Utilities.newBlob(bytes, 'application/pdf', name));
+    console.log('doPost saved: ' + name);
+    noteOk_(name);
     return respond_({ ok: true, name: name });
   } catch (err) {
-    return respond_({ ok: false, error: String(err && err.message || err) });
+    var msg = String(err && err.message || err);
+    console.error('doPost failed [' + name + ']: ' + msg);
+    noteErr_('[' + (name || '?') + '] ' + msg);
+    return respond_({ ok: false, error: msg });
   }
 }
 
