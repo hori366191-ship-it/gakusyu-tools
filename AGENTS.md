@@ -15,6 +15,9 @@ apps/
 ├── app5/   原子・周期表ツール (scriptId: YOUR_SCRIPT_ID_app5)
 ├── app6/   微分積分ビジュアライザー (scriptId: YOUR_SCRIPT_ID_app6)
 ├── app7/   月と星座シミュレーター (scriptId: YOUR_SCRIPT_ID_app7)
+├── app8/   英文法ビジュアライザー初級編 (開発中・未デプロイ)
+├── app9/   原稿用紙作成 (scriptId: YOUR_SCRIPT_ID_app9)
+├── pdfdrop/ PDF受信アプリ (scriptId: YOUR_SCRIPT_ID_pdfdrop、ポータル非掲載)
 ├── portal/ 学習ツール ポータル (scriptId: YOUR_SCRIPT_ID_portal)
 └── その他/  実験・非公開アプリの開発場所
 ```
@@ -113,6 +116,15 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 - 多読リーダー(app2)の権限(2026-08-16 変更): 閲覧=Googleアカウント全員 / AI生成=Script Properties `ALLOWED_EMAILS` / 削除=`OWNER_EMAIL`。デプロイのアクセス設定(「Googleアカウントでログイン」)とDrive共有(生成物フォルダ=全員閲覧+許可ユーザー編集、辞書2ファイル=全員閲覧)はUI/Driveで手動管理。変更時に `doGet()` の IS_ALLOWED/IS_OWNER 注入とサーバー側ガード(`generateText`/`deleteText`)を両方更新すること
 - 変更後は必ずヘッドレス検証 → `clasp push` → ユーザーにUIでのデプロイ更新を依頼
 - Gmailアカウント(REDACTED_EMAIL)の別アプリが存在するが、このリポジトリでは管理対象外(共有URLは`/a/*/`形式を使用)
+
+### pdfdrop(PDF受信アプリ)
+
+- 汎用PDFドロップ先。クライアントから隠しiframeフォームPOST(`text/plain`)を受け、Driveフォルダへ保存するだけの最小構成。ポータルには載せない
+- ガード: Script Properties `DROP_TOKEN`(必須) + `ALLOWED_EMAILS`(空ならemailゲートOFF、トークンのみ)。app2と同じ`Session.getActiveUser()`方式
+- 保存先: Script Properties `DROP_FOLDER_ID` のフォルダ(印刷監視対象=別アカウントのDriveフォルダをスクリプトオーナーに編集者共有して使用)
+- 送信側: app9の `CLASSROOM.url`(受信アプリの`/a/`形式URL)と `CLASSROOM.token` に同じ値を埋め込む。レスポンスはpostMessageで返る
+- デプロイ: アクセス「Googleアカウントでログイン」/ 実行「自分」(UI操作)
+- 初期トークン: `e6135dfd707ab9a6916635fa`(漏洩時は両側で再生成)
 
 ### gitバックアップ(Drive同期)
 
