@@ -15,10 +15,18 @@ apps/
 ├── app5/   原子・周期表ツール (scriptId: YOUR_SCRIPT_ID_app5)
 ├── app6/   微分積分ビジュアライザー (scriptId: YOUR_SCRIPT_ID_app6)
 ├── app7/   月と星座シミュレーター (scriptId: YOUR_SCRIPT_ID_app7)
-└── portal/ 学習ツール ポータル (scriptId: YOUR_SCRIPT_ID_portal)
+├── portal/ 学習ツール ポータル (scriptId: YOUR_SCRIPT_ID_portal)
+└── その他/  実験・非公開アプリの開発場所
 ```
 
 - 各フォルダに個別の `.clasp.json` を持つ(scriptId + rootDir ".")。**ルート直下に `.clasp.json` を作らないこと**(claspのclone/createはCWDに書き出すため、作成後に各フォルダへ移動する)
+
+### `その他/` フォルダについて
+
+- ポータルサイトには載せず、GASにもプッシュしないアプリの開発場所
+- コミットは行い、GitHubへもpushする(リポジトリ管理は通常どおり)
+- clasp操作(`.clasp.json` 作成を含む)やポータルへのカード追加は不要。デプロイ・公開もしない
+- 将来正式リリースする場合は `apps/appN/` へ移動し、scriptId発行・ポータル追加を行う
 
 ## 作業コマンド
 
