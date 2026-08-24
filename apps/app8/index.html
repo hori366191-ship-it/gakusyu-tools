@@ -15,6 +15,8 @@
   --mut:#64748b;
   --line:#e2e8f0;
   --bg:#f6f7fb;
+  /* アニメ速度係数（JSのSPEEDと一致させる）。1より大きい＝ゆっくり */
+  --spd:1.6;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
@@ -108,7 +110,7 @@ header .sub{font-size:12px;opacity:.75;font-weight:500}
 .sentence-line{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px}
 .sentence-line .row{flex:0 1 auto}
 .note-tag{display:inline-flex;align-items:center;gap:4px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:11px;font-weight:900;letter-spacing:.04em;line-height:1;padding:4px 10px;border-radius:999px;box-shadow:0 1px 4px rgba(251,146,60,.18);white-space:nowrap}
-.note-tag--after-row{flex:0 0 auto;align-self:flex-end;margin-bottom:2px;opacity:0;transform:translateY(4px);transition:opacity .35s,transform .35s}
+.note-tag--after-row{flex:0 0 auto;align-self:flex-end;margin-bottom:2px;opacity:0;transform:translateY(4px);transition:opacity calc(.35s*var(--spd)) ease,transform calc(.35s*var(--spd)) ease}
 .note-tag--after-row.show{opacity:1;transform:none}
 .note-tag--inline{font-size:10.5px;padding:2px 8px;box-shadow:0 1px 4px rgba(251,146,60,.14);vertical-align:middle}
 .note-tag--point{margin-left:8px;vertical-align:middle;transform:translateY(-1px)}
@@ -158,7 +160,7 @@ header .sub{font-size:12px;opacity:.75;font-weight:500}
 .slot{
   position:relative;border:1.5px dashed #cbd5e1;border-radius:14px;
   padding:16px 18px 14px;min-height:96px;background:#fdfdff;
-  transition:border-color .3s,background .3s;
+  transition:border-color calc(.3s*var(--spd)) ease,background calc(.3s*var(--spd)) ease;
 }
 .slot.filled{border-style:solid;border-color:var(--line);background:#fbfcfe}
 .slot-tag{
@@ -179,7 +181,7 @@ header .sub{font-size:12px;opacity:.75;font-weight:500}
 }
 .slot-foot{
   margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);
-  opacity:0;transform:translateY(6px);transition:opacity .45s,transform .45s;
+  opacity:0;transform:translateY(6px);transition:opacity calc(.45s*var(--spd)) ease,transform calc(.45s*var(--spd)) ease;
 }
 .slot-foot.show{opacity:1;transform:none}
 .point-badge{
@@ -350,6 +352,8 @@ footer{
 ================================================================ */
 
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* アニメ全体の速度係数（1より大きい＝ゆっくり。生徒が理解しやすいよう全演出に適用） */
+const SPEED = 1.6;
 
 const NODES = [
   {
@@ -574,10 +578,13 @@ let busy = false;
 
 /* ---------------- helpers ---------------- */
 const $ = s => document.querySelector(s);
-const wait = ms => new Promise(r => setTimeout(r, RM ? 0 : ms));
+const wait = ms => new Promise(r => setTimeout(r, RM ? 0 : ms * SPEED));
 
 function anim(el, kf, opt){
   if (RM){ el.style.opacity = ''; el.style.transform = ''; return Promise.resolve(); }
+  opt = Object.assign({}, opt);
+  if (opt.duration) opt.duration = opt.duration * SPEED;
+  if (opt.delay) opt.delay = opt.delay * SPEED;
   const a = el.animate(kf, Object.assign({fill:'both'}, opt));
   // 終了時にキャンセルして効果を除去（最終フレーム=DOMの自然状態に合わせてある）
   const done = a.finished.catch(() => {});
@@ -681,7 +688,7 @@ async function copyRowToBody(srcRow, dstBody){
     if(!s||RM) return Promise.resolve();
     el.style.transform=`translate(${s.left-d.left}px, ${s.top-d.top}px)`;
     el.style.opacity='.55';
-    const a=el.animate([{transform:`translate(${s.left-d.left}px, ${s.top-d.top}px)`, opacity:.55},{transform:'none', opacity:1}], {duration:620, delay:i*45, easing:'cubic-bezier(.22,.8,.25,1)', fill:'both'});
+    const a=el.animate([{transform:`translate(${s.left-d.left}px, ${s.top-d.top}px)`, opacity:.55},{transform:'none', opacity:1}], {duration:620*SPEED, delay:i*45*SPEED, easing:'cubic-bezier(.22,.8,.25,1)', fill:'both'});
     a.finished.then(()=>{ el.style.transform=''; el.style.opacity=''; try{a.cancel();}catch(e){} }).catch(()=>{});
     return a.finished;
   }));
@@ -848,7 +855,7 @@ async function copyPhase(bodyEl, sent){
     const a = el.animate(
       [{transform:`translate(${s.left-d.left}px, ${s.top-d.top}px)`, opacity:.55},
        {transform:'none', opacity:1}],
-      {duration:620, delay:i*45, easing:'cubic-bezier(.22,.8,.25,1)', fill:'both'});
+      {duration:620*SPEED, delay:i*45*SPEED, easing:'cubic-bezier(.22,.8,.25,1)', fill:'both'});
     a.finished.then(() => {
       el.style.transform = '';
       el.style.opacity = '';
