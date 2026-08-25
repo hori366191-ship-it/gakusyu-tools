@@ -370,25 +370,40 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     window.addEventListener('message', onMsg);
     form.submit();
     setStatus('送信中(保存確認中…)');
-    pollForFile(name, 0);
+    pollForFile(name, 0, 0);
 
-    function pollForFile(n, attempt) {
+    function pollForFile(n, attempt, silentStreak) {
       if (done) return;
+      if (silentStreak >= 3) {
+        finish({ ok: false, auth: true, error: 'Googleへの接続が確認できません。ログイン状態を確認してください。' });
+        return;
+      }
       if (attempt >= 20) {
         finish({ ok: false, error: '保存を確認できませんでした(pdfdropステータスページのlast_errorを確認)' });
         return;
       }
       var s = document.createElement('script');
+      var answered = false;
       window.__genkoPoll = function (res) {
+        if (answered) return;
+        answered = true;
         s.remove();
         if (done) return;
         if (res && res.genkoPoll && res.found && res.name === n) finish({ ok: true, name: n });
-        else setTimeout(function () { pollForFile(n, attempt + 1); }, 3000);
+        else setTimeout(function () { pollForFile(n, attempt + 1, 0); }, 3000);
       };
       s.onerror = function () {
+        if (answered) return;
+        answered = true;
         s.remove();
-        setTimeout(function () { pollForFile(n, attempt + 1); }, 3000);
+        setTimeout(function () { pollForFile(n, attempt + 1, silentStreak + 1); }, 1500);
       };
+      setTimeout(function () {
+        if (answered) return;
+        answered = true;
+        s.remove();
+        setTimeout(function () { pollForFile(n, attempt + 1, silentStreak + 1); }, 1500);
+      }, 6000);
       s.src = CLASSROOM.url + '?poll=' + encodeURIComponent(n)
         + '&token=' + encodeURIComponent(CLASSROOM.token)
         + '&callback=__genkoPoll&t=' + Date.now();
@@ -405,26 +420,71 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     }
   }
 
+  function jsonpGet(query, timeoutMs, cb) {
+    var s = document.createElement('script');
+    var settled = false;
+    var timer = setTimeout(function () {
+      if (settled) return;
+      settled = true;
+      s.remove();
+      cb(null);
+    }, timeoutMs);
+    window.__genkoJsonp = function (res) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      s.remove();
+      cb(res);
+    };
+    s.onerror = function () {};
+    s.src = CLASSROOM.url + query + '&callback=__genkoJsonp&t=' + Date.now();
+    document.head.appendChild(s);
+  }
+
+  function probeAuth(cb) {
+    jsonpGet('?probe=1&token=' + encodeURIComponent(CLASSROOM.token), 4000, function (res) {
+      if (!res || !res.genkoProbe) { cb({ state: 'noauth' }); return; }
+      if (!res.ok) { cb({ state: 'error', message: res.error }); return; }
+      if (!res.allowed) { cb({ state: 'notallowed', masked: res.masked }); return; }
+      cb({ state: 'ok' });
+    });
+  }
+
+  function showAuthHelp(msg) {
+    document.getElementById('sendStatus').innerHTML =
+      msg
+      + ' <a href="' + CLASSROOM.url + '" target="_blank" rel="noopener">ログインページを開く</a>'
+      + '(ログイン後にもう一度押してください)';
+  }
+
   document.getElementById('classroomBtn').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
-    setStatus('PDFを生成中…');
-    makePdf(function (err, pdf) {
-      if (err) {
+    setStatus('認証確認中…');
+    probeAuth(function (pr) {
+      if (pr.state !== 'ok') {
         btn.disabled = false;
-        setStatus('PDF生成に失敗しました');
+        if (pr.state === 'noauth') showAuthHelp('Googleにログインされていない可能性があります。');
+        else if (pr.state === 'notallowed') setStatus('送信失敗: このアカウント(' + (pr.masked || '不明') + ')は許可リストにありません');
+        else setStatus('送信失敗: ' + pr.message);
         return;
       }
-      setStatus('送信中…');
-      var n = readNum(nIn, DEFAULTS.n);
-      var l = readNum(lIn, DEFAULTS.l);
-      sendPdfToClassroom(pdf.output('datauristring').split(',')[1], buildPdfName(n, l), function (res) {
-        btn.disabled = false;
-        if (res && res.ok) {
-          setStatus('送信完了: ' + res.name);
-        } else {
-          setStatus('送信失敗: ' + ((res && res.error) || '不明なエラー'));
+      setStatus('PDFを生成中…');
+      makePdf(function (err, pdf) {
+        if (err) {
+          btn.disabled = false;
+          setStatus('PDF生成に失敗しました');
+          return;
         }
+        setStatus('送信中…');
+        var n = readNum(nIn, DEFAULTS.n);
+        var l = readNum(lIn, DEFAULTS.l);
+        sendPdfToClassroom(pdf.output('datauristring').split(',')[1], buildPdfName(n, l), function (res) {
+          btn.disabled = false;
+          if (res && res.ok) setStatus('送信完了: ' + res.name);
+          else if (res && res.auth) showAuthHelp(res.error);
+          else setStatus('送信失敗: ' + ((res && res.error) || '不明なエラー'));
+        });
       });
     });
   });
