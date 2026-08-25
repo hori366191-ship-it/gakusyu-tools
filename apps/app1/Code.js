@@ -1,5 +1,5 @@
 /**
- * 公式ビューア GAS Web App バックエンド
+ * 公式・暗記辞典 GAS Web App バックエンド
  *
  * デプロイ手順:
  *   1. 下記 DRIVE_FOLDER_ID を、MDファイルを置いている Drive フォルダの ID に設定する
@@ -229,7 +229,7 @@ function jsonOutput_(obj) {
 function serveHtml() {
   return HtmlService.createTemplateFromFile('Index')
     .evaluate()
-    .setTitle('公式ビューア')
+    .setTitle('公式・暗記辞典')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1.0')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
