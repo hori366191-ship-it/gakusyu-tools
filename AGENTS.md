@@ -124,6 +124,7 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 - 診断: `LAST_ERROR`/`LAST_OK`をScript Propertiesに記録しステータスページ(doGet)に表示。障害時はまずここを見る
 - 保存先: Script Properties `DROP_FOLDER_ID` のフォルダ(印刷監視対象=別アカウントのDriveフォルダをスクリプトオーナーに編集者共有して使用)
 - 送信側: app9の `CLASSROOM.url`(受信アプリの`/a/`形式URL)と `CLASSROOM.token` に同じ値を埋め込む。着弾確認は **doGet `?poll=<名>&token=&callback=` のJSONP**(3秒×20回)。postMessage(top+parent二重送信)は副経路(Googleサンドボックス多段iframe内では親へ届かない環境があるため主経路にしないこと)
+- 認証プローブ: 送信側はアップロード前に **doGet `?probe=1&token=&callback=` のJSONP**(4秒ウォッチドッグ)を叩く(email可視性・ALLOWED_EMAILS判定を返す)。無応答=未ログインとみなし約4秒でエラー+ログインリンク表示(旧設計は60秒待たされてから気づく問題があった)
 - デプロイ: アクセス「Googleアカウントでログイン」/ 実行「自分」(UI操作)
 - 初期トークン: `e6135dfd707ab9a6916635fa`(漏洩時は両側で再生成)
 
