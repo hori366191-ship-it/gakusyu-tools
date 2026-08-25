@@ -97,6 +97,7 @@ function noteErr_(msg) {
 function doGet(e) {
   var params = (e && e.parameter) || {};
   if (params.poll) return handlePoll_(params);
+  if (params.probe) return handleProbe_(params);
   var email = getEmail_();
   cleanupOldCounts_();
   var props = PropertiesService.getScriptProperties();
@@ -137,6 +138,29 @@ function handlePoll_(p) {
     } catch (err) {
       result = { genkoPoll: true, found: false, error: String(err && err.message || err) };
     }
+  }
+  return ContentService.createTextOutput(cb + '(' + JSON.stringify(result) + ')')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+}
+
+function handleProbe_(p) {
+  var cb = String(p.callback || '');
+  if (!/^[A-Za-z0-9_.]{1,64}$/.test(cb)) {
+    return ContentService.createTextOutput('/*bad callback*/').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  var token = getToken_();
+  var result;
+  if (!token || p.token !== token) {
+    result = { genkoProbe: true, ok: false, error: 'bad token' };
+  } else {
+    var email = getEmail_();
+    result = {
+      genkoProbe: true,
+      ok: true,
+      email_visible: !!email,
+      masked: email ? maskEmail_(email) : '',
+      allowed: isAllowed_(email)
+    };
   }
   return ContentService.createTextOutput(cb + '(' + JSON.stringify(result) + ')')
     .setMimeType(ContentService.MimeType.JAVASCRIPT);
