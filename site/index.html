@@ -564,20 +564,7 @@
 
   </main>
 
-  <aside class="notice" role="note" aria-label="多読リーダー利用時の注意">
-    <div class="notice__inner">
-      <div class="notice__icon" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20" role="img" aria-label="Google">
-          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
-          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-          <path fill="none" d="M0 0h48v48H0z"/>
-        </svg>
-      </div>
-      <p class="notice__text"><strong>英語長文多読リーダー</strong>は、Googleアカウントでのログインと認証が必要です。やり方が分からない方は、<strong>教室長に聞いてください！</strong></p>
-    </div>
-  </aside>
+
 
   <footer class="footer">
     <b>学習ツール</b> ・ 教室長自作の学習ツールのポータル<br>
@@ -607,7 +594,7 @@
         } else if (state === 'is-out') {
           textEl.textContent = '教室外アカウント';
         } else if (state === 'is-warn') {
-          banner.innerHTML = '<span class="auth-banner__dot" aria-hidden="true"></span><span>\u6559\u5BA4\u30BF\u30D6\u30EC\u30C3\u30C8\u3068\u3057\u3066\u30ED\u30B0\u30A4\u30F3\u3059\u308B\u306B\u306F\u3001\u4E0B\u8A18\u30DC\u30BF\u30F3\u304B\u3089\u30ED\u30B0\u30A4\u30F3\u3057\u3066\u304F\u3060\u3055\u3044\u3002</span><a class="auth-banner__btn" href="' + PROBE_URL + '" target="_blank" rel="noopener">\u30ED\u30B0\u30A4\u30F3\u3059\u308B \u2197</a>';
+          banner.innerHTML = '<span class="auth-banner__dot" aria-hidden="true"></span><span>\u6559\u5BA4\u30BF\u30D6\u30EC\u30C3\u30C8\u3068\u3057\u3066\u30ED\u30B0\u30A4\u30F3\u3059\u308B\u306B\u306F\u3001\u53F3\u306E\u30DC\u30BF\u30F3\u304B\u3089\u30ED\u30B0\u30A4\u30F3\u3057\u3066\u304F\u3060\u3055\u3044\u3002</span><a class="auth-banner__btn" href="' + PROBE_URL + '" target="_blank" rel="noopener">\u30ED\u30B0\u30A4\u30F3\u3059\u308B \u2197</a>';
         }
       }
       var done = false;
