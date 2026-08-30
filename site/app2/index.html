@@ -1029,12 +1029,11 @@
         try{
           google.accounts.id.initialize({
             client_id: GIS_CLIENT_ID,
-            callback: function(resp){ if(resp.credential){ setIdToken(resp.credential); location.reload(); } },
-            auto_select:false
+            callback: function(resp){ if(resp.credential){ setIdToken(resp.credential); applyProbeToUI(); } },
+            auto_select:false, cancel_on_tap_outside:true
           });
           var w=document.getElementById('gis-wrap');
           if(w){ w.style.display='block'; google.accounts.id.renderButton(w,{theme:'outline',size:'medium',text:'signin_with',shape:'pill'}); }
-          google.accounts.id.prompt();
         }catch(e){}
       }
       async function applyProbeToUI() {

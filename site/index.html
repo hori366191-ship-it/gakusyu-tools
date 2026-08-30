@@ -620,14 +620,30 @@
           google.accounts.id.initialize({
             client_id: GIS_CLIENT_ID,
             callback: function(resp){
-              if(resp.credential){ setIdToken(resp.credential); location.reload(); }
+              if(resp.credential){ setIdToken(resp.credential); runProbe(); }
             },
-            auto_select:false, cancel_on_tap_outside:false
+            auto_select:false, cancel_on_tap_outside:true
           });
           var btn=document.getElementById('gis-btn');
           if(btn) google.accounts.id.renderButton(btn,{theme:'outline',size:'small',text:'signin_with',shape:'pill'});
-          google.accounts.id.prompt();
         }catch(e){}
+      }
+      function runProbe(){
+        done=false;
+        textEl.textContent='確認中…';
+        banner.className='auth-banner__inner';
+        var s2=document.createElement('script');
+        var t2=setTimeout(function(){ if(done) return; done=true; s2.remove(); render('is-warn'); },5000);
+        window.__portalProbe2=function(res){
+          if(done) return;
+          done=true; clearTimeout(t2); s2.remove();
+          if(!res||!res.genkoProbe||!res.ok){ render('is-warn'); return; }
+          if(!res.allowed){ render('is-out'); return; }
+          render('is-ok',{isOwner:!!res.is_owner});
+        };
+        s2.onerror=function(){ if(done) return; done=true; clearTimeout(t2); s2.remove(); render('is-warn'); };
+        s2.src=buildProbeBase()+'&callback=__portalProbe2&t='+Date.now();
+        document.head.appendChild(s2);
       }
       function buildProbeBase(){ var b=PROBE_URL+'?probe=1&token='+encodeURIComponent(PROBE_TOKEN); var id=getIdToken(); if(id) b+='&id_token='+encodeURIComponent(id); return b; }
       var done = false;
