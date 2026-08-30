@@ -641,35 +641,58 @@
         textEl.textContent='確認中…';
         banner.className='auth-banner__inner';
         var idt=getIdToken();
-        if(idt){
+        if(idt && idt.length >= 1200){
           doProbePostWithFallback(function(res){
             if(done) return; done=true;
             if(!res||!res.genkoProbe||!res.ok){ render('is-warn'); return; }
             if(!res.allowed){ render('is-out'); return; }
             render('is-ok',{isOwner:!!res.is_owner});
           });
-          setTimeout(function(){ if(done) return; done=true; render('is-warn',{error:'timeout'}); },6500);
+          setTimeout(function(){ if(done) return; done=true; render('is-warn',{error:'timeout'}); },11000);
+          return;
+        }
+        if(idt){
+          // short token -> JSONP (Worker成功 1256ms)
+          if(PROBE_URL_WORKER){
+            var wNameR='__portalProbeR'+Date.now()+Math.random().toString(36).slice(2);
+            var doneR=false;
+            var tR=setTimeout(function(){ if(doneR) return; doneR=true; try{ delete window[wNameR]; }catch(e){} jsonpProbeFor(DIRECT_PROBE_URL, '__portalProbeR2'+Date.now()+Math.random().toString(36).slice(2), function(r){ if(done) return; done=true; if(!r||!r.genkoProbe||!r.ok){ render('is-warn'); return; } if(!r.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r.is_owner}); }, 7500); }, 8500);
+            jsonpProbeFor(PROBE_URL_WORKER, wNameR, function(res){
+              if(doneR) return; doneR=true; clearTimeout(tR);
+              if(done) return; done=true;
+              if(!res||!res.genkoProbe||!res.ok){ var dNameR='__portalProbeR2'+Date.now()+Math.random().toString(36).slice(2); jsonpProbeFor(DIRECT_PROBE_URL, dNameR, function(r2){ if(!r2||!r2.genkoProbe||!r2.ok){ render('is-warn'); return; } if(!r2.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r2.is_owner}); }, 7500); return; }
+              if(!res.allowed){ render('is-out'); return; }
+              render('is-ok',{isOwner:!!res.is_owner});
+            }, 7500);
+          } else {
+            var sR=document.createElement('script');
+            var tRB=setTimeout(function(){ if(done) return; done=true; try{ sR.remove(); }catch(e){} render('is-warn'); },7500);
+            window.__portalProbeR=function(res){ if(done) return; done=true; clearTimeout(tRB); try{ sR.remove(); }catch(e){} if(!res||!res.genkoProbe||!res.ok){ render('is-warn'); return; } if(!res.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!res.is_owner}); };
+            sR.onerror=function(){ if(done) return; done=true; clearTimeout(tRB); try{ sR.remove(); }catch(e){} render('is-warn'); };
+            sR.src=buildProbeBase()+'&callback=__portalProbeR&t='+Date.now();
+            document.head.appendChild(sR);
+          }
           return;
         }
         // id_tokenなしはJSONP fallback (worker→直)
         if(PROBE_URL_WORKER){
           var wName='__portalProbe2W'+Date.now()+Math.random().toString(36).slice(2);
           var doneRun=false;
-          var t2=setTimeout(function(){ if(doneRun) return; doneRun=true; try{ delete window[wName]; }catch(e){} jsonpProbeFor(DIRECT_PROBE_URL, '__portalProbe2D'+Date.now()+Math.random().toString(36).slice(2), function(r){ if(done) return; done=true; if(!r||!r.genkoProbe||!r.ok){ render('is-warn'); return; } if(!r.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r.is_owner}); }, 5000); }, 5200);
+          var t2=setTimeout(function(){ if(doneRun) return; doneRun=true; try{ delete window[wName]; }catch(e){} jsonpProbeFor(DIRECT_PROBE_URL, '__portalProbe2D'+Date.now()+Math.random().toString(36).slice(2), function(r){ if(done) return; done=true; if(!r||!r.genkoProbe||!r.ok){ render('is-warn'); return; } if(!r.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r.is_owner}); }, 7500); }, 8500);
           jsonpProbeFor(PROBE_URL_WORKER, wName, function(res){
             if(doneRun) return; doneRun=true; clearTimeout(t2);
             if(done) return; done=true;
             if(!res||!res.genkoProbe||!res.ok){ // fallback to direct
               var dName='__portalProbe2D'+Date.now()+Math.random().toString(36).slice(2);
-              jsonpProbeFor(DIRECT_PROBE_URL, dName, function(r2){ if(!r2||!r2.genkoProbe||!r2.ok){ render('is-warn'); return; } if(!r2.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r2.is_owner}); }, 5000);
+              jsonpProbeFor(DIRECT_PROBE_URL, dName, function(r2){ if(!r2||!r2.genkoProbe||!r2.ok){ render('is-warn'); return; } if(!r2.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r2.is_owner}); }, 7500);
               return;
             }
             if(!res.allowed){ render('is-out'); return; }
             render('is-ok',{isOwner:!!res.is_owner});
-          }, 5000);
+          }, 7500);
         } else {
           var s2=document.createElement('script');
-          var t2b=setTimeout(function(){ if(done) return; done=true; try{ s2.remove(); }catch(e){} render('is-warn'); },5000);
+          var t2b=setTimeout(function(){ if(done) return; done=true; try{ s2.remove(); }catch(e){} render('is-warn'); }, 7500);
           window.__portalProbe2=function(res){
             if(done) return;
             done=true; clearTimeout(t2b); try{ s2.remove(); }catch(e){}
@@ -703,7 +726,7 @@
         form.appendChild(inp);
         document.body.appendChild(form);
         var donePost=false;
-        var tPost=setTimeout(function(){ if(donePost) return; donePost=true; try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(null); },5000);
+        var tPost=setTimeout(function(){ if(donePost) return; donePost=true; try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(null); },8000);
         function onMsgPost(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(donePost) return; donePost=true; clearTimeout(tPost); window.removeEventListener('message',onMsgPost); try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(res); }
         window.addEventListener('message',onMsgPost);
         try{ form.submit(); }catch(e){ clearTimeout(tPost); window.removeEventListener('message',onMsgPost); try{ iframe.remove(); }catch(_e){} try{ form.remove(); }catch(_e){} cb(null); }
@@ -712,7 +735,7 @@
       function doProbePostWithFallback(cb){
         if(!PROBE_URL_WORKER){ doProbePostFor(DIRECT_PROBE_URL, cb); return; }
         var settled=false;
-        var timerFallback=setTimeout(function(){ if(settled) return; settled=true; doProbePostFor(DIRECT_PROBE_URL, cb); }, 5200);
+        var timerFallback=setTimeout(function(){ if(settled) return; settled=true; doProbePostFor(DIRECT_PROBE_URL, cb); }, 8500);
         doProbePostFor(PROBE_URL_WORKER, function(res){
           if(settled) return;
           if(res && res.genkoProbe && res.ok !== undefined){ clearTimeout(timerFallback); settled=true; cb(res); return; }
@@ -757,7 +780,7 @@
       var done = false;
       // id_token がある場合は最初からPOSTで試す（URL長とサードパーティブロック回避） Worker→直 fallback
       var idt0=getIdToken();
-      if(idt0){
+      if(idt0 && idt0.length >= 1200){
         doProbePostWithFallback(function(res){
           if(done) return;
           done=true;
@@ -765,8 +788,28 @@
           if(!res.allowed){ render('is-out'); return; }
           render('is-ok',{isOwner:!!res.is_owner});
         });
-        // POSTでも5秒でタイムアウトしたらis-warn
-        setTimeout(function(){ if(done) return; done=true; render('is-warn',{error:'timeout'}); },6500);
+        setTimeout(function(){ if(done) return; done=true; render('is-warn',{error:'timeout'}); },11000);
+      } else if(idt0){
+        // short id_token (先生/教室の通常JWT約1000字)はJSONPでWorker成功率が高い (debugで1256ms成功) ためPOSTではなくJSONPを使う
+        if(PROBE_URL_WORKER){
+          var wNameShort='__portalProbeS'+Date.now()+Math.random().toString(36).slice(2);
+          var doneShort=false;
+          var tShort=setTimeout(function(){ if(doneShort) return; doneShort=true; try{ delete window[wNameShort]; }catch(e){} jsonpProbeFor(DIRECT_PROBE_URL, '__portalProbeS2'+Date.now()+Math.random().toString(36).slice(2), function(r){ if(done) return; done=true; if(!r||!r.genkoProbe||!r.ok){ render('is-warn',{error:r&&r.error||'noauth'}); return; } if(!r.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r.is_owner}); }, 7500); }, 8500);
+          jsonpProbeFor(PROBE_URL_WORKER, wNameShort, function(res){
+            if(doneShort) return; doneShort=true; clearTimeout(tShort);
+            if(done) return; done=true;
+            if(!res||!res.genkoProbe||!res.ok){ var dNameS='__portalProbeS2'+Date.now()+Math.random().toString(36).slice(2); jsonpProbeFor(DIRECT_PROBE_URL, dNameS, function(r2){ if(!r2||!r2.genkoProbe||!r2.ok){ render('is-warn',{error:r2&&r2.error||'noauth'}); return; } if(!r2.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r2.is_owner}); }, 7500); return; }
+            if(!res.allowed){ render('is-out'); return; }
+            render('is-ok',{isOwner:!!res.is_owner});
+          }, 7500);
+        } else {
+          var sShort=document.createElement('script');
+          var tShortB=setTimeout(function(){ if(done) return; done=true; try{ sShort.remove(); }catch(e){} render('is-warn',{error:'timeout'}); },7500);
+          window.__portalProbeShort=function(res){ if(done) return; done=true; clearTimeout(tShortB); try{ sShort.remove(); }catch(e){} if(!res||!res.genkoProbe||!res.ok){ render('is-warn',{error:res&&res.error||'noauth'}); return; } if(!res.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!res.is_owner}); };
+          sShort.onerror=function(){ if(done) return; done=true; clearTimeout(tShortB); try{ sShort.remove(); }catch(e){} render('is-warn',{error:'onerror'}); };
+          sShort.src=buildProbeBase()+'&callback=__portalProbeShort&t='+Date.now();
+          document.head.appendChild(sShort);
+        }
       } else {
         var s = null;
         var timer = null;
@@ -780,7 +823,7 @@
             if (!res || !res.genkoProbe || !res.ok) { render('is-warn'); return; }
             if (!res.allowed) { render('is-out'); return; }
             render('is-ok', { isOwner: !!res.is_owner, invisible: !res.email_visible });
-          }, 5000);
+          }, 7500);
           // iframe fallback on error/timeout for direct
           var prevOnError = s.onerror;
           s.onerror = function(){
@@ -807,7 +850,7 @@
             function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var r=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t2); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(e){} if(!r||!r.genkoProbe||!r.ok){ render('is-warn'); return; } if(!r.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r.is_owner}); }
             window.addEventListener('message',onMsg);
             document.body.appendChild(iframe);
-          }, 5000);
+          }, 7500);
         }
         if(useFallback){
           var wName='__portalProbeW'+Date.now()+Math.random().toString(36).slice(2);
@@ -815,7 +858,7 @@
             try{ if(s) s.remove(); }catch(e){}
             try{ delete window[wName]; }catch(e){ window[wName]=undefined; }
             startDirectJsonp();
-          }, 5200);
+          }, 8500);
           s = jsonpProbeFor(PROBE_URL_WORKER, wName, function(res){
             if(done) return;
             clearTimeout(fallbackTimer);
@@ -829,7 +872,7 @@
             }
             // worker failed -> fallback to direct
             startDirectJsonp();
-          }, 5000);
+          }, 7500);
           var origErr=s.onerror;
           s.onerror=function(){ if(done) return; clearTimeout(fallbackTimer); try{ delete window[wName]; }catch(e){} startDirectJsonp(); };
         } else {

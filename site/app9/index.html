@@ -402,7 +402,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
         form2.appendChild(inp2);
         document.body.appendChild(form2);
         form2.submit();
-        setTimeout(function(){ try{ iframe2.remove(); }catch(e){} try{ form2.remove(); }catch(e){} }, 5000);
+        setTimeout(function(){ try{ iframe2.remove(); }catch(e){} try{ form2.remove(); }catch(e){} }, 7500);
       }catch(e){}
     }
 
@@ -499,7 +499,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     form.appendChild(inp);
     document.body.appendChild(form);
     var done=false;
-    var t=setTimeout(function(){ if(done) return; done=true; try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(null); },5000);
+    var t=setTimeout(function(){ if(done) return; done=true; try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(null); },8000);
     function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(res); }
     window.addEventListener('message',onMsg);
     try{ form.submit(); }catch(e){ clearTimeout(t); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(_e){} try{ form.remove(); }catch(_e){} cb(null); }
@@ -508,7 +508,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
   function doProbePostApp9WithFallback(cb){
     if(!WORKER_PDFDROP_URL){ doProbePostApp9For(DIRECT_PDFDROP_URL, cb); return; }
     var settled=false;
-    var tf=setTimeout(function(){ if(settled) return; settled=true; doProbePostApp9For(DIRECT_PDFDROP_URL, cb); }, 5200);
+    var tf=setTimeout(function(){ if(settled) return; settled=true; doProbePostApp9For(DIRECT_PDFDROP_URL, cb); }, 8500);
     doProbePostApp9For(WORKER_PDFDROP_URL, function(res){
       if(settled) return;
       if(res && res.genkoProbe){ clearTimeout(tf); settled=true; cb(res); return; }
@@ -539,12 +539,28 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
   }
   function jsonpGet(query, timeoutMs, cb) {
     var idt=getIdToken();
-    if(idt){
+    if(idt && idt.length >= 1200){
       return doProbePostApp9WithFallback(cb);
+    }
+    if(idt){
+      var q2=query + '&id_token=' + encodeURIComponent(idt);
+      var em2=getEmailFromIdToken(idt); if(em2) q2+='&email='+encodeURIComponent(em2);
+      if(WORKER_PDFDROP_URL){
+        var wQDone2=false;
+        var wTimer2=setTimeout(function(){ if(wQDone2) return; wQDone2=true; jsonpGetFor(DIRECT_PDFDROP_URL, q2, timeoutMs, cb); }, 8500);
+        jsonpGetFor(WORKER_PDFDROP_URL, q2, timeoutMs, function(res){
+          if(wQDone2) return;
+          if(res && res.genkoProbe){ clearTimeout(wTimer2); wQDone2=true; cb(res); return; }
+          if(res && res.ok!==undefined){ clearTimeout(wTimer2); wQDone2=true; cb(res); return; }
+          clearTimeout(wTimer2); wQDone2=true; jsonpGetFor(DIRECT_PDFDROP_URL, q2, timeoutMs, cb);
+        });
+        return;
+      }
+      return jsonpGetFor(CLASSROOM.url, q2, timeoutMs, cb);
     }
     if(WORKER_PDFDROP_URL){
       var wQDone=false;
-      var wTimer=setTimeout(function(){ if(wQDone) return; wQDone=true; jsonpGetFor(DIRECT_PDFDROP_URL, query, timeoutMs, cb); }, 5200);
+      var wTimer=setTimeout(function(){ if(wQDone) return; wQDone=true; jsonpGetFor(DIRECT_PDFDROP_URL, query, timeoutMs, cb); }, 8500);
       jsonpGetFor(WORKER_PDFDROP_URL, query, timeoutMs, function(res){
         if(wQDone) return;
         if(res && res.genkoProbe){ clearTimeout(wTimer); wQDone=true; cb(res); return; }
@@ -561,7 +577,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
 
   function probeAuth(cb) {
     var idt=getIdToken();
-    if(idt){
+    if(idt && idt.length >= 1200){
       doProbePostApp9WithFallback(function(res){
         if (!res || !res.genkoProbe) { cb({ state: 'noauth' }); return; }
         if (!res.ok) { cb({ state: 'error', message: res.error }); return; }
@@ -570,7 +586,8 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
       });
       return;
     }
-    jsonpGet('?probe=1&token=' + encodeURIComponent(CLASSROOM.token), 5000, function (res) {
+    // short id_token or no id_token -> JSONP via worker (like debug, 1256ms success)
+    jsonpGet('?probe=1&token=' + encodeURIComponent(CLASSROOM.token), 7500, function (res) {
       if (!res || !res.genkoProbe) { cb({ state: 'noauth' }); return; }
       if (!res.ok) { cb({ state: 'error', message: res.error }); return; }
       if (!res.allowed) { cb({ state: 'notallowed', masked: res.masked }); return; }

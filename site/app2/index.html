@@ -715,7 +715,7 @@
         form.appendChild(inp);
         document.body.appendChild(form);
         var done=false;
-        var t=setTimeout(function(){ if(done) return; done=true; try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(null); },5000);
+        var t=setTimeout(function(){ if(done) return; done=true; try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(null); }, 7500);
         function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(res); }
         window.addEventListener('message',onMsg);
         try{ form.submit(); }catch(e){ clearTimeout(t); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(_e){} try{ form.remove(); }catch(_e){} cb(null); }
@@ -724,7 +724,7 @@
       function doProbePostApp2WithFallback(cb){
         if(!WORKER_BACKEND_URL){ doProbePostApp2For(DIRECT_BACKEND_URL, cb); return; }
         var settled=false;
-        var tf=setTimeout(function(){ if(settled) return; settled=true; doProbePostApp2For(DIRECT_BACKEND_URL, cb); }, 5200);
+        var tf=setTimeout(function(){ if(settled) return; settled=true; doProbePostApp2For(DIRECT_BACKEND_URL, cb); }, 8500);
         doProbePostApp2For(WORKER_BACKEND_URL, function(res){
           if(settled) return;
           if(res && res.genkoProbe){ clearTimeout(tf); settled=true; cb(res); return; }
@@ -733,7 +733,7 @@
       }
       async function jsonpGetWithFallback(workerUrl, directUrl, timeoutMs){
         if(!WORKER_BACKEND_URL) return jsonpGet(directUrl, timeoutMs);
-        var r=await jsonpGet(workerUrl, Math.min(timeoutMs, 5000));
+        var r=await jsonpGet(workerUrl, Math.min(timeoutMs, 7500));
         if(r && r.genkoProbe) return r;
         if(r && r.ok!==undefined) return r;
         // worker failed -> try direct
@@ -756,13 +756,19 @@
         if (location.protocol === 'file:') return { state: 'file' };
         var idt=getIdToken();
         var res=null;
-        if(idt){
+        if(idt && idt.length >= 1200){
           res=await new Promise(function(r){ doProbePostApp2WithFallback(r); });
+        } else if(idt){
+          var em=idt? (function(){ try{ var p=idt.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } })() : '';
+          var wUrl2 = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + '&id_token=' + encodeURIComponent(idt) + (em?'&email='+encodeURIComponent(em):'') : '';
+          var dUrl2 = DIRECT_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + '&id_token=' + encodeURIComponent(idt) + (em?'&email='+encodeURIComponent(em):'');
+          if(wUrl2) res = await jsonpGetWithFallback(wUrl2, dUrl2, 7500);
+          else { var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + '&id_token=' + encodeURIComponent(idt) + (em?'&email='+encodeURIComponent(em):''); res = await jsonpGet(url, 7500); }
         } else {
           var wUrl = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) : '';
           var dUrl = DIRECT_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
-          if(wUrl) res = await jsonpGetWithFallback(wUrl, dUrl, 5000);
-          else { var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN); res = await jsonpGet(url, 5000); }
+          if(wUrl) res = await jsonpGetWithFallback(wUrl, dUrl, 7500);
+          else { var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN); res = await jsonpGet(url, 7500); }
         }
         if (!res || !res.genkoProbe) return { state: 'noauth' };
         if (!res.ok) return { state: 'error', message: res.error };
