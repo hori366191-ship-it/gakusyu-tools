@@ -816,16 +816,15 @@
           return gasCall(cfg.gas, payload);
         }
         // Pages静的版: site-app2-backend へ TOKEN + id_token 付きで送信（GIS対応）Worker→直 fallback
-        var body = payload || {};
-        body.token = SITE_BACKEND_TOKEN;
         var idt=getIdToken();
-        if(idt) body.id_token=idt;
-        // generateText/deleteText は POST JSON (Worker→直 fallback)
-        if (name === 'generateText' || name === 'deleteText') {
+        // generateText は settings をネストして送信（GAS側は body.settings を期待）
+        if (name === 'generateText') {
+          var genBody = { action: name, token: SITE_BACKEND_TOKEN, settings: payload || {} };
+          if (idt) genBody.id_token = idt;
           var wUrl = WORKER_BACKEND_URL;
           var dUrl = DIRECT_BACKEND_URL;
           var targetUrl = SITE_BACKEND_URL;
-          var opts = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action: name }, body)) };
+          var opts = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(genBody) };
           var res;
           if(wUrl){
             res = await fetchWithFallback(wUrl, dUrl, opts);
@@ -835,6 +834,24 @@
           var data = await res.json().catch(function () { return {}; });
           if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
           return data;
+        }
+        if (name === 'deleteText') {
+          var delBody = Object.assign({}, payload || {});
+          delBody.token = SITE_BACKEND_TOKEN;
+          if (idt) delBody.id_token = idt;
+          var wUrlD = WORKER_BACKEND_URL;
+          var dUrlD = DIRECT_BACKEND_URL;
+          var targetUrlD = SITE_BACKEND_URL;
+          var optsD = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action: name }, delBody)) };
+          var resD;
+          if(wUrlD){
+            resD = await fetchWithFallback(wUrlD, dUrlD, optsD);
+          } else {
+            resD = await fetch(targetUrlD, optsD);
+          }
+          var dataD = await resD.json().catch(function () { return {}; });
+          if (!resD.ok || dataD.ok === false) throw new Error(dataD.error || ('HTTP ' + resD.status));
+          return dataD;
         }
         // getSavedTexts は JSONP GET（CORS回避） Worker→直 fallback（ページング・級フィルタ対応）
         if (name === 'getSavedTexts') {

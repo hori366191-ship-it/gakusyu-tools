@@ -310,7 +310,22 @@ function handleProbe_(p) {
       return jsonOut_({ ok: false, error: 'not allowed' + (em ? ' (' + maskEmail_(em) + ')' : ' (invisible token bad?)') });
     }
     if (body.action === 'generateText') {
-      return jsonOut_({ ok: true, item: generateTextWithToken_(body.settings || {}, token, pForCheck) });
+      var settings = body.settings || {};
+      // 互換: フラット送信（level等がトップレベル）でも動作するようフォールバック
+      if (!settings.level && body.level) {
+        settings = {
+          level: body.level,
+          wordCount: body.wordCount,
+          world: body.world,
+          style: body.style,
+          textType: body.textType,
+          genre: body.genre,
+          development: body.development,
+          ending: body.ending,
+          prompt: body.prompt
+        };
+      }
+      return jsonOut_({ ok: true, item: generateTextWithToken_(settings, token, pForCheck) });
     }
     if (body.action === 'deleteText') {
       return jsonOut_({ ok: true, result: deleteTextWithToken_(body.payload || body, token, pForCheck) });
