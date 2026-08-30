@@ -597,19 +597,23 @@
       if (!banner || !textEl) return;
       function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
       function setIdToken(t){ try{ if(t) localStorage.setItem('gis_id_token',t); else localStorage.removeItem('gis_id_token'); }catch(e){} }
+      function decodeJwtPayload(t){ try{ var p=t.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; return JSON.parse(atob(p)); }catch(e){ return null; } }
       function render(state, opts) {
         opts = opts || {};
         banner.className = 'auth-banner__inner' + (state ? ' ' + state : '');
+        var idt=getIdToken();
+        var dbg=idt? ' (id_token:'+ (decodeJwtPayload(idt)?.email||'---').slice(0,12)+'…)':' (no id_token)';
         if (state === 'is-ok') {
-          if (opts.isOwner) textEl.textContent = '先生アカウントでログイン中 \u2705';
-          else textEl.textContent = '教室タブレットとしてログイン中 \u2705';
+          if (opts.isOwner) textEl.textContent = '先生アカウントでログイン中 \u2705' + dbg;
+          else textEl.textContent = '教室タブレットとしてログイン中 \u2705' + dbg;
         } else if (state === 'is-out') {
-          textEl.textContent = '教室外アカウント';
+          textEl.textContent = '教室外アカウント' + dbg + ' allowed:false';
         } else if (state === 'is-warn') {
           if (GIS_CLIENT_ID.indexOf('REPLACE')===0) {
             banner.innerHTML = '<span class="auth-banner__dot" aria-hidden="true"></span><span>教室タブレットとしてログインするには、右のボタンからログインしてください。</span><a class="auth-banner__btn" href="' + PROBE_URL + '" target="_blank" rel="noopener">ログインする \u2197</a>';
           } else {
-            banner.innerHTML = '<span class="auth-banner__dot" aria-hidden="true"></span><span>Googleでログインしてください</span><span id="gis-btn" style="margin-left:auto"></span>';
+            var lastErr=opts.error||'noauth';
+            banner.innerHTML = '<span class="auth-banner__dot" aria-hidden="true"></span><span>Googleでログインしてください</span><span id="gis-btn" style="margin-left:auto"></span><span style="font-size:9px;color:#94a3b8;margin-left:6px">'+lastErr+dbg+'</span>';
             initGis();
           }
         }
