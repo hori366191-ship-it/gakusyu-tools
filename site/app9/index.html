@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>原稿用紙作成</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 * { box-sizing: border-box; }
 body {
@@ -294,6 +295,10 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
   window.addEventListener('resize', fitZoom);
   document.getElementById('printBtn').addEventListener('click', function () { window.print(); });
 
+  // GIS 設定（要: Google Cloud Consoleで OAuthクライアントIDを作成し、下記を置換）
+  var GIS_CLIENT_ID = 'REPLACE_WITH_YOUR_CLIENT_ID.apps.googleusercontent.com';
+  function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
+  function setIdToken(t){ try{ if(t) localStorage.setItem('gis_id_token',t); else localStorage.removeItem('gis_id_token'); }catch(e){} }
   // site-gas/site-pdfdrop（新GAS）: YOUR_SCRIPT_ID_site-pdfdrop
   var CLASSROOM = {
     url: 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbwj7qTaMDmKGa-KTEEwa2jcP7wtZ8xh_rVMANzfwKapz5u8tThqjxc2pQsbN-lAWU5L7Q/exec',
@@ -360,7 +365,8 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     var input = document.createElement('input');
     input.type = 'hidden';
     input.name = 'data';
-    input.value = JSON.stringify({ token: CLASSROOM.token, name: name, b64: b64 });
+    var idt2=getIdToken(); var payload={ token: CLASSROOM.token, name: name, b64: b64 }; if(idt2) payload.id_token=idt2;
+    input.value = JSON.stringify(payload);
     form.appendChild(input);
     document.body.appendChild(form);
     var done = false;
@@ -422,6 +428,8 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
   }
 
   function jsonpGet(query, timeoutMs, cb) {
+    var idt=getIdToken();
+    var q2=query + (idt?'&id_token='+encodeURIComponent(idt):'');
     var s = document.createElement('script');
     var settled = false;
     var timer = setTimeout(function () {
@@ -430,7 +438,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
       s.remove();
       var iframe = document.createElement('iframe');
       iframe.style.display = 'none';
-      iframe.src = CLASSROOM.url + query + '&t=' + Date.now();
+      iframe.src = CLASSROOM.url + q2 + '&t=' + Date.now();
       var t2 = setTimeout(function () { if (settled) return; settled = true; iframe.remove(); cb(null); }, 4000);
       function onMsg(e) {
         if (!e.data || !e.data.genkoProbe) return;
@@ -458,7 +466,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
       s.remove();
       var iframe2 = document.createElement('iframe');
       iframe2.style.display = 'none';
-      iframe2.src = CLASSROOM.url + query + '&t=' + Date.now();
+      iframe2.src = CLASSROOM.url + q2 + '&t=' + Date.now();
       var t3 = setTimeout(function () { if (settled) return; settled = true; iframe2.remove(); cb(null); }, 4000);
       function onMsg2(e) {
         if (!e.data || !e.data.genkoProbe) return;
@@ -473,7 +481,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
       window.addEventListener('message', onMsg2);
       document.body.appendChild(iframe2);
     };
-    s.src = CLASSROOM.url + query + '&callback=__genkoJsonp&t=' + Date.now();
+    s.src = CLASSROOM.url + q2 + '&callback=__genkoJsonp&t=' + Date.now();
     document.head.appendChild(s);
   }
 

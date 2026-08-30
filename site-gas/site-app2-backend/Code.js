@@ -77,9 +77,9 @@ function isAllowedUser_() {
   var list = parseAllowedList_(allowedRaw).map(function (s) { return normalizeEmail_(s); });
   return list.length > 0 && list.indexOf(normalizeEmail_(email)) >= 0;
 }
-function isAllowedWithToken_(token) {
+function isAllowedWithToken_(token, params) {
   if (!getToken_() || String(token) !== getToken_()) return false;
-  var email = getEmail_();
+  var email = getEmailFromRequest_(params || {});
   return isAllowed_(email);
 }
 
@@ -90,10 +90,36 @@ function isOwner_() {
   var owner = normalizeEmail_(PropertiesService.getScriptProperties().getProperty('OWNER_EMAIL') || '');
   return !!owner && owner === email;
 }
+function isOwnerForEmail_(email) {
+  var owner = normalizeEmail_(PropertiesService.getScriptProperties().getProperty('OWNER_EMAIL') || '');
+  return !!owner && !!email && normalizeEmail_(email) === owner;
+}
 function maskEmail_(email) {
   var i = email.indexOf('@');
   if (i < 1) return '*';
   return email.slice(0, 2) + '***' + email.slice(i);
+}
+function verifyIdToken_(idToken) {
+  if (!idToken) return '';
+  try {
+    var res = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken), { muteHttpExceptions: true, followRedirects: true });
+    if (res.getResponseCode() !== 200) return '';
+    var data = JSON.parse(res.getContentText());
+    if (!data.email) return '';
+    // aud チェックは GAS 側で CLIENT_ID を知らないため省略（email_verified のみ確認）
+    if (data.email_verified && String(data.email_verified) !== 'true' && data.email_verified !== true) return '';
+    return normalizeEmail_(data.email);
+  } catch (e) {
+    return '';
+  }
+}
+function getEmailFromRequest_(p) {
+  // GIS id_token があればそれを優先（Cookie不要で教室Gmailも可視化できる）
+  if (p && p.id_token) {
+    var fromToken = verifyIdToken_(p.id_token);
+    if (fromToken) return fromToken;
+  }
+  return getEmail_();
 }
 
 /**
@@ -107,8 +133,11 @@ function doGet(e) {
     var token = params.token || '';
     var cb = params.callback || '';
     var isCb = /^[A-Za-z0-9_.]{1,64}$/.test(cb);
-    if (!isAllowedWithToken_(token)) {
-      var err = { ok: false, error: 'not allowed' };
+    // id_token があればメールをトークンから取得し、ALLOWED チェックを id_token 経由で行う
+    var emailForCheck = getEmailFromRequest_(params);
+    var allowed = isAllowed_(emailForCheck);
+    if (!getToken_() || String(token) !== getToken_() || !allowed) {
+      var err = { ok: false, error: 'not allowed' + (emailForCheck ? ' (' + maskEmail_(emailForCheck) + ')' : '') };
       return isCb ? ContentService.createTextOutput(cb + '(' + JSON.stringify(err) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(err);
     }
     try {
@@ -153,14 +182,14 @@ function handleProbe_(p) {
   if (!token || p.token !== token) {
     result = { genkoProbe: true, ok: false, error: 'bad token' };
   } else {
-    var email = getEmail_();
+    var email = getEmailFromRequest_(p);
     result = {
       genkoProbe: true,
       ok: true,
       email_visible: !!email,
       masked: email ? maskEmail_(email) : '',
       allowed: isAllowed_(email),
-      is_owner: isOwner_()
+      is_owner: isOwnerForEmail_(email)
     };
   }
   // iframe フォールバック用: callback 無しで HTML postMessage を返す（サードパーティCookieブロック対策）
@@ -185,7 +214,7 @@ function handleProbe_(p) {
  *  - JSON: {token, action:'generateText', settings:{}}
  *  - 互換: e.parameter.data に JSON が入る pdfdrop 型 hidden iframe でも受ける
  */
-function doPost(e) {
+  function doPost(e) {
   try {
     var raw = (e && e.postData && e.postData.contents) || '';
     // pdfdrop型 hidden iframe (e.parameter.data) 互換
@@ -194,27 +223,32 @@ function doPost(e) {
     var body = {};
     try { body = JSON.parse(raw); } catch (err2) { return jsonOut_({ ok: false, error: 'JSON parse error' }); }
     var token = body.token || (e && e.parameter && e.parameter.token) || '';
-    if (!isAllowedWithToken_(token)) {
-      var em = getEmail_();
+    var idToken = body.id_token || (e && e.parameter && e.parameter.id_token) || '';
+    var pForCheck = { id_token: idToken };
+    if (!isAllowedWithToken_(token, pForCheck)) {
+      var em = getEmailFromRequest_(pForCheck);
       return jsonOut_({ ok: false, error: 'not allowed' + (em ? ' (' + maskEmail_(em) + ')' : ' (invisible token bad?)') });
     }
     if (body.action === 'generateText') {
-      return jsonOut_({ ok: true, item: generateTextWithToken_(body.settings || {}, token) });
+      return jsonOut_({ ok: true, item: generateTextWithToken_(body.settings || {}, token, pForCheck) });
     }
     if (body.action === 'deleteText') {
-      return jsonOut_({ ok: true, result: deleteTextWithToken_(body.payload || body, token) });
+      return jsonOut_({ ok: true, result: deleteTextWithToken_(body.payload || body, token, pForCheck) });
     }
     return jsonOut_({ ok: false, error: 'unknown action' });
   } catch (err) {
     return jsonOut_({ ok: false, error: 'doPost error: ' + String(err && err.message ? err.message : err) });
   }
 }
-function generateTextWithToken_(settings, token) {
-  if (!isAllowedWithToken_(token)) throw new Error('AI生成は許可されたアカウントのみ利用できます');
+function generateTextWithToken_(settings, token, params) {
+  if (!isAllowedWithToken_(token, params)) throw new Error('AI生成は許可されたアカウントのみ利用できます');
   return generateText(settings);
 }
-function deleteTextWithToken_(payload, token) {
-  if (!isAllowedWithToken_(token)) throw new Error('not allowed');
+function deleteTextWithToken_(payload, token, params) {
+  if (!isAllowedWithToken_(token, params)) throw new Error('not allowed');
+  // 削除はオーナーのみ（GISのメールで判定）
+  var email = getEmailFromRequest_(params || {});
+  if (!isOwnerForEmail_(email)) throw new Error('削除はオーナーのみ実行できます');
   return deleteText(payload);
 }
 

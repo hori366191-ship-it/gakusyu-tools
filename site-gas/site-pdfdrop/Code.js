@@ -83,6 +83,26 @@ function maskEmail_(email) {
   if (i < 1) return '*';
   return email.slice(0, 2) + '***' + email.slice(i);
 }
+function verifyIdToken_(idToken) {
+  if (!idToken) return '';
+  try {
+    var res = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken), { muteHttpExceptions: true, followRedirects: true });
+    if (res.getResponseCode() !== 200) return '';
+    var data = JSON.parse(res.getContentText());
+    if (!data.email) return '';
+    if (data.email_verified && String(data.email_verified) !== 'true' && data.email_verified !== true) return '';
+    return normalizeEmail_(data.email);
+  } catch (e) {
+    return '';
+  }
+}
+function getEmailFromRequest_(p) {
+  if (p && p.id_token) {
+    var fromToken = verifyIdToken_(p.id_token);
+    if (fromToken) return fromToken;
+  }
+  return getEmail_();
+}
 
 function stamp_() {
   var tz = Session.getScriptTimeZone() || 'Asia/Tokyo';
@@ -153,7 +173,7 @@ function handleProbe_(p) {
   if (!token || p.token !== token) {
     result = { genkoProbe: true, ok: false, error: 'bad token' };
   } else {
-    var email = getEmail_();
+    var email = getEmailFromRequest_(p);
     result = {
       genkoProbe: true,
       ok: true,
@@ -187,7 +207,9 @@ function doPost(e) {
     console.log('doPost begin: ' + name);
     var token = getToken_();
     if (!token || String(req.token) !== token) throw Error('bad token');
-    var email = getEmail_();
+    // id_token があればそれでメール判定（GIS対応）、なければ Session
+    var email = getEmailFromRequest_(req);
+    if (!email) email = getEmail_();
     if (!isAllowed_(email)) throw Error('not allowed (' + (email ? maskEmail_(email) : 'identity invisible') + ')');
     var folderId = getFolderId_();
     if (!folderId) throw Error('folder not configured');
