@@ -634,9 +634,9 @@ function getSavedTexts(opts) {
 
 /**
  * 保存済み生成物の削除（payload: { id: "tadoku-..." }）— 統合ファイル版
+ * 権限チェックは呼び出し元（deleteTextWithToken_ または旧 google.script.run の isOwner_）で行うため、ここでは行わない
  */
 function deleteText(payload) {
-  if (!isOwner_()) throw new Error('削除はオーナーのみ実行できます');
   var id = (payload && payload.id) || '';
   if (!/^tadoku-\d+$/.test(id)) throw new Error('対象が見つかりません');
   var lock = LockService.getScriptLock();
