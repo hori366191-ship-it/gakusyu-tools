@@ -1,0 +1,17 @@
+﻿{
+    "runtimeVersion":  "V8",
+    "exceptionLogging":  "STACKDRIVER",
+    "webapp":  {
+                   "access":  "ANYONE",
+                   "executeAs":  "USER_ACCESSING"
+               },
+    "dependencies":  {
+
+                     },
+    "oauthScopes":  [
+                        "https://www.googleapis.com/auth/drive",
+                        "https://www.googleapis.com/auth/script.external_request",
+                        "https://www.googleapis.com/auth/userinfo.email"
+                    ],
+    "timeZone":  "Asia/Tokyo"
+}

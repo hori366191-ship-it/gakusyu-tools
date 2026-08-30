@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>月と星座シミュレーター</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='%23fef9c3' stroke='%23b08a3e' stroke-width='1.5'/%3E%3Cpath d='M16 5 A11 11 0 0 0 16 27 A7 11 0 0 1 16 5' fill='%231e2a4a' opacity='.9'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf9f6; --surface:#ffffff; --ink:#20242c; --ink-soft:#565c66;
+  --line:rgba(23,32,52,.12); --accent:#1f2f46; --accent-2:#2a3f5f;
+  --gold:#b08a3e; --ok:#2e7d4f; --bad:#b23a2e; --na:#9aa0a8;
+  --navy:#1e2a4a;
+  --shadow:0 1px 2px rgba(23,32,52,.05), 0 10px 28px -14px rgba(23,32,52,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"Noto Serif JP","Yu Mincho","Hiragino Mincho ProN",Georgia,serif;
+  color:var(--ink);
+  background:
+    radial-gradient(1100px 480px at 50% -140px, rgba(176,138,62,.08), transparent 62%),
+    linear-gradient(180deg,#fbfaf7 0%,#f6f4ef 100%);
+  min-height:100vh;
+  font-variant-numeric:tabular-nums;
+}
+.wrap{max-width:1280px;margin:0 auto;padding:0 28px}
+.hidden{display:none!important}
+.site-header{border-bottom:1px solid var(--line);background:rgba(255,255,255,.55);backdrop-filter:blur(6px)}
+.site-header .wrap{padding-top:26px;padding-bottom:18px;text-align:center}
+.title-row h1{font-size:27px;font-weight:600;letter-spacing:.04em}
+.title-row .sub{margin-top:5px;font-size:11px;letter-spacing:.22em;color:var(--ink-soft);text-transform:uppercase}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 336px;gap:22px;align-items:start;padding-top:24px;padding-bottom:30px}
+.stage{min-width:0;display:flex;flex-direction:column;gap:14px}
+.cv-wrap{position:relative}
+#cvOrbit{display:block;width:100%;height:auto;aspect-ratio:880/460;background:#fbfaf7;
+  border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);touch-action:none}
+#cvSky{display:block;width:100%;height:auto;aspect-ratio:880/320;background:#fbfaf7;
+  border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);touch-action:none;cursor:grab}
+#cvSky.dragging{cursor:grabbing}
+.sub-cap{position:absolute;left:12px;top:9px;font-size:11px;font-weight:700;letter-spacing:.14em;
+  color:var(--accent);text-transform:uppercase;pointer-events:none;background:rgba(251,250,247,.82);padding:1px 6px;border-radius:6px}
+.sub-cap::after{content:"";display:block;height:2px;width:22px;background:var(--gold);margin-top:3px;border-radius:2px}
+.cv-toggle{position:absolute;top:8px;right:8px;z-index:3;font-family:inherit;font-size:11px;font-weight:700;
+  letter-spacing:.05em;padding:5px 12px;border-radius:999px;border:1px solid var(--line);
+  background:rgba(255,255,255,.92);color:var(--accent);cursor:pointer;box-shadow:var(--shadow);
+  transition:background .18s,color .18s,border-color .18s}
+.cv-toggle:hover{border-color:rgba(176,138,62,.6)}
+.cv-toggle.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.panel{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px 16px 14px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--accent);text-transform:uppercase}
+.card-title::after{content:"";display:block;height:2px;width:26px;background:var(--gold);margin-top:5px;border-radius:2px}
+.ctl{display:block;margin-bottom:13px}
+.ctl:last-child{margin-bottom:2px}
+.ctl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;font-size:12.5px;color:var(--ink-soft)}
+.ctl-val{color:var(--accent);font-weight:600;font-size:13px}
+.ctl-val.gold{color:var(--gold)}
+input[type=range]{width:100%;accent-color:var(--accent);height:22px;cursor:pointer}
+.phase-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.phase-grid button{font-family:inherit;font-size:11px;letter-spacing:.03em;color:var(--ink-soft);background:transparent;
+  border:1px solid var(--line);border-radius:8px;padding:7px 2px;cursor:pointer;transition:background .18s,color .18s,border-color .18s;line-height:1.3}
+.phase-grid button:hover{color:var(--accent);border-color:rgba(176,138,62,.6)}
+.phase-grid button.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.phase-grid button span{font-size:10px;color:var(--ink-soft);display:block}
+.phase-grid button.active span{color:rgba(255,255,255,.8)}
+.row-btns{display:flex;gap:9px;margin-top:14px}
+.btn{flex:1;font-family:inherit;font-size:13px;letter-spacing:.06em;color:#fff;background:var(--accent);
+  border:1px solid var(--accent);border-radius:9px;padding:9px 12px;cursor:pointer;transition:background .18s,border-color .18s}
+.btn:hover{background:var(--accent-2);border-color:var(--gold)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.ghost:hover{background:rgba(31,58,95,.06)}
+.btn.sm{font-size:12px;padding:7px 10px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.seg.three{grid-template-columns:1fr 1fr 1fr}
+.seg.four{grid-template-columns:repeat(4,1fr)}
+.seg button{font-family:inherit;font-size:12px;letter-spacing:.05em;color:var(--ink-soft);background:transparent;
+  border:1px solid var(--line);border-radius:8px;padding:7px 4px;cursor:pointer;transition:background .18s,color .18s,border-color .18s}
+.seg button:hover{color:var(--accent);border-color:rgba(176,138,62,.6)}
+.seg button.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.stat{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px dashed rgba(23,32,52,.09);font-size:12.5px}
+.stat:last-child{border-bottom:none}
+.stat .lbl{color:var(--ink-soft)}
+.stat .val{font-weight:600}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.gold{color:var(--gold)}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:5px 8px;margin-top:12px;border-top:1px dashed rgba(23,32,52,.09);padding-top:10px}
+.lg{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-soft)}
+.lg .sw{flex:none;width:22px;height:3px;border-radius:2px}
+.lg .sw.dot{width:9px;height:9px;border-radius:50%}
+.lg .sw.star{width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 4px rgba(255,255,255,.9)}
+.notes{margin-top:12px;font-size:12px;line-height:1.85;color:#59606b;border-left:2px solid rgba(176,138,62,.55);padding-left:12px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;cursor:pointer}
+.toggle input{accent-color:var(--accent)}
+.site-footer{margin-top:6px;border-top:1px solid var(--line);background:rgba(255,255,255,.5)}
+.site-footer .wrap{display:flex;gap:18px 40px;justify-content:center;align-items:center;padding-top:16px;padding-bottom:18px;font-size:13px;color:var(--ink-soft);text-align:center}
+.site-footer .cap{font-size:10.5px;letter-spacing:.2em;color:var(--ink-soft);text-transform:uppercase}
+@media (max-width:820px){
+  .wrap{padding:0 14px}
+  .layout{grid-template-columns:1fr;gap:16px}
+  .title-row h1{font-size:21px}
+  #cvOrbit{aspect-ratio:4/3.2}
+  #cvSky{aspect-ratio:4/1.6}
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <div class="title-row">
+      <h1>月と星座シミュレーター</h1>
+      <div class="sub">Lunar Phases &amp; Constellations</div>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+<div class="layout">
+  <div class="stage">
+    <div class="cv-wrap">
+      <div class="sub-cap" id="capOrbit">宇宙から見た図（北極側から）</div>
+      <button id="btnStrict" class="cv-toggle hidden" type="button">簡易</button>
+      <canvas id="cvOrbit"></canvas>
+    </div>
+    <div class="cv-wrap">
+      <div class="sub-cap" id="capSky">地球から見た月（南の空）</div>
+      <canvas id="cvSky"></canvas>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="card">
+      <div class="seg" id="modeSeg">
+        <button data-mode="moon" class="active">月</button>
+        <button data-mode="const">星座</button>
+      </div>
+    </div>
+
+    <!-- MOON PANELS -->
+    <div id="moonPanels">
+      <div class="card">
+        <div class="card-head"><div class="card-title">月齢・満ち欠け</div><span class="ctl-val gold" id="ageVal2" style="font-size:11px"></span></div>
+        <div class="ctl">
+          <div class="ctl-head"><span>月齢</span><span class="ctl-val" id="ageVal">14.8日</span></div>
+          <input type="range" id="ageSlider" min="0" max="29.5" step="0.1" value="14.8">
+        </div>
+        <div class="stat"><span class="lbl">月相</span><span class="val" id="phaseName">満月</span></div>
+        <div class="stat"><span class="lbl">輝面率</span><span class="val" id="illumVal">100%</span></div>
+        <div class="stat"><span class="lbl">位相角</span><span class="val" id="angleVal">180°</span></div>
+        <div class="phase-grid" id="phaseGrid"></div>
+        <div class="row-btns">
+          <button class="btn" id="btnPlay">▶ アニメ</button>
+          <button class="btn ghost" id="btnReverse">↺ 逆再生</button>
+        </div>
+        <div class="ctl" style="margin-top:12px">
+          <div class="ctl-head"><span>速さ</span></div>
+          <div class="seg" style="margin-bottom:0">
+            <button data-speed="1" class="active">×1</button>
+            <button data-speed="3">×3</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">出・南中・入り</div></div>
+        <div class="stat"><span class="lbl">出（東から昇る）</span><span class="val" id="riseVal">18:00</span></div>
+        <div class="stat"><span class="lbl">南中（南で一番高い）</span><span class="val gold" id="transitVal">00:00</span></div>
+        <div class="stat"><span class="lbl">入り（西へ沈む）</span><span class="val" id="setVal">06:00</span></div>
+        <div class="legend">
+          <div class="lg"><span class="sw" style="background:#eab308"></span>太陽光</div>
+          <div class="lg"><span class="sw" style="background:#1f2f46"></span>影</div>
+          <div class="lg"><span class="sw dot" style="background:#fef9c3;border:1px solid #b08a3e"></span>月</div>
+          <div class="lg"><span class="sw dot" style="background:#60a5fa"></span>地球</div>
+        </div>
+        <div class="notes">毎日約50分遅れます。新月は昼に昇り夜に沈むため、夜空には見えません。<br>満月は日没ごろ昇り、夜通し見えます。</div>
+      </div>
+    </div>
+
+    <!-- CONSTELLATION PANELS -->
+    <div id="constPanels" class="hidden">
+      <div class="card">
+        <div class="card-head"><div class="card-title">日付・季節</div><span class="ctl-val gold" id="dateVal2">3/21 春分</span></div>
+        <div class="ctl">
+          <div class="ctl-head"><span>日付</span><span class="ctl-val" id="dateVal">80日目</span></div>
+          <input type="range" id="dateSlider" min="1" max="365" step="1" value="80">
+        </div>
+        <div class="seg four">
+          <button data-season="80">春分</button>
+          <button data-season="172">夏至</button>
+          <button data-season="266">秋分</button>
+          <button data-season="356">冬至</button>
+        </div>
+        <div class="row-btns">
+          <button class="btn" id="btnPlayYear">▶ 年周アニメ</button>
+          <button class="btn ghost" id="btnStopYear">■ 停止</button>
+        </div>
+        <div class="notes">同じ時刻で日付を進めると、星座が1ヶ月で30°（2時間）西へずれます。年周運動。</div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">見える星座</div></div>
+        <div class="stat"><span class="lbl">南に見える季節</span><span class="val" id="seasonVal">春</span></div>
+        <div class="stat"><span class="lbl">代表</span><span class="val" id="constVal">しし座・おおぐま座</span></div>
+        <div class="stat"><span class="lbl">方角ごとの見え方</span><span class="val" id="azInfoVal">—</span></div>
+        <div class="legend">
+          <div class="lg"><span class="sw dot" style="background:#fff"></span>1等星</div>
+          <div class="lg"><span class="sw" style="background:rgba(96,165,250,.9)"></span>星座線</div>
+          <div class="lg"><span class="sw" style="background:rgba(148,163,184,.7)"></span>天の赤道</div>
+        </div>
+        <div class="notes">下の空をドラッグで全方位に回せます。北を見ると北極星中心に回る星の動きが分かります。</div>
+      </div>
+    </div>
+
+    <!-- COMMON TIME CARD -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">時刻・観測者の位置</div></div>
+      <div class="ctl">
+        <div class="ctl-head"><span>時刻</span><span class="ctl-val" id="timeVal">00:00</span></div>
+        <input type="range" id="timeSlider" min="0" max="24" step="0.25" value="0">
+      </div>
+      <div class="stat"><span class="lbl">観測者の向き</span><span class="val" id="dirVal">南</span></div>
+      <div class="stat"><span class="lbl">月の位置（時角）</span><span class="val" id="hourAngleVal">—</span></div>
+      <div class="stat" id="constTimeStat" class="hidden"><span class="lbl">恒星時</span><span class="val" id="lstVal">—</span></div>
+      <div class="stat"><span class="lbl">見え方</span><span class="val" id="visibilityVal">—</span></div>
+      <div class="row-btns sm">
+        <button class="btn ghost sm" id="btnTransit">南中で見る</button>
+        <button class="btn ghost sm" id="btnEvening">0時で見る</button>
+      </div>
+      <div id="constTimeBtns" class="row-btns sm hidden">
+        <button class="btn sm" id="btnPlayDay">▶ 日周アニメ</button>
+        <button class="btn ghost sm" id="btnStopDay">■ 停止</button>
+      </div>
+      <div class="notes" id="timeNotes">時刻を動かすと地球上の観測者（宇宙図の橙点）が移動し、空の月の位置（東→南→西）が変わります。</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title">表示</div></div>
+      <div id="moonDisplayToggles">
+        <label class="toggle"><input type="checkbox" id="chkSpin" checked> 月の自転（同じ面を向ける）を表示</label>
+        <label class="toggle"><input type="checkbox" id="chkGhost"> 8つの月相を軌道に薄く表示</label>
+        <label class="toggle"><input type="checkbox" id="chkEclipse"> 食の説明を表示（一直線のときだけ）</label>
+      </div>
+      <div id="constDisplayToggles" class="hidden">
+        <!-- 厳密星座方角モードは物理的に誤解を招くため一時停止（恒星は無限遠のため方向は固定されるべき）
+        <label class="toggle"><input type="checkbox" id="chkStrict"> 厳密な星座の方角（地球から12方向の矢印）</label>
+        -->
+        <label class="toggle"><input type="checkbox" id="chkLines" checked> 星座線を表示</label>
+        <label class="toggle"><input type="checkbox" id="chkEquator"> 天の赤道を表示</label>
+        <label class="toggle"><input type="checkbox" id="chkGrid"> 方位グリッドを表示</label>
+      </div>
+      <div class="notes" style="margin-top:8px" id="displayNotes">月は自転周期＝公転周期のため、常に同じ面を地球に向けています。<br>地球の影が欠けの原因ではありません（影は月食のときだけ）。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">学習ポイント</div></div>
+      <div class="notes" style="border-left:none;padding-left:0;margin-top:0" id="learnNotes">
+        ・満ち欠けは <b>太陽に照らされた半分</b>のうち、地球から見える割合で決まります。<br>
+        ・上弦は右半分が光る（12時出→18時南中→0時入り）、下弦は左半分が光ります。<br>
+        ・距離は誇張しています（実際は月まで地球30個分）。角度の関係だけを正しく描いています。
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div><span class="cap">学習ツール</span><br>月と星座シミュレーター</div>
+  </div>
+</footer>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var SYNODIC=29.5;
+var PHASES=[
+  {age:0,   name:'新月',       sub:'朔',        yomi:'しんげつ'},
+  {age:3.7, name:'三日月',     sub:'',          yomi:'みかづき'},
+  {age:7.4, name:'上弦の月',   sub:'',          yomi:'じょうげん'},
+  {age:11.1,name:'十三夜月',   sub:'',          yomi:'じゅうさんや'},
+  {age:14.8,name:'満月',       sub:'望',        yomi:'まんげつ'},
+  {age:18.5,name:'十八夜月',   sub:'',          yomi:'じゅうはちや'},
+  {age:22.1,name:'下弦の月',   sub:'',          yomi:'かげん'},
+  {age:25.8,name:'有明月',     sub:'',          yomi:'ありあけづき'}
+];
+// ---- constellation data ---- 12星座（黄道十二星座）のみ
+var LAT=35; // Tokyo, fixed
+var STARS=[
+  {id:0, name:'おひつじ座', ra:31.8, dec:23.5, mag:2.0, col:'#ffffff'},
+  {id:1, name:'おうし座', ra:68.9, dec:16.5, mag:0.9, col:'#ffd27a'},
+  {id:2, name:'ふたご座', ra:116.3, dec:28.0, mag:1.1, col:'#ffffff'},
+  {id:3, name:'かに座', ra:130.0, dec:19.0, mag:3.5, col:'#ffffff'},
+  {id:4, name:'しし座', ra:152.1, dec:12.0, mag:1.4, col:'#ffffff'},
+  {id:5, name:'おとめ座', ra:201.3, dec:-11.2, mag:1.0, col:'#a8d8ff'},
+  {id:6, name:'てんびん座', ra:220.3, dec:-9.4, mag:2.6, col:'#ffffff'},
+  {id:7, name:'さそり座', ra:247.3, dec:-26.4, mag:1.1, col:'#ff7b4a'},
+  {id:8, name:'いて座', ra:276.0, dec:-34.4, mag:1.8, col:'#ffffff'},
+  {id:9, name:'やぎ座', ra:329.0, dec:-16.1, mag:2.8, col:'#ffffff'},
+  {id:10,name:'みずがめ座', ra:322.9, dec:-0.3, mag:3.0, col:'#ffffff'},
+  {id:11,name:'うお座', ra:30.1, dec:2.8, mag:3.8, col:'#ffffff'},
+  // 北極星は常時表示の基準
+  {id:12,name:'北極星', ra:37.9, dec:89.3, mag:2.0, col:'#ffffff'}
+];
+var CONST_LINES=[
+  {name:'おひつじ座', pts:[0], col:'rgba(96,165,250,.9)'},
+  {name:'おうし座', pts:[1], col:'rgba(96,165,250,.9)'},
+  {name:'ふたご座', pts:[2], col:'rgba(96,165,250,.9)'},
+  {name:'かに座', pts:[3], col:'rgba(96,165,250,.9)'},
+  {name:'しし座', pts:[4], col:'rgba(96,165,250,.9)'},
+  {name:'おとめ座', pts:[5], col:'rgba(96,165,250,.9)'},
+  {name:'てんびん座', pts:[6], col:'rgba(96,165,250,.9)'},
+  {name:'さそり座', pts:[7], col:'rgba(96,165,250,.9)'},
+  {name:'いて座', pts:[8], col:'rgba(96,165,250,.9)'},
+  {name:'やぎ座', pts:[9], col:'rgba(96,165,250,.9)'},
+  {name:'みずがめ座', pts:[10], col:'rgba(96,165,250,.9)'},
+  {name:'うお座', pts:[11], col:'rgba(96,165,250,.9)'}
+];
+var SEASON_MAP=[
+  {d:80,  name:'春', label:'3/21 春分',  consts:'しし座・おとめ座',  desc:'春の夜はしし座が見える（太陽と反対側）'},
+  {d:172, name:'夏', label:'6/21 夏至', consts:'さそり座・いて座', desc:'夏の夜はさそり座・いて座が見える'},
+  {d:266, name:'秋', label:'9/23 秋分', consts:'みずがめ座・うお座', desc:'秋の夜はみずがめ座・うお座が見える'},
+  {d:356, name:'冬', label:'12/21 冬至',consts:'おうし座・ふたご座', desc:'冬の夜はおうし座・ふたご座が見える'}
+];
+
+var state={mode:'moon', age:14.8, time:0, date:80, viewAz:180, playing:false, reverse:false, speed:1, spin:true, ghost:false, eclipse:false, playYear:false, playDay:false, showLines:true, showEquator:false, showGrid:false, strictZodiac:false};
+var cvOrbit, ctxO, cvSky, ctxS, W,H, SW,SH, DPR=1;
+
+// ---------- helpers ----------
+function fmtAge(v){ return v.toFixed(1)+'日'; }
+function fmtPct(v){ return Math.round(v*100)+'%'; }
+function fmtAngle(theta){ return Math.round(theta*180/Math.PI)+'°'; }
+function fmtTime(h){
+  h = ((h%24)+24)%24;
+  var hh = Math.floor(h);
+  var mm = Math.round((h-hh)*60);
+  if(mm===60){ hh=(hh+1)%24; mm=0; }
+  return ('0'+hh).slice(-2)+':'+('0'+mm).slice(-2);
+}
+function fmtDate(d){
+  var monthDays=[31,28,31,30,31,30,31,31,30,31,30,31];
+  var m=0;
+  while(d>monthDays[m]){ d-=monthDays[m]; m++; }
+  return (m+1)+'/'+d;
+}
+function illuminated(theta){ return (1 - Math.cos(theta))/2; }
+function phaseOf(age){
+  var best=PHASES[0], d=1e9;
+  for(var i=0;i<PHASES.length;i++){
+    var diff=Math.abs(age-PHASES[i].age);
+    diff=Math.min(diff, SYNODIC-diff);
+    if(diff<d){ d=diff; best=PHASES[i]; }
+  }
+  if(age<1.2 || age>28.3) return PHASES[0];
+  if(Math.abs(age-14.8)<1.2) return PHASES[4];
+  return best;
+}
+function transitHour(age){ return (12 + age*24/SYNODIC) % 24; }
+function hourAngle(age, time){
+  var tr=transitHour(age);
+  var ha = time - tr;
+  ha = ((ha+12)%24)-12;
+  if(ha<-12) ha+=24; if(ha>12) ha-=24;
+  return ha;
+}
+function fmtHourAngle(ha){
+  var sign = ha>=0? '+':'';
+  return sign+ha.toFixed(1)+'h';
+}
+function sunRA(date){ // degrees — 季節日に正確にアンカー（夏至=90°, 冬至=270°）
+  var pts=[[80,0],[172,90],[266,180],[356,270]];
+  var d=((date%365)+365)%365;
+  if(d<80) d+=365; // 80..444 の範囲へ
+  if(d>=356){
+    return 270+(d-356)/(445-356)*90;
+  }
+  for(var i=0;i<pts.length-1;i++){
+    if(d>=pts[i][0]&&d<pts[i+1][0]){
+      return pts[i][1]+(d-pts[i][0])/(pts[i+1][0]-pts[i][0])*(pts[i+1][1]-pts[i][1]);
+    }
+  }
+  return 0;
+}
+function lstDeg(date, time){
+  var raSun = sunRA(date);
+  var lst = (raSun + (time-12)*15) % 360;
+  if(lst<0) lst+=360;
+  return lst;
+}
+function raDecToAltAz(ra, dec, lst, lat){
+  var H = lst - ra;
+  H = ((H+180)%360)-180;
+  var Hd = H*Math.PI/180, decd=dec*Math.PI/180, latd=lat*Math.PI/180;
+  var sinAlt = Math.sin(decd)*Math.sin(latd) + Math.cos(decd)*Math.cos(latd)*Math.cos(Hd);
+  sinAlt = Math.max(-1, Math.min(1, sinAlt));
+  var alt = Math.asin(sinAlt)*180/Math.PI;
+  var cosAlt = Math.cos(alt*Math.PI/180);
+  var az=0;
+  if(Math.abs(cosAlt)>0.01){
+    var sinAz = -Math.cos(decd)*Math.sin(Hd)/cosAlt;
+    var cosAz = (Math.sin(decd) - sinAlt*Math.sin(latd))/(cosAlt*Math.cos(latd));
+    az = Math.atan2(sinAz, cosAz)*180/Math.PI;
+    az = (az+360)%360; // 0=N, 90=E, 180=S, 270=W
+  }
+  return {alt:alt, az:az, H:H};
+}
+
+// ---------- build phase buttons ----------
+function buildPhaseGrid(){
+  var g=$('phaseGrid'); if(!g) return; g.innerHTML='';
+  PHASES.forEach(function(p){
+    var b=document.createElement('button');
+    b.dataset.age=p.age;
+    b.innerHTML = p.name + '<span>'+p.age.toFixed(1)+'日</span>';
+    b.addEventListener('click',function(){
+      state.age=p.age;
+      $('ageSlider').value=state.age;
+      updateStats();
+    });
+    g.appendChild(b);
+  });
+}
+function updatePhaseGridActive(){
+  var ph=phaseOf(state.age);
+  var btns=document.querySelectorAll('#phaseGrid button');
+  btns.forEach(function(b){
+    var a=parseFloat(b.dataset.age);
+    b.classList.toggle('active', Math.abs(a-ph.age)<0.01);
+  });
+}
+
+// ---------- drawing: orbit view dispatcher ----------
+function drawOrbit(){
+  if(state.mode==='moon') drawOrbitMoon();
+  else drawOrbitConst();
+}
+function drawOrbitMoon(){
+  ctxO.clearRect(0,0,W,H);
+  ctxO.save();
+  ctxO.fillStyle='#fbfaf7';
+  ctxO.fillRect(0,0,W,H);
+  var grd=ctxO.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,Math.max(W,H)*0.7);
+  grd.addColorStop(0,'rgba(176,138,62,.04)');
+  grd.addColorStop(1,'transparent');
+  ctxO.fillStyle=grd; ctxO.fillRect(0,0,W,H);
+  ctxO.restore();
+  var cx = W*0.52, cy = H*0.52;
+  var orbitR = Math.min(W,H)*0.15;
+  if(W<500) orbitR = Math.min(W,H)*0.13;
+  var earthR = 18;
+  var moonR = 11;
+  var sunX = 56, sunY = cy, sunR=22;
+  ctxO.save();
+  ctxO.shadowColor='rgba(234,179,8,.35)'; ctxO.shadowBlur=14;
+  ctxO.fillStyle='#facc15';
+  ctxO.beginPath(); ctxO.arc(sunX,sunY,sunR,0,Math.PI*2); ctxO.fill();
+  ctxO.shadowBlur=0;
+  ctxO.strokeStyle='rgba(180,130,0,.9)'; ctxO.lineWidth=1.2; ctxO.stroke();
+  ctxO.strokeStyle='rgba(234,179,8,.32)'; ctxO.lineWidth=1;
+  for(var i=-3;i<=3;i++){
+    var y = cy + i*18;
+    ctxO.beginPath(); ctxO.moveTo(sunX+sunR+2, y); ctxO.lineTo(cx - earthR -6, y); ctxO.stroke();
+  }
+  ctxO.fillStyle='#7c4a00'; ctxO.font='11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillText('太陽', sunX, sunY+sunR+14);
+  ctxO.fillStyle='rgba(124,74,0,.55)'; ctxO.font='10px "Noto Serif JP",serif';
+  ctxO.fillText('平行光線', sunX+ (cx-sunX)/2, cy - orbitR -14);
+  ctxO.restore();
+  ctxO.save();
+  ctxO.strokeStyle='rgba(31,47,70,.14)'; ctxO.lineWidth=1; ctxO.setLineDash([6,6]);
+  ctxO.beginPath(); ctxO.arc(cx,cy,orbitR,0,Math.PI*2); ctxO.stroke();
+  ctxO.setLineDash([]);
+  // cardinal with halo
+  ['北','南','西','東'].forEach(function(lbl,i){
+    var pos=[ [cx, cy-orbitR-10], [cx, cy+orbitR+16], [cx-orbitR-16, cy+4], [cx+orbitR+16, cy+4] ][i];
+    ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='700 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.strokeText(lbl, pos[0], pos[1]);
+    ctxO.fillStyle='rgba(31,47,70,.88)'; ctxO.fillText(lbl, pos[0], pos[1]);
+  });
+  ctxO.strokeStyle='rgba(31,47,70,.32)'; ctxO.lineWidth=1.1;
+  ctxO.beginPath(); ctxO.arc(cx,cy,orbitR+10, -Math.PI*0.82, -Math.PI*0.68); ctxO.stroke();
+  ctxO.beginPath(); ctxO.moveTo(cx+ orbitR*Math.cos(-Math.PI*0.68), cy+ orbitR*Math.sin(-Math.PI*0.68)); ctxO.lineTo(cx+ orbitR*Math.cos(-Math.PI*0.68)-5, cy+ orbitR*Math.sin(-Math.PI*0.68)-6); ctxO.stroke();
+  ctxO.beginPath(); ctxO.moveTo(cx+ orbitR*Math.cos(-Math.PI*0.68), cy+ orbitR*Math.sin(-Math.PI*0.68)); ctxO.lineTo(cx+ orbitR*Math.cos(-Math.PI*0.68)+1, cy+ orbitR*Math.sin(-Math.PI*0.68)-7); ctxO.stroke();
+  ctxO.font='10px "Noto Serif JP",serif'; ctxO.fillStyle='rgba(31,47,70,.5)';
+  ctxO.fillText('公転（反時計回り）', cx+ orbitR*0.68, cy - orbitR*0.68);
+  ctxO.restore();
+  var theta = state.age/SYNODIC*2*Math.PI;
+  ctxO.save();
+  ctxO.beginPath(); ctxO.arc(cx,cy,earthR,0,Math.PI*2); ctxO.clip();
+  ctxO.fillStyle='#dbeafe';
+  ctxO.fillRect(cx-earthR, cy-earthR, earthR, earthR*2);
+  ctxO.fillStyle='#1e2f46';
+  ctxO.fillRect(cx, cy-earthR, earthR, earthR*2);
+  var gradE=ctxO.createLinearGradient(cx-6,cy,cx+6,cy);
+  gradE.addColorStop(0,'#dbeafe'); gradE.addColorStop(0.5,'#93c5fd'); gradE.addColorStop(1,'#1e2f46');
+  ctxO.fillStyle=gradE; ctxO.fillRect(cx-6, cy-earthR, 12, earthR*2);
+  ctxO.restore();
+  ctxO.strokeStyle='#1f2f46'; ctxO.lineWidth=1.4; ctxO.beginPath(); ctxO.arc(cx,cy,earthR,0,Math.PI*2); ctxO.stroke();
+  // Earth's north pole — top view, pole at center, latitude circles
+  var latRad = 35*Math.PI/180;
+  var latR = earthR * Math.cos(latRad);
+  ctxO.strokeStyle='rgba(239,68,68,.18)'; ctxO.lineWidth=1; ctxO.setLineDash([3,3]);
+  ctxO.beginPath(); ctxO.arc(cx,cy,latR,0,Math.PI*2); ctxO.stroke();
+  ctxO.setLineDash([]);
+  ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(cx, cy, 3.2,0,Math.PI*2); ctxO.fill();
+  ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
+  ctxO.fillStyle='#ef4444'; ctxO.font='700 8px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillText('北極', cx, cy-6);
+  ctxO.fillStyle='rgba(239,68,68,.65)'; ctxO.font='8px "Noto Serif JP",serif';
+  ctxO.fillText('緯度35°', cx+latR+6, cy+4);
+  var obsAng = (360 - state.time*15) * Math.PI/180;
+  var obsX = cx + latR*Math.cos(obsAng), obsY = cy + latR*Math.sin(obsAng);
+  ctxO.fillStyle='#b45309';
+  ctxO.beginPath(); ctxO.arc(obsX, obsY, 3.5,0,Math.PI*2); ctxO.fill();
+  var labelR = earthR+14;
+  var labX = cx + labelR*Math.cos(obsAng), labY = cy + labelR*Math.sin(obsAng);
+  ctxO.fillStyle='#1f2f46'; ctxO.font='600 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  var off = 10;
+  ctxO.fillText('観測者', labX + Math.cos(obsAng)*off, labY + Math.sin(obsAng)*off +4);
+  ctxO.strokeStyle='#b45309'; ctxO.lineWidth=1;
+  var ax = Math.cos(obsAng), ay=Math.sin(obsAng);
+  ctxO.beginPath(); ctxO.moveTo(obsX+ax*2, obsY+ay*2); ctxO.lineTo(obsX+ax*10, obsY+ay*10); ctxO.stroke();
+  ctxO.beginPath(); ctxO.moveTo(obsX+ax*6 - ay*4, obsY+ay*6 + ax*4); ctxO.lineTo(obsX+ax*10, obsY+ay*10); ctxO.lineTo(obsX+ax*6 + ay*4, obsY+ay*6 - ax*4); ctxO.stroke();
+  ctxO.fillStyle='rgba(180,83,9,.9)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillText(fmtTime(state.time), labX + ax*22, labY + ay*22 +3);
+  ctxO.fillStyle='#1f2f46'; ctxO.font='600 12px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillText('地球', cx, cy+5);
+  if(state.ghost){
+    PHASES.forEach(function(p){
+      var th=p.age/SYNODIC*2*Math.PI;
+      var al=Math.PI - th;
+      var mx=cx+orbitR*Math.cos(al), my=cy+orbitR*Math.sin(al);
+      ctxO.save();
+      ctxO.globalAlpha=0.18;
+      ctxO.fillStyle='#fef9c3'; ctxO.strokeStyle='rgba(31,47,70,.35)'; ctxO.lineWidth=0.8;
+      ctxO.beginPath(); ctxO.arc(mx,my,9,0,Math.PI*2); ctxO.fill(); ctxO.stroke();
+      ctxO.globalAlpha=0.55; ctxO.fillStyle='rgba(31,47,70,.55)'; ctxO.font='9px "Noto Serif JP",serif'; ctxO.textAlign='center';
+      ctxO.fillText(p.name, mx, my+9+10);
+      ctxO.restore();
+    });
+  }
+  var ang = Math.PI - theta;
+  var mx = cx + orbitR*Math.cos(ang), my = cy + orbitR*Math.sin(ang);
+  ctxO.save();
+  ctxO.strokeStyle='rgba(176,138,62,.55)'; ctxO.lineWidth=1; ctxO.setLineDash([5,4]);
+  ctxO.beginPath(); ctxO.moveTo(cx,cy); ctxO.lineTo(mx,my); ctxO.stroke();
+  ctxO.setLineDash([]);
+  ctxO.strokeStyle='rgba(176,138,62,.85)'; ctxO.lineWidth=1.2;
+  var arcR=34;
+  var ccw = theta < Math.PI;
+  ctxO.beginPath(); ctxO.arc(cx,cy,arcR, Math.PI, ang, ccw); ctxO.stroke();
+  var ahx=cx+arcR*Math.cos(ang), ahy=cy+arcR*Math.sin(ang);
+  ctxO.beginPath(); ctxO.moveTo(ahx,ahy); ctxO.lineTo(ahx-7*Math.cos(ang-0.35), ahy-7*Math.sin(ang-0.35)); ctxO.stroke();
+  ctxO.beginPath(); ctxO.moveTo(ahx,ahy); ctxO.lineTo(ahx-7*Math.cos(ang+0.35), ahy-7*Math.sin(ang+0.35)); ctxO.stroke();
+  ctxO.fillStyle='rgba(176,138,62,.95)'; ctxO.font='11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  var midAng = (Math.PI + ang)/2;
+  if(theta>0.25 && theta<6.0){
+    var tx=cx+(arcR+14)*Math.cos(midAng), ty=cy+(arcR+14)*Math.sin(midAng);
+    ctxO.fillText(Math.round(theta*180/Math.PI)+'°', tx, ty+3);
+  }
+  ctxO.restore();
+  ctxO.save();
+  ctxO.beginPath(); ctxO.arc(mx,my,moonR,0,Math.PI*2); ctxO.clip();
+  ctxO.fillStyle='#fef9c3'; ctxO.fillRect(mx-moonR, my-moonR, moonR, moonR*2);
+  ctxO.fillStyle='#1e2a4a'; ctxO.fillRect(mx, my-moonR, moonR, moonR*2);
+  var gM=ctxO.createLinearGradient(mx-2,my,mx+2,my);
+  gM.addColorStop(0,'#fef9c3'); gM.addColorStop(0.5,'#e7d9a0'); gM.addColorStop(1,'#1e2a4a');
+  ctxO.fillStyle=gM; ctxO.fillRect(mx-2, my-moonR, 4, moonR*2);
+  ctxO.restore();
+  ctxO.strokeStyle='#b08a3e'; ctxO.lineWidth=1.3; ctxO.beginPath(); ctxO.arc(mx,my,moonR,0,Math.PI*2); ctxO.stroke();
+  if(state.spin){
+    var toEarthX = cx - mx, toEarthY = cy - my;
+    var len=Math.hypot(toEarthX,toEarthY);
+    var ux=toEarthX/len, uy=toEarthY/len;
+    var crX = mx + ux*moonR*0.38, crY = my + uy*moonR*0.38;
+    ctxO.fillStyle='rgba(180,138,62,.42)'; ctxO.beginPath(); ctxO.arc(crX,crY,3,0,Math.PI*2); ctxO.fill();
+    ctxO.strokeStyle='rgba(120,90,30,.55)'; ctxO.lineWidth=0.9; ctxO.stroke();
+    ctxO.fillStyle='rgba(120,90,30,.30)'; ctxO.beginPath(); ctxO.arc(crX+1, crY-0.5, 1.2,0,Math.PI*2); ctxO.fill();
+  }
+  ctxO.fillStyle='#1f2f46'; ctxO.font='600 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillText('月', mx, my - moonR -8);
+  if(state.eclipse){
+    var distNew = Math.min(state.age, SYNODIC-state.age);
+    var distFull = Math.abs(state.age-14.8);
+    ctxO.save();
+    ctxO.font='11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    if(distNew<1.0){
+      ctxO.fillStyle='rgba(185,28,28,.85)';
+      ctxO.fillText('日食の位置（一直線）', mx, my - moonR -18);
+      ctxO.fillStyle='rgba(15,31,58,.18)';
+      ctxO.beginPath(); ctxO.moveTo(mx,my); ctxO.lineTo(cx-4, cy-4); ctxO.lineTo(cx-4, cy+4); ctxO.closePath(); ctxO.fill();
+      if(distNew<0.6){
+        ctxO.fillStyle='rgba(15,31,58,.32)';
+        ctxO.beginPath(); ctxO.arc(cx,cy,8,0,Math.PI*2); ctxO.fill();
+      }
+      ctxO.fillStyle='rgba(185,28,28,.55)'; ctxO.font='10px "Noto Serif JP",serif';
+      ctxO.fillText('※実際は軌道が5°傾いているため毎回は起きません', W*0.5, H-10);
+    } else if(distFull<1.0){
+      ctxO.fillStyle='rgba(185,28,28,.85)';
+      ctxO.fillText('月食の位置（地球の影）', mx, my - moonR -18);
+      ctxO.fillStyle='rgba(15,31,58,.18)';
+      var shadowLen = orbitR*0.95;
+      var sx = cx + Math.cos(0)*shadowLen, sy = cy;
+      ctxO.beginPath(); ctxO.moveTo(cx+earthR, cy-10); ctxO.lineTo(sx, sy-22); ctxO.lineTo(sx, sy+22); ctxO.lineTo(cx+earthR, cy+10); ctxO.closePath(); ctxO.fill();
+      if(distFull<0.6){
+        ctxO.fillStyle='rgba(120,20,20,.45)';
+        ctxO.beginPath(); ctxO.arc(mx,my,moonR,0,Math.PI*2); ctxO.fill();
+        ctxO.strokeStyle='rgba(185,28,28,.9)'; ctxO.lineWidth=1.5; ctxO.stroke();
+      }
+      ctxO.fillStyle='rgba(185,28,28,.55)'; ctxO.font='10px "Noto Serif JP",serif';
+      ctxO.fillText('※実際は傾きで影を外れることがほとんど', W*0.5, H-10);
+    } else {
+      ctxO.fillStyle='rgba(31,47,70,.55)'; ctxO.font='11px "Noto Serif JP",serif';
+      ctxO.setLineDash([3,4]); ctxO.strokeStyle='rgba(185,28,28,.22)'; ctxO.lineWidth=1;
+      ctxO.beginPath(); ctxO.moveTo(cx, cy- orbitR); ctxO.quadraticCurveTo(cx+18, cy, cx, cy+orbitR); ctxO.stroke();
+      ctxO.setLineDash([]);
+      ctxO.fillText('傾き5°で影を外れるため普段は食にならない', W*0.5, H-10);
+    }
+    ctxO.restore();
+  }
+}
+// 星座名ラベルの重なり回避（文字のみ移動。目盛線は実際の角度のまま）
+// 1) 縦に重なる近接ペアは内側=上／外側=下に分離  2) 下部の注記行と被るラベルは上へ逃がす
+function spreadBeltLabels(labs){
+  var LH=13;
+  for(var i=0;i<labs.length-1;i++){
+    var A=labs[i], B=labs[i+1];
+    var wA=A.name.length*11+4, wB=B.name.length*11+4;
+    if(Math.abs(A.x-B.x)<(wA+wB)/2 && Math.abs(A.y-B.y)<LH){
+      var mid=(A.y+B.y)/2;
+      if(A.outer){ A.y=mid+LH/2+0.5; B.y=mid-LH/2-0.5; }
+      else       { A.y=mid-LH/2-0.5; B.y=mid+LH/2+0.5; }
+    }
+  }
+  for(var round=0;round<4;round++){
+    var moved=false;
+    labs.forEach(function(L){
+      var w=L.name.length*11+4, guard=0;
+      function blocked(){
+        if(L.y>H-37 && L.x-w/2<310) return true;
+        for(var k=0;k<labs.length;k++){
+          var M=labs[k];
+          if(M!==L && Math.abs(M.x-L.x)<(w+M.name.length*11+4)/2 && Math.abs(M.y-L.y)<LH) return true;
+        }
+        return false;
+      }
+      while(blocked()&&guard++<40){ L.y-=2; moved=true; }
+    });
+    if(!moved) break;
+  }
+}
+function drawOrbitConst(){
+  ctxO.clearRect(0,0,W,H);
+  ctxO.fillStyle='#fbfaf7'; ctxO.fillRect(0,0,W,H);
+  var grd=ctxO.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,Math.max(W,H)*0.7);
+  grd.addColorStop(0,'rgba(176,138,62,.05)'); grd.addColorStop(1,'transparent');
+  ctxO.fillStyle=grd; ctxO.fillRect(0,0,W,H);
+  var cx=W*0.5, cy=H*0.52;
+  var orbitR=Math.min(W,H)*0.12;
+  if(W<500) orbitR=Math.min(W,H)*0.10;
+  var earthR=14;
+  var sunR=10;
+  // 星座帯の円は描画領域いっぱいに（恒星は無限遠という物理的事実の表現）
+  var beltR=Math.min(W,H)*0.46;
+  // sun at center for constellation mode
+  ctxO.save();
+  ctxO.shadowColor='rgba(234,179,8,.32)'; ctxO.shadowBlur=12;
+  ctxO.fillStyle='#facc15'; ctxO.beginPath(); ctxO.arc(cx,cy,sunR,0,Math.PI*2); ctxO.fill();
+  ctxO.shadowBlur=0;
+  ctxO.strokeStyle='rgba(180,130,0,.9)'; ctxO.lineWidth=1; ctxO.stroke();
+  ctxO.fillStyle='#7c4a00'; ctxO.font='11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillText('太陽', cx, cy+sunR+12);
+  ctxO.restore();
+  // ecliptic orbit
+  ctxO.save();
+  ctxO.strokeStyle='rgba(234,179,8,.28)'; ctxO.lineWidth=1.2; ctxO.setLineDash([7,5]);
+  ctxO.beginPath(); ctxO.arc(cx,cy,orbitR,0,Math.PI*2); ctxO.stroke();
+  ctxO.setLineDash([]);
+  // earth on orbit — textbook: top=spring, left=summer, bottom=autumn, right=winter (counterclockwise)
+  var sunRAVal = sunRA(state.date);
+  var earthTheta = (-sunRAVal - 90 + 720)%360 *Math.PI/180;
+  var ex=cx+orbitR*Math.cos(earthTheta), ey=cy+orbitR*Math.sin(earthTheta);
+  // earth
+  ctxO.fillStyle='#60a5fa'; ctxO.beginPath(); ctxO.arc(ex,ey,earthR,0,Math.PI*2); ctxO.fill();
+  ctxO.strokeStyle='#1e3a5a'; ctxO.lineWidth=1.2; ctxO.stroke();
+  ctxO.fillStyle='#fff'; ctxO.font='600 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillText('地球', ex, ey+4);
+  // night side fan (visible sky direction opposite sun)
+  var nightAng = earthTheta; // direction from earth away from sun (earth-sun vector)
+  var fanR = (beltR - orbitR)*0.42;
+  ctxO.fillStyle='rgba(15,31,58,.10)';
+  ctxO.beginPath(); ctxO.moveTo(ex,ey); ctxO.arc(ex,ey,fanR, nightAng-Math.PI/2, nightAng+Math.PI/2); ctxO.closePath(); ctxO.fill();
+  ctxO.strokeStyle='rgba(15,31,58,.18)'; ctxO.setLineDash([4,4]); ctxO.lineWidth=1;
+  ctxO.beginPath(); ctxO.moveTo(ex,ey); ctxO.arc(ex,ey,fanR, nightAng-Math.PI/2, nightAng+Math.PI/2); ctxO.closePath(); ctxO.stroke();
+  ctxO.setLineDash([]);
+  // observer on earth — correct for top view (north pole at Earth's center, latitude 35°)
+  var latRad = 35*Math.PI/180;
+  var latR = earthR * Math.cos(latRad);
+  // north pole at Earth's center
+  ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(ex,ey,2.8,0,Math.PI*2); ctxO.fill();
+  ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
+  var sunDir = (-sunRAVal + 90 + 720)%360; // direction Earth->Sun (toward center)
+  var obsAngEarth = (sunDir + (state.time-12)*15) *Math.PI/180;
+  var obsX = ex + latR*Math.cos(obsAngEarth), obsY = ey + latR*Math.sin(obsAngEarth);
+  ctxO.fillStyle='#b45309'; ctxO.beginPath(); ctxO.arc(obsX,obsY,3.2,0,Math.PI*2); ctxO.fill();
+  ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
+  // compass arrows from observer — north toward north pole (center), south outward
+  // local directions: north = toward center (north pole projection), south = opposite, east/west = 90° from north
+  var dxN = ex - obsX, dyN = ey - obsY;
+  var nlen = Math.hypot(dxN, dyN) || 1;
+  var nx = dxN/nlen, ny = dyN/nlen;
+  var sx = -nx, sy = -ny;
+  var exx = -ny, eyx = nx; // east = (-ny, nx) = 90° clockwise from north in screen coords
+  var wxx = ny, wyx = -nx;
+  var len=20;
+  var dirs=[
+    {x:nx, y:ny, label:'北', col:'#ef4444'},
+    {x:exx, y:eyx, label:'東', col:'#22c55e'},
+    {x:sx, y:sy, label:'南', col:'#eab308'},
+    {x:wxx, y:wyx, label:'西', col:'#3b82f6'}
+  ];
+  dirs.forEach(function(d){
+    var x2=obsX + d.x*len, y2=obsY + d.y*len;
+    var a=Math.atan2(d.y, d.x);
+    ctxO.strokeStyle=d.col; ctxO.lineWidth=1.3;
+    ctxO.beginPath(); ctxO.moveTo(obsX,obsY); ctxO.lineTo(x2,y2); ctxO.stroke();
+    ctxO.beginPath(); ctxO.moveTo(x2,y2); ctxO.lineTo(x2-6*Math.cos(a-0.4), y2-6*Math.sin(a-0.4)); ctxO.stroke();
+    ctxO.beginPath(); ctxO.moveTo(x2,y2); ctxO.lineTo(x2-6*Math.cos(a+0.4), y2-6*Math.sin(a+0.4)); ctxO.stroke();
+    var lx=x2+Math.cos(a)*8, ly=y2+Math.sin(a)*8+3;
+    ctxO.strokeStyle='rgba(255,255,255,.95)'; ctxO.lineWidth=3; ctxO.font='700 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.strokeText(d.label, lx, ly);
+    ctxO.fillStyle=d.col; ctxO.fillText(d.label, lx, ly);
+  });
+  ctxO.fillStyle='rgba(180,83,9,.9)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillText(fmtTime(state.time), obsX, obsY-10);
+  // constellations belt outside — 簡易(等間隔30°) / 厳密(実際の赤経位置)
+  var curSeason=SEASON_MAP.reduce(function(a,b){ var da=Math.abs(state.date-b.d); if(da>182) da=365-da; var aa=Math.abs(state.date-a.d); if(aa>182) aa=365-aa; return da<aa?b:a; });
+  ctxO.save();
+  if(state.strictZodiac){
+    // 厳密モード: 各星座の代表星の実際の赤経を外周円に配置（等間隔ではない）
+    ctxO.strokeStyle='rgba(96,165,250,.16)'; ctxO.lineWidth=1; ctxO.beginPath(); ctxO.arc(cx,cy,beltR,0,Math.PI*2); ctxO.stroke();
+    // 近接する星座名の重なり回避: 角度順にソートし、間隔が狭い場合は帯の外側に交互に逃がす
+    var items=[];
+    STARS.forEach(function(s){ if(s.id<12){ items.push({s:s, ang:(90-s.ra+720)%360}); } });
+    items.sort(function(a,b){ return a.ang-b.ang; });
+    var prevAng=-999, ring=0;
+    items.forEach(function(it){
+      if(prevAng>-999){
+        var gp=(it.ang-prevAng+360)%360;
+        ring = gp<14 ? ring+1 : 0;
+      } else { ring=0; }
+      it.r=beltR+(ring%2===1?17:0);
+      it.ring=ring;
+      prevAng=it.ang;
+    });
+    items.forEach(function(it){
+      var a=it.ang*Math.PI/180;
+      // 目盛線（内側4px）— 実際の角度のまま
+      ctxO.strokeStyle='rgba(96,165,250,.35)'; ctxO.lineWidth=1;
+      ctxO.beginPath();
+      ctxO.moveTo(cx+(beltR-5)*Math.cos(a), cy+(beltR-5)*Math.sin(a));
+      ctxO.lineTo(cx+(beltR+1)*Math.cos(a), cy+(beltR+1)*Math.sin(a));
+      ctxO.stroke();
+    });
+    var labs=items.map(function(it){
+      var a=it.ang*Math.PI/180;
+      return {name:it.s.name, x:cx+it.r*Math.cos(a), y:cy+it.r*Math.sin(a)+4, outer:it.r>beltR+0.5};
+    });
+    spreadBeltLabels(labs);
+    labs.forEach(function(L){
+      // 名前（白縁）
+      ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='500 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+      ctxO.strokeText(L.name, L.x, L.y);
+      ctxO.fillStyle='rgba(31,47,70,.88)';
+      ctxO.fillText(L.name, L.x, L.y);
+    });
+    ctxO.fillStyle='#1f2f46'; ctxO.font='600 11px "Noto Serif JP",serif'; ctxO.textAlign='left';
+    ctxO.fillText(curSeason.name+'の星座: '+curSeason.consts, 10, H-10);
+    ctxO.fillStyle='rgba(31,47,70,.58)'; ctxO.font='8.5px "Noto Serif JP",serif';
+    ctxO.fillText('※ 星座の間隔は実際の赤経に基づきます（等間隔ではありません）。', 10, H-24);
+  } else {
+    // 簡易モード: 等間隔30°
+    ctxO.strokeStyle='rgba(96,165,250,.12)'; ctxO.lineWidth=1; ctxO.beginPath(); ctxO.arc(cx,cy,beltR,0,Math.PI*2); ctxO.stroke();
+    var zodiacs=['おひつじ','おうし','ふたご','かに','しし','おとめ','てんびん','さそり','いて','やぎ','みずがめ','うお'];
+    var labs=zodiacs.map(function(name,i){
+      var ang=(45-i*30)*Math.PI/180; // 各季節の深夜0時に扇中心へ来る2星座が下側の星空（LST）と一致するよう調整
+      return {name:name, x:cx+beltR*Math.cos(ang), y:cy+beltR*Math.sin(ang)+4, outer:false};
+    });
+    spreadBeltLabels(labs);
+    labs.forEach(function(L){
+      ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='500 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+      ctxO.strokeText(L.name, L.x, L.y);
+      ctxO.fillStyle='rgba(31,47,70,.88)';
+      ctxO.fillText(L.name, L.x, L.y);
+    });
+    ctxO.fillStyle='#1f2f46'; ctxO.font='600 11px "Noto Serif JP",serif'; ctxO.textAlign='left';
+    ctxO.fillText(curSeason.name+'の星座: '+curSeason.consts, 10, H-10);
+    ctxO.fillStyle='rgba(31,47,70,.58)'; ctxO.font='8.5px "Noto Serif JP",serif';
+    ctxO.fillText('※ 星座の位置・方角は学習用の簡易表示です。', 10, H-24);
+  }
+  ctxO.restore();
+  // 「公転軌道」＋季節ラベル — 地球や注釈に隠れないよう最前面に描画（キャプションは軌道内側・太陽ラベルの下）
+  ctxO.strokeStyle='rgba(251,250,247,.9)'; ctxO.lineWidth=3; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.strokeText('公転軌道', cx, cy + sunR + 28);
+  ctxO.fillStyle='rgba(180,130,0,.55)'; ctxO.fillText('公転軌道', cx, cy + sunR + 28);
+  var seasons=[{d:80,label:'春分',deg:270},{d:172,label:'夏至',deg:180},{d:266,label:'秋分',deg:90},{d:356,label:'冬至',deg:0}];
+  seasons.forEach(function(s){
+    var a=s.deg*Math.PI/180;
+    var lr=orbitR+30;
+    var x=cx+lr*Math.cos(a), y=cy+lr*Math.sin(a);
+    ctxO.strokeStyle='rgba(251,250,247,.9)'; ctxO.lineWidth=3; ctxO.font='700 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.strokeText(s.label, x, y + 4);
+    ctxO.fillStyle='rgba(31,47,70,.88)'; ctxO.fillText(s.label, x, y + 4);
+  });
+}
+
+// ---------- drawing: sky view dispatcher ----------
+function drawSky(){
+  if(state.mode==='moon') drawSkyMoon();
+  else drawSkyConst();
+}
+function drawSkyMoon(){
+  ctxS.clearRect(0,0,SW,SH);
+  var theta = state.age/SYNODIC*2*Math.PI;
+  var ill = illuminated(theta);
+  var skyGrad=ctxS.createLinearGradient(0,0,0,SH);
+  skyGrad.addColorStop(0,'#0f1f3a');
+  skyGrad.addColorStop(0.55,'#1e2f46');
+  skyGrad.addColorStop(0.75,'#223a5a');
+  skyGrad.addColorStop(1,'#2a3a32');
+  ctxS.fillStyle=skyGrad; ctxS.fillRect(0,0,SW,SH);
+  ctxS.fillStyle='rgba(255,255,255,.55)';
+  var stars=[[0.12,0.18],[0.22,0.12],[0.35,0.22],[0.48,0.15],[0.62,0.10],[0.78,0.18],[0.88,0.24],[0.15,0.32],[0.42,0.28],[0.68,0.30],[0.82,0.08],[0.55,0.06]];
+  stars.forEach(function(s){
+    var x=s[0]*SW, y=s[1]*SH*0.6;
+    ctxS.beginPath(); ctxS.arc(x,y,0.9,0,Math.PI*2); ctxS.fill();
+    if(Math.random()<0.3){ ctxS.globalAlpha=0.35; ctxS.beginPath(); ctxS.arc(x,y,1.7,0,Math.PI*2); ctxS.fill(); ctxS.globalAlpha=1; }
+  });
+  var groundY = SH*0.72;
+  ctxS.fillStyle='#0f1a12';
+  ctxS.fillRect(0, groundY, SW, SH-groundY);
+  ctxS.fillStyle='#16232e';
+  ctxS.beginPath(); ctxS.moveTo(0, groundY);
+  ctxS.lineTo(SW*0.08, groundY-18); ctxS.lineTo(SW*0.18, groundY-8); ctxS.lineTo(SW*0.28, groundY-22);
+  ctxS.lineTo(SW*0.42, groundY-10); ctxS.lineTo(SW*0.58, groundY-20); ctxS.lineTo(SW*0.72, groundY-12);
+  ctxS.lineTo(SW*0.85, groundY-18); ctxS.lineTo(SW, groundY-6); ctxS.lineTo(SW, groundY); ctxS.closePath(); ctxS.fill();
+  ctxS.strokeStyle='rgba(176,138,62,.9)'; ctxS.lineWidth=1.2;
+  ctxS.beginPath(); ctxS.moveTo(0, groundY+0.5); ctxS.lineTo(SW, groundY+0.5); ctxS.stroke();
+  var viewAz = state.viewAz;
+  // ground compass bar — prominent
+  ctxS.fillStyle='rgba(255,255,255,.06)'; ctxS.fillRect(SW*0.04, groundY+10, SW*0.92, 30);
+  ctxS.strokeStyle='rgba(255,255,255,.12)'; ctxS.lineWidth=1; ctxS.strokeRect(SW*0.04, groundY+10, SW*0.92, 30);
+  [0,90,180,270].forEach(function(az){
+    var rel=((az - viewAz +540)%360)-180;
+    if(Math.abs(rel)>88) return;
+    var x=SW*0.5 + rel/90*SW*0.38;
+    var isCenter=Math.abs(rel)<12;
+    ctxS.strokeStyle= isCenter? 'rgba(250,204,21,.95)' : 'rgba(255,255,255,.35)';
+    ctxS.lineWidth= isCenter? 2:1;
+    ctxS.beginPath(); ctxS.moveTo(x, groundY+12); ctxS.lineTo(x, groundY+24); ctxS.stroke();
+    var name=azName(az);
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font=isCenter?'700 13px "Noto Serif JP",serif':'600 11px "Noto Serif JP",serif'; ctxS.textAlign='center';
+    ctxS.strokeText(name, x, groundY+34);
+    ctxS.fillStyle=isCenter? '#facc15':'rgba(255,255,255,.92)';
+    ctxS.fillText(name, x, groundY+34);
+  });
+  ctxS.fillStyle='rgba(250,204,21,.95)'; ctxS.beginPath(); ctxS.moveTo(SW*0.5, groundY+10); ctxS.lineTo(SW*0.5-6, groundY+4); ctxS.lineTo(SW*0.5+6, groundY+4); ctxS.closePath(); ctxS.fill();
+  ctxS.fillStyle='rgba(255,255,255,.9)'; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='center';
+  ctxS.fillText('正面：'+azName(viewAz), SW*0.5, groundY+8);
+  var moonR = Math.min(SW,SH)*0.16;
+  if(SW<500) moonR = Math.min(SW,SH)*0.18;
+  var trSky = transitHour(state.age);
+  var haSky = hourAngle(state.age, state.time);
+  var isAbove = Math.abs(haSky) <= 6.05;
+  var groundYForMoon = groundY;
+  var mx, my;
+  if(isAbove){
+    mx = SW*0.5 + (haSky/6)*(SW*0.34);
+    var altFactor = Math.cos(haSky/6 * Math.PI/2);
+    my = groundYForMoon - 32 - altFactor* (SH*0.22);
+  } else {
+    mx = SW*0.5 + (haSky>0? SW*0.34 : -SW*0.34);
+    my = groundYForMoon + 18;
+  }
+  if(isAbove && ill>0.92){
+    ctxS.save();
+    var g=ctxS.createRadialGradient(mx,my,moonR*0.9, mx,my,moonR*2.2);
+    g.addColorStop(0,'rgba(254,249,195,.38)'); g.addColorStop(1,'transparent');
+    ctxS.fillStyle=g; ctxS.beginPath(); ctxS.arc(mx,my,moonR*2.2,0,Math.PI*2); ctxS.fill();
+    ctxS.restore();
+  }
+  if(isAbove){
+    drawMoonPhase(ctxS, mx, my, moonR, theta);
+    ctxS.strokeStyle='rgba(176,138,62,.9)'; ctxS.lineWidth=1.4;
+    ctxS.beginPath(); ctxS.arc(mx,my,moonR,0,Math.PI*2); ctxS.stroke();
+  } else {
+    ctxS.save();
+    ctxS.setLineDash([4,4]); ctxS.strokeStyle='rgba(176,138,62,.35)'; ctxS.lineWidth=1.1;
+    ctxS.beginPath(); ctxS.arc(SW*0.5 + (haSky>0? SW*0.34 : -SW*0.34), groundYForMoon+10, moonR*0.9,0,Math.PI*2); ctxS.stroke();
+    ctxS.setLineDash([]);
+    ctxS.fillStyle='rgba(255,255,255,.45)'; ctxS.font='11px "Noto Serif JP",serif'; ctxS.textAlign='center';
+    ctxS.fillText('地平線の下', SW*0.5, groundYForMoon - 10);
+    ctxS.restore();
+  }
+  if(state.spin && isAbove){
+    var isWaxing = theta < Math.PI;
+    var offset = (isWaxing ? 0.12 : -0.12)*moonR;
+    ctxS.fillStyle='rgba(120,90,30,.22)'; ctxS.beginPath(); ctxS.arc(mx+offset, my-6, 6,0,Math.PI*2); ctxS.fill();
+    ctxS.strokeStyle='rgba(120,90,30,.32)'; ctxS.lineWidth=0.9; ctxS.stroke();
+    ctxS.fillStyle='rgba(120,90,30,.14)'; ctxS.beginPath(); ctxS.arc(mx+offset+1.5, my-7, 2.2,0,Math.PI*2); ctxS.fill();
+    ctxS.fillStyle='rgba(120,90,30,.18)'; ctxS.beginPath(); ctxS.arc(mx+offset-4, my+7, 3.5,0,Math.PI*2); ctxS.fill();
+    ctxS.strokeStyle='rgba(120,90,30,.30)'; ctxS.lineWidth=0.7; ctxS.stroke();
+  }
+  var ph = phaseOf(state.age);
+  ctxS.save();
+  ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.textAlign='left';
+  ctxS.font='700 14px "Noto Serif JP",serif'; ctxS.strokeText(ph.name, 12, 22);
+  ctxS.fillStyle='#ffffff'; ctxS.fillText(ph.name, 12, 22);
+  ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font='600 11px "Noto Serif JP",serif';
+  ctxS.strokeText('輝面率 '+fmtPct(ill)+' ・ '+ph.yomi, 12, 38);
+  ctxS.fillStyle='rgba(255,255,255,.88)'; ctxS.fillText('輝面率 '+fmtPct(ill)+' ・ '+ph.yomi, 12, 38);
+  var isWaxing = theta < Math.PI && ill>0.02 && ill<0.98;
+  var isWaning = theta >= Math.PI && ill>0.02 && ill<0.98;
+  ctxS.textAlign='right';
+  if(isWaxing){
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeText('右側が光る →', SW-12, 22);
+    ctxS.fillStyle='#fef9c3'; ctxS.fillText('右側が光る →', SW-12, 22);
+    ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif';
+    ctxS.strokeText('太陽は西（右）側', SW-12, 38);
+    ctxS.fillStyle='rgba(255,255,255,.88)'; ctxS.fillText('太陽は西（右）側', SW-12, 38);
+  } else if(isWaning){
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeText('← 左側が光る', SW-12, 22);
+    ctxS.fillStyle='#fef9c3'; ctxS.fillText('← 左側が光る', SW-12, 22);
+    ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif';
+    ctxS.strokeText('太陽は東（左）側', SW-12, 38);
+    ctxS.fillStyle='rgba(255,255,255,.88)'; ctxS.fillText('太陽は東（左）側', SW-12, 38);
+  } else if(ill<0.02){
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeText('見えない（太陽と同じ方向）', SW-12, 22);
+    ctxS.fillStyle='rgba(255,255,255,.9)'; ctxS.fillText('見えない（太陽と同じ方向）', SW-12, 22);
+  } else if(ill>0.98){
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeText('全体が光る', SW-12, 22);
+    ctxS.fillStyle='#fef9c3'; ctxS.fillText('全体が光る', SW-12, 22);
+  }
+  ctxS.restore();
+  var barY = SH*0.86, barH=3, barW=SW*0.72, barX=(SW-barW)/2;
+  var tr=transitHour(state.age), ri=(tr-6+24)%24, st=(tr+6)%24;
+  ctxS.fillStyle='rgba(255,255,255,.14)'; ctxS.fillRect(barX, barY, barW, barH);
+  var scale = function(h){ return barX + h/24*barW; };
+  ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font='9px "Noto Serif JP",serif'; ctxS.textAlign='center';
+  ctxS.fillText('0時', scale(0), barY+12); ctxS.fillText('12時', scale(12), barY+12); ctxS.fillText('24時', scale(24)-10, barY+12);
+  [{h:ri, col:'#60a5fa', lbl:'出'}, {h:tr, col:'#facc15', lbl:'南中'}, {h:st, col:'#f87171', lbl:'入り'}].forEach(function(m){
+    var x=scale(m.h);
+    ctxS.fillStyle=m.col; ctxS.beginPath(); ctxS.arc(x, barY+barH/2, 4,0,Math.PI*2); ctxS.fill();
+    ctxS.fillStyle='rgba(255,255,255,.85)'; ctxS.font='9px "Noto Serif JP",serif'; ctxS.textAlign='center';
+    ctxS.fillText(m.lbl, x, barY-6);
+    ctxS.fillText(fmtTime(m.h), x, barY+22);
+  });
+  var curX = scale(state.time);
+  ctxS.fillStyle='rgba(255,255,255,.95)';
+  ctxS.beginPath(); ctxS.moveTo(curX, barY-7); ctxS.lineTo(curX-5, barY-13); ctxS.lineTo(curX+5, barY-13); ctxS.closePath(); ctxS.fill();
+  ctxS.strokeStyle='rgba(15,31,58,.9)'; ctxS.lineWidth=0.8; ctxS.stroke();
+  ctxS.fillStyle='rgba(255,255,255,.95)'; ctxS.font='600 9px "Noto Serif JP",serif'; ctxS.textAlign='center';
+  ctxS.fillText('今 '+fmtTime(state.time), curX, barY-15);
+}
+function azName(az){
+  az=((az%360)+360)%360;
+  if(az>=315||az<45) return '北';
+  if(az>=45&&az<135) return '東';
+  if(az>=135&&az<225) return '南';
+  return '西';
+}
+function drawSkyConst(){
+  ctxS.clearRect(0,0,SW,SH);
+  var lst = lstDeg(state.date, state.time);
+  var groundY=SH*0.72;
+  // sky gradient
+  var skyGrad=ctxS.createLinearGradient(0,0,0,SH);
+  skyGrad.addColorStop(0,'#020617'); skyGrad.addColorStop(0.5,'#0f172a'); skyGrad.addColorStop(0.75,'#1e293b'); skyGrad.addColorStop(1,'#0f1a12');
+  ctxS.fillStyle=skyGrad; ctxS.fillRect(0,0,SW,SH);
+  // stars
+  var visibleCount=0;
+  STARS.forEach(function(s){
+    var p=raDecToAltAz(s.ra, s.dec, lst, LAT);
+    if(p.alt<0) return;
+    var relAz = ((p.az - state.viewAz +540)%360)-180;
+    if(Math.abs(relAz)>92) return;
+    visibleCount++;
+    var x = SW*0.5 + relAz/90*SW*0.38;
+    var altNorm = p.alt/90;
+    var y = groundY - 8 - altNorm*(groundY*0.68);
+    var r = s.mag<0? 2.8 : s.mag<1? 2.2 : s.mag<2? 1.7 : s.mag<3? 1.2 : 0.9;
+    if(s.id===0) r=2.6; // Polaris slightly larger
+    ctxS.fillStyle=s.col;
+    ctxS.shadowColor=s.col; ctxS.shadowBlur= r>1.8? 6:0;
+    ctxS.beginPath(); ctxS.arc(x,y,r,0,Math.PI*2); ctxS.fill();
+    ctxS.shadowBlur=0;
+    // star name — small, less prominent than constellation name
+    if(s.mag<0.5){
+      ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font='500 8px "Noto Serif JP",serif'; ctxS.textAlign='center';
+      ctxS.fillText(s.name, x, y-7);
+    }
+  });
+  // constellation lines — thicker for visibility
+  if(state.showLines){
+    CONST_LINES.forEach(function(c){
+      ctxS.strokeStyle=c.col; ctxS.lineWidth=1.6;
+      ctxS.beginPath();
+      var started=false;
+      for(var i=0;i<c.pts.length-1;i++){
+        var s1=STARS[c.pts[i]], s2=STARS[c.pts[i+1]];
+        if(!s1||!s2) continue;
+        var p1=raDecToAltAz(s1.ra,s1.dec,lst,LAT), p2=raDecToAltAz(s2.ra,s2.dec,lst,LAT);
+        if(p1.alt<0||p2.alt<0) { started=false; continue; }
+        var rel1=((p1.az-state.viewAz+540)%360)-180, rel2=((p2.az-state.viewAz+540)%360)-180;
+        if(Math.abs(rel1)>92||Math.abs(rel2)>92) { started=false; continue; }
+        if(Math.abs(rel1-rel2)>120){ started=false; continue; } // wrap
+        var x1=SW*0.5+rel1/90*SW*0.38, y1=groundY-8 - p1.alt/90*(groundY*0.68);
+        var x2=SW*0.5+rel2/90*SW*0.38, y2=groundY-8 - p2.alt/90*(groundY*0.68);
+        if(!started){ ctxS.moveTo(x1,y1); started=true; }
+        ctxS.lineTo(x2,y2);
+      }
+      ctxS.stroke();
+    });
+    // constellation names — all 12 always visible (even below horizon, dimmed at ground)
+    CONST_LINES.forEach(function(c){
+      var s=STARS[c.pts[0]]; if(!s) return;
+      var p=raDecToAltAz(s.ra,s.dec,lst,LAT);
+      var rel=((p.az-state.viewAz+540)%360)-180;
+      var isVisible = p.alt>0 && Math.abs(rel)<=92;
+      var x,y;
+      if(isVisible){
+        x=SW*0.5+rel/90*SW*0.38;
+        y=groundY-8 - p.alt/90*(groundY*0.68) - 14;
+      } else {
+        // show at horizon, dimmed, clamped to view
+        var clampedRel = Math.max(-88, Math.min(88, rel));
+        // if far behind, wrap to edge
+        if(Math.abs(rel)>150) clampedRel = rel>0? 88 : -88;
+        x=SW*0.5+clampedRel/90*SW*0.38;
+        y=groundY+22;
+      }
+      ctxS.globalAlpha = isVisible? 1 : 0.42;
+      ctxS.strokeStyle='rgba(15,23,42,.92)'; ctxS.lineWidth=4; ctxS.font='700 12px "Noto Serif JP",serif'; ctxS.textAlign='center';
+      ctxS.strokeText(c.name, x, y);
+      ctxS.fillStyle= isVisible? (c.col.includes('250,204')? '#facc15' : '#93c5fd') : 'rgba(148,163,184,.85)';
+      ctxS.fillText(c.name, x, y);
+      ctxS.globalAlpha=1;
+      // small dot at actual star position if visible, already drawn as star; if not visible, draw faint dot at horizon
+      if(!isVisible){
+        ctxS.fillStyle='rgba(255,255,255,.18)'; ctxS.beginPath(); ctxS.arc(x, groundY+8, 1.2,0,Math.PI*2); ctxS.fill();
+      }
+    });
+  }
+  if(state.showEquator){
+    ctxS.strokeStyle='rgba(148,163,184,.45)'; ctxS.lineWidth=1; ctxS.setLineDash([3,4]);
+    ctxS.beginPath();
+    var started=false;
+    for(var ra=0; ra<=360; ra+=4){
+      var p=raDecToAltAz(ra, 0, lst, LAT);
+      if(p.alt<0){ started=false; continue; }
+      var rel=((p.az-state.viewAz+540)%360)-180;
+      if(Math.abs(rel)>92){ started=false; continue; }
+      var x=SW*0.5+rel/90*SW*0.38, y=groundY-8 - p.alt/90*(groundY*0.68);
+      if(!started){ ctxS.moveTo(x,y); started=true; } else ctxS.lineTo(x,y);
+    }
+    ctxS.stroke(); ctxS.setLineDash([]);
+  }
+  if(state.showGrid){
+    // vertical azimuth lines every 30°
+    ctxS.strokeStyle='rgba(255,255,255,.07)'; ctxS.lineWidth=1;
+    for(var dAz=-90; dAz<=90; dAz+=30){
+      var absAz=(state.viewAz + dAz +360)%360;
+      // draw vertical line at relAz = dAz
+      var x=SW*0.5 + dAz/90*SW*0.38;
+      ctxS.beginPath(); ctxS.moveTo(x, 14); ctxS.lineTo(x, groundY); ctxS.stroke();
+      ctxS.fillStyle='rgba(255,255,255,.35)'; ctxS.font='9px "Noto Serif JP",serif'; ctxS.textAlign='center';
+      var label=azName(absAz);
+      ctxS.fillText(label, x, 14);
+    }
+    // altitude lines
+    for(var alt=30; alt<90; alt+=30){
+      var y=groundY-8 - alt/90*(groundY*0.68);
+      ctxS.beginPath(); ctxS.moveTo(SW*0.08, y); ctxS.lineTo(SW*0.92, y); ctxS.stroke();
+      ctxS.fillStyle='rgba(255,255,255,.25)'; ctxS.font='9px "Noto Serif JP",serif'; ctxS.textAlign='left';
+      ctxS.fillText(alt+'°', SW*0.92+4, y+3);
+    }
+  }
+  // ground — with prominent compass
+  ctxS.fillStyle='#0f1a12'; ctxS.fillRect(0, groundY, SW, SH-groundY);
+  ctxS.fillStyle='#16232e';
+  ctxS.beginPath(); ctxS.moveTo(0, groundY);
+  ctxS.lineTo(SW*0.08, groundY-14); ctxS.lineTo(SW*0.18, groundY-6); ctxS.lineTo(SW*0.28, groundY-18);
+  ctxS.lineTo(SW*0.42, groundY-8); ctxS.lineTo(SW*0.58, groundY-16); ctxS.lineTo(SW*0.72, groundY-10);
+  ctxS.lineTo(SW*0.85, groundY-14); ctxS.lineTo(SW, groundY-4); ctxS.lineTo(SW, groundY); ctxS.closePath(); ctxS.fill();
+  ctxS.strokeStyle='rgba(176,138,62,.9)'; ctxS.lineWidth=1.2;
+  ctxS.beginPath(); ctxS.moveTo(0, groundY+0.5); ctxS.lineTo(SW, groundY+0.5); ctxS.stroke();
+  // ground compass bar — shows which cardinal is at center
+  ctxS.fillStyle='rgba(255,255,255,.06)'; ctxS.fillRect(SW*0.04, groundY+10, SW*0.92, 30);
+  ctxS.strokeStyle='rgba(255,255,255,.12)'; ctxS.lineWidth=1; ctxS.strokeRect(SW*0.04, groundY+10, SW*0.92, 30);
+  // cardinal ticks within ground bar
+  [0,90,180,270].forEach(function(az){
+    var rel=((az - state.viewAz +540)%360)-180;
+    if(Math.abs(rel)>88) return;
+    var x=SW*0.5 + rel/90*SW*0.38;
+    var isCenter = Math.abs(rel)<12;
+    // tick
+    ctxS.strokeStyle= isCenter? 'rgba(250,204,21,.95)' : 'rgba(255,255,255,.35)';
+    ctxS.lineWidth= isCenter? 2:1;
+    ctxS.beginPath(); ctxS.moveTo(x, groundY+12); ctxS.lineTo(x, groundY+24); ctxS.stroke();
+    // label with halo
+    var name=azName(az);
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font=isCenter?'700 13px "Noto Serif JP",serif':'600 11px "Noto Serif JP",serif'; ctxS.textAlign='center';
+    ctxS.strokeText(name, x, groundY+34);
+    ctxS.fillStyle= isCenter? '#facc15' : 'rgba(255,255,255,.92)';
+    ctxS.fillText(name, x, groundY+34);
+  });
+  // center indicator
+  ctxS.fillStyle='rgba(250,204,21,.95)'; ctxS.beginPath(); ctxS.moveTo(SW*0.5, groundY+10); ctxS.lineTo(SW*0.5-6, groundY+4); ctxS.lineTo(SW*0.5+6, groundY+4); ctxS.closePath(); ctxS.fill();
+  ctxS.fillStyle='rgba(255,255,255,.72)'; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='center';
+  ctxS.fillText('正面：'+azName(state.viewAz), SW*0.5, groundY+8);
+  // compass at top — more visible
+  ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 12px "Noto Serif JP",serif'; ctxS.textAlign='left';
+  ctxS.strokeText(azName(state.viewAz)+'の空', 12, 22);
+  ctxS.fillStyle='#ffffff'; ctxS.fillText(azName(state.viewAz)+'の空', 12, 22);
+  ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif';
+  ctxS.strokeText('ドラッグで全方位（360°）を見回せます', 12, 38);
+  ctxS.fillStyle='rgba(255,255,255,.85)'; ctxS.fillText('ドラッグで全方位（360°）を見回せます', 12, 38);
+  // info: visible count
+  ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='right';
+  ctxS.strokeText('視界内の星 '+visibleCount, SW-12, 22);
+  ctxS.fillStyle='rgba(255,255,255,.9)'; ctxS.fillText('視界内の星 '+visibleCount, SW-12, 22);
+  // north star hint if view includes north
+  var polarAlt = raDecToAltAz(STARS[0].ra, STARS[0].dec, lst, LAT).alt;
+  if(Math.abs(((0-state.viewAz+540)%360)-180)<95 && polarAlt>5){
+    ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='right';
+    ctxS.strokeText('北極星 高度≈'+Math.round(polarAlt)+'°', SW-12, 38);
+    ctxS.fillStyle='#93c5fd'; ctxS.fillText('北極星 高度≈'+Math.round(polarAlt)+'°', SW-12, 38);
+  }
+}
+
+// scanline moon phase draw
+function drawMoonPhase(c, cx, cy, R, theta){
+  var ill = illuminated(theta);
+  if(ill<=0.005){
+    c.fillStyle='#1e2a4a'; c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.fill();
+    return;
+  }
+  if(ill>=0.995){
+    c.fillStyle='#fef9c3'; c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.fill();
+    c.fillStyle='rgba(176,138,62,.09)'; c.beginPath(); c.arc(cx+3, cy-2, R*0.92,0,Math.PI*2); c.fill();
+    return;
+  }
+  c.save();
+  c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.clip();
+  c.fillStyle='#1e2a4a'; c.fillRect(cx-R, cy-R, R*2, R*2);
+  var isWaxing = theta < Math.PI;
+  var cosT = Math.cos(theta);
+  c.fillStyle='#fef9c3';
+  for(var dy=-R; dy<=R; dy++){
+    var y = cy + dy;
+    var yy = dy / R;
+    var dxCircle = Math.sqrt(Math.max(0, R*R - dy*dy));
+    var xLeftCircle = cx - dxCircle;
+    var xRightCircle = cx + dxCircle;
+    var factor = Math.sqrt(Math.max(0, 1 - yy*yy));
+    var xTerm;
+    if(isWaxing){
+      xTerm = cx + cosT * R * factor;
+      var x0 = Math.max(xTerm, xLeftCircle);
+      var x1 = xRightCircle;
+      if(x1 > x0) c.fillRect(x0, y, x1 - x0, 1);
+    } else {
+      xTerm = cx - cosT * R * factor;
+      var xl0 = xLeftCircle;
+      var xl1 = Math.min(xTerm, xRightCircle);
+      if(xl1 > xl0) c.fillRect(xl0, y, xl1 - xl0, 1);
+    }
+  }
+  var grad=c.createRadialGradient(cx - R*0.3, cy - R*0.3, R*0.2, cx, cy, R);
+  grad.addColorStop(0,'rgba(255,255,255,.18)'); grad.addColorStop(1,'transparent');
+  c.fillStyle=grad;
+  c.fillRect(cx-R, cy-R, R*2, R*2);
+  c.restore();
+}
+
+// ---------- stats ----------
+function updateStats(){
+  if(state.mode==='moon'){
+    var theta = state.age/SYNODIC*2*Math.PI;
+    var ill = illuminated(theta);
+    var ph = phaseOf(state.age);
+    $('ageVal').textContent = fmtAge(state.age);
+    $('ageVal2').textContent = ph.name;
+    $('phaseName').textContent = ph.name + (ph.sub? '（'+ph.sub+'）':'');
+    $('illumVal').textContent = fmtPct(ill);
+    $('angleVal').textContent = fmtAngle(theta);
+    var tr=transitHour(state.age), ri=(tr-6+24)%24, st=(tr+6)%24;
+    $('riseVal').textContent = fmtTime(ri);
+    $('transitVal').textContent = fmtTime(tr);
+    $('setVal').textContent = fmtTime(st);
+    updatePhaseGridActive();
+  } else {
+    $('dateVal').textContent = state.date+'日目（'+fmtDate(state.date)+'）';
+    var s=SEASON_MAP.reduce(function(a,b){ var da=Math.abs(state.date-b.d); if(da>182) da=365-da; var aa=Math.abs(state.date-a.d); if(aa>182) aa=365-aa; return da<aa?b:a; });
+    $('dateVal2').textContent = s.label;
+    $('seasonVal').textContent = s.name;
+    $('constVal').textContent = s.consts;
+    var haMoon = hourAngle(state.age, state.time);
+    $('azInfoVal').textContent = azName(state.viewAz)+'中心・'+fmtTime(state.time)+'・'+(Math.abs(haMoon)<=6?'月は上':'月は下');
+  }
+  // common time
+  if($('timeVal')){
+    $('timeVal').textContent = fmtTime(state.time);
+    var ha = hourAngle(state.age, state.time);
+    $('hourAngleVal').textContent = fmtHourAngle(ha) + (Math.abs(ha)<=6? '（上）':'（下）');
+    var vis=$('visibilityVal');
+    if(state.mode==='moon'){
+      if(Math.abs(ha)<=6.05){
+        vis.textContent='見える（地平線の上）'; vis.className='val ok';
+      } else {
+        vis.textContent='沈んでいる（地平線の下）'; vis.className='val bad';
+      }
+    } else {
+      var lst=lstDeg(state.date, state.time);
+      vis.textContent='恒星時 '+Math.round(lst)+'°'; vis.className='val gold';
+      if($('lstVal')){ $('lstVal').textContent = Math.round(lst)+'°'; }
+    }
+    var dirEl=$('dirVal');
+    if(dirEl){
+      var t=Math.round(state.time)%24;
+      var dir='';
+      if(t>=11&&t<13) dir='西を向く（昼）';
+      else if(t>=17&&t<19) dir='南を向く';
+      else if((t>=23||t<1)) dir='東を向く（夜）';
+      else if(t>=5&&t<7) dir='北を向く';
+      else dir = fmtTime(state.time)+'の位置';
+      // for const mode show viewAz
+      if(state.mode==='const') dir = azName(state.viewAz)+'を向く（'+fmtTime(state.time)+'）';
+      dirEl.textContent = dir;
+    }
+  }
+  if(state.mode==='moon') updatePhaseGridActive();
+}
+function resize(){
+  var r=cvOrbit.getBoundingClientRect();
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  cvOrbit.width=Math.round(r.width*DPR); cvOrbit.height=Math.round(r.height*DPR);
+  W=r.width; H=r.height;
+  ctxO.setTransform(DPR,0,0,DPR,0,0);
+  var rs=cvSky.getBoundingClientRect();
+  cvSky.width=Math.round(rs.width*DPR); cvSky.height=Math.round(rs.height*DPR);
+  SW=rs.width; SH=rs.height;
+  ctxS.setTransform(DPR,0,0,DPR,0,0);
+}
+var last=performance.now();
+function frame(now){
+  requestAnimationFrame(frame);
+  var dt=Math.min((now-last)/1000,0.05); last=now;
+  if(state.mode==='moon' && state.playing){
+    var dir = state.reverse ? -1 : 1;
+    var speedBase = 29.5/18;
+    state.age += dir * dt * speedBase * state.speed;
+    if(state.age<0) state.age+=SYNODIC;
+    if(state.age>=SYNODIC) state.age-=SYNODIC;
+    $('ageSlider').value=state.age;
+    updateStats();
+  }
+  if(state.mode==='const'){
+    if(state.playYear){
+      state.date += dt * (365/18) * state.speed * (state.reverse? -1:1);
+      if(state.date<1) state.date+=365; if(state.date>365) state.date-=365;
+      $('dateSlider').value=Math.round(state.date);
+      updateStats();
+    }
+    if(state.playDay){
+      state.time += dt * (24/10) * state.speed;
+      if(state.time>=24) state.time-=24; if(state.time<0) state.time+=24;
+      $('timeSlider').value=state.time;
+      updateStats();
+    }
+  }
+  drawOrbit(); drawSky();
+}
+function setMode(m){
+  state.mode=m;
+  document.querySelectorAll('#modeSeg button').forEach(function(b){ b.classList.toggle('active', b.dataset.mode===m); });
+  $('moonPanels').classList.toggle('hidden', m!=='moon');
+  $('constPanels').classList.toggle('hidden', m!=='const');
+  $('moonDisplayToggles').classList.toggle('hidden', m!=='moon');
+  $('constDisplayToggles').classList.toggle('hidden', m!=='const');
+  var isConst = m==='const';
+  $('constTimeStat').classList.toggle('hidden', !isConst);
+  $('constTimeBtns').classList.toggle('hidden', !isConst);
+  $('btnStrict').classList.toggle('hidden', !isConst);
+  $('capOrbit').textContent = isConst? '宇宙から見た図（公転）' : '宇宙から見た図（北極側から）';
+  $('capSky').textContent = isConst? '観測者から見た星空（ドラッグで全方位）' : '地球から見た月（南の空）';
+  $('timeNotes').innerHTML = isConst? '時刻で日周運動、日付で年周運動が分かります。ドラッグで東西南北すべて見渡せます。' : '時刻を動かすと地球上の観測者（宇宙図の橙点）が移動し、空の月の位置（東→南→西）が変わります。';
+  $('displayNotes').innerHTML = isConst? '北極星は動かず、周りの星が回ります。' : '月は自転周期＝公転周期のため、常に同じ面を地球に向けています。<br>地球の影が欠けの原因ではありません（影は月食のときだけ）。';
+  $('learnNotes').innerHTML = isConst? '・北極星の高度≒緯度。周極星は沈みません。<br>・同じ時刻で1ヶ月後は星座が30°西へずれます。<br>・見える星座は季節で変わります。' : '・満ち欠けは <b>太陽に照らされた半分</b>のうち、地球から見える割合で決まります。<br>・上弦は右半分が光る（12時出→18時南中→0時入り）、下弦は左半分が光ります。<br>・距離は誇張しています（実際は月まで地球30個分）。';
+  document.title = isConst? '星座シミュレーター — 月と星座' : '月と星座シミュレーター';
+  cvSky.style.cursor = isConst? 'grab' : 'grab';
+  updateStats();
+}
+function setupEvents(){
+  // mode
+  document.querySelectorAll('#modeSeg button').forEach(function(b){
+    b.addEventListener('click', function(){ setMode(b.dataset.mode); });
+  });
+  // moon
+  var ageS=$('ageSlider');
+  if(ageS) ageS.addEventListener('input',function(){ state.age=parseFloat(this.value); updateStats(); });
+  var ts=$('timeSlider');
+  if(ts){
+    ts.addEventListener('input',function(){ state.time=parseFloat(this.value); updateStats(); });
+    $('btnTransit').addEventListener('click',function(){ state.time=transitHour(state.age); ts.value=state.time; updateStats(); });
+    $('btnEvening').addEventListener('click',function(){ state.time=0; ts.value=0; updateStats(); });
+  }
+  // const date
+  var ds=$('dateSlider');
+  if(ds) ds.addEventListener('input', function(){ state.date=parseInt(this.value,10); updateStats(); });
+  document.querySelectorAll('[data-season]').forEach(function(b){
+    b.addEventListener('click', function(){ state.date=parseInt(b.dataset.season,10); ds.value=state.date; updateStats(); });
+  });
+  $('btnPlay').addEventListener('click',function(){
+    if(state.mode==='moon'){
+      state.playing=!state.playing;
+      this.textContent = state.playing ? '■ 停止' : '▶ アニメ';
+      this.style.background = state.playing ? '#b45309' : '';
+    } else {
+      // in const mode this button is hidden, but keep for safety
+      state.playDay=!state.playDay;
+      this.textContent = state.playDay ? '■ 停止' : '▶ 日周アニメ';
+    }
+  });
+  $('btnReverse').addEventListener('click',function(){
+    state.reverse=!state.reverse;
+    this.textContent = state.reverse ? '↻ 逆（西→東）' : '↺ 逆再生';
+    if(state.mode==='moon' && !state.playing){ state.playing=true; $('btnPlay').textContent='■ 停止'; $('btnPlay').style.background='#b45309'; }
+    if(state.mode==='const' && !state.playYear && !state.playDay){ state.playDay=true; }
+  });
+  document.querySelectorAll('[data-speed]').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('[data-speed]').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');
+      state.speed=parseFloat(b.dataset.speed);
+    });
+  });
+  $('btnPlayYear').addEventListener('click', function(){ state.playYear=true; });
+  $('btnStopYear').addEventListener('click', function(){ state.playYear=false; });
+  $('btnPlayDay').addEventListener('click', function(){ state.playDay=true; });
+  $('btnStopDay').addEventListener('click', function(){ state.playDay=false; });
+  $('chkSpin').addEventListener('change',function(){ state.spin=this.checked; });
+  $('chkGhost').addEventListener('change',function(){ state.ghost=this.checked; });
+  $('chkEclipse').addEventListener('change',function(){ state.eclipse=this.checked; });
+  $('chkLines').addEventListener('change',function(){ state.showLines=this.checked; });
+  $('btnStrict').addEventListener('click',function(){
+    state.strictZodiac=!state.strictZodiac;
+    this.classList.toggle('active',state.strictZodiac);
+    this.textContent=state.strictZodiac?'厳密':'簡易';
+    this.title=state.strictZodiac?'実際の赤経に基づく配置':'等間隔の簡易配置';
+  });
+  $('chkEquator').addEventListener('change',function(){ state.showEquator=this.checked; });
+  $('chkGrid').addEventListener('change',function(){ state.showGrid=this.checked; });
+  // drag for sky viewAz (const mode only, but allow in both for moon? restrict to const)
+  var dragging=false, startX=0, startAz=0;
+  function onDown(e){
+    if(state.mode!=='const') return;
+    dragging=true; cvSky.classList.add('dragging');
+    startX = e.touches? e.touches[0].clientX : e.clientX;
+    startAz = state.viewAz;
+    e.preventDefault();
+  }
+  function onMove(e){
+    if(!dragging) return;
+    var x = e.touches? e.touches[0].clientX : e.clientX;
+    var dx = x - startX;
+    var degPerPx = 180 / SW;
+    state.viewAz = (startAz - dx*degPerPx) % 360;
+    if(state.viewAz<0) state.viewAz+=360;
+    updateStats();
+  }
+  function onUp(){ dragging=false; cvSky.classList.remove('dragging'); }
+  cvSky.addEventListener('mousedown', onDown);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  cvSky.addEventListener('touchstart', onDown, {passive:false});
+  window.addEventListener('touchmove', onMove, {passive:false});
+  window.addEventListener('touchend', onUp);
+  cvSky.addEventListener('wheel', function(e){
+    if(state.mode!=='const') return;
+    e.preventDefault();
+    state.viewAz = (state.viewAz + Math.sign(e.deltaY)*6 +360)%360;
+    updateStats();
+  }, {passive:false});
+}
+cvOrbit=$('cvOrbit'); ctxO=cvOrbit.getContext('2d');
+cvSky=$('cvSky'); ctxS=cvSky.getContext('2d');
+buildPhaseGrid();
+setupEvents();
+updateStats();
+resize();
+window.addEventListener('resize',function(){ clearTimeout(window._rt); window._rt=setTimeout(resize, 120); });
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

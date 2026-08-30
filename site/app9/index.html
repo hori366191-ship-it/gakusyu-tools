@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>原稿用紙作成</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, sans-serif;
+  background: #ecefee;
+  color: #2b2b2b;
+}
+.controls { max-width: 780px; margin: 18px auto 0; padding: 0 14px; }
+.panel {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  padding: 16px 20px;
+}
+.panel h1 { font-size: 18px; margin: 0 0 14px; color: #20574a; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-bottom: 12px; }
+fieldset.dirs {
+  border: 1px solid #ddd; border-radius: 8px; padding: 8px 16px 10px; margin: 0;
+  display: flex; gap: 18px;
+}
+legend { font-size: 13px; color: #666; padding: 0 6px; }
+.radio label { cursor: pointer; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+.field { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+input[type=number] {
+  width: 76px; padding: 6px 8px; border: 1px solid #bbb; border-radius: 6px;
+  font-size: 15px; text-align: center;
+}
+.count { font-size: 14px; color: #20574a; font-weight: 600; }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; }
+.presets button {
+  background: #f2f5f3; border: 1px solid #c8d2cc; border-radius: 6px;
+  padding: 6px 12px; font-size: 14px; cursor: pointer;
+}
+.presets button:hover { background: #e2eae6; }
+.swatches { display: flex; align-items: center; gap: 10px; }
+.swatch {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1px solid rgba(0,0,0,.15); cursor: pointer; padding: 0;
+}
+.swatch.active { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #2e7d63; }
+input[type=color] {
+  width: 36px; height: 30px; padding: 2px;
+  border: 1px solid #bbb; border-radius: 6px; background: #fff; cursor: pointer;
+}
+.custom-label { font-size: 13px; color: #666; }
+.chk { font-size: 15px; display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+.actions button {
+  font-size: 16px; padding: 10px 26px; border-radius: 8px; border: none;
+  cursor: pointer; color: #fff;
+}
+#printBtn { background: #2e7d63; }
+#printBtn:hover { background: #276a54; }
+#classroomBtn { background: #b0713a; }
+#classroomBtn:hover:not([disabled]) { background: #96602f; }
+#classroomBtn[disabled] { opacity: .6; cursor: default; }
+.sendStatus { font-size: 13px; color: #555; }
+.hint { font-size: 12.5px; color: #777; margin: 10px 0 0; }
+
+.page-wrap { overflow: auto; padding: 18px 0 48px; }
+.sheet {
+  width: 210mm; min-height: 297mm; background: #fff;
+  margin: 0 auto; padding: 10mm;
+  box-shadow: 0 3px 18px rgba(0,0,0,.16);
+}
+
+.doc-header { margin: 0 0 5mm; }
+.dh-row { display: flex; align-items: flex-end; gap: 2.5mm; }
+.dh-row.name { justify-content: flex-end; margin-top: 3.5mm; }
+.dh-label {
+  border: 0.35mm solid #444; color: #222; font-size: 11pt; line-height: 1;
+  padding: 1.4mm 1.4mm 1.4mm 2.8mm; letter-spacing: .28em;
+}
+.dh-line { flex: 1 1 auto; border-bottom: 0.35mm solid #444; height: 6.5mm; }
+.dh-row.name .dh-line { flex: 0 0 58mm; }
+
+table.grid { border-collapse: collapse; table-layout: fixed; margin: 0 auto; }
+table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
+
+@media print {
+  @page { size: A4 portrait; margin: 10mm; }
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  .page-wrap { overflow: visible; padding: 0; }
+  .sheet {
+    width: auto; min-height: auto; margin: 0; padding: 0;
+    box-shadow: none; zoom: 1 !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="controls no-print">
+  <div class="panel">
+    <h1>原稿用紙作成</h1>
+
+    <div class="row">
+      <fieldset class="dirs">
+        <legend>書き方向</legend>
+        <span class="radio"><label><input type="radio" name="dir" value="tate">縦書き</label></span>
+        <span class="radio"><label><input type="radio" name="dir" value="yoko" checked>横書き</label></span>
+      </fieldset>
+      <span class="field">1行のマス数 <input type="number" id="masu" value="20" min="1" max="50"></span>
+      <span class="field">行数 <input type="number" id="gyo" value="20" min="1" max="50"></span>
+      <span class="count" id="count"></span>
+    </div>
+
+    <div class="row presets">
+      <button data-n="20" data-l="20">400字詰め(20×20)</button>
+      <button data-n="20" data-l="10">200字詰め(20×10)</button>
+      <button data-n="30" data-l="20">600字詰め(30×20)</button>
+      <button data-n="10" data-l="10">100字詰め(10×10)</button>
+    </div>
+
+    <div class="row">
+      <span class="field">罫線の色</span>
+      <div class="swatches">
+        <button class="swatch" data-color="#bcd0c6" title="緑(定番)" style="background:#bcd0c6"></button>
+        <button class="swatch" data-color="#c8c8c8" title="グレー" style="background:#c8c8c8"></button>
+        <button class="swatch" data-color="#bccde2" title="青" style="background:#bccde2"></button>
+        <button class="swatch" data-color="#ecd0da" title="ピンク" style="background:#ecd0da"></button>
+        <button class="swatch" data-color="#e3d6bf" title="ベージュ" style="background:#e3d6bf"></button>
+        <input type="color" id="customColor" value="#bcd0c6" title="カスタムカラー">
+        <span class="custom-label">カスタム</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="headerChk" checked>題名・氏名欄を付ける</label>
+    </div>
+
+    <div class="actions">
+      <button id="printBtn">印刷する</button>
+      <button id="classroomBtn" style="display:none">教室タブレットで印刷</button>
+      <span class="sendStatus" id="sendStatus"></span>
+    </div>
+    <p class="hint">印刷ダイアログの保存先で「PDFに保存」を選ぶとPDFファイルも作成できます。どのサイズでも必ずA4用紙1枚に収まります。設定はこのブラウザに自動保存され、次回開いたときに復元されます。<br>※PDF出力には <a href="https://github.com/parallax/jsPDF" target="_blank" rel="noopener">jsPDF</a>・<a href="https://html2canvas.hertzen.com/" target="_blank" rel="noopener">html2canvas</a> (MIT License) を利用しています。</p>
+  </div>
+</div>
+
+<div class="page-wrap">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+(function () {
+  var KEY = 'genkoshi-settings-v2';
+  var DEFAULTS = { dir: 'yoko', n: 20, l: 20, header: true, color: '#bcd0c6' };
+  var sheet = document.getElementById('sheet');
+  var nIn = document.getElementById('masu');
+  var lIn = document.getElementById('gyo');
+  var countLbl = document.getElementById('count');
+  var headerChk = document.getElementById('headerChk');
+  var dirRadios = document.querySelectorAll('input[name="dir"]');
+  var swatches = document.querySelectorAll('.swatch');
+  var customColor = document.getElementById('customColor');
+  var MIN = 1, MAX = 50;
+  var lastColor = DEFAULTS.color;
+
+  function clamp(v) { return Math.min(MAX, Math.max(MIN, v)); }
+  function readNum(el, dflt) {
+    var v = parseInt(el.value, 10);
+    return Number.isFinite(v) ? clamp(v) : dflt;
+  }
+  function getDir() {
+    for (var i = 0; i < dirRadios.length; i++) if (dirRadios[i].checked) return dirRadios[i].value;
+    return 'tate';
+  }
+
+  function currentState() {
+    return {
+      dir: getDir(),
+      n: readNum(nIn, DEFAULTS.n),
+      l: readNum(lIn, DEFAULTS.l),
+      header: headerChk.checked,
+      color: lastColor
+    };
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return null;
+      var s = JSON.parse(raw);
+      if (!s || typeof s !== 'object') return null;
+      var st = {};
+      st.dir = s.dir === 'yoko' || s.dir === 'tate' ? s.dir : DEFAULTS.dir;
+      st.n = Number.isFinite(parseInt(s.n, 10)) ? clamp(parseInt(s.n, 10)) : DEFAULTS.n;
+      st.l = Number.isFinite(parseInt(s.l, 10)) ? clamp(parseInt(s.l, 10)) : DEFAULTS.l;
+      st.header = typeof s.header === 'boolean' ? s.header : DEFAULTS.header;
+      st.color = /^#[0-9a-fA-F]{6}$/.test(String(s.color)) ? String(s.color).toLowerCase() : DEFAULTS.color;
+      return st;
+    } catch (e) { return null; }
+  }
+
+  function saveState() {
+    try { localStorage.setItem(KEY, JSON.stringify(currentState())); } catch (e) {}
+  }
+
+  function setColor(c, persist) {
+    lastColor = String(c).toLowerCase();
+    sheet.style.setProperty('--line-color', lastColor);
+    customColor.value = lastColor;
+    Array.prototype.forEach.call(swatches, function (b) {
+      b.classList.toggle('active', b.getAttribute('data-color').toLowerCase() === lastColor);
+    });
+    if (persist) saveState();
+  }
+
+  function applyState(st) {
+    document.querySelector('input[name="dir"][value="' + st.dir + '"]').checked = true;
+    nIn.value = st.n;
+    lIn.value = st.l;
+    headerChk.checked = st.header;
+    setColor(st.color, false);
+  }
+
+  function render() {
+    var dir = getDir();
+    var n = readNum(nIn, DEFAULTS.n);
+    var l = readNum(lIn, DEFAULTS.l);
+    countLbl.textContent = (n * l) + '字';
+
+    var headerOn = headerChk.checked;
+    var HEADER_MM = 24;
+    var availW = 190, availH = 277 - (headerOn ? HEADER_MM : 0);
+    var cols = dir === 'yoko' ? n : l;
+    var rows = dir === 'yoko' ? l : n;
+    var cell = Math.min(availW / cols, availH / rows);
+    cell = Math.floor(cell * 100) / 100;
+
+    var h = '';
+    if (headerOn) {
+      h += '<div class="doc-header">'
+        + '<div class="dh-row"><span class="dh-label">題名</span><span class="dh-line"></span></div>'
+        + '<div class="dh-row name"><span class="dh-label">氏名</span><span class="dh-line"></span></div>'
+        + '</div>';
+    }
+    var cs = 'width:' + cell + 'mm;height:' + cell + 'mm;';
+    var tds = '';
+    for (var r = 0; r < rows; r++) {
+      tds += '<tr>';
+      if (dir === 'yoko') {
+        for (var c = 0; c < cols; c++) tds += '<td style="' + cs + '"></td>';
+      } else {
+        for (var c2 = cols - 1; c2 >= 0; c2--) tds += '<td style="' + cs + '"></td>';
+      }
+      tds += '</tr>';
+    }
+    h += '<table class="grid" style="width:' + (cell * cols) + 'mm">' + tds + '</table>';
+    sheet.innerHTML = h;
+    fitZoom();
+  }
+
+  function fitZoom() {
+    var BASE = 210 * 96 / 25.4;
+    var avail = document.documentElement.clientWidth - 16;
+    var z = Math.min(1, avail / BASE);
+    sheet.style.zoom = z < 1 ? z : 1;
+  }
+
+  nIn.addEventListener('input', function () { render(); saveState(); });
+  lIn.addEventListener('input', function () { render(); saveState(); });
+  nIn.addEventListener('change', function () { nIn.value = readNum(nIn, DEFAULTS.n); });
+  lIn.addEventListener('change', function () { lIn.value = readNum(lIn, DEFAULTS.l); });
+  Array.prototype.forEach.call(dirRadios, function (r) {
+    r.addEventListener('change', function () { render(); saveState(); });
+  });
+  headerChk.addEventListener('change', function () { render(); saveState(); });
+  Array.prototype.forEach.call(document.querySelectorAll('.presets button'), function (b) {
+    b.addEventListener('click', function () {
+      nIn.value = b.getAttribute('data-n');
+      lIn.value = b.getAttribute('data-l');
+      render();
+      saveState();
+    });
+  });
+  Array.prototype.forEach.call(swatches, function (b) {
+    b.addEventListener('click', function () {
+      setColor(b.getAttribute('data-color'), true);
+    });
+  });
+  customColor.addEventListener('input', function () {
+    if (/^#[0-9a-fA-F]{6}$/.test(customColor.value)) setColor(customColor.value, true);
+  });
+  window.addEventListener('resize', fitZoom);
+  document.getElementById('printBtn').addEventListener('click', function () { window.print(); });
+
+  // site-gas/site-pdfdrop 用。旧GASと同TOKENを流用（仕様書_移行案.md 3.3）
+  // TODO: site-gas/site-pdfdrop デプロイ後に新URLへ差替
+  var CLASSROOM = {
+    url: 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbxP6klWI4L5wnTl2wTO5PmrDMf6z4Fmu3Qh3zFwfCf0KUa91idOINv6w8PxoY3Ke-oN/exec',
+    token: 'e6135dfd707ab9a6916635fa'
+  };
+  var isGasEnv = typeof google !== 'undefined' && google.script && google.script.run;
+
+  function setStatus(msg) {
+    document.getElementById('sendStatus').textContent = msg;
+  }
+
+  function loadScriptOnce(src, cb) {
+    window.__loadedScripts = window.__loadedScripts || {};
+    if (window.__loadedScripts[src]) { cb(); return; }
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = function () { window.__loadedScripts[src] = true; cb(); };
+    s.onerror = function () { cb(new Error('load failed: ' + src)); };
+    document.head.appendChild(s);
+  }
+
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+  function buildPdfName(n, l) {
+    var d = new Date();
+    return 'genkoshi_' + d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate())
+      + '-' + pad2(d.getHours()) + pad2(d.getMinutes()) + pad2(d.getSeconds())
+      + '_' + n + 'x' + l + '.pdf';
+  }
+
+  function makePdf(cb) {
+    loadScriptOnce('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js', function (e1) {
+      if (e1) { cb(e1); return; }
+      loadScriptOnce('https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js', function (e2) {
+        if (e2) { cb(e2); return; }
+        var prevZoom = sheet.style.zoom;
+        sheet.style.zoom = 1;
+        html2canvas(sheet, { scale: 2, backgroundColor: '#ffffff', logging: false }).then(function (canvas) {
+          sheet.style.zoom = prevZoom;
+          try {
+            var pdf = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            var imgH = Math.min(297, 210 * canvas.height / canvas.width);
+            var imgW = imgH * canvas.width / canvas.height;
+            pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', (210 - imgW) / 2, 0, imgW, imgH);
+            cb(null, pdf);
+          } catch (err) { cb(err); }
+        }).catch(function (err) {
+          sheet.style.zoom = prevZoom;
+          cb(err);
+        });
+      });
+    });
+  }
+
+  function sendPdfToClassroom(b64, name, cb) {
+    var iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.name = '__dropframe' + Date.now();
+    document.body.appendChild(iframe);
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = CLASSROOM.url;
+    form.target = iframe.name;
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'data';
+    input.value = JSON.stringify({ token: CLASSROOM.token, name: name, b64: b64 });
+    form.appendChild(input);
+    document.body.appendChild(form);
+    var done = false;
+    var timer = setTimeout(function () { finish({ ok: false, error: 'タイムアウトしました' }); }, 60000);
+    function onMsg(ev) {
+      if (ev.data && ev.data.genko) finish(ev.data.payload || ev.data);
+    }
+    window.addEventListener('message', onMsg);
+    form.submit();
+    setStatus('送信中(保存確認中…)');
+    pollForFile(name, 0, 0);
+
+    function pollForFile(n, attempt, silentStreak) {
+      if (done) return;
+      if (silentStreak >= 3) {
+        finish({ ok: false, auth: true, error: 'Googleへの接続が確認できません。ログイン状態を確認してください。' });
+        return;
+      }
+      if (attempt >= 20) {
+        finish({ ok: false, error: '保存を確認できませんでした(pdfdropステータスページのlast_errorを確認)' });
+        return;
+      }
+      var s = document.createElement('script');
+      var answered = false;
+      window.__genkoPoll = function (res) {
+        if (answered) return;
+        answered = true;
+        s.remove();
+        if (done) return;
+        if (res && res.genkoPoll && res.found && res.name === n) finish({ ok: true, name: n });
+        else setTimeout(function () { pollForFile(n, attempt + 1, 0); }, 3000);
+      };
+      s.onerror = function () {
+        if (answered) return;
+        answered = true;
+        s.remove();
+        setTimeout(function () { pollForFile(n, attempt + 1, silentStreak + 1); }, 1500);
+      };
+      setTimeout(function () {
+        if (answered) return;
+        answered = true;
+        s.remove();
+        setTimeout(function () { pollForFile(n, attempt + 1, silentStreak + 1); }, 1500);
+      }, 6000);
+      s.src = CLASSROOM.url + '?poll=' + encodeURIComponent(n)
+        + '&token=' + encodeURIComponent(CLASSROOM.token)
+        + '&callback=__genkoPoll&t=' + Date.now();
+      document.head.appendChild(s);
+    }
+
+    function finish(res) {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      window.removeEventListener('message', onMsg);
+      setTimeout(function () { iframe.remove(); form.remove(); }, 200);
+      cb(res);
+    }
+  }
+
+  function jsonpGet(query, timeoutMs, cb) {
+    var s = document.createElement('script');
+    var settled = false;
+    var timer = setTimeout(function () {
+      if (settled) return;
+      settled = true;
+      s.remove();
+      cb(null);
+    }, timeoutMs);
+    window.__genkoJsonp = function (res) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      s.remove();
+      cb(res);
+    };
+    s.onerror = function () {};
+    s.src = CLASSROOM.url + query + '&callback=__genkoJsonp&t=' + Date.now();
+    document.head.appendChild(s);
+  }
+
+  function probeAuth(cb) {
+    jsonpGet('?probe=1&token=' + encodeURIComponent(CLASSROOM.token), 4000, function (res) {
+      if (!res || !res.genkoProbe) { cb({ state: 'noauth' }); return; }
+      if (!res.ok) { cb({ state: 'error', message: res.error }); return; }
+      if (!res.allowed) { cb({ state: 'notallowed', masked: res.masked }); return; }
+      cb({ state: 'ok' });
+    });
+  }
+
+  function showAuthHelp(msg) {
+    document.getElementById('sendStatus').innerHTML =
+      msg
+      + ' <a href="' + CLASSROOM.url + '" target="_blank" rel="noopener">ログインページを開く</a>'
+      + '(ログイン後にもう一度押してください)';
+  }
+
+  document.getElementById('classroomBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    setStatus('認証確認中…');
+    probeAuth(function (pr) {
+      if (pr.state !== 'ok') {
+        btn.disabled = false;
+        if (pr.state === 'noauth') showAuthHelp('Googleにログインされていない可能性があります。');
+        else if (pr.state === 'notallowed') setStatus('送信失敗: このアカウント(' + (pr.masked || '不明') + ')は許可リストにありません');
+        else setStatus('送信失敗: ' + pr.message);
+        return;
+      }
+      setStatus('PDFを生成中…');
+      makePdf(function (err, pdf) {
+        if (err) {
+          btn.disabled = false;
+          setStatus('PDF生成に失敗しました');
+          return;
+        }
+        setStatus('送信中…');
+        var n = readNum(nIn, DEFAULTS.n);
+        var l = readNum(lIn, DEFAULTS.l);
+        sendPdfToClassroom(pdf.output('datauristring').split(',')[1], buildPdfName(n, l), function (res) {
+          btn.disabled = false;
+          if (res && res.ok) setStatus('送信完了: ' + res.name);
+          else if (res && res.auth) showAuthHelp(res.error);
+          else setStatus('送信失敗: ' + ((res && res.error) || '不明なエラー'));
+        });
+      });
+    });
+  });
+
+  // Pages静的版: 起動時にprobeで表示判定（仕様書_移行案.md 4.4）
+  // - 未ログイン/教室外 → 非表示のまま
+  // - 教室タブレット(不可視) / 先生(可視) → 表示
+  function updateClassroomBtnVisibility() {
+    var btn = document.getElementById('classroomBtn');
+    if (!CLASSROOM.url || !CLASSROOM.token) return;
+    // file:// では probe しない
+    if (location.protocol === 'file:') return;
+    probeAuth(function (pr) {
+      if (pr.state === 'ok') {
+        btn.style.display = '';
+        setStatus('');
+      } else {
+        btn.style.display = 'none';
+      }
+    });
+  }
+  // 起動時に判定（旧 isGasEnv 表示は廃止）
+  updateClassroomBtnVisibility();
+  window.__genkoTest = { makePdf: makePdf, classroom: CLASSROOM, probeAuth: probeAuth, updateClassroomBtnVisibility: updateClassroomBtnVisibility };
+
+  applyState(loadState() || DEFAULTS);
+  render();
+})();
+</script>
+</body>
+</html>

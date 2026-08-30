@@ -1,0 +1,56 @@
+name: Deploy site to Pages
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'site/**'
+      - 'site-gas/**'
+      - '.github/workflows/pages.yml'
+      - '仕様書_移行案.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build app1 bundle placeholder
+        run: |
+          mkdir -p site/app1
+          if [ ! -f site/app1/bundle.json ]; then
+            echo '{"files":[],"updatedAt":"1970-01-01T00:00:00.000Z","note":"placeholder - replace with Drive content via Actions"}' > site/app1/bundle.json
+            echo "created placeholder site/app1/bundle.json"
+          else
+            echo "bundle.json exists - keep"
+          fi
+          ls -la site/app1/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
