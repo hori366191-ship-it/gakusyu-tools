@@ -853,10 +853,12 @@
 
       function loadFormMap() {
         if (FORM_MAP) return Promise.resolve();
+        console.log('loadFormMap start');
         return callServer('getFormMap').then(d => { FORM_MAP = d; window.FORM_MAP = d; console.log('loadFormMap success', Object.keys(d).length); }).catch((e) => { console.error('loadFormMap fail', e.message); FORM_MAP = {}; window.FORM_MAP = {}; });
       }
       function loadInvert() {
         if (INV) return Promise.resolve();
+        console.log('loadInvert start');
         return callServer('getDICTIONARY').then(d => { INV = d; window.INV = d; console.log('loadInvert success', Object.keys(d).length); }).catch((e) => { console.error('loadInvert fail', e.message); INV = {}; window.INV = {}; });
       }
       window.testCallServer = callServer;
