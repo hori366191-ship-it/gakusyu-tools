@@ -53,7 +53,11 @@ function getToken_() {
   return PropertiesService.getScriptProperties().getProperty(PROP_TOKEN) || '';
 }
 function getEmail_() {
-  return normalizeEmail_(Session.getActiveUser().getEmail());
+  try {
+    return normalizeEmail_(Session.getActiveUser().getEmail());
+  } catch (e) {
+    return '';
+  }
 }
 function getAllowedList_() {
   return parseAllowedList_(PropertiesService.getScriptProperties().getProperty('ALLOWED_EMAILS') || '')
@@ -66,7 +70,8 @@ function isAllowed_(email) {
   return list.indexOf(normalizeEmail_(email)) !== -1;
 }
 function isAllowedUser_() {
-  var email = Session.getActiveUser().getEmail();
+  var email = '';
+  try { email = Session.getActiveUser().getEmail(); } catch (e) { email = ''; }
   var allowedRaw = PropertiesService.getScriptProperties().getProperty('ALLOWED_EMAILS') || '';
   if (!email) return true; // 不可視はTOKENで判定（siteでは TOKEN 必須にするためここではtrueを返し、doPost/doGetでTOKEN検証を必須とする）
   var list = parseAllowedList_(allowedRaw).map(function (s) { return normalizeEmail_(s); });
@@ -79,7 +84,8 @@ function isAllowedWithToken_(token) {
 }
 
 function isOwner_() {
-  var email = normalizeEmail_(Session.getActiveUser().getEmail());
+  var email;
+  try { email = normalizeEmail_(Session.getActiveUser().getEmail()); } catch (e) { return false; }
   if (!email) return false;
   var owner = normalizeEmail_(PropertiesService.getScriptProperties().getProperty('OWNER_EMAIL') || '');
   return !!owner && owner === email;

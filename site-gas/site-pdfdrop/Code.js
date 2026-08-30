@@ -27,7 +27,11 @@ function getAllowedList_() {
 }
 
 function getEmail_() {
-  return normalizeEmail_(Session.getActiveUser().getEmail());
+  try {
+    return normalizeEmail_(Session.getActiveUser().getEmail());
+  } catch (e) {
+    return '';
+  }
 }
 
 function getMaxDay_() {
