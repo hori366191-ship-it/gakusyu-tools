@@ -756,7 +756,7 @@
         if (location.protocol === 'file:') return { state: 'file' };
         var idt=getIdToken();
         var res=null;
-        if(idt && idt.length >= 1200){
+        if(idt && idt.length >= 1800){
           res=await new Promise(function(r){ doProbePostApp2WithFallback(r); });
         } else if(idt){
           var em=idt? (function(){ try{ var p=idt.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } })() : '';

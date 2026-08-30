@@ -539,7 +539,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
   }
   function jsonpGet(query, timeoutMs, cb) {
     var idt=getIdToken();
-    if(idt && idt.length >= 1200){
+    if(idt && idt.length >= 1800){
       return doProbePostApp9WithFallback(cb);
     }
     if(idt){
@@ -577,7 +577,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
 
   function probeAuth(cb) {
     var idt=getIdToken();
-    if(idt && idt.length >= 1200){
+    if(idt && idt.length >= 1800){
       doProbePostApp9WithFallback(function(res){
         if (!res || !res.genkoProbe) { cb({ state: 'noauth' }); return; }
         if (!res.ok) { cb({ state: 'error', message: res.error }); return; }

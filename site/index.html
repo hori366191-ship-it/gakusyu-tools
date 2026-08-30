@@ -641,7 +641,8 @@
         textEl.textContent='確認中…';
         banner.className='auth-banner__inner';
         var idt=getIdToken();
-        if(idt && idt.length >= 1200){
+        var runProbeLen = idt ? buildProbeBaseFor(PROBE_URL_WORKER).length : 0;
+        if(idt && runProbeLen > 1800){
           doProbePostWithFallback(function(res){
             if(done) return; done=true;
             if(!res||!res.genkoProbe||!res.ok){ render('is-warn'); return; }
@@ -706,7 +707,7 @@
         }
       }
       function buildProbeBase(){ return buildProbeBaseFor(PROBE_URL); }
-      function buildProbeBaseFor(base){ var b=base+'?probe=1&token='+encodeURIComponent(PROBE_TOKEN); var id=getIdToken(); if(id && id.length<1200){ b+='&id_token='+encodeURIComponent(id); var em=getEmailFromIdToken(id); if(em) b+='&email='+encodeURIComponent(em); } return b; }
+      function buildProbeBaseFor(base){ var b=base+'?probe=1&token='+encodeURIComponent(PROBE_TOKEN); var id=getIdToken(); if(id){ b+='&id_token='+encodeURIComponent(id); var em=getEmailFromIdToken(id); if(em) b+='&email='+encodeURIComponent(em); } return b; }
       function doProbePostFor(base, cb){
         var id=getIdToken();
         var em=id?getEmailFromIdToken(id):'';
@@ -780,7 +781,8 @@
       var done = false;
       // id_token がある場合は最初からPOSTで試す（URL長とサードパーティブロック回避） Worker→直 fallback
       var idt0=getIdToken();
-      if(idt0 && idt0.length >= 1200){
+      var probeUrlLenCheck = idt0 ? buildProbeBaseFor(PROBE_URL_WORKER).length : 0;
+      if(idt0 && probeUrlLenCheck > 1800){
         doProbePostWithFallback(function(res){
           if(done) return;
           done=true;
