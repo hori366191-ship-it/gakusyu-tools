@@ -79,9 +79,10 @@ npx wrangler dev --port 8787
 curl.exe -i "http://localhost:8787/app2?probe=1&token=e6135dfd707ab9a6916635fa&callback=cb"
 curl.exe -i -X OPTIONS "http://localhost:8787/app2?probe=1&token=..."
 # 本番
-curl.exe -i "https://<workers.dev>/app2?probe=1&token=e6135dfd707ab9a6916635fa&callback=cb"
-curl.exe -i "https://<workers.dev>/pdfdrop?probe=1&token=e6135dfd707ab9a6916635fa&callback=cb"
+curl.exe -i "https://gakusyu-tools-proxy.hori-shota.workers.dev/app2?probe=1&token=e6135dfd707ab9a6916635fa&callback=cb"
+curl.exe -i "https://gakusyu-tools-proxy.hori-shota.workers.dev/pdfdrop?probe=1&token=e6135dfd707ab9a6916635fa&callback=cb"
 # 期待: Access-Control-Allow-Origin: * と cb({...genkoProbe:true...})、X-Frame-Optionsなし
+# id_token付き（4件のALLOWED_EMAILS）では cb({"genkoProbe":true,"ok":true,"allowed":true})、匿名は cb({"genkoProbe":true,"ok":false,"error":"noauth"})
 ```
 
 ### 匿名アクセスの確認(curl)
@@ -142,7 +143,7 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 ### pdfdrop(PDF受信アプリ)
 
 - 汎用PDFドロップ先。クライアントから隠しiframeフォームPOST(`text/plain`)を受け、Driveフォルダへ保存するだけの最小構成。ポータルには載せない
-- ガード: `DROP_TOKEN`必須 + email可視アカウントは`ALLOWED_EMAILS`照合 / email不可視(Gmail系等、GAS仕様でemailが取れない)はトークンのみで許可。`MAX_PER_DAY`(既定200)の日次上限は保存成功時のみ消費
+- ガード: `DROP_TOKEN`必須 + `ALLOWED_EMAILS`（現行4件: `REDACTED_EMAIL,REDACTED_EMAIL,REDACTED_EMAIL,REDACTED_EMAIL`）で照合。`id_token`（GIS）でGmailも可視化されるため `!email`（匿名）は `handleProbe` で `noauth`（`is-warn`）を返し `is-ok` にしない。`MAX_PER_DAY`(既定200)の日次上限は保存成功時のみ消費
 - 診断: `LAST_ERROR`/`LAST_OK`をScript Propertiesに記録しステータスページ(doGet)に表示。障害時はまずここを見る
 - 保存先: Script Properties `DROP_FOLDER_ID` のフォルダ(印刷監視対象=別アカウントのDriveフォルダをスクリプトオーナーに編集者共有して使用)
 - 送信側: app9の `CLASSROOM.url`(受信アプリの`/a/`形式URL)と `CLASSROOM.token` に同じ値を埋め込む。着弾確認は **doGet `?poll=<名>&token=&callback=` のJSONP**(3秒×20回)。postMessage(top+parent二重送信)は副経路(Googleサンドボックス多段iframe内では親へ届かない環境があるため主経路にしないこと)
@@ -152,10 +153,10 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 
 ### site/site-gas/site-worker（新Pages版）
 
-- `site/` は `hori366191-ship-it.github.io/gakusyu-tools/` で配信。`site/app1/bundle.json` は静的。`site/app2` / `site/app9` は `site-gas` 2本を `?probe` + `DROP_TOKEN` で判定し、教室/先生/教室外で表示を切替
-- `site-gas/` 2本は `apps/` のGASを複製した新GAS。`apps/` は永久残置。`site/` 側が正本
-- `site-worker/` は `site` → `GAS` のWorkersプロキシ。`site/` の `PROBE_URL` / `CLASSROOM.url` は `workers.dev` 経由に切替予定（直叩きの `script.google.com` はフォールバックとして残す）
-- 検証は `site/debug-probe.html` で `JSONP→iframe` の2段階と `is-ok/is-out/is-warn` を文字で確認
+- `site/` は `hori366191-ship-it.github.io/gakusyu-tools/` で配信。`site/app1/bundle.json` は静的。`site/app2` / `site/app9` は `site-gas` 2本を `?probe` + `DROP_TOKEN` + `id_token`（GIS）で判定し、教室/先生/教室外/未ログインの4状態で表示を切替（2026-08-31 時点で `REDACTED_EMAIL,REDACTED_EMAIL,REDACTED_EMAIL,REDACTED_EMAIL` の4件が `ALLOWED_EMAILS`）
+- `site-gas/` 2本は `apps/` のGASを複製した新GAS。`apps/` は永久残置。`site/` 側が正本。デプロイは `ANYONE_ANONYMOUS` / `USER_DEPLOYING`（`site-gas/site-app2-backend:YOUR_SCRIPT_ID... @18` / `site-pdfdrop:YOUR_SCRIPT_ID... @18`）、`handleProbe` は `!email → noauth`（`is-warn`）で匿名を `is-ok` にしない。短いJWT（`id_token.length<1800`）は `JSONP`（`Worker`）で高速化。
+- `site-worker/` は `site` → `GAS` のWorkersプロキシ（`https://gakusyu-tools-proxy.hori-shota.workers.dev` で本番稼働中）。`site/` の `PROBE_URL` / `CLASSROOM.url` は `workers.dev` の `WORKER_BASE+'/app2|/pdfdrop'` に切替済み（直叩きの `script.google.com` は `DIRECT_*` としてフォールバック）。`X-Frame-Options`／`Content-Security-Policy` 等を除去し `github.io` からの iframe `POST` を許可。
+- 検証は `site/debug-probe.html` で `JSONP→iframe` の2段階と `is-ok/is-out/is-warn` を文字で確認。`id_token` 長 `<1800` は `JSONP`（`Worker`）、`>=1800` のみ `POST`。
 
 ### gitバックアップ(Drive同期)
 

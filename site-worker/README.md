@@ -15,8 +15,7 @@ npx wrangler deploy
 wrangler deploy
 ```
 
-デプロイ後に表示される `https://gakusyu-tools-proxy.<subdomain>.workers.dev` を
-`site/index.html` 等の `PROBE_URL` / `SITE_BACKEND_URL` / `CLASSROOM.url` に設定する。
+デプロイ後に表示される `https://gakusyu-tools-proxy.hori-shota.workers.dev`（`hori-shota` サブドメインで本番稼働中、2026-08-31 時点 `ca48c7f0...`）が `site/index.html` 等の `PROBE_URL` / `SITE_BACKEND_URL` / `CLASSROOM.url` に設定済み。
 
 ## ルーティング
 
