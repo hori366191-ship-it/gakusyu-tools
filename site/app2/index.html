@@ -610,7 +610,9 @@
     function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
     function setIdToken(t){ try{ if(t) localStorage.setItem('gis_id_token',t); else localStorage.removeItem('gis_id_token'); }catch(e){} }
 
+    console.log('DOMContentLoaded start');
     window.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded fired');
       const viewer = document.getElementById('textViewer');
       const spinner = document.getElementById('spinner');
       const overlay = document.getElementById('spinner-overlay');
@@ -1160,9 +1162,10 @@
         loadSavedList();
       }
 
+      console.log('before Promise.all loadFormMap/loadInvert');
       applyZoom();
       applyProbeToUI();
-      Promise.all([loadFormMap(), loadInvert()]).catch(() => {});
+      Promise.all([loadFormMap(), loadInvert()]).then(()=>console.log('Promise.all done')).catch((e) => {console.error('Promise.all fail',e.message)});
     });
   </script>
 </body>
