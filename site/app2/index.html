@@ -827,19 +827,24 @@
         }
         // 辞書は Pages に同梱予定だが、フォールバックでGASから取得（JSONP一本化） Worker→直
         if (name === 'getDICTIONARY' || name === 'getFormMap') {
+          console.log('callServer '+name+' start');
           var idt3=getIdToken();
           var wUrl3 = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'') : '';
           var dUrl3 = DIRECT_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'');
           var jp2;
           if(wUrl3) jp2 = await jsonpGetWithFallback(wUrl3, dUrl3, 8000);
           else { var url2 = SITE_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):''); jp2 = await jsonpGet(url2, 8000); }
+          console.log('callServer '+name+' jp2',jp2?Object.keys(jp2).length:'null');
           if (jp2) return jp2;
+          console.log('callServer '+name+' jp2 null, trying fetch');
           var rUrl = WORKER_BACKEND_URL || DIRECT_BACKEND_URL;
           var rFull = rUrl + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'');
           var r;
           if(WORKER_BACKEND_URL) r = await fetchWithFallback(wUrl3, dUrl3, { method: 'GET' });
           else r = await fetch(rFull);
+          console.log('callServer '+name+' fetch status',r.status);
           var d = await r.json().catch(function () { return {}; });
+          console.log('callServer '+name+' fetch json keys',Object.keys(d).length);
           if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
           return d;
         }
