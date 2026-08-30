@@ -22,8 +22,9 @@ apps/      … 旧GAS版（永久残置・11本・現行運用中）
 ├── portal/ 学習ツール ポータル (scriptId: YOUR_SCRIPT_ID_portal)
 └── その他/  実験・非公開アプリの開発場所
 site/      … 新Pages版（正本・`hori366191-ship-it.github.io/gakusyu-tools/` で配信）
-├── index.html, app1/, app2/, app3/..app9/, debug-probe.html
-└── app1/bundle.json
+├── index.html, app1/, app2/, app3/..app9/, debug-probe.html, favicon.svg
+├── app1/bundle.json, app1/favicon.svg … app9/favicon.svg（各アプリ個別、SVGのみ）
+└── site-src/app1/content/*.md … 辞典の正本（`site/app1/bundle.json` の生成元）
 site-gas/  … 新GAS2本（Pagesの不可視API）
 ├── site-pdfdrop/   (scriptId: YOUR_SCRIPT_ID_site-pdfdrop)
 └── site-app2-backend/ (scriptId: YOUR_SCRIPT_ID_site-app2-backend)
@@ -68,7 +69,7 @@ clasp.cmd login            # 再認証(トークン失効時)
    ```
    (デプロイURLは不変。UI更新後の検証結果をユーザーに確認してもらう)
 3. 公開URLの確認に `/dev` 形式を使わない(エディタ用)。`/exec` が公開用
-4. **`site-worker/targets` のデプロイIDを旧GASに戻さない** — `site-worker/worker.js:13` の `AKfycbwj7q...` / `AKfycbxj8q...` は新GAS2本のID。旧 `AKfycbxP6...` / `AKfycbxvo...` に戻すと新 `site/` が全滅する
+4. **`site-worker/targets` のデプロイIDを旧GASに戻さない** — `site-worker/worker.js:13-16` の `AKfycbwj7q...` / `AKfycbxj8q...` は新GAS2本のID。旧 `AKfycbxP6...` / `AKfycbxvo...` に戻すと新 `site/` が全滅する
 
 ## 検証方法（site を含む）
 
@@ -164,4 +165,4 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 - コミット時フック(`scripts/hooks/post-commit`、`core.hooksPath=scripts/hooks`)とTask Scheduler(毎日18時 `GitBackupGakusyuTool`、`StartWhenAvailable`有効=PC電源OFFで見逃した場合は次回ログオン時に即実行)で、`E:\hori-shotaDrive\開発\学習ツール` に `backup-YYYYMMDD-HHmm.bundle` を自動作成(最新30個保持)
 - 手動実行: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\backup.ps1`
 - 復元: `git clone "E:\hori-shotaDrive\開発\学習ツール\backup-<最新>.bundle" <復元先>`
-- 注意: bundleはコミット済み履歴のみ。未コミット変更(例: `ロードマップ.md`)は含まれない
+- 注意: bundleはコミット済み履歴のみ。未コミット変更(例: `site-src/app1/content/*.md` の未コミット編集)は含まれない

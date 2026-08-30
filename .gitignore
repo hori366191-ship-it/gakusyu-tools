@@ -3,3 +3,10 @@ backup-*.bundle
 
 # clasp の認証トークン(ホームディレクトリにあるが誤混入防止のため)
 .clasprc.json
+
+# Wrangler のローカルキャッシュ
+site-worker/.wrangler/
+site-worker/.dev.vars
+
+# Windows のデスクトップ設定
+desktop.ini
