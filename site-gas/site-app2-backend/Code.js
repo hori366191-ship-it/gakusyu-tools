@@ -189,6 +189,33 @@ function doGet(e) {
       return isCb ? ContentService.createTextOutput(cb + '(' + JSON.stringify(fail) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(fail);
     }
   }
+  if (params.action === 'migrateToIndex') {
+    var tokM = params.token || '';
+    var cbM = params.callback || '';
+    var isCbM = /^[A-Za-z0-9_.]{1,64}$/.test(cbM);
+    if (!isAllowedWithToken_(tokM, params)) {
+      var errM = { ok: false, error: 'not allowed' };
+      return isCbM ? ContentService.createTextOutput(cbM + '(' + JSON.stringify(errM) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(errM);
+    }
+    var emailM = getEmailFromRequest_(params);
+    if (!isOwnerForEmail_(emailM)) {
+      var errM2 = { ok: false, error: 'owner only' };
+      return isCbM ? ContentService.createTextOutput(cbM + '(' + JSON.stringify(errM2) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(errM2);
+    }
+    try {
+      var msg = migrateToIndex();
+      var okM = { ok: true, result: msg };
+      return isCbM ? ContentService.createTextOutput(cbM + '(' + JSON.stringify(okM) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(okM);
+    } catch (errM3) {
+      var failM = { ok: false, error: String(errM3 && errM3.message || errM3) };
+      return isCbM ? ContentService.createTextOutput(cbM + '(' + JSON.stringify(failM) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(failM);
+    }
+  }
+  if (params.action === 'debugIndexInfo') {
+    var tokD = params.token || '';
+    if (!isAllowedWithToken_(tokD, params)) return jsonOut_({ ok: false, error: 'not allowed' });
+    return jsonOut_({ ok: true, info: debugIndexInfo(), props: debugProps() });
+  }
   if (params.action === 'getDICTIONARY') {
     var tok = params.token || '';
     if (!isAllowedWithToken_(tok) && tok !== '') return jsonOut_({ ok: false, error: 'not allowed' });
@@ -548,11 +575,27 @@ function getSavedTexts(opts) {
   }
   var items = data.items || [];
   // 旧データがまだ移行されていない場合はレガシーから読む（indexが空で旧にデータがある場合）
+  // ついでに自動移行を試みる（初回のみ）
   if ((!items || items.length === 0) && !opts._skipLegacy) {
     try {
       var legacy = getLegacyItems_();
       if (legacy && legacy.length) {
         items = legacy;
+        // 自動移行: indexが空なら旧データをindexへ保存（失敗しても読込は継続）
+        try {
+          var lock = LockService.getScriptLock();
+          if (lock.tryLock(5000)) {
+            try {
+              var cur = loadIndex_();
+              if (!cur.items || cur.items.length === 0) {
+                cur.items = legacy;
+                cur.version = 1;
+                saveIndex_(cur);
+                try { PropertiesService.getScriptProperties().setProperty('MIGRATED_AT', new Date().toISOString()); } catch (e3) {}
+              }
+            } finally { try { lock.releaseLock(); } catch (e4) {} }
+          }
+        } catch (e5) {}
       }
     } catch (e2) {}
   }
