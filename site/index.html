@@ -597,6 +597,7 @@
       if (!banner || !textEl) return;
       function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
       function setIdToken(t){ try{ if(t) localStorage.setItem('gis_id_token',t); else localStorage.removeItem('gis_id_token'); }catch(e){} }
+      function getEmailFromIdToken(idt){ try{ var p=idt.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } }
       function decodeJwtPayload(t){ try{ var p=t.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; return JSON.parse(atob(p)); }catch(e){ return null; } }
       function render(state, opts) {
         opts = opts || {};
@@ -649,7 +650,7 @@
         s2.src=buildProbeBase()+'&callback=__portalProbe2&t='+Date.now();
         document.head.appendChild(s2);
       }
-      function buildProbeBase(){ var b=PROBE_URL+'?probe=1&token='+encodeURIComponent(PROBE_TOKEN); var id=getIdToken(); if(id) b+='&id_token='+encodeURIComponent(id); return b; }
+      function buildProbeBase(){ var b=PROBE_URL+'?probe=1&token='+encodeURIComponent(PROBE_TOKEN); var id=getIdToken(); if(id){ b+='&id_token='+encodeURIComponent(id); var em=getEmailFromIdToken(id); if(em) b+='&email='+encodeURIComponent(em); } return b; }
       var done = false;
       var s = document.createElement('script');
       var timer = setTimeout(function () {

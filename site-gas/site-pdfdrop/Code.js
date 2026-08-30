@@ -201,13 +201,22 @@ function handleProbe_(p) {
 function doPost(e) {
   var name = '';
   try {
+    // POST probe 対応
+    var rawProbe = (e && e.postData && e.postData.contents) || '';
+    if (!rawProbe && e && e.parameter && e.parameter.data) rawProbe = e.parameter.data;
+    if (rawProbe) {
+      try {
+        var probeBody = JSON.parse(rawProbe);
+        if (probeBody.probe) return handleProbe_(probeBody);
+      } catch (e2) {}
+    }
+    if (e && e.parameter && e.parameter.probe) return handleProbe_(e.parameter);
     if (!e || !e.parameter || !e.parameter.data) throw Error('no data');
     var req = JSON.parse(e.parameter.data);
     name = sanitizeName_(req.name);
     console.log('doPost begin: ' + name);
     var token = getToken_();
     if (!token || String(req.token) !== token) throw Error('bad token');
-    // id_token があればそれでメール判定（GIS対応）、なければ Session
     var email = getEmailFromRequest_(req);
     if (!email) email = getEmail_();
     if (!isAllowed_(email)) throw Error('not allowed (' + (email ? maskEmail_(email) : 'identity invisible') + ')');

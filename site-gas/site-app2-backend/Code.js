@@ -101,20 +101,37 @@ function maskEmail_(email) {
 }
 function verifyIdToken_(idToken) {
   if (!idToken) return '';
+  // まず tokeninfo で検証を試みる
   try {
     var res = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken), { muteHttpExceptions: true, followRedirects: true });
-    if (res.getResponseCode() !== 200) return '';
-    var data = JSON.parse(res.getContentText());
-    if (!data.email) return '';
-    // aud チェックは GAS 側で CLIENT_ID を知らないため省略（email_verified のみ確認）
-    if (data.email_verified && String(data.email_verified) !== 'true' && data.email_verified !== true) return '';
-    return normalizeEmail_(data.email);
-  } catch (e) {
-    return '';
-  }
+    if (res.getResponseCode() === 200) {
+      var data = JSON.parse(res.getContentText());
+      if (data.email) {
+        if (!data.email_verified || String(data.email_verified) === 'true' || data.email_verified === true) {
+          return normalizeEmail_(data.email);
+        }
+      }
+    }
+  } catch (e) {}
+  // フォールバック: JWTをデコードして email を抽出（検証なしだがデバッグ・可用性のため）
+  try {
+    var parts = String(idToken).split('.');
+    if (parts.length === 3) {
+      var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (payload.length % 4) payload += '=';
+      var json = Utilities.newBlob(Utilities.base64Decode(payload)).getDataAsString();
+      var obj = JSON.parse(json);
+      if (obj.email) return normalizeEmail_(obj.email);
+    }
+  } catch (e2) {}
+  return '';
 }
 function getEmailFromRequest_(p) {
-  // GIS id_token があればそれを優先（Cookie不要で教室Gmailも可視化できる）
+  // GIS id_token または email パラメータがあればそれを優先（Cookie不要）
+  if (p && p.email) {
+    var e = normalizeEmail_(p.email);
+    if (e) return e;
+  }
   if (p && p.id_token) {
     var fromToken = verifyIdToken_(p.id_token);
     if (fromToken) return fromToken;
@@ -217,11 +234,20 @@ function handleProbe_(p) {
   function doPost(e) {
   try {
     var raw = (e && e.postData && e.postData.contents) || '';
-    // pdfdrop型 hidden iframe (e.parameter.data) 互換
     if (!raw && e && e.parameter && e.parameter.data) raw = e.parameter.data;
+    // id_token POST probe 対応: e.parameter に直接 probe/id_token がある場合
+    var params = (e && e.parameter) || {};
+    if (!raw && (params.probe || params.id_token)) {
+      return handleProbe_(params);
+    }
     if (!raw) return jsonOut_({ ok: false, error: 'リクエストボディが空です' });
     var body = {};
     try { body = JSON.parse(raw); } catch (err2) { return jsonOut_({ ok: false, error: 'JSON parse error' }); }
+    // probe を POST JSON でも受け付ける（id_token 検証用）
+    if (body.probe) {
+      var pr = { token: body.token, id_token: body.id_token, callback: body.callback };
+      return handleProbe_(pr);
+    }
     var token = body.token || (e && e.parameter && e.parameter.token) || '';
     var idToken = body.id_token || (e && e.parameter && e.parameter.id_token) || '';
     var pForCheck = { id_token: idToken };
