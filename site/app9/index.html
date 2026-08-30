@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>蜴溽ｨｿ逕ｨ邏吩ｽ懈・</title>
+<title>原稿用紙作成</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 * { box-sizing: border-box; }
@@ -101,49 +101,50 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
 
 <div class="controls no-print">
   <div class="panel">
-    <h1>蜴溽ｨｿ逕ｨ邏吩ｽ懈・</h1>
+    <h1>原稿用紙作成</h1>
 
     <div class="row">
       <fieldset class="dirs">
-        <legend>譖ｸ縺肴婿蜷・/legend>
-        <span class="radio"><label><input type="radio" name="dir" value="tate">邵ｦ譖ｸ縺・/label></span>
-        <span class="radio"><label><input type="radio" name="dir" value="yoko" checked>讓ｪ譖ｸ縺・/label></span>
+        <legend>書き方向</legend>
+        <span class="radio"><label><input type="radio" name="dir" value="tate">縦書き</label></span>
+        <span class="radio"><label><input type="radio" name="dir" value="yoko" checked>横書き</label></span>
       </fieldset>
-      <span class="field">1陦後・繝槭せ謨ｰ <input type="number" id="masu" value="20" min="1" max="50"></span>
-      <span class="field">陦梧焚 <input type="number" id="gyo" value="20" min="1" max="50"></span>
+      <span class="field">1行のマス数 <input type="number" id="masu" value="20" min="1" max="50"></span>
+      <span class="field">行数 <input type="number" id="gyo" value="20" min="1" max="50"></span>
       <span class="count" id="count"></span>
     </div>
 
     <div class="row presets">
-      <button data-n="20" data-l="20">400蟄苓ｩｰ繧・20ﾃ・0)</button>
-      <button data-n="20" data-l="10">200蟄苓ｩｰ繧・20ﾃ・0)</button>
-      <button data-n="30" data-l="20">600蟄苓ｩｰ繧・30ﾃ・0)</button>
-      <button data-n="10" data-l="10">100蟄苓ｩｰ繧・10ﾃ・0)</button>
+      <button data-n="20" data-l="20">400字詰め(20×20)</button>
+      <button data-n="20" data-l="10">200字詰め(20×10)</button>
+      <button data-n="30" data-l="20">600字詰め(30×20)</button>
+      <button data-n="10" data-l="10">100字詰め(10×10)</button>
     </div>
 
     <div class="row">
-      <span class="field">鄂ｫ邱壹・濶ｲ</span>
+      <span class="field">罫線の色</span>
       <div class="swatches">
-        <button class="swatch" data-color="#bcd0c6" title="邱・螳夂分)" style="background:#bcd0c6"></button>
-        <button class="swatch" data-color="#c8c8c8" title="繧ｰ繝ｬ繝ｼ" style="background:#c8c8c8"></button>
-        <button class="swatch" data-color="#bccde2" title="髱・ style="background:#bccde2"></button>
-        <button class="swatch" data-color="#ecd0da" title="繝斐Φ繧ｯ" style="background:#ecd0da"></button>
-        <button class="swatch" data-color="#e3d6bf" title="繝吶・繧ｸ繝･" style="background:#e3d6bf"></button>
-        <input type="color" id="customColor" value="#bcd0c6" title="繧ｫ繧ｹ繧ｿ繝繧ｫ繝ｩ繝ｼ">
-        <span class="custom-label">繧ｫ繧ｹ繧ｿ繝</span>
+        <button class="swatch" data-color="#bcd0c6" title="緑(定番)" style="background:#bcd0c6"></button>
+        <button class="swatch" data-color="#c8c8c8" title="グレー" style="background:#c8c8c8"></button>
+        <button class="swatch" data-color="#bccde2" title="青" style="background:#bccde2"></button>
+        <button class="swatch" data-color="#ecd0da" title="ピンク" style="background:#ecd0da"></button>
+        <button class="swatch" data-color="#e3d6bf" title="ベージュ" style="background:#e3d6bf"></button>
+        <input type="color" id="customColor" value="#bcd0c6" title="カスタムカラー">
+        <span class="custom-label">カスタム</span>
       </div>
     </div>
 
     <div class="row">
-      <label class="chk"><input type="checkbox" id="headerChk" checked>鬘悟錐繝ｻ豌丞錐谺・ｒ莉倥￠繧・/label>
+      <label class="chk"><input type="checkbox" id="headerChk" checked>題名・氏名欄を付ける</label>
     </div>
 
     <div class="actions">
-      <button id="printBtn">蜊ｰ蛻ｷ縺吶ｋ</button>
-      <button id="classroomBtn" style="display:none">謨吝ｮ､繧ｿ繝悶Ξ繝・ヨ縺ｧ蜊ｰ蛻ｷ</button>
+      <button id="printBtn">印刷する</button>
+      <button id="classroomBtn" style="display:none">教室タブレットで印刷</button>
+      <span id="gis-wrap-app9" style="display:none;margin-left:8px"></span>
       <span class="sendStatus" id="sendStatus"></span>
     </div>
-    <p class="hint">蜊ｰ蛻ｷ繝繧､繧｢繝ｭ繧ｰ縺ｮ菫晏ｭ伜・縺ｧ縲訓DF縺ｫ菫晏ｭ倥阪ｒ驕ｸ縺ｶ縺ｨPDF繝輔ぃ繧､繝ｫ繧ゆｽ懈・縺ｧ縺阪∪縺吶ゅ←縺ｮ繧ｵ繧､繧ｺ縺ｧ繧ょｿ・★A4逕ｨ邏・譫壹↓蜿弱∪繧翫∪縺吶りｨｭ螳壹・縺薙・繝悶Λ繧ｦ繧ｶ縺ｫ閾ｪ蜍穂ｿ晏ｭ倥＆繧後∵ｬ｡蝗樣幕縺・◆縺ｨ縺阪↓蠕ｩ蜈・＆繧後∪縺吶・br>窶ｻPDF蜃ｺ蜉帙↓縺ｯ <a href="https://github.com/parallax/jsPDF" target="_blank" rel="noopener">jsPDF</a>繝ｻ<a href="https://html2canvas.hertzen.com/" target="_blank" rel="noopener">html2canvas</a> (MIT License) 繧貞茜逕ｨ縺励※縺・∪縺吶・/p>
+    <p class="hint">印刷ダイアログの保存先で「PDFに保存」を選ぶとPDFファイルも作成できます。どのサイズでも必ずA4用紙1枚に収まります。設定はこのブラウザに自動保存され、次回開いたときに復元されます。<br>※PDF出力には <a href="https://github.com/parallax/jsPDF" target="_blank" rel="noopener">jsPDF</a>・<a href="https://html2canvas.hertzen.com/" target="_blank" rel="noopener">html2canvas</a> (MIT License) を利用しています。</p>
   </div>
 </div>
 
@@ -228,7 +229,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     var dir = getDir();
     var n = readNum(nIn, DEFAULTS.n);
     var l = readNum(lIn, DEFAULTS.l);
-    countLbl.textContent = (n * l) + '蟄・;
+    countLbl.textContent = (n * l) + '字';
 
     var headerOn = headerChk.checked;
     var HEADER_MM = 24;
@@ -241,8 +242,8 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     var h = '';
     if (headerOn) {
       h += '<div class="doc-header">'
-        + '<div class="dh-row"><span class="dh-label">鬘悟錐</span><span class="dh-line"></span></div>'
-        + '<div class="dh-row name"><span class="dh-label">豌丞錐</span><span class="dh-line"></span></div>'
+        + '<div class="dh-row"><span class="dh-label">題名</span><span class="dh-line"></span></div>'
+        + '<div class="dh-row name"><span class="dh-label">氏名</span><span class="dh-line"></span></div>'
         + '</div>';
     }
     var cs = 'width:' + cell + 'mm;height:' + cell + 'mm;';
@@ -295,10 +296,10 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
   window.addEventListener('resize', fitZoom);
   document.getElementById('printBtn').addEventListener('click', function () { window.print(); });
 
-  // GIS 險ｭ螳夲ｼ郁ｦ・ Google Cloud Console縺ｧ OAuth繧ｯ繝ｩ繧､繧｢繝ｳ繝・D繧剃ｽ懈・縺励∽ｸ玖ｨ倥ｒ鄂ｮ謠幢ｼ・  var GIS_CLIENT_ID = '920000857743-91jfqq1q45hmnas1b25ebg0dqafo846i.apps.googleusercontent.com';
+  var GIS_CLIENT_ID = '920000857743-91jfqq1q45hmnas1b25ebg0dqafo846i.apps.googleusercontent.com';
   function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
   function setIdToken(t){ try{ if(t) localStorage.setItem('gis_id_token',t); else localStorage.removeItem('gis_id_token'); }catch(e){} }
-  // site-gas/site-pdfdrop・域眠GAS・・ YOUR_SCRIPT_ID_site-pdfdrop
+  // site-gas/site-pdfdrop（新GAS）: YOUR_SCRIPT_ID_site-pdfdrop
   var CLASSROOM = {
     url: 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbwj7qTaMDmKGa-KTEEwa2jcP7wtZ8xh_rVMANzfwKapz5u8tThqjxc2pQsbN-lAWU5L7Q/exec',
     token: 'e6135dfd707ab9a6916635fa'
@@ -369,23 +370,23 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     form.appendChild(input);
     document.body.appendChild(form);
     var done = false;
-    var timer = setTimeout(function () { finish({ ok: false, error: '繧ｿ繧､繝繧｢繧ｦ繝医＠縺ｾ縺励◆' }); }, 60000);
+    var timer = setTimeout(function () { finish({ ok: false, error: 'タイムアウトしました' }); }, 60000);
     function onMsg(ev) {
       if (ev.data && ev.data.genko) finish(ev.data.payload || ev.data);
     }
     window.addEventListener('message', onMsg);
     form.submit();
-    setStatus('騾∽ｿ｡荳ｭ(菫晏ｭ倡｢ｺ隱堺ｸｭ窶ｦ)');
+    setStatus('送信中(保存確認中…)');
     pollForFile(name, 0, 0);
 
     function pollForFile(n, attempt, silentStreak) {
       if (done) return;
       if (silentStreak >= 3) {
-        finish({ ok: false, auth: true, error: 'Google縺ｸ縺ｮ謗･邯壹′遒ｺ隱阪〒縺阪∪縺帙ｓ縲ゅΟ繧ｰ繧､繝ｳ迥ｶ諷九ｒ遒ｺ隱阪＠縺ｦ縺上□縺輔＞縲・ });
+        finish({ ok: false, auth: true, error: 'Googleへの接続が確認できません。ログイン状態を確認してください。' });
         return;
       }
       if (attempt >= 20) {
-        finish({ ok: false, error: '菫晏ｭ倥ｒ遒ｺ隱阪〒縺阪∪縺帙ｓ縺ｧ縺励◆(pdfdrop繧ｹ繝・・繧ｿ繧ｹ繝壹・繧ｸ縺ｮlast_error繧堤｢ｺ隱・' });
+        finish({ ok: false, error: '保存を確認できませんでした(pdfdropステータスページのlast_errorを確認)' });
         return;
       }
       var s = document.createElement('script');
@@ -433,23 +434,13 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     var settled = false;
     var timer = setTimeout(function () {
       if (settled) return;
-      // JSONP繧ｿ繧､繝繧｢繧ｦ繝・竊・iframe 繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ
       s.remove();
-      var iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = CLASSROOM.url + q2 + '&t=' + Date.now();
-      var t2 = setTimeout(function () { if (settled) return; settled = true; iframe.remove(); cb(null); }, 4000);
-      function onMsg(e) {
-        if (!e.data || !e.data.genkoProbe) return;
-        var res = e.data.payload || e.data;
-        if (settled) return;
-        settled = true;
-        clearTimeout(t2);
-        window.removeEventListener('message', onMsg);
-        iframe.remove();
-        cb(res);
-      }
-      window.addEventListener('message', onMsg);
+      var iframe=document.createElement('iframe');
+      iframe.style.display='none';
+      iframe.src=CLASSROOM.url + q2 + '&t=' + Date.now();
+      var t2=setTimeout(function(){ if(settled) return; settled=true; iframe.remove(); cb(null); },4000);
+      function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(settled) return; settled=true; clearTimeout(t2); window.removeEventListener('message',onMsg); iframe.remove(); cb(res); }
+      window.addEventListener('message',onMsg);
       document.body.appendChild(iframe);
     }, timeoutMs);
     window.__genkoJsonp = function (res) {
@@ -463,21 +454,12 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
       if (settled) return;
       clearTimeout(timer);
       s.remove();
-      var iframe2 = document.createElement('iframe');
-      iframe2.style.display = 'none';
-      iframe2.src = CLASSROOM.url + q2 + '&t=' + Date.now();
-      var t3 = setTimeout(function () { if (settled) return; settled = true; iframe2.remove(); cb(null); }, 4000);
-      function onMsg2(e) {
-        if (!e.data || !e.data.genkoProbe) return;
-        var res = e.data.payload || e.data;
-        if (settled) return;
-        settled = true;
-        clearTimeout(t3);
-        window.removeEventListener('message', onMsg2);
-        iframe2.remove();
-        cb(res);
-      }
-      window.addEventListener('message', onMsg2);
+      var iframe2=document.createElement('iframe');
+      iframe2.style.display='none';
+      iframe2.src=CLASSROOM.url + q2 + '&t=' + Date.now();
+      var t3=setTimeout(function(){ if(settled) return; settled=true; iframe2.remove(); cb(null); },4000);
+      function onMsg2(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(settled) return; settled=true; clearTimeout(t3); window.removeEventListener('message',onMsg2); iframe2.remove(); cb(res); }
+      window.addEventListener('message',onMsg2);
       document.body.appendChild(iframe2);
     };
     s.src = CLASSROOM.url + q2 + '&callback=__genkoJsonp&t=' + Date.now();
@@ -496,58 +478,81 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
   function showAuthHelp(msg) {
     document.getElementById('sendStatus').innerHTML =
       msg
-      + ' <a href="' + CLASSROOM.url + '" target="_blank" rel="noopener">繝ｭ繧ｰ繧､繝ｳ繝壹・繧ｸ繧帝幕縺・/a>'
-      + '(繝ｭ繧ｰ繧､繝ｳ蠕後↓繧ゅ≧荳蠎ｦ謚ｼ縺励※縺上□縺輔＞)';
+      + ' <a href="' + CLASSROOM.url + '" target="_blank" rel="noopener">ログインページを開く</a>'
+      + '(ログイン後にもう一度押してください)';
   }
 
   document.getElementById('classroomBtn').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
-    setStatus('隱崎ｨｼ遒ｺ隱堺ｸｭ窶ｦ');
+    setStatus('認証確認中…');
     probeAuth(function (pr) {
       if (pr.state !== 'ok') {
         btn.disabled = false;
-        if (pr.state === 'noauth') showAuthHelp('Google縺ｫ繝ｭ繧ｰ繧､繝ｳ縺輔ｌ縺ｦ縺・↑縺・庄閭ｽ諤ｧ縺後≠繧翫∪縺吶・);
-        else if (pr.state === 'notallowed') setStatus('騾∽ｿ｡螟ｱ謨・ 縺薙・繧｢繧ｫ繧ｦ繝ｳ繝・' + (pr.masked || '荳肴・') + ')縺ｯ險ｱ蜿ｯ繝ｪ繧ｹ繝医↓縺ゅｊ縺ｾ縺帙ｓ');
-        else setStatus('騾∽ｿ｡螟ｱ謨・ ' + pr.message);
+        if (pr.state === 'noauth') showAuthHelp('Googleにログインされていない可能性があります。');
+        else if (pr.state === 'notallowed') setStatus('送信失敗: このアカウント(' + (pr.masked || '不明') + ')は許可リストにありません');
+        else setStatus('送信失敗: ' + pr.message);
         return;
       }
-      setStatus('PDF繧堤函謌蝉ｸｭ窶ｦ');
+      setStatus('PDFを生成中…');
       makePdf(function (err, pdf) {
         if (err) {
           btn.disabled = false;
-          setStatus('PDF逕滓・縺ｫ螟ｱ謨励＠縺ｾ縺励◆');
+          setStatus('PDF生成に失敗しました');
           return;
         }
-        setStatus('騾∽ｿ｡荳ｭ窶ｦ');
+        setStatus('送信中…');
         var n = readNum(nIn, DEFAULTS.n);
         var l = readNum(lIn, DEFAULTS.l);
         sendPdfToClassroom(pdf.output('datauristring').split(',')[1], buildPdfName(n, l), function (res) {
           btn.disabled = false;
-          if (res && res.ok) setStatus('騾∽ｿ｡螳御ｺ・ ' + res.name);
+          if (res && res.ok) setStatus('送信完了: ' + res.name);
           else if (res && res.auth) showAuthHelp(res.error);
-          else setStatus('騾∽ｿ｡螟ｱ謨・ ' + ((res && res.error) || '荳肴・縺ｪ繧ｨ繝ｩ繝ｼ'));
+          else setStatus('送信失敗: ' + ((res && res.error) || '不明なエラー'));
         });
       });
     });
   });
 
-  // Pages髱咏噪迚・ 襍ｷ蜍墓凾縺ｫprobe縺ｧ陦ｨ遉ｺ蛻､螳夲ｼ井ｻ墓ｧ俶嶌_遘ｻ陦梧｡・md 4.4・・  // - 譛ｪ繝ｭ繧ｰ繧､繝ｳ/謨吝ｮ､螟・竊・髱櫁｡ｨ遉ｺ縺ｮ縺ｾ縺ｾ
-  // - 謨吝ｮ､繧ｿ繝悶Ξ繝・ヨ(荳榊庄隕・ / 蜈育函(蜿ｯ隕・ 竊・陦ｨ遉ｺ
+  // Pages静的版: 起動時にprobeで表示判定（仕様書_移行案.md 4.4）GIS対応
+  function initGisApp9(){
+    if(GIS_CLIENT_ID.indexOf('REPLACE')===0) return;
+    if(typeof google==='undefined'||!google.accounts||!google.accounts.id) { setTimeout(initGisApp9,500); return; }
+    try{
+      google.accounts.id.initialize({
+        client_id: GIS_CLIENT_ID,
+        callback: function(resp){ if(resp.credential){ setIdToken(resp.credential); location.reload(); } },
+        auto_select:false
+      });
+      var w=document.getElementById('gis-wrap-app9');
+      if(w){ w.style.display='inline-block'; google.accounts.id.renderButton(w,{theme:'outline',size:'small',text:'signin_with',shape:'pill'}); }
+      google.accounts.id.prompt();
+    }catch(e){}
+  }
+  // Pages静的版: 起動時にprobeで表示判定（仕様書_移行案.md 4.4）
+  // - 未ログイン → GIS表示、教室外 → 非表示、教室/先生 → 表示
   function updateClassroomBtnVisibility() {
     var btn = document.getElementById('classroomBtn');
+    var gisW=document.getElementById('gis-wrap-app9');
     if (!CLASSROOM.url || !CLASSROOM.token) return;
-    // file:// 縺ｧ縺ｯ probe 縺励↑縺・    if (location.protocol === 'file:') return;
+    if (location.protocol === 'file:') return;
     probeAuth(function (pr) {
       if (pr.state === 'ok') {
         btn.style.display = '';
+        if(gisW) gisW.style.display='none';
         setStatus('');
+      } else if (pr.state === 'notallowed') {
+        btn.style.display = 'none';
+        if(gisW) gisW.style.display='none';
+        setStatus('教室外アカウントでは印刷できません');
       } else {
         btn.style.display = 'none';
+        if(GIS_CLIENT_ID.indexOf('REPLACE')!==0) initGisApp9();
       }
     });
   }
-  // 襍ｷ蜍墓凾縺ｫ蛻､螳夲ｼ域立 isGasEnv 陦ｨ遉ｺ縺ｯ蟒・ｭ｢・・  updateClassroomBtnVisibility();
+  // 起動時に判定（旧 isGasEnv 表示は廃止）
+  updateClassroomBtnVisibility();
   window.__genkoTest = { makePdf: makePdf, classroom: CLASSROOM, probeAuth: probeAuth, updateClassroomBtnVisibility: updateClassroomBtnVisibility };
 
   applyState(loadState() || DEFAULTS);

@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <title>闍ｱ隱樣聞譁・､夊ｪｭ繝ｪ繝ｼ繝繝ｼ</title>
+  <title>英語長文多読リーダー</title>
   <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://unpkg.com/compromise@13.11.3/builds/compromise.min.js"></script>
@@ -432,32 +432,32 @@
 <body>
   <div id="spinner-overlay"></div>
   <div id="spinner">
-    <div id="spinner-text">逕滓・荳ｭ<span id="dot-anim"></span></div>
+    <div id="spinner-text">生成中<span id="dot-anim"></span></div>
   </div>
   <div id="dict-overlay-fixed"></div>
 
   <div id="form-container">
     <div id="genSection">
-      <h1>逕滓・險ｭ螳・/h1>
+      <h1>生成設定</h1>
 
     <div class="field">
-      <label for="fLevel">髮｣譏灘ｺｦ・郁恭讀懊Ξ繝吶Ν・・/label>
+      <label for="fLevel">難易度（英検レベル）</label>
       <select id="fLevel">
-        <option>7邏・/option>
-        <option>6邏・/option>
-        <option>5邏・/option>
-        <option>4邏・/option>
-        <option selected>3邏・/option>
-        <option>貅・邏・/option>
-        <option>貅・邏壹・繝ｩ繧ｹ</option>
-        <option>2邏・/option>
-        <option>貅・邏・/option>
-        <option>1邏・/option>
+        <option>7級</option>
+        <option>6級</option>
+        <option>5級</option>
+        <option>4級</option>
+        <option selected>3級</option>
+        <option>準2級</option>
+        <option>準2級プラス</option>
+        <option>2級</option>
+        <option>準1級</option>
+        <option>1級</option>
       </select>
     </div>
 
     <div class="field">
-      <label for="fWords">蜊倩ｪ樣㍼</label>
+      <label for="fWords">単語量</label>
       <select id="fWords">
         <option>100</option>
         <option>200</option>
@@ -471,104 +471,106 @@
     </div>
 
     <div class="field">
-      <label for="fWorld">荳也阜險ｭ螳・/label>
+      <label for="fWorld">世界設定</label>
       <select id="fWorld">
-        <option selected>迴ｾ莉｣譌･譛ｬ</option>
-        <option>迴ｾ莉｣螟門嵜</option>
-        <option>荳ｭ荳悶Κ繝ｼ繝ｭ繝・ヱ</option>
-        <option>繝輔ぃ繝ｳ繧ｿ繧ｸ繝ｼ</option>
+        <option selected>現代日本</option>
+        <option>現代外国</option>
+        <option>中世ヨーロッパ</option>
+        <option>ファンタジー</option>
         <option>SF</option>
-        <option>繧ｵ繧､繝舌・繝代Φ繧ｯ</option>
-        <option>縺九ｏ縺・＞荳也阜</option>
-        <option>遶･隧ｱ縺ｮ荳也阜</option>
+        <option>サイバーパンク</option>
+        <option>かわいい世界</option>
+        <option>童話の世界</option>
       </select>
     </div>
 
     <div class="field">
-      <label for="fStyle">譁・ｽ・/label>
+      <label for="fStyle">文体</label>
       <select id="fStyle" disabled>
-        <option selected>迴ｾ莉｣闍ｱ隱・/option>
+        <option selected>現代英語</option>
       </select>
     </div>
 
     <div class="field">
-      <label for="fTextType">譁・・遞ｮ鬘・/label>
+      <label for="fTextType">文の種類</label>
       <select id="fTextType">
-        <option selected>迚ｩ隱樊枚</option>
-        <option>隱ｬ譏取枚</option>
-        <option>繧ｨ繝・そ繧､</option>
-        <option>莨夊ｩｱ譁・/option>
-        <option>謇狗ｴ吶・繝｡繝ｼ繝ｫ縺ｮ繧・ｊ蜿悶ｊ</option>
-        <option>蝠・刀繝ｻ譁ｽ險ｭ繝ｻ繧､繝吶Φ繝医・蠎・相譁・/option>
+        <option selected>物語文</option>
+        <option>説明文</option>
+        <option>エッセイ</option>
+        <option>会話文</option>
+        <option>手紙・メールのやり取り</option>
+        <option>商品・施設・イベントの広告文</option>
       </select>
     </div>
 
     <div class="field">
-      <label for="fGenre">繧ｸ繝｣繝ｳ繝ｫ</label>
+      <label for="fGenre">ジャンル</label>
       <select id="fGenre">
-        <option selected>譌･蟶ｸ</option>
-        <option>蜀帝匱</option>
-        <option>諱区・</option>
-        <option>謌ｦ譎ゆｸ・/option>
-        <option>繝溘せ繝・Μ繝ｼ</option>
-        <option>繝帙Λ繝ｼ</option>
-        <option>繝峨Λ繝・/option>
+        <option selected>日常</option>
+        <option>冒険</option>
+        <option>恋愛</option>
+        <option>戦時下</option>
+        <option>ミステリー</option>
+        <option>ホラー</option>
+        <option>ドラマ</option>
       </select>
     </div>
 
     <div class="field">
-      <label for="fDevelopment">螻暮幕縺ｮ莉墓婿</label>
+      <label for="fDevelopment">展開の仕方</label>
       <select id="fDevelopment">
-        <option>豺｡縲・→縺励◆螻暮幕</option>
-        <option selected>螟牙喧縺ｮ縺ｨ繧薙□螻暮幕</option>
+        <option>淡々とした展開</option>
+        <option selected>変化のとんだ展開</option>
       </select>
     </div>
 
     <div class="field">
-      <label for="fEnding">邨ゅｏ繧頑婿</label>
+      <label for="fEnding">終わり方</label>
       <select id="fEnding">
-        <option>豺｡縲・→縺励◆邨ゅｏ繧頑婿</option>
-        <option>鬩壹￥繧医≧縺ｪ邨ゅｏ繧頑婿</option>
-        <option>閠・∴縺輔○繧峨ｌ繧狗ｵゅｏ繧頑婿</option>
-        <option selected>繝上ャ繝斐・繧ｨ繝ｳ繝・/option>
-        <option>謔ｲ縺励＞邨ゅｏ繧頑婿</option>
+        <option>淡々とした終わり方</option>
+        <option>驚くような終わり方</option>
+        <option>考えさせられる終わり方</option>
+        <option selected>ハッピーエンド</option>
+        <option>悲しい終わり方</option>
       </select>
     </div>
 
     <div class="field">
-      <label for="fPrompt">繝励Ο繝ｳ繝励ヨ・井ｻｻ諢上・閾ｪ逕ｱ險伜・・・/label>
-      <textarea id="fPrompt" rows="3" placeholder="萓具ｼ壻ｸｻ莠ｺ蜈ｬ縺ｯ譁咏炊縺悟ｾ玲э縺ｪ蟆丞ｭｦ逕溘↓縺励※縺上□縺輔＞"></textarea>
+      <label for="fPrompt">プロンプト（任意・自由記入）</label>
+      <textarea id="fPrompt" rows="3" placeholder="例：主人公は料理が得意な小学生にしてください"></textarea>
     </div>
 
-    <button id="genBtn" class="gen-btn">闍ｱ隱樣聞譁・ｒ逕滓・</button>
+    <button id="genBtn" class="gen-btn">英語長文を生成</button>
+    <div id="gis-wrap" style="display:none;margin-top:8px"></div>
     </div>
 
-    <h1 class="sec">驕主悉縺ｮ逕滓・迚ｩ</h1>
+    <h1 class="sec">過去の生成物</h1>
     <ul id="savedList"></ul>
 
     <div id="credit">
       This app uses:<br>
-      - compromise.js by Spencer Kelly (MIT License) 竊・<a href="https://github.com/spencermountain/compromise" target="_blank">source</a><br>
-      - Font Awesome Free (CC BY 4.0) 竊・<a href="https://fontawesome.com" target="_blank">fontawesome.com</a><br>
-      - Kiwi Maru Font by MOTOYA (SIL Open Font License 1.1) 竊・<a href="https://fonts.google.com/specimen/Kiwi+Maru" target="_blank">Google Fonts</a><br>
+      - compromise.js by Spencer Kelly (MIT License) → <a href="https://github.com/spencermountain/compromise" target="_blank">source</a><br>
+      - Font Awesome Free (CC BY 4.0) → <a href="https://fontawesome.com" target="_blank">fontawesome.com</a><br>
+      - Kiwi Maru Font by MOTOYA (SIL Open Font License 1.1) → <a href="https://fonts.google.com/specimen/Kiwi+Maru" target="_blank">Google Fonts</a><br>
       Vocabulary data from:<br>
       - <a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank">NGSL (CC BY 4.0)</a> / <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.ja" target="_blank">Wiktionary (CC BY-SA 3.0)</a> / <a href="https://wordnet.princeton.edu/license-and-commercial-use" target="_blank">WordNet (Princeton University)</a><br>
-      霎樊嶌繝・・繧ｿ縺ｮ縺・■Wiktionary逕ｱ譚･縺ｮ驛ｨ蛻・・ <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.ja" target="_blank">CC BY-SA 3.0</a> 縺ｮ邯呎価迚ｩ縺ｨ縺励※蜷後Λ繧､繧ｻ繝ｳ繧ｹ荳九〒謠蝉ｾ帙＆繧後∪縺吶・    </div>
+      辞書データのうちWiktionary由来の部分は <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.ja" target="_blank">CC BY-SA 3.0</a> の継承物として同ライセンス下で提供されます。
+    </div>
   </div>
 
   <div id="preview-container">
     <h1>
-      <span id="preview-title">繝・く繧ｹ繝医・繝ｬ繝薙Η繝ｼ</span>
+      <span id="preview-title">テキストプレビュー</span>
       <span id="preview-subtitle"></span>
       <span id="zoomLabel"></span>
       <div id="controlButtons">
-        <button id="backButton" title="謌ｻ繧・>
+        <button id="backButton" title="戻る">
           <i class="fas fa-arrow-left"></i>
         </button>
-        <button id="zoomInButton" title="諡｡螟ｧ">
+        <button id="zoomInButton" title="拡大">
           <i class="fas fa-search-plus"></i>
         </button>
-        <button id="zoomOutButton" title="邵ｮ蟆・>
+        <button id="zoomOutButton" title="縮小">
           <i class="fas fa-search-minus"></i>
         </button>
       </div>
@@ -578,11 +580,11 @@
       <div id="textContentArea"></div>
       <div style="display: flex; width: 100%; margin-top: 20px; border-top: 1px solid #00ff00; color: #007700; line-height: 0.7;">
         <div style="flex: 1; padding-right: 20px;">
-          <div style="font-weight: bold; margin-bottom: 4px; color:#007700;">隱ｿ縺ｹ縺溷腰隱橸ｼ・/div>
+          <div style="font-weight: bold; margin-bottom: 4px; color:#007700;">調べた単語：</div>
           <div id="historyList" style="font-weight: bold; color:#007700;"></div>
         </div>
         <div style="flex: 1; border-left: 2px solid #00ff00; padding-left: 20px;">
-          <div style="font-weight: bold; margin-bottom: 4px; color:#666666;">蜑企勁縺励◆蜊倩ｪ橸ｼ・/div>
+          <div style="font-weight: bold; margin-bottom: 4px; color:#666666;">削除した単語：</div>
           <div id="deletedList" style="font-weight: bold; color:#666666;"></div>
         </div>
       </div>
@@ -592,10 +594,10 @@
   <div id="toaster"></div>
 
   <script>
-    // GIS 險ｭ螳夲ｼ郁ｦ・ Google Cloud Console縺ｧ OAuth繧ｯ繝ｩ繧､繧｢繝ｳ繝・D繧剃ｽ懈・縺励∽ｸ玖ｨ倥ｒ鄂ｮ謠帙よ価隱肴ｸ医∩JavaScript逕滓・蜈・↓ https://hori366191-ship-it.github.io 繧定ｿｽ蜉・・    const GIS_CLIENT_ID = '920000857743-91jfqq1q45hmnas1b25ebg0dqafo846i.apps.googleusercontent.com';
+    var GIS_CLIENT_ID = '920000857743-91jfqq1q45hmnas1b25ebg0dqafo846i.apps.googleusercontent.com';
   </script>
   <script>
-    // Pages髱咏噪迚・ site-gas/site-app2-backend・域眠GAS・・ YOUR_SCRIPT_ID_site-app2-backend
+    // Pages静的版: site-gas/site-app2-backend（新GAS）: YOUR_SCRIPT_ID_site-app2-backend
     const SITE_BACKEND_URL = 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
     const SITE_BACKEND_TOKEN = 'e6135dfd707ab9a6916635fa';
     const IS_GAS = false;
@@ -656,22 +658,12 @@
             if (done) return;
             done = true;
             s.remove();
-            // JSONP繧ｿ繧､繝繧｢繧ｦ繝・竊・iframe 繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ
-            var iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
-            var t2 = setTimeout(function () { if (done) return; done = true; iframe.remove(); resolve(null); }, 4000);
-            function onMsg(e) {
-              if (!e.data || !e.data.genkoProbe) return;
-              var res = e.data.payload || e.data;
-              if (done) return;
-              done = true;
-              clearTimeout(t2);
-              window.removeEventListener('message', onMsg);
-              iframe.remove();
-              resolve(res);
-            }
-            window.addEventListener('message', onMsg);
+            var iframe=document.createElement('iframe');
+            iframe.style.display='none';
+            iframe.src=url + (url.indexOf('?')>=0?'&':'?') + 't='+Date.now();
+            var t2=setTimeout(function(){ if(done) return; done=true; iframe.remove(); resolve(null); },4000);
+            function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t2); window.removeEventListener('message',onMsg); iframe.remove(); resolve(res); }
+            window.addEventListener('message',onMsg);
             document.body.appendChild(iframe);
           }, timeoutMs);
           var cbName = '__siteApp2Probe' + Date.now() + '_' + Math.random().toString(36).slice(2);
@@ -688,22 +680,12 @@
             done = true;
             clearTimeout(timer);
             s.remove();
-            // JSONP繧ｨ繝ｩ繝ｼ 竊・iframe 繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ
-            var iframe2 = document.createElement('iframe');
-            iframe2.style.display = 'none';
-            iframe2.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
-            var t3 = setTimeout(function () { if (done) return; done = true; iframe2.remove(); resolve(null); }, 4000);
-            function onMsg2(e) {
-              if (!e.data || !e.data.genkoProbe) return;
-              var res = e.data.payload || e.data;
-              if (done) return;
-              done = true;
-              clearTimeout(t3);
-              window.removeEventListener('message', onMsg2);
-              iframe2.remove();
-              resolve(res);
-            }
-            window.addEventListener('message', onMsg2);
+            var iframe2=document.createElement('iframe');
+            iframe2.style.display='none';
+            iframe2.src=url + (url.indexOf('?')>=0?'&':'?') + 't='+Date.now();
+            var t3=setTimeout(function(){ if(done) return; done=true; iframe2.remove(); resolve(null); },4000);
+            function onMsg2(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t3); window.removeEventListener('message',onMsg2); iframe2.remove(); resolve(res); }
+            window.addEventListener('message',onMsg2);
             document.body.appendChild(iframe2);
           };
           s.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + cbName + '&t=' + Date.now();
@@ -736,11 +718,12 @@
         if (IS_GAS) {
           return gasCall(cfg.gas, payload);
         }
-        // Pages髱咏噪迚・ site-app2-backend 縺ｸ TOKEN + id_token 莉倥″縺ｧ騾∽ｿ｡・・IS蟇ｾ蠢懶ｼ・        var body = payload || {};
+        // Pages静的版: site-app2-backend へ TOKEN + id_token 付きで送信（GIS対応）
+        var body = payload || {};
         body.token = SITE_BACKEND_TOKEN;
         var idt=getIdToken();
         if(idt) body.id_token=idt;
-        // generateText/deleteText 縺ｯ POST JSON
+        // generateText/deleteText は POST JSON
         if (name === 'generateText' || name === 'deleteText') {
           var res = await fetch(SITE_BACKEND_URL, {
             method: 'POST',
@@ -751,15 +734,17 @@
           if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
           return data;
         }
-        // getSavedTexts 縺ｯ JSONP GET・・ORS蝗樣∩・俄・fetch 繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ縺ｯCORS縺ｧ蠢・★螟ｱ謨励☆繧九◆繧∵彫蟒・        if (name === 'getSavedTexts') {
+        // getSavedTexts は JSONP GET（CORS回避）— fetch フォールバックはCORSで必ず失敗するため撤廃
+        if (name === 'getSavedTexts') {
           var idt2=getIdToken();
           var url = SITE_BACKEND_URL + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt2?'&id_token='+encodeURIComponent(idt2):'');
           var jp = await jsonpGet(url, 8000);
           if (jp && jp.ok) return jp;
           if (jp && jp.ok === false) throw new Error(jp.error || 'not allowed');
-          throw new Error('螻･豁ｴ縺ｮ隱ｭ縺ｿ霎ｼ縺ｿ縺ｫ螟ｱ謨励＠縺ｾ縺励◆・・AS蠢懃ｭ斐↑縺・ token/FOLDER_ID/蜈ｱ譛芽ｨｭ螳壹ｒ遒ｺ隱搾ｼ・);
+          throw new Error('履歴の読み込みに失敗しました（GAS応答なし: token/FOLDER_ID/共有設定を確認）');
         }
-        // 霎樊嶌縺ｯ Pages 縺ｫ蜷梧｢ｱ莠亥ｮ壹□縺後√ヵ繧ｩ繝ｼ繝ｫ繝舌ャ繧ｯ縺ｧGAS縺九ｉ蜿門ｾ暦ｼ・SONP荳譛ｬ蛹厄ｼ・        if (name === 'getDICTIONARY' || name === 'getFormMap') {
+        // 辞書は Pages に同梱予定だが、フォールバックでGASから取得（JSONP一本化）
+        if (name === 'getDICTIONARY' || name === 'getFormMap') {
           var idt3=getIdToken();
           var url2 = SITE_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'');
           var jp2 = await jsonpGet(url2, 8000);
@@ -832,7 +817,7 @@
             <button class="delete-word-btn" data-word="${w}" style="
               background: none; border: none; color: #990000; font-size: 0.9em;
               cursor: pointer; margin-left: 8px;
-            ">ﾃ・/button>
+            ">×</button>
           </div>
         `).join('');
         deletedEl.innerHTML = sortedDeleted.map(w => `
@@ -841,7 +826,7 @@
             <button class="restore-word-btn" data-word="${w}" style="
               background: none; border: none; color: #0044ff; font-size: 0.9em;
               cursor: pointer; margin-left: 8px;
-            ">竊ｩ</button>
+            ">↩</button>
           </div>
         `).join('');
         document.querySelectorAll('.delete-word-btn').forEach(btn => {
@@ -868,7 +853,7 @@
           level: val('fLevel'),
           wordCount: parseInt(val('fWords'), 10),
           world: val('fWorld'),
-          style: '迴ｾ莉｣闍ｱ隱・,
+          style: '現代英語',
           textType: val('fTextType'),
           genre: val('fGenre'),
           development: val('fDevelopment'),
@@ -878,9 +863,9 @@
       }
 
       function settingsSummary(s) {
-        const parts = [s.level, s.wordCount + '隱・, s.world, s.textType, s.genre, s.development, s.ending];
-        if (s.prompt) parts.push('霑ｽ蜉謖・､ｺ縺ゅｊ');
-        return parts.join('繝ｻ');
+        const parts = [s.level, s.wordCount + '語', s.world, s.textType, s.genre, s.development, s.ending];
+        if (s.prompt) parts.push('追加指示あり');
+        return parts.join('・');
       }
 
       function formatDate(iso) {
@@ -891,7 +876,7 @@
 
       function renderRecord(rec) {
         currentRecord = rec;
-        document.getElementById('preview-title').textContent = rec.title || '逕滓・邨先棡';
+        document.getElementById('preview-title').textContent = rec.title || '生成結果';
         document.getElementById('preview-subtitle').textContent = settingsSummary(rec.settings || {});
         document.getElementById('textContentArea').textContent =
           (rec.title ? rec.title + '\n\n' : '') + rec.text;
@@ -912,7 +897,7 @@
             document.getElementById('dict-overlay-fixed').style.display = 'none';
           }
         } catch (e) {
-          showToast(e.message || '逕滓・縺ｫ螟ｱ謨励＠縺ｾ縺励◆');
+          showToast(e.message || '生成に失敗しました');
         } finally {
           hideSpinner();
         }
@@ -924,7 +909,7 @@
         const ul = document.getElementById('savedList');
         ul.innerHTML = '';
         if (!items.length) {
-          ul.innerHTML = '<li style="cursor:default; color:#999999;">縺ｾ縺逕滓・螻･豁ｴ縺後≠繧翫∪縺帙ｓ</li>';
+          ul.innerHTML = '<li style="cursor:default; color:#999999;">まだ生成履歴がありません</li>';
           return;
         }
         for (const it of items) {
@@ -933,25 +918,25 @@
           if (IS_OWNER) {
             const delBtn = document.createElement('button');
             delBtn.className = 'delete-saved-btn';
-            delBtn.textContent = '蜑企勁';
+            delBtn.textContent = '削除';
             delBtn.addEventListener('click', async e => {
               e.stopPropagation();
-              if (!window.confirm('縺薙・逕滓・迚ｩ繧貞炎髯､縺励∪縺吶°・・)) return;
+              if (!window.confirm('この生成物を削除しますか？')) return;
               try {
                 await callServer('deleteText', { id: it.id });
                 loadSavedList();
               } catch (err) {
-                showToast(err.message || '蜑企勁縺ｫ螟ｱ謨励＠縺ｾ縺励◆');
+                showToast(err.message || '削除に失敗しました');
               }
             });
             li.appendChild(delBtn);
           }
           const titleEl = document.createElement('div');
           titleEl.className = 'saved-title';
-          titleEl.textContent = it.title || '(繧ｿ繧､繝医Ν縺ｪ縺・';
+          titleEl.textContent = it.title || '(タイトルなし)';
           const metaEl = document.createElement('div');
           metaEl.className = 'saved-meta';
-          metaEl.textContent = formatDate(it.createdAt) + '縲' + settingsSummary(it.settings || {});
+          metaEl.textContent = formatDate(it.createdAt) + '　' + settingsSummary(it.settings || {});
           li.appendChild(titleEl);
           li.appendChild(metaEl);
           li.addEventListener('click', () => {
@@ -970,7 +955,7 @@
           const res = await callServer('getSavedTexts');
           renderSavedList((res && res.items) || []);
         } catch (e) {
-          showToast(e.message || '螻･豁ｴ縺ｮ隱ｭ縺ｿ霎ｼ縺ｿ縺ｫ螟ｱ謨励＠縺ｾ縺励◆');
+          showToast(e.message || '履歴の読み込みに失敗しました');
         }
       }
 
@@ -979,28 +964,28 @@
         if (!raw || !/^[a-zA-Z\-']+$/.test(raw)) return;
         const dictDiv = document.getElementById('dict-overlay-fixed');
         dictDiv.style.display = 'block';
-        dictDiv.innerHTML = `<h4>${raw}</h4><p>隱ｭ縺ｿ霎ｼ縺ｿ荳ｭ窶ｦ</p>`;
+        dictDiv.innerHTML = `<h4>${raw}</h4><p>読み込み中…</p>`;
         try {
           await Promise.all([loadFormMap(), loadInvert()]);
           const normalized = normalize(raw);
           const defs = (INV && INV[normalized]) || [];
           let html = `
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <h4 style="margin: 4px 0;">${raw}${normalized !== raw.toLowerCase() ? ' 竊・' + normalized : ''}</h4>
+              <h4 style="margin: 4px 0;">${raw}${normalized !== raw.toLowerCase() ? ' → ' + normalized : ''}</h4>
               <button id="close-dict-btn" style="
                 background: #ffffff; color: #007700; border: 1px solid #00ff00;
                 padding: 2px 6px; border-radius: 4px; font-size: 0.8em;
                 cursor: pointer; margin-left: 8px;
-              ">髢峨§繧・/button>
+              ">閉じる</button>
             </div>
           `;
           if (defs.length) defs.forEach((d, i) => { html += `<div class='entry'><strong>${i + 1}.</strong> ${d}</div>`; });
-          else html += '<p>逋ｻ骭ｲ縺ｪ縺・/p>';
-          const encoded = encodeURIComponent(raw) + ' 諢丞袖';
+          else html += '<p>登録なし</p>';
+          const encoded = encodeURIComponent(raw) + ' 意味';
           html += `<div style="margin-top: 8px; font-size: 0.9em;">
                     <i class="fas fa-magnifying-glass" style="margin-right: 4px;"></i>
                     <a href="https://www.google.com/search?q=${encoded}" target="_blank" style="color:#007700;">
-                      縲・{raw}縲阪ｒGoogle縺ｧ讀懃ｴ｢
+                      「${raw}」をGoogleで検索
                     </a>
                   </div>`;
           viewedWords.add(raw.toLowerCase());
@@ -1011,7 +996,7 @@
           });
         } catch (err) {
           console.error(err);
-          dictDiv.innerHTML = '<p>霎樊嶌縺ｮ隱ｭ縺ｿ霎ｼ縺ｿ縺ｫ螟ｱ謨励＠縺ｾ縺励◆</p>';
+          dictDiv.innerHTML = '<p>辞書の読み込みに失敗しました</p>';
         }
       });
 
@@ -1037,30 +1022,46 @@
         if (e.touches.length > 1) e.preventDefault();
       }, { passive: false });
 
-      // Pages髱咏噪迚・ 襍ｷ蜍墓凾縺ｫprobe縺ｧ陦ｨ遉ｺ蛻､螳夲ｼ井ｻ墓ｧ俶嶌_遘ｻ陦梧｡・md 3.4・・      async function applyProbeToUI() {
+      // Pages静的版: 起動時にprobeで表示判定（仕様書_移行案.md 3.4）GIS対応
+      function initGisApp2(){
+        if(GIS_CLIENT_ID.indexOf('REPLACE')===0) return;
+        if(typeof google==='undefined'||!google.accounts||!google.accounts.id) { setTimeout(initGisApp2,500); return; }
+        try{
+          google.accounts.id.initialize({
+            client_id: GIS_CLIENT_ID,
+            callback: function(resp){ if(resp.credential){ setIdToken(resp.credential); location.reload(); } },
+            auto_select:false
+          });
+          var w=document.getElementById('gis-wrap');
+          if(w){ w.style.display='block'; google.accounts.id.renderButton(w,{theme:'outline',size:'medium',text:'signin_with',shape:'pill'}); }
+          google.accounts.id.prompt();
+        }catch(e){}
+      }
+      async function applyProbeToUI() {
         var genSection = document.getElementById('genSection');
         var textArea = document.getElementById('textContentArea');
+        var gisWrap=document.getElementById('gis-wrap');
         genSection.style.display = 'none';
-        textArea.textContent = '遒ｺ隱堺ｸｭ窶ｦ';
+        if(gisWrap) gisWrap.style.display='none';
+        textArea.textContent = '確認中…';
         var pr = await probeBackend();
         if (pr.state === 'ok') {
           IS_ALLOWED = true;
-          // Gmail蜿ｯ隕門喧蠕後・ isOwner・・WNER_EMAIL荳閾ｴ・峨〒蜈育函縺ｮ縺ｿ蜑企勁蜿ｯ縲よ蕗螳､縺ｯ逕滓・蜿ｯ繝ｻ蜑企勁荳榊庄
           IS_OWNER = !!pr.isOwner;
           genSection.style.display = '';
-          textArea.textContent = '蟾ｦ縺ｮ繝代ロ繝ｫ縺ｧ險ｭ螳壹ｒ驕ｸ縺ｳ縲・ｼｻ闍ｱ隱樣聞譁・ｒ逕滓・・ｽ繧呈款縺励※縺上□縺輔＞縲・n\n蜊倩ｪ槭ｒ繧ｿ繝・・縺吶ｋ縺ｨ霎樊嶌繧定｡ｨ遉ｺ縺励∪縺吶・;
+          textArea.textContent = '左のパネルで設定を選び、［英語長文を生成］を押してください。\n\n単語をタップすると辞書を表示します。';
         } else if (pr.state === 'notallowed') {
           IS_ALLOWED = false;
           IS_OWNER = false;
           genSection.style.display = 'none';
-          textArea.textContent = '謨吝ｮ､螟悶い繧ｫ繧ｦ繝ｳ繝医〒縺ｯ逕滓・縺ｧ縺阪∪縺帙ｓ縲・n\n蟾ｦ縺ｮ繝代ロ繝ｫ縺ｧ驕主悉縺ｮ逕滓・迚ｩ繧帝∈謚槭＠縺ｦ縺上□縺輔＞縲・n蜊倩ｪ槭ｒ繧ｿ繝・・縺吶ｋ縺ｨ霎樊嶌繧定｡ｨ遉ｺ縺励∪縺吶・;
+          textArea.textContent = '教室外アカウントでは生成できません。\n\n左のパネルで過去の生成物を選択してください。\n単語をタップすると辞書を表示します。';
         } else {
           IS_ALLOWED = false;
           IS_OWNER = false;
           genSection.style.display = 'none';
-          textArea.textContent = '蟾ｦ縺ｮ繝代ロ繝ｫ縺ｧ驕主悉縺ｮ逕滓・迚ｩ繧帝∈謚槭＠縺ｦ縺上□縺輔＞縲・n\n蜊倩ｪ槭ｒ繧ｿ繝・・縺吶ｋ縺ｨ霎樊嶌繧定｡ｨ遉ｺ縺励∪縺吶・;
+          textArea.textContent = '左のパネルで過去の生成物を選択してください。\n\n単語をタップすると辞書を表示します。';
+          if(GIS_CLIENT_ID.indexOf('REPLACE')!==0) initGisApp2();
         }
-        // 蜑企勁繝懊ち繝ｳ縺ｯ IS_OWNER 縺ｫ萓晏ｭ倥☆繧九◆繧∽ｸ隕ｧ繧貞・謠冗判
         loadSavedList();
       }
 
