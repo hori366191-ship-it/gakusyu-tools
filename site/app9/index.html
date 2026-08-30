@@ -294,10 +294,9 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
   window.addEventListener('resize', fitZoom);
   document.getElementById('printBtn').addEventListener('click', function () { window.print(); });
 
-  // site-gas/site-pdfdrop 用。旧GASと同TOKENを流用（仕様書_移行案.md 3.3）
-  // TODO: site-gas/site-pdfdrop デプロイ後に新URLへ差替
+  // site-gas/site-pdfdrop（新GAS）: YOUR_SCRIPT_ID_site-pdfdrop
   var CLASSROOM = {
-    url: 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbxP6klWI4L5wnTl2wTO5PmrDMf6z4Fmu3Qh3zFwfCf0KUa91idOINv6w8PxoY3Ke-oN/exec',
+    url: 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbwj7qTaMDmKGa-KTEEwa2jcP7wtZ8xh_rVMANzfwKapz5u8tThqjxc2pQsbN-lAWU5L7Q/exec',
     token: 'e6135dfd707ab9a6916635fa'
   };
   var isGasEnv = typeof google !== 'undefined' && google.script && google.script.run;
