@@ -608,10 +608,32 @@
       var s = document.createElement('script');
       var timer = setTimeout(function () {
         if (done) return;
-        done = true;
+        // JSONPタイムアウト → iframe フォールバック（サードパーティCookieブロック対策）
         s.remove();
-        render('is-warn');
-      }, 4000);
+        var iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = PROBE_URL + '?probe=1&token=' + encodeURIComponent(PROBE_TOKEN) + '&t=' + Date.now();
+        var iframeTimer = setTimeout(function () {
+          if (done) return;
+          done = true;
+          iframe.remove();
+          render('is-warn');
+        }, 4000);
+        function onMsg(e) {
+          if (!e.data || !e.data.genkoProbe) return;
+          var res = e.data.payload || e.data;
+          if (done) return;
+          done = true;
+          clearTimeout(iframeTimer);
+          window.removeEventListener('message', onMsg);
+          iframe.remove();
+          if (!res || !res.genkoProbe || !res.ok) { render('is-warn'); return; }
+          if (!res.allowed) { render('is-out'); return; }
+          render('is-ok', { isOwner: !!res.is_owner, invisible: !res.email_visible });
+        }
+        window.addEventListener('message', onMsg);
+        document.body.appendChild(iframe);
+      }, 5000);
       window.__portalProbe = function (res) {
         if (done) return;
         done = true;
@@ -623,10 +645,27 @@
       };
       s.onerror = function () {
         if (done) return;
-        done = true;
+        // JSONPエラー → 即iframeフォールバック
         clearTimeout(timer);
         s.remove();
-        render('is-warn');
+        var iframe2 = document.createElement('iframe');
+        iframe2.style.display = 'none';
+        iframe2.src = PROBE_URL + '?probe=1&token=' + encodeURIComponent(PROBE_TOKEN) + '&t=' + Date.now();
+        var t2 = setTimeout(function () { if (done) return; done = true; iframe2.remove(); render('is-warn'); }, 4000);
+        function onMsg2(e) {
+          if (!e.data || !e.data.genkoProbe) return;
+          var res = e.data.payload || e.data;
+          if (done) return;
+          done = true;
+          clearTimeout(t2);
+          window.removeEventListener('message', onMsg2);
+          iframe2.remove();
+          if (!res || !res.genkoProbe || !res.ok) { render('is-warn'); return; }
+          if (!res.allowed) { render('is-out'); return; }
+          render('is-ok', { isOwner: !!res.is_owner, invisible: !res.email_visible });
+        }
+        window.addEventListener('message', onMsg2);
+        document.body.appendChild(iframe2);
       };
       s.src = PROBE_URL + '?probe=1&token=' + encodeURIComponent(PROBE_TOKEN) + '&callback=__portalProbe&t=' + Date.now();
       document.head.appendChild(s);

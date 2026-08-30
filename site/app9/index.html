@@ -426,9 +426,24 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     var settled = false;
     var timer = setTimeout(function () {
       if (settled) return;
-      settled = true;
+      // JSONPタイムアウト → iframe フォールバック
       s.remove();
-      cb(null);
+      var iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = CLASSROOM.url + query + '&t=' + Date.now();
+      var t2 = setTimeout(function () { if (settled) return; settled = true; iframe.remove(); cb(null); }, 4000);
+      function onMsg(e) {
+        if (!e.data || !e.data.genkoProbe) return;
+        var res = e.data.payload || e.data;
+        if (settled) return;
+        settled = true;
+        clearTimeout(t2);
+        window.removeEventListener('message', onMsg);
+        iframe.remove();
+        cb(res);
+      }
+      window.addEventListener('message', onMsg);
+      document.body.appendChild(iframe);
     }, timeoutMs);
     window.__genkoJsonp = function (res) {
       if (settled) return;
@@ -437,13 +452,33 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
       s.remove();
       cb(res);
     };
-    s.onerror = function () {};
+    s.onerror = function () {
+      if (settled) return;
+      clearTimeout(timer);
+      s.remove();
+      var iframe2 = document.createElement('iframe');
+      iframe2.style.display = 'none';
+      iframe2.src = CLASSROOM.url + query + '&t=' + Date.now();
+      var t3 = setTimeout(function () { if (settled) return; settled = true; iframe2.remove(); cb(null); }, 4000);
+      function onMsg2(e) {
+        if (!e.data || !e.data.genkoProbe) return;
+        var res = e.data.payload || e.data;
+        if (settled) return;
+        settled = true;
+        clearTimeout(t3);
+        window.removeEventListener('message', onMsg2);
+        iframe2.remove();
+        cb(res);
+      }
+      window.addEventListener('message', onMsg2);
+      document.body.appendChild(iframe2);
+    };
     s.src = CLASSROOM.url + query + '&callback=__genkoJsonp&t=' + Date.now();
     document.head.appendChild(s);
   }
 
   function probeAuth(cb) {
-    jsonpGet('?probe=1&token=' + encodeURIComponent(CLASSROOM.token), 4000, function (res) {
+    jsonpGet('?probe=1&token=' + encodeURIComponent(CLASSROOM.token), 5000, function (res) {
       if (!res || !res.genkoProbe) { cb({ state: 'noauth' }); return; }
       if (!res.ok) { cb({ state: 'error', message: res.error }); return; }
       if (!res.allowed) { cb({ state: 'notallowed', masked: res.masked }); return; }

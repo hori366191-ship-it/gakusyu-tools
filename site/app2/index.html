@@ -647,8 +647,29 @@
         return new Promise(function (resolve) {
           var s = document.createElement('script');
           var done = false;
-          var timer = setTimeout(function () { if (done) return; done = true; s.remove(); resolve(null); }, timeoutMs);
-          var cbName = '__siteApp2Probe' + Date.now();
+          var timer = setTimeout(function () {
+            if (done) return;
+            done = true;
+            s.remove();
+            // JSONPタイムアウト → iframe フォールバック
+            var iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+            var t2 = setTimeout(function () { if (done) return; done = true; iframe.remove(); resolve(null); }, 4000);
+            function onMsg(e) {
+              if (!e.data || !e.data.genkoProbe) return;
+              var res = e.data.payload || e.data;
+              if (done) return;
+              done = true;
+              clearTimeout(t2);
+              window.removeEventListener('message', onMsg);
+              iframe.remove();
+              resolve(res);
+            }
+            window.addEventListener('message', onMsg);
+            document.body.appendChild(iframe);
+          }, timeoutMs);
+          var cbName = '__siteApp2Probe' + Date.now() + '_' + Math.random().toString(36).slice(2);
           window[cbName] = function (res) {
             if (done) return;
             done = true;
@@ -657,7 +678,29 @@
             try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
             resolve(res);
           };
-          s.onerror = function () { if (done) return; done = true; clearTimeout(timer); s.remove(); resolve(null); };
+          s.onerror = function () {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            s.remove();
+            // JSONPエラー → iframe フォールバック
+            var iframe2 = document.createElement('iframe');
+            iframe2.style.display = 'none';
+            iframe2.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+            var t3 = setTimeout(function () { if (done) return; done = true; iframe2.remove(); resolve(null); }, 4000);
+            function onMsg2(e) {
+              if (!e.data || !e.data.genkoProbe) return;
+              var res = e.data.payload || e.data;
+              if (done) return;
+              done = true;
+              clearTimeout(t3);
+              window.removeEventListener('message', onMsg2);
+              iframe2.remove();
+              resolve(res);
+            }
+            window.addEventListener('message', onMsg2);
+            document.body.appendChild(iframe2);
+          };
           s.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + cbName + '&t=' + Date.now();
           document.head.appendChild(s);
         });
@@ -666,7 +709,7 @@
       async function probeBackend() {
         if (location.protocol === 'file:') return { state: 'file' };
         var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
-        var res = await jsonpGet(url, 4000);
+        var res = await jsonpGet(url, 5000);
         if (!res || !res.genkoProbe) return { state: 'noauth' };
         if (!res.ok) return { state: 'error', message: res.error };
         if (!res.allowed) return { state: 'notallowed', masked: res.masked };

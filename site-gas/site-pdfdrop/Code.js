@@ -148,10 +148,6 @@ function handlePoll_(p) {
 }
 
 function handleProbe_(p) {
-  var cb = String(p.callback || '');
-  if (!/^[A-Za-z0-9_.]{1,64}$/.test(cb)) {
-    return ContentService.createTextOutput('/*bad callback*/').setMimeType(ContentService.MimeType.JAVASCRIPT);
-  }
   var token = getToken_();
   var result;
   if (!token || p.token !== token) {
@@ -165,6 +161,18 @@ function handleProbe_(p) {
       masked: email ? maskEmail_(email) : '',
       allowed: isAllowed_(email)
     };
+  }
+  if (!p.callback) {
+    var json = JSON.stringify(result);
+    var html = HtmlService.createHtmlOutput(
+      '<script>try{parent.postMessage({genkoProbe:true,payload:' + json + '},"*");}catch(e){}try{top.postMessage({genkoProbe:true,payload:' + json + '},"*");}catch(e){}</script>'
+    );
+    html.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    return html;
+  }
+  var cb = String(p.callback || '');
+  if (!/^[A-Za-z0-9_.]{1,64}$/.test(cb)) {
+    return ContentService.createTextOutput('/*bad callback*/').setMimeType(ContentService.MimeType.JAVASCRIPT);
   }
   return ContentService.createTextOutput(cb + '(' + JSON.stringify(result) + ')')
     .setMimeType(ContentService.MimeType.JAVASCRIPT);
