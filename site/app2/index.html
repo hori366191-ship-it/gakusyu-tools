@@ -1064,6 +1064,20 @@
         dictDiv.innerHTML = `<h4>${raw}</h4><p>読み込み中…</p>`;
         try {
           await Promise.all([loadFormMap(), loadInvert()]);
+          // Driveファイルが入れ替わっていても自動補正（FORM_MAPは string->string、INVは string->array が正）
+          if (FORM_MAP && INV) {
+            const fVals = Object.values(FORM_MAP);
+            const iVals = Object.values(INV);
+            if (fVals.length && iVals.length) {
+              const fIsList = Array.isArray(fVals[0]);
+              const iIsStr = typeof iVals[0] === 'string';
+              if (fIsList && iIsStr) {
+                console.warn('FORM_MAP/INV swapped detected - auto correcting');
+                const tmp = FORM_MAP; FORM_MAP = INV; INV = tmp;
+                window.FORM_MAP = FORM_MAP; window.INV = INV;
+              }
+            }
+          }
           const lower = raw.toLowerCase();
           const normalized = normalize(raw);
           const isNorm = normalized !== lower;
@@ -1078,8 +1092,10 @@
             </div>
           `;
           if (isNorm) {
-            const defsNorm = (INV && INV[normalized]) || [];
-            const defsRaw = (INV && INV[lower]) || [];
+            const rawNorm = (INV && INV[normalized]);
+            const rawRaw = (INV && INV[lower]);
+            const defsNorm = Array.isArray(rawNorm) ? rawNorm : [];
+            const defsRaw = Array.isArray(rawRaw) ? rawRaw : [];
             const hasNorm = defsNorm.length > 0;
             const hasRaw = defsRaw.length > 0;
             if (!hasNorm && !hasRaw) {
@@ -1098,7 +1114,8 @@
               }
             }
           } else {
-            const defs = (INV && INV[lower]) || [];
+            const rawDefs = (INV && INV[lower]);
+            const defs = Array.isArray(rawDefs) ? rawDefs : [];
             if (defs.length) defs.forEach((d, i) => { html += `<div class='entry'><strong>${i + 1}.</strong> ${d}</div>`; });
             else html += '<p>登録なし</p>';
           }

@@ -9,8 +9,8 @@
 // ・辞書ファイル（DICTIONARY_ID / MAP_ID）は全員に閲覧可で共有しておくこと
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-var DICTIONARY_ID = '13G_bvPbBaoFx-XC9qJAaJTBP66G_-EdK';
-var MAP_ID        = '1J4_grvw-tZKV1BLqgVlCGb8A5Oa2hEdx';
+var DICTIONARY_ID = '1J4_grvw-tZKV1BLqgVlCGb8A5Oa2hEdx';
+var MAP_ID        = '13G_bvPbBaoFx-XC9qJAaJTBP66G_-EdK';
 var FOLDER_NAME   = '生成済み長文';
 var API_BASE      = 'https://opencode.ai/zen/go/v1';
 var MODEL         = 'deepseek-v4-flash';
