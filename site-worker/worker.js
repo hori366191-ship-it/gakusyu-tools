@@ -89,9 +89,25 @@ export default {
     for (const [k, v] of Object.entries(corsHeaders())) {
       respHeaders.set(k, v);
     }
-    // X-Frame-Options を除去（iframe での postMessage を許可）
+    // X-Frame-Options / CSP を除去（iframe での postMessage を許可。GASの frame-ancestors 'self' が github.io からのフレームをブロックするため）
     respHeaders.delete('X-Frame-Options');
     respHeaders.delete('x-frame-options');
+    respHeaders.delete('Content-Security-Policy');
+    respHeaders.delete('content-security-policy');
+    respHeaders.delete('Content-Security-Policy-Report-Only');
+    respHeaders.delete('content-security-policy-report-only');
+    respHeaders.delete('Cross-Origin-Opener-Policy');
+    respHeaders.delete('cross-origin-opener-policy');
+    respHeaders.delete('Cross-Origin-Opener-Policy-Report-Only');
+    respHeaders.delete('cross-origin-opener-policy-report-only');
+    respHeaders.delete('Cross-Origin-Embedder-Policy');
+    respHeaders.delete('cross-origin-embedder-policy');
+    respHeaders.delete('Cross-Origin-Embedder-Policy-Report-Only');
+    respHeaders.delete('cross-origin-embedder-policy-report-only');
+    // 明示的にフレームを許可
+    respHeaders.set('Content-Security-Policy', "frame-ancestors *");
+    respHeaders.set('Cross-Origin-Opener-Policy', 'unsafe-none');
+    respHeaders.set('Cross-Origin-Embedder-Policy', 'unsafe-none');
 
     const buf = await resp.arrayBuffer();
     return new Response(buf, {
