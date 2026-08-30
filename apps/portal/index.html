@@ -309,9 +309,123 @@
     .card { animation: none; }
     .card:hover { transform: none; }
   }
+
+  /* ---- 移行バナー（旧ポータル専用・目立つ二重表示） ---- */
+  .migration-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 3000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: #fef3c7;
+    border-bottom: 2px solid #f59e0b;
+    color: #78350f;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.6;
+    text-align: center;
+  }
+  .migration-topbar__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #d3b491, #a67c52);
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .02em;
+    box-shadow: 0 2px 6px rgba(30, 41, 59, .14);
+    transition: filter .2s ease;
+  }
+  .migration-topbar__link:hover { filter: brightness(1.07); }
+  .migration-topbar__sub { font-weight: 500; color: #92400e; font-size: 12px; }
+
+  .migration-banner {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .migration-banner__inner {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: #fffbeb;
+    border: 1.5px solid #f59e0b;
+    border-left-width: 6px;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin: 16px 0 0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 16px rgba(15, 23, 42, .05);
+  }
+  .migration-banner__icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: #f59e0b;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .migration-banner__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 900;
+    color: #78350f;
+    line-height: 1.6;
+  }
+  .migration-banner__desc {
+    margin: 4px 0 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #92400e;
+    line-height: 1.8;
+  }
+  .migration-banner__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #d3b491, #a67c52);
+    color: #ffffff;
+    padding: 10px 22px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: .02em;
+    box-shadow: 0 4px 10px rgba(30, 41, 59, .14);
+    transition: filter .2s ease, transform .2s ease;
+  }
+  .migration-banner__btn:hover { filter: brightness(1.07); transform: translateY(-1px); }
+  @media (max-width: 640px) {
+    .migration-topbar { font-size: 11px; padding: 6px 10px; gap: 6px; }
+    .migration-topbar__link { font-size: 11px; padding: 3px 10px; }
+    .migration-banner { padding: 0 12px; }
+    .migration-banner__inner { padding: 14px; gap: 12px; }
+    .migration-banner__icon { width: 32px; height: 32px; font-size: 16px; }
+    .migration-banner__title { font-size: 15px; }
+    .migration-banner__desc { font-size: 13px; }
+    .migration-banner__btn { font-size: 13px; padding: 8px 16px; word-break: break-all; }
+  }
 </style>
 </head>
 <body>
+  <div class="migration-topbar" role="alert" aria-label="移行のお知らせ">
+    <span class="migration-topbar__text">移行しました →</span>
+    <a class="migration-topbar__link" href="https://hori366191-ship-it.github.io/gakusyu-tools/">https://hori366191-ship-it.github.io/gakusyu-tools/ ↗</a>
+    <span class="migration-topbar__sub">ブックマークを更新してください</span>
+  </div>
   <header class="hero">
     <canvas class="hero-canvas" id="hero-canvas" aria-hidden="true"></canvas>
     <p class="hero__kicker">Learning Tools</p>
@@ -322,6 +436,17 @@
       <p class="hero__qr-caption">スマホで開く</p>
     </div>
   </header>
+
+  <div class="migration-banner" role="alert" aria-label="移行のお知らせ 詳細">
+    <div class="migration-banner__inner">
+      <div class="migration-banner__icon" aria-hidden="true">↗</div>
+      <div class="migration-banner__body">
+        <p class="migration-banner__title">学習ツールポータルは新しいURLに移行しました。</p>
+        <p class="migration-banner__desc">以下のリンクから新しいサイトへ進み、ブックマークし直してください。</p>
+        <a class="migration-banner__btn" href="https://hori366191-ship-it.github.io/gakusyu-tools/">https://hori366191-ship-it.github.io/gakusyu-tools/ ↗</a>
+      </div>
+    </div>
+  </div>
 
   <main class="main">
 
