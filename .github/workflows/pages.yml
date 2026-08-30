@@ -4,9 +4,11 @@ on:
     branches: [master]
     paths:
       - 'site/**'
+      - 'site-src/**'
       - 'site-gas/**'
       - '.github/workflows/pages.yml'
       - '仕様書_移行案.md'
+      - 'scripts/build-app1-bundle.mjs'
   workflow_dispatch:
 
 permissions:
@@ -25,16 +27,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build app1 bundle placeholder
+      - name: Build app1 bundle from MD
         run: |
-          mkdir -p site/app1
-          if [ ! -f site/app1/bundle.json ]; then
-            echo '{"files":[],"updatedAt":"1970-01-01T00:00:00.000Z","note":"placeholder - replace with Drive content via Actions"}' > site/app1/bundle.json
-            echo "created placeholder site/app1/bundle.json"
+          if [ -d "site-src/app1/content" ]; then
+            echo "Building bundle.json from site-src/app1/content ..."
+            node scripts/build-app1-bundle.mjs
           else
-            echo "bundle.json exists - keep"
+            echo "site-src/app1/content not found - creating placeholder"
+            mkdir -p site/app1
+            if [ ! -f site/app1/bundle.json ]; then
+              echo '{"files":[],"updatedAt":"1970-01-01T00:00:00.000Z","note":"placeholder - no content dir"}' > site/app1/bundle.json
+            fi
           fi
-          ls -la site/app1/
+          ls -lh site/app1/bundle.json
+          echo "bundle preview (first 500 chars):"
+          head -c 500 site/app1/bundle.json; echo
+          echo "files count:"
+          node -e "const j=require('./site/app1/bundle.json'); console.log(j.files.length + ' files, updatedAt=' + j.updatedAt); j.files.forEach(f=>console.log(' - '+f.name+' ('+f.content.length+' chars)'))"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
