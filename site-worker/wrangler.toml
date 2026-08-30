@@ -1,0 +1,8 @@
+name = "gakusyu-tools-proxy"
+main = "worker.js"
+compatibility_date = "2024-08-01"
+
+# 初回デプロイ後に表示される workers.dev の URL を site 側の PROBE_URL に設定する
+# 例: https://gakusyu-tools-proxy.<subdomain>.workers.dev
+# カスタムドメインを使う場合は routes を追加
+# routes = [{ pattern = "proxy.hori-shota.com/*", zone_name = "hori-shota.com" }]

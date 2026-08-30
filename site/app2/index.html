@@ -693,11 +693,40 @@
         });
       }
 
+      function doProbePostApp2(cb){
+        var id=getIdToken();
+        var em=id? (function(){ try{ var p=id.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } })() : '';
+        var payload={ probe:1, token:SITE_BACKEND_TOKEN };
+        if(id) payload.id_token=id;
+        if(em) payload.email=em;
+        var iframe=document.createElement('iframe');
+        iframe.style.display='none';
+        iframe.name='__probeApp2'+Date.now();
+        document.body.appendChild(iframe);
+        var form=document.createElement('form');
+        form.method='POST';
+        form.action=SITE_BACKEND_URL;
+        form.target=iframe.name;
+        var inp=document.createElement('input');
+        inp.type='hidden'; inp.name='data'; inp.value=JSON.stringify(payload);
+        form.appendChild(inp);
+        document.body.appendChild(form);
+        var done=false;
+        var t=setTimeout(function(){ if(done) return; done=true; iframe.remove(); form.remove(); cb(null); },5000);
+        function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t); window.removeEventListener('message',onMsg); iframe.remove(); form.remove(); cb(res); }
+        window.addEventListener('message',onMsg);
+        form.submit();
+      }
       async function probeBackend() {
         if (location.protocol === 'file:') return { state: 'file' };
         var idt=getIdToken();
-        var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt?'&id_token='+encodeURIComponent(idt):'');
-        var res = await jsonpGet(url, 5000);
+        var res=null;
+        if(idt){
+          res=await new Promise(function(r){ doProbePostApp2(r); });
+        } else {
+          var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
+          res = await jsonpGet(url, 5000);
+        }
         if (!res || !res.genkoProbe) return { state: 'noauth' };
         if (!res.ok) return { state: 'error', message: res.error };
         if (!res.allowed) return { state: 'notallowed', masked: res.masked };

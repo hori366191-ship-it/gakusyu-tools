@@ -427,21 +427,42 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     }
   }
 
+  function doProbePostApp9(cb){
+    var id=getIdToken();
+    var em=id? (function(){ try{ var p=id.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } })() : '';
+    var payload={ probe:1, token:CLASSROOM.token };
+    if(id) payload.id_token=id;
+    if(em) payload.email=em;
+    var iframe=document.createElement('iframe');
+    iframe.style.display='none';
+    iframe.name='__probeApp9'+Date.now();
+    document.body.appendChild(iframe);
+    var form=document.createElement('form');
+    form.method='POST';
+    form.action=CLASSROOM.url;
+    form.target=iframe.name;
+    var inp=document.createElement('input');
+    inp.type='hidden'; inp.name='data'; inp.value=JSON.stringify(payload);
+    form.appendChild(inp);
+    document.body.appendChild(form);
+    var done=false;
+    var t=setTimeout(function(){ if(done) return; done=true; iframe.remove(); form.remove(); cb(null); },5000);
+    function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t); window.removeEventListener('message',onMsg); iframe.remove(); form.remove(); cb(res); }
+    window.addEventListener('message',onMsg);
+    form.submit();
+  }
   function jsonpGet(query, timeoutMs, cb) {
     var idt=getIdToken();
-    var q2=query + (idt?'&id_token='+encodeURIComponent(idt):'');
+    if(idt){
+      return doProbePostApp9(cb);
+    }
     var s = document.createElement('script');
     var settled = false;
     var timer = setTimeout(function () {
       if (settled) return;
+      settled = true;
       s.remove();
-      var iframe=document.createElement('iframe');
-      iframe.style.display='none';
-      iframe.src=CLASSROOM.url + q2 + '&t=' + Date.now();
-      var t2=setTimeout(function(){ if(settled) return; settled=true; iframe.remove(); cb(null); },4000);
-      function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(settled) return; settled=true; clearTimeout(t2); window.removeEventListener('message',onMsg); iframe.remove(); cb(res); }
-      window.addEventListener('message',onMsg);
-      document.body.appendChild(iframe);
+      cb(null);
     }, timeoutMs);
     window.__genkoJsonp = function (res) {
       if (settled) return;
@@ -450,23 +471,22 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
       s.remove();
       cb(res);
     };
-    s.onerror = function () {
-      if (settled) return;
-      clearTimeout(timer);
-      s.remove();
-      var iframe2=document.createElement('iframe');
-      iframe2.style.display='none';
-      iframe2.src=CLASSROOM.url + q2 + '&t=' + Date.now();
-      var t3=setTimeout(function(){ if(settled) return; settled=true; iframe2.remove(); cb(null); },4000);
-      function onMsg2(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(settled) return; settled=true; clearTimeout(t3); window.removeEventListener('message',onMsg2); iframe2.remove(); cb(res); }
-      window.addEventListener('message',onMsg2);
-      document.body.appendChild(iframe2);
-    };
-    s.src = CLASSROOM.url + q2 + '&callback=__genkoJsonp&t=' + Date.now();
+    s.onerror = function () { if (settled) return; settled = true; clearTimeout(timer); s.remove(); cb(null); };
+    s.src = CLASSROOM.url + query + '&callback=__genkoJsonp&t=' + Date.now();
     document.head.appendChild(s);
   }
 
   function probeAuth(cb) {
+    var idt=getIdToken();
+    if(idt){
+      doProbePostApp9(function(res){
+        if (!res || !res.genkoProbe) { cb({ state: 'noauth' }); return; }
+        if (!res.ok) { cb({ state: 'error', message: res.error }); return; }
+        if (!res.allowed) { cb({ state: 'notallowed', masked: res.masked }); return; }
+        cb({ state: 'ok' });
+      });
+      return;
+    }
     jsonpGet('?probe=1&token=' + encodeURIComponent(CLASSROOM.token), 5000, function (res) {
       if (!res || !res.genkoProbe) { cb({ state: 'noauth' }); return; }
       if (!res.ok) { cb({ state: 'error', message: res.error }); return; }

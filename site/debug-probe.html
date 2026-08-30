@@ -48,8 +48,12 @@ a{color:#2563eb}
 <p style="font-size:12px"><a id="direct1" target="_blank" rel="noopener">site-app2-backend を直接開く</a> / <a id="direct2" target="_blank" rel="noopener">site-pdfdrop を直接開く</a><br>直接開きで cb({"genkoProbe":true,...}) が出ればGAS自体は教室を許可しています。</p>
 </div>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 (function(){
+  var GIS_CLIENT_ID='920000857743-91jfqq1q45hmnas1b25ebg0dqafo846i.apps.googleusercontent.com';
+  function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
+  function getEmailFromIdToken(idt){ try{ var p=idt.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } }
   var TOKEN='e6135dfd707ab9a6916635fa';
   var URL1='https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
   var URL2='https://script.google.com/a/macros/hori-shota.com/s/AKfycbwj7qTaMDmKGa-KTEEwa2jcP7wtZ8xh_rVMANzfwKapz5u8tThqjxc2pQsbN-lAWU5L7Q/exec';
@@ -61,9 +65,24 @@ a{color:#2563eb}
   function setBadge(el, ok){ el.className='badge '+(ok?'ok':'ng'); el.textContent=ok?'成功':'失敗'; }
   function fmt(o){ try{ return JSON.stringify(o,null,2);}catch(e){ return String(o);} }
 
+  function buildProbeQuery(withId){
+    var q='?probe=1&token='+encodeURIComponent(TOKEN);
+    var id=getIdToken();
+    if(withId && id){
+      q+='&id_token='+encodeURIComponent(id);
+      var em=getEmailFromIdToken(id);
+      if(em) q+='&email='+encodeURIComponent(em);
+    }
+    return q;
+  }
   function probeJsonp(base, cb){
-    var url=base+'?probe=1&token='+encodeURIComponent(TOKEN);
+    var q=buildProbeQuery(true);
+    var url=base+q;
     var start=Date.now();
+    // id_token が長い場合は URL が 2000 を超えるため POST にフォールバック
+    if(url.length>1800){
+      return probePost(base).then(function(r){ cb(r); });
+    }
     return new Promise(function(resolve){
       var s=document.createElement('script');
       var done=false;
@@ -86,9 +105,51 @@ a{color:#2563eb}
       };
       s.src=url+'&callback='+name+'&t='+Date.now();
       document.head.appendChild(s);
+    }).then(function(r){ cb?cb(r):null; return r; });
+  }
+  function probePost(base){
+    var start=Date.now();
+    return new Promise(function(resolve){
+      var id=getIdToken();
+      var em=id?getEmailFromIdToken(id):'';
+      var payload={ probe:1, token:TOKEN };
+      if(id) payload.id_token=id;
+      if(em) payload.email=em;
+      var iframe=document.createElement('iframe');
+      iframe.style.display='none';
+      iframe.name='__probeDbg'+Date.now();
+      document.body.appendChild(iframe);
+      var form=document.createElement('form');
+      form.method='POST';
+      form.action=base;
+      form.target=iframe.name;
+      var inp=document.createElement('input');
+      inp.type='hidden'; inp.name='data'; inp.value=JSON.stringify(payload);
+      form.appendChild(inp);
+      document.body.appendChild(form);
+      var done=false;
+      var timer=setTimeout(function(){ if(done) return; done=true; iframe.remove(); form.remove(); resolve({ok:false, via:'post', error:'timeout', ms:Date.now()-start, raw:null}); },5000);
+      function onMsg(e){
+        if(!e.data||!e.data.genkoProbe) return;
+        var res=e.data.payload||e.data;
+        if(done) return;
+        done=true;
+        clearTimeout(timer);
+        window.removeEventListener('message',onMsg);
+        iframe.remove(); form.remove();
+        resolve({ok:true, via:'post', ms:Date.now()-start, raw:res});
+      }
+      window.addEventListener('message',onMsg);
+      form.submit();
     });
   }
+  // 互換: 旧 probeJsonp / probeIframe は上記をラップ
+  function probeJsonpLegacy(base){
+    return probeJsonp(base);
+  }
   function probeIframe(base){
+    var id=getIdToken();
+    if(id) return probePost(base);
     var url=base+'?probe=1&token='+encodeURIComponent(TOKEN);
     var start=Date.now();
     return new Promise(function(resolve){
