@@ -136,7 +136,7 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 ## 運用メモ
 
 - ポータルのカード追加: `apps/portal/index.html` の該当教科セクション(ツール/英語/数学/理科)の `.cards` 内にカード1ブロックを追加(リンクは`/a/`形式)。カードには教科色クラス(`subj--tool/eng/math/sci`)と学年タグ(`<span class="card__grade">`)を付与。新セクション追加時は `.sec--*`/`.subj--*` の色定義も追加すること(2026-08-25: セクション分割・学年タグ・教科色パステル化済み)
-- 多読リーダー(app2)の権限(2026-08-16 変更): 閲覧=Googleアカウント全員 / AI生成=Script Properties `ALLOWED_EMAILS` / 削除=`OWNER_EMAIL`。デプロイのアクセス設定(「Googleアカウントでログイン」)とDrive共有(生成物フォルダ=全員閲覧+許可ユーザー編集、辞書2ファイル=全員閲覧)はUI/Driveで手動管理。変更時に `doGet()` の IS_ALLOWED/IS_OWNER 注入とサーバー側ガード(`generateText`/`deleteText`)を両方更新すること
+- 多読リーダー(app2)の権限(2026-08-31 変更): 閲覧=誰でも可（`getSavedTexts` は `DROP_TOKEN` さえ合えば `ALLOWED_EMAILS` 4件外や匿名でも過去の生成物を閲覧可） / AI生成=Script Properties `ALLOWED_EMAILS` 4件 / 削除=`OWNER_EMAIL`（先生のみ）。デプロイのアクセス設定は `site-gas` 2本が `ANYONE_ANONYMOUS/USER_DEPLOYING`（`site/` 側が正本、旧 `apps/` は `Googleアカウントでログイン` のまま残置）、Drive共有(生成物フォルダ=全員閲覧+許可ユーザー編集、辞書2ファイル=全員閲覧)はUI/Driveで手動管理。変更時に `doGet()` の `isAllowed` とサーバー側ガード(`generateText`/`deleteText`)を両方更新すること
 - 変更後は必ずヘッドレス検証 → `clasp push` → ユーザーにUIでのデプロイ更新を依頼
 - Gmailアカウント(REDACTED_EMAIL)の別アプリが存在するが、このリポジトリでは管理対象外(共有URLは`/a/*/`形式を使用)
 

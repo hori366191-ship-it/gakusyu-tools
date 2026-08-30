@@ -166,11 +166,9 @@ function doGet(e) {
     var token = params.token || '';
     var cb = params.callback || '';
     var isCb = /^[A-Za-z0-9_.]{1,64}$/.test(cb);
-    // id_token があればメールをトークンから取得し、ALLOWED チェックを id_token 経由で行う
-    var emailForCheck = getEmailFromRequest_(params);
-    var allowed = isAllowed_(emailForCheck);
-    if (!getToken_() || String(token) !== getToken_() || !allowed) {
-      var err = { ok: false, error: 'not allowed' + (emailForCheck ? ' (' + maskEmail_(emailForCheck) + ')' : '') };
+    // 過去の生成物は閲覧のみなので token さえ合えば誰でも取得可（isAllowed は生成/削除のみでチェック）
+    if (!getToken_() || String(token) !== getToken_()) {
+      var err = { ok: false, error: 'bad token' };
       return isCb ? ContentService.createTextOutput(cb + '(' + JSON.stringify(err) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(err);
     }
     try {
@@ -473,3 +471,4 @@ function getDICTIONARY() {
 function getFormMap() {
   return JSON.parse(DriveApp.getFileById(MAP_ID).getBlob().getDataAsString());
 }
+function debugProps(){return JSON.stringify({FOLDER_ID: PropertiesService.getScriptProperties().getProperty('FOLDER_ID'), ALLOWED_EMAILS: PropertiesService.getScriptProperties().getProperty('ALLOWED_EMAILS')});}
