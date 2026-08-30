@@ -54,13 +54,20 @@ a{color:#2563eb}
   var GIS_CLIENT_ID='920000857743-91jfqq1q45hmnas1b25ebg0dqafo846i.apps.googleusercontent.com';
   function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
   function getEmailFromIdToken(idt){ try{ var p=idt.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } }
+  var WORKER_BASE='https://gakusyu-tools-proxy.hori-shota.workers.dev';
   var TOKEN='e6135dfd707ab9a6916635fa';
-  var URL1='https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
-  var URL2='https://script.google.com/a/macros/hori-shota.com/s/AKfycbwj7qTaMDmKGa-KTEEwa2jcP7wtZ8xh_rVMANzfwKapz5u8tThqjxc2pQsbN-lAWU5L7Q/exec';
-  document.getElementById('url1').textContent=URL1+'?probe=1&token='+TOKEN+'&callback=...';
-  document.getElementById('url2').textContent=URL2+'?probe=1&token='+TOKEN+'&callback=...';
+  var DIRECT_URL1='https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
+  var DIRECT_URL2='https://script.google.com/a/macros/hori-shota.com/s/AKfycbwj7qTaMDmKGa-KTEEwa2jcP7wtZ8xh_rVMANzfwKapz5u8tThqjxc2pQsbN-lAWU5L7Q/exec';
+  var WORKER_URL1=(WORKER_BASE && WORKER_BASE.indexOf('REPLACE')===-1 && WORKER_BASE.indexOf('workers.dev')!==-1) ? WORKER_BASE.replace(/\/+$/,'') + '/app2' : '';
+  var WORKER_URL2=(WORKER_BASE && WORKER_BASE.indexOf('REPLACE')===-1 && WORKER_BASE.indexOf('workers.dev')!==-1) ? WORKER_BASE.replace(/\/+$/,'') + '/pdfdrop' : '';
+  var URL1=WORKER_URL1 || DIRECT_URL1;
+  var URL2=WORKER_URL2 || DIRECT_URL2;
+  document.getElementById('url1').textContent=(WORKER_URL1?WORKER_URL1+'?probe=1&token='+TOKEN+' (Worker) → ':'')+DIRECT_URL1+'?probe=1&token='+TOKEN+' (Direct fallback)  [active:'+URL1+']';
+  document.getElementById('url2').textContent=(WORKER_URL2?WORKER_URL2+'?probe=1&token='+TOKEN+' (Worker) → ':'')+DIRECT_URL2+'?probe=1&token='+TOKEN+' (Direct fallback)  [active:'+URL2+']';
   document.getElementById('direct1').href=URL1+'?probe=1&token='+TOKEN+'&callback=cb';
   document.getElementById('direct2').href=URL2+'?probe=1&token='+TOKEN+'&callback=cb';
+  document.getElementById('direct1').textContent='site-app2-backend を直接開く ('+(WORKER_URL1?'Worker優先':'Directのみ')+')';
+  document.getElementById('direct2').textContent='site-pdfdrop を直接開く ('+(WORKER_URL2?'Worker優先':'Directのみ')+')';
 
   function setBadge(el, ok){ el.className='badge '+(ok?'ok':'ng'); el.textContent=ok?'成功':'失敗'; }
   function fmt(o){ try{ return JSON.stringify(o,null,2);}catch(e){ return String(o);} }
@@ -184,7 +191,7 @@ a{color:#2563eb}
     var j=await probeJsonp(base);
     document.getElementById(sJ).textContent=j.ok?'成功':'失敗';
     document.getElementById(sJ).className='badge '+(j.ok?'ok':'ng');
-    document.getElementById(tJ).textContent='('+j.ms+'ms via '+j.via+(j.error?' '+j.error:'')+')';
+    document.getElementById(tJ).textContent='('+j.ms+'ms via '+j.via+(j.error?' '+j.error:'')+') '+(base===WORKER_URL1||base===WORKER_URL2?'[Worker]':'[Direct]');
     document.getElementById(rJ).textContent=j.raw?fmt(j.raw):'(なし) error='+j.error;
     var i;
     if(j.ok){
@@ -198,24 +205,51 @@ a{color:#2563eb}
       i=await probeIframe(base);
       document.getElementById(sI).textContent=i.ok?'成功':'失敗';
       document.getElementById(sI).className='badge '+(i.ok?'ok':'ng');
-      document.getElementById(tI).textContent='('+i.ms+'ms via '+i.via+(i.error?' '+i.error:'')+')';
+      document.getElementById(tI).textContent='('+i.ms+'ms via '+i.via+(i.error?' '+i.error:'')+') '+(base===WORKER_URL1||base===WORKER_URL2?'[Worker]':'[Direct]');
       document.getElementById(rI).textContent=i.raw?fmt(i.raw):'(なし) error='+i.error;
     }
     var fin=document.getElementById(fId);
     var det=document.getElementById(dId);
     var r=i.ok?i:j;
-    if(!r||!r.raw||!r.raw.genkoProbe){ fin.textContent='ログインを促す表示（is-warn）'; fin.className='badge ng'; det.textContent='GASから genkoProbe が返りませんでした。token不一致、デプロイ未更新、またはサードパーティCookieブロックでタイムアウトの可能性。'; }
+    if(!r||!r.raw||!r.raw.genkoProbe){ fin.textContent='ログインを促す表示（is-warn）'; fin.className='badge ng'; det.textContent='GASから genkoProbe が返りませんでした。token不一致、デプロイ未更新、またはサードパーティCookieブロックでタイムアウトの可能性。 base='+base; }
     else if(!r.raw.ok){ fin.textContent='エラー（is-warn）'; fin.className='badge ng'; det.textContent=fmt(r.raw); }
     else if(!r.raw.allowed){ fin.textContent='教室外アカウント（is-out）'; fin.className='badge ng'; det.textContent=fmt(r.raw); }
     else{
       var isOwner=!!r.raw.is_owner;
-      fin.textContent=(isOwner?'先生アカウントでログイン中 ✅':'教室タブレットとしてログイン中 ✅')+'（is-ok）';
+      fin.textContent=(isOwner?'先生アカウントでログイン中 ✅':'教室タブレットとしてログイン中 ✅')+'（is-ok） '+(base===WORKER_URL1||base===WORKER_URL2?'[Worker]':'[Direct]');
       fin.className='badge ok';
       det.textContent=fmt(r.raw);
     }
+    return {ok: !!(r && r.raw && r.raw.genkoProbe && r.raw.ok), raw:r && r.raw};
   }
-  runOne(URL1,'s1j','t1j','r1j','s1i','t1i','r1i','f1','d1');
-  runOne(URL2,'s2j','t2j','r2j','s2i','t2i','r2i','f2','d2');
+  async function runOneWithFallback(workerBase, directBase, sJ,tJ,rJ,sI,tI,rI,fId,dId){
+    var active=workerBase||directBase;
+    var res=await runOne(active, sJ,tJ,rJ,sI,tI,rI,fId,dId);
+    // worker失敗時はdirectで再試行
+    if(workerBase && directBase && (!res.ok)){
+      document.getElementById(sJ).textContent+=' → Direct再試行中…';
+      document.getElementById(sI).textContent+=' → Direct再試行中…';
+      await new Promise(function(r){ setTimeout(r, 800); });
+      // clear previous badges
+      document.getElementById(sJ).className='badge wait';
+      document.getElementById(sJ).textContent='再試行…';
+      document.getElementById(sI).className='badge wait';
+      document.getElementById(sI).textContent='再試行…';
+      var res2=await runOne(directBase, sJ,tJ,rJ,sI,tI,rI,fId,dId);
+      // annotate fallback
+      var fin=document.getElementById(fId);
+      if(res2.ok) fin.textContent+=' (Worker失敗→Direct成功)';
+      else fin.textContent+=' (Worker&Direct共に失敗)';
+      return res2;
+    }
+    if(workerBase) {
+      var fin=document.getElementById(fId);
+      fin.textContent+=' (Worker)';
+    }
+    return res;
+  }
+  runOneWithFallback(WORKER_URL1, DIRECT_URL1,'s1j','t1j','r1j','s1i','t1i','r1i','f1','d1');
+  runOneWithFallback(WORKER_URL2, DIRECT_URL2,'s2j','t2j','r2j','s2i','t2i','r2i','f2','d2');
 })();
 </script>
 </body>

@@ -598,7 +598,10 @@
   </script>
   <script>
     // Pages静的版: site-gas/site-app2-backend（新GAS）: YOUR_SCRIPT_ID_site-app2-backend
-    const SITE_BACKEND_URL = 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
+    const WORKER_BASE = 'https://gakusyu-tools-proxy.hori-shota.workers.dev';
+    const DIRECT_BACKEND_URL = 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
+    const WORKER_BACKEND_URL = (WORKER_BASE && WORKER_BASE.indexOf('REPLACE')===-1 && WORKER_BASE.indexOf('workers.dev')!==-1) ? WORKER_BASE.replace(/\/+$/,'') + '/app2' : '';
+    const SITE_BACKEND_URL = WORKER_BACKEND_URL || DIRECT_BACKEND_URL;
     const SITE_BACKEND_TOKEN = 'e6135dfd707ab9a6916635fa';
     const IS_GAS = false;
     let GAS_APP_URL = SITE_BACKEND_URL;
@@ -693,7 +696,7 @@
         });
       }
 
-      function doProbePostApp2(cb){
+      function doProbePostApp2For(base, cb){
         var id=getIdToken();
         var em=id? (function(){ try{ var p=id.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } })() : '';
         var payload={ probe:1, token:SITE_BACKEND_TOKEN };
@@ -701,31 +704,65 @@
         if(em) payload.email=em;
         var iframe=document.createElement('iframe');
         iframe.style.display='none';
-        iframe.name='__probeApp2'+Date.now();
+        iframe.name='__probeApp2'+Date.now()+Math.random().toString(36).slice(2);
         document.body.appendChild(iframe);
         var form=document.createElement('form');
         form.method='POST';
-        form.action=SITE_BACKEND_URL;
+        form.action=base;
         form.target=iframe.name;
         var inp=document.createElement('input');
         inp.type='hidden'; inp.name='data'; inp.value=JSON.stringify(payload);
         form.appendChild(inp);
         document.body.appendChild(form);
         var done=false;
-        var t=setTimeout(function(){ if(done) return; done=true; iframe.remove(); form.remove(); cb(null); },5000);
-        function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t); window.removeEventListener('message',onMsg); iframe.remove(); form.remove(); cb(res); }
+        var t=setTimeout(function(){ if(done) return; done=true; try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(null); },5000);
+        function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(res); }
         window.addEventListener('message',onMsg);
-        form.submit();
+        try{ form.submit(); }catch(e){ clearTimeout(t); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(_e){} try{ form.remove(); }catch(_e){} cb(null); }
+      }
+      function doProbePostApp2(cb){ return doProbePostApp2For(SITE_BACKEND_URL, cb); }
+      function doProbePostApp2WithFallback(cb){
+        if(!WORKER_BACKEND_URL){ doProbePostApp2For(DIRECT_BACKEND_URL, cb); return; }
+        var settled=false;
+        var tf=setTimeout(function(){ if(settled) return; settled=true; doProbePostApp2For(DIRECT_BACKEND_URL, cb); }, 5200);
+        doProbePostApp2For(WORKER_BACKEND_URL, function(res){
+          if(settled) return;
+          if(res && res.genkoProbe){ clearTimeout(tf); settled=true; cb(res); return; }
+          clearTimeout(tf); settled=true; doProbePostApp2For(DIRECT_BACKEND_URL, cb);
+        });
+      }
+      async function jsonpGetWithFallback(workerUrl, directUrl, timeoutMs){
+        if(!WORKER_BACKEND_URL) return jsonpGet(directUrl, timeoutMs);
+        var r=await jsonpGet(workerUrl, Math.min(timeoutMs, 5000));
+        if(r && r.genkoProbe) return r;
+        if(r && r.ok!==undefined) return r;
+        // worker failed -> try direct
+        return jsonpGet(directUrl, timeoutMs);
+      }
+      async function fetchWithFallback(workerUrl, directUrl, opts){
+        if(!WORKER_BACKEND_URL) return fetch(directUrl, opts);
+        try{
+          var rw=await fetch(workerUrl, opts);
+          // 429 or 502/503 fallback to direct
+          if(rw.status===429 || rw.status===502 || rw.status===503 || rw.status===504){
+            return fetch(directUrl, opts);
+          }
+          return rw;
+        }catch(e){
+          return fetch(directUrl, opts);
+        }
       }
       async function probeBackend() {
         if (location.protocol === 'file:') return { state: 'file' };
         var idt=getIdToken();
         var res=null;
         if(idt){
-          res=await new Promise(function(r){ doProbePostApp2(r); });
+          res=await new Promise(function(r){ doProbePostApp2WithFallback(r); });
         } else {
-          var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
-          res = await jsonpGet(url, 5000);
+          var wUrl = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) : '';
+          var dUrl = DIRECT_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
+          if(wUrl) res = await jsonpGetWithFallback(wUrl, dUrl, 5000);
+          else { var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN); res = await jsonpGet(url, 5000); }
         }
         if (!res || !res.genkoProbe) return { state: 'noauth' };
         if (!res.ok) return { state: 'error', message: res.error };
@@ -747,43 +784,62 @@
         if (IS_GAS) {
           return gasCall(cfg.gas, payload);
         }
-        // Pages静的版: site-app2-backend へ TOKEN + id_token 付きで送信（GIS対応）
+        // Pages静的版: site-app2-backend へ TOKEN + id_token 付きで送信（GIS対応）Worker→直 fallback
         var body = payload || {};
         body.token = SITE_BACKEND_TOKEN;
         var idt=getIdToken();
         if(idt) body.id_token=idt;
-        // generateText/deleteText は POST JSON
+        // generateText/deleteText は POST JSON (Worker→直 fallback)
         if (name === 'generateText' || name === 'deleteText') {
-          var res = await fetch(SITE_BACKEND_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(Object.assign({ action: name }, body))
-          });
+          var wUrl = WORKER_BACKEND_URL;
+          var dUrl = DIRECT_BACKEND_URL;
+          var targetUrl = SITE_BACKEND_URL;
+          var opts = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action: name }, body)) };
+          var res;
+          if(wUrl){
+            res = await fetchWithFallback(wUrl, dUrl, opts);
+          } else {
+            res = await fetch(targetUrl, opts);
+          }
           var data = await res.json().catch(function () { return {}; });
           if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
           return data;
         }
-        // getSavedTexts は JSONP GET（CORS回避）— fetch フォールバックはCORSで必ず失敗するため撤廃
+        // getSavedTexts は JSONP GET（CORS回避） Worker→直 fallback
         if (name === 'getSavedTexts') {
           var idt2=getIdToken();
-          var url = SITE_BACKEND_URL + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt2?'&id_token='+encodeURIComponent(idt2):'');
-          var jp = await jsonpGet(url, 8000);
+          var wUrl2 = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt2?'&id_token='+encodeURIComponent(idt2):'') : '';
+          var dUrl2 = DIRECT_BACKEND_URL + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt2?'&id_token='+encodeURIComponent(idt2):'');
+          var jp;
+          if(wUrl2) jp = await jsonpGetWithFallback(wUrl2, dUrl2, 8000);
+          else { var url = SITE_BACKEND_URL + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt2?'&id_token='+encodeURIComponent(idt2):''); jp = await jsonpGet(url, 8000); }
           if (jp && jp.ok) return jp;
           if (jp && jp.ok === false) throw new Error(jp.error || 'not allowed');
           throw new Error('履歴の読み込みに失敗しました（GAS応答なし: token/FOLDER_ID/共有設定を確認）');
         }
-        // 辞書は Pages に同梱予定だが、フォールバックでGASから取得（JSONP一本化）
+        // 辞書は Pages に同梱予定だが、フォールバックでGASから取得（JSONP一本化） Worker→直
         if (name === 'getDICTIONARY' || name === 'getFormMap') {
           var idt3=getIdToken();
-          var url2 = SITE_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'');
-          var jp2 = await jsonpGet(url2, 8000);
+          var wUrl3 = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'') : '';
+          var dUrl3 = DIRECT_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'');
+          var jp2;
+          if(wUrl3) jp2 = await jsonpGetWithFallback(wUrl3, dUrl3, 8000);
+          else { var url2 = SITE_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):''); jp2 = await jsonpGet(url2, 8000); }
           if (jp2) return jp2;
-          var r = await fetch(url2);
+          var rUrl = WORKER_BACKEND_URL || DIRECT_BACKEND_URL;
+          var rFull = rUrl + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'');
+          var r;
+          if(WORKER_BACKEND_URL) r = await fetchWithFallback(wUrl3, dUrl3, { method: 'GET' });
+          else r = await fetch(rFull);
           var d = await r.json().catch(function () { return {}; });
           if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
           return d;
         }
-        var r = await fetch(SITE_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN));
+        var wUrlX = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) : '';
+        var dUrlX = DIRECT_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
+        var r;
+        if(wUrlX) r = await fetchWithFallback(wUrlX, dUrlX, { method: 'GET' });
+        else r = await fetch(dUrlX);
         var d = await r.json().catch(function () { return {}; });
         if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
         return d;
