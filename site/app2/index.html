@@ -545,7 +545,25 @@
     </div>
 
     <h1 class="sec">過去の生成物</h1>
+    <div class="field" id="filterSection" style="margin-bottom:8px; display:flex; gap:8px; align-items:center;">
+      <label for="fFilterLevel" style="margin:0; white-space:nowrap; font-size:0.8em;">絞り込み:</label>
+      <select id="fFilterLevel" style="flex:1;">
+        <option value="" selected>すべて</option>
+        <option>7級</option>
+        <option>6級</option>
+        <option>5級</option>
+        <option>4級</option>
+        <option>3級</option>
+        <option>準2級</option>
+        <option>準2級プラス</option>
+        <option>2級</option>
+        <option>準1級</option>
+        <option>1級</option>
+      </select>
+      <span id="savedCount" style="font-size:0.75em; color:#777; white-space:nowrap;"></span>
+    </div>
     <ul id="savedList"></ul>
+    <button id="loadMoreBtn" style="display:none; width:100%; margin-top:8px; padding:8px; font-family:'Kiwi Maru'; background:#ffffff; color:#007700; border:1px solid #00ff00; border-radius:4px; cursor:pointer;">もっと読む（20件ずつ）</button>
 
     <div id="credit">
       This app uses:<br>
@@ -624,6 +642,11 @@
       let FORM_MAP = null;
       let INV = null;
       let currentRecord = null;
+      let savedOffset = 0;
+      let savedTotal = 0;
+      let savedHasMore = false;
+      let savedLevel = '';
+      let savedIsLoading = false;
 
       const dotEl = document.getElementById('dot-anim');
       let frame = 0;
@@ -813,14 +836,26 @@
           if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
           return data;
         }
-        // getSavedTexts は JSONP GET（CORS回避） Worker→直 fallback
+        // getSavedTexts は JSONP GET（CORS回避） Worker→直 fallback（ページング・級フィルタ対応）
         if (name === 'getSavedTexts') {
           var idt2=getIdToken();
-          var wUrl2 = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt2?'&id_token='+encodeURIComponent(idt2):'') : '';
-          var dUrl2 = DIRECT_BACKEND_URL + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt2?'&id_token='+encodeURIComponent(idt2):'');
+          var qPayload = payload || {};
+          var qLimit = qPayload.limit != null ? String(qPayload.limit) : '';
+          var qOffset = qPayload.offset != null ? String(qPayload.offset) : '';
+          var qLevel = qPayload.level != null ? String(qPayload.level) : '';
+          function buildGetSavedUrl(base){
+            var u = base + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
+            if(idt2) u += '&id_token=' + encodeURIComponent(idt2);
+            if(qLimit) u += '&limit=' + encodeURIComponent(qLimit);
+            if(qOffset) u += '&offset=' + encodeURIComponent(qOffset);
+            if(qLevel) u += '&level=' + encodeURIComponent(qLevel);
+            return u;
+          }
+          var wUrl2 = WORKER_BACKEND_URL ? buildGetSavedUrl(WORKER_BACKEND_URL) : '';
+          var dUrl2 = DIRECT_BACKEND_URL ? buildGetSavedUrl(DIRECT_BACKEND_URL) : '';
           var jp;
           if(wUrl2) jp = await jsonpGetWithFallback(wUrl2, dUrl2, 8000);
-          else { var url = SITE_BACKEND_URL + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt2?'&id_token='+encodeURIComponent(idt2):''); jp = await jsonpGet(url, 8000); }
+          else { var url = buildGetSavedUrl(SITE_BACKEND_URL); jp = await jsonpGet(url, 8000); }
           if (jp && jp.ok) return jp;
           if (jp && jp.ok === false) throw new Error(jp.error || 'not allowed');
           throw new Error('履歴の読み込みに失敗しました（GAS応答なし: token/FOLDER_ID/共有設定を確認）');
@@ -988,7 +1023,7 @@
         try {
           const res = await callServer('generateText', settings);
           renderRecord(res.item || res);
-          loadSavedList();
+          loadSavedList({ reset: true });
           if (window.innerWidth < window.innerHeight) {
             document.body.classList.add('mobile-preview');
             document.getElementById('dict-overlay-fixed').style.display = 'none';
@@ -1002,13 +1037,16 @@
 
       document.getElementById('genBtn').addEventListener('click', generate);
 
-      function renderSavedList(items) {
+      function renderSavedList(items, opts) {
+        opts = opts || {};
         const ul = document.getElementById('savedList');
-        ul.innerHTML = '';
-        if (!items.length) {
+        const isAppend = !!opts.append;
+        if (!isAppend) ul.innerHTML = '';
+        if (!items.length && !isAppend) {
           ul.innerHTML = '<li style="cursor:default; color:#999999;">まだ生成履歴がありません</li>';
           return;
         }
+        if (!items.length && isAppend) return;
         for (const it of items) {
           const li = document.createElement('li');
           li.className = 'saved-item';
@@ -1021,7 +1059,7 @@
               if (!window.confirm('この生成物を削除しますか？')) return;
               try {
                 await callServer('deleteText', { id: it.id });
-                loadSavedList();
+                loadSavedList({ reset: true });
               } catch (err) {
                 showToast(err.message || '削除に失敗しました');
               }
@@ -1047,12 +1085,65 @@
         }
       }
 
-      async function loadSavedList() {
+      function updateSavedCount() {
+        const el = document.getElementById('savedCount');
+        if (!el) return;
+        if (!savedTotal) { el.textContent = ''; return; }
+        const shown = Math.min(savedOffset, savedTotal);
+        el.textContent = shown + ' / ' + savedTotal + '件';
+      }
+
+      function updateLoadMoreBtn() {
+        const btn = document.getElementById('loadMoreBtn');
+        if (!btn) return;
+        btn.style.display = savedHasMore ? 'block' : 'none';
+        btn.disabled = savedIsLoading;
+        btn.textContent = savedIsLoading ? '読み込み中…' : 'もっと読む（20件ずつ）';
+      }
+
+      async function loadSavedList(opts) {
+        opts = opts || {};
+        if (savedIsLoading) return;
+        const isReset = !!opts.reset;
+        const isAppend = !!opts.append && !isReset;
+        if (isReset) {
+          savedOffset = 0;
+          savedTotal = 0;
+          savedHasMore = false;
+        }
+        const levelEl = document.getElementById('fFilterLevel');
+        const level = levelEl ? levelEl.value : savedLevel;
+        savedLevel = level;
+        const limit = 20;
+        const offset = isAppend ? savedOffset : 0;
+        if (!isAppend && isReset) {
+          // クリアは render側で。カウントも一旦クリア
+          document.getElementById('savedList').innerHTML = '<li style="cursor:default; color:#999999;">読み込み中…</li>';
+          updateSavedCount();
+          updateLoadMoreBtn();
+        }
+        savedIsLoading = true;
+        updateLoadMoreBtn();
         try {
-          const res = await callServer('getSavedTexts');
-          renderSavedList((res && res.items) || []);
+          const res = await callServer('getSavedTexts', { limit: limit, offset: offset, level: savedLevel });
+          const items = (res && res.items) || [];
+          savedTotal = (res && typeof res.total === 'number') ? res.total : (offset + items.length + (res && res.hasMore ? 1 : 0));
+          savedHasMore = !!(res && res.hasMore);
+          if (isAppend) {
+            renderSavedList(items, { append: true });
+          } else {
+            renderSavedList(items, { append: false });
+          }
+          savedOffset = offset + items.length;
+          updateSavedCount();
+          updateLoadMoreBtn();
         } catch (e) {
+          if (isReset) document.getElementById('savedList').innerHTML = '';
           showToast(e.message || '履歴の読み込みに失敗しました');
+          updateLoadMoreBtn();
+        } finally {
+          savedIsLoading = false;
+          updateLoadMoreBtn();
         }
       }
 
@@ -1199,8 +1290,12 @@
           textArea.textContent = '左のパネルで過去の生成物を選択してください。\n\n単語をタップすると辞書を表示します。';
           if(GIS_CLIENT_ID.indexOf('REPLACE')!==0) initGisApp2();
         }
-        loadSavedList();
+        loadSavedList({ reset: true });
       }
+
+      // フィルタ・もっと読むのイベント
+      document.getElementById('fFilterLevel').addEventListener('change', () => loadSavedList({ reset: true }));
+      document.getElementById('loadMoreBtn').addEventListener('click', () => loadSavedList({ append: true }));
 
       console.log('before Promise.all loadFormMap/loadInvert isAllowed',IS_ALLOWED,'isOwner',IS_OWNER);
       applyZoom();

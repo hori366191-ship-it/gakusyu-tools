@@ -12,6 +12,10 @@
 var DICTIONARY_ID = '1J4_grvw-tZKV1BLqgVlCGb8A5Oa2hEdx';
 var MAP_ID        = '13G_bvPbBaoFx-XC9qJAaJTBP66G_-EdK';
 var FOLDER_NAME   = '生成済み長文';
+var INDEX_FOLDER_NAME = '生成済み長文_index';
+var INDEX_FILE_NAME   = 'tadoku-index.json';
+var INDEX_CACHE_KEY   = 'tadoku_index_cache';
+var INDEX_CACHE_TTL   = 60;
 var API_BASE      = 'https://opencode.ai/zen/go/v1';
 var MODEL         = 'deepseek-v4-flash';
 var SYSTEM_PROMPT = 'あなたは英語教材の長文作成者です。日本語の指示に従い、英語の長文を1本作成してください。出力はタイトルと本文のみとし、マークダウン記法・注釈・解説・日本語の説明は一切含めないこと。';
@@ -172,8 +176,13 @@ function doGet(e) {
       return isCb ? ContentService.createTextOutput(cb + '(' + JSON.stringify(err) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(err);
     }
     try {
-      var result = getSavedTexts();
-      var ok = { ok: true, items: result.items };
+      var opts = {
+        limit: params.limit,
+        offset: params.offset,
+        level: params.level
+      };
+      var result = getSavedTexts(opts);
+      var ok = { ok: true, items: result.items, total: result.total, hasMore: result.hasMore, offset: result.offset, limit: result.limit };
       return isCb ? ContentService.createTextOutput(cb + '(' + JSON.stringify(ok) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(ok);
     } catch (err2) {
       var fail = { ok: false, error: String(err2 && err2.message || err2) };
@@ -423,14 +432,66 @@ function getFolder_() {
   return DriveApp.createFolder(FOLDER_NAME);
 }
 
-function saveRecord_(record) {
-  getFolder_().createFile(record.id + '.json', JSON.stringify(record), 'application/json');
+function getIndexFolder_() {
+  var fid = PropertiesService.getScriptProperties().getProperty('INDEX_FOLDER_ID');
+  if (fid) {
+    try { return DriveApp.getFolderById(fid); } catch (e) {}
+  }
+  var it = DriveApp.getFoldersByName(INDEX_FOLDER_NAME);
+  if (it.hasNext()) {
+    var f = it.next();
+    try { PropertiesService.getScriptProperties().setProperty('INDEX_FOLDER_ID', f.getId()); } catch (e2) {}
+    return f;
+  }
+  var nf = DriveApp.createFolder(INDEX_FOLDER_NAME);
+  try { PropertiesService.getScriptProperties().setProperty('INDEX_FOLDER_ID', nf.getId()); } catch (e3) {}
+  return nf;
 }
 
-/**
- * 保存済み生成物の一覧（新しい順）
- */
-function getSavedTexts() {
+function getIndexFile_() {
+  var fileId = PropertiesService.getScriptProperties().getProperty('INDEX_FILE_ID');
+  if (fileId) {
+    try { return DriveApp.getFileById(fileId); } catch (e) {}
+  }
+  var folder = getIndexFolder_();
+  var it = folder.getFilesByName(INDEX_FILE_NAME);
+  if (it.hasNext()) {
+    var f = it.next();
+    try { PropertiesService.getScriptProperties().setProperty('INDEX_FILE_ID', f.getId()); } catch (e2) {}
+    return f;
+  }
+  var initial = { version: 1, updatedAt: new Date().toISOString(), items: [] };
+  var file = folder.createFile(INDEX_FILE_NAME, JSON.stringify(initial), MimeType.PLAIN_TEXT);
+  try { PropertiesService.getScriptProperties().setProperty('INDEX_FILE_ID', file.getId()); } catch (e3) {}
+  return file;
+}
+
+function loadIndex_() {
+  try {
+    var cache = CacheService.getScriptCache();
+    var cached = cache.get(INDEX_CACHE_KEY);
+    if (cached) return JSON.parse(cached);
+  } catch (e) {}
+  var file = getIndexFile_();
+  var txt = file.getBlob().getDataAsString();
+  var data;
+  try { data = JSON.parse(txt); } catch (e) { data = { version: 1, updatedAt: new Date().toISOString(), items: [] }; }
+  if (!data.items || !Array.isArray(data.items)) data.items = [];
+  if (!data.version) data.version = 1;
+  try { CacheService.getScriptCache().put(INDEX_CACHE_KEY, JSON.stringify(data), INDEX_CACHE_TTL); } catch (e2) {}
+  return data;
+}
+
+function saveIndex_(data) {
+  data.updatedAt = new Date().toISOString();
+  if (!data.version) data.version = 1;
+  var file = getIndexFile_();
+  file.setContent(JSON.stringify(data));
+  try { CacheService.getScriptCache().put(INDEX_CACHE_KEY, JSON.stringify(data), INDEX_CACHE_TTL); } catch (e) {}
+  try { CacheService.getScriptCache().remove('tadoku_index_cache_legacy'); } catch (e2) {}
+}
+
+function getLegacyItems_() {
   var files = getFolder_().getFiles();
   var items = [];
   while (files.hasNext()) {
@@ -439,23 +500,153 @@ function getSavedTexts() {
     try {
       var rec = JSON.parse(f.getBlob().getDataAsString());
       if (rec && rec.id) items.push(rec);
-    } catch (e) { /* 壊れたファイルは無視 */ }
+    } catch (e) {}
   }
   items.sort(function (a, b) { return String(b.id).localeCompare(String(a.id)); });
-  return { items: items };
+  return items;
+}
+
+function saveRecord_(record) {
+  var lock = LockService.getScriptLock();
+  var locked = false;
+  try {
+    locked = lock.tryLock(10000);
+    if (!locked) throw new Error('保存が混雑しています。少し待って再試行してください');
+    var data = loadIndex_();
+    // 重複チェック（同IDがあれば上書きしない）
+    var exists = data.items.some(function (it) { return it.id === record.id; });
+    if (!exists) {
+      data.items.unshift(record); // 新しい順（先頭）
+      // 念のためソート（id降順）
+      data.items.sort(function (a, b) { return String(b.id).localeCompare(String(a.id)); });
+    }
+    saveIndex_(data);
+  } finally {
+    if (locked) { try { lock.releaseLock(); } catch (e) {} }
+  }
 }
 
 /**
- * 保存済み生成物の削除（payload: { id: "tadoku-..." }）
+ * 保存済み生成物の一覧（新しい順）— 統合ファイル版
+ * opts: {limit, offset, level}  levelは「すべて」または級名（例: "3級"）
+ * 旧フォルダの個別ファイルは migrateToIndex() 後に INDEX_FILE に集約される
+ */
+function getSavedTexts(opts) {
+  opts = opts || {};
+  var limit = parseInt(opts.limit, 10);
+  var offset = parseInt(opts.offset, 10);
+  if (isNaN(limit) || limit <= 0) limit = 0; // 0は全件（旧互換）
+  if (isNaN(offset) || offset < 0) offset = 0;
+  var level = opts.level ? String(opts.level).trim() : '';
+  if (level === 'すべて' || level === '全て' || level === 'all') level = '';
+
+  var data;
+  try {
+    data = loadIndex_();
+  } catch (e) {
+    data = { items: [] };
+  }
+  var items = data.items || [];
+  // 旧データがまだ移行されていない場合はレガシーから読む（indexが空で旧にデータがある場合）
+  if ((!items || items.length === 0) && !opts._skipLegacy) {
+    try {
+      var legacy = getLegacyItems_();
+      if (legacy && legacy.length) {
+        items = legacy;
+      }
+    } catch (e2) {}
+  }
+  // 級フィルタ
+  if (level) {
+    items = items.filter(function (it) {
+      return it.settings && String(it.settings.level) === level;
+    });
+  }
+  var total = items.length;
+  // ソートは保存時に降順なので不要だが念のため
+  // items.sort(function(a,b){return String(b.id).localeCompare(String(a.id));});
+  if (limit > 0) {
+    items = items.slice(offset, offset + limit);
+  } else if (offset > 0) {
+    items = items.slice(offset);
+  }
+  var hasMore = limit > 0 ? (offset + limit < total) : false;
+  return { items: items, total: total, hasMore: hasMore, offset: offset, limit: limit };
+}
+
+/**
+ * 保存済み生成物の削除（payload: { id: "tadoku-..." }）— 統合ファイル版
  */
 function deleteText(payload) {
   if (!isOwner_()) throw new Error('削除はオーナーのみ実行できます');
   var id = (payload && payload.id) || '';
   if (!/^tadoku-\d+$/.test(id)) throw new Error('対象が見つかりません');
-  var files = getFolder_().getFilesByName(id + '.json');
-  if (!files.hasNext()) throw new Error('対象が見つかりません');
-  files.next().setTrashed(true);
-  return true;
+  var lock = LockService.getScriptLock();
+  var locked = false;
+  try {
+    locked = lock.tryLock(10000);
+    if (!locked) throw new Error('削除が混雑しています。少し待って再試行してください');
+    var data = loadIndex_();
+    var idx = -1;
+    for (var i = 0; i < data.items.length; i++) {
+      if (data.items[i].id === id) { idx = i; break; }
+    }
+    if (idx === -1) {
+      // 旧個別ファイルに残っている可能性（移行前データ）— 旧フォルダも探す
+      try {
+        var files = getFolder_().getFilesByName(id + '.json');
+        if (files.hasNext()) {
+          files.next().setTrashed(true);
+          return true;
+        }
+      } catch (e2) {}
+      throw new Error('対象が見つかりません');
+    }
+    data.items.splice(idx, 1);
+    saveIndex_(data);
+    return true;
+  } finally {
+    if (locked) { try { lock.releaseLock(); } catch (e) {} }
+  }
+}
+
+/**
+ * 旧個別ファイルから統合ファイルへの移行（手動実行）
+ * GASエディタで migrateToIndex() を実行。INDEX_FILE が空の場合のみ旧ファイルをコピー
+ */
+function migrateToIndex() {
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) throw new Error('ロック取得失敗');
+  try {
+    var data = loadIndex_();
+    if (data.items && data.items.length > 0) {
+      return 'index already has ' + data.items.length + ' items, skip. To force, clear index first.';
+    }
+    var legacy = getLegacyItems_();
+    data.items = legacy;
+    data.version = 1;
+    saveIndex_(data);
+    try { PropertiesService.getScriptProperties().setProperty('MIGRATED_AT', new Date().toISOString()); } catch (e) {}
+    try { CacheService.getScriptCache().remove(INDEX_CACHE_KEY); } catch (e2) {}
+    return 'migrated ' + legacy.length + ' items from legacy folder to index';
+  } finally {
+    try { lock.releaseLock(); } catch (e) {}
+  }
+}
+
+function forceMigrateToIndex_() {
+  // 強制再移行（indexを上書き）
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) throw new Error('ロック取得失敗');
+  try {
+    var legacy = getLegacyItems_();
+    var data = { version: 1, updatedAt: new Date().toISOString(), items: legacy };
+    saveIndex_(data);
+    try { PropertiesService.getScriptProperties().setProperty('MIGRATED_AT', new Date().toISOString()); } catch (e) {}
+    return 'force migrated ' + legacy.length + ' items';
+  } finally {
+    try { lock.releaseLock(); } catch (e) {}
+  }
 }
 
 /**
@@ -471,4 +662,5 @@ function getDICTIONARY() {
 function getFormMap() {
   return JSON.parse(DriveApp.getFileById(MAP_ID).getBlob().getDataAsString());
 }
-function debugProps(){return JSON.stringify({FOLDER_ID: PropertiesService.getScriptProperties().getProperty('FOLDER_ID'), ALLOWED_EMAILS: PropertiesService.getScriptProperties().getProperty('ALLOWED_EMAILS')});}
+function debugProps(){return JSON.stringify({FOLDER_ID: PropertiesService.getScriptProperties().getProperty('FOLDER_ID'), INDEX_FOLDER_ID: PropertiesService.getScriptProperties().getProperty('INDEX_FOLDER_ID'), INDEX_FILE_ID: PropertiesService.getScriptProperties().getProperty('INDEX_FILE_ID'), MIGRATED_AT: PropertiesService.getScriptProperties().getProperty('MIGRATED_AT'), ALLOWED_EMAILS: PropertiesService.getScriptProperties().getProperty('ALLOWED_EMAILS')});}
+function debugIndexInfo(){ var d=loadIndex_(); return JSON.stringify({total:(d.items||[]).length, updatedAt:d.updatedAt, version:d.version, sample:(d.items||[]).slice(0,2).map(function(x){return {id:x.id, level:x.settings&&x.settings.level, title:x.title};})});}
