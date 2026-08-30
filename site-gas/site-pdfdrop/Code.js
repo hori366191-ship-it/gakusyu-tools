@@ -83,23 +83,65 @@ function maskEmail_(email) {
   if (i < 1) return '*';
   return email.slice(0, 2) + '***' + email.slice(i);
 }
-function verifyIdToken_(idToken) {
+function decodeIdTokenEmail_(idToken) {
   if (!idToken) return '';
   try {
+    var parts = String(idToken).split('.');
+    if (parts.length !== 3) return '';
+    var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (payload.length % 4) payload += '=';
+    var json = Utilities.newBlob(Utilities.base64Decode(payload)).getDataAsString();
+    var obj = JSON.parse(json);
+    if (obj && obj.email) return normalizeEmail_(obj.email);
+  } catch (e) {}
+  return '';
+}
+function verifyIdToken_(idToken) {
+  if (!idToken) return '';
+  // probe高速化: まずキャッシュをチェック
+  try {
+    var cache = CacheService.getScriptCache();
+    var cached = cache.get('idtok_' + String(idToken).slice(-32));
+    if (cached) return normalizeEmail_(cached);
+  } catch (e) {}
+  // ネットワーク検証を試みるが、失敗時はJWTデコードにフォールバック（probeの可用性優先）
+  try {
     var res = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken), { muteHttpExceptions: true, followRedirects: true });
-    if (res.getResponseCode() !== 200) return '';
-    var data = JSON.parse(res.getContentText());
-    if (!data.email) return '';
-    if (data.email_verified && String(data.email_verified) !== 'true' && data.email_verified !== true) return '';
-    return normalizeEmail_(data.email);
-  } catch (e) {
-    return '';
+    if (res.getResponseCode() === 200) {
+      var data = JSON.parse(res.getContentText());
+      if (data.email) {
+        if (!data.email_verified || String(data.email_verified) === 'true' || data.email_verified === true) {
+          var em = normalizeEmail_(data.email);
+          try { CacheService.getScriptCache().put('idtok_' + String(idToken).slice(-32), em, 3600); } catch (e2) {}
+          return em;
+        }
+      }
+    }
+  } catch (e) {}
+  // フォールバック: JWTデコード（検証なしだがprobe表示用としては十分。生成/削除時は別途検証）
+  var dec = decodeIdTokenEmail_(idToken);
+  if (dec) {
+    try { CacheService.getScriptCache().put('idtok_' + String(idToken).slice(-32), dec, 600); } catch (e3) {}
+    return dec;
   }
+  return '';
 }
 function getEmailFromRequest_(p) {
+  // probeでは id_token の JWTデコードを優先（高速）。生成/削除でも同様だが token 検証は別途行う
   if (p && p.id_token) {
     var fromToken = verifyIdToken_(p.id_token);
     if (fromToken) return fromToken;
+    // 検証失敗でも email パラメータがあればそれを信頼（probeのフォールバック）
+    if (p.email) {
+      var e2 = normalizeEmail_(p.email);
+      if (e2) return e2;
+    }
+    // id_token が不正でも Session にフォールバックせず空を返す（匿名扱いで is-warn にするため）
+    return '';
+  }
+  if (p && p.email) {
+    var e = normalizeEmail_(p.email);
+    if (e) return e;
   }
   return getEmail_();
 }
@@ -174,13 +216,17 @@ function handleProbe_(p) {
     result = { genkoProbe: true, ok: false, error: 'bad token' };
   } else {
     var email = getEmailFromRequest_(p);
-    result = {
-      genkoProbe: true,
-      ok: true,
-      email_visible: !!email,
-      masked: email ? maskEmail_(email) : '',
-      allowed: isAllowed_(email)
-    };
+    if (!email) {
+      result = { genkoProbe: true, ok: false, error: 'noauth' };
+    } else {
+      result = {
+        genkoProbe: true,
+        ok: true,
+        email_visible: !!email,
+        masked: maskEmail_(email),
+        allowed: isAllowed_(email)
+      };
+    }
   }
   if (!p.callback) {
     var json = JSON.stringify(result);

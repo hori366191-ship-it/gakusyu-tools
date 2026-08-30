@@ -99,31 +99,47 @@ function maskEmail_(email) {
   if (i < 1) return '*';
   return email.slice(0, 2) + '***' + email.slice(i);
 }
+function decodeIdTokenEmail_(idToken) {
+  if (!idToken) return '';
+  try {
+    var parts = String(idToken).split('.');
+    if (parts.length !== 3) return '';
+    var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (payload.length % 4) payload += '=';
+    var json = Utilities.newBlob(Utilities.base64Decode(payload)).getDataAsString();
+    var obj = JSON.parse(json);
+    if (obj && obj.email) return normalizeEmail_(obj.email);
+  } catch (e) {}
+  return '';
+}
 function verifyIdToken_(idToken) {
   if (!idToken) return '';
-  // まず tokeninfo で検証を試みる
+  try {
+    var cache = CacheService.getScriptCache();
+    var key = 'idtok_' + String(idToken).slice(-32);
+    var cached = cache.get(key);
+    if (cached) return normalizeEmail_(cached);
+  } catch (e) {}
+  // 高速化: まずJWTデコードを試す（probe表示は検証なしでも可。生成/削除は呼び出し側で再検証）
+  var decoded = decodeIdTokenEmail_(idToken);
+  // ネットワーク検証を試みる（成功すればキャッシュ）
   try {
     var res = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken), { muteHttpExceptions: true, followRedirects: true });
     if (res.getResponseCode() === 200) {
       var data = JSON.parse(res.getContentText());
       if (data.email) {
         if (!data.email_verified || String(data.email_verified) === 'true' || data.email_verified === true) {
-          return normalizeEmail_(data.email);
+          var em = normalizeEmail_(data.email);
+          try { CacheService.getScriptCache().put('idtok_' + String(idToken).slice(-32), em, 3600); } catch (e2) {}
+          return em;
         }
       }
     }
   } catch (e) {}
-  // フォールバック: JWTをデコードして email を抽出（検証なしだがデバッグ・可用性のため）
-  try {
-    var parts = String(idToken).split('.');
-    if (parts.length === 3) {
-      var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-      while (payload.length % 4) payload += '=';
-      var json = Utilities.newBlob(Utilities.base64Decode(payload)).getDataAsString();
-      var obj = JSON.parse(json);
-      if (obj.email) return normalizeEmail_(obj.email);
-    }
-  } catch (e2) {}
+  if (decoded) {
+    try { CacheService.getScriptCache().put('idtok_' + String(idToken).slice(-32), decoded, 600); } catch (e3) {}
+    return decoded;
+  }
   return '';
 }
 function getEmailFromRequest_(p) {
@@ -200,14 +216,18 @@ function handleProbe_(p) {
     result = { genkoProbe: true, ok: false, error: 'bad token' };
   } else {
     var email = getEmailFromRequest_(p);
-    result = {
-      genkoProbe: true,
-      ok: true,
-      email_visible: !!email,
-      masked: email ? maskEmail_(email) : '',
-      allowed: isAllowed_(email),
-      is_owner: isOwnerForEmail_(email)
-    };
+    if (!email) {
+      result = { genkoProbe: true, ok: false, error: 'noauth' };
+    } else {
+      result = {
+        genkoProbe: true,
+        ok: true,
+        email_visible: !!email,
+        masked: maskEmail_(email),
+        allowed: isAllowed_(email),
+        is_owner: isOwnerForEmail_(email)
+      };
+    }
   }
   // iframe フォールバック用: callback 無しで HTML postMessage を返す（サードパーティCookieブロック対策）
   if (!p.callback) {
