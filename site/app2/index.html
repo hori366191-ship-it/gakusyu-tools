@@ -648,6 +648,13 @@
       let savedLevel = '';
       let savedIsLoading = false;
 
+      function resetViewerScroll() {
+        const v = document.getElementById('textViewer');
+        if (!v) return;
+        try { v.scrollTo({ top: 0, left: 0, behavior: 'instant' }); } catch (e) { v.scrollTop = 0; v.scrollLeft = 0; }
+        v.scrollTop = 0;
+      }
+
       const dotEl = document.getElementById('dot-anim');
       let frame = 0;
       setInterval(() => {
@@ -1032,6 +1039,7 @@
         viewedWords.clear();
         deletedWords.clear();
         updateHistoryDisplay();
+        resetViewerScroll();
       }
 
       async function generate() {

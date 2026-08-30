@@ -573,6 +573,20 @@
         let currentContentId = null; // 現在表示中のコンテンツID
 
         /**
+         * 文書切替時にスクロール位置を先頭に戻す（instant）
+         */
+        function resetScrollPosition() {
+            try {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            } catch (e) {
+                window.scrollTo(0, 0);
+            }
+            // フォールバック（instant未対応ブラウザ用）
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        }
+
+        /**
          * ページの読み込みが完了したら実行されるメイン処理
          */
         document.addEventListener('DOMContentLoaded', () => {
@@ -836,6 +850,9 @@
             clearSearch();
             updateSearchCount();
 
+            // 文書切替時は即座に先頭へスクロール（直観に合う挙動）
+            resetScrollPosition();
+
             // バンドル内にあればブラウザ内で即座に表示（通信なし）
             if (renderFromBundle(fileId)) {
                 return;
@@ -858,6 +875,8 @@
             }
 
             contentBody.innerHTML = marked.parse(item.content);
+            // 文書切替直後に先頭へ（MathJax前の暫定レイアウトでも先頭を保証）
+            resetScrollPosition();
             // MathJaxに数式を処理させる（失敗しても本文は消さない）
             if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
                 try {
@@ -868,6 +887,8 @@
             }
             // 数式処理後に暗記モード用の前処理を実行
             processContentForMemorization();
+            // MathJaxで行高が変わるため完了後にも先頭を保証
+            resetScrollPosition();
             return true;
         }
 
@@ -904,6 +925,7 @@
                     }
                     if (item && item.content) {
                         contentBody.innerHTML = marked.parse(item.content);
+                        if (seq === contentRequestSeq) resetScrollPosition();
                         // MathJaxに新しいコンテンツ内の数式を処理させる（失敗しても本文は消さない）
                         if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
                             return MathJax.typesetPromise([contentBody]).catch(() => {});
@@ -916,6 +938,7 @@
                     // 数式処理後に暗記モード用の前処理を実行
                     if (seq === contentRequestSeq) {
                         processContentForMemorization();
+                        resetScrollPosition();
                     }
                 })
                 .catch(error => {
