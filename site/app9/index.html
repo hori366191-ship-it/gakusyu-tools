@@ -141,7 +141,6 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     <div class="actions">
       <button id="printBtn">印刷する</button>
       <button id="classroomBtn" style="display:none">教室タブレットで印刷</button>
-      <span id="gis-wrap-app9" style="display:none;margin-left:8px"></span>
       <span class="sendStatus" id="sendStatus"></span>
     </div>
     <p class="hint">印刷ダイアログの保存先で「PDFに保存」を選ぶとPDFファイルも作成できます。どのサイズでも必ずA4用紙1枚に収まります。設定はこのブラウザに自動保存され、次回開いたときに復元されます。<br>※PDF出力には <a href="https://github.com/parallax/jsPDF" target="_blank" rel="noopener">jsPDF</a>・<a href="https://html2canvas.hertzen.com/" target="_blank" rel="noopener">html2canvas</a> (MIT License) を利用しています。</p>
@@ -635,39 +634,22 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     });
   });
 
-  // Pages静的版: 起動時にprobeで表示判定（仕様書_移行案.md 4.4）GIS対応
-  function initGisApp9(){
-    if(GIS_CLIENT_ID.indexOf('REPLACE')===0) return;
-    if(typeof google==='undefined'||!google.accounts||!google.accounts.id) { setTimeout(initGisApp9,500); return; }
-    try{
-      google.accounts.id.initialize({
-        client_id: GIS_CLIENT_ID,
-        callback: function(resp){ if(resp.credential){ setIdToken(resp.credential); updateClassroomBtnVisibility(); } },
-        auto_select:false, cancel_on_tap_outside:true
-      });
-      var w=document.getElementById('gis-wrap-app9');
-      if(w){ w.style.display='inline-block'; google.accounts.id.renderButton(w,{theme:'outline',size:'small',text:'signin_with',shape:'pill'}); }
-    }catch(e){}
-  }
   // Pages静的版: 起動時にprobeで表示判定（仕様書_移行案.md 4.4）
-  // - 未ログイン → GIS表示、教室外 → 非表示、教室/先生 → 表示
+  // - 未ログイン/教室外 → 非表示、教室/先生 → 表示（ログインはポータルの「教室用ログイン」で行うため、原稿用紙側にGISボタンは出さない）
   function updateClassroomBtnVisibility() {
     var btn = document.getElementById('classroomBtn');
-    var gisW=document.getElementById('gis-wrap-app9');
     if (!CLASSROOM.url || !CLASSROOM.token) return;
     if (location.protocol === 'file:') return;
     probeAuth(function (pr) {
       if (pr.state === 'ok') {
         btn.style.display = '';
-        if(gisW) gisW.style.display='none';
         setStatus('');
       } else if (pr.state === 'notallowed') {
         btn.style.display = 'none';
-        if(gisW) gisW.style.display='none';
         setStatus('教室外アカウントでは印刷できません');
       } else {
         btn.style.display = 'none';
-        if(GIS_CLIENT_ID.indexOf('REPLACE')!==0) initGisApp9();
+        setStatus('');
       }
     });
   }

@@ -605,19 +605,16 @@
       function render(state, opts) {
         opts = opts || {};
         banner.className = 'auth-banner__inner' + (state ? ' ' + state : '');
-        var idt=getIdToken();
-        var dbg=idt? ' (id_token:'+ (decodeJwtPayload(idt)?.email||'---').slice(0,12)+'…)':' (no id_token)';
         if (state === 'is-ok') {
-          if (opts.isOwner) textEl.textContent = '先生アカウントでログイン中 \u2705' + dbg;
-          else textEl.textContent = '教室タブレットとしてログイン中 \u2705' + dbg;
-        } else if (state === 'is-out') {
-          textEl.textContent = '教室外アカウント' + dbg + ' allowed:false';
-        } else if (state === 'is-warn') {
+          if (opts.isOwner) textEl.textContent = '先生アカウントでログイン中 \u2705';
+          else textEl.textContent = '教室タブレットとしてログイン中 \u2705';
+        } else if (state === 'is-out' || state === 'is-warn') {
+          // ログイン不要の生徒向けにシンプルに「教室用ログイン」のみ表示。デバッグ表示は削除。
+          var label = '教室用ログイン';
           if (GIS_CLIENT_ID.indexOf('REPLACE')===0) {
-            banner.innerHTML = '<span class="auth-banner__dot" aria-hidden="true"></span><span>教室タブレットとしてログインするには、右のボタンからログインしてください。</span><a class="auth-banner__btn" href="' + PROBE_URL + '" target="_blank" rel="noopener">ログインする \u2197</a>';
+            banner.innerHTML = '<span class="auth-banner__dot" aria-hidden="true"></span><span>'+label+'</span><a class="auth-banner__btn" href="' + PROBE_URL + '" target="_blank" rel="noopener">'+label+' \u2197</a>';
           } else {
-            var lastErr=opts.error||'noauth';
-            banner.innerHTML = '<span class="auth-banner__dot" aria-hidden="true"></span><span>Googleでログインしてください</span><span id="gis-btn" style="margin-left:auto"></span><span style="font-size:9px;color:#94a3b8;margin-left:6px">'+lastErr+dbg+'</span>';
+            banner.innerHTML = '<span class="auth-banner__dot" aria-hidden="true"></span><span>'+label+'</span><span id="gis-btn" style="margin-left:auto"></span>';
             initGis();
           }
         }
