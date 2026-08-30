@@ -2,12 +2,12 @@
 
 このリポジトリはGoogle Apps Script(GAS)製の学習ツール群(塾向け)を管理する。
 
-- 詳細な仕様は `仕様書.md` を参照
+- 詳細な仕様は `仕様書_移行案.md` を参照（`仕様書.md` はGAS版の凍結保存版）
 
 ## プロジェクト構造
 
 ```
-apps/
+apps/      … 旧GAS版（永久残置・11本・現行運用中）
 ├── app1/   公式・暗記辞典   (scriptId: YOUR_SCRIPT_ID_app1)
 ├── app2/   英語長文 多読リーダー (scriptId: YOUR_SCRIPT_ID_app2)
 ├── app3/   正規分布シミュレーター (scriptId: YOUR_SCRIPT_ID_app3)
@@ -20,6 +20,14 @@ apps/
 ├── pdfdrop/ PDF受信アプリ (scriptId: YOUR_SCRIPT_ID_pdfdrop、デプロイ: AKfycbxP6klWI4L5wnTl2wTO5PmrDMf6z4Fmu3Qh3zFwfCf0KUa91idOINv6w8PxoY3Ke-oN、ポータル非掲載)
 ├── portal/ 学習ツール ポータル (scriptId: YOUR_SCRIPT_ID_portal)
 └── その他/  実験・非公開アプリの開発場所
+site/      … 新Pages版（正本・`hori366191-ship-it.github.io/gakusyu-tools/` で配信）
+├── index.html, app1/, app2/, app3/..app9/, debug-probe.html
+└── app1/bundle.json
+site-gas/  … 新GAS2本（Pagesの不可視API）
+├── site-pdfdrop/   (scriptId: YOUR_SCRIPT_ID_site-pdfdrop)
+└── site-app2-backend/ (scriptId: YOUR_SCRIPT_ID_site-app2-backend)
+site-worker/ … Cloudflare Workers プロキシ（site → GAS の中継・CORS付与）
+├── worker.js, wrangler.toml
 ```
 
 - 各フォルダに個別の `.clasp.json` を持つ(scriptId + rootDir ".")。**ルート直下に `.clasp.json` を作らないこと**(claspのclone/createはCWDに書き出すため、作成後に各フォルダへ移動する)
@@ -59,8 +67,22 @@ clasp.cmd login            # 再認証(トークン失効時)
    ```
    (デプロイURLは不変。UI更新後の検証結果をユーザーに確認してもらう)
 3. 公開URLの確認に `/dev` 形式を使わない(エディタ用)。`/exec` が公開用
+4. **`site-worker/targets` のデプロイIDを旧GASに戻さない** — `site-worker/worker.js:13` の `AKfycbwj7q...` / `AKfycbxj8q...` は新GAS2本のID。旧 `AKfycbxP6...` / `AKfycbxvo...` に戻すと新 `site/` が全滅する
 
-## 検証方法
+## 検証方法（site を含む）
+
+### site-worker プロキシの検証
+
+```powershell
+# ローカル
+npx wrangler dev --port 8787
+curl.exe -i "http://localhost:8787/app2?probe=1&token=e6135dfd707ab9a6916635fa&callback=cb"
+curl.exe -i -X OPTIONS "http://localhost:8787/app2?probe=1&token=..."
+# 本番
+curl.exe -i "https://<workers.dev>/app2?probe=1&token=e6135dfd707ab9a6916635fa&callback=cb"
+curl.exe -i "https://<workers.dev>/pdfdrop?probe=1&token=e6135dfd707ab9a6916635fa&callback=cb"
+# 期待: Access-Control-Allow-Origin: * と cb({...genkoProbe:true...})、X-Frame-Optionsなし
+```
 
 ### 匿名アクセスの確認(curl)
 
@@ -127,6 +149,13 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 - 認証プローブ: 送信側はアップロード前に **doGet `?probe=1&token=&callback=` のJSONP**(4秒ウォッチドッグ)を叩く(email可視性・ALLOWED_EMAILS判定を返す)。無応答=未ログインとみなし約4秒でエラー+ログインリンク表示(旧設計は60秒待たされてから気づく問題があった)
 - デプロイ: アクセス「Googleアカウントでログイン」/ 実行「自分」(UI操作)
 - 初期トークン: `e6135dfd707ab9a6916635fa`(漏洩時は両側で再生成)
+
+### site/site-gas/site-worker（新Pages版）
+
+- `site/` は `hori366191-ship-it.github.io/gakusyu-tools/` で配信。`site/app1/bundle.json` は静的。`site/app2` / `site/app9` は `site-gas` 2本を `?probe` + `DROP_TOKEN` で判定し、教室/先生/教室外で表示を切替
+- `site-gas/` 2本は `apps/` のGASを複製した新GAS。`apps/` は永久残置。`site/` 側が正本
+- `site-worker/` は `site` → `GAS` のWorkersプロキシ。`site/` の `PROBE_URL` / `CLASSROOM.url` は `workers.dev` 経由に切替予定（直叩きの `script.google.com` はフォールバックとして残す）
+- 検証は `site/debug-probe.html` で `JSONP→iframe` の2段階と `is-ok/is-out/is-warn` を文字で確認
 
 ### gitバックアップ(Drive同期)
 
