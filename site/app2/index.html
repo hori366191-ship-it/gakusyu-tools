@@ -853,12 +853,15 @@
 
       function loadFormMap() {
         if (FORM_MAP) return Promise.resolve();
-        return callServer('getFormMap').then(d => { FORM_MAP = d; window.FORM_MAP = d; }).catch(() => { FORM_MAP = {}; window.FORM_MAP = {}; });
+        return callServer('getFormMap').then(d => { FORM_MAP = d; window.FORM_MAP = d; console.log('loadFormMap success', Object.keys(d).length); }).catch((e) => { console.error('loadFormMap fail', e.message); FORM_MAP = {}; window.FORM_MAP = {}; });
       }
       function loadInvert() {
         if (INV) return Promise.resolve();
-        return callServer('getDICTIONARY').then(d => { INV = d; window.INV = d; }).catch(() => { INV = {}; window.INV = {}; });
+        return callServer('getDICTIONARY').then(d => { INV = d; window.INV = d; console.log('loadInvert success', Object.keys(d).length); }).catch((e) => { console.error('loadInvert fail', e.message); INV = {}; window.INV = {}; });
       }
+      window.testCallServer = callServer;
+      window.testLoadFormMap = loadFormMap;
+      window.testLoadInvert = loadInvert;
 
       function getWordAtPoint(x, y) {
         const range = document.caretRangeFromPoint ? document.caretRangeFromPoint(x, y) : null;
