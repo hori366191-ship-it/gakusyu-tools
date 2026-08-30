@@ -105,13 +105,20 @@ function doGet(e) {
   if (params.probe) return handleProbe_(params);
   if (params.action === 'getSavedTexts') {
     var token = params.token || '';
-    if (!isAllowedWithToken_(token)) return jsonOut_({ ok: false, error: 'not allowed' });
-    var result = getSavedTexts();
-    if (params.callback && /^[A-Za-z0-9_.]{1,64}$/.test(params.callback)) {
-      return ContentService.createTextOutput(params.callback + '(' + JSON.stringify({ ok: true, items: result.items }) + ')')
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    var cb = params.callback || '';
+    var isCb = /^[A-Za-z0-9_.]{1,64}$/.test(cb);
+    if (!isAllowedWithToken_(token)) {
+      var err = { ok: false, error: 'not allowed' };
+      return isCb ? ContentService.createTextOutput(cb + '(' + JSON.stringify(err) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(err);
     }
-    return jsonOut_({ ok: true, items: result.items });
+    try {
+      var result = getSavedTexts();
+      var ok = { ok: true, items: result.items };
+      return isCb ? ContentService.createTextOutput(cb + '(' + JSON.stringify(ok) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(ok);
+    } catch (err2) {
+      var fail = { ok: false, error: String(err2 && err2.message || err2) };
+      return isCb ? ContentService.createTextOutput(cb + '(' + JSON.stringify(fail) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(fail);
+    }
   }
   if (params.action === 'getDICTIONARY') {
     var tok = params.token || '';
@@ -156,15 +163,16 @@ function handleProbe_(p) {
       ok: true,
       email_visible: !!email,
       masked: email ? maskEmail_(email) : '',
-      allowed: isAllowed_(email)
+      allowed: isAllowed_(email),
+      is_owner: isOwner_()
     };
   }
   return ContentService.createTextOutput(cb + '(' + JSON.stringify(result) + ')')
     .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 
-/**
- * API POST（Pages静的版: TOKEN必須）
+ /**
+  * API POST（Pages静的版: TOKEN必須）
  *  - JSON: {token, action:'generateText', settings:{}}
  *  - 互換: e.parameter.data に JSON が入る pdfdrop 型 hidden iframe でも受ける
  */

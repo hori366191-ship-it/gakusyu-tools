@@ -670,7 +670,7 @@
         if (!res || !res.genkoProbe) return { state: 'noauth' };
         if (!res.ok) return { state: 'error', message: res.error };
         if (!res.allowed) return { state: 'notallowed', masked: res.masked };
-        return { state: 'ok', invisible: !res.email_visible, masked: res.masked };
+        return { state: 'ok', invisible: !res.email_visible, masked: res.masked, isOwner: !!res.is_owner };
       }
 
       function gasCall(name, payload) {
@@ -701,18 +701,24 @@
           if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
           return data;
         }
-        // getSavedTexts は JSONP GET（CORS回避）
+        // getSavedTexts は JSONP GET（CORS回避）— fetch フォールバックはCORSで必ず失敗するため撤廃
         if (name === 'getSavedTexts') {
           var url = SITE_BACKEND_URL + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
-          var jp = await jsonpGet(url, 6000);
+          var jp = await jsonpGet(url, 8000);
           if (jp && jp.ok) return jp;
-          // フォールバック: 通常fetch
-          var r2 = await fetch(url);
-          var d2 = await r2.json().catch(function () { return {}; });
-          if (!r2.ok || d2.ok === false) throw new Error(d2.error || ('HTTP ' + r2.status));
-          return d2;
+          if (jp && jp.ok === false) throw new Error(jp.error || 'not allowed');
+          throw new Error('履歴の読み込みに失敗しました（GAS応答なし: token/FOLDER_ID/共有設定を確認）');
         }
-        // 辞書は Pages に同梱予定だが、フォールバックでGASから取得
+        // 辞書は Pages に同梱予定だが、フォールバックでGASから取得（JSONP一本化）
+        if (name === 'getDICTIONARY' || name === 'getFormMap') {
+          var url2 = SITE_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
+          var jp2 = await jsonpGet(url2, 8000);
+          if (jp2) return jp2;
+          var r = await fetch(url2);
+          var d = await r.json().catch(function () { return {}; });
+          if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
+          return d;
+        }
         var r = await fetch(SITE_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN));
         var d = await r.json().catch(function () { return {}; });
         if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
@@ -990,7 +996,8 @@
         var pr = await probeBackend();
         if (pr.state === 'ok') {
           IS_ALLOWED = true;
-          IS_OWNER = !pr.invisible; // 先生(可視)のみ削除可。教室タブレット(不可視)は不可
+          // Gmail可視化後は isOwner（OWNER_EMAIL一致）で先生のみ削除可。教室は生成可・削除不可
+          IS_OWNER = !!pr.isOwner;
           genSection.style.display = '';
           textArea.textContent = '左のパネルで設定を選び、［英語長文を生成］を押してください。\n\n単語をタップすると辞書を表示します。';
         } else if (pr.state === 'notallowed') {
