@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>probe デバッグ</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;padding:16px;background:#f8fafc;color:#1e293b}
+h1{font-size:18px;margin:0 0 12px}
+.card{background:#fff;border:1px solid #dde3ea;border-radius:10px;padding:12px;margin-bottom:12px}
+.card h2{font-size:14px;margin:0 0 8px}
+pre{background:#0f172a;color:#e2e8f0;padding:10px;border-radius:8px;overflow:auto;font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-all}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.ok{background:#dcfce7;color:#14532d}
+.ng{background:#fee2e2;color:#7f1d1d}
+.wait{background:#fef9c3;color:#713f12}
+a{color:#2563eb}
+</style>
+</head>
+<body>
+<h1>probe デバッグ（教室タブレットで開く）</h1>
+<p style="font-size:12px;color:#64748b">site/index.html と同じ ?probe を JSONP→iframe の順で実行し、結果を文字で表示します。スクショを撮ってください。</p>
+
+<div class="card">
+<h2>1. site-app2-backend（site/index と site/app2 が使用）</h2>
+<div>URL: <span id="url1" style="font-size:10px;word-break:break-all"></span></div>
+<div style="margin:8px 0">JSONP: <span id="s1j" class="badge wait">実行中…</span> <span id="t1j" style="font-size:11px;color:#64748b"></span></div>
+<pre id="r1j">(待機中)</pre>
+<div style="margin:8px 0">iframe: <span id="s1i" class="badge wait">未実行</span> <span id="t1i" style="font-size:11px;color:#64748b"></span></div>
+<pre id="r1i">(待機中)</pre>
+<div>最終判定: <span id="f1" class="badge wait">判定中…</span></div>
+<pre id="d1"></pre>
+</div>
+
+<div class="card">
+<h2>2. site-pdfdrop（site/app9 が使用）</h2>
+<div>URL: <span id="url2" style="font-size:10px;word-break:break-all"></span></div>
+<div style="margin:8px 0">JSONP: <span id="s2j" class="badge wait">実行中…</span> <span id="t2j" style="font-size:11px;color:#64748b"></span></div>
+<pre id="r2j">(待機中)</pre>
+<div style="margin:8px 0">iframe: <span id="s2i" class="badge wait">未実行</span> <span id="t2i" style="font-size:11px;color:#64748b"></span></div>
+<pre id="r2i">(待機中)</pre>
+<div>最終判定: <span id="f2" class="badge wait">判定中…</span></div>
+<pre id="d2"></pre>
+</div>
+
+<div class="card">
+<h2>3. 直開きテスト（参考）</h2>
+<p style="font-size:12px"><a id="direct1" target="_blank" rel="noopener">site-app2-backend を直接開く</a> / <a id="direct2" target="_blank" rel="noopener">site-pdfdrop を直接開く</a><br>直接開きで cb({"genkoProbe":true,...}) が出ればGAS自体は教室を許可しています。</p>
+</div>
+
+<script>
+(function(){
+  var TOKEN='e6135dfd707ab9a6916635fa';
+  var URL1='https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
+  var URL2='https://script.google.com/a/macros/hori-shota.com/s/AKfycbwj7qTaMDmKGa-KTEEwa2jcP7wtZ8xh_rVMANzfwKapz5u8tThqjxc2pQsbN-lAWU5L7Q/exec';
+  document.getElementById('url1').textContent=URL1+'?probe=1&token='+TOKEN+'&callback=...';
+  document.getElementById('url2').textContent=URL2+'?probe=1&token='+TOKEN+'&callback=...';
+  document.getElementById('direct1').href=URL1+'?probe=1&token='+TOKEN+'&callback=cb';
+  document.getElementById('direct2').href=URL2+'?probe=1&token='+TOKEN+'&callback=cb';
+
+  function setBadge(el, ok){ el.className='badge '+(ok?'ok':'ng'); el.textContent=ok?'成功':'失敗'; }
+  function fmt(o){ try{ return JSON.stringify(o,null,2);}catch(e){ return String(o);} }
+
+  function probeJsonp(base, cb){
+    var url=base+'?probe=1&token='+encodeURIComponent(TOKEN);
+    var start=Date.now();
+    return new Promise(function(resolve){
+      var s=document.createElement('script');
+      var done=false;
+      var timer=setTimeout(function(){ if(done) return; done=true; s.remove(); resolve({ok:false, via:'jsonp', error:'timeout', ms:Date.now()-start, raw:null}); },5000);
+      var name='__dbg'+Date.now()+Math.random().toString(36).slice(2);
+      window[name]=function(res){
+        if(done) return;
+        done=true;
+        clearTimeout(timer);
+        s.remove();
+        try{ delete window[name]; }catch(e){ window[name]=undefined; }
+        resolve({ok:true, via:'jsonp', ms:Date.now()-start, raw:res});
+      };
+      s.onerror=function(){
+        if(done) return;
+        done=true;
+        clearTimeout(timer);
+        s.remove();
+        resolve({ok:false, via:'jsonp', error:'onerror', ms:Date.now()-start, raw:null});
+      };
+      s.src=url+'&callback='+name+'&t='+Date.now();
+      document.head.appendChild(s);
+    });
+  }
+  function probeIframe(base){
+    var url=base+'?probe=1&token='+encodeURIComponent(TOKEN);
+    var start=Date.now();
+    return new Promise(function(resolve){
+      var iframe=document.createElement('iframe');
+      iframe.style.display='none';
+      iframe.src=url+'&t='+Date.now();
+      var done=false;
+      var timer=setTimeout(function(){ if(done) return; done=true; iframe.remove(); resolve({ok:false, via:'iframe', error:'timeout', ms:Date.now()-start, raw:null}); },4000);
+      function onMsg(e){
+        if(!e.data||!e.data.genkoProbe) return;
+        var res=e.data.payload||e.data;
+        if(done) return;
+        done=true;
+        clearTimeout(timer);
+        window.removeEventListener('message',onMsg);
+        iframe.remove();
+        resolve({ok:true, via:'iframe', ms:Date.now()-start, raw:res});
+      }
+      window.addEventListener('message',onMsg);
+      document.body.appendChild(iframe);
+      iframe.onerror=function(){
+        if(done) return;
+        done=true;
+        clearTimeout(timer);
+        window.removeEventListener('message',onMsg);
+        iframe.remove();
+        resolve({ok:false, via:'iframe', error:'onerror', ms:Date.now()-start, raw:null});
+      };
+    });
+  }
+  async function runOne(base, sJ,tJ,rJ,sI,tI,rI,fId,dId){
+    var j=await probeJsonp(base);
+    document.getElementById(sJ).textContent=j.ok?'成功':'失敗';
+    document.getElementById(sJ).className='badge '+(j.ok?'ok':'ng');
+    document.getElementById(tJ).textContent='('+j.ms+'ms via '+j.via+(j.error?' '+j.error:'')+')';
+    document.getElementById(rJ).textContent=j.raw?fmt(j.raw):'(なし) error='+j.error;
+    var i;
+    if(j.ok){
+      document.getElementById(sI).textContent='スキップ';
+      document.getElementById(sI).className='badge ok';
+      document.getElementById(tI).textContent='(JSONP成功のためiframe未実行)';
+      document.getElementById(rI).textContent='(スキップ)';
+      i=j;
+    }else{
+      document.getElementById(sI).textContent='実行中…';
+      i=await probeIframe(base);
+      document.getElementById(sI).textContent=i.ok?'成功':'失敗';
+      document.getElementById(sI).className='badge '+(i.ok?'ok':'ng');
+      document.getElementById(tI).textContent='('+i.ms+'ms via '+i.via+(i.error?' '+i.error:'')+')';
+      document.getElementById(rI).textContent=i.raw?fmt(i.raw):'(なし) error='+i.error;
+    }
+    var fin=document.getElementById(fId);
+    var det=document.getElementById(dId);
+    var r=i.ok?i:j;
+    if(!r||!r.raw||!r.raw.genkoProbe){ fin.textContent='ログインを促す表示（is-warn）'; fin.className='badge ng'; det.textContent='GASから genkoProbe が返りませんでした。token不一致、デプロイ未更新、またはサードパーティCookieブロックでタイムアウトの可能性。'; }
+    else if(!r.raw.ok){ fin.textContent='エラー（is-warn）'; fin.className='badge ng'; det.textContent=fmt(r.raw); }
+    else if(!r.raw.allowed){ fin.textContent='教室外アカウント（is-out）'; fin.className='badge ng'; det.textContent=fmt(r.raw); }
+    else{
+      var isOwner=!!r.raw.is_owner;
+      fin.textContent=(isOwner?'先生アカウントでログイン中 ✅':'教室タブレットとしてログイン中 ✅')+'（is-ok）';
+      fin.className='badge ok';
+      det.textContent=fmt(r.raw);
+    }
+  }
+  runOne(URL1,'s1j','t1j','r1j','s1i','t1i','r1i','f1','d1');
+  runOne(URL2,'s2j','t2j','r2j','s2i','t2i','r2i','f2','d2');
+})();
+</script>
+</body>
+</html>
