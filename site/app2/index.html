@@ -1161,10 +1161,10 @@
         loadSavedList();
       }
 
-      console.log('before Promise.all loadFormMap/loadInvert');
+      console.log('before Promise.all loadFormMap/loadInvert isAllowed',IS_ALLOWED,'isOwner',IS_OWNER);
       applyZoom();
       applyProbeToUI();
-      Promise.all([loadFormMap(), loadInvert()]).then(()=>console.log('Promise.all done')).catch((e) => {console.error('Promise.all fail',e.message)});
+      Promise.all([loadFormMap(), loadInvert()]).then(()=>console.log('Promise.all done FORM_MAP',Object.keys(window.FORM_MAP||{}).length,'INV',Object.keys(window.INV||{}).length)).catch((e) => {console.error('Promise.all fail',e.message)});
     });
   </script>
 </body>
