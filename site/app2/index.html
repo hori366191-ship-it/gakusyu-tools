@@ -853,11 +853,11 @@
 
       function loadFormMap() {
         if (FORM_MAP) return Promise.resolve();
-        return callServer('getFormMap').then(d => { FORM_MAP = d; }).catch(() => { FORM_MAP = {}; });
+        return callServer('getFormMap').then(d => { FORM_MAP = d; window.FORM_MAP = d; }).catch(() => { FORM_MAP = {}; window.FORM_MAP = {}; });
       }
       function loadInvert() {
         if (INV) return Promise.resolve();
-        return callServer('getDICTIONARY').then(d => { INV = d; }).catch(() => { INV = {}; });
+        return callServer('getDICTIONARY').then(d => { INV = d; window.INV = d; }).catch(() => { INV = {}; window.INV = {}; });
       }
 
       function getWordAtPoint(x, y) {
