@@ -201,12 +201,118 @@
             text-decoration: underline;
         }
 
-        /* 右側メインコンテンツ */
-        #main-content {
+        /* ▼▼▼ 新レイアウト：トップバー + 右ペインラッパー ▼▼▼ */
+        #app-layout {
             margin-left: 240px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            min-width: 0;
+        }
+        #app1-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+        .topbar__left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        #topbar-title {
+            font-weight: 700;
+            color: #005a9c;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 36vw;
+            font-size: 1em;
+        }
+        #app1-topbar .topbar__right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+        /* トップバー内のボタンはコンパクトな矩形に（FABの丸・fixedを無効化） */
+        #app1-topbar #menu-toggle-button,
+        #app1-topbar #memorize-toggle-button,
+        #app1-topbar #search-toggle-button,
+        #app1-topbar #font-increase-button,
+        #app1-topbar #font-decrease-button {
+            position: static !important;
+            width: 38px !important;
+            height: 36px !important;
+            border-radius: 6px !important;
+            font-size: 0.95em !important;
+            flex-shrink: 0;
+        }
+        #app1-topbar #menu-toggle-button {
+            display: none;
+            width: 36px !important;
+        }
+        /* 検索スロット：バー中央で展開 */
+        #app1-topbar #search-container {
+            position: static !important;
+            top: auto !important;
+            right: auto !important;
+            left: auto !important;
+            transform: none !important;
+            width: auto !important;
+            max-width: none !important;
+            flex: 1 1 260px;
+            margin: 0 4px;
+            border-radius: 8px !important;
+            padding: 4px 10px !important;
+        }
+        #app1-topbar #search-container.hidden {
+            display: none !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: none !important;
+        }
+        @media (max-width: 768px) {
+            #app-layout {
+                margin-left: 0;
+            }
+            #app1-topbar #menu-toggle-button {
+                display: flex !important;
+                justify-content: center;
+                align-items: center;
+            }
+            #topbar-title {
+                max-width: 42vw;
+                font-size: 0.95em;
+            }
+            #app1-topbar #search-container {
+                order: 10;
+                flex: 1 1 100%;
+                margin-top: 6px;
+            }
+        }
+
+        /* 右側メインコンテンツ（ラッパー内に移動） */
+        #main-content {
+            margin-left: 0;
             padding: 0 40px;
             max-width: 800px;
+            width: 100%;
             font-size: calc(16px * var(--app1-font-scale));
+            flex: 1;
+            min-width: 0;
+        }
+        #app-layout #main-content {
+            margin-left: 0;
         }
 
         #main-content h1,
@@ -604,7 +710,6 @@
 
 <body>
 
-    <button id="menu-toggle-button" aria-label="メニューを開閉">☰</button>
     <div id="menu-overlay"></div>
 
     <div id="menu-container">
@@ -613,25 +718,34 @@
         </div>
     </div>
 
-    <button id="memorize-toggle-button" title="暗記モード ON/OFF">暗</button>
-    <button id="search-toggle-button" title="検索を開く">🔍</button>
-    <button id="font-increase-button" type="button" aria-label="文字を大きくする" title="文字を大きく (80%〜150%)">A+</button>
-    <button id="font-decrease-button" type="button" aria-label="文字を小さくする" title="文字を小さく (80%〜150%)">A-</button>
+    <div id="app-layout">
+        <header id="app1-topbar">
+            <div class="topbar__left">
+                <button id="menu-toggle-button" aria-label="メニューを開閉">☰</button>
+                <span id="topbar-title">公式・暗記辞典</span>
+            </div>
+            <div id="search-container" class="hidden">
+                <input type="text" id="search-input" placeholder="検索...">
+                <span id="search-count">0/0</span>
+                <button id="search-prev-button" title="前へ">▲</button>
+                <button id="search-next-button" title="次へ">▼</button>
+                <button id="search-close-button" title="閉じる">×</button>
+            </div>
+            <div class="topbar__right">
+                <button id="font-decrease-button" type="button" aria-label="文字を小さくする" title="文字を小さく (80%〜150%)">A-</button>
+                <button id="font-increase-button" type="button" aria-label="文字を大きくする" title="文字を大きく (80%〜150%)">A+</button>
+                <button id="search-toggle-button" title="検索を開く">🔍</button>
+                <button id="memorize-toggle-button" title="暗記モード ON/OFF">暗</button>
+            </div>
+        </header>
 
-    <div id="search-container" class="hidden">
-        <input type="text" id="search-input" placeholder="検索...">
-        <span id="search-count">0/0</span>
-        <button id="search-prev-button" title="前へ">▲</button>
-        <button id="search-next-button" title="次へ">▼</button>
-        <button id="search-close-button" title="閉じる">×</button>
-    </div>
-
-    <main id="main-content">
+        <main id="main-content">
         <div id="content-body">
             <h1>公式・暗記辞典</h1>
             <p style="text-align: center; color: #555;">左のメニューから表示したい項目を選択してください。</p>
         </div>
     </main>
+    </div>
 
     <script>
         // ▼▼▼ Pages静的版: GASではなく bundle.json を利用 ▼▼▼
@@ -1038,9 +1152,28 @@
         }
 
         /**
-         * 現在表示しているコンテンツに対応するメニューリンクをハイライトする
-         * @param {string} currentId - 現在のファイルID
-         */
+          * トップバーのタイトルを更新する（文書名連動）
+          * @param {string} fileId
+          */
+        function updateTopbarTitle(fileId) {
+            const el = document.getElementById('topbar-title');
+            if (!el) return;
+            if (!fileId) {
+                el.textContent = '公式・暗記辞典';
+                document.title = '公式・暗記辞典';
+                return;
+            }
+            const item = (currentBundle && currentBundle.files.find(f => f.id === fileId))
+                || markdownFiles.find(f => f.id === fileId);
+            const name = item ? item.name.replace(/\.md$/, '') : '公式・暗記辞典';
+            el.textContent = name;
+            document.title = name + ' - 公式・暗記辞典';
+        }
+
+        /**
+          * 現在表示しているコンテンツに対応するメニューリンクをハイライトする
+          * @param {string} currentId - 現在のファイルID
+          */
         function activateCurrentMenuLink(currentId) {
             const menuLinks = document.querySelectorAll('#menu-container a');
             menuLinks.forEach(link => {
@@ -1049,6 +1182,7 @@
                     link.classList.add('active');
                 }
             });
+            updateTopbarTitle(currentId);
         }
 
         /**

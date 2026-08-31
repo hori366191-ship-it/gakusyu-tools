@@ -536,6 +536,17 @@ html[data-theme="pop"] #search-container {
   border-radius: var(--radius-sm) !important;
   box-shadow: var(--shadow-subtle) !important;
 }
+html[data-theme="pop"] #app1-topbar {
+  background: var(--color-frost-white) !important;
+  border-bottom: 1.5px solid var(--color-charcoal-ink) !important;
+}
+html[data-theme="pop"] #topbar-title {
+  color: var(--color-charcoal-ink) !important;
+  font-family: var(--font-jp-mono) !important;
+}
+html[data-theme="pop"] #app-layout {
+  background: var(--color-cream-paper) !important;
+}
 html[data-theme="pop"] #main-content {
   background: var(--color-cream-paper);
 }
