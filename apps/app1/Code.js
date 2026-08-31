@@ -25,9 +25,9 @@
  *   トリガーは不要。
  */
 
-// ▼▼▼▼▼【設定】MDファイル置き場の Drive フォルダ ID ▼▼▼▼▼
-const DRIVE_FOLDER_ID = '1zlwQWpn8xBO8EffxoiovjOLiYJVXbmIW';
-// ▲▲▲▲▲ 設定ここまで ▲▲▲▲▲
+// ▼▼▼▼▼【設定】MDファイル置き場の Drive フォルダ ID（Script Properties 必須） ▼▼▼▼▼
+const DRIVE_FOLDER_ID = PropertiesService.getScriptProperties().getProperty('DRIVE_FOLDER_ID') || 'YOUR_DRIVE_FOLDER_ID';
+// ▲▲▲▲▲ 設定ここまで（Script Properties に DRIVE_FOLDER_ID を設定すること） ▲▲▲▲▲
 
 // ▼▼▼▼▼【設定】キャッシュ（応答速度の改善用） ▼▼▼▼▼
 // ファイル一覧のキャッシュ時間(秒)。長いほど速いが、新しいファイルの反映が遅れる
