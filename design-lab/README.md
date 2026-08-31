@@ -46,6 +46,12 @@ http://localhost:8000/design-lab/app8/
 3. フォントは OFL の代替を使う（Aeonik Mono → `M PLUS 1 Code` 等）
 4. `prefers-reduced-motion` では影の移動を無効化（`site/index.html:361` と同作法）
 
+## 新規アプリ作成時の注意
+
+- 既存テーマ（現状は `標準` / `ポップ`）すべての分のスタイルを作らなければいけないが、追加テーマ分の作成は最優先ではない
+- まずは `標準` テーマで動作させ、`design-lab/app10/` 等で試作してから `site/themes/motherduck.css` 等へ追記して移植する
+- 1つの `app` に対して `site/appN/index.html` と `site/appN/favicon.svg` / `site/tokens` / `site/themes` の整合を取る
+
 ## Phase
 
 - Phase 0: 足場（本README + 複製 + トークン）
