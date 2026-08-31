@@ -322,6 +322,26 @@ html[data-theme="pop"] #loadMoreBtn {
   box-shadow: var(--shadow-subtle-sm) !important;
   font-family: var(--font-jp-mono) !important;
 }
+/* app2: history lines & dict close button — override inline #00ff00 */
+html[data-theme="pop"] #textViewer > div[style*="border-top"] {
+  border-top: 1.5px solid var(--color-charcoal-ink) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="pop"] #textViewer > div > div[style*="border-left"] {
+  border-left: 1.5px solid var(--color-charcoal-ink) !important;
+}
+html[data-theme="pop"] #close-dict-btn {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-jp-mono) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="pop"] #close-dict-btn:hover {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+}
 @media (orientation: portrait) {
   html[data-theme="pop"] #form-container { border-bottom: 1.5px solid var(--color-charcoal-ink) !important; }
 }
