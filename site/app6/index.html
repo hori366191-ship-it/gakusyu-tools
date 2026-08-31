@@ -234,6 +234,7 @@ select:disabled{opacity:.5;cursor:not-allowed}
 <script>
 (function(){
 "use strict";
+  function cf(s){ var isPop=document.documentElement.getAttribute('data-theme')==='pop'; if(isPop){ var r=s.replace(/"Noto Serif JP"[^,]*,?/g,'"M PLUS 1 Code", "BIZ UDGothic", ').replace(/,\s*,/g,',').replace(/,\s*serif/,'').replace(/Georgia[^,]*,?/g,'').replace(/"Yu[^\"]*"[^,]*,?/g,'').trim().replace(/,\s*$/,''); if(r.indexOf('monospace')===-1) r+=', monospace'; return r; } return s; }
 var $=function(id){return document.getElementById(id);};
 var $$=function(sel){return Array.prototype.slice.call(document.querySelectorAll(sel));};
 
@@ -364,7 +365,7 @@ function dampedRange(target, init){
 function drawGrid(c,xa,xb,ya,yb,w,h){
   c.save();
   c.strokeStyle='rgba(23,32,52,.08)';c.lineWidth=1;
-  c.font='10.5px "Noto Serif JP",serif';
+  c.font=cf('10.5px "Noto Serif JP",serif');
   c.fillStyle='rgba(86,92,102,.8)';
   c.textAlign='left';c.textBaseline='top';
   var sx=niceStep((xb-xa)/5),sy=niceStep((yb-ya)/5);

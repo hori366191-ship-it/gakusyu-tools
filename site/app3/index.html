@@ -282,6 +282,7 @@ select:focus{outline:1px solid var(--gold);outline-offset:1px}
 <script>
 (function(){
 'use strict';
+  function cf(s){ var isPop=document.documentElement.getAttribute('data-theme')==='pop'; if(isPop){ var r=s.replace(/"Noto Serif JP"[^,]*,?/g,'"M PLUS 1 Code", "BIZ UDGothic", ').replace(/,\s*,/g,',').replace(/,\s*serif/,'').replace(/Georgia[^,]*,?/g,'').replace(/"Yu[^\"]*"[^,]*,?/g,'').trim().replace(/,\s*$/,''); if(r.indexOf('monospace')===-1) r+=', monospace'; return r; } return s; }
 var $=function(s){return document.querySelector(s);};
 var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
 var clamp=function(v,a,b){return v<a?a:(v>b?b:v);};
@@ -821,7 +822,7 @@ function drawGalton(){
   ctx.moveTo(bl-3,floorY+6);ctx.lineTo(br+3,floorY+6);
   ctx.stroke();
   ctx.fillStyle='rgba(23,32,52,0.45)';
-  ctx.font='11px "Noto Serif JP",Georgia,serif';
+  ctx.font=cf('11px "Noto Serif JP",Georgia,serif');
   ctx.textAlign='center';
   ctx.textBaseline='top';
   var stepL=Math.max(1,Math.ceil(g.nBins/13));
@@ -908,7 +909,7 @@ function drawRW(){
   ctx.moveTo(x0,floorY+6);ctx.lineTo(x1,floorY+6);
   ctx.stroke();
   ctx.fillStyle='rgba(23,32,52,0.45)';
-  ctx.font='11px "Noto Serif JP",Georgia,serif';
+  ctx.font=cf('11px "Noto Serif JP",Georgia,serif');
   ctx.textAlign='center';
   ctx.textBaseline='top';
   var stepL=8;

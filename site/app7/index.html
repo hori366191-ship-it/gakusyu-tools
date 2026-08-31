@@ -271,6 +271,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:22px;cursor:point
 <script>
 (function(){
 "use strict";
+  function cf(s){ var isPop=document.documentElement.getAttribute('data-theme')==='pop'; if(isPop){ var r=s.replace(/"Noto Serif JP"[^,]*,?/g,'"M PLUS 1 Code", "BIZ UDGothic", ').replace(/,\s*,/g,',').replace(/,\s*serif/,'').replace(/Georgia[^,]*,?/g,'').replace(/"Yu[^\"]*"[^,]*,?/g,'').trim().replace(/,\s*$/,''); if(r.indexOf('monospace')===-1) r+=', monospace'; return r; } return s; }
 var $=function(id){return document.getElementById(id);};
 var SYNODIC=29.5;
 var PHASES=[
@@ -460,9 +461,9 @@ function drawOrbitMoon(){
     var y = cy + i*18;
     ctxO.beginPath(); ctxO.moveTo(sunX+sunR+2, y); ctxO.lineTo(cx - earthR -6, y); ctxO.stroke();
   }
-  ctxO.fillStyle='#7c4a00'; ctxO.font='11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillStyle='#7c4a00'; ctxO.font=cf('11px "Noto Serif JP",serif'); ctxO.textAlign='center';
   ctxO.fillText('太陽', sunX, sunY+sunR+14);
-  ctxO.fillStyle='rgba(124,74,0,.55)'; ctxO.font='10px "Noto Serif JP",serif';
+  ctxO.fillStyle='rgba(124,74,0,.55)'; ctxO.font=cf('10px "Noto Serif JP",serif');
   ctxO.fillText('平行光線', sunX+ (cx-sunX)/2, cy - orbitR -14);
   ctxO.restore();
   ctxO.save();
@@ -472,7 +473,7 @@ function drawOrbitMoon(){
   // cardinal with halo
   ['北','南','西','東'].forEach(function(lbl,i){
     var pos=[ [cx, cy-orbitR-10], [cx, cy+orbitR+16], [cx-orbitR-16, cy+4], [cx+orbitR+16, cy+4] ][i];
-    ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='700 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font=cf('700 11px "Noto Serif JP",serif'); ctxO.textAlign='center';
     ctxO.strokeText(lbl, pos[0], pos[1]);
     ctxO.fillStyle='rgba(31,47,70,.88)'; ctxO.fillText(lbl, pos[0], pos[1]);
   });
@@ -480,7 +481,7 @@ function drawOrbitMoon(){
   ctxO.beginPath(); ctxO.arc(cx,cy,orbitR+10, -Math.PI*0.82, -Math.PI*0.68); ctxO.stroke();
   ctxO.beginPath(); ctxO.moveTo(cx+ orbitR*Math.cos(-Math.PI*0.68), cy+ orbitR*Math.sin(-Math.PI*0.68)); ctxO.lineTo(cx+ orbitR*Math.cos(-Math.PI*0.68)-5, cy+ orbitR*Math.sin(-Math.PI*0.68)-6); ctxO.stroke();
   ctxO.beginPath(); ctxO.moveTo(cx+ orbitR*Math.cos(-Math.PI*0.68), cy+ orbitR*Math.sin(-Math.PI*0.68)); ctxO.lineTo(cx+ orbitR*Math.cos(-Math.PI*0.68)+1, cy+ orbitR*Math.sin(-Math.PI*0.68)-7); ctxO.stroke();
-  ctxO.font='10px "Noto Serif JP",serif'; ctxO.fillStyle='rgba(31,47,70,.5)';
+  ctxO.font=cf('10px "Noto Serif JP",serif'); ctxO.fillStyle='rgba(31,47,70,.5)';
   ctxO.fillText('公転（反時計回り）', cx+ orbitR*0.68, cy - orbitR*0.68);
   ctxO.restore();
   var theta = state.age/SYNODIC*2*Math.PI;
@@ -503,9 +504,9 @@ function drawOrbitMoon(){
   ctxO.setLineDash([]);
   ctxO.fillStyle='#ef4444'; ctxO.beginPath(); ctxO.arc(cx, cy, 3.2,0,Math.PI*2); ctxO.fill();
   ctxO.strokeStyle='rgba(255,255,255,.9)'; ctxO.lineWidth=1; ctxO.stroke();
-  ctxO.fillStyle='#ef4444'; ctxO.font='700 8px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillStyle='#ef4444'; ctxO.font=cf('700 8px "Noto Serif JP",serif'); ctxO.textAlign='center';
   ctxO.fillText('北極', cx, cy-6);
-  ctxO.fillStyle='rgba(239,68,68,.65)'; ctxO.font='8px "Noto Serif JP",serif';
+  ctxO.fillStyle='rgba(239,68,68,.65)'; ctxO.font=cf('8px "Noto Serif JP",serif');
   ctxO.fillText('緯度35°', cx+latR+6, cy+4);
   var obsAng = (360 - state.time*15) * Math.PI/180;
   var obsX = cx + latR*Math.cos(obsAng), obsY = cy + latR*Math.sin(obsAng);
@@ -515,7 +516,7 @@ function drawOrbitMoon(){
   ctxO.strokeStyle='#b45309'; ctxO.lineWidth=1;
   ctxO.beginPath(); ctxO.moveTo(obsX+ax*2, obsY+ay*2); ctxO.lineTo(obsX+ax*10, obsY+ay*10); ctxO.stroke();
   ctxO.beginPath(); ctxO.moveTo(obsX+ax*6 - ay*4, obsY+ay*6 + ax*4); ctxO.lineTo(obsX+ax*10, obsY+ay*10); ctxO.lineTo(obsX+ax*6 + ay*4, obsY+ay*6 - ax*4); ctxO.stroke();
-  ctxO.fillStyle='#1f2f46'; ctxO.font='600 12px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillStyle='#1f2f46'; ctxO.font=cf('600 12px "Noto Serif JP",serif'); ctxO.textAlign='center';
   ctxO.fillText('地球', cx, cy+5);
   if(state.ghost){
     PHASES.forEach(function(p){
@@ -526,7 +527,7 @@ function drawOrbitMoon(){
       ctxO.globalAlpha=0.18;
       ctxO.fillStyle='#fef9c3'; ctxO.strokeStyle='rgba(31,47,70,.35)'; ctxO.lineWidth=0.8;
       ctxO.beginPath(); ctxO.arc(mx,my,9,0,Math.PI*2); ctxO.fill(); ctxO.stroke();
-      ctxO.globalAlpha=0.55; ctxO.fillStyle='rgba(31,47,70,.55)'; ctxO.font='9px "Noto Serif JP",serif'; ctxO.textAlign='center';
+      ctxO.globalAlpha=0.55; ctxO.fillStyle='rgba(31,47,70,.55)'; ctxO.font=cf('9px "Noto Serif JP",serif'); ctxO.textAlign='center';
       ctxO.fillText(p.name, mx, my+9+10);
       ctxO.restore();
     });
@@ -544,7 +545,7 @@ function drawOrbitMoon(){
   var ahx=cx+arcR*Math.cos(ang), ahy=cy+arcR*Math.sin(ang);
   ctxO.beginPath(); ctxO.moveTo(ahx,ahy); ctxO.lineTo(ahx-7*Math.cos(ang-0.35), ahy-7*Math.sin(ang-0.35)); ctxO.stroke();
   ctxO.beginPath(); ctxO.moveTo(ahx,ahy); ctxO.lineTo(ahx-7*Math.cos(ang+0.35), ahy-7*Math.sin(ang+0.35)); ctxO.stroke();
-  ctxO.fillStyle='rgba(176,138,62,.95)'; ctxO.font='11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillStyle='rgba(176,138,62,.95)'; ctxO.font=cf('11px "Noto Serif JP",serif'); ctxO.textAlign='center';
   var midAng = (Math.PI + ang)/2;
   if(theta>0.25 && theta<6.0){
     var tx=cx+(arcR+14)*Math.cos(midAng), ty=cy+(arcR+14)*Math.sin(midAng);
@@ -569,13 +570,13 @@ function drawOrbitMoon(){
     ctxO.strokeStyle='rgba(120,90,30,.55)'; ctxO.lineWidth=0.9; ctxO.stroke();
     ctxO.fillStyle='rgba(120,90,30,.30)'; ctxO.beginPath(); ctxO.arc(crX+1, crY-0.5, 1.2,0,Math.PI*2); ctxO.fill();
   }
-  ctxO.fillStyle='#1f2f46'; ctxO.font='600 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillStyle='#1f2f46'; ctxO.font=cf('600 10px "Noto Serif JP",serif'); ctxO.textAlign='center';
   ctxO.fillText('月', mx, my - moonR -8);
   if(state.eclipse){
     var distNew = Math.min(state.age, SYNODIC-state.age);
     var distFull = Math.abs(state.age-14.8);
     ctxO.save();
-    ctxO.font='11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.font=cf('11px "Noto Serif JP",serif'); ctxO.textAlign='center';
     if(distNew<1.0){
       ctxO.fillStyle='rgba(185,28,28,.85)';
       ctxO.fillText('日食の位置（一直線）', mx, my - moonR -18);
@@ -585,7 +586,7 @@ function drawOrbitMoon(){
         ctxO.fillStyle='rgba(15,31,58,.32)';
         ctxO.beginPath(); ctxO.arc(cx,cy,8,0,Math.PI*2); ctxO.fill();
       }
-      ctxO.fillStyle='rgba(185,28,28,.55)'; ctxO.font='10px "Noto Serif JP",serif';
+      ctxO.fillStyle='rgba(185,28,28,.55)'; ctxO.font=cf('10px "Noto Serif JP",serif');
       ctxO.fillText('※実際は軌道が5°傾いているため毎回は起きません', W*0.5, H-10);
     } else if(distFull<1.0){
       ctxO.fillStyle='rgba(185,28,28,.85)';
@@ -599,10 +600,10 @@ function drawOrbitMoon(){
         ctxO.beginPath(); ctxO.arc(mx,my,moonR,0,Math.PI*2); ctxO.fill();
         ctxO.strokeStyle='rgba(185,28,28,.9)'; ctxO.lineWidth=1.5; ctxO.stroke();
       }
-      ctxO.fillStyle='rgba(185,28,28,.55)'; ctxO.font='10px "Noto Serif JP",serif';
+      ctxO.fillStyle='rgba(185,28,28,.55)'; ctxO.font=cf('10px "Noto Serif JP",serif');
       ctxO.fillText('※実際は傾きで影を外れることがほとんど', W*0.5, H-10);
     } else {
-      ctxO.fillStyle='rgba(31,47,70,.55)'; ctxO.font='11px "Noto Serif JP",serif';
+      ctxO.fillStyle='rgba(31,47,70,.55)'; ctxO.font=cf('11px "Noto Serif JP",serif');
       ctxO.setLineDash([3,4]); ctxO.strokeStyle='rgba(185,28,28,.22)'; ctxO.lineWidth=1;
       ctxO.beginPath(); ctxO.moveTo(cx, cy- orbitR); ctxO.quadraticCurveTo(cx+18, cy, cx, cy+orbitR); ctxO.stroke();
       ctxO.setLineDash([]);
@@ -660,7 +661,7 @@ function drawOrbitConst(){
   ctxO.fillStyle='#facc15'; ctxO.beginPath(); ctxO.arc(cx,cy,sunR,0,Math.PI*2); ctxO.fill();
   ctxO.shadowBlur=0;
   ctxO.strokeStyle='rgba(180,130,0,.9)'; ctxO.lineWidth=1; ctxO.stroke();
-  ctxO.fillStyle='#7c4a00'; ctxO.font='11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillStyle='#7c4a00'; ctxO.font=cf('11px "Noto Serif JP",serif'); ctxO.textAlign='center';
   ctxO.fillText('太陽', cx, cy+sunR+12);
   ctxO.restore();
   // ecliptic orbit
@@ -675,7 +676,7 @@ function drawOrbitConst(){
   // earth
   ctxO.fillStyle='#60a5fa'; ctxO.beginPath(); ctxO.arc(ex,ey,earthR,0,Math.PI*2); ctxO.fill();
   ctxO.strokeStyle='#1e3a5a'; ctxO.lineWidth=1.2; ctxO.stroke();
-  ctxO.fillStyle='#fff'; ctxO.font='600 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.fillStyle='#fff'; ctxO.font=cf('600 10px "Noto Serif JP",serif'); ctxO.textAlign='center';
   ctxO.fillText('地球', ex, ey+4);
   // night side fan (visible sky direction opposite sun)
   var nightAng = earthTheta; // direction from earth away from sun (earth-sun vector)
@@ -719,7 +720,7 @@ function drawOrbitConst(){
     ctxO.beginPath(); ctxO.moveTo(x2,y2); ctxO.lineTo(x2-6*Math.cos(a-0.4), y2-6*Math.sin(a-0.4)); ctxO.stroke();
     ctxO.beginPath(); ctxO.moveTo(x2,y2); ctxO.lineTo(x2-6*Math.cos(a+0.4), y2-6*Math.sin(a+0.4)); ctxO.stroke();
     var lx=x2+Math.cos(a)*8, ly=y2+Math.sin(a)*8+3;
-    ctxO.strokeStyle='rgba(255,255,255,.95)'; ctxO.lineWidth=3; ctxO.font='700 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.strokeStyle='rgba(255,255,255,.95)'; ctxO.lineWidth=3; ctxO.font=cf('700 10px "Noto Serif JP",serif'); ctxO.textAlign='center';
     ctxO.strokeText(d.label, lx, ly);
     ctxO.fillStyle=d.col; ctxO.fillText(d.label, lx, ly);
   });
@@ -759,14 +760,14 @@ function drawOrbitConst(){
     spreadBeltLabels(labs);
     labs.forEach(function(L){
       // 名前（白縁）
-      ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='500 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+      ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font=cf('500 11px "Noto Serif JP",serif'); ctxO.textAlign='center';
       ctxO.strokeText(L.name, L.x, L.y);
       ctxO.fillStyle='rgba(31,47,70,.88)';
       ctxO.fillText(L.name, L.x, L.y);
     });
-    ctxO.fillStyle='#1f2f46'; ctxO.font='600 11px "Noto Serif JP",serif'; ctxO.textAlign='left';
+    ctxO.fillStyle='#1f2f46'; ctxO.font=cf('600 11px "Noto Serif JP",serif'); ctxO.textAlign='left';
     ctxO.fillText(curSeason.name+'の星座: '+curSeason.consts, 10, H-10);
-    ctxO.fillStyle='rgba(31,47,70,.58)'; ctxO.font='8.5px "Noto Serif JP",serif';
+    ctxO.fillStyle='rgba(31,47,70,.58)'; ctxO.font=cf('8.5px "Noto Serif JP",serif');
     ctxO.fillText('※ 星座の間隔は実際の赤経に基づきます（等間隔ではありません）。', 10, H-24);
   } else {
     // 簡易モード: 等間隔30°
@@ -778,19 +779,19 @@ function drawOrbitConst(){
     });
     spreadBeltLabels(labs);
     labs.forEach(function(L){
-      ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font='500 11px "Noto Serif JP",serif'; ctxO.textAlign='center';
+      ctxO.strokeStyle='rgba(251,250,247,.95)'; ctxO.lineWidth=3; ctxO.font=cf('500 11px "Noto Serif JP",serif'); ctxO.textAlign='center';
       ctxO.strokeText(L.name, L.x, L.y);
       ctxO.fillStyle='rgba(31,47,70,.88)';
       ctxO.fillText(L.name, L.x, L.y);
     });
-    ctxO.fillStyle='#1f2f46'; ctxO.font='600 11px "Noto Serif JP",serif'; ctxO.textAlign='left';
+    ctxO.fillStyle='#1f2f46'; ctxO.font=cf('600 11px "Noto Serif JP",serif'); ctxO.textAlign='left';
     ctxO.fillText(curSeason.name+'の星座: '+curSeason.consts, 10, H-10);
-    ctxO.fillStyle='rgba(31,47,70,.58)'; ctxO.font='8.5px "Noto Serif JP",serif';
+    ctxO.fillStyle='rgba(31,47,70,.58)'; ctxO.font=cf('8.5px "Noto Serif JP",serif');
     ctxO.fillText('※ 星座の位置・方角は学習用の簡易表示です。', 10, H-24);
   }
   ctxO.restore();
   // 「公転軌道」＋季節ラベル — 地球や注釈に隠れないよう最前面に描画（キャプションは軌道内側・太陽ラベルの下）
-  ctxO.strokeStyle='rgba(251,250,247,.9)'; ctxO.lineWidth=3; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+  ctxO.strokeStyle='rgba(251,250,247,.9)'; ctxO.lineWidth=3; ctxO.font=cf('10px "Noto Serif JP",serif'); ctxO.textAlign='center';
   ctxO.strokeText('公転軌道', cx, cy + sunR + 28);
   ctxO.fillStyle='rgba(180,130,0,.55)'; ctxO.fillText('公転軌道', cx, cy + sunR + 28);
   var seasons=[{d:80,label:'春分',deg:270},{d:172,label:'夏至',deg:180},{d:266,label:'秋分',deg:90},{d:356,label:'冬至',deg:0}];
@@ -798,7 +799,7 @@ function drawOrbitConst(){
     var a=s.deg*Math.PI/180;
     var lr=orbitR+30;
     var x=cx+lr*Math.cos(a), y=cy+lr*Math.sin(a);
-    ctxO.strokeStyle='rgba(251,250,247,.9)'; ctxO.lineWidth=3; ctxO.font='700 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
+    ctxO.strokeStyle='rgba(251,250,247,.9)'; ctxO.lineWidth=3; ctxO.font=cf('700 10px "Noto Serif JP",serif'); ctxO.textAlign='center';
     ctxO.strokeText(s.label, x, y + 4);
     ctxO.fillStyle='rgba(31,47,70,.88)'; ctxO.fillText(s.label, x, y + 4);
   });
@@ -855,7 +856,7 @@ function drawSkyMoon(){
     ctxS.fillText(name, x, groundY+34);
   });
   ctxS.fillStyle='rgba(250,204,21,.95)'; ctxS.beginPath(); ctxS.moveTo(SW*0.5, groundY+10); ctxS.lineTo(SW*0.5-6, groundY+4); ctxS.lineTo(SW*0.5+6, groundY+4); ctxS.closePath(); ctxS.fill();
-  ctxS.fillStyle='rgba(255,255,255,.9)'; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='center';
+  ctxS.fillStyle='rgba(255,255,255,.9)'; ctxS.font=cf('600 10px "Noto Serif JP",serif'); ctxS.textAlign='center';
   ctxS.fillText('正面：'+azName(viewAz), SW*0.5, groundY+8);
   var moonR = Math.min(SW,SH)*0.16;
   if(SW<500) moonR = Math.min(SW,SH)*0.18;
@@ -888,7 +889,7 @@ function drawSkyMoon(){
     ctxS.setLineDash([4,4]); ctxS.strokeStyle='rgba(176,138,62,.35)'; ctxS.lineWidth=1.1;
     ctxS.beginPath(); ctxS.arc(SW*0.5 + (haSky>0? SW*0.34 : -SW*0.34), groundYForMoon+10, moonR*0.9,0,Math.PI*2); ctxS.stroke();
     ctxS.setLineDash([]);
-    ctxS.fillStyle='rgba(255,255,255,.45)'; ctxS.font='11px "Noto Serif JP",serif'; ctxS.textAlign='center';
+    ctxS.fillStyle='rgba(255,255,255,.45)'; ctxS.font=cf('11px "Noto Serif JP",serif'); ctxS.textAlign='center';
     ctxS.fillText('地平線の下', SW*0.5, groundYForMoon - 10);
     ctxS.restore();
   }
@@ -904,34 +905,34 @@ function drawSkyMoon(){
   var ph = phaseOf(state.age);
   ctxS.save();
   ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.textAlign='left';
-  ctxS.font='700 14px "Noto Serif JP",serif'; ctxS.strokeText(ph.name, 12, 22);
+  ctxS.font=cf('700 14px "Noto Serif JP",serif'); ctxS.strokeText(ph.name, 12, 22);
   ctxS.fillStyle='#ffffff'; ctxS.fillText(ph.name, 12, 22);
-  ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font='600 11px "Noto Serif JP",serif';
+  ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font=cf('600 11px "Noto Serif JP",serif');
   ctxS.strokeText('輝面率 '+fmtPct(ill)+' ・ '+ph.yomi, 12, 38);
   ctxS.fillStyle='rgba(255,255,255,.88)'; ctxS.fillText('輝面率 '+fmtPct(ill)+' ・ '+ph.yomi, 12, 38);
   var isWaxing = theta < Math.PI && ill>0.02 && ill<0.98;
   var isWaning = theta >= Math.PI && ill>0.02 && ill<0.98;
   ctxS.textAlign='right';
   if(isWaxing){
-    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font=cf('700 11px "Noto Serif JP",serif');
     ctxS.strokeText('右側が光る →', SW-12, 22);
     ctxS.fillStyle='#fef9c3'; ctxS.fillText('右側が光る →', SW-12, 22);
-    ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif';
+    ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font=cf('600 10px "Noto Serif JP",serif');
     ctxS.strokeText('太陽は西（右）側', SW-12, 38);
     ctxS.fillStyle='rgba(255,255,255,.88)'; ctxS.fillText('太陽は西（右）側', SW-12, 38);
   } else if(isWaning){
-    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font=cf('700 11px "Noto Serif JP",serif');
     ctxS.strokeText('← 左側が光る', SW-12, 22);
     ctxS.fillStyle='#fef9c3'; ctxS.fillText('← 左側が光る', SW-12, 22);
-    ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif';
+    ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font=cf('600 10px "Noto Serif JP",serif');
     ctxS.strokeText('太陽は東（左）側', SW-12, 38);
     ctxS.fillStyle='rgba(255,255,255,.88)'; ctxS.fillText('太陽は東（左）側', SW-12, 38);
   } else if(ill<0.02){
-    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font=cf('700 11px "Noto Serif JP",serif');
     ctxS.strokeText('見えない（太陽と同じ方向）', SW-12, 22);
     ctxS.fillStyle='rgba(255,255,255,.9)'; ctxS.fillText('見えない（太陽と同じ方向）', SW-12, 22);
   } else if(ill>0.98){
-    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 11px "Noto Serif JP",serif';
+    ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font=cf('700 11px "Noto Serif JP",serif');
     ctxS.strokeText('全体が光る', SW-12, 22);
     ctxS.fillStyle='#fef9c3'; ctxS.fillText('全体が光る', SW-12, 22);
   }
@@ -940,12 +941,12 @@ function drawSkyMoon(){
   var tr=transitHour(state.age), ri=(tr-6+24)%24, st=(tr+6)%24;
   ctxS.fillStyle='rgba(255,255,255,.14)'; ctxS.fillRect(barX, barY, barW, barH);
   var scale = function(h){ return barX + h/24*barW; };
-  ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font='9px "Noto Serif JP",serif'; ctxS.textAlign='center';
+  ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font=cf('9px "Noto Serif JP",serif'); ctxS.textAlign='center';
   ctxS.fillText('0時', scale(0), barY+12); ctxS.fillText('12時', scale(12), barY+12); ctxS.fillText('24時', scale(24)-10, barY+12);
   [{h:ri, col:'#60a5fa', lbl:'出'}, {h:tr, col:'#facc15', lbl:'南中'}, {h:st, col:'#f87171', lbl:'入り'}].forEach(function(m){
     var x=scale(m.h);
     ctxS.fillStyle=m.col; ctxS.beginPath(); ctxS.arc(x, barY+barH/2, 4,0,Math.PI*2); ctxS.fill();
-    ctxS.fillStyle='rgba(255,255,255,.85)'; ctxS.font='9px "Noto Serif JP",serif'; ctxS.textAlign='center';
+    ctxS.fillStyle='rgba(255,255,255,.85)'; ctxS.font=cf('9px "Noto Serif JP",serif'); ctxS.textAlign='center';
     ctxS.fillText(m.lbl, x, barY-6);
     ctxS.fillText(fmtTime(m.h), x, barY+22);
   });
@@ -953,7 +954,7 @@ function drawSkyMoon(){
   ctxS.fillStyle='rgba(255,255,255,.95)';
   ctxS.beginPath(); ctxS.moveTo(curX, barY-7); ctxS.lineTo(curX-5, barY-13); ctxS.lineTo(curX+5, barY-13); ctxS.closePath(); ctxS.fill();
   ctxS.strokeStyle='rgba(15,31,58,.9)'; ctxS.lineWidth=0.8; ctxS.stroke();
-  ctxS.fillStyle='rgba(255,255,255,.95)'; ctxS.font='600 9px "Noto Serif JP",serif'; ctxS.textAlign='center';
+  ctxS.fillStyle='rgba(255,255,255,.95)'; ctxS.font=cf('600 9px "Noto Serif JP",serif'); ctxS.textAlign='center';
   ctxS.fillText('今 '+fmtTime(state.time), curX, barY-15);
 }
 function azName(az){
@@ -990,7 +991,7 @@ function drawSkyConst(){
     ctxS.shadowBlur=0;
     // star name — small, less prominent than constellation name
     if(s.mag<0.5){
-      ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font='500 8px "Noto Serif JP",serif'; ctxS.textAlign='center';
+      ctxS.fillStyle='rgba(255,255,255,.55)'; ctxS.font=cf('500 8px "Noto Serif JP",serif'); ctxS.textAlign='center';
       ctxS.fillText(s.name, x, y-7);
     }
   });
@@ -1034,7 +1035,7 @@ function drawSkyConst(){
         y=groundY+22;
       }
       ctxS.globalAlpha = isVisible? 1 : 0.42;
-      ctxS.strokeStyle='rgba(15,23,42,.92)'; ctxS.lineWidth=4; ctxS.font='700 12px "Noto Serif JP",serif'; ctxS.textAlign='center';
+      ctxS.strokeStyle='rgba(15,23,42,.92)'; ctxS.lineWidth=4; ctxS.font=cf('700 12px "Noto Serif JP",serif'); ctxS.textAlign='center';
       ctxS.strokeText(c.name, x, y);
       ctxS.fillStyle= isVisible? (c.col.includes('250,204')? '#facc15' : '#93c5fd') : 'rgba(148,163,184,.85)';
       ctxS.fillText(c.name, x, y);
@@ -1067,7 +1068,7 @@ function drawSkyConst(){
       // draw vertical line at relAz = dAz
       var x=SW*0.5 + dAz/90*SW*0.38;
       ctxS.beginPath(); ctxS.moveTo(x, 14); ctxS.lineTo(x, groundY); ctxS.stroke();
-      ctxS.fillStyle='rgba(255,255,255,.35)'; ctxS.font='9px "Noto Serif JP",serif'; ctxS.textAlign='center';
+      ctxS.fillStyle='rgba(255,255,255,.35)'; ctxS.font=cf('9px "Noto Serif JP",serif'); ctxS.textAlign='center';
       var label=azName(absAz);
       ctxS.fillText(label, x, 14);
     }
@@ -1075,7 +1076,7 @@ function drawSkyConst(){
     for(var alt=30; alt<90; alt+=30){
       var y=groundY-8 - alt/90*(groundY*0.68);
       ctxS.beginPath(); ctxS.moveTo(SW*0.08, y); ctxS.lineTo(SW*0.92, y); ctxS.stroke();
-      ctxS.fillStyle='rgba(255,255,255,.25)'; ctxS.font='9px "Noto Serif JP",serif'; ctxS.textAlign='left';
+      ctxS.fillStyle='rgba(255,255,255,.25)'; ctxS.font=cf('9px "Noto Serif JP",serif'); ctxS.textAlign='left';
       ctxS.fillText(alt+'°', SW*0.92+4, y+3);
     }
   }
@@ -1110,23 +1111,23 @@ function drawSkyConst(){
   });
   // center indicator
   ctxS.fillStyle='rgba(250,204,21,.95)'; ctxS.beginPath(); ctxS.moveTo(SW*0.5, groundY+10); ctxS.lineTo(SW*0.5-6, groundY+4); ctxS.lineTo(SW*0.5+6, groundY+4); ctxS.closePath(); ctxS.fill();
-  ctxS.fillStyle='rgba(255,255,255,.72)'; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='center';
+  ctxS.fillStyle='rgba(255,255,255,.72)'; ctxS.font=cf('600 10px "Noto Serif JP",serif'); ctxS.textAlign='center';
   ctxS.fillText('正面：'+azName(state.viewAz), SW*0.5, groundY+8);
   // compass at top — more visible
-  ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font='700 12px "Noto Serif JP",serif'; ctxS.textAlign='left';
+  ctxS.strokeStyle='rgba(15,23,42,.85)'; ctxS.lineWidth=3; ctxS.font=cf('700 12px "Noto Serif JP",serif'); ctxS.textAlign='left';
   ctxS.strokeText(azName(state.viewAz)+'の空', 12, 22);
   ctxS.fillStyle='#ffffff'; ctxS.fillText(azName(state.viewAz)+'の空', 12, 22);
-  ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif';
+  ctxS.strokeStyle='rgba(15,23,42,.7)'; ctxS.lineWidth=2; ctxS.font=cf('600 10px "Noto Serif JP",serif');
   ctxS.strokeText('ドラッグで全方位（360°）を見回せます', 12, 38);
   ctxS.fillStyle='rgba(255,255,255,.85)'; ctxS.fillText('ドラッグで全方位（360°）を見回せます', 12, 38);
   // info: visible count
-  ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='right';
+  ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font=cf('600 10px "Noto Serif JP",serif'); ctxS.textAlign='right';
   ctxS.strokeText('視界内の星 '+visibleCount, SW-12, 22);
   ctxS.fillStyle='rgba(255,255,255,.9)'; ctxS.fillText('視界内の星 '+visibleCount, SW-12, 22);
   // north star hint if view includes north
   var polarAlt = raDecToAltAz(STARS[0].ra, STARS[0].dec, lst, LAT).alt;
   if(Math.abs(((0-state.viewAz+540)%360)-180)<95 && polarAlt>5){
-    ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font='600 10px "Noto Serif JP",serif'; ctxS.textAlign='right';
+    ctxS.strokeStyle='rgba(15,23,42,.75)'; ctxS.lineWidth=2; ctxS.font=cf('600 10px "Noto Serif JP",serif'); ctxS.textAlign='right';
     ctxS.strokeText('北極星 高度≈'+Math.round(polarAlt)+'°', SW-12, 38);
     ctxS.fillStyle='#93c5fd'; ctxS.fillText('北極星 高度≈'+Math.round(polarAlt)+'°', SW-12, 38);
   }

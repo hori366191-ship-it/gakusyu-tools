@@ -326,6 +326,7 @@ select:focus{outline:1px solid var(--gold);outline-offset:1px}
 <script>
 (function(){
 'use strict';
+  function cf(s){ var isPop=document.documentElement.getAttribute('data-theme')==='pop'; if(isPop){ var r=s.replace(/"Noto Serif JP"[^,]*,?/g,'"M PLUS 1 Code", "BIZ UDGothic", ').replace(/,\s*,/g,',').replace(/,\s*serif/,'').replace(/Georgia[^,]*,?/g,'').replace(/"Yu[^\"]*"[^,]*,?/g,'').trim().replace(/,\s*$/,''); if(r.indexOf('monospace')===-1) r+=', monospace'; return r; } return s; }
 var $=function(s){return document.querySelector(s);};
 var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
 var clamp=function(v,a,b){return v<a?a:(v>b?b:v);};
@@ -1455,7 +1456,7 @@ function drawDiag(){
   ctxC.stroke();
   ctxC.setLineDash([]);
   ctxC.fillStyle='rgba(32,36,44,.55)';
-  ctxC.font='12px "Noto Serif JP",serif';
+  ctxC.font=cf('12px "Noto Serif JP",serif');
   ctxC.textAlign='left';
   ctxC.textBaseline='alphabetic';
   ctxC.fillText(STRUCT_JP[CRY_STRUCT]+' · 対角線断面 (x=y 面)',14,CH-14);
@@ -1686,7 +1687,7 @@ function drawCry(now){
   var label=cryInfo?STRUCT_JP[CRY_STRUCT]:'';
   if(label){
     ctxC.fillStyle='rgba(32,36,44,.55)';
-    ctxC.font='12px "Noto Serif JP",serif';
+    ctxC.font=cf('12px "Noto Serif JP",serif');
     ctxC.textAlign='left';
     ctxC.textBaseline='alphabetic';
     ctxC.fillText(label+' · '+(cryState.expanded?'2×2×2 拡張':'単位格子'),14,CH-14);

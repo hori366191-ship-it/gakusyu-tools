@@ -242,6 +242,7 @@ select:disabled{opacity:.5;cursor:not-allowed}
 <script>
 (function(){
 "use strict";
+  function cf(s){ var isPop=document.documentElement.getAttribute('data-theme')==='pop'; if(isPop){ var r=s.replace(/"Noto Serif JP"[^,]*,?/g,'"M PLUS 1 Code", "BIZ UDGothic", ').replace(/,\s*,/g,',').replace(/,\s*serif/,'').replace(/Georgia[^,]*,?/g,'').replace(/"Yu[^\"]*"[^,]*,?/g,'').trim().replace(/,\s*$/,''); if(r.indexOf('monospace')===-1) r+=', monospace'; return r; } return s; }
 var $=function(id){return document.getElementById(id);};
 var T=function(id,v){$(id).textContent=v;};
 var clamp=function(v,a,b){return v<a?a:(v>b?b:v);};
@@ -1211,7 +1212,7 @@ function drawGallery(W,H){
       });
       renderFacesInto(faces,false,W,H,cx,cy,scale);
       ctx.fillStyle='rgba(23,32,52,.6)';
-      ctx.font='11px "M PLUS 1 Code","Yu Mincho",serif';
+      ctx.font=cf('11px "Noto Serif JP","Yu Mincho",serif');
       ctx.textAlign='center';
       ctx.fillText(''+(i+1),c*cellW+cellW/2,r*cellH+cellH-4);
       ctx.textAlign='left';
