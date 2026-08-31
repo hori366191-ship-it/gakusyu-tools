@@ -4,8 +4,8 @@
  * サードパーティCookieブロック/フィルタを回避しつつ ALLOWED_EMAILS 判定を維持する。
  *
  * Routes:
- *  /pdfdrop/*  -> site-pdfdrop  (YOUR_SCRIPT_ID...)
- *  /app2/*     -> site-app2-backend (YOUR_SCRIPT_ID...)
+ *  /pdfdrop/*  -> site-pdfdrop  (YOUR_SCRIPT_ID_site-pdfdrop...)
+ *  /app2/*     -> site-app2-backend (YOUR_SCRIPT_ID_site-app2-backend...)
  *  前方一致で /pdfdrop?probe=1... や /app2?action=getSavedTexts... を中継
  *  クエリとメソッド・ボディはそのまま転送、CORSヘッダを付与して返す。
  */

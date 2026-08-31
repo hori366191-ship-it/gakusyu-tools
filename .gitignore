@@ -13,3 +13,6 @@ desktop.ini
 
 # 機密情報ロードマップ（ローカル専用・コミットしない）
 ロードマップ_機密情報.md
+
+# clasp scriptId（機密列挙防止・個別管理）
+**/.clasp.json

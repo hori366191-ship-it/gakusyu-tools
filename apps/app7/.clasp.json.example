@@ -1,5 +1,5 @@
 {
-  "scriptId": "YOUR_SCRIPT_ID_portal",
+  "scriptId": "YOUR_SCRIPT_ID_app7",
   "rootDir": ".",
   "scriptExtensions": [
     ".js",
