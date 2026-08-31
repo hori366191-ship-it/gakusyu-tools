@@ -1,4 +1,4 @@
-# AGENTS.md — 作業ガイド
+﻿# AGENTS.md — 作業ガイド
 
 このリポジトリはGoogle Apps Script(GAS)製の学習ツール群(塾向け)を管理する。
 
@@ -24,7 +24,7 @@ apps/      … 旧GAS版（永久残置・11本・現行運用中）
 site/      … 新Pages版（正本・`hori366191-ship-it.github.io/gakusyu-tools/` で配信）
 ├── index.html, app1/, app2/, app3/..app9/, debug-probe.html, favicon.svg
 ├── app1/bundle.json, app1/favicon.svg … app9/favicon.svg（各アプリ個別、SVGのみ）
-├── tokens/motherduck.css, themes/motherduck.css, themes/theme.js … テーマ機構（標準/ポップ切替、永続化はlocalStorage）
+├── tokens/pop.css, themes/pop.css, themes/theme.js … テーマ機構（標準/ポップ切替、永続化はlocalStorage）
 └── site-src/app1/content/*.md … 辞典の正本（`site/app1/bundle.json` の生成元）
 site-gas/  … 新GAS2本（Pagesの不可視API）
 ├── site-pdfdrop/   (scriptId: YOUR_SCRIPT_ID_site-pdfdrop)
@@ -32,11 +32,11 @@ site-gas/  … 新GAS2本（Pagesの不可視API）
 site-worker/ … Cloudflare Workers プロキシ（site → GAS の中継・CORS付与）
 ├── worker.js, wrangler.toml
 design-lab/ … デザイン実験工房（Pages非配信・`site` に影響を与えずに試作）
-├── portal/, app1/..app9/ … `site/` の複製（MotherDuckテーマで常時表示）
-├── tokens/motherduck.css … Refero抽出の生トークン（編集しない）
-├── themes/motherduck.css … 塾適応版（ここだけを編集して試作）
+├── portal/, app1/..app9/ … `site/` の複製（Popテーマで常時表示）
+├── tokens/pop.css … Refero抽出の生トークン（編集しない）
+├── themes/pop.css … 塾適応版（ここだけを編集して試作）
 ├── font-lab.html … 和文フォント試着室（M PLUS 1 Code / BIZ UDGothic 等を比較）
-└── favicon-motherduck.svg … 直角・左下影の試作アイコン（`site` 本流は標準faviconに統一）
+└── favicon-pop.svg … 直角・左下影の試作アイコン（`site` 本流は標準faviconに統一）
 ```
 
 - 各フォルダに個別の `.clasp.json` を持つ(scriptId + rootDir ".")。**ルート直下に `.clasp.json` を作らないこと**(claspのclone/createはCWDに書き出すため、作成後に各フォルダへ移動する)
@@ -51,14 +51,14 @@ design-lab/ … デザイン実験工房（Pages非配信・`site` に影響を�
 ### `design-lab/` フォルダについて
 
 - `site/` の本流デザインを一切変えずに試作するための隔離工房。Pages配信対象外（`.github/workflows/pages.yml` は `site/` のみを配信）
-- `site/` を複製して `design-lab/portal/` / `design-lab/app1/` 等に配置し、`themes/motherduck.css` だけで見た目を上書きして検証。ローカルは `python -m http.server 8000` → `http://localhost:8000/design-lab/portal/` で確認
-- 本流 `site/` のデフォルトは従来通り。テーマ切替が必要になった段階で `design-lab/themes/motherduck.css` → `site/themes/motherduck.css` へ移植し、`site/index.html` の切替UI（`localStorage` 永続化）で有効化する
+- `site/` を複製して `design-lab/portal/` / `design-lab/app1/` 等に配置し、`themes/pop.css` だけで見た目を上書きして検証。ローカルは `python -m http.server 8000` → `http://localhost:8000/design-lab/portal/` で確認
+- 本流 `site/` のデフォルトは従来通り。テーマ切替が必要になった段階で `design-lab/themes/pop.css` → `site/themes/pop.css` へ移植し、`site/index.html` の切替UI（`localStorage` 永続化）で有効化する
 
 ### テーマ機構について
 
-- 実装: `site/themes/theme.js`（`localStorage: gakusyu-theme` + `?theme=` パラメータ、同期的に `html[data-theme]` を立てる）+ `site/themes/motherduck.css`（`html[data-theme="motherduck"]` 時のみ上書き）+ `site/tokens/motherduck.css`（Refero抽出の生トークン）
+- 実装: `site/themes/theme.js`（`localStorage: gakusyu-theme` + `?theme=` パラメータ、同期的に `html[data-theme]` を立てる）+ `site/themes/pop.css`（`html[data-theme="pop"]` 時のみ上書き）+ `site/tokens/pop.css`（Refero抽出の生トークン）
 - ポータル `site/index.html:382` の「標準 / ポップ」ボタンで切替。選択は `localStorage` に永続化され、次回も保持。`site/app*` は `head` で同じ `theme.js/css` を読み込むためポータルの選択が自動で引き継がれる（同一オリジンのため）
-- faviconはPagesでは標準に統一（`site/favicon-motherduck.svg` は残置するが未参照）。`design-lab/` では直角・左下影の試作アイコンで確認
+- faviconはPagesでは標準に統一（`site/favicon-pop.svg` は残置するが未参照）。`design-lab/` では直角・左下影の試作アイコンで確認
 - **新規アプリ作成時の注意**: 既存テーマ（現状は `標準` / `ポップ`）すべての分のスタイルを作らなければいけないが、追加テーマ分の作成は最優先ではない。まずは標準テーマで動作させ、ポップ等の追加テーマは追って `design-lab` で試作→ `site/themes/*.css` へ移植する
 
 ## 作業コマンド

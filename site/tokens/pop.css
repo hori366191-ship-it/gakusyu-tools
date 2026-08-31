@@ -1,9 +1,9 @@
-/*!
- * MotherDuck — crayon-coded terminal on cream paper
+﻿/*!
+ * Pop — crayon-coded terminal on cream paper
  * Source: Refero Styles 2bd7363d-7aae-4b1f-9d5a-1edeb17ca567 (https://styles.refero.design/style/2bd7363d-7aae-4b1f-9d5a-1edeb17ca567)
  * Extracted: CSS Variables + Tailwind v4 tokens + Do/Don't
- * Note: This file is the raw Refero analysis. Do not edit directly — override in ../themes/motherduck.css
- * Inspired by MotherDuck via Refero Styles
+ * Note: This file is the raw Refero analysis. Do not edit directly — override in ../themes/pop.css
+ * Inspired by Pop via Refero Styles
  */
 :root {
   /* Colors — Brand */
@@ -102,7 +102,7 @@
   --card-padding: 40px;
   --element-gap: 8px;
 
-  /* Border Radius — MotherDuck: all 2px, no blur */
+  /* Border Radius — Pop: all 2px, no blur */
   --radius-sm: 2px;
   --radius-nav: 2px;
   --radius-tags: 2px;
