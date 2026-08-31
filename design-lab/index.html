@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>design-lab — 実験一覧</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+1+Code:wght@400;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box} body{margin:0;font-family:'Zen Kaku Gothic New',system-ui,sans-serif;background:#f4efea;color:#383838}
+  .wrap{max-width:900px;margin:0 auto;padding:32px 20px 48px}
+  h1{font-family:'M PLUS 1 Code',monospace;letter-spacing:.02em;margin:0}
+  .sub{color:#818181;font-size:13px;margin:6px 0 20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+  @media(max-width:700px){.grid{grid-template-columns:1fr}}
+  a.card{display:block;text-decoration:none;color:inherit;background:#fff;border:1.5px solid #383838;border-radius:2px;padding:16px;box-shadow: rgb(56,56,56) -6px 6px 0 0}
+  a.card:hover{transform:translate(2px,2px);box-shadow: rgb(56,56,56) -4px 4px 0 0}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:2px;border:1px solid #383838;background:#ffde00}
+  .tag--done{background:#6fc2ff}
+  .card h2{margin:10px 0 6px;font-size:16px}
+  .card p{margin:0;font-size:12.5px;color:#565c66;line-height:1.7}
+  code{background:#f4efea;padding:1px 5px;border-radius:2px;font-family:'M PLUS 1 Code',monospace;font-size:12px}
+  .foot{margin-top:24px;font-size:11px;color:#a1a1a1;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>design-lab</h1>
+  <p class="sub">本流 <code>site/</code> に触れずにデザインを試す隔離工房。ローカルで <code>python -m http.server 8000</code> → <code>http://localhost:8000/design-lab/</code> で確認。</p>
+  <div class="grid">
+    <a class="card" href="./portal/">
+      <span class="tag tag--done">DONE — MotherDuck</span>
+      <h2>portal — MotherDuck試作</h2>
+      <p>クリーム紙 #f4efea / 2px角 / ハード影 -6px 6px / M PLUS 1 Code。元: <code>site/index.html</code></p>
+    </a>
+    <a class="card" href="./font-lab.html">
+      <span class="tag tag--done">TOOL</span>
+      <h2>font-lab — 和文フォント試着室</h2>
+      <p>M PLUS 1 Code / BIZ UDGothic / Zen Kaku / Zen Maru を同一カードで比較。クリックで切替。</p>
+    </a>
+    <a class="card" href="./app3/">
+      <span class="tag tag--done">DONE</span>
+      <h2>app3 — 正規分布シミュレーター</h2>
+      <p>テーマCSSのみ上書き。元: <code>site/app3/index.html</code></p>
+    </a>
+    <a class="card" href="./app8/">
+      <span class="tag tag--done">DONE</span>
+      <h2>app8 — 英文法ビジュアライザー</h2>
+      <p>テーマCSSのみ上書き。元: <code>site/app8/index.html</code></p>
+    </a>
+    <a class="card" href="./app1/">
+      <span class="tag tag--done">DONE</span>
+      <h2>app1 — 公式・暗記辞典</h2>
+      <p>テーマCSSのみ上書き。bundle.jsonも複製済み。</p>
+    </a>
+    <a class="card" href="./app9/">
+      <span class="tag tag--done">DONE</span>
+      <h2>app9 — 原稿用紙メーカー</h2>
+      <p>テーマCSSのみ上書き。</p>
+    </a>
+    <a class="card" href="./app2/">
+      <span class="tag tag--done">DONE</span>
+      <h2>app2 — 英語長文 多読リーダー</h2>
+      <p>テーマCSSのみ上書き。</p>
+    </a>
+    <a class="card" href="./app4/">
+      <span class="tag tag--done">DONE</span>
+      <h2>app4 — 立体図形ビューア</h2>
+      <p>テーマCSSのみ上書き。</p>
+    </a>
+  </div>
+  <p class="foot">Inspired by MotherDuck via Refero Styles 2bd7363d-7aae-4b1f-9d5a-1edeb17ca567 / 本流への移植は全アプリで「良い」と判断してから <code>site/themes/motherduck.css</code> へコピーし、ポータルに切替UIを追加します（Phase 4）。</p>
+  <p class="foot"><a href="../site/">本流 site/ を見る ↗</a> ／ <a href="./portal/">試作 portal を見る ↗</a></p>
+</div>
+</body>
+</html>

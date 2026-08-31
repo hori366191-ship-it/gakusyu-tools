@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="motherduck">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>原子・周期表ツール</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../tokens/motherduck.css">
+<link rel="stylesheet" href="../themes/motherduck.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+1+Code:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.4/katex.min.css">
+<style>
+:root{
+  --bg:#faf9f6; --surface:#ffffff; --ink:#20242c; --ink-soft:#565c66;
+  --line:rgba(23,32,52,.12); --accent:#1f3a5f; --accent-2:#27496f;
+  --gold:#b08a3e; --ok:#2e7d4f; --bad:#b23a2e; --na:#9aa0a8;
+  --shadow:0 1px 2px rgba(23,32,52,.05), 0 10px 28px -14px rgba(23,32,52,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"M PLUS 1 Code","Yu Mincho","Hiragino Mincho ProN",Georgia,serif;
+  color:var(--ink);
+  background:
+    radial-gradient(1100px 480px at 50% -140px, rgba(176,138,62,.08), transparent 62%),
+    linear-gradient(180deg,#fbfaf7 0%,#f6f4ef 100%);
+  min-height:100vh;
+  font-variant-numeric:tabular-nums;
+}
+.wrap{max-width:1280px;margin:0 auto;padding:0 28px}
+.hidden{display:none!important}
+em{font-style:italic;font-family:Georgia,"M PLUS 1 Code",serif}
+
+.site-header{border-bottom:1px solid var(--line);background:rgba(255,255,255,.55);backdrop-filter:blur(6px)}
+.site-header .wrap{padding-top:26px;padding-bottom:18px;text-align:center}
+.title-row h1{font-size:27px;font-weight:600;letter-spacing:.04em}
+.title-row .sub{margin-top:5px;font-size:11px;letter-spacing:.22em;color:var(--ink-soft);text-transform:uppercase}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);padding:0 28px}
+.tab{
+  appearance:none;border:none;background:transparent;cursor:pointer;
+  font-family:inherit;font-size:15px;letter-spacing:.06em;color:var(--ink-soft);
+  padding:13px 20px 11px;border-bottom:2px solid transparent;transition:color .18s,border-color .18s;
+}
+.tab:hover{color:var(--accent)}
+.tab.active{color:var(--accent);border-bottom-color:var(--gold);font-weight:600}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 336px;gap:22px;align-items:start;padding-top:24px;padding-bottom:30px}
+.stage{min-width:0}
+#cvAtom,#cvCry{display:block;width:100%;height:auto;aspect-ratio:880/660;background:#f8f6f1;
+  border:1px solid var(--line);border-radius:0;box-shadow:var(--shadow);touch-action:none;cursor:grab}
+#cvCry:active{cursor:grabbing}
+.cv-wrap{position:relative}
+.notes{margin-top:14px;font-size:12.5px;line-height:1.85;color:#59606b;border-left:2px solid rgba(176,138,62,.55);padding-left:12px}
+
+.panel{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px 16px 14px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--accent);text-transform:uppercase}
+.card-title::after{content:"";display:block;height:2px;width:26px;background:var(--gold);margin-top:5px;border-radius:2px}
+
+.ctl{display:block;margin-bottom:13px}
+.ctl:last-child{margin-bottom:2px}
+.ctl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;font-size:12.5px;color:var(--ink-soft)}
+.ctl-val{color:var(--accent);font-weight:600;font-size:13px}
+select{width:100%;font-family:inherit;font-size:13px;color:var(--ink);background:#fff;
+  border:1px solid var(--line);border-radius:8px;padding:7px 9px;cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23202024' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center}
+select:focus{outline:1px solid var(--gold);outline-offset:1px}
+
+.toggles{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;padding-top:2px}
+.switch{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--ink-soft);user-select:none}
+.switch input{display:none}
+.track{width:34px;height:18px;border-radius:999px;background:#ddd9d1;position:relative;flex:none;transition:background .2s}
+.track::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.22);transition:left .2s}
+.switch input:checked + .track{background:var(--accent)}
+.switch input:checked + .track::after{left:18px;background:var(--gold)}
+
+.row-btns{display:flex;gap:9px;margin-top:14px}
+.btn{flex:1;font-family:inherit;font-size:13px;letter-spacing:.06em;color:#fff;background:var(--accent);
+  border:1px solid var(--accent);border-radius:9px;padding:9px 12px;cursor:pointer;transition:background .18s,border-color .18s}
+.btn:hover{background:var(--accent-2);border-color:var(--gold)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.ghost:hover{background:rgba(31,58,95,.06)}
+.btn.small{flex:none;padding:4px 12px;font-size:12px}
+.btn.active{background:var(--accent-2);border-color:var(--gold)}
+.seg{display:flex;gap:8px}
+.seg .btn{flex:1;padding:8px 6px;font-size:12px;background:rgba(31,58,95,.07);color:var(--accent);border:1px solid transparent}
+.seg .btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.seg .btn.disabled{opacity:.4;cursor:default}
+
+.stat{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px dashed rgba(23,32,52,.09);font-size:12.5px}
+.stat:last-child{border-bottom:none}
+.stat .lbl{color:var(--ink-soft)}
+.stat .val{font-weight:600;text-align:right}
+.tex-row{margin:6px 0 2px;text-align:center;font-size:14px}
+.tex-row.tex-d{font-size:16px}
+
+/* ---- 周期表 ---- */
+.pt-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:0;box-shadow:var(--shadow);background:#fff;padding:10px 8px;-webkit-overflow-scrolling:touch}
+.pt{display:grid;grid-template-columns:repeat(18,minmax(33px,1fr));gap:3px;min-width:650px}
+.el{
+  position:relative;appearance:none;border:1px solid rgba(23,32,52,.14);border-radius:0;background:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  min-height:50px;padding:6px 2px 4px;cursor:pointer;font-family:inherit;color:var(--ink);
+  transition:transform .12s,box-shadow .12s;
+}
+.el:hover{transform:translateY(-1px);box-shadow:0 6px 14px -8px rgba(23,32,52,.4);z-index:2}
+.el .num{position:absolute;top:2.5px;left:5px;font-size:8px;opacity:.68;line-height:1}
+.el .sym{font-size:14.5px;font-weight:600;line-height:1.15}
+.el .nm{font-size:7.5px;color:rgba(32,36,44,.75);line-height:1.25;margin-top:1px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.el.selected{outline:2px solid var(--gold);outline-offset:1px;z-index:3}
+.pt-marker{display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--ink-soft);letter-spacing:.02em;border:1px dashed rgba(23,32,52,.25);border-radius:0;min-height:50px}
+.pt[data-mode="cat"] .cat0{background:#f7a88c}.pt[data-mode="cat"] .cat1{background:#f7c98c}.pt[data-mode="cat"] .cat2{background:#8cb8f0}
+.pt[data-mode="cat"] .cat3{background:#8ce0c0}.pt[data-mode="cat"] .cat4{background:#b8d48c}.pt[data-mode="cat"] .cat5{background:#d8a0e8}
+.pt[data-mode="cat"] .cat6{background:#f0e08c}.pt[data-mode="cat"] .cat7{background:#a8d8f0}.pt[data-mode="cat"] .cat8{background:#f09cd0}.pt[data-mode="cat"] .cat9{background:#c8a0f0}
+.pt[data-mode="blk"] .blk-s{background:#8cb8f0}.pt[data-mode="blk"] .blk-p{background:#e08cd0}.pt[data-mode="blk"] .blk-d{background:#8ce0c0}.pt[data-mode="blk"] .blk-f{background:#f0d88c}
+
+.legend{display:flex;flex-direction:column;gap:7px;font-size:11.5px;color:var(--ink-soft);margin-top:12px}
+.chip{display:flex;align-items:center;gap:9px}
+.sw{flex:none;width:24px;height:12px;border-radius:3px;border:1px solid rgba(23,32,52,.15)}
+
+/* ---- 元素詳細 ---- */
+.detail-head{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.detail-sym{font-size:34px;font-weight:600;line-height:1;min-width:64px;text-align:center;padding:8px 6px;border-radius:10px;border:1px solid rgba(23,32,52,.14);background:#f8f6f1}
+.detail-name{font-size:17px;font-weight:600}
+.detail-state{font-size:11px;color:var(--ink-soft);margin-top:2px}
+.cfg-line{font-size:13px;text-align:center;background:#f8f6f1;border:1px solid rgba(23,32,52,.1);border-radius:8px;padding:7px 4px;margin:8px 0 2px;letter-spacing:.02em;overflow-x:auto;white-space:nowrap}
+.use-val{font-weight:500;font-size:11.5px;text-align:left;flex:1;line-height:1.55;min-width:0}
+.cry-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.cry-link{flex:none;font-family:inherit;font-size:11.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:background .15s}
+.cry-link:hover{background:rgba(31,58,95,.07)}
+
+.site-footer{margin-top:6px;border-top:1px solid var(--line);background:rgba(255,255,255,.5)}
+.site-footer .wrap{display:flex;flex-wrap:wrap;gap:18px 40px;justify-content:center;align-items:center;padding-top:16px;padding-bottom:18px;font-size:17px;color:var(--accent)}
+.site-footer .cap{font-size:10.5px;letter-spacing:.2em;color:var(--ink-soft);text-transform:uppercase}
+
+@media (orientation: portrait){
+  .layout{grid-template-columns:1fr}
+  .panel{order:2}
+  .stage{order:1}
+}
+@media (max-width:720px){
+  .el .nm{display:none}
+  .el{min-height:44px}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="title-row">
+      <h1>原子・周期表ツール</h1>
+      <p class="sub">Atoms &mdash; Periodic Table &mdash; Crystal Structures</p>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="pt">周期表</button>
+  <button class="tab" data-tab="atom">原子モデル</button>
+  <button class="tab" data-tab="crystal">結晶構造</button>
+</nav>
+
+<main class="wrap layout">
+  <section class="stage">
+    <div class="pane" data-tab="pt" id="stage-pt">
+      <div class="pt-scroll">
+        <div class="pt" id="ptGrid" data-mode="cat"></div>
+      </div>
+      <p class="notes">元素セルをタップすると右側に詳細が表示されます。族と周期、価電子の数(主族元素)の関係を確認しましょう。<em>s</em>/<em>p</em>/<em>d</em>/<em>f</em> ブロックのハイライト切り替えもできます。</p>
+    </div>
+    <div class="pane hidden" data-tab="atom" id="stage-atom">
+      <div class="cv-wrap">
+        <canvas id="cvAtom"></canvas>
+      </div>
+      <p class="notes">電子の公転はボーア模型による模式図です。実際の電子は軌道上を回っているのではなく、原子核の周囲に確率的に広がる「電子雲」として存在します。最外殻の電子を<strong>価電子</strong>といい、金色で示しました(遷移元素などでは簡略化)。</p>
+    </div>
+    <div class="pane hidden" data-tab="crystal" id="stage-cry">
+      <div class="cv-wrap">
+        <canvas id="cvCry"></canvas>
+      </div>
+      <p class="notes">ドラッグで回転、ホイール/ピンチでズーム。六方最密充填(HCP)と面心立方格子(FCC)はどちらも配位数 12・充填率 74% ですが、層の重なり方が異なります(HCP は ABAB&hellip;、FCC は ABCABC&hellip;)。</p>
+    </div>
+  </section>
+
+  <aside class="panel">
+
+    <div class="card" data-tab="pt" id="ctl-pt">
+      <div class="card-head"><span class="card-title">ハイライト</span></div>
+      <div class="seg" id="hlMode">
+        <button class="btn active" data-mode="cat">分類別</button>
+        <button class="btn" data-mode="blk">ブロック</button>
+      </div>
+      <div class="legend" id="ptLegend"></div>
+      <div class="legend hidden" id="ptLegendBlk"></div>
+    </div>
+
+    <div class="card" data-tab="pt" id="detail-pt">
+      <div class="card-head"><span class="card-title">元素詳細</span></div>
+      <div class="detail-head">
+        <div class="detail-sym" id="detSym">&mdash;</div>
+        <div>
+          <div class="detail-name" id="detName">&mdash;</div>
+          <div class="detail-state" id="detState"></div>
+        </div>
+      </div>
+      <div class="stat"><span class="lbl">原子番号</span><span class="val" id="detNum">&mdash;</span></div>
+      <div class="stat"><span class="lbl">原子量</span><span class="val" id="detMass">&mdash;</span></div>
+      <div class="stat"><span class="lbl">分類</span><span class="val" id="detCat">&mdash;</span></div>
+      <div class="stat"><span class="lbl">周期・族</span><span class="val" id="detPG">&mdash;</span></div>
+      <div class="stat"><span class="lbl">ブロック</span><span class="val" id="detBlk">&mdash;</span></div>
+      <div class="stat"><span class="lbl">最外殻電子数</span><span class="val" id="detOuter">&mdash;</span></div>
+      <div class="stat"><span class="lbl">価電子数</span><span class="val" id="detVal">&mdash;</span></div>
+      <div class="stat"><span class="lbl">主なイオン</span><span class="val" id="detIons">&mdash;</span></div>
+      <div class="stat"><span class="lbl">イオンの説明</span><span class="val use-val" id="detIonNote" style="display:none"></span></div>
+      <div class="cfg-line" id="detCfg">&mdash;</div>
+      <div class="stat"><span class="lbl">殻ごとの電子数</span><span class="val" id="detShells">&mdash;</span></div>
+      <div class="stat"><span class="lbl">主な用途</span><span class="val use-val" id="detUse">&mdash;</span></div>
+      <div class="stat"><span class="lbl">自然界での存在</span><span class="val use-val" id="detNat">&mdash;</span></div>
+      <div class="cry-links" id="detCry"></div>
+      <div class="row-btns">
+        <button class="btn" id="toAtomBtn">原子モデルで見る</button>
+      </div>
+    </div>
+
+    <div class="card hidden" data-tab="atom" id="ctl-atom">
+      <div class="card-head"><span class="card-title">原子モデル</span></div>
+      <label class="ctl">
+        <span class="ctl-head"><span>元素</span></span>
+        <select id="atomEl"></select>
+      </label>
+      <label class="ctl">
+        <span class="ctl-head"><span>イオン</span></span>
+        <select id="atomIon"></select>
+      </label>
+      <div class="toggles">
+        <label class="switch"><input type="checkbox" id="atomVal" checked><span class="track"></span><span>価電子強調</span></label>
+        <label class="switch"><input type="checkbox" id="atomSpin" checked><span class="track"></span><span>回転アニメ</span></label>
+      </div>
+    </div>
+
+    <div class="card hidden" data-tab="atom" id="info-atom">
+      <div class="card-head"><span class="card-title">情報</span></div>
+      <div class="detail-head">
+        <div class="detail-sym" id="aiSym">&mdash;</div>
+        <div>
+          <div class="detail-name" id="aiName">&mdash;</div>
+          <div class="detail-state" id="aiIon">&mdash;</div>
+        </div>
+      </div>
+      <div class="cfg-line" id="aiCfg">&mdash;</div>
+      <div class="stat"><span class="lbl">陽子数 Z</span><span class="val" id="aiZ">&mdash;</span></div>
+      <div class="stat"><span class="lbl">中性子数 N</span><span class="val" id="aiN">&mdash;</span></div>
+      <div class="stat"><span class="lbl">電子数 e</span><span class="val" id="aiE">&mdash;</span></div>
+      <div class="stat"><span class="lbl">電荷</span><span class="val" id="aiQ">&mdash;</span></div>
+      <div class="stat"><span class="lbl">殻ごとの電子数</span><span class="val" id="aiShells">&mdash;</span></div>
+      <div class="stat"><span class="lbl">イオンの説明</span><span class="val use-val" id="aiIonNote" style="display:none"></span></div>
+    </div>
+
+    <div class="card hidden" data-tab="crystal" id="ctl-cry">
+      <div class="card-head"><span class="card-title">結晶構造</span></div>
+      <label class="ctl">
+        <span class="ctl-head"><span>構造</span></span>
+        <select id="crySel"></select>
+      </label>
+      <label class="ctl">
+        <span class="ctl-head"><span>単位格子</span></span>
+        <div class="seg" id="cryCellMode">
+          <button class="btn active" data-cell="unit">単位格子</button>
+          <button class="btn" data-cell="exp">2&times;2&times;2 拡張</button>
+        </div>
+      </label>
+      <label class="ctl">
+        <span class="ctl-head"><span>表示形式</span></span>
+        <div class="seg" id="cryMode">
+          <button class="btn active" data-mode="stick">ボール&スティック</button>
+          <button class="btn" data-mode="space">実半径</button>
+          <button class="btn" data-mode="cut">単位格子切断</button>
+          <button class="btn hidden" data-mode="diag">対角線断面</button>
+        </div>
+      </label>
+      <div class="toggles">
+        <label class="switch"><input type="checkbox" id="cryAuto"><span class="track"></span><span>自動回転</span></label>
+        <label class="switch"><input type="checkbox" id="cryCell" checked><span class="track"></span><span>格子線</span></label>
+      </div>
+      <div class="row-btns">
+        <button class="btn ghost" id="cryReset">視点リセット</button>
+      </div>
+    </div>
+
+    <div class="card hidden" data-tab="crystal" id="info-cry">
+      <div class="card-head"><span class="card-title">情報</span></div>
+      <div class="detail-head">
+        <div class="detail-sym" id="ciSym">&mdash;</div>
+        <div>
+          <div class="detail-name" id="ciName">&mdash;</div>
+          <div class="detail-state" id="ciBond">&mdash;</div>
+        </div>
+      </div>
+      <div class="stat"><span class="lbl">代表物質</span><span class="val" id="ciEx">&mdash;</span></div>
+      <div class="stat"><span class="lbl">配位数</span><span class="val" id="ciCn">&mdash;</span></div>
+      <div class="stat"><span class="lbl">単位格子中の原子数</span><span class="val" id="ciCount">&mdash;</span></div>
+      <div class="tex-row" id="ciCountTex"></div>
+      <div class="stat"><span class="lbl">充填率</span><span class="val" id="ciRatio">&mdash;</span></div>
+      <div class="tex-row" id="ciRatioTex"></div>
+      <div class="tex-row hidden" id="ciDiagTex"></div>
+      <p class="notes" id="ciDesc"></p>
+    </div>
+
+  </aside>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span class="tex" data-tex="\mathrm{Na}\ \rightarrow\ \mathrm{Na}^{+}+e^{-},\qquad \mathrm{Cl}+e^{-}\ \rightarrow\ \mathrm{Cl}^{-}"></span>
+    <span class="tex" data-tex="\eta_{\mathrm{BCC}}=\frac{\sqrt{3}\pi}{8}\approx 0.68,\qquad \eta_{\mathrm{FCC}}=\frac{\sqrt{2}\pi}{6}\approx 0.74"></span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.4/katex.min.js"></script>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s);};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+var clamp=function(v,a,b){return v<a?a:(v>b?b:v);};
+
+/* ================= 元素データ ================= */
+var CATS=['アルカリ金属','アルカリ土類金属','遷移金属','その他の金属','半金属','非金属','ハロゲン','希ガス','ランタノイド','アクチノイド'];
+var STATES=['','気体','液体','固体'];
+var CAT_COL=['#f7a88c','#f7c98c','#8cb8f0','#8ce0c0','#b8d48c','#d8a0e8','#f0e08c','#a8d8f0','#f09cd0','#c8a0f0'];
+var BLK_JP={s:'s ブロック',p:'p ブロック',d:'d ブロック',f:'f ブロック'};
+var NOBLE={He:[2],Ne:[2,8],Ar:[2,8,8],Kr:[2,8,18,8],Xe:[2,8,18,18,8],Rn:[2,8,18,32,18,8]};
+
+var ELEM_STR=[
+'',
+'H,水素,1.008,5,1,,1+',
+'He,ヘリウム,4.0026,7,1,,',
+'Li,リチウム,6.94,0,3,,1+',
+'Be,ベリリウム,9.0122,1,3,,2+',
+'B,ホウ素,10.81,4,3,,',
+'C,炭素,12.011,5,3,D;G,',
+'N,窒素,14.007,5,1,,3-',
+'O,酸素,15.999,5,1,,2-',
+'F,フッ素,18.998,6,1,,1-',
+'Ne,ネオン,20.180,7,1,,',
+'Na,ナトリウム,22.990,0,3,BCC;NaCl,1+',
+'Mg,マグネシウム,24.305,1,3,HCP,2+',
+'Al,アルミニウム,26.982,3,3,FCC,3+',
+'Si,ケイ素,28.085,4,3,,',
+'P,リン,30.974,5,3,,',
+'S,硫黄,32.06,5,3,,2-',
+'Cl,塩素,35.45,6,1,NaCl,1-',
+'Ar,アルゴン,39.948,7,1,,',
+'K,カリウム,39.098,0,3,BCC,1+',
+'Ca,カルシウム,40.078,1,3,,2+',
+'Sc,スカンジウム,44.956,2,3,,',
+'Ti,チタン,47.867,2,3,HCP,4+',
+'V,バナジウム,50.942,2,3,,',
+'Cr,クロム,51.996,2,3,BCC,3+',
+'Mn,マンガン,54.938,2,3,,2+',
+'Fe,鉄,55.845,2,3,BCC,2+;3+',
+'Co,コバルト,58.933,2,3,,2+',
+'Ni,ニッケル,58.693,2,3,,2+',
+'Cu,銅,63.546,2,3,FCC,2+;1+',
+'Zn,亜鉛,65.38,2,3,HCP,2+',
+'Ga,ガリウム,69.723,3,3,,',
+'Ge,ゲルマニウム,72.630,4,3,,',
+'As,ヒ素,74.922,4,3,,',
+'Se,セレン,78.971,5,3,,2-',
+'Br,臭素,79.904,6,2,,1-',
+'Kr,クリプトン,83.798,7,1,,',
+'Rb,ルビジウム,85.468,0,3,,1+',
+'Sr,ストロンチウム,87.62,1,3,,2+',
+'Y,イットリウム,88.906,2,3,,',
+'Zr,ジルコニウム,91.224,2,3,,',
+'Nb,ニオブ,92.906,2,3,BCC,',
+'Mo,モリブデン,95.95,2,3,,',
+'Tc,テクネチウム,[97],2,3,,',
+'Ru,ルテニウム,101.07,2,3,,',
+'Rh,ロジウム,102.91,2,3,,',
+'Pd,パラジウム,106.42,2,3,,',
+'Ag,銀,107.87,2,3,FCC,1+',
+'Cd,カドミウム,112.41,2,3,,2+',
+'In,インジウム,114.82,3,3,,',
+'Sn,スズ,118.71,3,3,,2+;4+',
+'Sb,アンチモン,121.76,4,3,,',
+'Te,テルル,127.60,4,3,,2-',
+'I,ヨウ素,126.90,6,3,,1-',
+'Xe,キセノン,131.29,7,1,,',
+'Cs,セシウム,132.91,0,3,CsCl,1+',
+'Ba,バリウム,137.33,1,3,,2+',
+'La,ランタン,138.91,8,3,,',
+'Ce,セリウム,140.12,8,3,,',
+'Pr,プラセオジム,140.91,8,3,,',
+'Nd,ネオジム,144.24,8,3,,',
+'Pm,プロメチウム,[145],8,3,,',
+'Sm,サマリウム,150.36,8,3,,',
+'Eu,ユウロピウム,151.96,8,3,,',
+'Gd,ガドリニウム,157.25,8,3,,',
+'Tb,テルビウム,158.93,8,3,,',
+'Dy,ジスプロシウム,162.50,8,3,,',
+'Ho,ホルミウム,164.93,8,3,,',
+'Er,エルビウム,167.26,8,3,,',
+'Tm,ツリウム,168.93,8,3,,',
+'Yb,イッテルビウム,173.05,8,3,,',
+'Lu,ルテチウム,174.97,8,3,,',
+'Hf,ハフニウム,178.49,2,3,,',
+'Ta,タンタル,180.95,2,3,,',
+'W,タングステン,183.84,2,3,BCC,',
+'Re,レニウム,186.21,2,3,,',
+'Os,オスミウム,190.23,2,3,,',
+'Ir,イリジウム,192.22,2,3,,',
+'Pt,白金,195.08,2,3,FCC,',
+'Au,金,196.97,2,3,FCC,3+',
+'Hg,水銀,200.59,2,2,,2+;1+',
+'Tl,タリウム,204.38,3,3,,1+;3+',
+'Pb,鉛,207.2,3,3,FCC,2+;4+',
+'Bi,ビスマス,208.98,3,3,,3+',
+'Po,ポロニウム,[209],3,3,,',
+'At,アスタチン,[210],6,3,,',
+'Rn,ラドン,[222],7,1,,',
+'Fr,フランシウム,[223],0,3,,1+',
+'Ra,ラジウム,[226],1,3,,2+',
+'Ac,アクチニウム,[227],9,3,,',
+'Th,トリウム,232.04,9,3,,',
+'Pa,プロトアクチニウム,231.04,9,3,,',
+'U,ウラン,238.03,9,3,,',
+'Np,ネプツニウム,[237],9,3,,',
+'Pu,プルトニウム,[244],9,3,,',
+'Am,アメリシウム,[243],9,3,,',
+'Cm,キュリウム,[247],9,3,,',
+'Bk,バークリウム,[247],9,3,,',
+'Cf,カリホルニウム,[251],9,3,,',
+'Es,アインスタイニウム,[252],9,3,,',
+'Fm,フェルミウム,[257],9,3,,',
+'Md,メンデレビウム,[258],9,3,,',
+'No,ノーベリウム,[259],9,3,,',
+'Lr,ローレンシウム,[266],9,3,,',
+'Rf,ラザホージウム,[267],2,3,,',
+'Db,ドブニウム,[268],2,3,,',
+'Sg,シーボーギウム,[269],2,3,,',
+'Bh,ボーリウム,[270],2,3,,',
+'Hs,ハッシウム,[277],2,3,,',
+'Mt,マイトネリウム,[278],2,3,,',
+'Ds,ダームスタチウム,[281],2,3,,',
+'Rg,レントゲニウム,[282],2,3,,',
+'Cn,コペルニシウム,[285],2,3,,',
+'Nh,ニホニウム,[286],3,3,,',
+'Fl,フレロビウム,[289],3,3,,',
+'Mc,モスコビウム,[290],3,3,,',
+'Lv,リバモリウム,[293],3,3,,',
+'Ts,テネシン,[294],6,3,,',
+'Og,オガネソン,[294],7,3,,'
+];
+
+var CFG=[
+'',
+'1s1','1s2','[He] 2s1','[He] 2s2','[He] 2s2 2p1','[He] 2s2 2p2','[He] 2s2 2p3','[He] 2s2 2p4','[He] 2s2 2p5','[He] 2s2 2p6',
+'[Ne] 3s1','[Ne] 3s2','[Ne] 3s2 3p1','[Ne] 3s2 3p2','[Ne] 3s2 3p3','[Ne] 3s2 3p4','[Ne] 3s2 3p5','[Ne] 3s2 3p6',
+'[Ar] 4s1','[Ar] 4s2','[Ar] 3d1 4s2','[Ar] 3d2 4s2','[Ar] 3d3 4s2','[Ar] 3d5 4s1','[Ar] 3d5 4s2','[Ar] 3d6 4s2','[Ar] 3d7 4s2','[Ar] 3d8 4s2','[Ar] 3d10 4s1','[Ar] 3d10 4s2',
+'[Ar] 3d10 4s2 4p1','[Ar] 3d10 4s2 4p2','[Ar] 3d10 4s2 4p3','[Ar] 3d10 4s2 4p4','[Ar] 3d10 4s2 4p5','[Ar] 3d10 4s2 4p6',
+'[Kr] 5s1','[Kr] 5s2','[Kr] 4d1 5s2','[Kr] 4d2 5s2','[Kr] 4d4 5s1','[Kr] 4d5 5s1','[Kr] 4d5 5s2','[Kr] 4d7 5s1','[Kr] 4d8 5s1','[Kr] 4d10','[Kr] 4d10 5s1','[Kr] 4d10 5s2',
+'[Kr] 4d10 5s2 5p1','[Kr] 4d10 5s2 5p2','[Kr] 4d10 5s2 5p3','[Kr] 4d10 5s2 5p4','[Kr] 4d10 5s2 5p5','[Kr] 4d10 5s2 5p6',
+'[Xe] 6s1','[Xe] 6s2','[Xe] 5d1 6s2','[Xe] 4f1 5d1 6s2','[Xe] 4f3 6s2','[Xe] 4f4 6s2','[Xe] 4f5 6s2','[Xe] 4f6 6s2','[Xe] 4f7 6s2','[Xe] 4f7 5d1 6s2','[Xe] 4f9 6s2','[Xe] 4f10 6s2','[Xe] 4f11 6s2','[Xe] 4f12 6s2','[Xe] 4f13 6s2','[Xe] 4f14 6s2','[Xe] 4f14 5d1 6s2',
+'[Xe] 4f14 5d2 6s2','[Xe] 4f14 5d3 6s2','[Xe] 4f14 5d4 6s2','[Xe] 4f14 5d5 6s2','[Xe] 4f14 5d6 6s2','[Xe] 4f14 5d7 6s2','[Xe] 4f14 5d9 6s1','[Xe] 4f14 5d10 6s1','[Xe] 4f14 5d10 6s2',
+'[Xe] 4f14 5d10 6s2 6p1','[Xe] 4f14 5d10 6s2 6p2','[Xe] 4f14 5d10 6s2 6p3','[Xe] 4f14 5d10 6s2 6p4','[Xe] 4f14 5d10 6s2 6p5','[Xe] 4f14 5d10 6s2 6p6',
+'[Rn] 7s1','[Rn] 7s2','[Rn] 6d1 7s2','[Rn] 6d2 7s2','[Rn] 5f2 6d1 7s2','[Rn] 5f3 6d1 7s2','[Rn] 5f4 6d1 7s2','[Rn] 5f6 7s2','[Rn] 5f7 7s2','[Rn] 5f7 6d1 7s2','[Rn] 5f9 7s2','[Rn] 5f10 7s2','[Rn] 5f11 7s2','[Rn] 5f12 7s2','[Rn] 5f13 7s2','[Rn] 5f14 7s2','[Rn] 5f14 7s2 7p1',
+'[Rn] 5f14 6d2 7s2','[Rn] 5f14 6d3 7s2','[Rn] 5f14 6d4 7s2','[Rn] 5f14 6d5 7s2','[Rn] 5f14 6d6 7s2','[Rn] 5f14 6d7 7s2','[Rn] 5f14 6d8 7s2','[Rn] 5f14 6d9 7s2','[Rn] 5f14 6d10 7s2',
+'[Rn] 5f14 6d10 7s2 7p1','[Rn] 5f14 6d10 7s2 7p2','[Rn] 5f14 6d10 7s2 7p3','[Rn] 5f14 6d10 7s2 7p4','[Rn] 5f14 6d10 7s2 7p5','[Rn] 5f14 6d10 7s2 7p6'
+];
+
+var POS=[
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
+[3,4,0,0,0,0,0,0,0,0,0,0,5,6,7,8,9,10],
+[11,12,0,0,0,0,0,0,0,0,0,0,13,14,15,16,17,18],
+[19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36],
+[37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54],
+[55,56,0,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86],
+[87,88,0,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118],
+[0,0,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,0],
+[0,0,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,0]
+];
+
+var USE=[null,
+'アンモニア合成・石油精製・燃料電池・ロケット燃料','液体ヘリウム(超伝導磁石の冷却)・気球・溶接ガス','リチウムイオン電池・セラミックス・医薬品','航空機材料・X線窓・原子炉の反射材','ホウケイ酸ガラス・洗剤・磁石','鉄鋼・燃料・ダイヤモンド・黒鉛(鉛筆)・プラスチック','肥料(アンモニア)・食品保存ガス・火薬','医療・溶接・製鉄・ロケットの酸化剤','歯磨き(フッ化物)・フッ素樹脂・半導体','ネオンサイン・放電ランプ',
+'食塩・ガラス・ソーダ工業','軽量合金(航空機部品)・カメラ・花火','アルミ缶・航空機・電線・建材','半導体・太陽電池・ガラス・シリコン樹脂','肥料・マッチ・洗剤・DNAの成分','硫酸・ゴムの加硫・火薬・肥料','殺菌・漂白・塩ビ樹脂・水道水の消毒','アルゴン溶接・電球・半導体の保護ガス','肥料(カリ)・ガラス・火薬','石灰・セメント・骨の材料',
+'アルミ合金強化・燃料電池','航空機・メガネフレーム・人工関節・白色顔料','特殊鋼の添加元素・蓄電池','ステンレス鋼・メッキ・顔料','鋼の脱酸・乾電池・ガラス着色','鉄鋼・建築・自動車・磁石','超硬合金・電池の正極材・青い顔料','ステンレス鋼・ニッケル電池・硬貨','電線・配管・硬貨・真鍮','めっき(トタン)・乾電池・真鍮',
+'半導体(GaAs)・LED・体温計','半導体・光ファイバー・赤外線レンズ','半導体添加物・木材防腐剤','光電変換・ガラス着色・整流体','殺菌剤・難燃剤・写真用薬品','蛍光灯・放電管・断熱窓ガラス','原子時計・光電池','花火の赤色・電子部品','LED・蛍光灯・レーザー(YAG)','原子炉の燃料被覆管・人工宝石(ジルコニア)',
+'超伝導合金・ステンレス強化','鋼の強化・潤滑剤・触媒','医療(核医学検査)・研究用','ハードディスク・電気接点・触媒','自動車触媒・めっき・反射鏡','自動車触媒・電子部品・歯科合金','硬貨・装飾品・写真・銀めっき・殺菌','ニカド電池・顔料・原子炉の制御棒','液晶パネルの透明電極・半導体','ブリキ・ハンダ・青銅・ガラス',
+'鉛蓄電池・難燃剤・半導体','太陽電池・熱電発電・合金添加','消毒液(ヨードチンキ)・うがい薬・甲状腺ホルモン','キセノンランプ・麻酔・イオンエンジン','原子時計(セシウム時計)・光電管','バリウム造影剤・顔料','光学ガラス・カメラレンズ・触媒・水素吸蔵合金','ガラス研磨剤・ライターの火打石・触媒','磁石・レーザー・溶接用ゴーグル','ネオジム磁石(最強磁石)・レーザー',
+'蛍光体・核電池(ペースメーカー用)','サマリウムコバルト磁石・中性子吸収材','蛍光灯・ディスプレイの赤色蛍光体','MRI造影剤・中性子吸収材','蛍光灯・磁気光学素子','ハイブリッド車モーター用磁石・レーザー','レーザー・MRI造影剤','光ファイバー増幅器・レーザー・ガラス着色','レーザー・医療機器','光ファイバー増幅器・ステンレス強化',
+'触媒・PET検出器の結晶','原子炉の制御棒・高温合金','コンデンサ(スマホ部品)・超硬合金・医療用インプラント','電球のフィラメント・超硬工具','ジェットエンジンの耐熱合金・触媒','万年筆ペン先・電気接点・触媒','点火プラグ・るつぼ・標準キログラム原器','自動車触媒・宝飾品・電極','宝飾品・電子部品・金箔','蛍光灯・体温計(使用減少)・アマルガム',
+'半導体・赤外線センサー','鉛蓄電池・放射線遮蔽・ハンダ','胃薬・ハンダ・低融点合金・顔料','研究用・静電気除去装置','研究用','研究用・温泉(ラドン温泉)','研究用のみ','研究用(かつて夜光塗料)','研究用(中性子源)','ガスマントル・原子力燃料(研究)',
+'研究用','原子力発電の燃料','研究用(中性子検出器)','原子力・宇宙探査機の熱源','煙探知機・放射線源','研究用・宇宙探査機の熱源','研究用','研究用・中性子源','研究用','研究用',
+'研究用','研究用','研究用','研究用','研究用','研究用','研究用','研究用','研究用','研究用',
+'研究用','研究用','研究用','研究用','研究用','研究用','研究用','研究用'
+];
+var NAT=[null,
+'宇宙で最も多い元素。水や有機物の成分として広く存在','天然ガス中に微量。恒星で核融合により生成','火成岩や塩湖の塩水に含まれる','緑柱石(エメラルド)など希少な鉱物として存在','鉱物(硼砂など)として存在。海水にも微量','二酸化炭素・炭酸塩・すべての生物の有機物の主成分','大気の約78%。タンパク質・核酸の成分','大気の約21%、地殻の約46%(最も多い)。水の成分','蛍石などの鉱物。単体では存在しない','大気中に微量(約0.002%)',
+'食塩として海水中に豊富','海水・苦灰石。植物の葉緑素の中心元素','地殻で最も多い金属元素(約8%)。ボーキサイトとして採掘','地殻の約28%(酸素に次いで多い)。石英・砂の主成分','リン鉱石として産出。骨・歯・DNAの成分','火山地帯の硫黄・硫化鉄鉱石。タンパク質に含まれる','食塩として海水中に豊富','大気中に約0.9%','海水・カリ長石などの鉱物。植物の必須元素','石灰岩・大理石。生物の骨・歯・貝殻の成分',
+'希少な鉱物中に微量','チタン鉄鉱・ルチル鉱。地殻中9番目に多い','原油・鉄鉱石中に含まれる','クロム鉄鉱として産出','マンガン鉱として産出。海底にマンガン団塊','地殻中4番目に多い(約5%)。鉄鉱石として産出、ヘモグロビンの成分','コバルト鉱として産出。ビタミンB12の成分','硫化鉱物として産出。地球の中心核の成分','天然銅としても存在。黄銅鉱などから精錬','閃亜鉛鉱として産出。体内の酵素に必須',
+'ボーキサイト中に微量(単体は存在しない)','亜鉛鉱石・石炭灰中に微量','硫砒鉄鉱などとして産出。猛毒として知られる','硫黄鉱床中に微量。必須微量元素','海水中に臭化物として存在(単体はない)','大気中に極微量(約1ppm)','リチア雲母などに微量','天青石などの鉱物。海水にも微量','希土類鉱物に含まれる','ジルコンとして広く存在',
+'ニオブ鉱・鉄鉱石中に微量','輝水鉛鉱として産出。酵素の必須元素','天然にはほぼ存在しない(人工元素・核分裂で生成)','白金鉱石中に微量','白金鉱石中に極微量','白金族鉱石中に微量','輝銀鉱などとして産出。天然銀も存在','亜鉛鉱石中に含まれる','亜鉛鉱石中に微量','スズ石として産出',
+'輝安鉱として産出','金・銅鉱石中に微量','海藻に濃縮。チリ硝石からも採取','大気中に極微量','ポルックス石などに含まれる','重晶石として産出','希土類鉱物に含まれる','希土類鉱物の中で最も多い','希土類鉱物に含まれる','希土類鉱物に含まれる',
+'天然にはほぼ存在しない(ウラン鉱に微量)','希土類鉱物に含まれる','希土類鉱物に極微量','希土類鉱物に含まれる','希土類鉱物に極微量','希土類鉱物に含まれる','希土類鉱物に極微量','希土類鉱物に含まれる','希土類鉱物に極微量','希土類鉱物に含まれる',
+'希土類鉱物に極微量(最も高価な希土類)','ジルコン鉱に含まれる(ジルコニウムと一緒)','タンタル鉱として産出','鉄マンガン重石として産出','モリブデン鉱石中に微量','白金鉱石中に微量','白金鉱石中に微量(隕石にも含まれる)','白金鉱として産出(天然白金も存在)','天然金・金鉱脈として産出(最も古くから利用)','辰砂(硫化水銀)として産出。常温で液体の金属',
+'硫化物鉱石中に微量','方鉛鉱として産出','輝蒼鉛鉱として産出(放射性の最後の安定元素)','ウラン鉱石中に微量(放射性)','天然にはほぼ存在しない(ウラン鉱に微量・放射性)','ウラン鉱石から放出される放射性ガス','天然にはほぼ存在しない(放射性・ウラン鉱中に微量)','ウラン鉱石中に微量(放射性)','ウラン鉱石中に微量(放射性)','モナザイト砂として産出(放射性)',
+'ウラン鉱石中に極微量(放射性)','ウラン鉱として産出(放射性)','天然にはほぼ存在しない(原子炉で生成)','天然にはほぼ存在しない(極微量はウラン鉱に)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)',
+'天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)',
+'天然にはほぼ存在しない(人工元素・日本で発見)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)','天然にはほぼ存在しない(人工元素)'
+];
+
+var ION_NOTE=[null,
+'','','','','','','','','','',
+'','','','','','','','','','',
+'','Ti⁴⁺(酸化チタンTiO₂など)が主ですが、高校化学ではほとんど扱いません。','','Cr は [Ar]3d⁵4s¹ という特別な電子配置(3dが半閉殻で安定)をとります。主なイオンは Cr³⁺ です。','Mn²⁺ は 3d⁵ の半閉殻配置で特に安定です。','遷移元素は最外殻の4s軌道と内側の3d軌道のエネルギー差が小さく、電子を失いやすいため複数の価数をとります。Fe²⁺(4s²を失う)と Fe³⁺(さらに3dを1個失う)があります。','Co²⁺ が主です。','','Cu は 3d¹⁰4s¹。4sの電子を失って Cu⁺(3d¹⁰)に、さらに3dの電子を失って Cu²⁺(3d⁹)になります。水溶液中では Cu²⁺ が安定なため、銅の主なイオンは Cu²⁺ です。','',
+'','','','','','','','','','',
+'','','','','','','','','','Sn²⁺ と Sn⁴⁺。6s² の電子対が安定なため(不活性電子対効果)、Sn²⁺ も存在します。',
+'','','','','','','','','','',
+'','','','','','','','','','',
+'','','','','','','','','Au³⁺ が主ですが、高校化学ではほとんど扱いません。','主なイオンは Hg²⁺(水銀(II))。Hg⁺ と書かれることもありますが、実際には Hg₂²⁺ という2個の水銀が結合した形で存在します。',
+'Tl⁺ と Tl³⁺(高校化学ではほとんど扱いません)。','Pb²⁺ と Pb⁴⁺。6s² の電子対が安定なため(不活性電子対効果)、Pb²⁺ がより安定で主なイオンです。','','','','','','','','',
+'','','','','','','','','','',
+'','','','','','','','','','',
+'','','','','','','',''
+];
+
+function parseConfig(cfg){
+  var s=[0,0,0,0,0,0,0];
+  var m=/^\[(\w+)\]/.exec(cfg);
+  if(m&&NOBLE[m[1]]){var b=NOBLE[m[1]];for(var i=0;i<b.length;i++)s[i]=b[i];}
+  var re=/([1-7])([spdf])(\d+)/g,t;
+  while((t=re.exec(cfg))!==null)s[+t[1]-1]+=+t[3];
+  while(s.length&&s[s.length-1]===0)s.pop();
+  return s;
+}
+function formatCfg(cfg){
+  var SU=['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'];
+  return cfg.replace(/([spdf])(\d+)/g,function(a,l,d){
+    var o='';for(var i=0;i<d.length;i++)o+=SU[+d[i]];return l+o;
+  });
+}
+function blockOf(cat,group){
+  if(cat===8||cat===9)return 'f';
+  if(group<=2)return 's';
+  if(group>=13)return 'p';
+  return 'd';
+}
+function valenceOf(cat,group){
+  if(cat===8||cat===9)return '—';
+  if(group===18)return (group===18&&cat===7)?'—':'8';
+  if(group<=2)return ''+group;
+  if(group>=13)return ''+(group-10);
+  return '—';
+}
+function massNum(mass){
+  var m=parseFloat(mass);
+  return isNaN(m)?parseInt(mass.replace(/[^\d]/g,''),10):Math.round(m);
+}
+function ionLabel(sym,ion){
+  var n=parseInt(ion,10),sign=ion.charAt(ion.length-1);
+  var S=['','⁺','²⁺','³⁺','⁴⁺','⁵⁺','⁶⁺','⁷⁺','⁸⁺'];
+  var SU=['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'];
+  if(sign==='+')return sym+(n<=8?S[n]:sym+'^(+'+n+')');
+  return sym+'⁻'+(n>1?SU[n]:'');
+}
+
+var ELEMS=[null];
+var GROUP=[0],PERIOD=[0],BLOCK=[''],SHELLS=[null],VALENCE=[''],MASS_N=[0];
+ELEM_STR.forEach(function(line,i){
+  if(!line)return;
+  var p=line.split(',');
+  ELEMS[i]={sym:p[0],ja:p[1],mass:p[2],cat:+p[3],st:+p[4],cry:p[5]||'',ions:p[6]||''};
+});
+for(var r=0;r<POS.length;r++){
+  for(var c=0;c<18;c++){
+    var n=POS[r][c];
+    if(!n)continue;
+    GROUP[n]=c+1;PERIOD[n]=r+1;
+    BLOCK[n]=blockOf(ELEMS[n].cat,GROUP[n]);
+    VALENCE[n]=valenceOf(ELEMS[n].cat,GROUP[n]);
+    SHELLS[n]=parseConfig(CFG[n]);
+    MASS_N[n]=massNum(ELEMS[n].mass);
+  }
+}
+(function(){
+  for(var n=1;n<=118;n++){
+    if(!GROUP[n]){GROUP[n]=3;PERIOD[n]=6;BLOCK[n]='f';VALENCE[n]='—';}
+  }
+})();
+
+/* ================= タブ切替 ================= */
+var STRUCT_JP={
+  BCC:'体心立方格子',FCC:'面心立方格子',HCP:'六方最密充填',
+  NaCl:'NaCl型(岩塩型)',CsCl:'CsCl型',Diamond:'ダイヤモンド型',Graphite:'黒鉛(層状構造)'
+};
+var activeTab='pt';
+function switchTab(tab){
+  activeTab=tab;
+  $$('#tabs .tab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
+  $$('.pane').forEach(function(p){p.classList.toggle('hidden',p.dataset.tab!==tab);});
+  $$('.panel .card').forEach(function(c){c.classList.toggle('hidden',c.dataset.tab!==tab);});
+  if(tab==='atom'&&!atomState.n)setAtom(11);
+  if(tab==='crystal'&&!cryState.id)setCry('BCC');
+  resize();
+}
+$$('#tabs .tab').forEach(function(b){
+  b.addEventListener('click',function(){switchTab(b.dataset.tab);});
+});
+
+/* ================= 周期表 ================= */
+var grid=$('#ptGrid');
+var elNodes={};
+(function buildPT(){
+  for(var r=0;r<POS.length;r++){
+    for(var c=0;c<18;c++){
+      var n=POS[r][c];
+      var style='';
+      if((r===5||r===6)&&c===2){
+        var mk=document.createElement('div');
+        mk.className='pt-marker';
+        mk.style.gridRow=(r+1)+'';mk.style.gridColumn=(c+1)+'';
+        mk.textContent=(r===5?'ランタノイド':'アクチノイド')+' ('+(r===5?'57–71':'89–103')+')';
+        grid.appendChild(mk);
+        continue;
+      }
+      if(!n){continue;}
+      var e=ELEMS[n];
+      var b=document.createElement('button');
+      b.className='el cat'+e.cat+' blk-'+BLOCK[n];
+      b.style.gridRow=(r+1)+'';b.style.gridColumn=(c+1)+'';
+      b.dataset.n=n;
+      b.title=e.ja;
+      var nm=document.createElement('span');nm.className='num';nm.textContent=n;
+      var sy=document.createElement('span');sy.className='sym';sy.textContent=e.sym;
+      var nm2=document.createElement('span');nm2.className='nm';nm2.textContent=e.ja;
+      b.appendChild(nm);b.appendChild(sy);b.appendChild(nm2);
+      b.addEventListener('click',function(){selectElement(+this.dataset.n);});
+      grid.appendChild(b);
+      elNodes[n]=b;
+    }
+  }
+  var lg=$('#ptLegend');
+  for(var i=0;i<CATS.length;i++){
+    var ch=document.createElement('div');
+    ch.className='chip';
+    var sw=document.createElement('span');
+    sw.className='sw';
+    sw.style.background=CAT_COL[i];
+    ch.appendChild(sw);
+    var tx=document.createElement('span');
+    tx.textContent=CATS[i];
+    ch.appendChild(tx);
+    lg.appendChild(ch);
+  }
+  var lgb=$('#ptLegendBlk');
+  var BLK_DEF=[['s ブロック','#8cb8f0'],['p ブロック','#e08cd0'],['d ブロック','#8ce0c0'],['f ブロック','#f0d88c']];
+  BLK_DEF.forEach(function(bd){
+    var ch=document.createElement('div');
+    ch.className='chip';
+    var sw=document.createElement('span');
+    sw.className='sw';
+    sw.style.background=bd[1];
+    ch.appendChild(sw);
+    var tx=document.createElement('span');
+    tx.textContent=bd[0];
+    ch.appendChild(tx);
+    lgb.appendChild(ch);
+  });
+})();
+$$('#hlMode .btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    $$('#hlMode .btn').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    grid.dataset.mode=b.dataset.mode;
+    $('#ptLegend').classList.toggle('hidden',b.dataset.mode!=='cat');
+    $('#ptLegendBlk').classList.toggle('hidden',b.dataset.mode!=='blk');
+  });
+});
+
+var selN=11;
+function selectElement(n){
+  selN=n;
+  $$('.el.selected').forEach(function(x){x.classList.remove('selected');});
+  var node=elNodes[n];
+  if(node)node.classList.add('selected');
+  var e=ELEMS[n],g=GROUP[n],sh=SHELLS[n];
+  $('#detSym').textContent=e.sym;
+  $('#detSym').style.background=CAT_COL[e.cat];
+  $('#detName').textContent=e.ja;
+  $('#detState').textContent='常温で'+STATES[e.st];
+  $('#detNum').textContent=n;
+  $('#detMass').textContent=e.mass;
+  $('#detCat').textContent=CATS[e.cat];
+  $('#detPG').textContent=PERIOD[n]+' 周期・'+g+' 族';
+  $('#detBlk').textContent=BLK_JP[BLOCK[n]];
+  $('#detOuter').textContent=sh[sh.length-1];
+  $('#detVal').textContent=VALENCE[n];
+  var ionTxt=e.ions?e.ions.split(';').map(function(x){return ionLabel(e.sym,x);}).join('・'):'—';
+  $('#detIons').textContent=ionTxt;
+  $('#detIonNote').textContent=ION_NOTE[n]||'';
+  $('#detIonNote').style.display=ION_NOTE[n]?'':'none';
+  $('#detCfg').textContent=formatCfg(CFG[n]);
+  var sn=['K','L','M','N','O','P','Q'];
+  $('#detShells').textContent=sh.map(function(v,i){return sn[i]+':'+v;}).join(' ');
+  $('#detUse').textContent=USE[n]||'—';
+  $('#detNat').textContent=NAT[n]||'—';
+  var cryBox=$('#detCry');
+  cryBox.innerHTML='';
+  if(e.cry){
+    e.cry.split(';').forEach(function(id){
+      var bk=document.createElement('button');
+      bk.className='cry-link';
+      bk.textContent=STRUCT_JP[id];
+      bk.addEventListener('click',function(){
+        switchTab('crystal');
+        setCry(id);
+      });
+      cryBox.appendChild(bk);
+    });
+  }
+}
+selectElement(11);
+
+$('#toAtomBtn').addEventListener('click',function(){
+  switchTab('atom');
+  setAtom(selN);
+});
+
+/* ================= 原子モデル ================= */
+var cvA=$('#cvAtom'),ctxA=cvA.getContext('2d');
+var AW=0,AH=0,DPR=1;
+var SHELL_LETTERS=['K','L','M','N','O','P','Q'];
+var atomState={n:11,ion:0};
+var atomAnim={a:null,b:null,t:1};
+
+$('#atomEl').innerHTML=(function(){
+  var o='';
+  for(var n=1;n<=118;n++){
+    o+='<option value="'+n+'">'+n+' '+ELEMS[n].sym+' '+ELEMS[n].ja+'</option>';
+  }
+  return o;
+})();
+$('#atomEl').value='11';
+
+function ionOpts(n){
+  var e=ELEMS[n],o='<option value="0">原子(中性)</option>';
+  if(e.ions){
+    e.ions.split(';').forEach(function(x){
+      o+='<option value="'+x+'">'+ionLabel(e.sym,x)+'</option>';
+    });
+  }
+  return o;
+}
+function setAtom(n){
+  atomState.n=n;
+  $('#atomEl').value=''+n;
+  $('#atomIon').innerHTML=ionOpts(n);
+  atomState.ion=0;
+  $('#atomIon').value='0';
+  snapShells(neutralShells(n));
+}
+$('#atomEl').addEventListener('change',function(){
+  setAtom(+this.value);
+});
+$('#atomIon').addEventListener('change',function(){
+  var v=this.value;
+  atomState.ion=v==='0'?0:v;
+  animateTo(ionShells(atomState.n,atomState.ion));
+});
+function neutralShells(n){return SHELLS[n].slice();}
+function ionShells(n,ion){
+  if(!ion)return neutralShells(n);
+  var s=neutralShells(n);
+  var q=parseInt(ion,10),sign=ion.charAt(ion.length-1);
+  if(sign==='+'){
+    while(q>0&&s.length){
+      while(s.length&&s[s.length-1]===0)s.pop();
+      if(!s.length)break;
+      var take=Math.min(s[s.length-1],q);
+      s[s.length-1]-=take;q-=take;
+      while(s.length&&s[s.length-1]===0)s.pop();
+    }
+  }else{
+    while(q>0){
+      if(!s.length)s.push(0);
+      s[s.length-1]+=1;q--;
+    }
+  }
+  return s;
+}
+function snapShells(s){atomAnim={a:null,b:s,t:1};}
+function animateTo(s){
+  atomAnim.a=atomAnim.b||neutralShells(atomState.n);
+  atomAnim.b=s;
+  atomAnim.t=0;
+}
+function currentShells(){
+  if(!atomAnim.b)return neutralShells(atomState.n);
+  if(atomAnim.t>=1)return atomAnim.b;
+  var a=atomAnim.a,b=atomAnim.b,t=atomAnim.t;
+  var L=Math.max(a.length,b.length),out=[];
+  for(var i=0;i<L;i++)out.push((a[i]||0)*(1-t)+(b[i]||0)*t);
+  return out;
+}
+function chargeOf(shells,n){
+  var e=0;for(var i=0;i<shells.length;i++)e+=shells[i];
+  return n-e;
+}
+
+function drawAtom(now){
+  var W=AW,H=AH;
+  ctxA.clearRect(0,0,W,H);
+  if(!atomState.n)return;
+  var n=atomState.n,e=ELEMS[n];
+  var sh=currentShells();
+  var cx=W/2,cy=H/2;
+  var maxSh=Math.max(sh.length,1);
+  var r0=Math.min(W,H)*0.072;
+  var dr=Math.min(W,H)*0.085;
+  var elR=Math.max(2.4,Math.min(W,H)*0.017);
+  var highlight=$('#atomVal').checked;
+  var spin=$('#atomSpin').checked;
+  var t0=now*0.001;
+
+  var validShells=[];
+  for(var i=0;i<sh.length;i++)if(sh[i]>0.01)validShells.push(i);
+
+  ctxA.strokeStyle='rgba(23,32,52,.16)';
+  ctxA.lineWidth=1;
+  ctxA.fillStyle='rgba(23,32,52,.55)';
+  ctxA.font='11px "M PLUS 1 Code", monospace';
+  ctxA.textAlign='left';
+  ctxA.textBaseline='middle';
+  for(var si=0;si<maxSh;si++){
+    var rr=r0+si*dr;
+    var val=highlight&&si===validShells[validShells.length-1];
+    ctxA.beginPath();
+    ctxA.ellipse(cx,cy,rr,rr*0.34,0,0,Math.PI*2);
+    ctxA.strokeStyle=val?'rgba(176,138,62,.55)':'rgba(23,32,52,.16)';
+    ctxA.stroke();
+    ctxA.fillStyle=val?'rgba(176,138,62,.8)':'rgba(23,32,52,.5)';
+    ctxA.fillText(SHELL_LETTERS[si],cx+rr+6,cy);
+  }
+
+  var cnt=sh.length?sh[validShells[validShells.length-1]]:0;
+  for(var i2=0;i2<sh.length;i2++){
+    var c=sh[i2];
+    if(c<=0.01)continue;
+    var rr2=r0+i2*dr;
+    var omega=spin?(1.15/(rr2*0.05+0.5)):0;
+    var ph=t0*omega;
+    var nFull=Math.floor(c),frac=c-nFull;
+    var val2=highlight&&i2===validShells[validShells.length-1];
+    for(var k=0;k<nFull;k++){
+      var a=ph+k*(Math.PI*2/Math.max(c,nFull));
+      var px=cx+Math.cos(a)*rr2,py=cy+Math.sin(a)*rr2*0.34;
+      drawBall(px,py,elR,val2?'#c9992e':'#2f5f9e');
+    }
+    if(frac>0.01){
+      var ag=ph+(nFull+0.5)*(Math.PI*2/Math.max(c,nFull+1));
+      var gx=cx+Math.cos(ag)*rr2,gy=cy+Math.sin(ag)*rr2*0.34;
+      ctxA.globalAlpha=frac;
+      drawBall(gx,gy,elR,val2?'#c9992e':'#2f5f9e');
+      ctxA.globalAlpha=1;
+    }
+  }
+
+  drawNucleus(cx,cy,Math.min(W,H)*0.058,n);
+}
+function drawNucleus(cx,cy,r,n){
+  var e=ELEMS[n];
+  var Z=n,N=MASS_N[n]-Z;
+  var total=Math.min(Z+N,56);
+  var pR=Z/(Z+N);
+  var seed=1;
+  var pts=[];
+  for(var i=0;i<total;i++){
+    seed=(seed*16807)%2147483647;
+    var u1=seed/2147483647;
+    seed=(seed*16807)%2147483647;
+    var u2=seed/2147483647;
+    var rr=r*Math.sqrt(u1)*(0.35+0.65*(1-Math.abs(u2-0.5)*2));
+    var a=u2*Math.PI*2;
+    pts.push([cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,i<total*pR]);
+  }
+  for(var k=0;k<pts.length;k++){
+    ctxA.beginPath();
+    ctxA.arc(pts[k][0],pts[k][1],Math.max(1.1,r*0.14),0,Math.PI*2);
+    ctxA.fillStyle=pts[k][2]?'#c05a4a':'#8a919c';
+    ctxA.fill();
+  }
+  ctxA.beginPath();
+  ctxA.arc(cx,cy,r*0.86,0,Math.PI*2);
+  ctxA.strokeStyle='rgba(23,32,52,.25)';
+  ctxA.lineWidth=1;
+  ctxA.stroke();
+}
+function drawBall(px,py,r,base){
+  var g=ctxA.createRadialGradient(px-r*0.4,py-r*0.4,r*0.1,px,py,r);
+  g.addColorStop(0,'#ffffff');
+  g.addColorStop(0.35,base);
+  g.addColorStop(1,shade(base,-38));
+  ctxA.beginPath();
+  ctxA.arc(px,py,r,0,Math.PI*2);
+  ctxA.fillStyle=g;
+  ctxA.fill();
+}
+function shade(hex,amt){
+  var v=hex.replace('#','');
+  var r=parseInt(v.substr(0,2),16),g=parseInt(v.substr(2,2),16),b=parseInt(v.substr(4,2),16);
+  r=clamp(r+amt,0,255);g=clamp(g+amt,0,255);b=clamp(b+amt,0,255);
+  function h(x){x=x.toString(16);return x.length<2?'0'+x:x;}
+  return '#'+h(r)+h(g)+h(b);
+}
+
+function updateAtomInfo(){
+  var n=atomState.n,e=ELEMS[n];
+  var sh=currentShells();
+  var ion=atomState.ion;
+  $('#aiSym').textContent=e.sym;
+  $('#aiSym').style.background=CAT_COL[e.cat];
+  $('#aiName').textContent=e.ja;
+  $('#aiIon').textContent=ion?ionLabel(e.sym,ion):'原子(中性)';
+  $('#aiCfg').textContent=formatCfg(CFG[n]);
+  $('#aiZ').textContent=n;
+  $('#aiN').textContent=MASS_N[n]-n;
+  var eSum=0;for(var i=0;i<sh.length;i++)eSum+=sh[i];
+  $('#aiE').textContent=Math.round(eSum);
+  var q=chargeOf(sh,n);
+  $('#aiQ').textContent=q===0?'0':(q>0?'+'+q:''+q);
+  var sn=['K','L','M','N','O','P','Q'];
+  $('#aiShells').textContent=sh.map(function(v,i){return sn[i]+':'+Math.round(v);}).join(' ');
+  $('#aiIonNote').textContent=ION_NOTE[n]||'';
+  $('#aiIonNote').style.display=ION_NOTE[n]?'':'none';
+}
+setAtom(11,true);
+updateAtomInfo();
+
+/* ================= 結晶構造 ================= */
+var cvC=$('#cvCry'),ctxC=cvC.getContext('2d');
+var CW=0,CH=0,CDPR=1;
+var cryState={id:'BCC',expanded:false,zoom:1,mode:'stick',auto:false,cell:true};
+var CRY_STRUCT='BCC';
+var cryMesh=null;
+var cryInfo=null;
+var lastCryT=0;
+var viewM=null;
+function matRotX(a){var c=Math.cos(a),s=Math.sin(a);return [[1,0,0],[0,c,-s],[0,s,c]];}
+function matRotY(a){var c=Math.cos(a),s=Math.sin(a);return [[c,0,s],[0,1,0],[-s,0,c]];}
+function matMul(A,B){
+  return [
+    [A[0][0]*B[0][0]+A[0][1]*B[1][0]+A[0][2]*B[2][0], A[0][0]*B[0][1]+A[0][1]*B[1][1]+A[0][2]*B[2][1], A[0][0]*B[0][2]+A[0][1]*B[1][2]+A[0][2]*B[2][2]],
+    [A[1][0]*B[0][0]+A[1][1]*B[1][0]+A[1][2]*B[2][0], A[1][0]*B[0][1]+A[1][1]*B[1][1]+A[1][2]*B[2][1], A[1][0]*B[0][2]+A[1][1]*B[1][2]+A[1][2]*B[2][2]],
+    [A[2][0]*B[0][0]+A[2][1]*B[1][0]+A[2][2]*B[2][0], A[2][0]*B[0][1]+A[2][1]*B[1][1]+A[2][2]*B[2][1], A[2][0]*B[0][2]+A[2][1]*B[1][2]+A[2][2]*B[2][2]]
+  ];
+}
+function matVec(A,p){
+  return [A[0][0]*p[0]+A[0][1]*p[1]+A[0][2]*p[2],
+          A[1][0]*p[0]+A[1][1]*p[1]+A[1][2]*p[2],
+          A[2][0]*p[0]+A[2][1]*p[1]+A[2][2]*p[2]];
+}
+function v3sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
+function v3sc(a,s){return [a[0]*s,a[1]*s,a[2]*s];}
+function v3dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+function v3cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+function v3norm(a){var l=Math.hypot(a[0],a[1],a[2]);return l<1e-12?a.slice():[a[0]/l,a[1]/l,a[2]/l];}
+function ortho(M){
+  var r0=v3norm([M[0][0],M[0][1],M[0][2]]);
+  var r1=v3norm(v3sub([M[1][0],M[1][1],M[1][2]],v3sc(r0,v3dot([M[1][0],M[1][1],M[1][2]],r0))));
+  var r2=v3cross(r0,r1);
+  return [[r0[0],r0[1],r0[2]],[r1[0],r1[1],r1[2]],[r2[0],r2[1],r2[2]]];
+}
+function resetView(){
+  viewM=ortho(matMul(matRotY(0.7),matRotX(0.4)));
+}
+
+var STRUCT_INFO={
+  BCC:{bond:'金属結合',ex:'Fe・Na・K など',cn:'8',count:'2',countTex:'8\\times\\frac{1}{8}+1=2',
+    ratio:'68%',ratioTex:'\\frac{\\sqrt{3}\\pi}{8}\\approx 0.680',
+    desc:'立方体の角と中心に原子が並ぶ格子。中心原子は角の8個と接する。隙間が多く、充填率は金属結晶の中で最も低い。'},
+  FCC:{bond:'金属結合',ex:'Cu・Al・Au・Ag など',cn:'12',count:'4',countTex:'8\\times\\frac{1}{8}+6\\times\\frac{1}{2}=4',
+    ratio:'74%',ratioTex:'\\frac{\\sqrt{2}\\pi}{6}\\approx 0.740',
+    desc:'面心立方最密充填(ccp)。層が ABCABC&hellip; の順に重なる。六方最密充填(HCP)と同じく配位数12・充填率74%。'},
+  HCP:{bond:'金属結合',ex:'Mg・Zn・Ti など',cn:'12',count:'6',countTex:'12\\times\\frac{1}{6}+2\\times\\frac{1}{2}+3=6',
+    ratio:'74%',ratioTex:'\\eta_{\\mathrm{HCP}}=0.740\\ (\\mathrm{FCC\\ と同じ})',
+    desc:'六方最密充填(hcp)。層が ABAB&hellip; の順に重なる。単位格子は六角柱で、中層の3個の原子が上層・下層の窪みに入る。'},
+  NaCl:{bond:'イオン結合',ex:'NaCl・KCl・AgCl など',cn:'6 : 6',count:'Na⁺ 4 / Cl⁻ 4',countTex:'\\mathrm{Na}^{+}:12\\times\\frac{1}{4}+1=4,\\ \\mathrm{Cl}^{-}:8\\times\\frac{1}{8}+6\\times\\frac{1}{2}=4',
+    ratio:'—',ratioTex:'',
+    desc:'岩塩型。Cl⁻(緑)が面心立方格子を作り、その隙間(八面体位置)に Na⁺(紫)が入る。配位数は6:6で、結晶は硬いが脆い。'},
+  CsCl:{bond:'イオン結合',ex:'CsCl・CsBr など',cn:'8 : 8',count:'Cs⁺ 1 / Cl⁻ 1',countTex:'\\mathrm{Cs}^{+}:8\\times\\frac{1}{8}=1,\\ \\mathrm{Cl}^{-}:1',
+    ratio:'—',ratioTex:'',
+    desc:'塩化セシウム型。Cs⁺(金)が立方体の角、Cl⁻(緑)が中心に位置し、配位数は8:8。Cs⁺が大きいため中心に1個の Cl⁻ が入る。'},
+  Diamond:{bond:'共有結合(共有結合結晶)',ex:'C(ダイヤモンド)・Si など',cn:'4',count:'8',countTex:'8\\times\\frac{1}{8}+6\\times\\frac{1}{2}+4=8',
+    ratio:'34%',ratioTex:'\\frac{\\sqrt{3}\\pi}{16}\\approx 0.340',
+    desc:'各原子が正四面体状に4個の原子と共有結合する。極めて硬く融点が高い。充填率は低く、隙間の多い構造。'},
+  Graphite:{bond:'共有結合(層状構造)',ex:'C(黒鉛)・鉛筆の芯',cn:'3',count:'4',countTex:'2+2=4\\ (1層2個\\times 2層)',
+    ratio:'—',ratioTex:'',
+    desc:'炭素が六角形の網目(ハニカム)状に共有結合した層が重なった構造。層間は弱いファンデルワールス力で、ずれやすいため滑りやすい。'}
+};
+
+var SQ3=Math.sqrt(3)/2;
+var HEX_V=[
+[1,0],[0.5,SQ3],[-0.5,SQ3],[-1,0],[-0.5,-SQ3],[0.5,-SQ3]
+];
+function inHex(px,py,cx,cy){
+  var inside=true;
+  for(var i=0;i<6;i++){
+    var v1=HEX_V[i],v2=HEX_V[(i+1)%6];
+    var ax=v1[0],ay=v1[1],bx=v2[0],by=v2[1];
+    var dx=bx-ax,dy=by-ay;
+    var ox=px-(cx+ax),oy=py-(cy+ay);
+    if(dx*oy-dy*ox<-1e-9){inside=false;break;}
+  }
+  return inside;
+}
+
+function addAtom(list,key,x,y,z,r,col,kind){
+  var k=x.toFixed(4)+','+y.toFixed(4)+','+z.toFixed(4);
+  if(list.map[k])return;
+  list.map[k]=true;
+  list.atoms.push({x:x,y:y,z:z,r:r,col:col,kind:kind});
+}
+function bondsOf(atoms,thr){
+  var b=[];
+  for(var i=0;i<atoms.length;i++){
+    for(var j=i+1;j<atoms.length;j++){
+      var dx=atoms[i].x-atoms[j].x,dy=atoms[i].y-atoms[j].y,dz=atoms[i].z-atoms[j].z;
+      if(Math.sqrt(dx*dx+dy*dy+dz*dz)<thr)b.push([i,j]);
+    }
+  }
+  return b;
+}
+function wireCube(ox,oy,oz,L,lines){
+  var c=[[0,0,0],[1,0,0],[0,1,0],[0,0,1],[1,1,0],[1,0,1],[0,1,1],[1,1,1]];
+  var e=[[0,1],[0,2],[0,3],[1,4],[1,5],[2,4],[2,6],[3,5],[3,6],[4,7],[5,7],[6,7]];
+  for(var i=0;i<e.length;i++){
+    lines.push([[ox+c[e[i][0]][0]*L,oy+c[e[i][0]][1]*L,oz+c[e[i][0]][2]*L],
+                [ox+c[e[i][1]][0]*L,oy+c[e[i][1]][1]*L,oz+c[e[i][1]][2]*L]]);
+  }
+}
+function wireHexPrism(cx,cy,cz,c,lines){
+  for(var i=0;i<6;i++){
+    var v1=HEX_V[i],v2=HEX_V[(i+1)%6];
+    lines.push([[cx+v1[0],cy+v1[1],cz],[cx+v2[0],cy+v2[1],cz]]);
+    lines.push([[cx+v1[0],cy+v1[1],cz+c],[cx+v2[0],cy+v2[1],cz+c]]);
+    lines.push([[cx+v1[0],cy+v1[1],cz],[cx+v1[0],cy+v1[1],cz+c]]);
+  }
+}
+function clipBox(L){
+  return [
+    {n:[1,0,0],d:L},{n:[-1,0,0],d:0},
+    {n:[0,1,0],d:L},{n:[0,-1,0],d:0},
+    {n:[0,0,1],d:L},{n:[0,0,-1],d:0}
+  ];
+}
+function clipHex(c){
+  var planes=[];
+  for(var i=0;i<6;i++){
+    var mx=(HEX_V[i][0]+HEX_V[(i+1)%6][0])/2,my=(HEX_V[i][1]+HEX_V[(i+1)%6][1])/2;
+    var l=Math.hypot(mx,my);
+    planes.push({n:[mx/l,my/l,0],d:l});
+  }
+  planes.push({n:[0,0,1],d:c},{n:[0,0,-1],d:0});
+  return planes;
+}
+function cubeMesh(atoms,bonds,L,expanded){
+  var lines=[];
+  var lim=expanded?2:1;
+  for(var i=0;i<lim;i++)for(var j=0;j<lim;j++)for(var k=0;k<lim;k++){
+    wireCube(i*L,j*L,k*L,L,lines);
+  }
+  var verts=[];
+  for(var c=0;c<8;c++)verts.push([CORNER[c][0]*L,CORNER[c][1]*L,CORNER[c][2]*L]);
+  return {atoms:atoms,bonds:bonds,lines:lines,expanded:expanded,clip:clipBox(L),verts:verts};
+}
+function clipPoly3D(poly,planes){
+  var out=poly;
+  for(var p=0;p<planes.length;p++){
+    if(out.length<3)return [];
+    var pl=planes[p],next=[];
+    for(var i=0;i<out.length;i++){
+      var a=out[i],b=out[(i+1)%out.length];
+      var da=pl.d-(pl.n[0]*a[0]+pl.n[1]*a[1]+pl.n[2]*a[2]);
+      var db=pl.d-(pl.n[0]*b[0]+pl.n[1]*b[1]+pl.n[2]*b[2]);
+      if(da>=-1e-9){
+        next.push(a);
+        if(db<-1e-9){
+          var t=da/(da-db);
+          next.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]);
+        }
+      }else if(db>=-1e-9){
+        var t2=da/(da-db);
+        next.push([a[0]+(b[0]-a[0])*t2,a[1]+(b[1]-a[1])*t2,a[2]+(b[2]-a[2])*t2]);
+      }
+    }
+    out=next;
+  }
+  return out;
+}
+function cross2(o,a,b){return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);}
+function convexHull2D(pts){
+  pts=pts.slice().sort(function(a,b){return a[0]-b[0]||a[1]-b[1];});
+  var lower=[];
+  for(var i=0;i<pts.length;i++){
+    while(lower.length>=2&&cross2(lower[lower.length-2],lower[lower.length-1],pts[i])<=0)lower.pop();
+    lower.push(pts[i]);
+  }
+  var upper=[];
+  for(var i2=pts.length-1;i2>=0;i2--){
+    while(upper.length>=2&&cross2(upper[upper.length-2],upper[upper.length-1],pts[i2])<=0)upper.pop();
+    upper.push(pts[i2]);
+  }
+  lower.pop();upper.pop();
+  return lower.concat(upper);
+}
+
+var CORNER=[[0,0,0],[1,0,0],[0,1,0],[0,0,1],[1,1,0],[1,0,1],[0,1,1],[1,1,1]];
+var CRY_DATA={
+  BCC:{
+    r:Math.sqrt(3)/4*2,col:'#4f7bb5',
+    build:function(expanded){
+      var L=2,a=[];a.map={};a.atoms=[];
+      var lim=expanded?2:1;
+      for(var i=0;i<lim;i++)for(var j=0;j<lim;j++)for(var k=0;k<lim;k++){
+        for(var c=0;c<8;c++){
+          addAtom(a,null,i*L+CORNER[c][0]*L,j*L+CORNER[c][1]*L,k*L+CORNER[c][2]*L,this.r,this.col);
+        }
+        addAtom(a,null,i*L+L/2,j*L+L/2,k*L+L/2,this.r,this.col);
+      }
+      return cubeMesh(a.atoms,bondsOf(a.atoms,Math.sqrt(3)/2*L*1.06),L,expanded);
+    }
+  },
+  FCC:{
+    r:Math.sqrt(2)/4*2,col:'#4f7bb5',
+    build:function(expanded){
+      var L=2,a=[];a.map={};a.atoms=[];
+      var lim=expanded?2:1;
+      var faces=[[1,1,0],[1,0,1],[0,1,1],[1,1,2],[1,2,1],[2,1,1]];
+      for(var i=0;i<lim;i++)for(var j=0;j<lim;j++)for(var k=0;k<lim;k++){
+        for(var c=0;c<8;c++){
+          addAtom(a,null,i*L+CORNER[c][0]*L,j*L+CORNER[c][1]*L,k*L+CORNER[c][2]*L,this.r,this.col);
+        }
+        for(var f=0;f<6;f++){
+          addAtom(a,null,i*L+faces[f][0]*L/2,j*L+faces[f][1]*L/2,k*L+faces[f][2]*L/2,this.r,this.col);
+        }
+      }
+      return cubeMesh(a.atoms,bondsOf(a.atoms,L/Math.sqrt(2)*1.06),L,expanded);
+    }
+  },
+  HCP:{
+    c:Math.sqrt(8/3),
+    build:function(expanded){
+      var a1=[1,0,0],a2=[0.5,Math.sqrt(3)/2,0],c=this.c;
+      var a=[];a.map={};a.atoms=[];
+      var centers=expanded?[[0,0],[1.5,SQ3],[0,2*SQ3],[1.5,3*SQ3]]:[[0,0]];
+      var z0=0,z1=expanded?2*c:c;
+      function inAny(x,y){
+        for(var ci=0;ci<centers.length;ci++){
+          if(inHex(x,y,centers[ci][0],centers[ci][1]))return true;
+        }
+        return false;
+      }
+      var RN=expanded?4:3;
+      for(var m=-RN;m<=RN;m++){
+        for(var n=-RN;n<=RN;n++){
+          for(var l=-1;l<=3;l++){
+            var px=m*a1[0]+n*a2[0],py=m*a1[1]+n*a2[1],pz=l*c;
+            var bx=px+a1[0]/3+a2[0]/3,by=py+a1[1]/3+a2[1]/3;
+            var bz=pz+c/2;
+            if(pz>=-0.02&&pz<=z1+0.02&&inAny(px,py))addAtom(a,null,px,py,pz,0.5,'#4f7bb5');
+            if(bz>=-0.02&&bz<=z1+0.02&&inAny(bx,by))addAtom(a,null,bx,by,bz,0.5,'#4f7bb5');
+          }
+        }
+      }
+      var lines=[];
+      for(var ci2=0;ci2<centers.length;ci2++){
+        wireHexPrism(centers[ci2][0],centers[ci2][1],0,expanded?2*c:c,lines);
+      }
+      var verts=[];
+      for(var vi=0;vi<6;vi++){
+        verts.push([HEX_V[vi][0],HEX_V[vi][1],0]);
+        verts.push([HEX_V[vi][0],HEX_V[vi][1],c]);
+      }
+      return {atoms:a.atoms,bonds:bondsOf(a.atoms,1.06),lines:lines,expanded:expanded,clip:clipHex(c),verts:verts};
+    }
+  },
+  NaCl:{
+    rCl:1/2.8*2*0.9,rNa:1/2.8*2*0.5,
+    build:function(expanded){
+      var L=2,a=[];a.map={};a.atoms=[];
+      var lim=expanded?2:1;
+      var faces=[[1,1,0],[1,0,1],[0,1,1],[1,1,2],[1,2,1],[2,1,1]];
+      var edges=[[1,0,0],[1,0,2],[1,2,0],[1,2,2],[0,1,0],[0,1,2],[2,1,0],[2,1,2],[0,0,1],[0,2,1],[2,0,1],[2,2,1]];
+      for(var i=0;i<lim;i++)for(var j=0;j<lim;j++)for(var k=0;k<lim;k++){
+        for(var c=0;c<8;c++){
+          addAtom(a,null,i*L+CORNER[c][0]*L,j*L+CORNER[c][1]*L,k*L+CORNER[c][2]*L,this.rCl,'#3f9e4d','cl');
+        }
+        for(var f=0;f<6;f++){
+          addAtom(a,null,i*L+faces[f][0]*L/2,j*L+faces[f][1]*L/2,k*L+faces[f][2]*L/2,this.rCl,'#3f9e4d','cl');
+        }
+        for(var e=0;e<12;e++){
+          addAtom(a,null,i*L+edges[e][0]*L/2,j*L+edges[e][1]*L/2,k*L+edges[e][2]*L/2,this.rNa,'#7b6fd6','na');
+        }
+        addAtom(a,null,i*L+L/2,j*L+L/2,k*L+L/2,this.rNa,'#7b6fd6','na');
+      }
+      return cubeMesh(a.atoms,bondsOf(a.atoms,1.06),L,expanded);
+    }
+  },
+  CsCl:{
+    rCs:1.732/2*0.95,rCl:1.732/2*1.05,
+    build:function(expanded){
+      var L=2,a=[];a.map={};a.atoms=[];
+      var lim=expanded?2:1;
+      for(var i=0;i<lim;i++)for(var j=0;j<lim;j++)for(var k=0;k<lim;k++){
+        for(var c=0;c<8;c++){
+          addAtom(a,null,i*L+CORNER[c][0]*L,j*L+CORNER[c][1]*L,k*L+CORNER[c][2]*L,this.rCs,'#c9992e','cs');
+        }
+        addAtom(a,null,i*L+L/2,j*L+L/2,k*L+L/2,this.rCl,'#3f9e4d','cl');
+      }
+      return cubeMesh(a.atoms,bondsOf(a.atoms,1.82),L,expanded);
+    }
+  },
+  Diamond:{
+    r:Math.sqrt(3)/8*2,
+    build:function(expanded){
+      var L=2,a=[];a.map={};a.atoms=[];
+      var lim=expanded?2:1;
+      var faces=[[1,1,0],[1,0,1],[0,1,1],[1,1,2],[1,2,1],[2,1,1]];
+      var inner=[[0.5,0.5,0.5],[1.5,1.5,0.5],[1.5,0.5,1.5],[0.5,1.5,1.5]];
+      for(var i=0;i<lim;i++)for(var j=0;j<lim;j++)for(var k=0;k<lim;k++){
+        for(var c=0;c<8;c++){
+          addAtom(a,null,i*L+CORNER[c][0]*L,j*L+CORNER[c][1]*L,k*L+CORNER[c][2]*L,this.r,'#5a6577','c');
+        }
+        for(var f=0;f<6;f++){
+          addAtom(a,null,i*L+faces[f][0]*L/2,j*L+faces[f][1]*L/2,k*L+faces[f][2]*L/2,this.r,'#5a6577','c');
+        }
+        for(var q=0;q<4;q++){
+          addAtom(a,null,i*L+inner[q][0],j*L+inner[q][1],k*L+inner[q][2],this.r,'#5a6577','c');
+        }
+      }
+      return cubeMesh(a.atoms,bondsOf(a.atoms,Math.sqrt(3)/4*2*1.06),L,expanded);
+    }
+  },
+  Graphite:{
+    c:3,
+    build:function(expanded){
+      var a1=[1,0,0],a2=[0.5,Math.sqrt(3)/2,0],c=this.c;
+      var a=[];a.map={};a.atoms=[];
+      var centers=expanded?[[0,0],[1.5,SQ3],[0,2*SQ3],[1.5,3*SQ3]]:[[0,0]];
+      var z0=0,z1=expanded?2*c:c;
+      var off1=[a1[0]/3+a2[0]/3,a1[1]/3+a2[1]/3];
+      function inAny(x,y){
+        for(var ci=0;ci<centers.length;ci++){
+          if(inHex(x,y,centers[ci][0],centers[ci][1]))return true;
+        }
+        return false;
+      }
+      var RN=expanded?4:3;
+      for(var m=-RN;m<=RN;m++){
+        for(var n=-RN;n<=RN;n++){
+          for(var l=-1;l<=4;l++){
+            var px=m*a1[0]+n*a2[0],py=m*a1[1]+n*a2[1],pz=l*c;
+            var bx=px+off1[0],by=py+off1[1];
+            var cx2=px+off1[0]*2,cy2=py+off1[1]*2;
+            var bz=pz+c/2;
+            if(pz>=-0.02&&pz<=z1+0.02&&inAny(px,py))addAtom(a,null,px,py,pz,0.3,'#66707f','c');
+            if(pz>=-0.02&&pz<=z1+0.02&&inAny(bx,by))addAtom(a,null,bx,by,pz,0.3,'#66707f','c');
+            if(bz>=-0.02&&bz<=z1+0.02&&inAny(bx,by))addAtom(a,null,bx,by,bz,0.3,'#66707f','c');
+            if(bz>=-0.02&&bz<=z1+0.02&&inAny(cx2,cy2))addAtom(a,null,cx2,cy2,bz,0.3,'#66707f','c');
+          }
+        }
+      }
+      var lines=[];
+      for(var ci2=0;ci2<centers.length;ci2++){
+        wireHexPrism(centers[ci2][0],centers[ci2][1],0,expanded?2*c:c,lines);
+      }
+      var verts=[];
+      for(var vi=0;vi<6;vi++){
+        verts.push([HEX_V[vi][0],HEX_V[vi][1],0]);
+        verts.push([HEX_V[vi][0],HEX_V[vi][1],c]);
+      }
+      return {atoms:a.atoms,bonds:bondsOf(a.atoms,0.62),lines:lines,expanded:expanded,clip:clipHex(c),verts:verts};
+    }
+  }
+};
+
+function buildCry(){
+  var key=CRY_STRUCT;
+  var st=CRY_DATA[key];
+  var mesh=st.build(cryState.expanded&&cryState.mode!=='cut');
+  var info=STRUCT_INFO[key];
+  return {mesh:mesh,info:info,stickFactor:0.1};
+}
+function setCry(id){
+  CRY_STRUCT=id;
+  $('#crySel').value=id;
+  var diagBtn=$('#cryMode .btn[data-mode="diag"]');
+  diagBtn.classList.toggle('hidden',id!=='BCC'&&id!=='CsCl');
+  if(cryState.mode==='diag'&&id!=='BCC'&&id!=='CsCl'){
+    cryState.mode='stick';
+    $$('#cryMode .btn').forEach(function(x){x.classList.toggle('active',x.dataset.mode==='stick');});
+    $$('#cryCellMode .btn').forEach(function(x){x.classList.toggle('disabled',false);});
+  }
+  buildCryMesh();
+  renderCryInfo();
+}
+$('#crySel').innerHTML=(function(){
+  var o='';
+  var order=['BCC','FCC','HCP','NaCl','CsCl','Diamond','Graphite'];
+  for(var i=0;i<order.length;i++)o+='<option value="'+order[i]+'">'+STRUCT_JP[order[i]]+'</option>';
+  return o;
+})();
+$('#crySel').addEventListener('change',function(){setCry(this.value);});
+$$('#cryCellMode .btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    if(cryState.mode==='cut'||cryState.mode==='diag')return;
+    $$('#cryCellMode .btn').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    cryState.expanded=b.dataset.cell==='exp';
+    buildCryMesh();
+  });
+});
+$$('#cryMode .btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    $$('#cryMode .btn').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    cryState.mode=b.dataset.mode;
+    var lock=(cryState.mode==='cut'||cryState.mode==='diag');
+    $$('#cryCellMode .btn').forEach(function(x){x.classList.toggle('disabled',lock);});
+    if(lock&&cryState.expanded){
+      cryState.expanded=false;
+      $$('#cryCellMode .btn').forEach(function(x){x.classList.toggle('active',x.dataset.cell==='unit');});
+    }
+    buildCryMesh();
+    renderCryInfo();
+  });
+});
+$('#cryAuto').addEventListener('change',function(){cryState.auto=this.checked;});
+$('#cryCell').addEventListener('change',function(){cryState.cell=this.checked;});
+$('#cryReset').addEventListener('click',function(){resetView();cryState.zoom=1;});
+
+function buildCryMesh(){
+  var built=buildCry();
+  cryMesh=built.mesh;
+  cryMesh.stickFactor=built.stickFactor;
+  computeMeshBounds(cryMesh);
+  cryInfo=built.info;
+  renderCryInfo();
+}
+function computeMeshBounds(m){
+  var mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9];
+  m.atoms.forEach(function(a){
+    mn[0]=Math.min(mn[0],a.x);mx[0]=Math.max(mx[0],a.x);
+    mn[1]=Math.min(mn[1],a.y);mx[1]=Math.max(mx[1],a.y);
+    mn[2]=Math.min(mn[2],a.z);mx[2]=Math.max(mx[2],a.z);
+  });
+  m.lines.forEach(function(l){
+    for(var q=0;q<2;q++){
+      mn[0]=Math.min(mn[0],l[q][0]);mx[0]=Math.max(mx[0],l[q][0]);
+      mn[1]=Math.min(mn[1],l[q][1]);mx[1]=Math.max(mx[1],l[q][1]);
+      mn[2]=Math.min(mn[2],l[q][2]);mx[2]=Math.max(mx[2],l[q][2]);
+    }
+  });
+  m.center=[(mn[0]+mx[0])/2,(mn[1]+mx[1])/2,(mn[2]+mx[2])/2];
+  var ext=0;
+  function upd(v){
+    ext=Math.max(ext,Math.abs(v[0]-m.center[0]),Math.abs(v[1]-m.center[1]),Math.abs(v[2]-m.center[2]));
+  }
+  m.atoms.forEach(function(a){upd([a.x,a.y,a.z]);});
+  m.lines.forEach(function(l){upd(l[0]);upd(l[1]);});
+  m.ext=Math.max(ext,0.01);
+}
+function renderCryInfo(){
+  var info=cryInfo;
+  if(!info)return;
+  $('#ciSym').textContent=CRY_STRUCT==='NaCl'?'NaCl':CRY_STRUCT==='CsCl'?'CsCl':(CRY_STRUCT==='Diamond'||CRY_STRUCT==='Graphite'?'C':'');
+  $('#ciName').textContent=STRUCT_JP[CRY_STRUCT];
+  $('#ciBond').textContent=info.bond;
+  $('#ciEx').textContent=info.ex;
+  $('#ciCn').textContent=info.cn;
+  $('#ciCount').textContent=info.count;
+  $('#ciRatio').textContent=info.ratio;
+  $('#ciDesc').innerHTML=info.desc;
+  renderTex($('#ciCountTex'),info.countTex);
+  renderTex($('#ciRatioTex'),info.ratioTex);
+  var diagTex=$('#ciDiagTex');
+  if(cryState.mode==='diag'){
+    var tex=CRY_STRUCT==='BCC'
+      ?'4r=\\sqrt{3}\\,a\\;\\Rightarrow\\; r=\\frac{\\sqrt{3}}{4}\\,a'
+      :'r_{+}+r_{-}=\\frac{\\sqrt{3}}{2}\\,a';
+    diagTex.classList.remove('hidden');
+    renderTex(diagTex,tex);
+  }else{
+    diagTex.classList.add('hidden');
+    renderTex(diagTex,'');
+  }
+}
+
+function project(p,S,P,cx,cy){
+  var c0=cryMesh.center;
+  var q=matVec(viewM,[p[0]-c0[0],p[1]-c0[1],p[2]-c0[2]]);
+  var f=P/(P-q[2]);
+  if(f>10)f=10;
+  return [cx+q[0]*S*f,cy-q[1]*S*f,f,q[2]];
+}
+function drawDiag(){
+  var W=CW,H=CH;
+  ctxC.clearRect(0,0,W,H);
+  if(!cryMesh)return;
+  var L=2;
+  var uMax=Math.SQRT2*L,vMax=L;
+  var S2=Math.min(W,H)*0.72/Math.max(uMax,vMax)*cryState.zoom;
+  var cx0=W/2,cy0=H/2;
+  function toX(u){return cx0+(u-uMax/2)*S2;}
+  function toY(v){return cy0-(v-vMax/2)*S2;}
+  var rectX=toX(0),rectY=toY(vMax),rectW=uMax*S2,rectH=vMax*S2;
+  var atoms=cryMesh.atoms;
+  ctxC.save();
+  ctxC.beginPath();
+  ctxC.rect(rectX,rectY,rectW,rectH);
+  ctxC.clip();
+  for(var i=0;i<atoms.length;i++){
+    var at=atoms[i];
+    var d=Math.abs(at.x-at.y)/Math.SQRT2;
+    if(d>at.r)continue;
+    var rho=Math.sqrt(Math.max(0,at.r*at.r-d*d));
+    if(rho<0.02)continue;
+    var X=toX((at.x+at.y)/Math.SQRT2),Y=toY(at.z);
+    var R=rho*S2;
+    ctxC.beginPath();
+    ctxC.arc(X,Y,R,0,Math.PI*2);
+    ctxC.fillStyle=shade(at.col,18);
+    ctxC.fill();
+    ctxC.strokeStyle='rgba(23,32,52,.5)';
+    ctxC.lineWidth=1.5;
+    ctxC.stroke();
+  }
+  ctxC.restore();
+  ctxC.strokeStyle='#27496f';
+  ctxC.lineWidth=2;
+  ctxC.strokeRect(rectX,rectY,rectW,rectH);
+  ctxC.strokeStyle='rgba(176,138,62,.85)';
+  ctxC.lineWidth=1.3;
+  ctxC.setLineDash([6,4]);
+  ctxC.beginPath();
+  ctxC.moveTo(toX(0),toY(0));
+  ctxC.lineTo(toX(uMax),toY(vMax));
+  ctxC.stroke();
+  ctxC.setLineDash([]);
+  ctxC.fillStyle='rgba(32,36,44,.55)';
+  ctxC.font='12px "M PLUS 1 Code",serif';
+  ctxC.textAlign='left';
+  ctxC.textBaseline='alphabetic';
+  ctxC.fillText(STRUCT_JP[CRY_STRUCT]+' · 対角線断面 (x=y 面)',14,CH-14);
+}
+function drawCry(now){
+  var W=CW,H=CH;
+  ctxC.clearRect(0,0,W,H);
+  if(!cryMesh)return;
+  var mode=cryState.mode;
+  if(mode==='diag'){
+    drawDiag();
+    return;
+  }
+  var dt=Math.min((now-lastCryT)/1000,0.05);
+  lastCryT=now;
+  if(cryState.auto)viewM=ortho(matMul(matRotY(dt*0.4),viewM));
+  var atoms=cryMesh.atoms;
+  var ext=cryMesh.ext;
+  var cx=W/2,cy=H/2;
+  var S=Math.min(W,H)*0.80/(ext*2+1.6)*cryState.zoom;
+  var P=(mode==='stick')?Math.max(8,ext*2.6):Math.max(4.5,ext*2.2);
+  var rMul=(mode==='stick')?0.1:1;
+  var stickMode=(mode==='stick');
+  var cutMode=(mode==='cut');
+  var c0=cryMesh.center;
+  var BIG=4000;
+
+  if(cryState.cell){
+    ctxC.strokeStyle='rgba(31,58,95,.6)';
+    ctxC.lineWidth=1.2;
+    for(var i2=0;i2<cryMesh.lines.length;i2++){
+      var l2=cryMesh.lines[i2];
+      var p1=project(l2[0],S,P,cx,cy);
+      var p2=project(l2[1],S,P,cx,cy);
+      ctxC.beginPath();
+      ctxC.moveTo(p1[0],p1[1]);
+      ctxC.lineTo(p2[0],p2[1]);
+      ctxC.stroke();
+    }
+  }
+
+  if(stickMode&&cryMesh.bonds){
+    ctxC.strokeStyle='rgba(23,32,52,.4)';
+    ctxC.lineWidth=1.4;
+    for(var i5=0;i5<cryMesh.bonds.length;i5++){
+      var bb=cryMesh.bonds[i5];
+      var pa=project([atoms[bb[0]].x,atoms[bb[0]].y,atoms[bb[0]].z],S,P,cx,cy);
+      var pb=project([atoms[bb[1]].x,atoms[bb[1]].y,atoms[bb[1]].z],S,P,cx,cy);
+      ctxC.beginPath();
+      ctxC.moveTo(pa[0],pa[1]);
+      ctxC.lineTo(pb[0],pb[1]);
+      ctxC.stroke();
+    }
+  }
+
+  var sorted=[];
+  for(var i3=0;i3<atoms.length;i3++){
+    var v3=atoms[i3];
+    var pr=project([v3.x,v3.y,v3.z],S,P,cx,cy);
+    sorted.push({d:pr[2],x:pr[0],y:pr[1],r:v3.r*S*rMul*pr[2],base:v3.col,atom:v3,f:pr[2]});
+  }
+  sorted.sort(function(a,b){return a.d-b.d;});
+  var planes=cutMode?(cryMesh.clip||[]):null;
+  for(var i4=0;i4<sorted.length;i4++){
+    var s=sorted[i4];
+    if(s.r<0.6)continue;
+    if(!cutMode){
+      var g=ctxC.createRadialGradient(s.x-s.r*0.35,s.y-s.r*0.35,s.r*0.1,s.x,s.y,s.r);
+      g.addColorStop(0,'#ffffff');
+      g.addColorStop(0.3,s.base);
+      g.addColorStop(1,shade(s.base,-42));
+      ctxC.beginPath();
+      ctxC.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctxC.fillStyle=g;
+      ctxC.fill();
+      ctxC.strokeStyle='rgba(23,32,52,.18)';
+      ctxC.lineWidth=0.8;
+      ctxC.stroke();
+      continue;
+    }
+    var skip=false;
+    var cutPlanes=[];
+    var mx=s.atom.x,my=s.atom.y,mz=s.atom.z;
+    for(var pi=0;pi<planes.length;pi++){
+      var pl=planes[pi];
+      var gM=pl.d-(pl.n[0]*mx+pl.n[1]*my+pl.n[2]*mz);
+      if(gM<-s.atom.r){skip=true;break;}
+      if(gM>s.atom.r)continue;
+      cutPlanes.push({n:pl.n,d:pl.d,g:gM});
+    }
+    if(skip)continue;
+    var cq=matVec(viewM,[mx-c0[0],my-c0[1],mz-c0[2]]);
+    var rS=s.atom.r;
+    var viewPlanes=[];
+    for(var kp=0;kp<cutPlanes.length;kp++){
+      var cp0=cutPlanes[kp];
+      viewPlanes.push({
+        n:matVec(viewM,cp0.n),
+        d:cp0.d-(cp0.n[0]*c0[0]+cp0.n[1]*c0[1]+cp0.n[2]*c0[2])
+      });
+    }
+    function projV(q){
+      var f=P/(P-q[2]);
+      if(f>10)f=10;
+      return [cx+q[0]*S*f,cy-q[1]*S*f];
+    }
+    var hullPts=[];
+    var ns=[cq[0],cq[1],cq[2]-P];
+    var D=Math.hypot(ns[0],ns[1],ns[2]);
+    if(D<1e-9){ns=[0,0,-1];D=1;}
+    ns=[ns[0]/D,ns[1]/D,ns[2]/D];
+    var rD=rS*rS/D;
+    var silC=[cq[0]-ns[0]*rD,cq[1]-ns[1]*rD,cq[2]-ns[2]*rD];
+    var silR=rS*Math.sqrt(Math.max(0,1-rS*rS/(D*D)));
+    var e1s=v3norm(v3cross(ns,[0,0,1]));
+    if(Math.hypot(e1s[0],e1s[1])<1e-6)e1s=[1,0,0];
+    var e2s=v3cross(ns,e1s);
+    var sil=[];
+    for(var sk=0;sk<48;sk++){
+      var ths=sk*(Math.PI*2/48);
+      sil.push([silC[0]+silR*(Math.cos(ths)*e1s[0]+Math.sin(ths)*e2s[0]),
+                silC[1]+silR*(Math.cos(ths)*e1s[1]+Math.sin(ths)*e2s[1]),
+                silC[2]+silR*(Math.cos(ths)*e1s[2]+Math.sin(ths)*e2s[2])]);
+    }
+    sil=clipPoly3D(sil,viewPlanes);
+    for(var si2=0;si2<sil.length;si2++)hullPts.push(projV(sil[si2]));
+    for(var cli2=0;cli2<cutPlanes.length;cli2++){
+      var cl2=cutPlanes[cli2];
+      var g4=cl2.g;
+      var rho=Math.sqrt(Math.max(0,rS*rS-g4*g4));
+      if(rho<0.05)continue;
+      var nv2=viewPlanes[cli2].n;
+      var fcv=[cq[0]+nv2[0]*g4,cq[1]+nv2[1]*g4,cq[2]+nv2[2]*g4];
+      var e1=v3norm(v3cross(nv2,[0,0,1]));
+      if(Math.hypot(e1[0],e1[1])<1e-6)e1=[1,0,0];
+      var e2=v3cross(nv2,e1);
+      var others=[];
+      for(var oj=0;oj<viewPlanes.length;oj++){
+        if(oj===cli2)continue;
+        others.push(viewPlanes[oj]);
+      }
+      var facePoly=[];
+      var K=40;
+      for(var kk=0;kk<K;kk++){
+        var th=kk*(Math.PI*2/K);
+        facePoly.push([fcv[0]+rho*(Math.cos(th)*e1[0]+Math.sin(th)*e2[0]),
+                       fcv[1]+rho*(Math.cos(th)*e1[1]+Math.sin(th)*e2[1]),
+                       fcv[2]+rho*(Math.cos(th)*e1[2]+Math.sin(th)*e2[2])]);
+      }
+      facePoly=clipPoly3D(facePoly,others);
+      if(facePoly.length<3)continue;
+      for(var fp=0;fp<facePoly.length;fp++)hullPts.push(projV(facePoly[fp]));
+    }
+    if(hullPts.length<3)continue;
+    var hull=convexHull2D(hullPts);
+    if(hull.length<3)continue;
+    var maxD=1;
+    for(var md=0;md<hull.length;md++){
+      var ddx=hull[md][0]-s.x,ddy=hull[md][1]-s.y;
+      var dd=Math.sqrt(ddx*ddx+ddy*ddy);
+      if(dd>maxD)maxD=dd;
+    }
+    var g3=ctxC.createRadialGradient(s.x-s.r*0.35,s.y-s.r*0.35,s.r*0.1,s.x,s.y,maxD);
+    g3.addColorStop(0,'#ffffff');
+    g3.addColorStop(0.3,s.base);
+    g3.addColorStop(1,shade(s.base,-42));
+    ctxC.beginPath();
+    for(var hl=0;hl<hull.length;hl++){
+      if(hl===0)ctxC.moveTo(hull[hl][0],hull[hl][1]);
+      else ctxC.lineTo(hull[hl][0],hull[hl][1]);
+    }
+    ctxC.closePath();
+    ctxC.fillStyle=g3;
+    ctxC.fill();
+    for(var cli2=0;cli2<cutPlanes.length;cli2++){
+      var cl2=cutPlanes[cli2];
+      var nv2=matVec(viewM,cl2.n);
+      if(nv2[2]<=0.01)continue;
+      var g4=cl2.g;
+      var rho=Math.sqrt(Math.max(0,s.atom.r*s.atom.r-g4*g4));
+      if(rho<0.05)continue;
+      var fc=[mx+cl2.n[0]*g4,my+cl2.n[1]*g4,mz+cl2.n[2]*g4];
+      var e1=v3norm(v3cross(cl2.n,[0,0,1]));
+      if(Math.hypot(e1[0],e1[1])<1e-6)e1=[1,0,0];
+      var e2=v3cross(cl2.n,e1);
+      var others=[];
+      for(var oj=0;oj<cutPlanes.length;oj++){
+        if(oj===cli2)continue;
+        others.push({n:cutPlanes[oj].n,d:cutPlanes[oj].d});
+      }
+      var facePoly=[];
+      var K=40;
+      for(var kk=0;kk<K;kk++){
+        var th=kk*(Math.PI*2/K);
+        facePoly.push([fc[0]+rho*(Math.cos(th)*e1[0]+Math.sin(th)*e2[0]),
+                       fc[1]+rho*(Math.cos(th)*e1[1]+Math.sin(th)*e2[1]),
+                       fc[2]+rho*(Math.cos(th)*e1[2]+Math.sin(th)*e2[2])]);
+      }
+      facePoly=clipPoly3D(facePoly,others);
+      if(facePoly.length<3)continue;
+      ctxC.beginPath();
+      for(var fp=0;fp<facePoly.length;fp++){
+        var pf=project(facePoly[fp],S,P,cx,cy);
+        if(fp===0)ctxC.moveTo(pf[0],pf[1]);
+        else ctxC.lineTo(pf[0],pf[1]);
+      }
+      ctxC.closePath();
+      ctxC.fillStyle=shade(s.base,48);
+      ctxC.fill();
+      ctxC.strokeStyle='rgba(23,32,52,.25)';
+      ctxC.lineWidth=0.8;
+      ctxC.stroke();
+    }
+  }
+  if(cutMode&&cryState.cell){
+    ctxC.strokeStyle='rgba(31,58,95,.62)';
+    ctxC.lineWidth=1.2;
+    for(var i6=0;i6<cryMesh.lines.length;i6++){
+      var l6=cryMesh.lines[i6];
+      var pa2=project(l6[0],S,P,cx,cy);
+      var pb2=project(l6[1],S,P,cx,cy);
+      ctxC.beginPath();
+      ctxC.moveTo(pa2[0],pa2[1]);
+      ctxC.lineTo(pb2[0],pb2[1]);
+      ctxC.stroke();
+    }
+  }
+  var label=cryInfo?STRUCT_JP[CRY_STRUCT]:'';
+  if(label){
+    ctxC.fillStyle='rgba(32,36,44,.55)';
+    ctxC.font='12px "M PLUS 1 Code",serif';
+    ctxC.textAlign='left';
+    ctxC.textBaseline='alphabetic';
+    ctxC.fillText(label+' · '+(cryState.expanded?'2×2×2 拡張':'単位格子'),14,CH-14);
+  }
+}
+
+var cryPointer=null,ptrs={};
+cvC.addEventListener('pointerdown',function(e){
+  cvC.setPointerCapture(e.pointerId);
+  ptrs[e.pointerId]=[e.clientX,e.clientY];
+  cryPointer=e.pointerId;
+});
+cvC.addEventListener('pointermove',function(e){
+  if(!ptrs[e.pointerId])return;
+  var keys=Object.keys(ptrs);
+  if(keys.length===2){
+    var a=ptrs[keys[0]],b=ptrs[keys[1]];
+    var d0=Math.hypot(a[0]-b[0],a[1]-b[1]);
+    var na=keys[0]===e.pointerId?[e.clientX,e.clientY]:a;
+    var nb=keys[1]===e.pointerId?[e.clientX,e.clientY]:b;
+    var d1=Math.hypot(na[0]-nb[0],na[1]-nb[1]);
+    if(d0>0)cryState.zoom=clamp(cryState.zoom*d1/d0,0.25,6);
+    ptrs[e.pointerId]=[e.clientX,e.clientY];
+    return;
+  }
+  var p=ptrs[e.pointerId];
+  var dx=e.clientX-p[0],dy=e.clientY-p[1];
+  ptrs[e.pointerId]=[e.clientX,e.clientY];
+  if(e.pointerId!==cryPointer)return;
+  viewM=ortho(matMul(matMul(matRotX(dy*0.009),matRotY(dx*0.009)),viewM));
+});
+function releasePtr(e){
+  delete ptrs[e.pointerId];
+  if(e.pointerId===cryPointer)cryPointer=null;
+}
+cvC.addEventListener('pointerup',releasePtr);
+cvC.addEventListener('pointercancel',releasePtr);
+cvC.addEventListener('wheel',function(e){
+  e.preventDefault();
+  cryState.zoom=clamp(cryState.zoom*(e.deltaY>0?0.9:1.1),0.25,6);
+},{passive:false});
+cvC.addEventListener('dblclick',function(){
+  resetView();cryState.zoom=1;
+});
+
+/* ================= 共通 ================= */
+function renderTex(node,tex){
+  if(!node)return;
+  if(!tex){node.textContent='';node.style.display='none';return;}
+  node.style.display='';
+  try{
+    if(window.katex&&katex.render){
+      katex.render(tex,node,{displayMode:false,throwOnError:false});
+    }else{
+      node.textContent=tex;
+    }
+  }catch(err){
+    node.textContent=tex;
+  }
+}
+function renderMath(){
+  $$('.tex').forEach(function(e){
+    try{
+      if(window.katex&&katex.render){
+        katex.render(e.dataset.tex,e,{displayMode:e.classList.contains('tex-d'),throwOnError:false});
+      }else{
+        e.textContent=e.dataset.tex;
+      }
+    }catch(err){
+      e.textContent=e.dataset.tex;
+    }
+  });
+}
+
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  var ra=cvA.getBoundingClientRect();
+  AW=ra.width;AH=ra.height;
+  cvA.width=Math.round(AW*DPR);
+  cvA.height=Math.round(AH*DPR);
+  ctxA.setTransform(DPR,0,0,DPR,0,0);
+  var rc=cvC.getBoundingClientRect();
+  CW=rc.width;CH=rc.height;
+  cvC.width=Math.round(CW*DPR);
+  cvC.height=Math.round(CH*DPR);
+  ctxC.setTransform(DPR,0,0,DPR,0,0);
+}
+var resizeT=null;
+window.addEventListener('resize',function(){
+  if(resizeT)clearTimeout(resizeT);
+  resizeT=setTimeout(resize,150);
+});
+
+var lastInfo=0,lastT=0;
+function frame(now){
+  requestAnimationFrame(frame);
+  if(atomAnim.t<1){
+    atomAnim.t=Math.min(1,atomAnim.t+Math.min((now-lastT)/600,0.2));
+  }
+  lastT=now;
+  if(activeTab==='atom')drawAtom(now);
+  else if(activeTab==='crystal')drawCry(now);
+  if(activeTab==='atom'&&now-lastInfo>250){
+    updateAtomInfo();
+    lastInfo=now;
+  }
+}
+
+renderMath();
+resetView();
+setCry('BCC');
+resize();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

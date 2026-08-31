@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>和文フォント試着室 — design-lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+1+Code:wght@400;500;700&family=BIZ+UDGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0; font-family:'Zen Kaku Gothic New',system-ui,sans-serif; background:#f4efea; color:#383838; line-height:1.7}
+  header{max-width:1100px;margin:0 auto;padding:28px 20px 12px}
+  header h1{margin:0;font-size:22px;letter-spacing:.04em}
+  header p{margin:6px 0 0;color:#818181;font-size:13px}
+  .controls{max-width:1100px;margin:0 auto;padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap}
+  .controls button{font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px;border:1.5px solid #383838;border-radius:2px;background:#fff;cursor:pointer;box-shadow: rgb(56,56,56) -4px 4px 0 0}
+  .controls button.active{background:#6fc2ff}
+  .controls button:active{transform:translate(2px,2px);box-shadow: rgb(56,56,56) -2px 2px 0 0}
+  .grid{max-width:1100px;margin:0 auto;padding:16px 20px 40px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:#fff;border:1.5px solid #383838;border-radius:2px;padding:18px 16px;box-shadow: rgb(56,56,56) -6px 6px 0 0}
+  .card h2{margin:0 0 8px;font-size:13px;letter-spacing:.14em;color:#818181;text-transform:uppercase}
+  .sample-title{font-size:22px;font-weight:700;letter-spacing:.02em;line-height:1.3;margin:0}
+  .sample-desc{margin:8px 0 0;font-size:13px;color:#565c66;line-height:1.85}
+  .sample-meta{margin:10px 0 0;display:flex;gap:8px;flex-wrap:wrap}
+  .sample-meta span{font-size:11px;font-weight:700;padding:3px 8px;border-radius:2px;border:1px solid #383838;background:#f4efea}
+  .hero{max-width:1100px;margin:0 auto;padding:0 20px 8px}
+  .hero-card{background:#fff;border:1.5px solid #383838;border-radius:2px;padding:22px 18px;box-shadow: rgb(56,56,56) -6px 6px 0 0;text-align:center}
+  .hero-card .kicker{font-size:11px;letter-spacing:.22em;color:#383838;font-weight:700}
+  .hero-card .title{font-size: clamp(28px,5vw,44px);font-weight:900;letter-spacing:.04em;margin:8px 0 6px}
+  .hero-card .sub{font-size:13px;color:#818181}
+  .note{max-width:1100px;margin:0 auto;padding:0 20px 28px;font-size:12px;color:#818181;line-height:1.9}
+  .note b{color:#383838}
+  .font-mplus1code{font-family:'M PLUS 1 Code', monospace}
+  .font-biz{font-family:'BIZ UDGothic', monospace}
+  .font-zenkaku{font-family:'Zen Kaku Gothic New', sans-serif}
+  .font-zenmaru{font-family:'Zen Maru Gothic', sans-serif}
+</style>
+</head>
+<body>
+<header>
+  <h1>和文フォント試着室 <span style="font-weight:400;color:#a1a1a1">— design-lab</span></h1>
+  <p>MotherDuckの <code>Aeonik Mono (等幅・幾何学・0/O弁別)</code> に近い日本語フォントを並べて比較します。上のボタンで全カードを一括切替、カード内クリックで個別切替もできます。</p>
+</header>
+
+<div class="controls" role="group" aria-label="フォント切替">
+  <button data-font="mplus1code" class="active">M PLUS 1 Code（推し・等幅）</button>
+  <button data-font="biz">BIZ UDGothic（UD・読みやすい）</button>
+  <button data-font="zenkaku">Zen Kaku Gothic New（現行）</button>
+  <button data-font="zenmaru">Zen Maru Gothic（丸・やわらか）</button>
+</div>
+
+<div class="hero">
+  <div class="hero-card" id="hero-preview">
+    <div class="kicker">LEARNING TOOLS</div>
+    <div class="title">学習ツール</div>
+    <div class="sub">教室長自作の学習ツール — クリーム紙にクレヨン色のカードが並ぶ</div>
+  </div>
+</div>
+
+<div class="grid" id="grid">
+  <div class="card" data-card>
+    <h2>ツール — 公式・暗記辞典</h2>
+    <p class="sample-title">公式・暗記辞典</p>
+    <p class="sample-desc">公式や暗記項目を、ブラウザでいつでも閲覧できる辞典です。0/O、1/l/I の見分けがつくかも確認。<br>例: x² + y² = r² / 2πr / 0, 1, 10, 100</p>
+    <div class="sample-meta"><span>中学生以上</span><span>開く ↗</span></div>
+  </div>
+  <div class="card" data-card>
+    <h2>数学 — 正規分布シミュレーター</h2>
+    <p class="sample-title">正規分布 シミュレーター</p>
+    <p class="sample-desc">正規分布の性質を視覚的に体験できる物理シミュレーション。<br>数式: f(x)=1/σ√2π exp(-(x-μ)²/2σ²) / 標本平均 x̄ / 標準偏差 σ</p>
+    <div class="sample-meta"><span>高校生以上</span><span>開く ↗</span></div>
+  </div>
+  <div class="card" data-card>
+    <h2>理科 — 原子・周期表ツール</h2>
+    <p class="sample-title">原子・周期表ツール</p>
+    <p class="sample-desc">周期表で元素の詳細を見たり、原子モデルや結晶構造を3Dで観察できます。<br>例: H He Li Be B C N O F Ne / 6.02×10²³</p>
+    <div class="sample-meta"><span>高校生以上</span><span>開く ↗</span></div>
+  </div>
+  <div class="card" data-card>
+    <h2>英語 — 英文法ビジュアライザー</h2>
+    <p class="sample-title">英文法ビジュアライザー</p>
+    <p class="sample-desc">肯定文がコピーされて否定文・疑問文へ変化する様子をアニメで観察。<br>Ken is a student. → Ken isn't a student. / Are you kind?</p>
+    <div class="sample-meta"><span>中学生以上</span><span>開く ↗</span></div>
+  </div>
+</div>
+
+<div class="note">
+  <b>選び方のヒント</b> — 小学生が読む「ひらがな」の懐の広さ、長文の数字・記号の弁別、タイトルとしての力強さを同時に見るのがコツです。<br>
+  <b>M PLUS 1 Code</b>: 等幅で数字の桁が揃い、MotherDuckの機械的な端正さに最も近い。漢字も内包するので1フォントで完結。<br>
+  <b>BIZ UDGothic</b>: モリサワのUD。最も読みやすいが等幅感は弱く、遊びは控えめ。<br>
+  <b>Zen Kaku / Zen Maru</b>: 現行に近い丸み。可愛いがターミナル感は薄れる。<br>
+  決めたら <code>design-lab/themes/motherduck.css:1</code> の <code>--font-display</code> を書き換えてください。
+</div>
+
+<script>
+  const map = {
+    mplus1code: 'font-mplus1code',
+    biz: 'font-biz',
+    zenkaku: 'font-zenkaku',
+    zenmaru: 'font-zenmaru'
+  };
+  let current = 'mplus1code';
+  function apply(fontKey){
+    current = fontKey;
+    const cls = map[fontKey];
+    document.querySelectorAll('[data-card] .sample-title, #hero-preview .title').forEach(el=>{
+      el.classList.remove(...Object.values(map));
+      el.classList.add(cls);
+    });
+    document.querySelectorAll('.controls button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.font===fontKey);
+    });
+  }
+  document.querySelectorAll('.controls button').forEach(b=> b.addEventListener('click', ()=> apply(b.dataset.font)));
+  document.querySelectorAll('[data-card]').forEach(c=> c.addEventListener('click', ()=>{
+    const order = ['mplus1code','biz','zenkaku','zenmaru'];
+    const idx = order.indexOf(current);
+    apply(order[(idx+1)%order.length]);
+  }));
+  apply('mplus1code');
+</script>
+</body>
+</html>

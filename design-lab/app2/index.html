@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="motherduck">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>英語長文多読リーダー</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../tokens/motherduck.css">
+<link rel="stylesheet" href="../themes/motherduck.css">
+  <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://unpkg.com/compromise@13.11.3/builds/compromise.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    html,
+    body {
+      overscroll-behavior-y: contain;
+      overscroll-behavior-x: contain;
+      touch-action: pan-x pan-y;
+      height: 100dvh;
+      min-height: 100dvh;
+      width: 100vw;
+      max-width: 100vw;
+      overflow-x: hidden;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      font-size: clamp(16px, 2vw, 20px);
+    }
+
+    body {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100dvh;
+      font-family: 'Kiwi Maru', 'Courier New', monospace;
+      background-color: #e5e5e5;
+      color: #007700;
+    }
+
+    button {
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    button:hover {
+      opacity: 1;
+    }
+
+    #controlButtons {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 1001;
+    }
+
+    #zoomLabel {
+      position: absolute;
+      top: 50%;
+      right: 168px;
+      transform: translateY(-50%);
+      font-size: 0.75em;
+      color: #007700;
+      white-space: nowrap;
+    }
+
+    #form-container {
+      width: 300px;
+      overflow: auto;
+      border-right: 2px solid #00ff00;
+      padding: 10px;
+      background-color: #ffffff;
+      box-sizing: border-box;
+    }
+
+    #preview-container {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+      min-width: 0;
+    }
+
+    #preview-container h1 {
+      position: relative;
+      margin: 0;
+      padding: 10px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      flex-direction: column;
+      text-align: left;
+      border-bottom: 2px solid #00ff00;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 1em;
+      color: #007700;
+    }
+
+    #form-container h1 {
+      font-size: 1em;
+      color: #007700;
+      border-bottom: 1px solid #00ff00;
+      padding-bottom: 4px;
+    }
+
+    #form-container h1.sec {
+      margin-top: 24px;
+    }
+
+    #preview-title {
+      margin: 0;
+      padding: 0;
+      padding-right: 190px;
+      text-align: left;
+      width: 100%;
+      box-sizing: border-box;
+      word-break: break-all;
+    }
+
+    #preview-subtitle {
+      font-size: 0.7em;
+      color: #777777;
+      width: 100%;
+      text-align: left;
+      margin-top: 4px;
+      padding-right: 190px;
+      box-sizing: border-box;
+      line-height: 1.5;
+    }
+
+    #backButton,
+    #zoomInButton,
+    #zoomOutButton {
+      background: #ffffff;
+      color: #007700;
+      border: 1px solid #00ff00;
+      font-size: 1.1em;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    #backButton:hover,
+    #zoomInButton:hover,
+    #zoomOutButton:hover {
+      background: #00ff00;
+      color: #000000;
+    }
+
+    #backButton {
+      display: none;
+    }
+
+    #spinner {
+      position: fixed;
+      top: 95%;
+      left: 95%;
+      transform: translate(-95%, -95%);
+      display: none;
+      z-index: 10003;
+      color: #007700;
+      font-size: 32px;
+    }
+
+    #spinner-text {
+      position: fixed;
+      min-width: 0;
+      bottom: 20px;
+      right: 20px;
+      font-size: 1.2em;
+      color: #007700;
+      white-space: nowrap;
+    }
+
+    #spinner-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100dvh;
+      background: rgba(255, 255, 255, 0.85);
+      z-index: 10002;
+      display: none;
+    }
+
+    #dict-overlay-fixed {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      max-width: 30%;
+      background: rgba(255, 255, 255, 0.97);
+      color: #007700;
+      border: 1px solid #00ff00;
+      box-shadow: 0 2px 6px rgba(0, 204, 0, 0.3);
+      padding: 8px;
+      font-size: 1em;
+      display: none;
+      z-index: 10000;
+    }
+
+    #toaster {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #00ff00;
+      color: #000000;
+      padding: 8px 12px;
+      border-radius: 4px;
+      display: none;
+      z-index: 10000;
+    }
+
+    .dict-popup {
+      position: absolute;
+      background: #ffffff;
+      color: #007700;
+      border: 1px solid #00ff00;
+      box-shadow: 0 2px 6px rgba(0, 204, 0, 0.3);
+      font-size: 14px;
+      line-height: 1.4;
+      z-index: 10001;
+    }
+
+    .dict-popup h4 {
+      margin: 4px 0;
+      font-size: 16px;
+    }
+
+    .dict-popup .entry {
+      margin-bottom: 6px;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 20px;
+    }
+
+    li {
+      cursor: pointer;
+      margin: 6px 0;
+      padding: 6px 4px;
+      color: #00a000;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    li.saved-item {
+      padding: 8px;
+      border: 1px solid #ccffcc;
+      background: #f7fff7;
+    }
+
+    li.saved-item .saved-title {
+      color: #008000;
+      font-weight: bold;
+      word-break: break-all;
+    }
+
+    li.saved-item .saved-meta {
+      font-size: 0.75em;
+      color: #777777;
+      margin-top: 2px;
+    }
+
+    li.file.active {
+      background-color: #00ff00;
+      color: #000000;
+      font-weight: bold;
+      border-radius: 4px;
+      padding-left: 4px;
+    }
+
+    #textViewer {
+      width: 100%;
+      padding: 10px;
+      overflow: auto;
+      white-space: pre-wrap;
+      line-height: 3;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8em;
+      color: #007700;
+      margin-bottom: 4px;
+    }
+
+    .field select,
+    .field textarea {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: 'Kiwi Maru', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #005500;
+      background: #ffffff;
+      border: 1px solid #99e699;
+      border-radius: 4px;
+      padding: 6px;
+    }
+
+    .field select:disabled {
+      color: #888888;
+      background: #f2f2f2;
+    }
+
+    .gen-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 1.1em;
+      font-weight: bold;
+      font-family: 'Kiwi Maru', 'Courier New', monospace;
+      background: #00ff00;
+      color: #000000;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .delete-saved-btn {
+      float: right;
+      background: none;
+      border: 1px solid #cc9999;
+      color: #990000;
+      font-size: 0.85em;
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 2px 8px;
+    }
+
+    #credit {
+      margin-top: 20px;
+      font-size: 0.5em;
+      color: #999999;
+      line-height: 1.5;
+      border-top: 1px solid #ccffcc;
+      padding-top: 8px;
+    }
+
+    #credit a {
+      color: #999999;
+    }
+
+    @media (orientation: portrait) {
+      html,
+      body {
+        height: 100dvh;
+        width: 100vw;
+        min-width: 0;
+        max-width: 100vw;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        overflow-x: hidden;
+        box-sizing: border-box;
+        flex-direction: column;
+        font-size: clamp(18px, 3vw, 22px);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      #form-container,
+      #preview-container {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100vw !important;
+        flex: 1 0 auto;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        height: 100dvh;
+        overflow: auto;
+        border-right: none;
+      }
+
+      #form-container {
+        border-bottom: 2px solid #00ff00;
+        font-size: 1.3em;
+      }
+
+      #form-container h1,
+      #preview-container h1 {
+        font-size: 1.3em;
+        color: #007700;
+        border-bottom: 1px solid #00ff00;
+      }
+
+      #preview-container {
+        display: none;
+        font-size: 1em;
+      }
+
+      body.mobile-preview #form-container {
+        display: none;
+      }
+
+      body.mobile-preview #preview-container {
+        display: flex;
+      }
+
+      #dict-overlay-fixed {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        max-width: 90%;
+        font-size: 1em;
+      }
+
+      #backButton {
+        display: none;
+      }
+
+      body.mobile-preview #backButton {
+        display: block;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="spinner-overlay"></div>
+  <div id="spinner">
+    <div id="spinner-text">生成中<span id="dot-anim"></span></div>
+  </div>
+  <div id="dict-overlay-fixed"></div>
+
+  <div id="form-container">
+    <div id="genSection">
+      <h1>生成設定</h1>
+
+    <div class="field">
+      <label for="fLevel">難易度（英検レベル）</label>
+      <select id="fLevel">
+        <option>7級</option>
+        <option>6級</option>
+        <option>5級</option>
+        <option>4級</option>
+        <option selected>3級</option>
+        <option>準2級</option>
+        <option>準2級プラス</option>
+        <option>2級</option>
+        <option>準1級</option>
+        <option>1級</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fWords">単語量</label>
+      <select id="fWords">
+        <option>100</option>
+        <option>200</option>
+        <option selected>300</option>
+        <option>400</option>
+        <option>500</option>
+        <option>600</option>
+        <option>700</option>
+        <option>800</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fWorld">世界設定</label>
+      <select id="fWorld">
+        <option selected>現代日本</option>
+        <option>現代外国</option>
+        <option>中世ヨーロッパ</option>
+        <option>ファンタジー</option>
+        <option>SF</option>
+        <option>サイバーパンク</option>
+        <option>かわいい世界</option>
+        <option>童話の世界</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fStyle">文体</label>
+      <select id="fStyle" disabled>
+        <option selected>現代英語</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fTextType">文の種類</label>
+      <select id="fTextType">
+        <option selected>物語文</option>
+        <option>説明文</option>
+        <option>エッセイ</option>
+        <option>会話文</option>
+        <option>手紙・メールのやり取り</option>
+        <option>商品・施設・イベントの広告文</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fGenre">ジャンル</label>
+      <select id="fGenre">
+        <option selected>日常</option>
+        <option>冒険</option>
+        <option>恋愛</option>
+        <option>戦時下</option>
+        <option>ミステリー</option>
+        <option>ホラー</option>
+        <option>ドラマ</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fDevelopment">展開の仕方</label>
+      <select id="fDevelopment">
+        <option>淡々とした展開</option>
+        <option selected>変化のとんだ展開</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fEnding">終わり方</label>
+      <select id="fEnding">
+        <option>淡々とした終わり方</option>
+        <option>驚くような終わり方</option>
+        <option>考えさせられる終わり方</option>
+        <option selected>ハッピーエンド</option>
+        <option>悲しい終わり方</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="fPrompt">プロンプト（任意・自由記入）</label>
+      <textarea id="fPrompt" rows="3" placeholder="例：主人公は料理が得意な小学生にしてください"></textarea>
+    </div>
+
+    <button id="genBtn" class="gen-btn">英語長文を生成</button>
+    <div id="gis-wrap" style="display:none;margin-top:8px"></div>
+    </div>
+
+    <h1 class="sec">過去の生成物</h1>
+    <div class="field" id="filterSection" style="margin-bottom:8px; display:flex; gap:8px; align-items:center;">
+      <label for="fFilterLevel" style="margin:0; white-space:nowrap; font-size:0.8em;">絞り込み:</label>
+      <select id="fFilterLevel" style="flex:1;">
+        <option value="" selected>すべて</option>
+        <option>7級</option>
+        <option>6級</option>
+        <option>5級</option>
+        <option>4級</option>
+        <option>3級</option>
+        <option>準2級</option>
+        <option>準2級プラス</option>
+        <option>2級</option>
+        <option>準1級</option>
+        <option>1級</option>
+      </select>
+      <span id="savedCount" style="font-size:0.75em; color:#777; white-space:nowrap;"></span>
+    </div>
+    <ul id="savedList"></ul>
+    <button id="loadMoreBtn" style="display:none; width:100%; margin-top:8px; padding:8px; font-family:'Kiwi Maru'; background:#ffffff; color:#007700; border:1px solid #00ff00; border-radius:4px; cursor:pointer;">もっと読む（20件ずつ）</button>
+
+    <div id="credit">
+      This app uses:<br>
+      - compromise.js by Spencer Kelly (MIT License) → <a href="https://github.com/spencermountain/compromise" target="_blank">source</a><br>
+      - Font Awesome Free (CC BY 4.0) → <a href="https://fontawesome.com" target="_blank">fontawesome.com</a><br>
+      - Kiwi Maru Font by MOTOYA (SIL Open Font License 1.1) → <a href="https://fonts.google.com/specimen/Kiwi+Maru" target="_blank">Google Fonts</a><br>
+      Vocabulary data from:<br>
+      - <a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank">NGSL (CC BY 4.0)</a> / <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.ja" target="_blank">Wiktionary (CC BY-SA 3.0)</a> / <a href="https://wordnet.princeton.edu/license-and-commercial-use" target="_blank">WordNet (Princeton University)</a><br>
+      辞書データのうちWiktionary由来の部分は <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.ja" target="_blank">CC BY-SA 3.0</a> の継承物として同ライセンス下で提供されます。
+    </div>
+  </div>
+
+  <div id="preview-container">
+    <h1>
+      <span id="preview-title">テキストプレビュー</span>
+      <span id="preview-subtitle"></span>
+      <span id="zoomLabel"></span>
+      <div id="controlButtons">
+        <button id="backButton" title="戻る">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <button id="zoomInButton" title="拡大">
+          <i class="fas fa-search-plus"></i>
+        </button>
+        <button id="zoomOutButton" title="縮小">
+          <i class="fas fa-search-minus"></i>
+        </button>
+      </div>
+    </h1>
+
+    <div id="textViewer" style="padding:10px; overflow:auto; white-space:pre-wrap; color:#007700; background:#ffffff;">
+      <div id="textContentArea"></div>
+      <div style="display: flex; width: 100%; margin-top: 20px; border-top: 1px solid #00ff00; color: #007700; line-height: 0.7;">
+        <div style="flex: 1; padding-right: 20px;">
+          <div style="font-weight: bold; margin-bottom: 4px; color:#007700;">調べた単語：</div>
+          <div id="historyList" style="font-weight: bold; color:#007700;"></div>
+        </div>
+        <div style="flex: 1; border-left: 2px solid #00ff00; padding-left: 20px;">
+          <div style="font-weight: bold; margin-bottom: 4px; color:#666666;">削除した単語：</div>
+          <div id="deletedList" style="font-weight: bold; color:#666666;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toaster"></div>
+
+  <script>
+    var GIS_CLIENT_ID = '920000857743-91jfqq1q45hmnas1b25ebg0dqafo846i.apps.googleusercontent.com';
+  </script>
+  <script>
+    // Pages静的版: site-gas/site-app2-backend（新GAS）: YOUR_SCRIPT_ID_site-app2-backend
+    const WORKER_BASE = 'https://gakusyu-tools-proxy.hori-shota.workers.dev';
+    const DIRECT_BACKEND_URL = 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
+    const WORKER_BACKEND_URL = (WORKER_BASE && WORKER_BASE.indexOf('REPLACE')===-1 && WORKER_BASE.indexOf('workers.dev')!==-1) ? WORKER_BASE.replace(/\/+$/,'') + '/app2' : '';
+    const SITE_BACKEND_URL = WORKER_BACKEND_URL || DIRECT_BACKEND_URL;
+    const SITE_BACKEND_TOKEN = 'e6135dfd707ab9a6916635fa';
+    const IS_GAS = false;
+    let GAS_APP_URL = SITE_BACKEND_URL;
+    let IS_ALLOWED = false;
+    let IS_OWNER = false;
+    function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
+    function setIdToken(t){ try{ if(t) localStorage.setItem('gis_id_token',t); else localStorage.removeItem('gis_id_token'); }catch(e){} }
+
+    console.log('DOMContentLoaded start');
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded fired');
+      const viewer = document.getElementById('textViewer');
+      const spinner = document.getElementById('spinner');
+      const overlay = document.getElementById('spinner-overlay');
+      const backBtn = document.getElementById('backButton');
+      const toaster = document.getElementById('toaster');
+      const viewedWords = new Set();
+      const deletedWords = new Set();
+      let textScale = 1.0;
+      let FORM_MAP = null;
+      let INV = null;
+      let currentRecord = null;
+      let savedOffset = 0;
+      let savedTotal = 0;
+      let savedHasMore = false;
+      let savedLevel = '';
+      let savedIsLoading = false;
+
+      function resetViewerScroll() {
+        const v = document.getElementById('textViewer');
+        if (!v) return;
+        try { v.scrollTo({ top: 0, left: 0, behavior: 'instant' }); } catch (e) { v.scrollTop = 0; v.scrollLeft = 0; }
+        v.scrollTop = 0;
+      }
+
+      const dotEl = document.getElementById('dot-anim');
+      let frame = 0;
+      setInterval(() => {
+        const frames = ['', '.', '. .', '. . .'];
+        dotEl.textContent = ' ' + frames[frame % frames.length];
+        frame++;
+      }, 500);
+
+      function showSpinner() {
+        spinner.style.display = 'block';
+        overlay.style.display = 'block';
+      }
+      function hideSpinner() {
+        spinner.style.display = 'none';
+        overlay.style.display = 'none';
+      }
+      function showToast(msg) {
+        toaster.textContent = msg;
+        toaster.style.display = 'block';
+        setTimeout(() => toaster.style.display = 'none', 4000);
+      }
+
+      const SERVER = {
+        generateText: { path: '/api/generateText', method: 'POST', gas: 'generateText' },
+        getSavedTexts: { path: '/api/getSavedTexts', method: 'GET', gas: 'getSavedTexts' },
+        deleteText: { path: '/api/deleteText', method: 'DELETE', gas: 'deleteText' },
+        getDICTIONARY: { path: '/api/getDICTIONARY', method: 'GET', gas: 'getDICTIONARY' },
+        getFormMap: { path: '/api/getFormMap', method: 'GET', gas: 'getFormMap' },
+      };
+
+      function jsonpGet(url, timeoutMs) {
+        return new Promise(function (resolve) {
+          var s = document.createElement('script');
+          var done = false;
+          var timer = setTimeout(function () {
+            if (done) return;
+            done = true;
+            s.remove();
+            var iframe=document.createElement('iframe');
+            iframe.style.display='none';
+            iframe.src=url + (url.indexOf('?')>=0?'&':'?') + 't='+Date.now();
+            var t2=setTimeout(function(){ if(done) return; done=true; iframe.remove(); resolve(null); },4000);
+            function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t2); window.removeEventListener('message',onMsg); iframe.remove(); resolve(res); }
+            window.addEventListener('message',onMsg);
+            document.body.appendChild(iframe);
+          }, timeoutMs);
+          var cbName = '__siteApp2Probe' + Date.now() + '_' + Math.random().toString(36).slice(2);
+          window[cbName] = function (res) {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            s.remove();
+            try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+            resolve(res);
+          };
+          s.onerror = function () {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            s.remove();
+            var iframe2=document.createElement('iframe');
+            iframe2.style.display='none';
+            iframe2.src=url + (url.indexOf('?')>=0?'&':'?') + 't='+Date.now();
+            var t3=setTimeout(function(){ if(done) return; done=true; iframe2.remove(); resolve(null); },4000);
+            function onMsg2(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t3); window.removeEventListener('message',onMsg2); iframe2.remove(); resolve(res); }
+            window.addEventListener('message',onMsg2);
+            document.body.appendChild(iframe2);
+          };
+          s.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + cbName + '&t=' + Date.now();
+          document.head.appendChild(s);
+        });
+      }
+
+      function doProbePostApp2For(base, cb){
+        var id=getIdToken();
+        var em=id? (function(){ try{ var p=id.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } })() : '';
+        var payload={ probe:1, token:SITE_BACKEND_TOKEN };
+        if(id) payload.id_token=id;
+        if(em) payload.email=em;
+        var iframe=document.createElement('iframe');
+        iframe.style.display='none';
+        iframe.name='__probeApp2'+Date.now()+Math.random().toString(36).slice(2);
+        document.body.appendChild(iframe);
+        var form=document.createElement('form');
+        form.method='POST';
+        form.action=base;
+        form.target=iframe.name;
+        var inp=document.createElement('input');
+        inp.type='hidden'; inp.name='data'; inp.value=JSON.stringify(payload);
+        form.appendChild(inp);
+        document.body.appendChild(form);
+        var done=false;
+        var t=setTimeout(function(){ if(done) return; done=true; try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(null); }, 7500);
+        function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(res); }
+        window.addEventListener('message',onMsg);
+        try{ form.submit(); }catch(e){ clearTimeout(t); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(_e){} try{ form.remove(); }catch(_e){} cb(null); }
+      }
+      function doProbePostApp2(cb){ return doProbePostApp2For(SITE_BACKEND_URL, cb); }
+      function doProbePostApp2WithFallback(cb){
+        if(!WORKER_BACKEND_URL){ doProbePostApp2For(DIRECT_BACKEND_URL, cb); return; }
+        var settled=false;
+        var tf=setTimeout(function(){ if(settled) return; settled=true; doProbePostApp2For(DIRECT_BACKEND_URL, cb); }, 8500);
+        doProbePostApp2For(WORKER_BACKEND_URL, function(res){
+          if(settled) return;
+          if(res && res.genkoProbe){ clearTimeout(tf); settled=true; cb(res); return; }
+          clearTimeout(tf); settled=true; doProbePostApp2For(DIRECT_BACKEND_URL, cb);
+        });
+      }
+      async function jsonpGetWithFallback(workerUrl, directUrl, timeoutMs){
+        if(!WORKER_BACKEND_URL) return jsonpGet(directUrl, timeoutMs);
+        var r=await jsonpGet(workerUrl, Math.min(timeoutMs, 7500));
+        if(r && r.genkoProbe) return r;
+        if(r && r.ok!==undefined) return r;
+        // worker failed -> try direct
+        return jsonpGet(directUrl, timeoutMs);
+      }
+      async function fetchWithFallback(workerUrl, directUrl, opts){
+        if(!WORKER_BACKEND_URL) return fetch(directUrl, opts);
+        try{
+          var rw=await fetch(workerUrl, opts);
+          // 429 or 502/503 fallback to direct
+          if(rw.status===429 || rw.status===502 || rw.status===503 || rw.status===504){
+            return fetch(directUrl, opts);
+          }
+          return rw;
+        }catch(e){
+          return fetch(directUrl, opts);
+        }
+      }
+      async function probeBackend() {
+        if (location.protocol === 'file:') return { state: 'file' };
+        var idt=getIdToken();
+        var res=null;
+        if(idt && idt.length >= 1800){
+          res=await new Promise(function(r){ doProbePostApp2WithFallback(r); });
+        } else if(idt){
+          var em=idt? (function(){ try{ var p=idt.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } })() : '';
+          var wUrl2 = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + '&id_token=' + encodeURIComponent(idt) + (em?'&email='+encodeURIComponent(em):'') : '';
+          var dUrl2 = DIRECT_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + '&id_token=' + encodeURIComponent(idt) + (em?'&email='+encodeURIComponent(em):'');
+          if(wUrl2) res = await jsonpGetWithFallback(wUrl2, dUrl2, 7500);
+          else { var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + '&id_token=' + encodeURIComponent(idt) + (em?'&email='+encodeURIComponent(em):''); res = await jsonpGet(url, 7500); }
+        } else {
+          var wUrl = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) : '';
+          var dUrl = DIRECT_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
+          if(wUrl) res = await jsonpGetWithFallback(wUrl, dUrl, 7500);
+          else { var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN); res = await jsonpGet(url, 7500); }
+        }
+        if (!res || !res.genkoProbe) return { state: 'noauth' };
+        if (!res.ok) return { state: 'error', message: res.error };
+        if (!res.allowed) return { state: 'notallowed', masked: res.masked };
+        return { state: 'ok', invisible: !res.email_visible, masked: res.masked, isOwner: !!res.is_owner };
+      }
+
+      function gasCall(name, payload) {
+        return new Promise((resolve, reject) => {
+          google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(e => reject(new Error((e && e.message) ? e.message : String(e))))
+            [name](payload);
+        });
+      }
+
+      async function callServer(name, payload) {
+        const cfg = SERVER[name];
+        if (IS_GAS) {
+          return gasCall(cfg.gas, payload);
+        }
+        // Pages静的版: site-app2-backend へ TOKEN + id_token 付きで送信（GIS対応）Worker→直 fallback
+        var idt=getIdToken();
+        // generateText は settings をネストして送信（GAS側は body.settings を期待）
+        if (name === 'generateText') {
+          var genBody = { action: name, token: SITE_BACKEND_TOKEN, settings: payload || {} };
+          if (idt) genBody.id_token = idt;
+          var wUrl = WORKER_BACKEND_URL;
+          var dUrl = DIRECT_BACKEND_URL;
+          var targetUrl = SITE_BACKEND_URL;
+          var opts = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(genBody) };
+          var res;
+          if(wUrl){
+            res = await fetchWithFallback(wUrl, dUrl, opts);
+          } else {
+            res = await fetch(targetUrl, opts);
+          }
+          var data = await res.json().catch(function () { return {}; });
+          if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
+          return data;
+        }
+        if (name === 'deleteText') {
+          var delBody = Object.assign({}, payload || {});
+          delBody.token = SITE_BACKEND_TOKEN;
+          if (idt) delBody.id_token = idt;
+          var wUrlD = WORKER_BACKEND_URL;
+          var dUrlD = DIRECT_BACKEND_URL;
+          var targetUrlD = SITE_BACKEND_URL;
+          var optsD = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action: name }, delBody)) };
+          var resD;
+          if(wUrlD){
+            resD = await fetchWithFallback(wUrlD, dUrlD, optsD);
+          } else {
+            resD = await fetch(targetUrlD, optsD);
+          }
+          var dataD = await resD.json().catch(function () { return {}; });
+          if (!resD.ok || dataD.ok === false) throw new Error(dataD.error || ('HTTP ' + resD.status));
+          return dataD;
+        }
+        // getSavedTexts は JSONP GET（CORS回避） Worker→直 fallback（ページング・級フィルタ対応）
+        if (name === 'getSavedTexts') {
+          var idt2=getIdToken();
+          var qPayload = payload || {};
+          var qLimit = qPayload.limit != null ? String(qPayload.limit) : '';
+          var qOffset = qPayload.offset != null ? String(qPayload.offset) : '';
+          var qLevel = qPayload.level != null ? String(qPayload.level) : '';
+          function buildGetSavedUrl(base){
+            var u = base + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
+            if(idt2) u += '&id_token=' + encodeURIComponent(idt2);
+            if(qLimit) u += '&limit=' + encodeURIComponent(qLimit);
+            if(qOffset) u += '&offset=' + encodeURIComponent(qOffset);
+            if(qLevel) u += '&level=' + encodeURIComponent(qLevel);
+            return u;
+          }
+          var wUrl2 = WORKER_BACKEND_URL ? buildGetSavedUrl(WORKER_BACKEND_URL) : '';
+          var dUrl2 = DIRECT_BACKEND_URL ? buildGetSavedUrl(DIRECT_BACKEND_URL) : '';
+          var jp;
+          if(wUrl2) jp = await jsonpGetWithFallback(wUrl2, dUrl2, 8000);
+          else { var url = buildGetSavedUrl(SITE_BACKEND_URL); jp = await jsonpGet(url, 8000); }
+          if (jp && jp.ok) return jp;
+          if (jp && jp.ok === false) throw new Error(jp.error || 'not allowed');
+          throw new Error('履歴の読み込みに失敗しました（GAS応答なし: token/FOLDER_ID/共有設定を確認）');
+        }
+        // 辞書は Pages に同梱予定だが、フォールバックでGASから取得。Workerの fetch で直接取得
+        if (name === 'getDICTIONARY' || name === 'getFormMap') {
+          console.log('callServer '+name+' start fetch');
+          var idt3=getIdToken();
+          var wUrl3 = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'') : '';
+          var dUrl3 = DIRECT_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'');
+          var rUrl = WORKER_BACKEND_URL || DIRECT_BACKEND_URL;
+          var rFull = rUrl + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'');
+          var r;
+          if(WORKER_BACKEND_URL) r = await fetchWithFallback(wUrl3, dUrl3, { method: 'GET' });
+          else r = await fetch(rFull);
+          console.log('callServer '+name+' fetch status',r.status, r.url.slice(0,80));
+          var d = await r.json().catch(function (e) { console.error('json parse fail',e.message); return {}; });
+          console.log('callServer '+name+' fetch json keys',Object.keys(d).length, 'ok',d.ok);
+          if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
+          return d;
+        }
+        var wUrlX = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) : '';
+        var dUrlX = DIRECT_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
+        var r;
+        if(wUrlX) r = await fetchWithFallback(wUrlX, dUrlX, { method: 'GET' });
+        else r = await fetch(dUrlX);
+        var d = await r.json().catch(function () { return {}; });
+        if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
+        return d;
+      }
+
+      function loadFormMap() {
+        if (FORM_MAP) return Promise.resolve();
+        console.log('loadFormMap start');
+        return callServer('getFormMap').then(d => { FORM_MAP = d; window.FORM_MAP = d; console.log('loadFormMap success', Object.keys(d).length); }).catch((e) => { console.error('loadFormMap fail', e.message); FORM_MAP = {}; window.FORM_MAP = {}; });
+      }
+      function loadInvert() {
+        if (INV) return Promise.resolve();
+        console.log('loadInvert start');
+        return callServer('getDICTIONARY').then(d => { INV = d; window.INV = d; console.log('loadInvert success', Object.keys(d).length); }).catch((e) => { console.error('loadInvert fail', e.message); INV = {}; window.INV = {}; });
+      }
+      window.testCallServer = callServer;
+      window.testLoadFormMap = loadFormMap;
+      window.testLoadInvert = loadInvert;
+
+      function getWordAtPoint(x, y) {
+        const range = document.caretRangeFromPoint ? document.caretRangeFromPoint(x, y) : null;
+        if (!range || range.startContainer.nodeType !== Node.TEXT_NODE) return '';
+        const txt = range.startContainer.textContent;
+        const idx = range.startOffset;
+        const char = txt[idx];
+        if (!char || [' ', '\t', '\n', '\r'].includes(char)) return '';
+        const l = txt.slice(0, idx).search(/[^\s\-]+$/);
+        const r = txt.slice(idx).search(/[\s\-]/);
+        const s = l < 0 ? 0 : l;
+        const e = r < 0 ? txt.length : idx + r;
+        const full = txt.slice(s, e);
+        const segments = full.split('-');
+        let offset = s;
+        for (let segment of segments) {
+          const start = offset;
+          const end = offset + segment.length;
+          if (idx >= start && idx <= end) {
+            return segment.replace(/^[_\W]+|[_\W]+$/g, '');
+          }
+          offset = end + 1;
+        }
+        return '';
+      }
+
+      function normalize(w) {
+        const lower = w.toLowerCase();
+        if (FORM_MAP && FORM_MAP[lower]) return FORM_MAP[lower];
+        try {
+          const lemma = nlp(lower).verbs().toInfinitive().out('text');
+          return lemma || lower;
+        } catch (e) {
+          return lower;
+        }
+      }
+
+      function updateHistoryDisplay() {
+        const historyEl = document.getElementById('historyList');
+        const deletedEl = document.getElementById('deletedList');
+        if (!historyEl || !deletedEl) return;
+        const sortedHistory = Array.from(viewedWords).sort();
+        const sortedDeleted = Array.from(deletedWords).sort();
+        historyEl.innerHTML = sortedHistory.map(w => `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>${w}</span>
+            <button class="delete-word-btn" data-word="${w}" style="
+              background: none; border: none; color: #990000; font-size: 0.9em;
+              cursor: pointer; margin-left: 8px;
+            ">×</button>
+          </div>
+        `).join('');
+        deletedEl.innerHTML = sortedDeleted.map(w => `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>${w}</span>
+            <button class="restore-word-btn" data-word="${w}" style="
+              background: none; border: none; color: #0044ff; font-size: 0.9em;
+              cursor: pointer; margin-left: 8px;
+            ">↩</button>
+          </div>
+        `).join('');
+        document.querySelectorAll('.delete-word-btn').forEach(btn => {
+          btn.addEventListener('click', e => {
+            const word = e.target.getAttribute('data-word');
+            viewedWords.delete(word);
+            deletedWords.add(word);
+            updateHistoryDisplay();
+          });
+        });
+        document.querySelectorAll('.restore-word-btn').forEach(btn => {
+          btn.addEventListener('click', e => {
+            const word = e.target.getAttribute('data-word');
+            deletedWords.delete(word);
+            viewedWords.add(word);
+            updateHistoryDisplay();
+          });
+        });
+      }
+
+      function readForm() {
+        const val = id => document.getElementById(id).value;
+        return {
+          level: val('fLevel'),
+          wordCount: parseInt(val('fWords'), 10),
+          world: val('fWorld'),
+          style: '現代英語',
+          textType: val('fTextType'),
+          genre: val('fGenre'),
+          development: val('fDevelopment'),
+          ending: val('fEnding'),
+          prompt: document.getElementById('fPrompt').value.trim(),
+        };
+      }
+
+      function settingsSummary(s) {
+        const parts = [s.level, s.wordCount + '語', s.world, s.textType, s.genre, s.development, s.ending];
+        if (s.prompt) parts.push('追加指示あり');
+        return parts.join('・');
+      }
+
+      function formatDate(iso) {
+        const d = new Date(iso);
+        const p = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+      }
+
+      function renderRecord(rec) {
+        currentRecord = rec;
+        document.getElementById('preview-title').textContent = rec.title || '生成結果';
+        document.getElementById('preview-subtitle').textContent = settingsSummary(rec.settings || {});
+        document.getElementById('textContentArea').textContent =
+          (rec.title ? rec.title + '\n\n' : '') + rec.text;
+        viewedWords.clear();
+        deletedWords.clear();
+        updateHistoryDisplay();
+        resetViewerScroll();
+      }
+
+      async function generate() {
+        const settings = readForm();
+        showSpinner();
+        try {
+          const res = await callServer('generateText', settings);
+          renderRecord(res.item || res);
+          loadSavedList({ reset: true });
+          if (window.innerWidth < window.innerHeight) {
+            document.body.classList.add('mobile-preview');
+            document.getElementById('dict-overlay-fixed').style.display = 'none';
+          }
+        } catch (e) {
+          showToast(e.message || '生成に失敗しました');
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      document.getElementById('genBtn').addEventListener('click', generate);
+
+      function renderSavedList(items, opts) {
+        opts = opts || {};
+        const ul = document.getElementById('savedList');
+        const isAppend = !!opts.append;
+        if (!isAppend) ul.innerHTML = '';
+        if (!items.length && !isAppend) {
+          ul.innerHTML = '<li style="cursor:default; color:#999999;">まだ生成履歴がありません</li>';
+          return;
+        }
+        if (!items.length && isAppend) return;
+        for (const it of items) {
+          const li = document.createElement('li');
+          li.className = 'saved-item';
+          if (IS_OWNER) {
+            const delBtn = document.createElement('button');
+            delBtn.className = 'delete-saved-btn';
+            delBtn.textContent = '削除';
+            delBtn.addEventListener('click', async e => {
+              e.stopPropagation();
+              if (!window.confirm('この生成物を削除しますか？')) return;
+              try {
+                await callServer('deleteText', { id: it.id });
+                loadSavedList({ reset: true });
+              } catch (err) {
+                showToast(err.message || '削除に失敗しました');
+              }
+            });
+            li.appendChild(delBtn);
+          }
+          const titleEl = document.createElement('div');
+          titleEl.className = 'saved-title';
+          titleEl.textContent = it.title || '(タイトルなし)';
+          const metaEl = document.createElement('div');
+          metaEl.className = 'saved-meta';
+          metaEl.textContent = formatDate(it.createdAt) + '　' + settingsSummary(it.settings || {});
+          li.appendChild(titleEl);
+          li.appendChild(metaEl);
+          li.addEventListener('click', () => {
+            renderRecord(it);
+            if (window.innerWidth < window.innerHeight) {
+              document.body.classList.add('mobile-preview');
+              document.getElementById('dict-overlay-fixed').style.display = 'none';
+            }
+          });
+          ul.appendChild(li);
+        }
+      }
+
+      function updateSavedCount() {
+        const el = document.getElementById('savedCount');
+        if (!el) return;
+        if (!savedTotal) { el.textContent = ''; return; }
+        const shown = Math.min(savedOffset, savedTotal);
+        el.textContent = shown + ' / ' + savedTotal + '件';
+      }
+
+      function updateLoadMoreBtn() {
+        const btn = document.getElementById('loadMoreBtn');
+        if (!btn) return;
+        btn.style.display = savedHasMore ? 'block' : 'none';
+        btn.disabled = savedIsLoading;
+        btn.textContent = savedIsLoading ? '読み込み中…' : 'もっと読む（20件ずつ）';
+      }
+
+      async function loadSavedList(opts) {
+        opts = opts || {};
+        if (savedIsLoading) return;
+        const isReset = !!opts.reset;
+        const isAppend = !!opts.append && !isReset;
+        if (isReset) {
+          savedOffset = 0;
+          savedTotal = 0;
+          savedHasMore = false;
+        }
+        const levelEl = document.getElementById('fFilterLevel');
+        const level = levelEl ? levelEl.value : savedLevel;
+        savedLevel = level;
+        const limit = 20;
+        const offset = isAppend ? savedOffset : 0;
+        if (!isAppend && isReset) {
+          // クリアは render側で。カウントも一旦クリア
+          document.getElementById('savedList').innerHTML = '<li style="cursor:default; color:#999999;">読み込み中…</li>';
+          updateSavedCount();
+          updateLoadMoreBtn();
+        }
+        savedIsLoading = true;
+        updateLoadMoreBtn();
+        try {
+          const res = await callServer('getSavedTexts', { limit: limit, offset: offset, level: savedLevel });
+          const items = (res && res.items) || [];
+          savedTotal = (res && typeof res.total === 'number') ? res.total : (offset + items.length + (res && res.hasMore ? 1 : 0));
+          savedHasMore = !!(res && res.hasMore);
+          if (isAppend) {
+            renderSavedList(items, { append: true });
+          } else {
+            renderSavedList(items, { append: false });
+          }
+          savedOffset = offset + items.length;
+          updateSavedCount();
+          updateLoadMoreBtn();
+        } catch (e) {
+          if (isReset) document.getElementById('savedList').innerHTML = '';
+          showToast(e.message || '履歴の読み込みに失敗しました');
+          updateLoadMoreBtn();
+        } finally {
+          savedIsLoading = false;
+          updateLoadMoreBtn();
+        }
+      }
+
+      viewer.addEventListener('click', async e => {
+        const raw = getWordAtPoint(e.clientX, e.clientY);
+        if (!raw || !/^[a-zA-Z\-']+$/.test(raw)) return;
+        const dictDiv = document.getElementById('dict-overlay-fixed');
+        dictDiv.style.display = 'block';
+        dictDiv.innerHTML = `<h4>${raw}</h4><p>読み込み中…</p>`;
+        try {
+          await Promise.all([loadFormMap(), loadInvert()]);
+          // Driveファイルが入れ替わっていても自動補正（FORM_MAPは string->string、INVは string->array が正）
+          if (FORM_MAP && INV) {
+            const fVals = Object.values(FORM_MAP);
+            const iVals = Object.values(INV);
+            if (fVals.length && iVals.length) {
+              const fIsList = Array.isArray(fVals[0]);
+              const iIsStr = typeof iVals[0] === 'string';
+              if (fIsList && iIsStr) {
+                console.warn('FORM_MAP/INV swapped detected - auto correcting');
+                const tmp = FORM_MAP; FORM_MAP = INV; INV = tmp;
+                window.FORM_MAP = FORM_MAP; window.INV = INV;
+              }
+            }
+          }
+          const lower = raw.toLowerCase();
+          const normalized = normalize(raw);
+          const isNorm = normalized !== lower;
+          let html = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <h4 style="margin: 4px 0;">${raw}${isNorm ? ' → ' + normalized : ''}</h4>
+              <button id="close-dict-btn" style="
+                background: #ffffff; color: #007700; border: 1px solid #00ff00;
+                padding: 2px 6px; border-radius: 4px; font-size: 0.8em;
+                cursor: pointer; margin-left: 8px;
+              ">閉じる</button>
+            </div>
+          `;
+          if (isNorm) {
+            const rawNorm = (INV && INV[normalized]);
+            const rawRaw = (INV && INV[lower]);
+            const defsNorm = Array.isArray(rawNorm) ? rawNorm : [];
+            const defsRaw = Array.isArray(rawRaw) ? rawRaw : [];
+            const hasNorm = defsNorm.length > 0;
+            const hasRaw = defsRaw.length > 0;
+            if (!hasNorm && !hasRaw) {
+              html += '<p>登録なし</p>';
+            } else {
+              if (hasNorm) {
+                html += `<div class="dict-section dict-section--normalized"><div style="font-weight:bold; margin:6px 0 4px; color:#004400;">${normalized}</div>`;
+                defsNorm.forEach((d, i) => { html += `<div class='entry'><strong>${i + 1}.</strong> ${d}</div>`; });
+                html += `</div>`;
+              }
+              if (hasRaw) {
+                if (hasNorm) html += `<hr style="margin:8px 0; border:none; border-top:1px solid #ddd;">`;
+                html += `<div class="dict-section dict-section--raw"><div style="font-weight:bold; margin:6px 0 4px; color:#004400;">${lower}</div>`;
+                defsRaw.forEach((d, i) => { html += `<div class='entry'><strong>${i + 1}.</strong> ${d}</div>`; });
+                html += `</div>`;
+              }
+            }
+          } else {
+            const rawDefs = (INV && INV[lower]);
+            const defs = Array.isArray(rawDefs) ? rawDefs : [];
+            if (defs.length) defs.forEach((d, i) => { html += `<div class='entry'><strong>${i + 1}.</strong> ${d}</div>`; });
+            else html += '<p>登録なし</p>';
+          }
+          const encoded = encodeURIComponent(raw) + ' 意味';
+          html += `<div style="margin-top: 8px; font-size: 0.9em;">
+                    <i class="fas fa-magnifying-glass" style="margin-right: 4px;"></i>
+                    <a href="https://www.google.com/search?q=${encoded}" target="_blank" style="color:#007700;">
+                      「${raw}」をGoogleで検索
+                    </a>
+                  </div>`;
+          viewedWords.add(raw.toLowerCase());
+          updateHistoryDisplay();
+          dictDiv.innerHTML = html;
+          document.getElementById('close-dict-btn').addEventListener('click', () => {
+            dictDiv.style.display = 'none';
+          });
+        } catch (err) {
+          console.error(err);
+          dictDiv.innerHTML = '<p>辞書の読み込みに失敗しました</p>';
+        }
+      });
+
+      function applyZoom() {
+        viewer.style.fontSize = textScale + 'em';
+        document.getElementById('zoomLabel').textContent = textScale.toFixed(1) + 'x';
+      }
+      document.getElementById('zoomInButton').addEventListener('click', () => {
+        textScale = Math.min(textScale * 1.2, 5.0);
+        applyZoom();
+      });
+      document.getElementById('zoomOutButton').addEventListener('click', () => {
+        textScale = Math.max(textScale / 1.2, 0.4);
+        applyZoom();
+      });
+
+      backBtn.addEventListener('click', () => {
+        document.body.classList.remove('mobile-preview');
+        document.getElementById('dict-overlay-fixed').style.display = 'none';
+      });
+
+      viewer.addEventListener('touchstart', e => {
+        if (e.touches.length > 1) e.preventDefault();
+      }, { passive: false });
+
+      // Pages静的版: 起動時にprobeで表示判定（仕様書_移行案.md 3.4）GIS対応
+      function initGisApp2(){
+        if(GIS_CLIENT_ID.indexOf('REPLACE')===0) return;
+        if(typeof google==='undefined'||!google.accounts||!google.accounts.id) { setTimeout(initGisApp2,500); return; }
+        try{
+          google.accounts.id.initialize({
+            client_id: GIS_CLIENT_ID,
+            callback: function(resp){ if(resp.credential){ setIdToken(resp.credential); applyProbeToUI(); } },
+            auto_select:false, cancel_on_tap_outside:true
+          });
+          var w=document.getElementById('gis-wrap');
+          if(w){ w.style.display='block'; google.accounts.id.renderButton(w,{theme:'outline',size:'medium',text:'signin_with',shape:'pill'}); }
+        }catch(e){}
+      }
+      async function applyProbeToUI() {
+        var genSection = document.getElementById('genSection');
+        var textArea = document.getElementById('textContentArea');
+        var gisWrap=document.getElementById('gis-wrap');
+        genSection.style.display = 'none';
+        if(gisWrap) gisWrap.style.display='none';
+        textArea.textContent = '確認中…';
+        var pr = await probeBackend();
+        if (pr.state === 'ok') {
+          IS_ALLOWED = true;
+          IS_OWNER = !!pr.isOwner;
+          genSection.style.display = '';
+          textArea.textContent = '左のパネルで設定を選び、［英語長文を生成］を押してください。\n\n単語をタップすると辞書を表示します。';
+        } else if (pr.state === 'notallowed') {
+          IS_ALLOWED = false;
+          IS_OWNER = false;
+          genSection.style.display = 'none';
+          textArea.textContent = '教室外アカウントでは生成できません。\n\n左のパネルで過去の生成物を選択してください。\n単語をタップすると辞書を表示します。';
+        } else {
+          IS_ALLOWED = false;
+          IS_OWNER = false;
+          genSection.style.display = 'none';
+          textArea.textContent = '左のパネルで過去の生成物を選択してください。\n\n単語をタップすると辞書を表示します。';
+          if(GIS_CLIENT_ID.indexOf('REPLACE')!==0) initGisApp2();
+        }
+        loadSavedList({ reset: true });
+      }
+
+      // フィルタ・もっと読むのイベント
+      document.getElementById('fFilterLevel').addEventListener('change', () => loadSavedList({ reset: true }));
+      document.getElementById('loadMoreBtn').addEventListener('click', () => loadSavedList({ append: true }));
+
+      console.log('before Promise.all loadFormMap/loadInvert isAllowed',IS_ALLOWED,'isOwner',IS_OWNER);
+      applyZoom();
+      applyProbeToUI();
+      Promise.all([loadFormMap(), loadInvert()]).then(()=>console.log('Promise.all done FORM_MAP',Object.keys(window.FORM_MAP||{}).length,'INV',Object.keys(window.INV||{}).length)).catch((e) => {console.error('Promise.all fail',e.message)});
+    });
+  </script>
+</body>
+
+</html>
