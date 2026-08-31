@@ -20,8 +20,8 @@
       touch-action: pan-x pan-y;
       height: 100dvh;
       min-height: 100dvh;
-      width: 100vw;
-      max-width: 100vw;
+      width: 100%;
+      max-width: 100%;
       overflow-x: hidden;
       padding-bottom: env(safe-area-inset-bottom, 0);
       font-size: clamp(16px, 2vw, 20px);
@@ -181,7 +181,7 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
+      width: 100%;
       height: 100dvh;
       background: rgba(255, 255, 255, 0.85);
       z-index: 10002;
@@ -278,12 +278,14 @@
 
     #textViewer {
       width: 100%;
+      max-width: 100%;
       padding: 10px;
       overflow: auto;
       white-space: pre-wrap;
       line-height: 3;
       word-break: break-word;
       overflow-wrap: anywhere;
+      box-sizing: border-box;
     }
 
     .field {
@@ -357,9 +359,9 @@
       html,
       body {
         height: 100dvh;
-        width: 100vw;
+        width: 100%;
         min-width: 0;
-        max-width: 100vw;
+        max-width: 100%;
         margin: 0;
         padding: 0;
         overflow: hidden;
@@ -379,7 +381,7 @@
       #preview-container {
         width: 100% !important;
         min-width: 0 !important;
-        max-width: 100vw !important;
+        max-width: 100% !important;
         flex: 1 0 auto;
         box-sizing: border-box;
         overflow-x: hidden;

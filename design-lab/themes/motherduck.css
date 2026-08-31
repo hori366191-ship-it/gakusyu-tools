@@ -272,6 +272,9 @@ html[data-theme="motherduck"] #textViewer {
   border-radius: var(--radius-sm) !important;
   box-shadow: var(--shadow-subtle-sm) !important;
   margin: 12px;
+  box-sizing: border-box !important;
+  width: calc(100% - 24px) !important;
+  max-width: calc(100% - 24px) !important;
 }
 html[data-theme="motherduck"] #preview-subtitle { color: var(--color-graphite) !important; }
 html[data-theme="motherduck"] #zoomLabel { color: var(--color-charcoal-ink) !important; font-family: var(--font-jp-mono) !important; }
