@@ -218,12 +218,12 @@ function doGet(e) {
   }
   if (params.action === 'getDICTIONARY') {
     var tok = params.token || '';
-    if (!isAllowedWithToken_(tok) && tok !== '') return jsonOut_({ ok: false, error: 'not allowed' });
+    if (getToken_() && String(tok) !== getToken_()) return jsonOut_({ ok: false, error: 'bad token' });
     return jsonOut_(getDICTIONARY());
   }
   if (params.action === 'getFormMap') {
     var tok2 = params.token || '';
-    if (!isAllowedWithToken_(tok2) && tok2 !== '') return jsonOut_({ ok: false, error: 'not allowed' });
+    if (getToken_() && String(tok2) !== getToken_()) return jsonOut_({ ok: false, error: 'bad token' });
     return jsonOut_(getFormMap());
   }
   // 旧GAS互換: テンプレートがあれば従来通りHTMLを返す（Pages移行後は通常ここには来ない）
@@ -337,7 +337,7 @@ function handleProbe_(p) {
 }
 function generateTextWithToken_(settings, token, params) {
   if (!isAllowedWithToken_(token, params)) throw new Error('AI生成は許可されたアカウントのみ利用できます');
-  return generateText(settings);
+  return generateTextInternal_(settings);
 }
 function deleteTextWithToken_(payload, token, params) {
   if (!isAllowedWithToken_(token, params)) throw new Error('not allowed');
@@ -353,10 +353,13 @@ function jsonOut_(obj) {
 }
 
 /**
- * AI で英語長文を生成し、Drive に保存して返す
+ * AI で英語長文を生成し、Drive に保存して返す（直呼び用: Session で判定）
  */
 function generateText(settings) {
   if (!isAllowedUser_()) throw new Error('AI生成は許可されたアカウントのみ利用できます');
+  return generateTextInternal_(settings);
+}
+function generateTextInternal_(settings) {
   var key = getApiKey_();
   if (!key) throw new Error('OPENCODE_API_KEY が設定されていません');
   var retryHint = '重要な指示：思考プロセス・ユーザーへの言及・指示の書き写し・見出しの転記を出力に含めてはならない。必ずタイトル（1行目）・空行・本文のみを出力すること。前回の応答は形式違反のため無効とする。';
