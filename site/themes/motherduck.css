@@ -1,0 +1,594 @@
+/*!
+ * MotherDuck adaptation for 学習ツール — gakusyu-adapt
+ * Base: ../tokens/motherduck.css（編集しない）
+ * このファイルだけを編集して portal/app の見た目を調整する
+ * Inspired by MotherDuck via Refero Styles 2bd7363d (cream paper / hard shadow / 2px)
+ */
+@import url("../tokens/motherduck.css");
+
+/* ---- Japanese font loading ----
+   M PLUS 1 Code: 等幅・幾何学・0/O弁別 — Aeonik Mono の和文代替として最適
+   BIZ UDGothic: UDで小学生にも読みやすいフォールバック
+   Zen Kaku Gothic New: 現行の柔らかいゴシック（比較用）
+*/
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+1+Code:wght@400;500;700&family=BIZ+UDGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap");
+
+:root {
+  /* Gakusyu mapping: 教科色を MotherDuck レインボー枠線に割当 */
+  --gakusyu-math: var(--color-periwinkle-sketch); /* #7597ee */
+  --gakusyu-eng:  var(--color-mint-sketch);       /* #38c1b0 */
+  --gakusyu-sci:  var(--color-lilac-sketch);      /* #b291de */
+  --gakusyu-tool: var(--color-peach-sketch);      /* #f5b161 */
+  /* 予備: coral / lime / slate / marigold */
+}
+
+/* ============================================================
+   Portal (design-lab/portal/index.html) — MotherDuck overrides
+   元: site/index.html のインライン<style>を上書きする想定
+   ============================================================ */
+
+/* Page canvas: #fdfcf8 -> cream paper #f4efea + hard grid */
+html[data-theme="motherduck"] body {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal-ink) !important;
+  font-family: var(--font-jp-sans);
+}
+html[data-theme="motherduck"] body::before {
+  background-image:
+    linear-gradient(to right, rgba(56,56,56,.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(56,56,56,.045) 1px, transparent 1px) !important;
+  background-size: 28px 28px !important;
+}
+
+/* Hero: cream paper, 2px角に近いフラット化、sky-crayon アクセント */
+html[data-theme="motherduck"] .hero {
+  background: var(--color-cream-paper) !important;
+  border-bottom: 2px solid var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .hero__kicker {
+  font-family: var(--font-jp-mono);
+  letter-spacing: .22em !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .hero__title {
+  font-family: var(--font-jp-mono);
+  letter-spacing: .02em !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .hero__sub {
+  font-family: var(--font-jp-mono);
+  color: var(--color-graphite) !important;
+}
+
+/* Section bar: 教科色のグラデをやめ、2px角の太線に */
+html[data-theme="motherduck"] .section__bar {
+  border-radius: var(--radius-sm) !important;
+  width: 8px !important;
+}
+html[data-theme="motherduck"] .sec--math .section__bar { background: var(--gakusyu-math) !important; }
+html[data-theme="motherduck"] .sec--eng  .section__bar { background: var(--gakusyu-eng) !important; }
+html[data-theme="motherduck"] .sec--sci  .section__bar { background: var(--gakusyu-sci) !important; }
+html[data-theme="motherduck"] .sec--tool .section__bar { background: var(--gakusyu-tool) !important; }
+html[data-theme="motherduck"] .section__title {
+  font-family: var(--font-jp-mono);
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .section__en {
+  font-family: var(--font-jp-mono);
+  color: var(--color-pencil-gray) !important;
+}
+
+/* Cards: 14px丸角＋ぼかし影 -> 2px角＋ハード影 */
+html[data-theme="motherduck"] .card {
+  border-radius: var(--radius-cards) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  box-shadow: var(--shadow-subtle) !important;
+  background: var(--color-frost-white) !important;
+  transition: transform .08s ease, box-shadow .08s ease !important;
+}
+html[data-theme="motherduck"] .card:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="motherduck"] .card:focus-visible {
+  outline: 2px solid var(--color-sky-crayon) !important;
+  outline-offset: 2px;
+}
+
+/* 教科ごとのカード枠線レインボー（上辺2pxに色を足す） */
+html[data-theme="motherduck"] .subj--math { border-top-color: var(--gakusyu-math) !important; border-top-width: 3px !important; }
+html[data-theme="motherduck"] .subj--eng  { border-top-color: var(--gakusyu-eng) !important; border-top-width: 3px !important; }
+html[data-theme="motherduck"] .subj--sci  { border-top-color: var(--gakusyu-sci) !important; border-top-width: 3px !important; }
+html[data-theme="motherduck"] .subj--tool { border-top-color: var(--gakusyu-tool) !important; border-top-width: 3px !important; }
+
+/* Icon: グラデをやめ、単色 + ハードな縁 */
+html[data-theme="motherduck"] .card__icon {
+  border-radius: var(--radius-sm) !important;
+  border: 1.5px solid var(--color-charcoal-ink);
+}
+html[data-theme="motherduck"] .subj--math .card__icon { background: var(--gakusyu-math) !important; }
+html[data-theme="motherduck"] .subj--eng  .card__icon { background: var(--gakusyu-eng) !important; }
+html[data-theme="motherduck"] .subj--sci  .card__icon { background: var(--gakusyu-sci) !important; }
+html[data-theme="motherduck"] .subj--tool .card__icon { background: var(--gakusyu-tool) !important; }
+
+/* Title / Desc: 日本語は等幅寄りに、字間を広げる */
+html[data-theme="motherduck"] .card__title {
+  font-family: var(--font-jp-mono);
+  letter-spacing: .02em;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .card__desc {
+  font-family: var(--font-jp-sans);
+  color: var(--color-graphite) !important;
+}
+html[data-theme="motherduck"] .card__grade {
+  border-radius: var(--radius-sm) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  background: var(--color-frost-white) !important;
+  font-family: var(--font-jp-mono);
+}
+
+/* Button: 999pxピル -> 2px角 + ハード影、単色は sky-crayon のみ */
+html[data-theme="motherduck"] .card__btn {
+  border-radius: var(--radius-buttons) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono);
+  letter-spacing: .04em;
+}
+html[data-theme="motherduck"] .subj--math .card__btn,
+html[data-theme="motherduck"] .subj--eng  .card__btn,
+html[data-theme="motherduck"] .subj--sci  .card__btn,
+html[data-theme="motherduck"] .subj--tool .card__btn {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .card:hover .card__btn {
+  transform: translate(1px,1px);
+  box-shadow: rgb(56,56,56) -2px 2px 0 0 !important;
+}
+
+/* Notice banner: Canary yellow + ハード影 */
+html[data-theme="motherduck"] .notice__inner {
+  border-radius: var(--radius-cards) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-left-width: 1.5px !important;
+  background: var(--color-canary-banner) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="motherduck"] .notice__icon {
+  border-radius: var(--radius-sm) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+}
+
+/* Auth banner */
+html[data-theme="motherduck"] .auth-banner__inner {
+  border-radius: var(--radius-sm) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono);
+}
+
+/* Footer */
+html[data-theme="motherduck"] .footer {
+  border-top: 1.5px solid var(--color-charcoal-ink);
+  background: var(--color-cream-paper);
+}
+
+/* ============================================================
+   app2 — 英語長文 多読リーダー (design-lab/app2/index.html)
+   元: #e5e5e5 + #007700/#00ff00 のターミナル風 → クリーム紙 + charcoal + sky
+   ============================================================ */
+html[data-theme="motherduck"] body:has(#form-container) {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal-ink) !important;
+  font-family: var(--font-jp-sans) !important;
+}
+html[data-theme="motherduck"] #form-container {
+  background: var(--color-frost-white) !important;
+  border-right: 1.5px solid var(--color-charcoal-ink) !important;
+  box-shadow: var(--shadow-subtle) !important;
+}
+html[data-theme="motherduck"] #preview-container {
+  background: var(--color-cream-paper) !important;
+}
+html[data-theme="motherduck"] #form-container h1,
+html[data-theme="motherduck"] #preview-container h1 {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border-bottom: 1.5px solid var(--color-charcoal-ink) !important;
+  font-family: var(--font-jp-mono) !important;
+  letter-spacing: .02em;
+}
+html[data-theme="motherduck"] #form-container h1.sec { border-top: 1px dashed var(--color-soft-silver); padding-top: 10px; }
+html[data-theme="motherduck"] .field label {
+  color: var(--color-charcoal-ink) !important;
+  font-family: var(--font-jp-mono) !important;
+  font-weight: 700;
+  letter-spacing: .02em;
+  font-size: .75em !important;
+}
+html[data-theme="motherduck"] .field select,
+html[data-theme="motherduck"] .field textarea,
+html[data-theme="motherduck"] #fFilterLevel {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-jp-sans) !important;
+}
+html[data-theme="motherduck"] .field select:focus,
+html[data-theme="motherduck"] .field textarea:focus {
+  outline: 2px solid var(--color-sky-crayon);
+  outline-offset: 1px;
+}
+html[data-theme="motherduck"] .gen-btn {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono) !important;
+  letter-spacing: .04em;
+  opacity: 1 !important;
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+html[data-theme="motherduck"] .gen-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: rgb(56,56,56) -2px 2px 0 0 !important;
+}
+html[data-theme="motherduck"] #savedList li.saved-item {
+  background: var(--color-frost-white) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+html[data-theme="motherduck"] #savedList li.saved-item:hover {
+  transform: translate(1px, 1px);
+  box-shadow: rgb(56,56,56) -2px 2px 0 0 !important;
+}
+html[data-theme="motherduck"] li.saved-item .saved-title {
+  color: var(--color-charcoal-ink) !important;
+  font-family: var(--font-jp-mono) !important;
+  font-weight: 700 !important;
+}
+html[data-theme="motherduck"] li.saved-item .saved-meta {
+  color: var(--color-graphite) !important;
+  font-family: var(--font-jp-mono) !important;
+}
+html[data-theme="motherduck"] li.file.active {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+}
+html[data-theme="motherduck"] li { color: var(--color-charcoal-ink) !important; }
+html[data-theme="motherduck"] li:hover { background: var(--color-ice-wash) !important; }
+html[data-theme="motherduck"] #textViewer {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  margin: 12px;
+}
+html[data-theme="motherduck"] #preview-subtitle { color: var(--color-graphite) !important; }
+html[data-theme="motherduck"] #zoomLabel { color: var(--color-charcoal-ink) !important; font-family: var(--font-jp-mono) !important; }
+html[data-theme="motherduck"] #backButton,
+html[data-theme="motherduck"] #zoomInButton,
+html[data-theme="motherduck"] #zoomOutButton {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="motherduck"] #backButton:hover,
+html[data-theme="motherduck"] #zoomInButton:hover,
+html[data-theme="motherduck"] #zoomOutButton:hover {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+  transform: translate(1px,1px);
+}
+html[data-theme="motherduck"] #toaster {
+  background: var(--color-canary-banner) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle) !important;
+  font-family: var(--font-jp-mono) !important;
+}
+html[data-theme="motherduck"] .dict-popup,
+html[data-theme="motherduck"] #dict-overlay-fixed {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle) !important;
+}
+html[data-theme="motherduck"] #spinner,
+html[data-theme="motherduck"] #spinner-text { color: var(--color-charcoal-ink) !important; }
+html[data-theme="motherduck"] #spinner-overlay { background: rgba(244,239,234,.85) !important; }
+html[data-theme="motherduck"] #credit { border-top: 1.5px solid var(--color-charcoal-ink) !important; color: var(--color-pencil-gray) !important; }
+html[data-theme="motherduck"] #loadMoreBtn {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono) !important;
+}
+@media (orientation: portrait) {
+  html[data-theme="motherduck"] #form-container { border-bottom: 1.5px solid var(--color-charcoal-ink) !important; }
+}
+
+/* ============================================================
+   app8 — 英文法ビジュアライザー (design-lab/app8/index.html)
+   ボタン: 999pxピル+グラデ → 2px角+ハード影、sky単色 / レインボー枠
+   ============================================================ */
+html[data-theme="motherduck"] header {
+  background: var(--color-frost-white) !important;
+  border-bottom: 1.5px solid var(--color-charcoal-ink) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] header h1,
+html[data-theme="motherduck"] header .sub { color: var(--color-charcoal-ink) !important; }
+html[data-theme="motherduck"] header .sub { opacity: 1 !important; color: var(--color-graphite) !important; }
+html[data-theme="motherduck"] .tree-card,
+html[data-theme="motherduck"] .stage,
+html[data-theme="motherduck"] .affirm-block,
+html[data-theme="motherduck"] .slot {
+  border-radius: var(--radius-sm) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  background: var(--color-frost-white) !important;
+}
+html[data-theme="motherduck"] .tree-card { background: var(--color-frost-white) !important; }
+html[data-theme="motherduck"] .slot.filled { background: var(--color-frost-white) !important; }
+html[data-theme="motherduck"] .slot.neg .slot-tag,
+html[data-theme="motherduck"] .slot.q .slot-tag,
+html[data-theme="motherduck"] .slot-tag,
+html[data-theme="motherduck"] .node-badge {
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--color-charcoal-ink) !important;
+}
+/* tnode: 999pxピル → 2px角 + ハード影 */
+html[data-theme="motherduck"] .tnode {
+  border-radius: var(--radius-sm) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono) !important;
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .tnode.active {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .tnode.locked-chip {
+  background: var(--color-chalk-gray) !important;
+  border-style: dashed !important;
+  box-shadow: none !important;
+}
+html[data-theme="motherduck"] .tnode:hover { transform: translate(1px,1px) !important; }
+/* pick-chip */
+html[data-theme="motherduck"] .pick-chip {
+  border-radius: var(--radius-sm) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono) !important;
+}
+html[data-theme="motherduck"] .pick-chip.active {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+/* act-btn: グラデ999px → 2px角+ハード影、sky単色 */
+html[data-theme="motherduck"] .act-btn {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle) !important;
+  font-family: var(--font-jp-mono) !important;
+  letter-spacing: .04em;
+}
+html[data-theme="motherduck"] .act-btn.q {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .act-btn--wh {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+/* Wh4色をレインボー枠で差別化（左上3pxの色帯） */
+html[data-theme="motherduck"] .act-btn--wh[data-wh="where"] { border-top: 3px solid var(--color-sky-crayon) !important; }
+html[data-theme="motherduck"] .act-btn--wh[data-wh="what"]  { border-top: 3px solid var(--color-mint-sketch) !important; }
+html[data-theme="motherduck"] .act-btn--wh[data-wh="who"]   { border-top: 3px solid var(--color-lilac-sketch) !important; }
+html[data-theme="motherduck"] .act-btn--wh[data-wh="when"]  { border-top: 3px solid var(--color-peach-sketch) !important; }
+html[data-theme="motherduck"] .act-btn:hover:not(:disabled),
+html[data-theme="motherduck"] .act-btn--wh:hover:not(:disabled) {
+  transform: translate(2px, 2px) !important;
+  box-shadow: rgb(56,56,56) -2px 2px 0 0 !important;
+}
+html[data-theme="motherduck"] .act-btn:active:not(:disabled) { transform: translate(2px,2px) !important; }
+html[data-theme="motherduck"] .card {
+  border-radius: var(--radius-sm) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="motherduck"] .slot-foot { border-top: 1.5px dashed var(--color-charcoal-ink) !important; }
+
+/* ============================================================
+   app1 — 公式・暗記辞典 (design-lab/app1/index.html)
+   左メニュー: #f0f0f0 + 淡い枠 → 白カード + charcoal縁 + ハード影
+   ============================================================ */
+html[data-theme="motherduck"] #menu-container {
+  background: var(--color-frost-white) !important;
+  border-right: 1.5px solid var(--color-charcoal-ink) !important;
+  box-shadow: var(--shadow-subtle) !important;
+}
+html[data-theme="motherduck"] .side-menu {
+  background: var(--color-frost-white) !important;
+}
+html[data-theme="motherduck"] .side-menu h3 {
+  color: var(--color-charcoal-ink) !important;
+  border-bottom: 1.5px solid var(--color-charcoal-ink) !important;
+  font-family: var(--font-jp-mono) !important;
+  letter-spacing: .06em;
+}
+html[data-theme="motherduck"] .side-menu ul li a {
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid transparent !important;
+  font-family: var(--font-jp-mono) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .side-menu ul li a:hover {
+  background: var(--color-ice-wash) !important;
+  border-color: var(--color-soft-silver) !important;
+}
+html[data-theme="motherduck"] .side-menu li a.active {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-weight: 700 !important;
+}
+html[data-theme="motherduck"] #refresh-button {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono) !important;
+}
+html[data-theme="motherduck"] #refresh-button:hover { transform: translate(1px,1px); }
+html[data-theme="motherduck"] #qrcode-container {
+  background: var(--color-cream-paper) !important;
+  border-top: 1.5px solid var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] #qrcode-image img {
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="motherduck"] #menu-toggle-button {
+  background: var(--color-frost-white) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="motherduck"] #memorize-toggle-button,
+html[data-theme="motherduck"] #search-toggle-button,
+html[data-theme="motherduck"] #font-increase-button,
+html[data-theme="motherduck"] #font-decrease-button {
+  background: var(--color-frost-white) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="motherduck"] body.memorize-mode-on #memorize-toggle-button {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+  border-color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] #search-container {
+  background: var(--color-frost-white) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle) !important;
+}
+html[data-theme="motherduck"] #main-content {
+  background: var(--color-cream-paper);
+}
+html[data-theme="motherduck"] #main-content h1 {
+  font-family: var(--font-jp-mono) !important;
+  color: var(--color-charcoal-ink) !important;
+  border-bottom: 2px solid var(--color-charcoal-ink) !important;
+  background: var(--color-frost-white) !important;
+  padding: 12px !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="motherduck"] #main-content h2 {
+  font-family: var(--font-jp-mono) !important;
+  color: var(--color-charcoal-ink) !important;
+  background: var(--color-frost-white) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-left: 6px solid var(--color-sky-crayon) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="motherduck"] #main-content h3 {
+  font-family: var(--font-jp-mono) !important;
+  color: var(--color-charcoal-ink) !important;
+  border-bottom: 1.5px dashed var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] #main-content li {
+  background: var(--color-frost-white) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+}
+html[data-theme="motherduck"] #main-content table th {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1px solid var(--color-charcoal-ink) !important;
+  font-family: var(--font-jp-mono) !important;
+}
+html[data-theme="motherduck"] #main-content table td {
+  border: 1px solid var(--color-soft-silver) !important;
+}
+html[data-theme="motherduck"] .tag-maniac {
+  background: var(--color-canary-banner) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+/* Motion: MotherDuckは影の沈み込みだけ。prefers-reduced-motionでは無効 */
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="motherduck"] .card,
+  html[data-theme="motherduck"] .card__btn { transition: none !important; }
+  html[data-theme="motherduck"] .card:hover { transform: none !important; }
+}
+
+/* Canvas drawing areas: keep sharp corners (left top drawing area for app3/app4/app5/app6/app7) */
+html[data-theme="motherduck"] #cv,
+html[data-theme="motherduck"] #cvAtom,
+html[data-theme="motherduck"] #cvCry,
+html[data-theme="motherduck"] #cvMain,
+html[data-theme="motherduck"] #cvSub,
+html[data-theme="motherduck"] #cvOrbit,
+html[data-theme="motherduck"] #cvSky {
+  border-radius: 0 !important;
+}
+
+
+/* Periodic table: keep square corners for MotherDuck theme */
+html[data-theme="motherduck"] .pt-scroll,
+html[data-theme="motherduck"] .el,
+html[data-theme="motherduck"] .pt-marker {
+  border-radius: 0 !important;
+}
+
+/* Left top drawing area notes: hide ocher left border inside .stage (keep indent, avoid overlap with black frame) */
+html[data-theme="motherduck"] .stage .notes {
+  border-left: 2px solid transparent !important;
+  padding-left: 12px !important;
+}
+
+/* ============================================================
+   App共通
+   ============================================================ */
+html[data-theme="motherduck"] {
+  --app-radius: var(--radius-sm);
+  --app-border: 1.5px solid var(--color-charcoal-ink);
+  --app-shadow: var(--shadow-subtle-sm);
+}
