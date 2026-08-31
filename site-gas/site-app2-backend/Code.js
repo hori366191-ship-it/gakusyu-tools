@@ -69,7 +69,7 @@ function getAllowedList_() {
 }
 function isAllowed_(email) {
   var list = getAllowedList_();
-  if (!email) return true;
+  if (!email) return false;
   if (!list.length) return true;
   return list.indexOf(normalizeEmail_(email)) !== -1;
 }
@@ -77,7 +77,7 @@ function isAllowedUser_() {
   var email = '';
   try { email = Session.getActiveUser().getEmail(); } catch (e) { email = ''; }
   var allowedRaw = PropertiesService.getScriptProperties().getProperty('ALLOWED_EMAILS') || '';
-  if (!email) return true; // 不可視はTOKENで判定（siteでは TOKEN 必須にするためここではtrueを返し、doPost/doGetでTOKEN検証を必須とする）
+  if (!email) return false;
   var list = parseAllowedList_(allowedRaw).map(function (s) { return normalizeEmail_(s); });
   return list.length > 0 && list.indexOf(normalizeEmail_(email)) >= 0;
 }
