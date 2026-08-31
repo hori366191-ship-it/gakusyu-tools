@@ -147,7 +147,7 @@ function verifyIdToken_(idToken) {
   return '';
 }
 function getEmailFromRequest_(p) {
-  // GIS id_token または email パラメータがあればそれを優先（Cookie不要）
+  // GIS id_token または email パラメータがあればそれを優先（Cookie不要）— probe 表示用（高速・フォールバックあり）
   if (p && p.email) {
     var e = normalizeEmail_(p.email);
     if (e) return e;
@@ -157,6 +157,42 @@ function getEmailFromRequest_(p) {
     if (fromToken) return fromToken;
   }
   return getEmail_();
+}
+function verifyIdTokenStrict_(idToken) {
+  if (!idToken) return '';
+  try {
+    var cache = CacheService.getScriptCache();
+    var key = 'idtok_strict_' + String(idToken).slice(-32);
+    var cached = cache.get(key);
+    if (cached) return normalizeEmail_(cached);
+  } catch (e) {}
+  try {
+    var res = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken), { muteHttpExceptions: true, followRedirects: true });
+    if (res.getResponseCode() === 200) {
+      var data = JSON.parse(res.getContentText());
+      if (data.email) {
+        if (!data.email_verified || String(data.email_verified) === 'true' || data.email_verified === true) {
+          var em = normalizeEmail_(data.email);
+          try { CacheService.getScriptCache().put('idtok_strict_' + String(idToken).slice(-32), em, 3600); } catch (e2) {}
+          return em;
+        }
+      }
+    }
+  } catch (e) {}
+  return '';
+}
+function getEmailFromRequestStrict_(p) {
+  if (p && p.id_token) {
+    var em = verifyIdTokenStrict_(p.id_token);
+    if (em) return em;
+    return '';
+  }
+  return '';
+}
+function isAllowedWithTokenStrict_(token, params) {
+  if (!getToken_() || String(token) !== getToken_()) return false;
+  var email = getEmailFromRequestStrict_(params || {});
+  return isAllowed_(email);
 }
 
 /**
@@ -193,11 +229,11 @@ function doGet(e) {
     var tokM = params.token || '';
     var cbM = params.callback || '';
     var isCbM = /^[A-Za-z0-9_.]{1,64}$/.test(cbM);
-    if (!isAllowedWithToken_(tokM, params)) {
+    if (!isAllowedWithTokenStrict_(tokM, params)) {
       var errM = { ok: false, error: 'not allowed' };
       return isCbM ? ContentService.createTextOutput(cbM + '(' + JSON.stringify(errM) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(errM);
     }
-    var emailM = getEmailFromRequest_(params);
+    var emailM = getEmailFromRequestStrict_(params);
     if (!isOwnerForEmail_(emailM)) {
       var errM2 = { ok: false, error: 'owner only' };
       return isCbM ? ContentService.createTextOutput(cbM + '(' + JSON.stringify(errM2) + ')').setMimeType(ContentService.MimeType.JAVASCRIPT) : jsonOut_(errM2);
@@ -213,7 +249,7 @@ function doGet(e) {
   }
   if (params.action === 'debugIndexInfo') {
     var tokD = params.token || '';
-    if (!isAllowedWithToken_(tokD, params)) return jsonOut_({ ok: false, error: 'not allowed' });
+    if (!isAllowedWithTokenStrict_(tokD, params)) return jsonOut_({ ok: false, error: 'not allowed' });
     return jsonOut_({ ok: true, info: debugIndexInfo(), props: debugProps() });
   }
   if (params.action === 'getDICTIONARY') {
@@ -305,9 +341,9 @@ function handleProbe_(p) {
     var token = body.token || (e && e.parameter && e.parameter.token) || '';
     var idToken = body.id_token || (e && e.parameter && e.parameter.id_token) || '';
     var pForCheck = { id_token: idToken };
-    if (!isAllowedWithToken_(token, pForCheck)) {
-      var em = getEmailFromRequest_(pForCheck);
-      return jsonOut_({ ok: false, error: 'not allowed' + (em ? ' (' + maskEmail_(em) + ')' : ' (invisible token bad?)') });
+    if (!isAllowedWithTokenStrict_(token, pForCheck)) {
+      var em = getEmailFromRequestStrict_(pForCheck);
+      return jsonOut_({ ok: false, error: 'not allowed' + (em ? ' (' + maskEmail_(em) + ')' : ' (strict verification failed)') });
     }
     if (body.action === 'generateText') {
       var settings = body.settings || {};
@@ -336,13 +372,13 @@ function handleProbe_(p) {
   }
 }
 function generateTextWithToken_(settings, token, params) {
-  if (!isAllowedWithToken_(token, params)) throw new Error('AI生成は許可されたアカウントのみ利用できます');
+  if (!isAllowedWithTokenStrict_(token, params)) throw new Error('AI生成は許可されたアカウントのみ利用できます');
   return generateTextInternal_(settings);
 }
 function deleteTextWithToken_(payload, token, params) {
-  if (!isAllowedWithToken_(token, params)) throw new Error('not allowed');
-  // 削除はオーナーのみ（GISのメールで判定）
-  var email = getEmailFromRequest_(params || {});
+  if (!isAllowedWithTokenStrict_(token, params)) throw new Error('not allowed');
+  // 削除はオーナーのみ（GISのメールで判定・strict）
+  var email = getEmailFromRequestStrict_(params || {});
   if (!isOwnerForEmail_(email)) throw new Error('削除はオーナーのみ実行できます');
   return deleteText(payload);
 }
