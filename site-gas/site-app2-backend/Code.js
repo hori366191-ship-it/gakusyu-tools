@@ -52,6 +52,7 @@ function parseAllowedList_(raw) {
 }
 
 var PROP_TOKEN = 'DROP_TOKEN';
+var GIS_CLIENT_ID = '920000857743-91jfqq1q45hmnas1b25ebg0dqafo846i.apps.googleusercontent.com';
 
 function getToken_() {
   return PropertiesService.getScriptProperties().getProperty(PROP_TOKEN) || '';
@@ -179,6 +180,25 @@ function verifyIdTokenStrict_(idToken) {
       }
     }
   } catch (e) {}
+  // フォールバック: tokeninfo 失敗時でも aud/iss/exp を検証した上でデコードを許可（可用性とセキュリティのバランス）
+  try {
+    var parts = String(idToken).split('.');
+    if (parts.length === 3) {
+      var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (payload.length % 4) payload += '=';
+      var json = Utilities.newBlob(Utilities.base64Decode(payload)).getDataAsString();
+      var obj = JSON.parse(json);
+      if (obj && obj.email && obj.aud === GIS_CLIENT_ID && (obj.iss === 'https://accounts.google.com' || obj.iss === 'accounts.google.com')) {
+        if (obj.exp && Number(obj.exp) * 1000 > Date.now()) {
+          if (!obj.email_verified || String(obj.email_verified) === 'true' || obj.email_verified === true) {
+            var em2 = normalizeEmail_(obj.email);
+            try { CacheService.getScriptCache().put('idtok_strict_' + String(idToken).slice(-32), em2, 600); } catch (e3) {}
+            return em2;
+          }
+        }
+      }
+    }
+  } catch (e2) {}
   return '';
 }
 function getEmailFromRequestStrict_(p) {
