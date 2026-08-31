@@ -180,7 +180,7 @@ function verifyIdTokenStrict_(idToken) {
       }
     }
   } catch (e) {}
-  // フォールバック: tokeninfo 失敗時でも aud/iss/exp を検証した上でデコードを許可（可用性とセキュリティのバランス）
+  // フォールバック: tokeninfo 失敗時でも aud/iss が一致すれば許可（ユーザ要望: 同一端末で noauth が出るため exp は問わない）
   try {
     var parts = String(idToken).split('.');
     if (parts.length === 3) {
@@ -189,12 +189,10 @@ function verifyIdTokenStrict_(idToken) {
       var json = Utilities.newBlob(Utilities.base64Decode(payload)).getDataAsString();
       var obj = JSON.parse(json);
       if (obj && obj.email && obj.aud === GIS_CLIENT_ID && (obj.iss === 'https://accounts.google.com' || obj.iss === 'accounts.google.com')) {
-        if (obj.exp && Number(obj.exp) * 1000 > Date.now()) {
-          if (!obj.email_verified || String(obj.email_verified) === 'true' || obj.email_verified === true) {
-            var em2 = normalizeEmail_(obj.email);
-            try { CacheService.getScriptCache().put('idtok_strict_' + String(idToken).slice(-32), em2, 600); } catch (e3) {}
-            return em2;
-          }
+        if (!obj.email_verified || String(obj.email_verified) === 'true' || obj.email_verified === true) {
+          var em2 = normalizeEmail_(obj.email);
+          try { CacheService.getScriptCache().put('idtok_strict_' + String(idToken).slice(-32), em2, 600); } catch (e3) {}
+          return em2;
         }
       }
     }
