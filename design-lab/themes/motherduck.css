@@ -534,7 +534,7 @@ html[data-theme="motherduck"] #main-content li {
   background: var(--color-frost-white) !important;
   border: 1.5px solid var(--color-charcoal-ink) !important;
   border-radius: var(--radius-sm) !important;
-  box-shadow: var(--shadow-subtle-sm) !important;
+  box-shadow: none !important;
 }
 html[data-theme="motherduck"] #main-content table th {
   background: var(--color-cream-paper) !important;
