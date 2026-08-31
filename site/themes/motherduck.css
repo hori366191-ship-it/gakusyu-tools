@@ -561,6 +561,97 @@ html[data-theme="motherduck"] .tag-maniac {
   border-radius: var(--radius-sm) !important;
 }
 
+/* ============================================================
+   app9 — 原稿用紙メーカー (site/app9/index.html) — テーマを強く反映
+   ============================================================ */
+html[data-theme="motherduck"] body:has(.sheet) {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .controls .panel {
+  background: var(--color-frost-white) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle) !important;
+}
+html[data-theme="motherduck"] .panel h1 {
+  font-family: var(--font-jp-mono) !important;
+  color: var(--color-charcoal-ink) !important;
+  letter-spacing: .04em;
+  border-bottom: 1.5px solid var(--color-charcoal-ink) !important;
+  padding-bottom: 8px !important;
+}
+html[data-theme="motherduck"] fieldset.dirs {
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  background: var(--color-frost-white) !important;
+}
+html[data-theme="motherduck"] fieldset.dirs legend {
+  font-family: var(--font-jp-mono) !important;
+  color: var(--color-charcoal-ink) !important;
+  font-weight: 700;
+}
+html[data-theme="motherduck"] .presets button {
+  background: var(--color-frost-white) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] .presets button:hover {
+  background: var(--color-ice-wash) !important;
+  transform: translate(1px, 1px);
+  box-shadow: rgb(56,56,56) -2px 2px 0 0 !important;
+}
+html[data-theme="motherduck"] .swatch {
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="motherduck"] .swatch.active {
+  box-shadow: 0 0 0 2px var(--color-frost-white), 0 0 0 4px var(--color-sky-crayon) !important;
+}
+html[data-theme="motherduck"] input[type=number],
+html[data-theme="motherduck"] input[type=color] {
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  background: var(--color-frost-white) !important;
+  font-family: var(--font-jp-mono) !important;
+}
+html[data-theme="motherduck"] .actions button {
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle) !important;
+  font-family: var(--font-jp-mono) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] #printBtn {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] #printBtn:hover {
+  transform: translate(1px, 1px);
+  box-shadow: rgb(56,56,56) -2px 2px 0 0 !important;
+}
+html[data-theme="motherduck"] #classroomBtn {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="motherduck"] #classroomBtn:hover:not([disabled]) {
+  background: var(--color-ice-wash) !important;
+  transform: translate(1px, 1px);
+}
+html[data-theme="motherduck"] .page-wrap {
+  background: var(--color-cream-paper) !important;
+}
+html[data-theme="motherduck"] .sheet {
+  background: var(--color-frost-white) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle) !important;
+}
+html[data-theme="motherduck"] .hint { color: var(--color-graphite) !important; }
+html[data-theme="motherduck"] .count { color: var(--color-charcoal-ink) !important; font-family: var(--font-jp-mono) !important; }
+
 /* Motion: MotherDuckは影の沈み込みだけ。prefers-reduced-motionでは無効 */
 @media (prefers-reduced-motion: reduce) {
   html[data-theme="motherduck"] .card,
