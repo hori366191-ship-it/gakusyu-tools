@@ -57,32 +57,12 @@
       }
     } catch (e) {}
   }
-  function updateFavicon(t) {
-    try {
-      var link = document.getElementById('favicon') || document.querySelector('link[rel="icon"]');
-      if (!link) return;
-      var href = link.getAttribute('href') || 'favicon.svg';
-      var dir = '';
-      var slash = href.lastIndexOf('/');
-      if (slash !== -1) dir = href.substring(0, slash + 1);
-      var base = t === 'motherduck' ? 'favicon-motherduck.svg' : 'favicon.svg';
-      var v = t === 'motherduck' ? '?v=motherduck' : '?v=default';
-      link.setAttribute('href', dir + base + v);
-    } catch (e) {}
-  }
-  // Initial href/favicon sync after DOM is ready (for when theme is motherduck)
+  // Initial href sync after DOM is ready (for when theme is motherduck)
   if (theme === 'motherduck') {
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () { updateCardHrefs('motherduck'); updateFavicon('motherduck'); });
+      document.addEventListener('DOMContentLoaded', function () { updateCardHrefs('motherduck'); });
     } else {
-      updateCardHrefs('motherduck'); updateFavicon('motherduck');
-    }
-  } else {
-    // Ensure favicon is default on first load (in case previous theme was motherduck but now default)
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () { updateFavicon('default'); });
-    } else {
-      updateFavicon('default');
+      updateCardHrefs('motherduck');
     }
   }
   // Cross-tab sync
@@ -91,7 +71,6 @@
       if (e.key === KEY && VALID[e.newValue || 'default']) {
         applyTheme(e.newValue || 'default');
         updateCardHrefs(e.newValue || 'default');
-        updateFavicon(e.newValue || 'default');
         // Dispatch custom event for UI to update
         try { window.dispatchEvent(new CustomEvent('gakusyu-theme-change', { detail: e.newValue })); } catch (_) {}
       }
@@ -104,7 +83,6 @@
     setStored(t);
     applyTheme(t);
     updateCardHrefs(t);
-    updateFavicon(t);
     try { window.dispatchEvent(new CustomEvent('gakusyu-theme-change', { detail: t })); } catch (_) {}
     return t;
   };
