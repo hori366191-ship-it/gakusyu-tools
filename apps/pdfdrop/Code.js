@@ -62,7 +62,7 @@ function bumpUsage_() {
 
 function isAllowed_(email) {
   var list = getAllowedList_();
-  if (!email) return true;
+  if (!email) return false;
   if (!list.length) return true;
   return list.indexOf(email) !== -1;
 }
