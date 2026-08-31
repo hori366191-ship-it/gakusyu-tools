@@ -425,6 +425,15 @@ html[data-theme="motherduck"] .card {
 }
 html[data-theme="motherduck"] .slot-foot { border-top: 1.5px dashed var(--color-charcoal-ink) !important; }
 
+/* 英文のカードだけ影を消す（外側の tree-card/stage は影を保持） */
+html[data-theme="motherduck"] .row .card,
+html[data-theme="motherduck"] .card.c-subj,
+html[data-theme="motherduck"] .card.c-verb,
+html[data-theme="motherduck"] .card.c-aux,
+html[data-theme="motherduck"] .card.c-other {
+  box-shadow: none !important;
+}
+
 /* ============================================================
    app1 — 公式・暗記辞典 (design-lab/app1/index.html)
    左メニュー: #f0f0f0 + 淡い枠 → 白カード + charcoal縁 + ハード影
