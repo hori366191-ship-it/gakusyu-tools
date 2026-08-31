@@ -511,17 +511,10 @@ function drawOrbitMoon(){
   var obsX = cx + latR*Math.cos(obsAng), obsY = cy + latR*Math.sin(obsAng);
   ctxO.fillStyle='#b45309';
   ctxO.beginPath(); ctxO.arc(obsX, obsY, 3.5,0,Math.PI*2); ctxO.fill();
-  var labelR = earthR+14;
-  var labX = cx + labelR*Math.cos(obsAng), labY = cy + labelR*Math.sin(obsAng);
-  ctxO.fillStyle='#1f2f46'; ctxO.font='600 10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  var off = 10;
-  ctxO.fillText('観測者', labX + Math.cos(obsAng)*off, labY + Math.sin(obsAng)*off +4);
-  ctxO.strokeStyle='#b45309'; ctxO.lineWidth=1;
   var ax = Math.cos(obsAng), ay=Math.sin(obsAng);
+  ctxO.strokeStyle='#b45309'; ctxO.lineWidth=1;
   ctxO.beginPath(); ctxO.moveTo(obsX+ax*2, obsY+ay*2); ctxO.lineTo(obsX+ax*10, obsY+ay*10); ctxO.stroke();
   ctxO.beginPath(); ctxO.moveTo(obsX+ax*6 - ay*4, obsY+ay*6 + ax*4); ctxO.lineTo(obsX+ax*10, obsY+ay*10); ctxO.lineTo(obsX+ax*6 + ay*4, obsY+ay*6 - ax*4); ctxO.stroke();
-  ctxO.fillStyle='rgba(180,83,9,.9)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  ctxO.fillText(fmtTime(state.time), labX + ax*22, labY + ay*22 +3);
   ctxO.fillStyle='#1f2f46'; ctxO.font='600 12px "Noto Serif JP",serif'; ctxO.textAlign='center';
   ctxO.fillText('地球', cx, cy+5);
   if(state.ghost){
@@ -730,8 +723,6 @@ function drawOrbitConst(){
     ctxO.strokeText(d.label, lx, ly);
     ctxO.fillStyle=d.col; ctxO.fillText(d.label, lx, ly);
   });
-  ctxO.fillStyle='rgba(180,83,9,.9)'; ctxO.font='10px "Noto Serif JP",serif'; ctxO.textAlign='center';
-  ctxO.fillText(fmtTime(state.time), obsX, obsY-10);
   // constellations belt outside — 簡易(等間隔30°) / 厳密(実際の赤経位置)
   var curSeason=SEASON_MAP.reduce(function(a,b){ var da=Math.abs(state.date-b.d); if(da>182) da=365-da; var aa=Math.abs(state.date-a.d); if(aa>182) aa=365-aa; return da<aa?b:a; });
   ctxO.save();
