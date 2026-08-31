@@ -596,6 +596,15 @@ html[data-theme="pop"] .tag-maniac {
 }
 
 /* ============================================================
+   app1 — 数式サイズ補正（本文と同等 + ポップのex差を保険）
+   JS側で 1.15/0.95 + pop 1.07 に拡大済み。
+   CSSは行揃えのみ微調整（font-sizeはMathJaxのinline styleを尊重）。
+   ============================================================ */
+html[data-theme="pop"] #main-content mjx-container svg {
+  vertical-align: -0.12em !important;
+}
+
+/* ============================================================
    app9 — 原稿用紙メーカー (site/app9/index.html) — テーマを強く反映
    ============================================================ */
 html[data-theme="pop"] body:has(.sheet) {

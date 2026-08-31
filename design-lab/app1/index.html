@@ -10,6 +10,12 @@
 <link rel="stylesheet" href="../themes/pop.css">
 
     <script>
+        // app1 数式スケール定数: 本文(16px)と同等に見えるよう調整 (日本語基準)
+        // デスクトップ1.15 / モバイル0.95 + ポップ時+7% (本文と同等)
+        const MATH_SCALE_DESKTOP = 1.15;
+        const MATH_SCALE_MOBILE = 0.95;
+        const POP_EXTRA = 1.07;
+        function _isPopTheme() { try { return document.documentElement.getAttribute('data-theme') === 'pop'; } catch (e) { return false; } }
         // 画面がスマホサイズ（幅が768px以下）かどうかを判定
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
@@ -20,8 +26,8 @@
             },
             svg: {
                 fontCache: 'global',
-                // スマホ表示では数式のスケールを少し小さくする
-                scale: isMobile ? 0.7 : 1.0
+                // 本文と同等サイズ: デスクトップ1.15 / モバイル0.95 + ポップ時+7%
+                scale: (isMobile ? MATH_SCALE_MOBILE : MATH_SCALE_DESKTOP) * (_isPopTheme() ? POP_EXTRA : 1)
             }
         };
     </script>
@@ -37,13 +43,18 @@
             var _fs = parseFloat(localStorage.getItem('mdv1_fontScale'));
             if (!isNaN(_fs) && _fs >= 0.8 && _fs <= 1.5) {
                 document.documentElement.style.setProperty('--app1-font-scale', String(Math.round(_fs * 10) / 10));
-                // MathJax 初期scaleも補正（モバイル判定込み）
+                // MathJax 初期scaleも補正（モバイル判定込み + ポップ補正 + 文字サイズ倍率）
+                var _MS_D = (typeof MATH_SCALE_DESKTOP !== 'undefined') ? MATH_SCALE_DESKTOP : 1.15;
+                var _MS_M = (typeof MATH_SCALE_MOBILE !== 'undefined') ? MATH_SCALE_MOBILE : 0.95;
+                var _POP_E = (typeof POP_EXTRA !== 'undefined') ? POP_EXTRA : 1.07;
+                var _isPop = false; try { _isPop = document.documentElement.getAttribute('data-theme') === 'pop'; } catch (e) {}
+                var _popMul = _isPop ? _POP_E : 1;
                 if (typeof MathJax !== 'undefined' && MathJax.svg) {
                     var _isMob = window.matchMedia('(max-width: 768px)').matches;
-                    MathJax.svg.scale = (_isMob ? 0.7 : 1.0) * (Math.round(_fs * 10) / 10);
+                    MathJax.svg.scale = (_isMob ? _MS_M : _MS_D) * _popMul * (Math.round(_fs * 10) / 10);
                 } else if (typeof MathJax !== 'undefined' && MathJax.config && MathJax.config.svg) {
                     var _isMob2 = window.matchMedia('(max-width: 768px)').matches;
-                    MathJax.config.svg.scale = (_isMob2 ? 0.7 : 1.0) * (Math.round(_fs * 10) / 10);
+                    MathJax.config.svg.scale = (_isMob2 ? _MS_M : _MS_D) * _popMul * (Math.round(_fs * 10) / 10);
                 }
             }
         } catch (e) {}
@@ -1231,12 +1242,15 @@
         }
 
         /**
-         * MathJaxの有効スケール（モバイル基礎値 × 文字サイズ倍率）
+         * MathJaxの有効スケール（モバイル基礎値 × 文字サイズ倍率 × ポップ補正）
+         * 本文(16px)と同等: デスクトップ1.15 / モバイル0.95 + ポップ時 1.07
          */
         function getEffectiveMathScale(isMobileWidth) {
-            const base = isMobileWidth ? 0.7 : 1.0;
+            const base = isMobileWidth ? MATH_SCALE_MOBILE : MATH_SCALE_DESKTOP;
+            let popMul = 1;
+            try { popMul = document.documentElement.getAttribute('data-theme') === 'pop' ? POP_EXTRA : 1; } catch (e) {}
             const s = (typeof fontScale === 'number' && !isNaN(fontScale)) ? fontScale : FONT_DEFAULT;
-            return base * s;
+            return base * popMul * s;
         }
 
         /**
@@ -1259,6 +1273,36 @@
                     }
                 };
                 mediaQuery.addEventListener('change', handleScaleChange);
+                // テーマ切替(pop/標準)でもスケールを再計算
+                try {
+                    window.addEventListener('gakusyu-theme-change', () => {
+                        try {
+                            const isMob = mediaQuery.matches;
+                            const ns = getEffectiveMathScale(isMob);
+                            if (MathJax.config.svg.scale !== ns) {
+                                MathJax.config.svg.scale = ns;
+                                MathJax.startup.document.rerender();
+                            }
+                        } catch (e) {}
+                    });
+                } catch (e) {}
+                // Webフォント読込完了後に ex 確定のため再描画
+                try {
+                    if (document.fonts && document.fonts.ready) {
+                        document.fonts.ready.then(() => {
+                            try {
+                                const isMob2 = mediaQuery.matches;
+                                const ns2 = getEffectiveMathScale(isMob2);
+                                if (MathJax.config.svg.scale !== ns2) {
+                                    MathJax.config.svg.scale = ns2;
+                                    MathJax.startup.document.rerender();
+                                } else {
+                                    try { MathJax.startup.document.rerender(); } catch (e) {}
+                                }
+                            } catch (e) {}
+                        });
+                    }
+                } catch (e) {}
                 // 初期表示時に保存されたfontScaleをMathJaxへ反映（startup後に一度だけ）
                 try {
                     const curIsMobile = mediaQuery.matches;
