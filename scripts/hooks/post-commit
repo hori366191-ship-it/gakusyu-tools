@@ -1,3 +1,4 @@
 #!/bin/sh
-# コミットのたびに Drive 同期フォルダへ git bundle バックアップを実行する
+# コミットのたびに Drive 同期フォルダへ git bundle バックアップと複数端末用フォルダの同期を実行する
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "scripts/backup.ps1"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "scripts/sync-multi-device.ps1"
