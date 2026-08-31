@@ -29,8 +29,26 @@
         </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // 初期表示のちらつき防止：保存された文字サイズを即時反映（FOUC対策）
+        try {
+            var _fs = parseFloat(localStorage.getItem('mdv1_fontScale'));
+            if (!isNaN(_fs) && _fs >= 0.8 && _fs <= 1.5) {
+                document.documentElement.style.setProperty('--app1-font-scale', String(Math.round(_fs * 10) / 10));
+                // MathJax 初期scaleも補正（モバイル判定込み）
+                if (typeof MathJax !== 'undefined' && MathJax.svg) {
+                    var _isMob = window.matchMedia('(max-width: 768px)').matches;
+                    MathJax.svg.scale = (_isMob ? 0.7 : 1.0) * (Math.round(_fs * 10) / 10);
+                } else if (typeof MathJax !== 'undefined' && MathJax.config && MathJax.config.svg) {
+                    var _isMob2 = window.matchMedia('(max-width: 768px)').matches;
+                    MathJax.config.svg.scale = (_isMob2 ? 0.7 : 1.0) * (Math.round(_fs * 10) / 10);
+                }
+            }
+        } catch (e) {}
+    </script>
 
     <style>
+        :root { --app1-font-scale: 1; }
         * { box-sizing: border-box; }
         html { -webkit-text-size-adjust: 100%; }
 
@@ -186,6 +204,7 @@
             margin-left: 240px;
             padding: 0 40px;
             max-width: 800px;
+            font-size: calc(16px * var(--app1-font-scale));
         }
 
         #main-content h1,
@@ -435,6 +454,57 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         }
 
+        /* ▼▼▼ 文字拡大・縮小ボタン（FAB列 3・4段目） ▼▼▼ */
+        #font-increase-button,
+        #font-decrease-button {
+            position: fixed;
+            right: 20px;
+            z-index: 1500;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: white;
+            color: #333;
+            border: 1px solid #ddd;
+            font-size: 1.05em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #font-increase-button { top: 160px; }
+        #font-decrease-button { top: 230px; }
+        #font-increase-button:hover,
+        #font-decrease-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+        #font-increase-button:disabled,
+        #font-decrease-button:disabled {
+            opacity: 0.4;
+            cursor: default;
+            transform: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        @media (max-width: 768px) {
+            /* モバイルでは本文がFABに隠れないよう右パディングを確保 */
+            #main-content { padding: 0 75px 0 15px; }
+            #memorize-toggle-button,
+            #search-toggle-button,
+            #font-increase-button,
+            #font-decrease-button {
+                right: 10px;
+                width: 48px;
+                height: 48px;
+            }
+            #search-toggle-button { top: 78px; }
+            #font-increase-button { top: 136px; }
+            #font-decrease-button { top: 194px; }
+        }
+
         /* 検索バーコンテナ */
         #search-container {
             position: fixed;
@@ -545,6 +615,8 @@
 
     <button id="memorize-toggle-button" title="暗記モード ON/OFF">暗</button>
     <button id="search-toggle-button" title="検索を開く">🔍</button>
+    <button id="font-increase-button" type="button" aria-label="文字を大きくする" title="文字を大きく (80%〜150%)">A+</button>
+    <button id="font-decrease-button" type="button" aria-label="文字を小さくする" title="文字を小さく (80%〜150%)">A-</button>
 
     <div id="search-container" class="hidden">
         <input type="text" id="search-input" placeholder="検索...">
@@ -576,6 +648,13 @@
         let isMemorizeMode = false; // 暗記モードの状態
         let currentBundle = null; // 現在保持しているバンドル（一覧+全コンテンツ）
         let currentContentId = null; // 現在表示中のコンテンツID
+        // ▼▼▼ 文字サイズ拡大・縮小用 ▼▼▼
+        const FONT_SCALE_KEY = 'mdv1_fontScale';
+        const FONT_MIN = 0.8;
+        const FONT_MAX = 1.5;
+        const FONT_STEP = 0.1;
+        const FONT_DEFAULT = 1.0;
+        let fontScale = FONT_DEFAULT;
 
         /**
          * 文書切替時にスクロール位置を先頭に戻す（instant）
@@ -595,6 +674,8 @@
          * ページの読み込みが完了したら実行されるメイン処理
          */
         document.addEventListener('DOMContentLoaded', () => {
+            // 文字サイズのセットアップ（MathJax初期化より先にscaleを反映）
+            setupFontZoom();
             // ハンバーガーメニューのセットアップ
             setupHamburgerMenu();
             // MathJaxの動的スケール調整機能のセットアップ
@@ -1016,7 +1097,17 @@
         }
 
         /**
+         * MathJaxの有効スケール（モバイル基礎値 × 文字サイズ倍率）
+         */
+        function getEffectiveMathScale(isMobileWidth) {
+            const base = isMobileWidth ? 0.7 : 1.0;
+            const s = (typeof fontScale === 'number' && !isNaN(fontScale)) ? fontScale : FONT_DEFAULT;
+            return base * s;
+        }
+
+        /**
          * MathJaxのスケールを画面幅に応じて動的に変更するリスナーを設定
+         * 文字拡大と連動するため getEffectiveMathScale を使用
          */
         function setupDynamicMathScale() {
             if (typeof MathJax === 'undefined' || !MathJax.startup) {
@@ -1027,14 +1118,87 @@
             MathJax.startup.promise.then(() => {
                 const mediaQuery = window.matchMedia('(max-width: 768px)');
                 const handleScaleChange = (e) => {
-                    const newScale = e.matches ? 0.7 : 1.0;
+                    const newScale = getEffectiveMathScale(e.matches);
                     if (MathJax.config.svg.scale !== newScale) {
                         MathJax.config.svg.scale = newScale;
                         MathJax.startup.document.rerender();
                     }
                 };
                 mediaQuery.addEventListener('change', handleScaleChange);
+                // 初期表示時に保存されたfontScaleをMathJaxへ反映（startup後に一度だけ）
+                try {
+                    const curIsMobile = mediaQuery.matches;
+                    const curScale = getEffectiveMathScale(curIsMobile);
+                    if (MathJax.config.svg.scale !== curScale) {
+                        MathJax.config.svg.scale = curScale;
+                        MathJax.startup.document.rerender();
+                    }
+                } catch (e) {}
             });
+        }
+
+        /**
+         * 文字サイズ拡大・縮小のセットアップ（右側FAB）
+         * 80%〜150% を 10% 刻みで切替。#main-content のみを拡大し、MathJaxも連動。
+         * 保存キー: mdv1_fontScale（localStorage）
+         */
+        function setupFontZoom() {
+            const incBtn = document.getElementById('font-increase-button');
+            const decBtn = document.getElementById('font-decrease-button');
+            if (!incBtn || !decBtn) return;
+
+            // 保存値を読込
+            let initial = FONT_DEFAULT;
+            try {
+                const raw = localStorage.getItem(FONT_SCALE_KEY);
+                const v = parseFloat(raw);
+                if (!isNaN(v) && v >= FONT_MIN && v <= FONT_MAX) initial = Math.round(v * 10) / 10;
+            } catch (e) {}
+            fontScale = initial;
+            applyFontScale(fontScale, true);
+
+            incBtn.addEventListener('click', () => applyFontScale(fontScale + FONT_STEP));
+            decBtn.addEventListener('click', () => applyFontScale(fontScale - FONT_STEP));
+            updateFontZoomButtons();
+        }
+        function applyFontScale(newScale, isInitial) {
+            newScale = Math.round(newScale * 10) / 10;
+            newScale = Math.min(FONT_MAX, Math.max(FONT_MIN, newScale));
+            if (!isInitial && newScale === fontScale) return;
+            fontScale = newScale;
+            document.documentElement.style.setProperty('--app1-font-scale', String(fontScale));
+            try { localStorage.setItem(FONT_SCALE_KEY, String(fontScale)); } catch (e) {}
+            updateFontZoomButtons();
+            // MathJaxが準備できていれば再描画
+            try {
+                if (typeof MathJax !== 'undefined' && MathJax.config && MathJax.startup && MathJax.startup.document) {
+                    const isMobileWidth = window.matchMedia('(max-width: 768px)').matches;
+                    const eff = getEffectiveMathScale(isMobileWidth);
+                    if (MathJax.config.svg.scale !== eff) {
+                        MathJax.config.svg.scale = eff;
+                        // startup.promise が解決済みなら即rerender、未解決ならstartup.promise経由で反映される
+                        if (MathJax.startup.promise) {
+                            MathJax.startup.promise.then(() => {
+                                try { MathJax.startup.document.rerender(); } catch (e) {}
+                            }).catch(() => {});
+                            // 既にtypeset済みなら即時も試す
+                            try { MathJax.startup.document.rerender(); } catch (e) {}
+                        }
+                    }
+                }
+            } catch (e) {}
+        }
+        function updateFontZoomButtons() {
+            const incBtn = document.getElementById('font-increase-button');
+            const decBtn = document.getElementById('font-decrease-button');
+            if (!incBtn || !decBtn) return;
+            incBtn.disabled = fontScale >= FONT_MAX - 1e-9;
+            decBtn.disabled = fontScale <= FONT_MIN + 1e-9;
+            const pct = Math.round(fontScale * 100);
+            incBtn.title = `文字を大きく (${pct}% / 最大150%)`;
+            decBtn.title = `文字を小さく (${pct}% / 最小80%)`;
+            incBtn.setAttribute('aria-label', `文字を大きくする 現在${pct}%`);
+            decBtn.setAttribute('aria-label', `文字を小さくする 現在${pct}%`);
         }
 
         /**
