@@ -2,13 +2,13 @@
 
 このリポジトリはGoogle Apps Script(GAS)製の学習ツール群(塾向け)を管理する。
 
-- **現行の正本は `site/` + `site-gas/` + `site-worker/`**。`apps/` は旧GAS版として永久残置するが、**今後の機能改修は `site/` 側のみを更新し `apps/` には手を加えない**
-- 詳細な仕様・権限・ガードの詳細は `仕様書_移行案.md` を正とする（`仕様書.md` はGAS版の凍結保存版。旧版の詳細が必要な場合はそちらを参照）
+- **現行の正本は `site/` + `site-gas/` + `site-worker/`**。`apps/` は旧GAS版として `archive/apps-20260902/`（GitHub未追跡、Driveにもコピー）へ退避済みで、**現行 `apps/` は新URLへの単一リンク最小HTML（`target="_blank"`、GAS `sandbox` 対策）に置換済み。今後の機能改修は `site/` 側のみ**
+- 詳細な仕様・権限・ガードの詳細は `仕様書_移行案.md` を正とする（`仕様書.md` はGAS版の凍結保存版。旧版の詳細が必要な場合は `archive/` を参照）
 
 ## プロジェクト構造
 
 ```
-apps/      … 旧GAS版（永久残置・11本・現行運用中）
+apps/      … 旧GAS版（最小リダイレクト・11本。新URL https://hori366191-ship-it.github.io/gakusyu-tools/ への単一リンクのみ、`target="_blank"`）
 ├── app1/   公式・暗記辞典   (scriptId: YOUR_SCRIPT_ID_app1)
 ├── app2/   英語長文 多読リーダー (scriptId: YOUR_SCRIPT_ID_app2)
 ├── app3/   正規分布シミュレーター (scriptId: YOUR_SCRIPT_ID_app3)
@@ -21,10 +21,12 @@ apps/      … 旧GAS版（永久残置・11本・現行運用中）
 ├── pdfdrop/ PDF受信アプリ (scriptId: YOUR_SCRIPT_ID_pdfdrop、デプロイ: AKfycbxP6klWI4L5wnTl2wTO5PmrDMf6z4Fmu3Qh3zFwfCf0KUa91idOINv6w8PxoY3Ke-oN、ポータル非掲載)
 ├── portal/ 学習ツール ポータル (scriptId: YOUR_SCRIPT_ID_portal)
 └── その他/  実験・非公開アプリの開発場所
+archive/ … 旧GAS退避（GitHub未追跡、Driveにもコピー） `archive/apps-20260902/` に11本の元コードを保存（`apps/` は上記最小HTMLに置換済み）
 site/      … 新Pages版（正本・`hori366191-ship-it.github.io/gakusyu-tools/` で配信）
-├── index.html, app1/, app2/, app3/..app9/, debug-probe.html, favicon.svg
+├── index.html, app1/, app2/, app3/..app9/, credits.html, debug-probe.html, favicon.svg
 ├── app1/bundle.json, app1/favicon.svg … app9/favicon.svg（各アプリ個別、SVGのみ）
-├── tokens/pop.css, themes/pop.css, themes/theme.js … テーマ機構（標準/ポップ切替、永続化はlocalStorage）
+├── credits.html … クレジット集約（フォント/ライブラリ/データ/Refero）
+├── tokens/pop.css, themes/pop.css, themes/forest.css, themes/theme.js … テーマ機構（標準/ポップ/フォレスト切替、永続化はlocalStorage）
 └── site-src/app1/content/*.md … 辞典の正本（`site/app1/bundle.json` の生成元）
 site-gas/  … 新GAS2本（Pagesの不可視API）
 ├── site-pdfdrop/   (scriptId: YOUR_SCRIPT_ID_site-pdfdrop)
@@ -56,10 +58,10 @@ design-lab/ … デザイン実験工房（Pages非配信・`site` に影響を�
 
 ### テーマ機構について
 
-- 実装: `site/themes/theme.js`（`localStorage: gakusyu-theme` + `?theme=` パラメータ、同期的に `html[data-theme]` を立てる）+ `site/themes/pop.css`（`html[data-theme="pop"]` 時のみ上書き）+ `site/tokens/pop.css`（Refero抽出の生トークン）
-- ポータル `site/index.html:382` の「標準 / ポップ」ボタンで切替。選択は `localStorage` に永続化され、次回も保持。`site/app*` は `head` で同じ `theme.js/css` を読み込むためポータルの選択が自動で引き継がれる（同一オリジンのため）
+- 実装: `site/themes/theme.js`（`localStorage: gakusyu-theme` + `?theme=` パラメータ、同期的に `html[data-theme]` を立てる）+ `site/themes/pop.css`（`html[data-theme="pop"]` 時のみ上書き）+ `site/themes/forest.css` + `site/tokens/pop.css` `forest.css`（Refero抽出の生トークン）
+- ポータル `site/index.html:382` の「標準 / ポップ / フォレスト」ボタンで切替。選択は `localStorage` に永続化され、次回も保持。`site/app*` は `head` で同じ `theme.js/css` を読み込むためポータルの選択が自動で引き継がれる（同一オリジンのため）
 - faviconはPagesでは標準に統一（`site/favicon-pop.svg` は残置するが未参照）。`design-lab/` では直角・左下影の試作アイコンで確認
-- **新規アプリ作成時の注意**: 既存テーマ（現状は `標準` / `ポップ`）すべての分のスタイルを作らなければいけないが、追加テーマ分の作成は最優先ではない。まずは標準テーマで動作させ、ポップ等の追加テーマは追って `design-lab` で試作→ `site/themes/*.css` へ移植する
+- **新規アプリ作成時の注意**: 既存テーマ（現状は `標準` / `ポップ` / `フォレスト`）すべての分のスタイルを作らなければいけないが、追加テーマ分の作成は最優先ではない。まずは標準テーマで動作させ、ポップ等の追加テーマは追って `design-lab` で試作→ `site/themes/*.css` へ移植する
 
 ## 作業コマンド
 
@@ -157,8 +159,8 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 
 ## 運用メモ
 
-- ポータルのカード追加: `apps/portal/index.html` の該当教科セクション(ツール/英語/数学/理科)の `.cards` 内にカード1ブロックを追加(リンクは`/a/`形式)。カードには教科色クラス(`subj--tool/eng/math/sci`)と学年タグ(`<span class="card__grade">`)を付与。新セクション追加時は `.sec--*`/`.subj--*` の色定義も追加すること
-- 変更後は必ずヘッドレス検証 → `clasp push` → ユーザーにUIでのデプロイ更新を依頼
+- ポータルのカード追加: `site/index.html` の該当教科セクション(ツール/英語/数学/理科)の `.cards` 内にカード1ブロックを追加(リンクはPages相対 `./appN/` + `target="_blank"`)。カードには教科色クラス(`subj--tool/eng/math/sci`)と学年タグ(`<span class="card__grade">`)を付与。新セクション追加時は `.sec--*`/`.subj--*` の色定義も追加すること（旧 `apps/portal` は最小リダイレクト済みのため追加不要）
+- 変更後は必ずヘッドレス検証 → `clasp push`（`site-gas` のみ）→ ユーザーにUIでのデプロイ更新を依頼（`apps/` は最小リダイレクトのため通常は `site/` のみ）
 - 詳細な権限・ガード・トークン運用・トラブルシュートは `仕様書_移行案.md` を参照（旧GAS版の詳細は `仕様書.md` を参照）
 - Gmailアカウント(別途管理)の別アプリが存在するが、このリポジトリでは管理対象外(共有URLは`/a/*/`形式を使用)
 
