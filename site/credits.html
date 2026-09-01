@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>クレジット - 学習ツール</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="./themes/theme.js"></script>
+<link rel="stylesheet" href="./themes/pop.css">
+<link rel="stylesheet" href="./themes/forest.css">
+<style>
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', system-ui, sans-serif;
+    background: #fdfcf8;
+    color: #1f2933;
+    min-height: 100vh;
+    line-height: 1.8;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(15, 23, 42, .032) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, .032) 1px, transparent 1px);
+    background-size: 28px 28px;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .wrap { max-width: 840px; margin: 0 auto; padding: 32px 20px 64px; }
+  .crumbs { font-size: 13px; margin-bottom: 18px; }
+  .crumbs a { color: #4f46e5; text-decoration: none; }
+  .crumbs a:hover { text-decoration: underline; }
+  h1 { font-size: 26px; font-weight: 900; letter-spacing: .04em; color: #1e2a4a; margin: 0 0 6px; }
+  .lead { font-size: 13px; color: #6b7280; margin: 0 0 28px; }
+  .section { background: #fff; border: 1px solid #e6e8ee; border-radius: 14px; padding: 20px 22px; margin-bottom: 18px; box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 6px 16px rgba(15,23,42,.05); }
+  .section h2 { font-size: 14px; font-weight: 900; letter-spacing: .08em; color: #1e2a4a; margin: 0 0 12px; text-transform: uppercase; }
+  .section h2 span { font-size: 11px; font-weight: 700; letter-spacing: .14em; color: #9aa3ae; margin-left: 8px; }
+  .list { margin: 0; padding: 0; list-style: none; }
+  .list li { font-size: 13px; color: #334155; padding: 7px 0; border-bottom: 1px dashed #e6e8ee; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+  .list li:last-child { border-bottom: none; }
+  .tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #f4f6f9; border: 1px solid #dde3ea; color: #55627a; white-space: nowrap; }
+  .list a { color: #4f46e5; text-decoration: none; word-break: break-all; }
+  .list a:hover { text-decoration: underline; }
+  .note { font-size: 12px; color: #6b7280; margin-top: 10px; }
+  .footer { text-align: center; padding: 28px 20px 48px; font-size: 12px; color: #9aa3ae; line-height: 1.9; }
+  .footer a { color: #9aa3ae; }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="crumbs"><a href="./">← ポータルに戻る</a></p>
+    <h1>クレジット</h1>
+    <p class="lead">学習ツール（site / site-gas / site-worker）で利用している外部フォント・ライブラリ・データ・デザインの出典一覧です。Portal に集約して掲載しています。</p>
+
+    <section class="section">
+      <h2>Fonts <span>Google Fonts / OFL 1.1</span></h2>
+      <ul class="list">
+        <li><b>Zen Kaku Gothic New</b> <span class="tag">OFL 1.1</span> <a href="https://fonts.google.com/specimen/Zen+Kaku+Gothic+New" target="_blank" rel="noopener">Google Fonts</a> — ポータル / 英文法ビジュアライザー / テーマ共通</li>
+        <li><b>Noto Serif JP</b> <span class="tag">OFL 1.1</span> <a href="https://fonts.google.com/specimen/Noto+Serif+JP" target="_blank" rel="noopener">Google Fonts</a> — 正規分布 / 立体図形 / 原子・周期表 / 微分積分 / 月と星座（標準テーマ）</li>
+        <li><b>Kiwi Maru</b> by MOTOYA <span class="tag">OFL 1.1</span> <a href="https://fonts.google.com/specimen/Kiwi+Maru" target="_blank" rel="noopener">Google Fonts</a> — 英語長文 多読リーダー</li>
+        <li><b>M PLUS 1 Code</b> <span class="tag">OFL 1.1</span> <a href="https://fonts.google.com/specimen/M+PLUS+1+Code" target="_blank" rel="noopener">Google Fonts</a> — Pop テーマ（描画領域・UI）</li>
+        <li><b>BIZ UDGothic</b> <span class="tag">OFL 1.1</span> <a href="https://fonts.google.com/specimen/BIZ+UDGothic" target="_blank" rel="noopener">Google Fonts</a> — Pop テーマ（補助）</li>
+        <li><b>Shippori Mincho</b> <span class="tag">OFL 1.1</span> <a href="https://fonts.google.com/specimen/Shippori+Mincho" target="_blank" rel="noopener">Google Fonts</a> — Forest テーマ</li>
+        <li><b>Cormorant Garamond</b> <span class="tag">OFL 1.1</span> <a href="https://fonts.google.com/specimen/Cormorant+Garamond" target="_blank" rel="noopener">Google Fonts</a> — Forest テーマ（見出し）</li>
+        <li><b>Inter</b> <span class="tag">OFL 1.1</span> <a href="https://fonts.google.com/specimen/Inter" target="_blank" rel="noopener">Google Fonts</a> — Forest テーマ（UI）</li>
+      </ul>
+      <p class="note">上記は全て SIL Open Font License 1.1。ライセンス全文は各 Google Fonts ページの “License” から確認できます。</p>
+    </section>
+
+    <section class="section">
+      <h2>Libraries <span>MIT / Apache-2.0 / CC BY 4.0</span></h2>
+      <ul class="list">
+        <li><b>qrcode-generator</b> by Kazuhiko Arase <span class="tag">MIT</span> <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener">github.com/kazuhikoarase/qrcode-generator</a> — ポータルのQRコード生成（インライン同梱）</li>
+        <li><b>QRCode.js</b> by davidshimjs <span class="tag">MIT</span> <a href="https://github.com/davidshimjs/qrcodejs" target="_blank" rel="noopener">github.com/davidshimjs/qrcodejs</a> — 公式・暗記辞典（1.0.0 / cdnjs）</li>
+        <li><b>MathJax</b> <span class="tag">Apache-2.0</span> <a href="https://github.com/mathjax/MathJax" target="_blank" rel="noopener">github.com/mathjax/MathJax</a> — 公式・暗記辞典（3.2.2 / cdnjs）</li>
+        <li><b>marked</b> <span class="tag">MIT</span> <a href="https://github.com/markedjs/marked" target="_blank" rel="noopener">github.com/markedjs/marked</a> — 公式・暗記辞典（4.3.0 / cdnjs）</li>
+        <li><b>compromise</b> by Spencer Kelly <span class="tag">MIT</span> <a href="https://github.com/spencermountain/compromise" target="_blank" rel="noopener">github.com/spencermountain/compromise</a> — 英語長文 多読リーダー（13.11.3 / unpkg）</li>
+        <li><b>Font Awesome Free</b> <span class="tag">CC BY 4.0</span> <a href="https://fontawesome.com" target="_blank" rel="noopener">fontawesome.com</a> — 英語長文 多読リーダー（6.5.0 / cdnjs）</li>
+        <li><b>KaTeX</b> <span class="tag">MIT</span> <a href="https://github.com/KaTeX/KaTeX" target="_blank" rel="noopener">github.com/KaTeX/KaTeX</a> — 正規分布 / 立体図形 / 原子・周期表 / 微分積分（0.18.4 / cdnjs）</li>
+        <li><b>html2canvas</b> <span class="tag">MIT</span> <a href="https://html2canvas.hertzen.com/" target="_blank" rel="noopener">html2canvas.hertzen.com</a> — 原稿用紙メーカー（1.4.1 / jsDelivr）</li>
+        <li><b>jsPDF</b> by parallax <span class="tag">MIT</span> <a href="https://github.com/parallax/jsPDF" target="_blank" rel="noopener">github.com/parallax/jsPDF</a> — 原稿用紙メーカー（2.5.2 / jsDelivr）</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Data <span>CC BY 4.0 / CC BY-SA 3.0</span></h2>
+      <ul class="list">
+        <li><b>NGSL</b> <span class="tag">CC BY 4.0</span> <a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">creativecommons.org/licenses/by/4.0</a> — 英語長文 多読リーダーの語彙データ</li>
+        <li><b>Wiktionary</b> <span class="tag">CC BY-SA 3.0</span> <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.ja" target="_blank" rel="noopener">creativecommons.org/licenses/by-sa/3.0</a> — 英語長文 多読リーダーの辞書データ。Wiktionary 由来の部分は CC BY-SA 3.0 の継承物として同ライセンス下で提供されます</li>
+        <li><b>WordNet</b> (Princeton University) <a href="https://wordnet.princeton.edu/license-and-commercial-use" target="_blank" rel="noopener">wordnet.princeton.edu/license-and-commercial-use</a> — 英語長文 多読リーダーの辞書データ</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Design <span>Refero Styles</span></h2>
+      <ul class="list">
+        <li><b>Pop — crayon-coded terminal on cream paper</b> — Inspired by Pop via Refero Styles <a href="https://styles.refero.design/style/2bd7363d-7aae-4b1f-9d5a-1edeb17ca567" target="_blank" rel="noopener">2bd7363d-7aae-4b1f-9d5a-1edeb17ca567</a> — tokens: <code>site/tokens/pop.css</code>（生トークン、編集しない）/ themes: <code>site/themes/pop.css</code></li>
+        <li><b>Forest — botanical greenhouse on cream paper</b> — Inspired by Ease Health via Refero Styles <a href="https://styles.refero.design/style/e9f5e976-53f7-42f5-a882-4e63b3c2f734" target="_blank" rel="noopener">e9f5e976-53f7-42f5-a882-4e63b3c2f734</a> — tokens: <code>site/tokens/forest.css</code> / themes: <code>site/themes/forest.css</code></li>
+      </ul>
+      <p class="note">Refero はデザイントークンの抽出元。Pop / Forest の配色・タイポグラフィは上記スタイルに着想を得て塾向けに適応しています。</p>
+    </section>
+
+  </main>
+  <footer class="footer">
+    <a href="./">ポータルに戻る</a> ・ <a href="https://github.com/hori366191-ship-it/gakusyu-tools" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</body>
+</html>
