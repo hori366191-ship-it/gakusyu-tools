@@ -1,6 +1,1 @@
-function doGet() {
-  var html = HtmlService.createTemplateFromFile('index').evaluate();
-  html.setTitle('原稿用紙作成');
-  html.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-  return html;
-}
+﻿function doGet(){return HtmlService.createHtmlOutputFromFile('index').setTitle('移行しました').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL).addMetaTag('viewport','width=device-width, initial-scale=1');}

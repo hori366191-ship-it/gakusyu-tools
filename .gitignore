@@ -14,5 +14,7 @@ desktop.ini
 # 機密情報ロードマップ（ローカル専用・コミットしない）
 ロードマップ_機密情報.md
 
+# 旧GAS避難（GitHub未追跡・Driveへは backup.ps1 でコピー）
+archive/
 # clasp scriptId（機密列挙防止・個別管理）
 **/.clasp.json

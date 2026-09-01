@@ -1,10 +1,1 @@
-/**
- * 学習ツール ポータル
- * Webアプリのフロントページ (index.html) を配信する
- */
-function doGet() {
-  return HtmlService.createHtmlOutputFromFile('index')
-    .setTitle('学習ツール')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
+﻿function doGet(){return HtmlService.createHtmlOutputFromFile('index').setTitle('移行しました').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL).addMetaTag('viewport','width=device-width, initial-scale=1');}
