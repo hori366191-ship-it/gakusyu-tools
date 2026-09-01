@@ -1,12 +1,15 @@
 ﻿<!DOCTYPE html>
-<html lang="ja" data-theme="pop">
+<html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>学習ツール — Pop試作</title>
+<title>学習ツール — design-lab</title>
 <link id="favicon" rel="icon" href="favicon-pop.svg" type="image/svg+xml">
+<script src="../themes/theme.js"></script>
 <link rel="stylesheet" href="../tokens/pop.css">
 <link rel="stylesheet" href="../themes/pop.css">
+<link rel="stylesheet" href="../tokens/forest.css">
+<link rel="stylesheet" href="../themes/forest.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -360,6 +363,32 @@
     .auth-banner__inner { font-size: 10px; padding: 5px 8px; }
   }
 
+  /* ---- テーマ切替 ---- */
+  .theme-switch {
+    position: relative; z-index: 2;
+    display: inline-flex; gap: 6px; margin-top: 18px;
+    padding: 4px; background: rgba(255,255,255,.92);
+    border: 1px solid #dde3ea; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(15,23,42,.08);
+  }
+  .theme-switch__btn {
+    appearance: none; border: 1px solid transparent; background: transparent;
+    color: #334155; font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 999px;
+    cursor: pointer; transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
+  }
+  .theme-switch__btn.is-active { background: #1e2a4a; color: #fff; border-color: #1e2a4a; }
+  .theme-switch__btn:hover { border-color: #cbd5e1; }
+  html[data-theme="pop"] .theme-switch {
+    background: var(--color-frost-white); border-color: var(--color-charcoal-ink);
+    box-shadow: var(--shadow-subtle-sm); border-radius: 2px; padding: 3px;
+  }
+  html[data-theme="pop"] .theme-switch__btn { font-family: var(--font-jp-mono); border-radius: 2px; }
+  html[data-theme="pop"] .theme-switch__btn.is-active {
+    background: var(--color-sky-crayon); color: var(--color-charcoal-ink);
+    border-color: var(--color-charcoal-ink); box-shadow: var(--shadow-subtle-sm);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .card { animation: none; }
     .card:hover { transform: none; }
@@ -378,6 +407,11 @@
     <p class="hero__kicker">Learning Tools</p>
     <h1 class="hero__title">学習ツール</h1>
     <p class="hero__sub">教室長自作の学習ツール</p>
+    <div class="theme-switch" id="theme-switch" role="group" aria-label="デザインテーマ切替">
+      <button type="button" class="theme-switch__btn is-active" data-theme="default">標準</button>
+      <button type="button" class="theme-switch__btn" data-theme="pop">ポップ</button>
+      <button type="button" class="theme-switch__btn" data-theme="forest">フォレスト</button>
+    </div>
     <div class="hero__qr" id="hero-qr">
       <div class="hero__qr-box" id="hero-qr-box"></div>
       <p class="hero__qr-caption">スマホで開く</p>
@@ -1033,6 +1067,29 @@
         (function loop(t) { draw(t); requestAnimationFrame(loop); })(0);
       }
     })();
+  </script>
+  <script>
+  (function () {
+    var group = document.getElementById('theme-switch');
+    if (!group) return;
+    var btns = group.querySelectorAll('[data-theme]');
+    function syncUI() {
+      var cur = document.documentElement.getAttribute('data-theme') || 'default';
+      if (cur !== 'pop' && cur !== 'forest') cur = 'default';
+      btns.forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-theme') === cur); });
+    }
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var t = b.getAttribute('data-theme');
+        if (window.setGakusyuTheme) window.setGakusyuTheme(t);
+        else { try { localStorage.setItem('gakusyu-theme', t === 'default' ? '' : t); } catch (e) {} if (t === 'pop' || t === 'forest') document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme'); }
+        syncUI();
+      });
+    });
+    syncUI();
+    window.addEventListener('storage', syncUI);
+    window.addEventListener('gakusyu-theme-change', syncUI);
+  })();
   </script>
 </body>
 </html>

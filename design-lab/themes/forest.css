@@ -1,0 +1,811 @@
+/*!
+ * Forest adaptation for 学習ツール — gakusyu-adapt
+ * Base: ../tokens/forest.css（編集しない）
+ * このファイルだけを編集して portal/app の見た目を調整する
+ * Inspired by Ease Health via Refero Styles e9f5e976 (botanical greenhouse / cream paper / forest ink)
+ * Theme ID: forest / 表示名: フォレスト
+ */
+@import url("../tokens/forest.css");
+
+/* ---- Japanese font loading ----
+   Faire Octave (Display serif 300) -> Cormorant Garamond (欧文) + Shippori Mincho (和文)
+   Suisse Intl (Humanist sans 300/400/600) -> Inter + Zen Kaku Gothic New
+   Shippori Mincho: うららかな明朝、教育向けに柔らかく
+   Cormorant Garamond: 300の繊細なセリフ、見出しの editorial 性を再現
+*/
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Shippori+Mincho:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Inter:wght@300;400;600&display=swap");
+
+html[data-theme="forest"] {
+  /* Gakusyu mapping: 教科ごとにパネル背景を割当（Ease の層化パレット） */
+  --gakusyu-math: var(--color-slate-hush);    /* #b6ced5 — cool counter-balance */
+  --gakusyu-eng:  var(--color-sage-mist);     /* #b1dbb8 — mid-tone sage */
+  --gakusyu-sci:  var(--color-mint-veil);     /* #cfe7d3 — soft mint */
+  --gakusyu-tool: var(--color-keylime-wash);  /* #e1f4df — dominant light tint */
+}
+
+/* ============================================================
+   Portal 裏 + Apps 裏 — 単一テーマ forest で全ページ裏統一
+   Portal: Keylime背景 + 白カード + Sageボタン
+   Apps: 背景は Keylime/Slate/Mint/Sage を分散＋白カード/白ステージで統一
+   bodyは :has() で分散、カード/ステージは白で軽やかに
+   ============================================================ */
+
+/* Apps 裏: デフォルトは Keylime Wash（裏）— Portalと同様に背景色＋白カード */
+html[data-theme="forest"] body {
+  background: var(--color-keylime-wash) !important;
+  color: var(--color-charcoal) !important;
+  font-family: var(--font-jp-sans);
+}
+html[data-theme="forest"] body::before {
+  background-image: none !important;
+}
+/* Portal 裏: .hero を持つページだけ Keylime に上書き */
+html[data-theme="forest"] body:has(.hero) {
+  background: var(--color-keylime-wash) !important;
+}
+
+/* Hero: 白 — メイン（Keylime）とのコントラストで区切る */
+html[data-theme="forest"] .hero {
+  background: var(--color-cream-paper) !important;
+  border-bottom: 2px solid var(--color-cream-paper) !important;
+}
+html[data-theme="forest"] .hero::before {
+  background-image: none !important;
+}
+html[data-theme="forest"] .hero__kicker {
+  font-family: var(--font-suisse-intl);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .08em !important;
+  text-transform: uppercase;
+  color: var(--color-forest-ink) !important;
+}
+html[data-theme="forest"] .hero__title {
+  font-family: var(--font-jp-serif), var(--font-faire-octave);
+  font-weight: 400;
+  letter-spacing: -0.01em !important;
+  color: var(--color-forest-ink) !important;
+}
+html[data-theme="forest"] .hero__sub {
+  font-family: var(--font-jp-sans);
+  font-weight: 400;
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] .hero__qr-caption {
+  font-family: var(--font-suisse-intl);
+  color: var(--color-charcoal) !important;
+}
+
+/* Section head: eyebrow ラベル風。バーは 14px丸角の tint panel */
+html[data-theme="forest"] .section__head {
+  align-items: center;
+}
+html[data-theme="forest"] .section__bar {
+  border-radius: var(--radius-cards) !important;
+  width: 6px !important;
+  height: 18px !important;
+}
+html[data-theme="forest"] .sec--math .section__bar { background: var(--gakusyu-math) !important; }
+html[data-theme="forest"] .sec--eng  .section__bar { background: var(--gakusyu-eng) !important; }
+html[data-theme="forest"] .sec--sci  .section__bar { background: var(--gakusyu-sci) !important; }
+html[data-theme="forest"] .sec--tool .section__bar { background: var(--gakusyu-tool) !important; }
+html[data-theme="forest"] .section__title {
+  font-family: var(--font-jp-serif), var(--font-faire-octave);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--color-forest-ink) !important;
+}
+html[data-theme="forest"] .section__en {
+  font-family: var(--font-suisse-intl);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--color-charcoal) !important;
+  opacity: .7;
+}
+
+/* Cards: 14px丸角 + ぼかし影 -> 14px丸角 + 影なし + tinted層化 */
+html[data-theme="forest"] .card {
+  border-radius: var(--radius-cards) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  box-shadow: none !important;
+  transition: transform .18s ease, border-color .18s ease !important;
+  animation: none !important;
+}
+html[data-theme="forest"] .card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: none !important;
+  border-color: rgba(15,62,23,.12) !important;
+}
+html[data-theme="forest"] .card:focus-visible {
+  outline: 2px solid var(--color-forest-ink) !important;
+  outline-offset: 2px;
+}
+
+/* カード: 別バージョン — 全て白色（Keylime背景に白カードで軽やかに） */
+html[data-theme="forest"] .card,
+html[data-theme="forest"] .subj--tool,
+html[data-theme="forest"] .subj--eng,
+html[data-theme="forest"] .subj--sci,
+html[data-theme="forest"] .subj--math {
+  background: var(--color-cream-paper) !important; /* #fffefc 白 */
+}
+/* カード内テキストは常に charcoal / forest ink でコントラスト確保 */
+html[data-theme="forest"] .subj--math .card__title,
+html[data-theme="forest"] .subj--eng .card__title,
+html[data-theme="forest"] .subj--sci .card__title,
+html[data-theme="forest"] .subj--tool .card__title {
+  color: var(--color-forest-ink) !important;
+}
+html[data-theme="forest"] .subj--math .card__desc,
+html[data-theme="forest"] .subj--eng .card__desc,
+html[data-theme="forest"] .subj--sci .card__desc,
+html[data-theme="forest"] .subj--tool .card__desc {
+  color: var(--color-charcoal) !important;
+}
+
+/* Icon: Sage Mist #b1dbb8 塗り + Forest Ink ストローク */
+html[data-theme="forest"] .card__icon {
+  border-radius: var(--radius-sm) !important;
+  border: none !important;
+  background: var(--color-sage-mist) !important;
+}
+html[data-theme="forest"] .subj--math .card__icon,
+html[data-theme="forest"] .subj--eng .card__icon,
+html[data-theme="forest"] .subj--sci .card__icon,
+html[data-theme="forest"] .subj--tool .card__icon {
+  background: var(--color-sage-mist) !important;
+}
+html[data-theme="forest"] .card__icon svg {
+  stroke: var(--color-forest-ink) !important;
+}
+
+/* Title / Desc: 見出しは明朝セリフ、本文はhumanist sans */
+html[data-theme="forest"] .card__title {
+  font-family: var(--font-jp-serif), var(--font-faire-octave);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--color-forest-ink) !important;
+}
+html[data-theme="forest"] .card__desc {
+  font-family: var(--font-jp-sans);
+  font-weight: 400;
+  line-height: 1.8;
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] .card__grade {
+  border-radius: var(--radius-badges) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  background: var(--color-cream-paper) !important;
+  font-family: var(--font-suisse-intl);
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: .02em;
+  color: var(--color-forest-ink) !important;
+}
+
+/* Button: Sage Mist #b1dbb8 塗り + Forest Ink文字 */
+html[data-theme="forest"] .card__btn {
+  border-radius: var(--radius-buttons) !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: .02em;
+  transition: background .15s ease, transform .15s ease !important;
+}
+html[data-theme="forest"] .subj--math .card__btn,
+html[data-theme="forest"] .subj--eng .card__btn,
+html[data-theme="forest"] .subj--sci .card__btn,
+html[data-theme="forest"] .subj--tool .card__btn {
+  background: var(--color-sage-mist) !important;
+  color: var(--color-forest-ink) !important;
+}
+html[data-theme="forest"] .card:hover .card__btn {
+  background: #a3cfaa !important;
+  color: var(--color-forest-ink) !important;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Notice banner: 別バージョンでは白カードに（Keylime背景に白で浮かせる） */
+html[data-theme="forest"] .notice__inner {
+  border-radius: var(--radius-cards) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-left-width: 1px !important;
+  background: var(--color-cream-paper) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] .notice__icon {
+  border-radius: var(--radius-full) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  background: var(--color-cream-paper) !important;
+}
+html[data-theme="forest"] .notice__text {
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] .notice__text strong {
+  color: var(--color-forest-ink) !important;
+}
+
+/* Auth banner: Forest では cream 上にフローティング、pillではなく 14px 角の柔らかいカード */
+html[data-theme="forest"] .auth-banner__inner {
+  border-radius: var(--radius-buttons) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl);
+  background: var(--color-cream-paper) !important;
+}
+html[data-theme="forest"] .auth-banner__inner.is-ok {
+  background: var(--color-mint-veil) !important;
+  border-color: var(--color-sage-mist) !important;
+  color: var(--color-forest-ink) !important;
+}
+html[data-theme="forest"] .auth-banner__inner.is-warn {
+  background: var(--color-keylime-wash) !important;
+  border-color: var(--color-border-mist) !important;
+  color: var(--color-forest-ink) !important;
+}
+html[data-theme="forest"] .auth-banner__inner.is-out {
+  background: var(--color-cream-paper) !important;
+  border-color: var(--color-border-mist) !important;
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] .auth-banner__btn {
+  background: var(--color-forest-ink) !important;
+  border-radius: var(--radius-badges) !important;
+}
+
+/* Footer: 白 — メイン（Keylime）とのコントラストで区切る */
+html[data-theme="forest"] .footer {
+  border-top: 2px solid var(--color-cream-paper) !important;
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] .footer b {
+  color: var(--color-forest-ink) !important;
+  font-family: var(--font-jp-serif), var(--font-faire-octave);
+  font-weight: 400;
+}
+html[data-theme="forest"] .footer a {
+  color: var(--color-forest-ink) !important;
+}
+
+/* Hero canvas poly lines: forest ink の薄い線に */
+html[data-theme="forest"] .hero-canvas {
+  opacity: .9;
+}
+
+/* Theme switch: 3択対応 — フォレストでは 14px 角 + cream/frost の pill 内で forest ink が active */
+html[data-theme="forest"] .theme-switch {
+  background: var(--color-cream-paper) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  box-shadow: none !important;
+  border-radius: var(--radius-badges) !important;
+  padding: 4px !important;
+}
+html[data-theme="forest"] .theme-switch__btn {
+  font-family: var(--font-suisse-intl) !important;
+  font-weight: 400 !important;
+  border-radius: var(--radius-badges) !important;
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] .theme-switch__btn.is-active {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+  border-color: var(--color-forest-ink) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] .theme-switch__btn:hover {
+  border-color: var(--color-border-mist) !important;
+}
+
+/* ============================================================
+   Apps 裏フォレスト — 単一テーマ forest でアプリも裏（背景色＋白カード）
+   PortalもAppsも裏で統一。背景は Keylime/Slate/Mint/Sage を分散、白カードで統一
+   将来「このアプリだけ表」にする場合は末尾の雛形を有効化（:has()で上書き）
+   ============================================================ */
+
+/* ---- app1 — 公式・暗記辞典（裏: Mint背景＋白カード） ---- */
+html[data-theme="forest"] body:has(#menu-container) {
+  background: var(--color-mint-veil) !important;
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] body:has(#menu-container) #app-layout,
+html[data-theme="forest"] body:has(#menu-container) #main-content {
+  background: var(--color-mint-veil) !important;
+}
+html[data-theme="forest"] #menu-container {
+  background: var(--color-mint-veil) !important;
+  border-right: 1px solid var(--color-border-mist) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] .side-menu { background: var(--color-mint-veil) !important; }
+html[data-theme="forest"] .side-menu h3 {
+  color: var(--color-forest-ink) !important;
+  border-bottom: 1px solid var(--color-border-mist) !important;
+  font-family: var(--font-jp-serif), var(--font-faire-octave) !important;
+  font-weight: 400;
+  letter-spacing: .04em;
+}
+html[data-theme="forest"] .side-menu ul li a {
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  background: var(--color-cream-paper) !important;
+  font-family: var(--font-suisse-intl) !important;
+  color: var(--color-charcoal) !important;
+  margin: 0 6px !important;
+  padding: 10px 12px !important;
+}
+html[data-theme="forest"] .side-menu ul li {
+  margin-bottom: 8px !important;
+}
+html[data-theme="forest"] .side-menu ul li:last-child { margin-bottom: 0 !important; }
+html[data-theme="forest"] .side-menu ul li a:hover {
+  background: var(--color-keylime-wash) !important;
+  border-color: var(--color-border-mist) !important;
+}
+html[data-theme="forest"] .side-menu li a.active {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+  border-color: var(--color-forest-ink) !important;
+  box-shadow: none !important;
+  font-weight: 600 !important;
+}
+html[data-theme="forest"] #refresh-button {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+  border: none !important;
+  border-radius: var(--radius-buttons) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+}
+html[data-theme="forest"] #qrcode-container {
+  background: var(--color-mint-veil) !important;
+  border-top: 1px solid var(--color-border-mist) !important;
+}
+html[data-theme="forest"] #qrcode-image img {
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] #menu-toggle-button,
+html[data-theme="forest"] #memorize-toggle-button,
+html[data-theme="forest"] #search-toggle-button,
+html[data-theme="forest"] #font-increase-button,
+html[data-theme="forest"] #font-decrease-button {
+  background: var(--color-cream-paper) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] body.memorize-mode-on #memorize-toggle-button {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+  border-color: var(--color-forest-ink) !important;
+}
+html[data-theme="forest"] #search-container {
+  background: var(--color-cream-paper) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-cards) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] #app1-topbar {
+  background: var(--color-cream-paper) !important;
+  border-bottom: 1px solid var(--color-border-mist) !important;
+}
+html[data-theme="forest"] #topbar-title {
+  color: var(--color-forest-ink) !important;
+  font-family: var(--font-jp-serif), var(--font-faire-octave) !important;
+  font-weight: 400;
+}
+html[data-theme="forest"] #app-layout { background: var(--color-cream-paper) !important; }
+html[data-theme="forest"] #main-content { background: var(--color-cream-paper) !important; }
+html[data-theme="forest"] #main-content h1 {
+  font-family: var(--font-jp-serif), var(--font-faire-octave) !important;
+  color: var(--color-forest-ink) !important;
+  border-bottom: 2px solid var(--color-forest-ink) !important;
+  background: var(--color-cream-paper) !important;
+  padding: 12px !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] #main-content h2 {
+  font-family: var(--font-jp-serif), var(--font-faire-octave) !important;
+  color: var(--color-forest-ink) !important;
+  background: var(--color-cream-paper) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-left: 6px solid var(--color-forest-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] #main-content h3 {
+  font-family: var(--font-jp-serif), var(--font-faire-octave) !important;
+  color: var(--color-forest-ink) !important;
+  border-bottom: 1px dashed var(--color-border-mist) !important;
+}
+html[data-theme="forest"] #main-content li {
+  background: var(--color-cream-paper) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-cards) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] #main-content table th {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-forest-ink) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  font-family: var(--font-suisse-intl) !important;
+}
+html[data-theme="forest"] #main-content table td { border: 1px solid var(--color-border-mist) !important; }
+html[data-theme="forest"] .tag-maniac {
+  background: var(--color-sage-mist) !important;
+  color: var(--color-forest-ink) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-badges) !important;
+}
+html[data-theme="forest"] #main-content mjx-container svg { vertical-align: -0.12em !important; }
+
+/* ---- app2 — 英語長文 多読リーダー（裏: Slate背景＋白カード） ---- */
+html[data-theme="forest"] body:has(#form-container) {
+  background: var(--color-slate-hush) !important;
+  color: var(--color-charcoal) !important;
+  font-family: var(--font-jp-sans) !important;
+}
+html[data-theme="forest"] #form-container {
+  background: var(--color-slate-hush) !important;
+  border-right: 1px solid var(--color-border-mist) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] #preview-container { background: var(--color-slate-hush) !important; }
+html[data-theme="forest"] #form-container h1,
+html[data-theme="forest"] #preview-container h1 {
+  background: var(--color-slate-hush) !important;
+  color: var(--color-forest-ink) !important;
+  border-bottom: 1px solid var(--color-border-mist) !important;
+  font-family: var(--font-jp-serif), var(--font-faire-octave) !important;
+  font-weight: 400;
+  letter-spacing: .02em;
+}
+html[data-theme="forest"] #form-container h1.sec { border-top: 1px dashed var(--color-border-mist) !important; padding-top: 10px; }
+html[data-theme="forest"] .field label {
+  color: var(--color-forest-ink) !important;
+  font-family: var(--font-suisse-intl) !important;
+  font-weight: 600;
+  letter-spacing: .04em;
+  font-size: .75em !important;
+}
+html[data-theme="forest"] .field select,
+html[data-theme="forest"] .field textarea,
+html[data-theme="forest"] #fFilterLevel {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-jp-sans) !important;
+}
+html[data-theme="forest"] .field select:focus,
+html[data-theme="forest"] .field textarea:focus { outline: 2px solid var(--color-forest-ink) !important; outline-offset: 1px; }
+html[data-theme="forest"] .gen-btn {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+  border: none !important;
+  border-radius: var(--radius-buttons) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+  letter-spacing: .04em;
+  opacity: 1 !important;
+}
+html[data-theme="forest"] .gen-btn:hover { background: var(--color-forest-shadow) !important; color: var(--color-cream-paper) !important; }
+html[data-theme="forest"] #savedList li.saved-item {
+  background: var(--color-cream-paper) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-cards) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] li.saved-item .saved-title {
+  color: var(--color-forest-ink) !important;
+  font-family: var(--font-suisse-intl) !important;
+  font-weight: 600 !important;
+}
+html[data-theme="forest"] li.saved-item .saved-meta { color: var(--color-charcoal) !important; font-family: var(--font-suisse-intl) !important; }
+html[data-theme="forest"] li.file.active {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+  border: 1px solid var(--color-forest-ink) !important;
+  border-radius: var(--radius-sm) !important;
+}
+html[data-theme="forest"] li { color: var(--color-charcoal) !important; }
+html[data-theme="forest"] li:hover { background: var(--color-keylime-wash) !important; }
+html[data-theme="forest"] #textViewer {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-cards) !important;
+  box-shadow: none !important;
+  margin: 12px;
+  box-sizing: border-box !important;
+  width: calc(100% - 24px) !important;
+  max-width: calc(100% - 24px) !important;
+}
+html[data-theme="forest"] #preview-subtitle { color: var(--color-charcoal) !important; opacity: .7; }
+html[data-theme="forest"] #zoomLabel { color: var(--color-forest-ink) !important; font-family: var(--font-suisse-intl) !important; }
+html[data-theme="forest"] #backButton,
+html[data-theme="forest"] #zoomInButton,
+html[data-theme="forest"] #zoomOutButton {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] #backButton:hover,
+html[data-theme="forest"] #zoomInButton:hover,
+html[data-theme="forest"] #zoomOutButton:hover {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+}
+html[data-theme="forest"] #toaster {
+  background: var(--color-sage-mist) !important;
+  color: var(--color-forest-ink) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-cards) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+}
+html[data-theme="forest"] .dict-popup,
+html[data-theme="forest"] #dict-overlay-fixed {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-cards) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] #spinner,
+html[data-theme="forest"] #spinner-text { color: var(--color-forest-ink) !important; }
+html[data-theme="forest"] #spinner-overlay { background: rgba(255,254,252,.85) !important; }
+html[data-theme="forest"] #credit { border-top: 1px solid var(--color-border-mist) !important; color: var(--color-charcoal) !important; opacity: .6; }
+html[data-theme="forest"] #loadMoreBtn {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-forest-ink) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-buttons) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+}
+html[data-theme="forest"] #textViewer > div[style*="border-top"] {
+  border-top: 1px solid var(--color-border-mist) !important;
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] #textViewer > div > div[style*="border-left"] { border-left: 1px solid var(--color-border-mist) !important; }
+html[data-theme="forest"] #close-dict-btn {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-forest-ink) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-buttons) !important;
+  font-family: var(--font-suisse-intl) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] #close-dict-btn:hover { background: var(--color-forest-ink) !important; color: var(--color-cream-paper) !important; }
+@media (orientation: portrait) { html[data-theme="forest"] #form-container { border-bottom: 1px solid var(--color-border-mist) !important; } }
+
+/* ---- app8 — 英文法ビジュアライザー（裏: Mint背景＋白カード） ---- */
+html[data-theme="forest"] body:has(.tree-card) {
+  background: var(--color-mint-veil) !important;
+}
+html[data-theme="forest"] header {
+  background: var(--color-cream-paper) !important;
+  border-bottom: 1px solid var(--color-border-mist) !important;
+  color: var(--color-forest-ink) !important;
+}
+html[data-theme="forest"] header h1,
+html[data-theme="forest"] header .sub { color: var(--color-forest-ink) !important; }
+html[data-theme="forest"] header .sub { opacity: .7 !important; color: var(--color-charcoal) !important; }
+html[data-theme="forest"] .stage,
+html[data-theme="forest"] .tree-card {
+  border-radius: var(--radius-cards) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  box-shadow: none !important;
+  background: var(--color-cream-paper) !important;
+}
+html[data-theme="forest"] .affirm-block,
+html[data-theme="forest"] .slot {
+  border-radius: var(--radius-cards) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  box-shadow: none !important;
+  background: var(--color-cream-paper) !important;
+}
+html[data-theme="forest"] .slot.filled { background: var(--color-cream-paper) !important; }
+html[data-theme="forest"] .slot.neg .slot-tag,
+html[data-theme="forest"] .slot.q .slot-tag,
+html[data-theme="forest"] .slot-tag,
+html[data-theme="forest"] .node-badge {
+  border-radius: var(--radius-badges) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  color: var(--color-forest-ink) !important;
+  background: var(--color-cream-paper) !important;
+}
+html[data-theme="forest"] .tnode {
+  border-radius: var(--radius-buttons) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] .tnode.active {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+}
+html[data-theme="forest"] .tnode.locked-chip { background: var(--color-keylime-wash) !important; border-style: dashed !important; box-shadow: none !important; }
+html[data-theme="forest"] .tnode:hover { transform: none !important; }
+html[data-theme="forest"] .pick-chip {
+  border-radius: var(--radius-badges) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+}
+html[data-theme="forest"] .pick-chip.active { background: var(--color-forest-ink) !important; color: var(--color-cream-paper) !important; }
+html[data-theme="forest"] .act-btn {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+  border: none !important;
+  border-radius: var(--radius-buttons) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+  letter-spacing: .04em;
+}
+html[data-theme="forest"] .act-btn.q {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-forest-ink) !important;
+  border: 1px solid var(--color-border-mist) !important;
+}
+html[data-theme="forest"] .act-btn--wh {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-badges) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] .act-btn--wh[data-wh="where"] { border-top: 3px solid var(--color-sage-mist) !important; }
+html[data-theme="forest"] .act-btn--wh[data-wh="what"]  { border-top: 3px solid var(--color-mint-veil) !important; }
+html[data-theme="forest"] .act-btn--wh[data-wh="who"]   { border-top: 3px solid var(--color-slate-hush) !important; }
+html[data-theme="forest"] .act-btn--wh[data-wh="when"]  { border-top: 3px solid var(--color-keylime-wash) !important; }
+html[data-theme="forest"] .act-btn:hover:not(:disabled),
+html[data-theme="forest"] .act-btn--wh:hover:not(:disabled) { background: var(--color-forest-shadow) !important; color: var(--color-cream-paper) !important; }
+html[data-theme="forest"] .card {
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] .row .card,
+html[data-theme="forest"] .card.c-subj,
+html[data-theme="forest"] .card.c-verb,
+html[data-theme="forest"] .card.c-aux,
+html[data-theme="forest"] .card.c-other { box-shadow: none !important; }
+
+/* ---- app9 — 原稿用紙メーカー（裏: Sage背景＋白カード） ---- */
+html[data-theme="forest"] body:has(.sheet) {
+  background: var(--color-sage-mist) !important;
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] .controls .panel {
+  background: var(--color-cream-paper) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-cards) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] .panel h1 {
+  font-family: var(--font-jp-serif), var(--font-faire-octave) !important;
+  color: var(--color-forest-ink) !important;
+  border-bottom: 1px solid var(--color-border-mist) !important;
+}
+html[data-theme="forest"] fieldset.dirs {
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-cards) !important;
+  background: var(--color-cream-paper) !important;
+}
+html[data-theme="forest"] fieldset.dirs legend { font-family: var(--font-suisse-intl) !important; color: var(--color-forest-ink) !important; font-weight: 600; }
+html[data-theme="forest"] .presets button {
+  background: var(--color-cream-paper) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-buttons) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+  color: var(--color-charcoal) !important;
+}
+html[data-theme="forest"] .presets button:hover { background: var(--color-keylime-wash) !important; }
+html[data-theme="forest"] .swatch { border: 1px solid var(--color-border-mist) !important; box-shadow: none !important; }
+html[data-theme="forest"] .swatch.active { box-shadow: 0 0 0 2px var(--color-cream-paper), 0 0 0 3px var(--color-forest-ink) !important; }
+html[data-theme="forest"] input[type=number],
+html[data-theme="forest"] input[type=color] {
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-sm) !important;
+  background: var(--color-cream-paper) !important;
+  font-family: var(--font-suisse-intl) !important;
+}
+html[data-theme="forest"] .actions button {
+  border-radius: var(--radius-buttons) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+  border: 1px solid var(--color-border-mist) !important;
+}
+html[data-theme="forest"] #printBtn { background: var(--color-forest-ink) !important; color: var(--color-cream-paper) !important; border: none !important; }
+html[data-theme="forest"] #printBtn:hover { background: var(--color-forest-shadow) !important; }
+html[data-theme="forest"] #classroomBtn { background: var(--color-cream-paper) !important; color: var(--color-charcoal) !important; border: 1px solid var(--color-border-mist) !important; }
+html[data-theme="forest"] .page-wrap { background: var(--color-sage-mist) !important; }
+html[data-theme="forest"] .sheet {
+  background: #ffffff !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] .hint { color: var(--color-charcoal) !important; opacity: .6; }
+html[data-theme="forest"] .count { color: var(--color-forest-ink) !important; font-family: var(--font-suisse-intl) !important; }
+
+/* Canvasアプリは裏: 背景を分散 — app3 Keylime / app5 Mint / app6 Slate / app7 Sage */
+html[data-theme="forest"] body:has(#cv) { background: var(--color-keylime-wash) !important; }
+html[data-theme="forest"] body:has(#cvAtom),
+html[data-theme="forest"] body:has(#cvCry) { background: var(--color-mint-veil) !important; }
+html[data-theme="forest"] body:has(#cvMain),
+html[data-theme="forest"] body:has(#cvSub) { background: var(--color-slate-hush) !important; }
+html[data-theme="forest"] body:has(#cvOrbit),
+html[data-theme="forest"] body:has(#cvSky) { background: var(--color-sage-mist) !important; }
+
+/* ---- Canvas系アプリ共通（app3/app4/app5/app6/app7） — 裏: 背景色＋白ステージ ---- */
+html[data-theme="forest"] #cv,
+html[data-theme="forest"] #cvAtom,
+html[data-theme="forest"] #cvCry,
+html[data-theme="forest"] #cvMain,
+html[data-theme="forest"] #cvSub,
+html[data-theme="forest"] #cvOrbit,
+html[data-theme="forest"] #cvSky { border-radius: 0 !important; border-color: var(--color-border-mist) !important; }
+html[data-theme="forest"] body:has(#cv) .stage,
+html[data-theme="forest"] body:has(#cvAtom) .stage,
+html[data-theme="forest"] body:has(#cvCry) .stage,
+html[data-theme="forest"] body:has(#cvMain) .stage,
+html[data-theme="forest"] body:has(#cvSub) .stage,
+html[data-theme="forest"] body:has(#cvOrbit) .stage,
+html[data-theme="forest"] body:has(#cvSky) .stage { background: var(--color-cream-paper) !important; }
+html[data-theme="forest"] body:has(#cv) .stage,
+html[data-theme="forest"] body:has(#cvAtom) .stage,
+html[data-theme="forest"] body:has(#cvCry) .stage,
+html[data-theme="forest"] body:has(#cvMain) .stage,
+html[data-theme="forest"] body:has(#cvSub) .stage,
+html[data-theme="forest"] body:has(#cvOrbit) .stage,
+html[data-theme="forest"] body:has(#cvSky) .stage {
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-cards) !important;
+  box-shadow: none !important;
+}
+html[data-theme="forest"] .stage .notes { border-left: 2px solid transparent !important; padding-left: 12px !important; color: var(--color-charcoal) !important; opacity: .7; }
+html[data-theme="forest"] .pt-scroll,
+html[data-theme="forest"] .el,
+html[data-theme="forest"] .pt-marker { border-radius: 0 !important; }
+
+/* ============================================================
+   将来: 特定アプリだけ裏（Keylime + 白カード）にする上書き雛形
+   例: app3を裏にする場合は以下を有効化
+   html[data-theme="forest"] body:has(#cv) { background: var(--color-keylime-wash) !important; }
+   html[data-theme="forest"] body:has(#cv) .stage { background: #ffffff !important; border-color: var(--color-border-mist) !important; }
+   指示があったら該当アプリの :has() ブロックを追記します。現時点では表で統一。
+   ============================================================ */
+
+/* Motion */
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="forest"] .card,
+  html[data-theme="forest"] .card__btn { transition: none !important; }
+  html[data-theme="forest"] .card:hover { transform: none !important; }
+}
+
+/* App共通変数 */
+html[data-theme="forest"] {
+  --app-radius: var(--radius-cards);
+  --app-border: 1px solid var(--color-border-mist);
+  --app-shadow: none;
+}
