@@ -322,6 +322,50 @@ html[data-theme="pop"] #loadMoreBtn {
   box-shadow: var(--shadow-subtle-sm) !important;
   font-family: var(--font-jp-mono) !important;
 }
+/* app2: キーワード積み上げUI */
+html[data-theme="pop"] .keyword-input {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-jp-sans) !important;
+}
+html[data-theme="pop"] .keyword-input:focus {
+  outline: 2px solid var(--color-sky-crayon);
+  outline-offset: 1px;
+}
+html[data-theme="pop"] .keyword-input::placeholder {
+  color: var(--color-pencil-gray) !important;
+}
+html[data-theme="pop"] #addKeywordBtn {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono) !important;
+  opacity: 1 !important;
+}
+html[data-theme="pop"] #addKeywordBtn:hover:not(:disabled) {
+  background: var(--color-ice-wash) !important;
+}
+html[data-theme="pop"] #addKeywordBtn:disabled {
+  opacity: .4 !important;
+  box-shadow: none !important;
+}
+html[data-theme="pop"] .keyword-del {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono) !important;
+  opacity: 1 !important;
+}
+html[data-theme="pop"] .keyword-del:hover {
+  background: var(--color-coral-sketch) !important;
+  color: var(--color-charcoal-ink) !important;
+}
 /* app2: history lines & dict close button — override inline #00ff00 */
 html[data-theme="pop"] #textViewer > div[style*="border-top"] {
   border-top: 1.5px solid var(--color-charcoal-ink) !important;

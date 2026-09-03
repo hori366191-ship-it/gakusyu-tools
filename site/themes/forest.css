@@ -576,6 +576,46 @@ html[data-theme="forest"] #loadMoreBtn {
   box-shadow: none !important;
   font-family: var(--font-suisse-intl) !important;
 }
+/* app2: キーワード積み上げUI */
+html[data-theme="forest"] .keyword-input {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-jp-sans) !important;
+}
+html[data-theme="forest"] .keyword-input:focus {
+  outline: 2px solid var(--color-forest-ink) !important;
+  outline-offset: 1px;
+}
+html[data-theme="forest"] #addKeywordBtn {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-forest-ink) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-buttons) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+  opacity: 1 !important;
+}
+html[data-theme="forest"] #addKeywordBtn:hover:not(:disabled) {
+  background: var(--color-keylime-wash) !important;
+}
+html[data-theme="forest"] #addKeywordBtn:disabled {
+  opacity: .4 !important;
+}
+html[data-theme="forest"] .keyword-del {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-buttons) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+  opacity: 1 !important;
+}
+html[data-theme="forest"] .keyword-del:hover {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+}
 html[data-theme="forest"] #textViewer > div[style*="border-top"] {
   border-top: 1px solid var(--color-border-mist) !important;
   color: var(--color-charcoal) !important;

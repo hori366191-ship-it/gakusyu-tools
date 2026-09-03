@@ -375,6 +375,7 @@ function handleProbe_(p) {
           genre: body.genre,
           development: body.development,
           ending: body.ending,
+          keywords: body.keywords,
           prompt: body.prompt
         };
       }
@@ -675,7 +676,8 @@ function buildPrompt_(s) {
     '【ジャンル】' + s.genre,
     '【展開】' + s.development,
     '【終わり方】' + s.ending,
-    s.prompt ? '【追加指示】' + s.prompt : '【追加指示】なし'
+    s.prompt ? '【追加指示】' + s.prompt : '【追加指示】なし',
+    buildKeywordsLine_(s)
   ];
   var def = EIKEN_LEVELS[s.level];
   if (def) {
@@ -699,6 +701,15 @@ function buildPrompt_(s) {
     '上記以外の出力は禁止。'
   ]);
   return lines.join('\n');
+}
+
+function buildKeywordsLine_(s) {
+  var kw = (s && s.keywords) || [];
+  if (typeof kw === 'string') kw = kw.split(/[、,，\s　]+/);
+  if (!Array.isArray(kw)) kw = [];
+  kw = kw.map(function (w) { return String(w || '').trim(); }).filter(function (w) { return w; });
+  if (!kw.length) return '【キーワード】なし';
+  return '【キーワード】' + kw.join('、') + '（上記の言葉・概念を本文中で必ず使うこと。日本語の場合は意味に合う英語で使うこと）';
 }
 
 function splitTitle_(content) {
