@@ -633,6 +633,7 @@
     let IS_OWNER = false;
     function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
     function setIdToken(t){ try{ if(t) localStorage.setItem('gis_id_token',t); else localStorage.removeItem('gis_id_token'); }catch(e){} }
+    function getDeviceId(){ try{ var k='tadoku_device_id'; var v=localStorage.getItem(k); if(!/^[A-Za-z0-9_-]{8,64}$/.test(v||'')){ v='d-'; var ch='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; for(var i=0;i<21;i++){ v+=ch.charAt(Math.floor(Math.random()*ch.length)); } try{ localStorage.setItem(k,v); }catch(e){} } return v; }catch(e){ return ''; } }
 
     console.log('DOMContentLoaded start');
     window.addEventListener('DOMContentLoaded', () => {
@@ -809,8 +810,8 @@
           else { var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN); res = await jsonpGet(url, 7500); }
         }
         if (!res || !res.genkoProbe) return { state: 'noauth' };
-        if (!res.ok) return { state: 'error', message: res.error };
-        if (!res.allowed) return { state: 'notallowed', masked: res.masked };
+        if (!res.ok) return { state: 'error', message: res.error, open: !!res.open };
+        if (!res.allowed) return { state: 'notallowed', masked: res.masked, open: !!res.open };
         return { state: 'ok', invisible: !res.email_visible, masked: res.masked, isOwner: !!res.is_owner };
       }
 
@@ -832,7 +833,7 @@
         var idt=getIdToken();
         // generateText は settings をネストして送信（GAS側は body.settings を期待）
         if (name === 'generateText') {
-          var genBody = { action: name, token: SITE_BACKEND_TOKEN, settings: payload || {} };
+          var genBody = { action: name, token: SITE_BACKEND_TOKEN, settings: payload || {}, device_id: getDeviceId() };
           if (idt) genBody.id_token = idt;
           var wUrl = WORKER_BACKEND_URL;
           var dUrl = DIRECT_BACKEND_URL;
@@ -1304,11 +1305,17 @@
         if(gisWrap) gisWrap.style.display='none';
         textArea.textContent = '確認中…';
         var pr = await probeBackend();
+        var trialOpen = !!pr.open;
         if (pr.state === 'ok') {
           IS_ALLOWED = true;
           IS_OWNER = !!pr.isOwner;
           genSection.style.display = '';
           textArea.textContent = '左のパネルで設定を選び、［英語長文を生成］を押してください。\n\n単語をタップすると辞書を表示します。';
+        } else if (trialOpen) {
+          IS_ALLOWED = false;
+          IS_OWNER = false;
+          genSection.style.display = '';
+          textArea.textContent = '試験運用中：どなたでも英語長文を生成できます（1端末あたり1日10件・全体で1日100件まで。生成物は全員に公開されます）。\n\n左のパネルで設定を選び、［英語長文を生成］を押してください。\n単語をタップすると辞書を表示します。';
         } else if (pr.state === 'notallowed') {
           IS_ALLOWED = false;
           IS_OWNER = false;

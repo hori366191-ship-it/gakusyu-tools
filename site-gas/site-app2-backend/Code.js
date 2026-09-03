@@ -2,6 +2,7 @@
 // Code.gs ― GAS 版 英語長文多読リーダー
 // ・サイト閲覧は Google アカウントがあれば誰でも可（デプロイ設定: 実行ユーザー=アクセスしているユーザー / アクセス=Google アカウントでログイン）
 // ・AI 生成は許可ユーザーのみ（Script Properties: ALLOWED_EMAILS）
+//   ただし OPEN_GENERATE=true の試験期間中は匿名生成も可（端末上限＋全体上限つき。削除は従来通りオーナーのみ）
 // ・生成物の削除はオーナーのみ（Script Properties: OWNER_EMAIL）
 // ・AI 生成（Script Properties: OPENCODE_API_KEY）
 // ・生成物は共有フォルダに保存（Script Properties: FOLDER_ID。未設定なら「生成済み長文」を自動作成）
@@ -17,7 +18,7 @@ var INDEX_FILE_NAME   = 'tadoku-index.json';
 var INDEX_CACHE_KEY   = 'tadoku_index_cache';
 var INDEX_CACHE_TTL   = 60;
 var API_BASE      = 'https://opencode.ai/zen/go/v1';
-var MODEL         = 'deepseek-v4-flash';
+var MODEL         = 'muse-spark-1.3-contributor';
 var SYSTEM_PROMPT = 'あなたは英語教材の長文作成者です。日本語の指示に従い、英語の長文を1本作成してください。出力はタイトルと本文のみとし、マークダウン記法・注釈・解説・日本語の説明は一切含めないこと。';
 
 var EIKEN_LEVELS = {
@@ -305,7 +306,7 @@ function handleProbe_(p) {
   } else {
     var email = getEmailFromRequest_(p);
     if (!email) {
-      result = { genkoProbe: true, ok: false, error: 'noauth' };
+      result = { genkoProbe: true, ok: false, error: 'noauth', open: isOpenGenerate_() };
     } else {
       result = {
         genkoProbe: true,
@@ -313,7 +314,8 @@ function handleProbe_(p) {
         email_visible: !!email,
         masked: maskEmail_(email),
         allowed: isAllowed_(email),
-        is_owner: isOwnerForEmail_(email)
+        is_owner: isOwnerForEmail_(email),
+        open: isOpenGenerate_()
       };
     }
   }
@@ -359,10 +361,7 @@ function handleProbe_(p) {
     var token = body.token || (e && e.parameter && e.parameter.token) || '';
     var idToken = body.id_token || (e && e.parameter && e.parameter.id_token) || '';
     var pForCheck = { id_token: idToken };
-    if (!isAllowedWithTokenStrict_(token, pForCheck)) {
-      var em = getEmailFromRequestStrict_(pForCheck);
-      return jsonOut_({ ok: false, error: 'not allowed' + (em ? ' (' + maskEmail_(em) + ')' : ' (strict verification failed)') });
-    }
+    var allowed = isAllowedWithTokenStrict_(token, pForCheck);
     if (body.action === 'generateText') {
       var settings = body.settings || {};
       // 互換: フラット送信（level等がトップレベル）でも動作するようフォールバック
@@ -379,7 +378,24 @@ function handleProbe_(p) {
           prompt: body.prompt
         };
       }
-      return jsonOut_({ ok: true, item: generateTextWithToken_(settings, token, pForCheck) });
+      if (allowed) {
+        return jsonOut_({ ok: true, item: generateTextInternal_(settings) });
+      }
+      // 試験開放: 匿名生成（端末上限＋全体上限つき）。probe・削除・閲覧系の権限は不変
+      if (!isOpenGenerate_()) {
+        var em = getEmailFromRequestStrict_(pForCheck);
+        return jsonOut_({ ok: false, error: 'not allowed' + (em ? ' (' + maskEmail_(em) + ')' : ' (strict verification failed)') });
+      }
+      var devId = normalizeDeviceId_(body.device_id);
+      if (!devId) return jsonOut_({ ok: false, error: '端末IDが不正です。ページを再読み込みしてお試しください' });
+      checkTrialCaps_(devId);
+      var item = generateTextInternal_(settings);
+      countTrialUse_(devId);
+      return jsonOut_({ ok: true, item: item });
+    }
+    if (!allowed) {
+      var em2 = getEmailFromRequestStrict_(pForCheck);
+      return jsonOut_({ ok: false, error: 'not allowed' + (em2 ? ' (' + maskEmail_(em2) + ')' : ' (strict verification failed)') });
     }
     if (body.action === 'deleteText') {
       return jsonOut_({ ok: true, result: deleteTextWithToken_(body.payload || body, token, pForCheck) });
@@ -401,6 +417,66 @@ function deleteTextWithToken_(payload, token, params) {
   return deleteText(payload);
 }
 
+/**
+ * 試験開放関連（匿名生成の二重上限）
+ * ・OPEN_GENERATE=true で匿名生成を許可（probe・削除の権限は不変）
+ * ・端末IDは自己申告のため厳密な制限にはならない。全体上限が最終防波堤
+ * ・許可アカウントは上限の対象外（教室利用を圧迫しない）
+ */
+function isOpenGenerate_() {
+  return String(PropertiesService.getScriptProperties().getProperty('OPEN_GENERATE') || '').toLowerCase() === 'true';
+}
+function normalizeDeviceId_(v) {
+  var s = String(v || '').trim();
+  if (/^[A-Za-z0-9_-]{8,64}$/.test(s)) return s;
+  return '';
+}
+function trialDay_() {
+  return Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd');
+}
+function checkTrialCaps_(devId) {
+  var props = PropertiesService.getScriptProperties();
+  var maxAll = parseInt(props.getProperty('MAX_GEN_PER_DAY') || '100', 10) || 100;
+  var maxDev = parseInt(props.getProperty('MAX_GEN_PER_DEVICE') || '10', 10) || 10;
+  var today = trialDay_();
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) throw new Error('混雑しています。少し待って再試行してください');
+  try {
+    var day = props.getProperty('GEN_DAY');
+    var all = parseInt(props.getProperty('GEN_COUNT') || '0', 10) || 0;
+    if (day !== today) {
+      props.setProperty('GEN_DAY', today);
+      all = 0;
+    }
+    if (all >= maxAll) throw new Error('本日の試験生成は上限(' + maxAll + '件)に達しました。また明日お試しください');
+    var m = /^(\d{8}):(\d+)$/.exec(props.getProperty('DEV_' + devId) || '');
+    var dc = (m && m[1] === today) ? (parseInt(m[2], 10) || 0) : 0;
+    if (dc >= maxDev) throw new Error('この端末の本日の生成上限(' + maxDev + '件)に達しました。また明日お試しください');
+  } finally {
+    try { lock.releaseLock(); } catch (e) {}
+  }
+}
+function countTrialUse_(devId) {
+  var props = PropertiesService.getScriptProperties();
+  var today = trialDay_();
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) return;
+  try {
+    var day = props.getProperty('GEN_DAY');
+    var all = parseInt(props.getProperty('GEN_COUNT') || '0', 10) || 0;
+    if (day !== today) {
+      props.setProperty('GEN_DAY', today);
+      all = 0;
+    }
+    props.setProperty('GEN_COUNT', String(all + 1));
+    var m = /^(\d{8}):(\d+)$/.exec(props.getProperty('DEV_' + devId) || '');
+    var dc = (m && m[1] === today) ? (parseInt(m[2], 10) || 0) : 0;
+    props.setProperty('DEV_' + devId, today + ':' + (dc + 1));
+  } finally {
+    try { lock.releaseLock(); } catch (e) {}
+  }
+}
+
 function jsonOut_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
@@ -414,22 +490,42 @@ function generateText(settings) {
   return generateTextInternal_(settings);
 }
 function generateTextInternal_(settings) {
+  var first = generatePassage_(settings);
+  var chk = checkPassage_(settings, first.title, first.text);
+  var final = first;
+  if (!chk.ok) {
+    // 倫理チェックNGは1回だけ作り直す
+    var second = generatePassage_(settings);
+    var chk2 = checkPassage_(settings, second.title, second.text);
+    if (!chk2.ok) throw new Error('教材チェックで不適切と判定されたため保存しませんでした（' + (chk2.reason || chk.reason || '理由不明') + '）');
+    final = second;
+  }
+  var record = {
+    id: 'tadoku-' + Date.now(),
+    createdAt: new Date().toISOString(),
+    settings: settings,
+    title: final.title,
+    text: final.text
+  };
+  saveRecord_(record);
+  return record;
+}
+function generatePassage_(settings) {
   var key = getApiKey_();
   if (!key) throw new Error('OPENCODE_API_KEY が設定されていません');
   var retryHint = '重要な指示：思考プロセス・ユーザーへの言及・指示の書き写し・見出しの転記を出力に含めてはならない。必ずタイトル（1行目）・空行・本文のみを出力すること。前回の応答は形式違反のため無効とする。';
   var content = '';
   for (var attempt = 0; attempt < 3; attempt++) {
+    // Muse Sparkはreasoning系: max_output_tokensは推論+回答の合算予算のため多めに確保
     var payload = {
       model: MODEL,
-      messages: [
-        { role: 'system', content: attempt === 0 ? SYSTEM_PROMPT : SYSTEM_PROMPT + ' ' + retryHint },
-        { role: 'user', content: buildPrompt_(settings) }
-      ],
+      instructions: attempt === 0 ? SYSTEM_PROMPT : SYSTEM_PROMPT + ' ' + retryHint,
+      input: buildPrompt_(settings),
       temperature: 0.9,
-      max_tokens: 4096,
-      reasoning_effort: 'none'
+      max_output_tokens: 16384,
+      store: false
     };
-    var res = UrlFetchApp.fetch(API_BASE + '/chat/completions', {
+    var res = UrlFetchApp.fetch(API_BASE + '/responses', {
       method: 'post',
       contentType: 'application/json',
       headers: { Authorization: 'Bearer ' + key },
@@ -441,22 +537,123 @@ function generateTextInternal_(settings) {
       var detail = (data.error && (data.error.message || JSON.stringify(data.error))) || ('HTTP ' + res.getResponseCode());
       throw new Error('AI API エラー: ' + detail);
     }
-    var msg = (data.choices && data.choices[0] && data.choices[0].message) || {};
-    content = String(msg.content || msg.reasoning_content || '').replace(/```[\s\S]*?```/gm, '').trim();
+    if (data.status === 'incomplete') {
+      var reason = (data.incomplete_details && data.incomplete_details.reason) || 'unknown';
+      throw new Error('AI出力が上限で中断しました(status:incomplete reason:' + reason + ')');
+    }
+    content = String(extractResponsesText_(data) || '').replace(/```[\s\S]*?```/gm, '').trim();
     if (content && !looksLikeThinking_(content)) break;
     content = '';
   }
   if (!content) throw new Error('AI の応答が異常でした。もう一度お試しください。');
-  var t = splitTitle_(content);
-  var record = {
-    id: 'tadoku-' + Date.now(),
-    createdAt: new Date().toISOString(),
-    settings: settings,
-    title: t.title,
-    text: t.text
+  return splitTitle_(content);
+}
+
+/**
+ * 生成物の倫理・教材適合チェック（小学生〜高校生の学習利用を想定）
+ * 性的表現の禁止を主眼とする。戻り値 {ok:true} / {ok:false, reason}
+ */
+function checkPassage_(settings, title, text) {
+  var key = getApiKey_();
+  if (!key) throw new Error('OPENCODE_API_KEY が設定されていません');
+  var def = EIKEN_LEVELS[settings.level];
+  var lines = [
+    'あなたは小学生から高校生向け英語教材の倫理審査員です。以下の英語長文が学習教材として適切かを判定してください。',
+    '',
+    '【最重要：性的表現の禁止】',
+    '- 性的な描写・示唆・語彙は、明示・暗示を問わず不適切',
+    '- 身体の性的描写、性的関係を示唆する恋愛描写は不適切',
+    '- 健全な恋愛・友情そのものは適切（例：初恋の淡い描写。「付き合う」「好き」程度は可。「キス以上の示唆」は不適切）',
+    '',
+    '【副次：学習利用の最低限】',
+    '- 残虐・暴力の賛美、いじめ・差別の助長、危険行為の推奨、自傷・自殺関連は不適切',
+    '- 対象は小学生〜高校生の一律基準とし、級別に緩めない',
+    '',
+    '【教材適合性】',
+    '- 英検' + settings.level + 'レベルの語彙・文法・文長に収まっていること'
+  ];
+  if (def) {
+    lines.push('- 語彙：' + def.vocabulary);
+    lines.push('- 使えない文法：' + (def.forbidden || 'なし'));
+  }
+  lines.push('- 日本語・注釈・解説の混入がないこと');
+  lines.push('');
+  lines.push('【出力形式】');
+  lines.push('1行目に OK または NG:理由 のみを書く。理由は抽象記述に限定し（例：性的な描写が含まれているため）、問題箇所の引用・再掲は禁止');
+  lines.push('2行目以降には何も書かない');
+  lines.push('');
+  lines.push('【審査対象】');
+  lines.push('タイトル：' + title);
+  lines.push('本文：');
+  lines.push(text);
+  var payload = {
+    model: MODEL,
+    instructions: lines.join('\n'),
+    input: '上記の基準で判定してください。',
+    temperature: 0,
+    max_output_tokens: 512,
+    store: false
   };
-  saveRecord_(record);
-  return record;
+  try {
+    var res = UrlFetchApp.fetch(API_BASE + '/responses', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { Authorization: 'Bearer ' + key },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    if (res.getResponseCode() >= 400) return { ok: true, skipped: true };
+    var data = JSON.parse(res.getContentText());
+    if (data.status === 'incomplete') return { ok: true, skipped: true };
+    var verdict = String(extractResponsesText_(data) || '').trim().split('\n')[0] || '';
+    var m = verdict.match(/^NG\s*[:：]\s*(.+)$/i);
+    if (m) return { ok: false, reason: m[1].slice(0, 200) };
+    if (/^OK\b/i.test(verdict)) return { ok: true };
+    return { ok: false, reason: '自動チェックで確認できませんでした' };
+  } catch (e) {
+    // チェック自体の失敗は生成を止めない（監査は保存一覧＋削除権限で担保）
+    return { ok: true, skipped: true };
+  }
+}
+
+function extractResponsesText_(data) {
+  if (!data) return '';
+  if (typeof data.output_text === 'string' && data.output_text) return data.output_text;
+  var out = data.output;
+  if (typeof out === 'string') return out;
+  if (out && !Array.isArray(out) && typeof out === 'object') {
+    if (typeof out.output_text === 'string' && out.output_text) return out.output_text;
+    if (Array.isArray(out.content)) out = [out];
+    else if (Array.isArray(out.outputs)) out = out.outputs;
+  }
+  if (Array.isArray(out)) {
+    var texts = [];
+    for (var i = 0; i < out.length; i++) {
+      var item = out[i] || {};
+      if (item.type === 'reasoning') continue;
+      if (typeof item.text === 'string' && item.text) { texts.push(item.text); continue; }
+      if (typeof item.output_text === 'string' && item.output_text) { texts.push(item.output_text); continue; }
+      var contentArr = item.content;
+      if (typeof contentArr === 'string' && contentArr) { texts.push(contentArr); continue; }
+      if (Array.isArray(contentArr)) {
+        for (var j = 0; j < contentArr.length; j++) {
+          var c = contentArr[j] || {};
+          if (typeof c === 'string') { texts.push(c); continue; }
+          if (c.type === 'output_text' || c.type === 'input_text' || c.type === 'text') {
+            if (typeof c.text === 'string' && c.text) texts.push(c.text);
+          } else if (typeof c.text === 'string' && c.text) {
+            texts.push(c.text);
+          }
+        }
+      }
+    }
+    if (texts.length) return texts.join('');
+  }
+  if (data.response && typeof data.response === 'object') {
+    var nested = extractResponsesText_(data.response);
+    if (nested) return nested;
+  }
+  return '';
 }
 
 function looksLikeThinking_(t) {
