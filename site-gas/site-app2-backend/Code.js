@@ -18,7 +18,7 @@ var INDEX_FILE_NAME   = 'tadoku-index.json';
 var INDEX_CACHE_KEY   = 'tadoku_index_cache';
 var INDEX_CACHE_TTL   = 60;
 var API_BASE      = 'https://opencode.ai/zen/v1';
-var MODEL         = 'muse-spark-1.3-contributor-free';
+var MODEL         = 'muse-spark-1.3'; // Zen有料枠（無料contributor-freeはOpenCode内専用のため外部GASから不可。2026-09-09）
 var SYSTEM_PROMPT = 'あなたは英語教材の長文作成者です。日本語の指示に従い、英語の長文を1本作成してください。出力はタイトルと本文のみとし、マークダウン記法・注釈・解説・日本語の説明は一切含めないこと。';
 
 var EIKEN_LEVELS = {
