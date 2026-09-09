@@ -4,7 +4,7 @@
 // ・AI 生成は許可ユーザーのみ（Script Properties: ALLOWED_EMAILS）
 //   ただし OPEN_GENERATE=true の試験期間中は匿名生成も可（端末上限＋全体上限つき。削除は従来通りオーナーのみ）
 // ・生成物の削除はオーナーのみ（Script Properties: OWNER_EMAIL）
-// ・AI 生成（Script Properties: OPENCODE_API_KEY）
+// ・AI 生成（Script Properties: ZEN_API_KEY。2026-09-09にGoのx-opencode-session必須化のためZen無料枠へ移行。旧OPENCODE_API_KEYもフォールバックで読む）
 // ・生成物は共有フォルダに保存（Script Properties: FOLDER_ID。未設定なら「生成済み長文」を自動作成）
 // ・生成物フォルダ（FOLDER_ID）は全員に閲覧可 + 許可ユーザーに編集可で共有しておくこと
 // ・辞書ファイル（DICTIONARY_ID / MAP_ID）は全員に閲覧可で共有しておくこと
@@ -17,8 +17,8 @@ var INDEX_FOLDER_NAME = '生成済み長文_index';
 var INDEX_FILE_NAME   = 'tadoku-index.json';
 var INDEX_CACHE_KEY   = 'tadoku_index_cache';
 var INDEX_CACHE_TTL   = 60;
-var API_BASE      = 'https://opencode.ai/zen/go/v1';
-var MODEL         = 'muse-spark-1.3-contributor';
+var API_BASE      = 'https://opencode.ai/zen/v1';
+var MODEL         = 'muse-spark-1.3-contributor-free';
 var SYSTEM_PROMPT = 'あなたは英語教材の長文作成者です。日本語の指示に従い、英語の長文を1本作成してください。出力はタイトルと本文のみとし、マークダウン記法・注釈・解説・日本語の説明は一切含めないこと。';
 
 var EIKEN_LEVELS = {
@@ -35,7 +35,8 @@ var EIKEN_LEVELS = {
 };
 
 function getApiKey_() {
-  return PropertiesService.getScriptProperties().getProperty('OPENCODE_API_KEY');
+  var props = PropertiesService.getScriptProperties();
+  return props.getProperty('ZEN_API_KEY') || props.getProperty('OPENCODE_API_KEY');
 }
 
 function normalizeEmail_(addr) {
@@ -513,7 +514,7 @@ function generateTextInternal_(settings) {
 }
 function generatePassage_(settings) {
   var key = getApiKey_();
-  if (!key) throw new Error('OPENCODE_API_KEY が設定されていません');
+  if (!key) throw new Error('ZEN_API_KEY が設定されていません');
   var retryHint = '重要な指示：思考プロセス・ユーザーへの言及・指示の書き写し・見出しの転記を出力に含めてはならない。必ずタイトル（1行目）・空行・本文のみを出力すること。前回の応答は形式違反のため無効とする。';
   var content = '';
   for (var attempt = 0; attempt < 3; attempt++) {
@@ -556,7 +557,7 @@ function generatePassage_(settings) {
  */
 function checkPassage_(settings, title, text) {
   var key = getApiKey_();
-  if (!key) throw new Error('OPENCODE_API_KEY が設定されていません');
+  if (!key) throw new Error('ZEN_API_KEY が設定されていません');
   var def = EIKEN_LEVELS[settings.level];
   var lines = [
     'あなたは小学生から高校生向け英語教材の倫理審査員です。以下の英語長文が学習教材として適切かを判定してください。',
