@@ -82,14 +82,22 @@ clasp.cmd login            # 再認証(トークン失効時)
 
 ## ⚠️ 絶対にやらないこと
 
-1. **`clasp deploy` / `clasp redeploy` は禁止**
-   - claspが作成・更新するデプロイは webAppエントリポイント(アクセス設定)を持たず、実行URLが **404** になる(実測済み)
-   - アクセス設定の変更はApps Script APIからも不可。**GASエディタUIのみ**で設定できる
-2. **デプロイの更新はUIで行う** — コード変更後は `clasp push` までを実施し、ユーザーに以下を依頼する:
-   ```
-   GASエディタ → デプロイ → デプロイを管理 → 編集(鉛筆) → バージョン「新しいバージョン」→ デプロイ
-   ```
-   (デプロイURLは不変。UI更新後の検証結果をユーザーに確認してもらう)
+1. **新規デプロイ作成・アクセス設定変更はCLI/APIで行わない**
+   - 過去にclaspが作成・更新したデプロイが webAppエントリポイント(アクセス設定)を持たず、実行URLが **404** になった実測例がある（履歴。解消を断定しない）
+   - アクセス設定自体は既存デプロイの版更新では書き換えられない。**GASエディタUIのみ**で設定できる
+2. **既存デプロイの版更新は原則UI。例外は明示承認＋検証済み手順のみ**
+   - 通常は `clasp push` までとし、GASエディタUIで「新しいバージョン」を作成する
+   - CLI/APIで既存版を更新できるのは、ユーザーの明示承認があり、かつ次をすべて満たす場合だけ:
+     - 更新前バックアップ（remote HEAD更新前を含む）
+     - immutableなversion作成とデプロイ切替の分離（新versionは各1つ）
+     - 既存 `deploymentId` の固定とconfig保持
+     - canary等で実版切替テストを行い、入口URL・access・executeAs・URL deepと設定保持を確認してから本番へ
+     - 専用authのみを使い、共有authは変更しない
+     - 入口URL・access・executeAs・deep linkの前後確認
+     - 公式GET複数経路（list/別fields/prettyPrint/no-cache等）で最新version・updateTimeの一致確認
+     - 不明・不一致時は再PUTしない（安全停止）
+   - 上記を満たせない場合はUIで行う。CLI/API一般の安全性や過去404の解消を断定しない
+   - 参考: clasp 3.3系は `clasp version` → `clasp redeploy <deploymentId> -V <version>`。ただし2026-10-26の実証はclasp自体ではなく、同APIをconsoleのNode runnerから呼んだもの。claspの動作を検証済みとは扱わない
 3. 公開URLの確認に `/dev` 形式を使わない(エディタ用)。`/exec` が公開用
 4. **`site-worker/targets` のデプロイIDを旧GASに戻さない** — `site-worker/worker.js:13-16` の `AKfycbwj7q...` / `AKfycbxj8q...` は新GAS2本のID。旧 `AKfycbxP6...` / `AKfycbxvo...` に戻すと新 `site/` が全滅する
 5. **認証フォールバック・旧公開面を再導入しない** — 未検証JWTや `aud`/`iss` 文字列一致だけの許可、`p.email` での認可、allowlist空の許可、旧HTML/旧RPC配信の復活は禁止（下記「セキュリティ不変条件」）
@@ -179,8 +187,8 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 ## 運用メモ
 
 - ポータルのカード追加: `site/index.html` の該当教科セクション(ツール/英語/数学/理科)の `.cards` 内にカード1ブロックを追加(リンクはPages相対 `./appN/` + `target="_blank"`)。カードには教科色クラス(`subj--tool/eng/math/sci`)と学年タグ(`<span class="card__grade">`)を付与。新セクション追加時は `.sec--*`/`.subj--*` の色定義も追加すること（旧 `apps/portal` は最小リダイレクト済みのため追加不要）
-- 変更後は必ずヘッドレス検証 → `clasp push`（`site-gas` のみ）→ ユーザーにUIでのデプロイ更新を依頼（`apps/` は最小リダイレクトのため通常は `site/` のみ）
-- **セキュリティ修正の記録**: コード修正・ローカル検証、GAS HEADへの `clasp push`、公開デプロイのUI更新を区別して記録する。UI公開を確認するまで「本番反映済」と書かない（`仕様書_移行案.md` 8.3 に日付と範囲を追記）
+- 変更後は必ずヘッドレス検証 → `clasp push`（`site-gas` のみ）→ デプロイ更新。通常はUIで行う。明示承認下で上記「絶対にやらないこと」2の検証済み手順を満たす場合のみCLI/API例外可（`apps/` は最小リダイレクトのため通常は `site/` のみ）
+- **セキュリティ修正の記録**: コード修正・ローカル検証、GAS HEADへの `clasp push`、公開デプロイ更新（UIまたは明示承認下のCLI/API）を区別して記録する。公開確認（metadata・実疎通）まで「本番反映済」と書かない（`仕様書_移行案.md` 8.3 に日付と範囲を追記）
 - 詳細な権限・ガード・トークン運用・トラブルシュートは `仕様書_移行案.md` を参照（旧GAS版の詳細は `仕様書.md` を参照）
 - Gmailアカウント(別途管理)の別アプリが存在するが、このリポジトリでは管理対象外(共有URLは`/a/*/`形式を使用)
 
