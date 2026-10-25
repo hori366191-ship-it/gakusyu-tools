@@ -882,7 +882,9 @@
                         }
                         // 表示中のコンテンツが更新されていれば再表示
                         if (currentContentId) {
-                            renderFromBundle(currentContentId);
+                            renderFromBundle(currentContentId).catch(error => {
+                                console.error('表示中のコンテンツの再表示に失敗:', error);
+                            });
                         }
 
                         refreshButton.textContent = '✓ 更新完了';
@@ -989,7 +991,9 @@
 
                 const fileId = link.dataset.id;
                 if (fileId) {
-                    loadMarkdownContent(fileId);
+                    loadMarkdownContent(fileId).catch(error => {
+                        console.error('コンテンツ読み込みに失敗:', error);
+                    });
                     activateCurrentMenuLink(fileId);
                 }
             });
@@ -1037,11 +1041,187 @@
         }
         // ▲▲▲▲▲
 
+        // ▼▼▼▼▼ Markdown HTML の許可リスト消毒（XSS対策） ▼▼▼▼▼
+        // marked の出力を innerHTML に入れる前に、危険な要素・属性を DOM 上で取り除く。
+        // 文字列の正規表現置換ではなく、ブラウザのパーサに解釈させた DOM を走査する。
+        const MD_ALLOWED_TAGS = new Set([
+            'a', 'b', 'blockquote', 'br', 'caption', 'code', 'col', 'colgroup',
+            'dd', 'del', 'details', 'div', 'dl', 'dt', 'em', 'figcaption', 'figure',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'ins', 'li',
+            'mark', 'ol', 'p', 'pre', 's', 'small', 'span', 'strong', 'sub',
+            'summary', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead',
+            'tr', 'u', 'ul'
+        ]);
+        // 完全に削除する要素（中身も残さない）
+        const MD_DROP_TAGS = new Set([
+            'script', 'style', 'iframe', 'object', 'embed', 'link', 'meta',
+            'base', 'form', 'input', 'button', 'textarea', 'select', 'option',
+            'svg', 'math', 'template', 'noscript'
+        ]);
+        const MD_GLOBAL_ATTRS = new Set(['class', 'title', 'dir', 'lang']);
+        const MD_TAG_ATTRS = {
+            a: new Set(['href']),
+            img: new Set(['src', 'alt', 'width', 'height']),
+            ol: new Set(['start']),
+            td: new Set(['colspan', 'rowspan', 'align', 'style']),
+            th: new Set(['colspan', 'rowspan', 'align', 'style']),
+            col: new Set(['span', 'width']),
+            colgroup: new Set(['span', 'width'])
+        };
+        const MD_ALIGN_VALUES = new Set(['left', 'right', 'center', 'justify']);
+        const MD_STYLE_PROPS = {
+            'text-align': MD_ALIGN_VALUES,
+            'vertical-align': new Set(['top', 'middle', 'bottom', 'baseline'])
+        };
+
+        /**
+         * URL 属性が安全かどうかを判定する（http/https、リンクのみ mailto を許可）
+         * @param {string} value
+         * @param {boolean} allowMailto
+         * @param {string} [baseUrl]
+         * @returns {boolean}
+         */
+        function isSafeMarkdownUrl(value, allowMailto, baseUrl) {
+            const raw = String(value == null ? '' : value).trim();
+            if (!raw) return false;
+            // 制御文字（改行・タブ・NUL等）を含む URL はスキーム偽装の恐れがあるため拒否
+            for (let i = 0; i < raw.length; i++) {
+                const code = raw.charCodeAt(i);
+                if (code < 0x20 || code === 0x7f) return false;
+            }
+            let url;
+            try {
+                let base = baseUrl;
+                if (!base && typeof document !== 'undefined' && document.baseURI) base = document.baseURI;
+                url = base ? new URL(raw, base) : new URL(raw);
+            } catch (e) {
+                return false;
+            }
+            if (url.protocol === 'http:' || url.protocol === 'https:') return true;
+            if (allowMailto && url.protocol === 'mailto:') return true;
+            return false;
+        }
+
+        /**
+         * class 属性として安全な文字だけかどうか（空白区切りのトークン）
+         * @param {string} value
+         * @returns {boolean}
+         */
+        function isSafeClassValue(value) {
+            for (let i = 0; i < value.length; i++) {
+                const c = value.charAt(i);
+                const code = value.charCodeAt(i);
+                const ok = (code >= 0x30 && code <= 0x39)
+                    || (code >= 0x41 && code <= 0x5a)
+                    || (code >= 0x61 && code <= 0x7a)
+                    || c === '-' || c === '_' || c === ' ';
+                if (!ok) return false;
+            }
+            return true;
+        }
+
+        /**
+         * style 属性を許可したプロパティ・値だけに絞る
+         * @param {string} value
+         * @returns {string} 安全な宣言だけを残した style 値
+         */
+        function sanitizeMarkdownStyle(value) {
+            const out = [];
+            String(value == null ? '' : value).split(';').forEach(decl => {
+                const idx = decl.indexOf(':');
+                if (idx < 0) return;
+                const prop = decl.slice(0, idx).trim().toLowerCase();
+                const val = decl.slice(idx + 1).trim().toLowerCase();
+                const allowed = MD_STYLE_PROPS[prop];
+                if (allowed && allowed.has(val)) out.push(prop + ': ' + val);
+            });
+            return out.join('; ');
+        }
+
+        /**
+         * 要素を削除せず、中身だけを親に引き上げる
+         * @param {Element} el
+         */
+        function unwrapMarkdownElement(el) {
+            const parent = el.parentNode;
+            if (!parent) { el.remove(); return; }
+            while (el.firstChild) parent.insertBefore(el.firstChild, el);
+            parent.removeChild(el);
+        }
+
+        /**
+         * タグ・属性が許可リストに含まれるか
+         * @param {string} tag
+         * @param {string} name
+         * @returns {boolean}
+         */
+        function isAllowedMarkdownAttr(tag, name) {
+            if (MD_GLOBAL_ATTRS.has(name)) return true;
+            const set = MD_TAG_ATTRS[tag];
+            return !!(set && set.has(name));
+        }
+
+        /**
+         * marked の出力 HTML を許可リスト方式で消毒する
+         * @param {string} html
+         * @returns {string} 消毒済み HTML
+         */
+        function sanitizeMarkdownHtml(html) {
+            const template = document.createElement('template');
+            template.innerHTML = String(html == null ? '' : html);
+            const root = template.content;
+            const nodes = root.querySelectorAll('*');
+            for (let i = 0; i < nodes.length; i++) {
+                const el = nodes[i];
+                const tag = el.tagName.toLowerCase();
+                if (!MD_ALLOWED_TAGS.has(tag)) {
+                    if (MD_DROP_TAGS.has(tag)) el.remove();
+                    else unwrapMarkdownElement(el);
+                    continue;
+                }
+                const attrs = Array.prototype.slice.call(el.attributes);
+                for (let j = 0; j < attrs.length; j++) {
+                    const name = attrs[j].name.toLowerCase();
+                    const value = attrs[j].value;
+                    if (!isAllowedMarkdownAttr(tag, name)) {
+                        el.removeAttribute(attrs[j].name);
+                        continue;
+                    }
+                    if (name === 'href' && !isSafeMarkdownUrl(value, true)) {
+                        el.removeAttribute(attrs[j].name);
+                    } else if (name === 'src' && !isSafeMarkdownUrl(value, false)) {
+                        el.removeAttribute(attrs[j].name);
+                    } else if (name === 'class' && !isSafeClassValue(value)) {
+                        el.removeAttribute(attrs[j].name);
+                    } else if (name === 'style') {
+                        const safeStyle = sanitizeMarkdownStyle(value);
+                        if (safeStyle) el.setAttribute('style', safeStyle);
+                        else el.removeAttribute(attrs[j].name);
+                    } else if (name === 'align' && !MD_ALIGN_VALUES.has(value.toLowerCase())) {
+                        el.removeAttribute(attrs[j].name);
+                    } else if (name === 'width' || name === 'height' || name === 'colspan'
+                        || name === 'rowspan' || name === 'start' || name === 'span') {
+                        const digits = value.trim();
+                        let numeric = digits.length > 0 && digits.length <= 4;
+                        for (let k = 0; numeric && k < digits.length; k++) {
+                            const ch = digits.charCodeAt(k);
+                            if (ch < 0x30 || ch > 0x39) numeric = false;
+                        }
+                        if (!numeric) el.removeAttribute(attrs[j].name);
+                    }
+                }
+                if (tag === 'img' && !el.getAttribute('src')) el.remove();
+                if (tag === 'a' && !el.getAttribute('href')) unwrapMarkdownElement(el);
+            }
+            return template.innerHTML;
+        }
+        // ▲▲▲▲▲
+
         /**
          * 指定されたIDのMarkdownコンテンツを読み込んで表示する
          * @param {string} fileId - Google DriveのファイルID
          */
-        function loadMarkdownContent(fileId) {
+        async function loadMarkdownContent(fileId) {
             const contentBody = document.getElementById('content-body');
 
             // HTMLの更新が正しく行われているか念のため確認
@@ -1054,7 +1234,7 @@
             currentContentId = fileId;
 
             // ナビゲーション時に、進行中のAPIリクエストを無効化する
-            contentRequestSeq++;
+            const seq = ++contentRequestSeq;
 
             // ページ切り替え時に検索状態をリセット
             const searchInput = document.getElementById('search-input');
@@ -1066,27 +1246,38 @@
             resetScrollPosition();
 
             // バンドル内にあればブラウザ内で即座に表示（通信なし）
-            if (renderFromBundle(fileId)) {
-                return;
+            // renderFromBundle は Promise を返すため、必ず解決を待ってからフォールバックを判断する
+            try {
+                const rendered = await renderFromBundle(fileId, seq);
+                if (rendered) return;
+                if (seq !== contentRequestSeq) return;
+                fetchContentFromApi(fileId);
+            } catch (error) {
+                console.error('バンドルからの表示に失敗:', error);
+                if (seq === contentRequestSeq) fetchContentFromApi(fileId);
             }
-
-            // バンドルに無ければAPIから取得する（競合ガード付き）
-            fetchContentFromApi(fileId);
         }
 
         /**
          * バンドル内のコンテンツをブラウザ内でレンダリングする
          * @param {string} fileId
-         * @returns {boolean} 表示できたら true
+         * @param {number} [seq] - 競合ガード用のリクエスト連番（省略時は現在の連番）
+         * @returns {Promise<boolean>} バンドルで処理したら true（古い要求も true）
          */
-        async function renderFromBundle(fileId) {
+        async function renderFromBundle(fileId, seq) {
             const contentBody = document.getElementById('content-body');
+            if (!contentBody) return false;
             const item = currentBundle && currentBundle.files.find(f => f.id === fileId);
             if (!item || !item.content) {
                 return false;
             }
 
-            contentBody.innerHTML = marked.parse(item.content);
+            const reqSeq = (typeof seq === 'number') ? seq : contentRequestSeq;
+            const isStale = () => reqSeq !== contentRequestSeq;
+            // 既に新しい文書が要求されていれば、古い内容は表示しない
+            if (isStale()) return true;
+
+            contentBody.innerHTML = sanitizeMarkdownHtml(marked.parse(item.content));
             // 文書切替直後に先頭へ（MathJax前の暫定レイアウトでも先頭を保証）
             resetScrollPosition();
             // MathJaxに数式を処理させる（失敗しても本文は消さない）
@@ -1097,6 +1288,8 @@
                     // 数式処理の失敗は無視する
                 }
             }
+            // 待機中に別の文書へ切り替わっていたら、後処理・スクロールで上書きしない
+            if (isStale()) return true;
             // 数式処理後に暗記モード用の前処理を実行
             processContentForMemorization();
             // MathJaxで行高が変わるため完了後にも先頭を保証
@@ -1136,7 +1329,7 @@
                         item = data;
                     }
                     if (item && item.content) {
-                        contentBody.innerHTML = marked.parse(item.content);
+                        contentBody.innerHTML = sanitizeMarkdownHtml(marked.parse(item.content));
                         if (seq === contentRequestSeq) resetScrollPosition();
                         // MathJaxに新しいコンテンツ内の数式を処理させる（失敗しても本文は消さない）
                         if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {

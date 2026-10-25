@@ -92,8 +92,27 @@ clasp.cmd login            # 再認証(トークン失効時)
    (デプロイURLは不変。UI更新後の検証結果をユーザーに確認してもらう)
 3. 公開URLの確認に `/dev` 形式を使わない(エディタ用)。`/exec` が公開用
 4. **`site-worker/targets` のデプロイIDを旧GASに戻さない** — `site-worker/worker.js:13-16` の `AKfycbwj7q...` / `AKfycbxj8q...` は新GAS2本のID。旧 `AKfycbxP6...` / `AKfycbxvo...` に戻すと新 `site/` が全滅する
+5. **認証フォールバック・旧公開面を再導入しない** — 未検証JWTや `aud`/`iss` 文字列一致だけの許可、`p.email` での認可、allowlist空の許可、旧HTML/旧RPC配信の復活は禁止（下記「セキュリティ不変条件」）
+6. **セキュリティ修正に便乗した構造変更をしない** — 認証・公開面の修正は最小差分にとどめ、フォルダ構成・URL・全面リファクタを同時に変えない
+7. **機密・個人情報を不用意に追記しない** — 実メールアドレスや生徒/保護者の情報などを docs・コード・ログに追加しない（既存の記載は履歴として維持）
+
+## 🔐 セキュリティ不変条件（`site-gas` 2本）
+
+`site-pdfdrop` / `site-app2-backend` の認証・公開面を変えるときは、以下を破らない。詳細は `仕様書_移行案.md` の 3.3〜3.5 / 8.3。
+
+1. **検証**: `tokeninfo` 成功 + `aud`/`iss`/`exp`/`email_verified` を**すべて**満たす場合のみ許可。`iss` は `accounts.google.com` または `https://accounts.google.com` のみ。署名未検証JWTのデコードや `aud`/`iss` 一致だけのフォールバックは禁止。検証キャッシュのTTLは `exp` 以下
+2. **認可**: `p.email` など未検証の値で probe の `allowed` を決めない。`ALLOWED_EMAILS` が空なら probe も `allowed:false`・書込みは全拒否（教室機能が閉じるため設定漏れ注意）
+3. **公開面**: `doGet` / `doPost` 以外は末尾 `_` のprivate関数にする（`google.script.run` からの削除等の迂回を閉じる）。旧HTML/旧RPC配信は復活させない（probe/PDFの `HtmlService` 応答は可）
+4. **状態・メッセージ**: 変更系は `request_id` で冪等化。PDF上限は保存前ロック予約（返却は保存呼出前など副作用ゼロ／未保存が確実な失敗のみ。保存呼出後の結果不明は枠と `in_flight` を維持し同IDの再保存を禁止）。AI匿名試行上限はAPI前に一括予約し以後の障害も消費。保存結果不明時はapp2も新AI生成を開始しない。台帳は初回永続化失敗で副作用を開始せず、TTL内receiptは満杯でも消さず容量超過を拒否、未知stateはfail-closed。moderationは明示OK以外保存しない。legacyは一回移行＋墓標。JSONP経路は `rid` と生成callback名を照合（`MessageEvent` なし）。postMessage経路（iframe POST/PDF）は `rid` + `parent_origin` を受け取り `rid` を返し、クライアントは `rid`/`event.origin`/`event.source` を検証、`parent_origin` は応答の宛先に使う
+5. **期限切れ**: クライアントは `exp` 切れトークンを破棄して再ログインを要求する（`exp` 不問のUX回避は廃止）
 
 ## 検証方法（site を含む）
+
+### オフラインテスト（`scripts/tests`）
+
+- 認証・冪等性・上限・moderation・legacy の回帰は、`scripts/tests` 配下の Node 回帰テストでオフライン検証する（外部API・Drive・GAS実行を呼ばず、fake/スタブで検証）
+- アプリ起動・操作確認と最終回帰テストは `test` サブエージェントが担当。coder は構文/静的確認に加え、実装した unit テストの自己確認まで可（既存の委譲ルールに従う）
+- 本番GAS/Driveの実データを操作する確認は、別途ユーザーの合意を得てから行う（テストの一環として無断で実行しない）
 
 ### site-worker プロキシの検証
 
@@ -161,6 +180,7 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 
 - ポータルのカード追加: `site/index.html` の該当教科セクション(ツール/英語/数学/理科)の `.cards` 内にカード1ブロックを追加(リンクはPages相対 `./appN/` + `target="_blank"`)。カードには教科色クラス(`subj--tool/eng/math/sci`)と学年タグ(`<span class="card__grade">`)を付与。新セクション追加時は `.sec--*`/`.subj--*` の色定義も追加すること（旧 `apps/portal` は最小リダイレクト済みのため追加不要）
 - 変更後は必ずヘッドレス検証 → `clasp push`（`site-gas` のみ）→ ユーザーにUIでのデプロイ更新を依頼（`apps/` は最小リダイレクトのため通常は `site/` のみ）
+- **セキュリティ修正の記録**: コード修正・ローカル検証、GAS HEADへの `clasp push`、公開デプロイのUI更新を区別して記録する。UI公開を確認するまで「本番反映済」と書かない（`仕様書_移行案.md` 8.3 に日付と範囲を追記）
 - 詳細な権限・ガード・トークン運用・トラブルシュートは `仕様書_移行案.md` を参照（旧GAS版の詳細は `仕様書.md` を参照）
 - Gmailアカウント(別途管理)の別アプリが存在するが、このリポジトリでは管理対象外(共有URLは`/a/*/`形式を使用)
 

@@ -299,9 +299,44 @@ var FUNCS={
   }
 };
 
-var state={tab:'diff',func:'quad',params:{},rectMode:'mid',anim:null,x0:0,h:0.5,a:-3,b:3,n:8};
+var state={tab:'diff',func:'quad',params:{},rectMode:'mid',anim:null,x0:0,h:0.5,a:-3,b:3,n:8,nProg:8};
 var cvMain,ctxM,cvSub,ctxS,W,H,SW,SH,DPR=1;
+var N_MIN=2,N_MAX=120,N_INITIAL=8;
 var DAMP=0.15;
+
+/**
+ * 分割数 n を整数に正規化する（スライダー範囲 2〜120）
+ * @param {*} value
+ * @returns {number}
+ */
+function normalizeStepCount(value){
+  var n=Math.round(Number(value));
+  if(!isFinite(n)||n<N_MIN)n=N_MIN;
+  if(n>N_MAX)n=N_MAX;
+  return n;
+}
+/**
+ * リーマン和の区間境界を作る。最後の境界は必ず x1 に一致させる（浮動小数の隙間対策）
+ * @param {number} x0
+ * @param {number} x1
+ * @param {number} n
+ * @returns {number[]} 長さ n+1 の境界配列
+ */
+function riemannEdges(x0,x1,n){
+  var count=normalizeStepCount(n);
+  var edges=new Array(count+1);
+  for(var i=0;i<=count;i++)edges[i]=x0+(x1-x0)*i/count;
+  edges[0]=x0;edges[count]=x1;
+  return edges;
+}
+/**
+ * アニメ用の小数進行度と整数 n を同期する
+ */
+function syncStepProgress(){
+  state.n=normalizeStepCount(state.n);
+  state.nProg=state.n;
+}
+
 
 function niceStep(raw){
   var mag=Math.pow(10,Math.floor(Math.log10(raw)));
@@ -425,10 +460,11 @@ function fillArea(c,f,x0,x1,fillPos,fillNeg,N){
   c.restore();
 }
 function fillRect(c,f,x0,x1,n,mode,fillPos,fillNeg,stroke){
-  var dx=(x1-x0)/n;
+  var edges=riemannEdges(x0,x1,n);
+  var count=edges.length-1;
   c.save();
-  for(var i=0;i<n;i++){
-    var xi=x0+dx*i,xi1=xi+dx;
+  for(var i=0;i<count;i++){
+    var xi=edges[i],xi1=edges[i+1];
     var xb=mode==='left'?xi:(mode==='right'?xi1:(xi+xi1)/2);
     var v=f(xb);
     if(!isFinite(v))continue;
@@ -589,6 +625,8 @@ function syncSliders(){
   bs.min=state.a+0.2;bs.max=fn.xmax;bs.step=0.1;bs.value=state.b;
   $('aVal').textContent=fmt(state.a);
   $('bVal').textContent=fmt(state.b);
+  state.n=normalizeStepCount(state.n);state.nProg=state.n;
+  $('nSlider').value=state.n;
   $('nVal').textContent=state.n;
 }
 function renderMath(){
@@ -619,12 +657,12 @@ function updateStats(){
   }else{
     var a=state.a,b=state.b;
     var exact=fn.F(state.params,b)-fn.F(state.params,a);
-    var n=state.n,dx=(b-a)/n,mode=state.rectMode,sum=0;
+    var n=normalizeStepCount(state.n),edges=riemannEdges(a,b,n),mode=state.rectMode,sum=0;
     for(var i=0;i<n;i++){
-      var xi=a+dx*i,xi1=xi+dx;
+      var xi=edges[i],xi1=edges[i+1];
       var xb=mode==='left'?xi:(mode==='right'?xi1:(xi+xi1)/2);
       var v=fn.f(state.params,xb);
-      if(isFinite(v))sum+=v*dx;
+      if(isFinite(v))sum+=v*(xi1-xi);
     }
     $('intVal').textContent=fmt(exact);
     $('riemVal').textContent=fmt(sum);
@@ -640,6 +678,7 @@ function updateSubCap(){
 
 function setTab(t){
   state.anim=null;updateAnimBtns();
+  syncStepProgress();
   state.tab=t;
   $$('[data-tab-group="mode"] button').forEach(function(b){b.classList.toggle('active',b.dataset.tab===t);});
   $('diffCard').classList.toggle('hidden',t!=='diff');
@@ -662,10 +701,12 @@ function frame(now){
     $('hSlider').value=state.h;$('hVal').textContent=fmt(state.h);
     updateStats();
   }else if(state.anim==='n'){
-    state.n=Math.min(120,state.n+dt*30);
-    if(state.n>=120){state.n=120;state.anim=null;updateAnimBtns();}
-    $('nSlider').value=Math.round(state.n);
-    $('nVal').textContent=Math.round(state.n);
+    // 進行度だけ小数で持ち、計算・描画・表示に使う n は常に整数に保つ
+    state.nProg=Math.min(N_MAX,(state.nProg==null?state.n:state.nProg)+dt*30);
+    state.n=normalizeStepCount(state.nProg);
+    if(state.nProg>=N_MAX){state.nProg=N_MAX;state.n=N_MAX;state.anim=null;updateAnimBtns();}
+    $('nSlider').value=state.n;
+    $('nVal').textContent=state.n;
     updateStats();
   }
   drawMain();drawSub();
@@ -692,12 +733,14 @@ $('funcSel').addEventListener('change',function(){
   state.anim=null;updateAnimBtns();
   state.func=this.value;
   state.params={};
+  syncStepProgress();
   buildParamCtls();applyDefs();updateTex();updateStats();
 });
 $('x0Slider').addEventListener('input',function(){
   state.x0=parseFloat(this.value);$('x0Val').textContent=fmt(this.value);updateStats();
 });
 $('hSlider').addEventListener('input',function(){
+  state.anim=null;updateAnimBtns();
   state.h=parseFloat(this.value);$('hVal').textContent=fmt(this.value);updateStats();
 });
 $('aSlider').addEventListener('input',function(){
@@ -717,14 +760,27 @@ $('bSlider').addEventListener('input',function(){
   updateStats();
 });
 $('nSlider').addEventListener('input',function(){
-  state.n=parseInt(this.value,10);$('nVal').textContent=state.n;updateStats();
+  state.anim=null;updateAnimBtns();
+  state.n=normalizeStepCount(this.value);state.nProg=state.n;
+  this.value=state.n;$('nVal').textContent=state.n;updateStats();
 });
 $('btnH').addEventListener('click',function(){
   if(state.anim==='h'){state.anim=null;updateAnimBtns();return;}
+  // 終了値 h=0.02 から再クリックした場合は、スライダー上限からやり直す
+  if(state.h<=0.0201){
+    state.h=parseFloat($('hSlider').max)||3;
+    $('hSlider').value=state.h;$('hVal').textContent=fmt(state.h);
+    updateStats();
+  }
   state.anim='h';updateAnimBtns();
 });
 $('btnN').addEventListener('click',function(){
   if(state.anim==='n'){state.anim=null;updateAnimBtns();return;}
+  // 終了値 n=120 から再クリックした場合は初期値 8 からやり直す
+  if(state.n>=N_MAX)state.n=N_INITIAL;
+  syncStepProgress();
+  $('nSlider').value=state.n;$('nVal').textContent=state.n;
+  updateStats();
   state.anim='n';updateAnimBtns();
 });
 $$('[data-tab-group="mode"] button').forEach(function(b){

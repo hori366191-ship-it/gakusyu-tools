@@ -344,6 +344,18 @@ function fmtDate(d){
   while(d>monthDays[m]){ d-=monthDays[m]; m++; }
   return (m+1)+'/'+d;
 }
+/**
+ * 表示用の日付（1〜365の整数）。アニメ中は小数になるため丸める
+ * @param {number} d
+ * @returns {number}
+ */
+function displayDay(d){
+  var day=Math.round(Number(d));
+  if(!isFinite(day))day=1;
+  if(day<1)day=1;
+  if(day>365)day=365;
+  return day;
+}
 function illuminated(theta){ return (1 - Math.cos(theta))/2; }
 function phaseOf(age){
   var best=PHASES[0], d=1e9;
@@ -1196,8 +1208,9 @@ function updateStats(){
     $('setVal').textContent = fmtTime(st);
     updatePhaseGridActive();
   } else {
-    $('dateVal').textContent = state.date+'日目（'+fmtDate(state.date)+'）';
-    var s=SEASON_MAP.reduce(function(a,b){ var da=Math.abs(state.date-b.d); if(da>182) da=365-da; var aa=Math.abs(state.date-a.d); if(aa>182) aa=365-aa; return da<aa?b:a; });
+    var day = displayDay(state.date);
+    $('dateVal').textContent = day+'日目（'+fmtDate(day)+'）';
+    var s=SEASON_MAP.reduce(function(a,b){ var da=Math.abs(day-b.d); if(da>182) da=365-da; var aa=Math.abs(day-a.d); if(aa>182) aa=365-aa; return da<aa?b:a; });
     $('dateVal2').textContent = s.label;
     $('seasonVal').textContent = s.name;
     $('constVal').textContent = s.consts;
@@ -1263,7 +1276,8 @@ function frame(now){
   }
   if(state.mode==='const'){
     if(state.playYear){
-      state.date += dt * (365/18) * state.speed * (state.reverse? -1:1);
+      // 星座の年周運動は常に正方向（reverse は月専用）
+      state.date += dt * (365/18) * state.speed;
       if(state.date<1) state.date+=365; if(state.date>365) state.date-=365;
       $('dateSlider').value=Math.round(state.date);
       updateStats();
@@ -1277,7 +1291,25 @@ function frame(now){
   }
   drawOrbit(); drawSky();
 }
+function syncPlayButtons(){
+  var pb=$('btnPlay');
+  if(pb){
+    pb.textContent = state.playing ? '■ 停止' : '▶ アニメ';
+    pb.style.background = state.playing ? '#b45309' : '';
+  }
+  var py=$('btnPlayYear'), pd=$('btnPlayDay');
+  if(py) py.textContent = '▶ 年周アニメ';
+  if(pd) pd.textContent = '▶ 日周アニメ';
+}
+function stopAllPlayback(){
+  state.playing=false;
+  state.playYear=false;
+  state.playDay=false;
+  syncPlayButtons();
+}
 function setMode(m){
+  // モード切替時は再生をすべて止め、表示状態を同期する
+  stopAllPlayback();
   state.mode=m;
   document.querySelectorAll('#modeSeg button').forEach(function(b){ b.classList.toggle('active', b.dataset.mode===m); });
   $('moonPanels').classList.toggle('hidden', m!=='moon');
@@ -1320,19 +1352,18 @@ function setupEvents(){
   $('btnPlay').addEventListener('click',function(){
     if(state.mode==='moon'){
       state.playing=!state.playing;
-      this.textContent = state.playing ? '■ 停止' : '▶ アニメ';
-      this.style.background = state.playing ? '#b45309' : '';
     } else {
       // in const mode this button is hidden, but keep for safety
       state.playDay=!state.playDay;
-      this.textContent = state.playDay ? '■ 停止' : '▶ 日周アニメ';
     }
+    syncPlayButtons();
   });
   $('btnReverse').addEventListener('click',function(){
+    // reverse は月の再生方向のみに作用させる（星座の年周・日周は常に正方向）
+    if(state.mode!=='moon') return;
     state.reverse=!state.reverse;
     this.textContent = state.reverse ? '↻ 逆（西→東）' : '↺ 逆再生';
-    if(state.mode==='moon' && !state.playing){ state.playing=true; $('btnPlay').textContent='■ 停止'; $('btnPlay').style.background='#b45309'; }
-    if(state.mode==='const' && !state.playYear && !state.playDay){ state.playDay=true; }
+    if(!state.playing){ state.playing=true; syncPlayButtons(); }
   });
   document.querySelectorAll('[data-speed]').forEach(function(b){
     b.addEventListener('click',function(){

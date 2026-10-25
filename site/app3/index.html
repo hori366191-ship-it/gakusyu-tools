@@ -241,7 +241,7 @@ select:focus{outline:1px solid var(--gold);outline-offset:1px}
         <div class="stat"><span class="lbl">理論SD &radic;<em>np</em>(1&minus;<em>p</em>)</span><span class="val" id="gTheoSd">&mdash;</span></div>
         <div class="stat"><span class="lbl">歪度 <em>g</em><sub>1</sub></span><span class="val" id="gSkew">&mdash;</span></div>
         <div class="stat"><span class="lbl">尖度（超過）<em>g</em><sub>2</sub></span><span class="val" id="gKurt">&mdash;</span></div>
-        <div class="stat"><span class="lbl">&chi;&sup2; 適合度検定</span><span class="val" id="gChi">&mdash; <span class="verdict na" id="gChiV">&mdash;</span></span></div>
+        <div class="stat"><span class="lbl">&chi;&sup2; 適合度検定</span><span class="val" id="gChi"><span id="gChiText">&mdash;</span> <span class="verdict na" id="gChiV">&mdash;</span></span></div>
       </div>
       <div class="pane hidden" id="stats-rw">
         <div class="stat"><span class="lbl">粒子数 <em>N</em></span><span class="val" id="rN">&mdash;</span></div>
@@ -251,7 +251,7 @@ select:focus{outline:1px solid var(--gold);outline-offset:1px}
         <div class="stat"><span class="lbl">理論SD &sigma;&radic;<em>t</em></span><span class="val" id="rTheoSd">&mdash;</span></div>
         <div class="stat"><span class="lbl">歪度 <em>g</em><sub>1</sub></span><span class="val" id="rSkew">&mdash;</span></div>
         <div class="stat"><span class="lbl">尖度（超過）<em>g</em><sub>2</sub></span><span class="val" id="rKurt">&mdash;</span></div>
-        <div class="stat"><span class="lbl">KS 検定 <em>D</em></span><span class="val" id="rKs">&mdash; <span class="verdict na" id="rKsV">&mdash;</span></span></div>
+        <div class="stat"><span class="lbl">KS 検定 <em>D</em></span><span class="val" id="rKs"><span id="rKsText">&mdash;</span> <span class="verdict na" id="rKsV">&mdash;</span></span></div>
       </div>
     </div>
 
@@ -367,26 +367,75 @@ var UI={
   rw:{N:800,sigma:1.5,mu:0,dist:'normal',speed:60,showTheo:true,showSigma:true,prob:true}
 };
 
+/**
+ * ガルトン板の寸法を決める。デスクトップでは従来値を保ち、
+ * 縦に余裕がないモバイルでは段間隔・玉/ペグ半径を圧縮して
+ * binTop が必ず floorY より上に来るようにする。
+ * @param {number} W キャンバスCSS幅
+ * @param {number} H キャンバスCSS高さ
+ * @param {number} rows 段数
+ * @returns {Object} geometry
+ */
+function galtonLayout(W,H,rows){
+  rows=clamp(Math.round(Number(rows)||12),4,24);
+  var nBins=rows+1,cx=W/2;
+  // デスクトップと同じ左右余白（合計100px）を基本にし、段数が多い場合だけ
+  // ビン幅を縮めて全ビンをキャンバス内に収める（玉の可動域より内側に置く）
+  var binW=clamp((W-100)/nBins,6,26);
+  var pegR=Math.min(3.4,binW*0.13);
+  var topY=64,axisZ=38;
+  var floorY=H-axisZ;
+  var rowDY=clamp((H-124-axisZ-topY)/Math.max(1,rows-1),14,26);
+  var layoutBallR=5.2;
+  var binTop=topY+(rows-1)*rowDY+pegR+layoutBallR+3;
+  var minBinH=28;
+  if(binTop>floorY-minBinH){
+    // 縦が足りない: 上部の余白と軸ラベル余白を詰め、段間隔を再計算する
+    topY=clamp(H*0.12,24,64);
+    axisZ=clamp(H*0.09,24,38);
+    floorY=H-axisZ;
+    var gapReserve=pegR+5.2+3;
+    var maxRowDY=(floorY-minBinH-gapReserve-topY)/Math.max(1,rows-1);
+    rowDY=clamp(maxRowDY,4,26);
+    layoutBallR=Math.min(5.2,binW*0.22,rowDY*0.30);
+    binTop=topY+(rows-1)*rowDY+pegR+layoutBallR+3;
+    // 極端に低いキャンバスでも集計境界を床の上に残す最終安全策
+    if(binTop>floorY-12){
+      rowDY=Math.max(2,rowDY-(binTop-(floorY-12))/Math.max(1,rows-1));
+      layoutBallR=Math.min(layoutBallR,rowDY*0.30);
+      binTop=topY+(rows-1)*rowDY+pegR+layoutBallR+3;
+    }
+  }
+  return {
+    rows:rows,nBins:nBins,cx:cx,
+    binW:binW,pegR:pegR,ballR:layoutBallR,
+    topY:topY,rowDY:rowDY,binTop:binTop,floorY:floorY,
+    binLeft:cx-nBins/2*binW,binRight:cx+nBins/2*binW
+  };
+}
+
 var G={
   maxBalls:1000,balls:[],pegs:[],counts:[],ballSize:3,
   spawned:0,dropped:0,acc:0,drain:false,
   build:function(keep){
-    var rows=this.rows;
-    this.nBins=rows+1;
-    this.cx=W/2;
-    var binsH=124,axisZ=38,topY=64;
-    this.rowDY=clamp((H-binsH-axisZ-topY)/Math.max(1,rows-1),14,26);
-    this.binW=clamp(Math.floor((W-100)/this.nBins),18,26);
-    this.ballR=5.2;
-    this.pegR=Math.min(3.4,this.binW*0.13);
-    this.topY=topY;
-    this.binLeft=this.cx-this.nBins/2*this.binW;
-    this.binRight=this.cx+this.nBins/2*this.binW;
-    this.binTop=this.topY+(rows-1)*this.rowDY+this.pegR+this.ballR+3;
-    this.floorY=H-axisZ;
+    // 確定済みのビン結果を保つため、再構築前のgeometryを控える
+    var oldBinLeft=this.binLeft,oldBinW=this.binW;
+    var L=galtonLayout(W,H,this.rows);
+    this.rows=L.rows;
+    this.nBins=L.nBins;
+    this.cx=L.cx;
+    this.binW=L.binW;
+    this.pegR=L.pegR;
+    this.ballR=L.ballR;
+    this.topY=L.topY;
+    this.rowDY=L.rowDY;
+    this.binTop=L.binTop;
+    this.floorY=L.floorY;
+    this.binLeft=L.binLeft;
+    this.binRight=L.binRight;
     this.pegs=[];
     this.pegY=[];
-    for(var i=0;i<rows;i++){
+    for(var i=0;i<this.rows;i++){
       var y=this.topY+i*this.rowDY;
       this.pegY.push(y);
       for(var j=0;j<=i;j++)this.pegs.push({x:this.cx+(j-i/2)*this.binW,y:y});
@@ -400,9 +449,26 @@ var G={
       this.dropped=0;
       for(var b=0;b<this.balls.length;b++){
         var bl=this.balls[b];
+        // リサイズ後の新しい半径・床に合わせて既存玉も補正する
+        bl.r=Math.min(bl.r,this.ballR);
+        if(bl.counted){
+          // 集計時の論理ビンを保存し、新geometryの同じビンへ置き直す。
+          // 確定済みのcounts/平均/SDをresizeで変えない。
+          var bi=bl.bin;
+          if(typeof bi!=='number'||!isFinite(bi))bi=this.binOf(bl.x);
+          bi=clamp(Math.round(bi),0,this.nBins-1);
+          bl.bin=bi;
+          var oldCenter=oldBinLeft+(bi+0.5)*oldBinW;
+          var rel=oldBinW>0?clamp((bl.x-oldCenter)/oldBinW,-0.5,0.5):0;
+          bl.x=this.binX(bi)+rel*this.binW;
+          var inLeft=this.binLeft+bi*this.binW+bl.r;
+          var inRight=this.binLeft+(bi+1)*this.binW-bl.r;
+          if(inLeft<=inRight)bl.x=clamp(bl.x,inLeft,inRight);
+        }
         bl.x=clamp(bl.x,24+bl.r,W-24-bl.r);
-        bl.y=clamp(bl.y,4,H-30);
-        if(bl.counted){this.counts[this.binOf(bl.x)]++;this.dropped++;}
+        bl.y=clamp(bl.y,4,Math.max(4,this.floorY-bl.r));
+        bl.py=bl.y;
+        if(bl.counted){this.counts[bl.bin]++;this.dropped++;}
       }
     }
   },
@@ -410,7 +476,9 @@ var G={
   xOf:function(j){return this.binLeft+(j+0.5)*this.binW;},
   binX:function(j){return this.binLeft+(j+0.5)*this.binW;},
   spawn:function(){
-    this.balls.push({x:this.cx,y:8+(this.spawned%6),vx:0,vy:0,r:this.ballSize,dr:0,row:0,counted:false,asleep:false,sleepT:0,py:8,i:this.spawned});
+    // レイアウト上の最大半径を超えないようにする（窮屈な画面でもペグ間を通せる）
+    var r=Math.min(this.ballSize,this.ballR);
+    this.balls.push({x:this.cx,y:8+(this.spawned%6),vx:0,vy:0,r:r,dr:0,row:0,counted:false,bin:null,asleep:false,sleepT:0,settleT:0,py:8,i:this.spawned});
     this.spawned++;
   },
   update:function(dt){
@@ -428,7 +496,8 @@ var G={
     var Gt=this,cell=Math.max(Gt.ballR*2,11),grid=new Map();
     for(var i=0;i<Gt.balls.length;i++){
       var b=Gt.balls[i];
-      if(b.y<6)continue;
+      // 集計済みで静止した玉は衝突計算から外す（描画とビン集計はそのまま残す）
+      if(b.settled||b.y<6)continue;
       var key=Math.floor(b.y/cell)*4096+Math.floor(b.x/cell);
       var arr=grid.get(key);
       if(!arr){arr=[];grid.set(key,arr);}
@@ -449,7 +518,17 @@ var G={
     var chB=Gt.topY-12;
     for(var i2=0;i2<Gt.balls.length;i2++){
       var bl=Gt.balls[i2];
-      if(bl.asleep)continue;
+      if(bl.settled)continue;
+      if(bl.asleep){
+        if(bl.counted){
+          // 集計済みの玉だけ、静止が続いたら衝突対象から外して入口の渋滞を防ぐ
+          bl.settleT=(bl.settleT||0)+1;
+          if(bl.settleT>30)bl.settled=true;
+          continue;
+        }
+        // 未集計の玉は眠らせたままにしない（bin到達前に永久固定しない）
+        bl.asleep=false;bl.sleepT=0;
+      }
       bl.vy+=0.16;
       if(bl.vy>9)bl.vy=9;
       if(bl.vx>9)bl.vx=9;
@@ -483,18 +562,22 @@ var G={
         var k=Gt.binOf(bl.x);
         seg(bl,Gt.binLeft+(k+1)*Gt.binW,Gt.binTop,Gt.binLeft+(k+1)*Gt.binW,Gt.floorY,0.3);
         seg(bl,Gt.binLeft+k*Gt.binW,Gt.binTop,Gt.binLeft+k*Gt.binW,Gt.floorY,0.3);
-        if(bl.y>Gt.floorY-bl.r){
-          bl.y=Gt.floorY-bl.r;
-          if(bl.vy>0)bl.vy=-bl.vy*0.25;
-          bl.vx*=0.9;
-        }
       }
-      if(!bl.counted&&bl.py<Gt.binTop&&bl.y>=Gt.binTop&&bl.x>Gt.binLeft-bl.r&&bl.x<Gt.binRight+bl.r){
-        bl.counted=true;
+      // 床の補正はビン境界と独立に行う（binTopが床より下になる異常時も玉を止める）
+      if(bl.y>Gt.floorY-bl.r){
+        bl.y=Gt.floorY-bl.r;
+        if(bl.vy>0)bl.vy=-bl.vy*0.25;
+        bl.vx*=0.9;
+      }
+      // 最終段を通過してビン入口以下に到達した未集計玉を一度だけ集計する。
+      // 外周（binLeft/binRightの外側）で跨いだ場合も binOf の端ビンへ寄せる。
+      if(!bl.counted&&bl.row>=Gt.rows&&bl.y>=Gt.binTop){
+        bl.counted=true;bl.settleT=0;
         var kk=Gt.binOf(bl.x);
+        bl.bin=kk;
         Gt.counts[kk]++;Gt.dropped++;
       }
-      if(bl.y>Gt.topY&&Math.abs(bl.vx)+Math.abs(bl.vy)<0.25){
+      if(bl.counted&&bl.y>Gt.topY&&Math.abs(bl.vx)+Math.abs(bl.vy)<0.25){
         bl.sleepT++;
         if(bl.sleepT>8){bl.asleep=true;bl.vx=0;bl.vy=0;}
       }else{
@@ -504,7 +587,7 @@ var G={
     }
     for(var i3=0;i3<Gt.balls.length;i3++){
       var b3=Gt.balls[i3];
-      if(b3.row<Gt.rows)continue;
+      if(b3.settled||b3.row<Gt.rows)continue;
       var kx3=Math.floor(b3.x/cell),ky3=Math.floor(b3.y/cell);
       for(var ax=-1;ax<=1;ax++){
         for(var ay=-1;ay<=1;ay++){
@@ -512,7 +595,7 @@ var G={
           if(!carr)continue;
           for(var oi=0;oi<carr.length;oi++){
             var o=carr[oi];
-            if(o.i<=b3.i||o.row<Gt.rows)continue;
+            if(o.settled||o.i<=b3.i||o.row<Gt.rows)continue;
             var dx3=o.x-b3.x,dy3=o.y-b3.y,d23=dx3*dx3+dy3*dy3;
             var rr2=b3.r+o.r;
             if(d23>=rr2*rr2||d23<=1e-9)continue;
@@ -543,6 +626,21 @@ var G={
           }
         }
       }
+    }
+    // 玉同士の重なり補正は床・壁を押し抜くことがあるため、最後に制約を再適用する。
+    // 補正で外向き速度が残ると永久に押し戻し合うので、その成分は0にする。
+    for(var i4=0;i4<Gt.balls.length;i4++){
+      var b4=Gt.balls[i4];
+      var minX=24+b4.r,maxX=W-24-b4.r;
+      if(b4.x<minX){b4.x=minX;if(b4.vx<0)b4.vx=0;}
+      else if(b4.x>maxX){b4.x=maxX;if(b4.vx>0)b4.vx=0;}
+      var maxY=Gt.floorY-b4.r;
+      if(b4.y>maxY){
+        b4.y=maxY;
+        if(b4.vy>0)b4.vy=0;
+        b4.vx*=0.9;
+      }
+      if(b4.y<8){b4.y=8;if(b4.vy<0)b4.vy=0;}
     }
   },
   computeStats:function(){
@@ -1002,7 +1100,15 @@ function setRun(on){
 startOverlay.addEventListener('click',function(){setRun(true);});
 $('#cv').addEventListener('click',function(){setRun(!running);});
 
-function T(id,v){document.getElementById(id).textContent=v;}
+function T(id,v){
+  var el=document.getElementById(id);
+  if(el)el.textContent=v;
+}
+function setVerdict(el,cls,text){
+  if(!el)return;
+  el.className=cls;
+  el.textContent=text;
+}
 
 function updateStats(){
   if(active==='galton'){
@@ -1010,8 +1116,8 @@ function updateStats(){
     var V=$('#gChiV');
     if(!s){
       T('gN','\u2014');T('gMean','\u2014');T('gSd','\u2014');T('gTheoSd',fmt(Math.sqrt(G.rows*G.p*(1-G.p)),3));
-      T('gSkew','\u2014');T('gKurt','\u2014');T('gChi','\u2014');
-      V.className='verdict na';V.textContent='\u2014';
+      T('gSkew','\u2014');T('gKurt','\u2014');T('gChiText','\u2014');
+      setVerdict(V,'verdict na','\u2014');
       return;
     }
     T('gN',fmt(s.n,0));
@@ -1021,20 +1127,20 @@ function updateStats(){
     T('gSkew',fmt(s.skew,3));
     T('gKurt',fmt(s.kurt,3));
     if(!isNaN(s.pv)){
-      T('gChi','\u03c7\u00b2='+fmt(s.chi,2)+', df='+s.df+', p='+fmt(s.pv,4)+' ');
-      if(s.pv>=0.05){V.className='verdict ok';V.textContent='適合';}
-      else{V.className='verdict bad';V.textContent='乖離';}
+      T('gChiText','\u03c7\u00b2='+fmt(s.chi,2)+', df='+s.df+', p='+fmt(s.pv,4)+' ');
+      if(s.pv>=0.05){setVerdict(V,'verdict ok','適合');}
+      else{setVerdict(V,'verdict bad','乖離');}
     }else{
-      T('gChi','\u2014');
-      V.className='verdict na';V.textContent='\u2014';
+      T('gChiText','\u2014');
+      setVerdict(V,'verdict na','\u2014');
     }
   }else{
     var st=R.computeStats();
     var W2=$('#rKsV');
     if(!st){
       T('rN',fmt(R.N,0));T('rT','\u2014');T('rMean','\u2014');T('rSd','\u2014');
-      T('rTheoSd','\u2014');T('rSkew','\u2014');T('rKurt','\u2014');T('rKs','\u2014');
-      W2.className='verdict na';W2.textContent='\u2014';
+      T('rTheoSd','\u2014');T('rSkew','\u2014');T('rKurt','\u2014');T('rKsText','\u2014');
+      setVerdict(W2,'verdict na','\u2014');
       return;
     }
     T('rN',fmt(st.N,0));
@@ -1045,12 +1151,12 @@ function updateStats(){
     T('rSkew',fmt(st.skew,2));
     T('rKurt',fmt(st.kurt,2));
     if(st.D!==null&&!isNaN(st.pv)){
-      T('rKs','D='+fmt(st.D,4)+', p='+fmt(st.pv,4)+' ');
-      if(st.pv>=0.05){W2.className='verdict ok';W2.textContent='正規と矛盾なし';}
-      else{W2.className='verdict bad';W2.textContent='乖離を示唆';}
+      T('rKsText','D='+fmt(st.D,4)+', p='+fmt(st.pv,4)+' ');
+      if(st.pv>=0.05){setVerdict(W2,'verdict ok','正規と矛盾なし');}
+      else{setVerdict(W2,'verdict bad','乖離を示唆');}
     }else{
-      T('rKs','\u2014');
-      W2.className='verdict na';W2.textContent='\u2014';
+      T('rKsText','\u2014');
+      setVerdict(W2,'verdict na','\u2014');
     }
   }
 }

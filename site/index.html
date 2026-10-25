@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="./themes/pop.css">
 <link rel="stylesheet" href="./themes/forest.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="./shared/transport.js"></script>
 <style>
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
@@ -625,297 +626,141 @@
     var GIS_CLIENT_ID = '920000857743-91jfqq1q45hmnas1b25ebg0dqafo846i.apps.googleusercontent.com';
   </script>
   <script>
-    /* ---- 認証プローブ（仕様書_移行案.md 3.4）site-app2-backendで判定し is_owner で教室/先生を区別。GIS id_token でCookie不要化 ---- */
+    /* ---- 認証プローブ（仕様書_移行案.md 3.4）site-app2-backendで判定し is_owner で教室/先生を区別。
+       JSONP/POST/iframe の順序・timeout・後始末は site/shared/transport.js に集約（postMessageはrid/origin/source検証） ---- */
     (function () {
       'use strict';
+      var T = window.GakusyuTransport;
+      var banner = document.getElementById('auth-banner-inner');
+      if (!T || !banner) return;
       var WORKER_BASE = 'https://gakusyu-tools-proxy.hori-shota.workers.dev';
       var DIRECT_PROBE_URL = 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
       var PROBE_URL_WORKER = (WORKER_BASE && WORKER_BASE.indexOf('REPLACE')===-1 && WORKER_BASE.indexOf('workers.dev')!==-1) ? WORKER_BASE.replace(/\/+$/,'') + '/app2' : '';
       var PROBE_URL = PROBE_URL_WORKER || DIRECT_PROBE_URL;
       var PROBE_TOKEN = 'e6135dfd707ab9a6916635fa';
-      var banner = document.getElementById('auth-banner-inner');
-      var textEl = document.getElementById('auth-banner-text');
-      if (!banner || !textEl) return;
-      function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
-      function setIdToken(t){ try{ if(t) localStorage.setItem('gis_id_token',t); else localStorage.removeItem('gis_id_token'); }catch(e){} }
-      function getEmailFromIdToken(idt){ try{ var p=idt.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } }
-      function decodeJwtPayload(t){ try{ var p=t.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; return JSON.parse(atob(p)); }catch(e){ return null; } }
-      function render(state, opts) {
-        opts = opts || {};
+      T.configure({ origins: [WORKER_BASE] });
+
+      var probeSeq = 0;
+      var lastProbeAt = 0;
+      var lastProbeToken = null;
+      var lastLoginState = 'is-warn';
+      var gisPending = false;
+
+      function makeEl(tag, cls, text) {
+        var el = document.createElement(tag);
+        if (cls) el.className = cls;
+        if (text !== undefined) el.textContent = text;
+        return el;
+      }
+      function clearEl(node) {
+        while (node.firstChild) node.removeChild(node.firstChild);
+      }
+      function setState(state, authState) {
         banner.className = 'auth-banner__inner' + (state ? ' ' + state : '');
-        if (state === 'is-ok') {
-          if (opts.isOwner) textEl.textContent = '先生アカウントでログイン中 \u2705';
-          else textEl.textContent = '教室タブレットとしてログイン中 \u2705';
-        } else if (state === 'is-out' || state === 'is-warn') {
-          // ログイン不要の生徒向けにシンプルに「教室用ログイン」のみ表示。デバッグ表示は削除。
-          var label = '教室用ログイン';
-          if (GIS_CLIENT_ID.indexOf('REPLACE')===0) {
-            banner.innerHTML = '<span class="auth-banner__dot" aria-hidden="true"></span><span>'+label+'</span><a class="auth-banner__btn" href="' + PROBE_URL + '" target="_blank" rel="noopener">'+label+' \u2197</a>';
-          } else {
-            banner.innerHTML = '<span class="auth-banner__dot" aria-hidden="true"></span><span>'+label+'</span><span id="gis-btn" style="margin-left:auto"></span>';
-            initGis();
+        banner.setAttribute('data-auth-state', authState || state || 'checking');
+      }
+      function renderChecking() {
+        setState('', 'checking');
+        clearEl(banner);
+        banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
+        banner.appendChild(makeEl('span', '', '確認中…'));
+      }
+      function renderOk(isOwner) {
+        setState('is-ok', 'ok');
+        clearEl(banner);
+        banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
+        banner.appendChild(makeEl('span', '', isOwner ? '先生アカウントでログイン中 \u2705' : '教室タブレットとしてログイン中 \u2705'));
+      }
+      function renderLogin(state, opts) {
+        opts = opts || {};
+        var gisFailed = !!opts.gisFailed;
+        var unreachable = !!opts.unreachable;
+        if (!gisFailed) lastLoginState = state;
+        setState(gisFailed || unreachable ? 'is-warn' : state, state === 'is-out' ? 'notallowed' : (gisFailed ? 'login-error' : (unreachable ? 'unreachable' : 'login')));
+        clearEl(banner);
+        banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
+        var label = '教室用ログイン';
+        if (state === 'is-out') label = '教室外アカウントです';
+        else if (gisFailed) label = 'Googleログインを読み込めませんでした';
+        else if (unreachable) label = '接続を確認できませんでした';
+        banner.appendChild(makeEl('span', '', label));
+        var gisMissing = GIS_CLIENT_ID.indexOf('REPLACE') === 0;
+        if (gisMissing || gisFailed) {
+          var link = makeEl('a', 'auth-banner__btn', '教室用ログイン \u2197');
+          link.href = PROBE_URL;
+          link.target = '_blank';
+          link.rel = 'noopener';
+          banner.appendChild(link);
+          if (gisFailed) {
+            var retry = makeEl('button', 'auth-banner__btn', '再試行');
+            retry.type = 'button';
+            retry.addEventListener('click', function () {
+              retry.disabled = true;
+              initGis();
+            });
+            banner.appendChild(retry);
           }
         }
+        // GIS/再試行の描画先は常に作り直して確保する（失敗表示で削除されても復旧できる）
+        var host = makeEl('span', '', '');
+        host.id = 'gis-btn';
+        host.style.marginLeft = 'auto';
+        banner.appendChild(host);
+        if (!opts.skipInit && !gisFailed && !gisMissing) initGis();
       }
-      function initGis(){
-        if(typeof google==='undefined'||!google.accounts||!google.accounts.id) { setTimeout(initGis,500); return; }
-        try{
-          google.accounts.id.initialize({
-            client_id: GIS_CLIENT_ID,
-            callback: function(resp){
-              if(resp.credential){ setIdToken(resp.credential); runProbe(); }
-            },
-            auto_select:false, cancel_on_tap_outside:true
-          });
-          var btn=document.getElementById('gis-btn');
-          if(btn) google.accounts.id.renderButton(btn,{theme:'outline',size:'small',text:'signin_with',shape:'pill'});
-        }catch(e){}
-      }
-      function runProbe(){
-        done=false;
-        textEl.textContent='確認中…';
-        banner.className='auth-banner__inner';
-        var idt=getIdToken();
-        var runProbeLen = idt ? buildProbeBaseFor(PROBE_URL_WORKER).length : 0;
-        if(idt && runProbeLen > 1800){
-          doProbePostWithFallback(function(res){
-            if(done) return; done=true;
-            if(!res||!res.genkoProbe||!res.ok){ render('is-warn'); return; }
-            if(!res.allowed){ render('is-out'); return; }
-            render('is-ok',{isOwner:!!res.is_owner});
-          });
-          setTimeout(function(){ if(done) return; done=true; render('is-warn',{error:'timeout'}); },11000);
-          return;
-        }
-        if(idt){
-          // short token -> JSONP (Worker成功 1256ms)
-          if(PROBE_URL_WORKER){
-            var wNameR='__portalProbeR'+Date.now()+Math.random().toString(36).slice(2);
-            var doneR=false;
-            var tR=setTimeout(function(){ if(doneR) return; doneR=true; try{ delete window[wNameR]; }catch(e){} jsonpProbeFor(DIRECT_PROBE_URL, '__portalProbeR2'+Date.now()+Math.random().toString(36).slice(2), function(r){ if(done) return; done=true; if(!r||!r.genkoProbe||!r.ok){ render('is-warn'); return; } if(!r.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r.is_owner}); }, 7500); }, 8500);
-            jsonpProbeFor(PROBE_URL_WORKER, wNameR, function(res){
-              if(doneR) return; doneR=true; clearTimeout(tR);
-              if(done) return; done=true;
-              if(!res||!res.genkoProbe||!res.ok){ var dNameR='__portalProbeR2'+Date.now()+Math.random().toString(36).slice(2); jsonpProbeFor(DIRECT_PROBE_URL, dNameR, function(r2){ if(!r2||!r2.genkoProbe||!r2.ok){ render('is-warn'); return; } if(!r2.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r2.is_owner}); }, 7500); return; }
-              if(!res.allowed){ render('is-out'); return; }
-              render('is-ok',{isOwner:!!res.is_owner});
-            }, 7500);
-          } else {
-            var sR=document.createElement('script');
-            var tRB=setTimeout(function(){ if(done) return; done=true; try{ sR.remove(); }catch(e){} render('is-warn'); },7500);
-            window.__portalProbeR=function(res){ if(done) return; done=true; clearTimeout(tRB); try{ sR.remove(); }catch(e){} if(!res||!res.genkoProbe||!res.ok){ render('is-warn'); return; } if(!res.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!res.is_owner}); };
-            sR.onerror=function(){ if(done) return; done=true; clearTimeout(tRB); try{ sR.remove(); }catch(e){} render('is-warn'); };
-            sR.src=buildProbeBase()+'&callback=__portalProbeR&t='+Date.now();
-            document.head.appendChild(sR);
+      function initGis() {
+        if (gisPending) return;
+        gisPending = true;
+        T.waitForGis({ timeoutMs: 8000, intervalMs: 300 }).then(function (ok) {
+          gisPending = false;
+          if (!ok) {
+            renderLogin(lastLoginState, { gisFailed: true });
+            return;
           }
-          return;
-        }
-        // id_tokenなしはJSONP fallback (worker→直)
-        if(PROBE_URL_WORKER){
-          var wName='__portalProbe2W'+Date.now()+Math.random().toString(36).slice(2);
-          var doneRun=false;
-          var t2=setTimeout(function(){ if(doneRun) return; doneRun=true; try{ delete window[wName]; }catch(e){} jsonpProbeFor(DIRECT_PROBE_URL, '__portalProbe2D'+Date.now()+Math.random().toString(36).slice(2), function(r){ if(done) return; done=true; if(!r||!r.genkoProbe||!r.ok){ render('is-warn'); return; } if(!r.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r.is_owner}); }, 7500); }, 8500);
-          jsonpProbeFor(PROBE_URL_WORKER, wName, function(res){
-            if(doneRun) return; doneRun=true; clearTimeout(t2);
-            if(done) return; done=true;
-            if(!res||!res.genkoProbe||!res.ok){ // fallback to direct
-              var dName='__portalProbe2D'+Date.now()+Math.random().toString(36).slice(2);
-              jsonpProbeFor(DIRECT_PROBE_URL, dName, function(r2){ if(!r2||!r2.genkoProbe||!r2.ok){ render('is-warn'); return; } if(!r2.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r2.is_owner}); }, 7500);
-              return;
-            }
-            if(!res.allowed){ render('is-out'); return; }
-            render('is-ok',{isOwner:!!res.is_owner});
-          }, 7500);
-        } else {
-          var s2=document.createElement('script');
-          var t2b=setTimeout(function(){ if(done) return; done=true; try{ s2.remove(); }catch(e){} render('is-warn'); }, 7500);
-          window.__portalProbe2=function(res){
-            if(done) return;
-            done=true; clearTimeout(t2b); try{ s2.remove(); }catch(e){}
-            if(!res||!res.genkoProbe||!res.ok){ render('is-warn'); return; }
-            if(!res.allowed){ render('is-out'); return; }
-            render('is-ok',{isOwner:!!res.is_owner});
-          };
-          s2.onerror=function(){ if(done) return; done=true; clearTimeout(t2b); try{ s2.remove(); }catch(e){} render('is-warn'); };
-          s2.src=buildProbeBase()+'&callback=__portalProbe2&t='+Date.now();
-          document.head.appendChild(s2);
-        }
-      }
-      function buildProbeBase(){ return buildProbeBaseFor(PROBE_URL); }
-      function buildProbeBaseFor(base){ var b=base+'?probe=1&token='+encodeURIComponent(PROBE_TOKEN); var id=getIdToken(); if(id){ b+='&id_token='+encodeURIComponent(id); var em=getEmailFromIdToken(id); if(em) b+='&email='+encodeURIComponent(em); } return b; }
-      function doProbePostFor(base, cb){
-        var id=getIdToken();
-        var em=id?getEmailFromIdToken(id):'';
-        var payload={ probe:1, token:PROBE_TOKEN };
-        if(id) payload.id_token=id;
-        if(em) payload.email=em;
-        var iframe=document.createElement('iframe');
-        iframe.style.display='none';
-        iframe.name='__probe'+Date.now()+Math.random().toString(36).slice(2);
-        document.body.appendChild(iframe);
-        var form=document.createElement('form');
-        form.method='POST';
-        form.action=base;
-        form.target=iframe.name;
-        var inp=document.createElement('input');
-        inp.type='hidden'; inp.name='data'; inp.value=JSON.stringify(payload);
-        form.appendChild(inp);
-        document.body.appendChild(form);
-        var donePost=false;
-        var tPost=setTimeout(function(){ if(donePost) return; donePost=true; try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(null); },8000);
-        function onMsgPost(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(donePost) return; donePost=true; clearTimeout(tPost); window.removeEventListener('message',onMsgPost); try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(res); }
-        window.addEventListener('message',onMsgPost);
-        try{ form.submit(); }catch(e){ clearTimeout(tPost); window.removeEventListener('message',onMsgPost); try{ iframe.remove(); }catch(_e){} try{ form.remove(); }catch(_e){} cb(null); }
-      }
-      function doProbePost(cb){ return doProbePostFor(PROBE_URL, cb); }
-      function doProbePostWithFallback(cb){
-        if(!PROBE_URL_WORKER){ doProbePostFor(DIRECT_PROBE_URL, cb); return; }
-        var settled=false;
-        var timerFallback=setTimeout(function(){ if(settled) return; settled=true; doProbePostFor(DIRECT_PROBE_URL, cb); }, 8500);
-        doProbePostFor(PROBE_URL_WORKER, function(res){
-          if(settled) return;
-          if(res && res.genkoProbe && res.ok !== undefined){ clearTimeout(timerFallback); settled=true; cb(res); return; }
-          if(res && res.genkoProbe){ clearTimeout(timerFallback); settled=true; cb(res); return; }
-          clearTimeout(timerFallback); settled=true; doProbePostFor(DIRECT_PROBE_URL, cb);
+          try {
+            // 失敗表示で消えた #gis-btn を作り直してから描画する
+            renderLogin(lastLoginState, { skipInit: true });
+            google.accounts.id.initialize({
+              client_id: GIS_CLIENT_ID,
+              callback: function (resp) {
+                if (!resp || !resp.credential) return;
+                T.setIdToken(resp.credential);
+                runProbe();
+              },
+              auto_select: false,
+              cancel_on_tap_outside: true
+            });
+            var btn = document.getElementById('gis-btn');
+            if (btn) google.accounts.id.renderButton(btn, { theme: 'outline', size: 'small', text: 'signin_with', shape: 'pill' });
+          } catch (e) {
+            renderLogin(lastLoginState, { gisFailed: true });
+          }
         });
       }
-      function jsonpProbeFor(base, cbName, cb, timeoutMs){
-        var s=document.createElement('script');
-        var doneJs=false;
-        var timer=setTimeout(function(){ if(doneJs) return; doneJs=true; try{ s.remove(); }catch(e){} try{ delete window[cbName]; }catch(e){ window[cbName]=undefined; } cb(null); }, timeoutMs);
-        window[cbName]=function(res){ if(doneJs) return; doneJs=true; clearTimeout(timer); try{ s.remove(); }catch(e){} try{ delete window[cbName]; }catch(e){ window[cbName]=undefined; } cb(res); };
-        s.onerror=function(){ if(doneJs) return; doneJs=true; clearTimeout(timer); try{ s.remove(); }catch(e){} try{ delete window[cbName]; }catch(e){ window[cbName]=undefined; } cb(null); };
-        s.src=buildProbeBaseFor(base)+'&callback='+cbName+'&t='+Date.now();
-        document.head.appendChild(s);
-        return s;
-      }
-      function jsonpProbeWithFallback(cb, timeoutMs){
-        if(!PROBE_URL_WORKER){ var n='__portalProbe'+Date.now()+Math.random().toString(36).slice(2); jsonpProbeFor(DIRECT_PROBE_URL, n, cb, timeoutMs); return; }
-        var wName='__portalProbeW'+Date.now()+Math.random().toString(36).slice(2);
-        var dName='__portalProbeD'+Date.now()+Math.random().toString(36).slice(2);
-        var doneFb=false;
-        var sW=jsonpProbeFor(PROBE_URL_WORKER, wName, function(res){
-          if(doneFb) return;
-          if(res && res.genkoProbe){ doneFb=true; // success via worker, cancel direct attempt
-            // cleanup direct if started
-            try{ window[dName]=undefined; }catch(e){}
-            cb(res); return;
-          }
-          // worker returned null or not genkoProbe -> fallback to direct
-          doneFb=true;
-          jsonpProbeFor(DIRECT_PROBE_URL, dName, cb, timeoutMs);
-        }, timeoutMs);
-        // if worker times out, jsonpProbeFor will call cb(null) -> fallback
-        // we need to intercept null to fallback; wrap above already does. But need to handle timeout case where res null
-        // re-route null case: actually above callback with null will trigger fallback
-        // To avoid double, we make wrapper that on null fallback
-        var origCb=cb;
-        // override: we already handle null in w callback; need to ensure timeout leads to direct
-        // The above w callback already handles null -> fallback. No extra timer needed.
-      }
-      var done = false;
-      // id_token がある場合は最初からPOSTで試す（URL長とサードパーティブロック回避） Worker→直 fallback
-      var idt0=getIdToken();
-      var probeUrlLenCheck = idt0 ? buildProbeBaseFor(PROBE_URL_WORKER).length : 0;
-      if(idt0 && probeUrlLenCheck > 1800){
-        doProbePostWithFallback(function(res){
-          if(done) return;
-          done=true;
-          if(!res||!res.genkoProbe||!res.ok){ render('is-warn',{error:res&&res.error||'noauth'}); return; }
-          if(!res.allowed){ render('is-out'); return; }
-          render('is-ok',{isOwner:!!res.is_owner});
+      function runProbe() {
+        var token = T.getIdToken();
+        var t = Date.now();
+        // 同一トークンの連続呼び出しだけ間引く（トークン変更時は必ず再probeする）
+        if (probeSeq > 0 && token === lastProbeToken && t - lastProbeAt < 400) return;
+        lastProbeToken = token;
+        lastProbeAt = t;
+        var seq = ++probeSeq;
+        renderChecking();
+        T.probeAuth({
+          workerUrl: PROBE_URL_WORKER,
+          directUrl: DIRECT_PROBE_URL,
+          token: PROBE_TOKEN,
+          totalMs: 22000
+        }).then(function (res) {
+          if (seq !== probeSeq) return;
+          if (res.status === 'ok') { renderOk(res.isOwner); return; }
+          if (res.status === 'notallowed') { renderLogin('is-out'); return; }
+          if (res.status === 'noauth') { renderLogin('is-warn'); return; }
+          renderLogin('is-warn', { unreachable: true });
         });
-        setTimeout(function(){ if(done) return; done=true; render('is-warn',{error:'timeout'}); },11000);
-      } else if(idt0){
-        // short id_token (先生/教室の通常JWT約1000字)はJSONPでWorker成功率が高い (debugで1256ms成功) ためPOSTではなくJSONPを使う
-        if(PROBE_URL_WORKER){
-          var wNameShort='__portalProbeS'+Date.now()+Math.random().toString(36).slice(2);
-          var doneShort=false;
-          var tShort=setTimeout(function(){ if(doneShort) return; doneShort=true; try{ delete window[wNameShort]; }catch(e){} jsonpProbeFor(DIRECT_PROBE_URL, '__portalProbeS2'+Date.now()+Math.random().toString(36).slice(2), function(r){ if(done) return; done=true; if(!r||!r.genkoProbe||!r.ok){ render('is-warn',{error:r&&r.error||'noauth'}); return; } if(!r.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r.is_owner}); }, 7500); }, 8500);
-          jsonpProbeFor(PROBE_URL_WORKER, wNameShort, function(res){
-            if(doneShort) return; doneShort=true; clearTimeout(tShort);
-            if(done) return; done=true;
-            if(!res||!res.genkoProbe||!res.ok){ var dNameS='__portalProbeS2'+Date.now()+Math.random().toString(36).slice(2); jsonpProbeFor(DIRECT_PROBE_URL, dNameS, function(r2){ if(!r2||!r2.genkoProbe||!r2.ok){ render('is-warn',{error:r2&&r2.error||'noauth'}); return; } if(!r2.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r2.is_owner}); }, 7500); return; }
-            if(!res.allowed){ render('is-out'); return; }
-            render('is-ok',{isOwner:!!res.is_owner});
-          }, 7500);
-        } else {
-          var sShort=document.createElement('script');
-          var tShortB=setTimeout(function(){ if(done) return; done=true; try{ sShort.remove(); }catch(e){} render('is-warn',{error:'timeout'}); },7500);
-          window.__portalProbeShort=function(res){ if(done) return; done=true; clearTimeout(tShortB); try{ sShort.remove(); }catch(e){} if(!res||!res.genkoProbe||!res.ok){ render('is-warn',{error:res&&res.error||'noauth'}); return; } if(!res.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!res.is_owner}); };
-          sShort.onerror=function(){ if(done) return; done=true; clearTimeout(tShortB); try{ sShort.remove(); }catch(e){} render('is-warn',{error:'onerror'}); };
-          sShort.src=buildProbeBase()+'&callback=__portalProbeShort&t='+Date.now();
-          document.head.appendChild(sShort);
-        }
-      } else {
-        var s = null;
-        var timer = null;
-        var useFallback = !!PROBE_URL_WORKER;
-        function startDirectJsonp(){
-          var dName='__portalProbe'+Date.now()+Math.random().toString(36).slice(2);
-          s = jsonpProbeFor(DIRECT_PROBE_URL, dName, function(res){
-            if(done) return;
-            done=true;
-            if(timer) clearTimeout(timer);
-            if (!res || !res.genkoProbe || !res.ok) { render('is-warn'); return; }
-            if (!res.allowed) { render('is-out'); return; }
-            render('is-ok', { isOwner: !!res.is_owner, invisible: !res.email_visible });
-          }, 7500);
-          // iframe fallback on error/timeout for direct
-          var prevOnError = s.onerror;
-          s.onerror = function(){
-            if(done) return;
-            if(timer) clearTimeout(timer);
-            try{ s.remove(); }catch(e){}
-            // iframe via direct
-            var iframe2=document.createElement('iframe');
-            iframe2.style.display='none';
-            iframe2.src=buildProbeBaseFor(DIRECT_PROBE_URL)+'&t='+Date.now();
-            var t3=setTimeout(function(){ if(done) return; done=true; try{ iframe2.remove(); }catch(e){} render('is-warn'); },4000);
-            function onMsg2(e){ if(!e.data||!e.data.genkoProbe) return; var r=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t3); window.removeEventListener('message',onMsg2); try{ iframe2.remove(); }catch(e){} if(!r||!r.genkoProbe||!r.ok){ render('is-warn'); return; } if(!r.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r.is_owner}); }
-            window.addEventListener('message',onMsg2);
-            document.body.appendChild(iframe2);
-          };
-          timer = setTimeout(function () {
-            if (done) return;
-            done = true;
-            try{ s.remove(); }catch(e){}
-            var iframe=document.createElement('iframe');
-            iframe.style.display='none';
-            iframe.src=buildProbeBaseFor(DIRECT_PROBE_URL)+'&t='+Date.now();
-            var t2=setTimeout(function(){ if(done) return; done=true; try{ iframe.remove(); }catch(e){} render('is-warn'); },4000);
-            function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var r=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t2); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(e){} if(!r||!r.genkoProbe||!r.ok){ render('is-warn'); return; } if(!r.allowed){ render('is-out'); return; } render('is-ok',{isOwner:!!r.is_owner}); }
-            window.addEventListener('message',onMsg);
-            document.body.appendChild(iframe);
-          }, 7500);
-        }
-        if(useFallback){
-          var wName='__portalProbeW'+Date.now()+Math.random().toString(36).slice(2);
-          var fallbackTimer=setTimeout(function(){ if(done) return; // worker timeout -> fallback to direct
-            try{ if(s) s.remove(); }catch(e){}
-            try{ delete window[wName]; }catch(e){ window[wName]=undefined; }
-            startDirectJsonp();
-          }, 8500);
-          s = jsonpProbeFor(PROBE_URL_WORKER, wName, function(res){
-            if(done) return;
-            clearTimeout(fallbackTimer);
-            if(res && res.genkoProbe){
-              done=true;
-              if(timer) clearTimeout(timer);
-              if (!res.genkoProbe || !res.ok) { render('is-warn'); return; }
-              if (!res.allowed) { render('is-out'); return; }
-              render('is-ok', { isOwner: !!res.is_owner, invisible: !res.email_visible });
-              return;
-            }
-            // worker failed -> fallback to direct
-            startDirectJsonp();
-          }, 7500);
-          var origErr=s.onerror;
-          s.onerror=function(){ if(done) return; clearTimeout(fallbackTimer); try{ delete window[wName]; }catch(e){} startDirectJsonp(); };
-        } else {
-          startDirectJsonp();
-        }
       }
+      T.onAuthChange(function () { runProbe(); });
+      runProbe();
     })();
   </script>
   <script>

@@ -86,7 +86,9 @@ html[data-theme="pop"] .card {
   background: var(--color-frost-white) !important;
   transition: transform .08s ease, box-shadow .08s ease !important;
 }
-html[data-theme="pop"] .card:hover {
+/* ポータルのカードだけに hover を限定（教材アプリ内の .card は WAAPI の transform を優先） */
+html[data-theme="pop"] a.card:hover,
+html[data-theme="pop"] .cards > .card:hover {
   transform: translate(2px, 2px) !important;
   box-shadow: var(--shadow-subtle-sm) !important;
 }
@@ -143,7 +145,7 @@ html[data-theme="pop"] .subj--tool .card__btn {
   background: var(--color-sky-crayon) !important;
   color: var(--color-charcoal-ink) !important;
 }
-html[data-theme="pop"] .card:hover .card__btn {
+html[data-theme="pop"] a.card:hover .card__btn {
   transform: translate(1px,1px);
   box-shadow: rgb(56,56,56) -2px 2px 0 0 !important;
 }
@@ -500,6 +502,10 @@ html[data-theme="pop"] .card.c-aux,
 html[data-theme="pop"] .card.c-other {
   box-shadow: none !important;
 }
+/* 英文カードは Web Animations の transform を CSS transition と競合させない */
+html[data-theme="pop"] .row .card {
+  transition: none !important;
+}
 
 /* ============================================================
    app1 — 公式・暗記辞典 (design-lab/app1/index.html)
@@ -741,9 +747,10 @@ html[data-theme="pop"] .count { color: var(--color-charcoal-ink) !important; fon
 
 /* Motion: Popは影の沈み込みだけ。prefers-reduced-motionでは無効 */
 @media (prefers-reduced-motion: reduce) {
-  html[data-theme="pop"] .card,
-  html[data-theme="pop"] .card__btn { transition: none !important; }
-  html[data-theme="pop"] .card:hover { transform: none !important; }
+  html[data-theme="pop"] a.card,
+  html[data-theme="pop"] .card__btn,
+  html[data-theme="pop"] .row .card { transition: none !important; }
+  html[data-theme="pop"] a.card:hover { transform: none !important; }
 }
 
 /* Canvas drawing areas: keep sharp corners (left top drawing area for app3/app4/app5/app6/app7) */

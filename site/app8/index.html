@@ -157,7 +157,10 @@ header .sub{font-size:12px;opacity:.75;font-weight:500}
 .act-btn:hover:not(:disabled){transform:translateY(-2px)}
 .act-btn:active:not(:disabled){transform:none}
 .act-btn:disabled{opacity:.45;cursor:wait}
+.act-btn--wh:disabled{cursor:not-allowed}
 .actions .hint{font-size:12px;color:var(--mut)}
+.wh-hint{display:none;flex-basis:100%;font-size:12px;font-weight:700;color:#b45309}
+.wh-hint.show{display:block}
 
 /* slots */
 .slots{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
@@ -292,6 +295,7 @@ footer{
       <button class="act-btn act-btn--wh" data-wh="who">Whoで尋ねる</button>
       <button class="act-btn act-btn--wh" data-wh="when">Whenで尋ねる</button>
       <span class="hint">肯定文→Yes/No→Wh の順に変化するよ</span>
+      <span class="wh-hint" id="whHint" role="status"></span>
     </div>
 
     <div class="slots" id="slots-normal">
@@ -524,6 +528,7 @@ const NODES = [
           {t:'tennis', role:'obj'},
           {t:'in the park', role:'place'}
         ],
+        whoVerb:'plays',
         ja:{pos:'ケンは公園でテニスをします。', yesno:'ケンは公園でテニスをしますか。', whWhere:'ケンはどこでテニスをしますか。', whWhat:'ケンは公園で何をしますか。', whWho:'誰が公園でテニスをしますか。', whWhen:'ケンはいつ公園でテニスをしますか。'}
       },
       {
@@ -533,6 +538,7 @@ const NODES = [
           {t:'TV', role:'obj'},
           {t:'every day', role:'time'}
         ],
+        whoVerb:'watches',
         ja:{pos:'彼女は毎日テレビを見ます。', yesno:'彼女は毎日テレビを見ますか。', whWhere:'彼女はどこでテレビを見ますか。', whWhat:'彼女は毎日何を見ますか。', whWho:'誰が毎日テレビを見ますか。', whWhen:'彼女はいつテレビを見ますか。'}
       },
       {
@@ -543,6 +549,7 @@ const NODES = [
           {t:'at school', role:'place'},
           {t:'yesterday', role:'time'}
         ],
+        whoVerb:'played',
         ja:{pos:'私たちは昨日学校でサッカーをしました。', yesno:'私たちは昨日学校でサッカーをしましたか。', whWhere:'私たちは昨日どこでサッカーをしましたか。', whWhat:'私たちは昨日学校で何をしましたか。', whWho:'誰が昨日学校でサッカーをしましたか。', whWhen:'私たちはいつ学校でサッカーをしましたか。'}
       },
       {
@@ -552,7 +559,8 @@ const NODES = [
           {t:'to Kyoto', role:'place'},
           {t:'last year', role:'time'}
         ],
-        ja:{pos:'私は去年京都へ行きました。', yesno:'私は去年京都へ行きましたか。', whWhere:'私は去年どこへ行きましたか。', whWhat:'私は去年京都で何をしましたか。', whWho:'誰が去年京都へ行きましたか。', whWhen:'私はいつ京都へ行きましたか。'}
+        whoVerb:'went',
+        ja:{pos:'私は去年京都へ行きました。', yesno:'私は去年京都へ行きましたか。', whWhere:'私は去年どこへ行きましたか。', whWho:'誰が去年京都へ行きましたか。', whWhen:'私はいつ京都へ行きましたか。'}
       },
       {
         cards:[
@@ -560,7 +568,8 @@ const NODES = [
           {t:'is', role:'verb', be:true},
           {t:'in the park', role:'place'}
         ],
-        ja:{pos:'ケンは公園にいます。', yesno:'ケンは公園にいますか。', whWhere:'ケンはどこにいますか。', whWhat:'ケンは公園で何をしていますか。', whWho:'誰が公園にいますか。', whWhen:'ケンはいつ公園にいますか。'}
+        whoVerb:'is',
+        ja:{pos:'ケンは公園にいます。', yesno:'ケンは公園にいますか。', whWhere:'ケンはどこにいますか。', whWho:'誰が公園にいますか。', whWhen:'ケンはいつ公園にいますか。'}
       },
       {
         cards:[
@@ -569,7 +578,8 @@ const NODES = [
           {t:'at school', role:'place'},
           {t:'yesterday', role:'time'}
         ],
-        ja:{pos:'彼らは昨日学校にいました。', yesno:'彼らは昨日学校にいましたか。', whWhere:'彼らは昨日どこにいましたか。', whWhat:'彼らは昨日学校で何をしていましたか。', whWho:'誰が昨日学校にいましたか。', whWhen:'彼らはいつ学校にいましたか。'}
+        whoVerb:'was',
+        ja:{pos:'彼らは昨日学校にいました。', yesno:'彼らは昨日学校にいましたか。', whWhere:'彼らは昨日どこにいましたか。', whWho:'誰が昨日学校にいましたか。', whWhen:'彼らはいつ学校にいましたか。'}
       }
     ]
   }
@@ -637,6 +647,47 @@ function shakeLocked(el){
 
 const WH_WORD = {where:'Where', what:'What', who:'Who', when:'When'};
 const WH_ROLE = {where:'place', what:'obj', who:'subj', when:'time'};
+
+/**
+ * Who に置き換えた主語に合わせた動詞の形を返す
+ * @param {Object} verbDef - 動詞カード定義
+ * @returns {string}
+ */
+function conjugateWhoVerb(verbDef){
+  if (!verbDef) return '';
+  if (verbDef.be) return verbDef.past ? 'was' : 'is';
+  if (verbDef.past) return verbDef.t;
+  if (verbDef.suffix === 's' || verbDef.suffix === 'es') return verbDef.t;
+  if (verbDef.stem){
+    const s = verbDef.stem;
+    const last = s.charAt(s.length - 1);
+    const ends = s.slice(-2);
+    const needsEs = last === 's' || last === 'x' || last === 'o' || ends === 'sh' || ends === 'ch';
+    return s + (needsEs ? 'es' : 's');
+  }
+  return verbDef.t;
+}
+/**
+ * 例文の Who 用動詞（例文定義の whoVerb を優先）
+ * @param {Object} sent
+ * @returns {string}
+ */
+function whoVerbFor(sent){
+  if (sent && sent.whoVerb) return sent.whoVerb;
+  const v = sent && sent.cards.find(c => c.role === 'verb');
+  return conjugateWhoVerb(v);
+}
+/**
+ * その Wh 疑問文をこの例文から作れない理由を返す（作れるなら空文字）
+ * @param {Object} sent
+ * @param {string} kind
+ * @returns {string}
+ */
+function whBlockReason(sent, kind){
+  if (!sent || !Array.isArray(sent.cards)) return '例文がない';
+  if (kind === 'what' && !sent.cards.some(c => c.role === 'obj')) return '目的語のない例文';
+  return '';
+}
 
 function findTargetIdx(row, role){
   const cards=[...row.children].filter(el=>el.classList.contains('card'));
@@ -1052,6 +1103,8 @@ async function ensureYesNo(){
 async function playWh(kind){
   const sent=NODES[curNode].sentences[curSent];
   const whWord=WH_WORD[kind];
+  // 作れない Wh（目的語のない What 等）は内部からも生成しない
+  if (whBlockReason(sent, kind)) return;
   // StepA: Yes/No を確保（Whoでも参考として残す）
   await ensureYesNo();
   await wait(250);
@@ -1069,6 +1122,12 @@ async function playWh(kind){
       await insertIntoRow(row, 0, {t:'Who', role:'subj'});
     } else {
       await insertIntoRow(row, 0, {t:'Who', role:'subj'});
+    }
+    // 主語が Who（三人称単数扱い）になったので動詞も一致させる
+    const verbEl=[...row.children].find(el=>el.classList.contains('card') && el.dataset.role==='verb');
+    const whoVerb=whoVerbFor(sent);
+    if (verbEl && whoVerb && verbEl.textContent!==whoVerb){
+      await swapText(verbEl, whoVerb);
     }
     await swapPunct(row);
     finishSlotWh(kind, sent, subjIdx>=0);
@@ -1129,6 +1188,7 @@ function renderAffirmative(withAnim){
   renderRow($('#affirmRow'), sent.cards, '.');
   $('#affirmJa').textContent = sent.ja.pos;
   clearAllSlots();
+  syncActionButtons();
   if (withAnim && !RM){
     const block = $('#affirmRow').parentElement;
     block.animate([{opacity:.5, transform:'translateY(6px)'},{opacity:1, transform:'none'}],
@@ -1162,13 +1222,34 @@ async function switchNode(idx){
   renderAffirmative(false);
 }
 
+/**
+ * Wh ボタンの可否と理由表示を現在の例文に合わせる
+ */
+function syncActionButtons(){
+  const sent = NODES[curNode] && NODES[curNode].sentences[curSent];
+  document.querySelectorAll('[data-act]').forEach(b => { b.disabled = busy; });
+  document.querySelectorAll('[data-wh]').forEach(b => {
+    const reason = whBlockReason(sent, b.dataset.wh);
+    b.disabled = busy || !!reason;
+    b.setAttribute('aria-disabled', (busy || !!reason) ? 'true' : 'false');
+    b.title = reason ? '作れません（' + reason + '）' : '';
+  });
+  const hint = document.getElementById('whHint');
+  if (hint){
+    const reason = whBlockReason(sent, 'what');
+    hint.textContent = reason ? 'What は作れません（' + reason + '）。' : '';
+    hint.classList.toggle('show', !!reason);
+  }
+}
+
 function guard(fn, allowSame){
   if (busy) return;
   busy = true;
   document.querySelectorAll('.act-btn').forEach(b => b.disabled = true);
   Promise.resolve(fn()).catch(e => console.error(e)).finally(() => {
     busy = false;
-    document.querySelectorAll('.act-btn').forEach(b => b.disabled = false);
+    // 作れない Wh（目的語のない What 等）は finally でも有効化しない
+    syncActionButtons();
   });
 }
 

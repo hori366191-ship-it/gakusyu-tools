@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>probe デバッグ</title>
+<script src="./shared/transport.js"></script>
 <style>
 body{font-family:system-ui,sans-serif;margin:0;padding:16px;background:#f8fafc;color:#1e293b}
 h1{font-size:18px;margin:0 0 12px}
@@ -51,9 +52,10 @@ a{color:#2563eb}
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 (function(){
+  var T = window.GakusyuTransport;
+  if(!T){ try{ document.getElementById('url1').textContent='shared/transport.js を読み込めませんでした'; }catch(e){} return; }
   var GIS_CLIENT_ID='920000857743-91jfqq1q45hmnas1b25ebg0dqafo846i.apps.googleusercontent.com';
-  function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
-  function getEmailFromIdToken(idt){ try{ var p=idt.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } }
+  function getIdToken(){ return T ? T.getIdToken() : ''; }
   var WORKER_BASE='https://gakusyu-tools-proxy.hori-shota.workers.dev';
   var TOKEN='e6135dfd707ab9a6916635fa';
   var DIRECT_URL1='https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
@@ -69,149 +71,70 @@ a{color:#2563eb}
   document.getElementById('direct1').textContent='site-app2-backend を直接開く ('+(WORKER_URL1?'Worker優先':'Directのみ')+')';
   document.getElementById('direct2').textContent='site-pdfdrop を直接開く ('+(WORKER_URL2?'Worker優先':'Directのみ')+')';
 
-  function setBadge(el, ok){ el.className='badge '+(ok?'ok':'ng'); el.textContent=ok?'成功':'失敗'; }
+  function setBadge(el, ok, text){
+    el.className='badge '+(ok?'ok':'ng');
+    el.textContent=text||(ok?'成功':'失敗');
+  }
   function fmt(o){ try{ return JSON.stringify(o,null,2);}catch(e){ return String(o);} }
 
-  function buildProbeQuery(withId){
-    var q='?probe=1&token='+encodeURIComponent(TOKEN);
-    var id=getIdToken();
-    if(withId && id){
-      q+='&id_token='+encodeURIComponent(id);
-      var em=getEmailFromIdToken(id);
-      if(em) q+='&email='+encodeURIComponent(em);
-    }
-    return q;
-  }
-  function probeJsonp(base, cb){
-    var q=buildProbeQuery(true);
-    var url=base+q;
-    var start=Date.now();
-    // id_token が長い場合は URL が 2000 を超えるため POST にフォールバック
-    if(url.length>1800){
-      return probePost(base).then(function(r){ cb(r); });
-    }
-    return new Promise(function(resolve){
-      var s=document.createElement('script');
-      var done=false;
-      var timer=setTimeout(function(){ if(done) return; done=true; s.remove(); resolve({ok:false, via:'jsonp', error:'timeout', ms:Date.now()-start, raw:null}); },5000);
-      var name='__dbg'+Date.now()+Math.random().toString(36).slice(2);
-      window[name]=function(res){
-        if(done) return;
-        done=true;
-        clearTimeout(timer);
-        s.remove();
-        try{ delete window[name]; }catch(e){ window[name]=undefined; }
-        resolve({ok:true, via:'jsonp', ms:Date.now()-start, raw:res});
-      };
-      s.onerror=function(){
-        if(done) return;
-        done=true;
-        clearTimeout(timer);
-        s.remove();
-        resolve({ok:false, via:'jsonp', error:'onerror', ms:Date.now()-start, raw:null});
-      };
-      s.src=url+'&callback='+name+'&t='+Date.now();
-      document.head.appendChild(s);
-    }).then(function(r){ cb?cb(r):null; return r; });
-  }
+  // 新契約: probeのPOST/GET iframeには rid と parent_origin を付与し、応答のridを検証する
   function probePost(base){
-    var start=Date.now();
-    return new Promise(function(resolve){
-      var id=getIdToken();
-      var em=id?getEmailFromIdToken(id):'';
-      var payload={ probe:1, token:TOKEN };
-      if(id) payload.id_token=id;
-      if(em) payload.email=em;
-      var iframe=document.createElement('iframe');
-      iframe.style.display='none';
-      iframe.name='__probeDbg'+Date.now();
-      document.body.appendChild(iframe);
-      var form=document.createElement('form');
-      form.method='POST';
-      form.action=base;
-      form.target=iframe.name;
-      var inp=document.createElement('input');
-      inp.type='hidden'; inp.name='data'; inp.value=JSON.stringify(payload);
-      form.appendChild(inp);
-      document.body.appendChild(form);
-      var done=false;
-      var timer=setTimeout(function(){ if(done) return; done=true; iframe.remove(); form.remove(); resolve({ok:false, via:'post', error:'timeout', ms:Date.now()-start, raw:null}); },5000);
-      function onMsg(e){
-        if(!e.data||!e.data.genkoProbe) return;
-        var res=e.data.payload||e.data;
-        if(done) return;
-        done=true;
-        clearTimeout(timer);
-        window.removeEventListener('message',onMsg);
-        iframe.remove(); form.remove();
-        resolve({ok:true, via:'post', ms:Date.now()-start, raw:res});
-      }
-      window.addEventListener('message',onMsg);
-      form.submit();
-    });
+    var rid=T.newNonce();
+    var payload={ probe:1, token:TOKEN, rid:rid };
+    var po = T.parentOriginForBackend ? T.parentOriginForBackend() : '';
+    if(po) payload.parent_origin=po;
+    var idt=getIdToken();
+    if(idt) payload.id_token=idt;
+    return T.postForm({ url:base, payload:payload, rid:rid, kind:'genkoProbe', timeoutMs:6000 })
+      .then(function(r){
+        return { ok: !!(r.ok && r.data && r.data.genkoProbe), via:'post', ms:r.ms, raw:(r.ok?r.data:null), error:(r.ok?'':(r.error||'no-data')), rid:rid };
+      });
   }
-  // 互換: 旧 probeJsonp / probeIframe は上記をラップ
-  function probeJsonpLegacy(base){
-    return probeJsonp(base);
+  function probeJsonp(base){
+    var rid=T.newNonce();
+    var q='?probe=1&token='+encodeURIComponent(TOKEN)+'&rid='+encodeURIComponent(rid);
+    var idt=getIdToken();
+    if(idt) q+='&id_token='+encodeURIComponent(idt);
+    return T.jsonp(base+q, { timeoutMs:6000, rid:rid })
+      .then(function(r){
+        return { ok: !!(r.ok && r.data && r.data.genkoProbe), via:'jsonp', ms:r.ms, raw:(r.ok?r.data:null), error:(r.ok?'':(r.error||'no-data')), rid:rid };
+      });
   }
-  function probeIframe(base){
-    var id=getIdToken();
-    if(id) return probePost(base);
-    var url=base+'?probe=1&token='+encodeURIComponent(TOKEN);
-    var start=Date.now();
-    return new Promise(function(resolve){
-      var iframe=document.createElement('iframe');
-      iframe.style.display='none';
-      iframe.src=url+'&t='+Date.now();
-      var done=false;
-      var timer=setTimeout(function(){ if(done) return; done=true; iframe.remove(); resolve({ok:false, via:'iframe', error:'timeout', ms:Date.now()-start, raw:null}); },4000);
-      function onMsg(e){
-        if(!e.data||!e.data.genkoProbe) return;
-        var res=e.data.payload||e.data;
-        if(done) return;
-        done=true;
-        clearTimeout(timer);
-        window.removeEventListener('message',onMsg);
-        iframe.remove();
-        resolve({ok:true, via:'iframe', ms:Date.now()-start, raw:res});
-      }
-      window.addEventListener('message',onMsg);
-      document.body.appendChild(iframe);
-      iframe.onerror=function(){
-        if(done) return;
-        done=true;
-        clearTimeout(timer);
-        window.removeEventListener('message',onMsg);
-        iframe.remove();
-        resolve({ok:false, via:'iframe', error:'onerror', ms:Date.now()-start, raw:null});
-      };
-    });
+  function probeFrame(base){
+    var idt=getIdToken();
+    if(idt) return probePost(base);
+    var rid=T.newNonce();
+    var q='?probe=1&token='+encodeURIComponent(TOKEN);
+    return T.getViaIframe(base+q, { rid:rid, timeoutMs:5000, kinds:['genkoProbe'] })
+      .then(function(r){
+        return { ok: !!(r.ok && r.data && r.data.genkoProbe), via:'iframe', ms:r.ms, raw:(r.ok?r.data:null), error:(r.ok?'':(r.error||'no-data')), rid:rid };
+      });
   }
+
   async function runOne(base, sJ,tJ,rJ,sI,tI,rI,fId,dId){
     var j=await probeJsonp(base);
-    document.getElementById(sJ).textContent=j.ok?'成功':'失敗';
-    document.getElementById(sJ).className='badge '+(j.ok?'ok':'ng');
-    document.getElementById(tJ).textContent='('+j.ms+'ms via '+j.via+(j.error?' '+j.error:'')+') '+(base===WORKER_URL1||base===WORKER_URL2?'[Worker]':'[Direct]');
+    setBadge(document.getElementById(sJ), j.ok);
+    document.getElementById(tJ).textContent='('+j.ms+'ms via '+j.via+(j.error?' '+j.error:'')+' rid='+(j.rid||'').slice(0,8)+') '+(base===WORKER_URL1||base===WORKER_URL2?'[Worker]':'[Direct]');
     document.getElementById(rJ).textContent=j.raw?fmt(j.raw):'(なし) error='+j.error;
     var i;
     if(j.ok){
       document.getElementById(sI).textContent='スキップ';
       document.getElementById(sI).className='badge ok';
-      document.getElementById(tI).textContent='(JSONP成功のためiframe未実行)';
+      document.getElementById(tI).textContent='(JSONP成功のため未実行)';
       document.getElementById(rI).textContent='(スキップ)';
       i=j;
     }else{
       document.getElementById(sI).textContent='実行中…';
-      i=await probeIframe(base);
-      document.getElementById(sI).textContent=i.ok?'成功':'失敗';
-      document.getElementById(sI).className='badge '+(i.ok?'ok':'ng');
-      document.getElementById(tI).textContent='('+i.ms+'ms via '+i.via+(i.error?' '+i.error:'')+') '+(base===WORKER_URL1||base===WORKER_URL2?'[Worker]':'[Direct]');
+      document.getElementById(sI).className='badge wait';
+      i=await probeFrame(base);
+      setBadge(document.getElementById(sI), i.ok);
+      document.getElementById(tI).textContent='('+i.ms+'ms via '+i.via+(i.error?' '+i.error:'')+' rid='+(i.rid||'').slice(0,8)+') '+(base===WORKER_URL1||base===WORKER_URL2?'[Worker]':'[Direct]');
       document.getElementById(rI).textContent=i.raw?fmt(i.raw):'(なし) error='+i.error;
     }
     var fin=document.getElementById(fId);
     var det=document.getElementById(dId);
     var r=i.ok?i:j;
-    if(!r||!r.raw||!r.raw.genkoProbe){ fin.textContent='ログインを促す表示（is-warn）'; fin.className='badge ng'; det.textContent='GASから genkoProbe が返りませんでした。token不一致、デプロイ未更新、またはサードパーティCookieブロックでタイムアウトの可能性。 base='+base; }
+    if(!r||!r.raw||!r.raw.genkoProbe){ fin.textContent='ログインを促す表示（is-warn）'; fin.className='badge ng'; det.textContent='GASから genkoProbe が返りませんでした。token不一致、デプロイ未更新（rid契約）、サードパーティCookieブロックの可能性。 base='+base; }
     else if(!r.raw.ok){ fin.textContent='エラー（is-warn）'; fin.className='badge ng'; det.textContent=fmt(r.raw); }
     else if(!r.raw.allowed){ fin.textContent='教室外アカウント（is-out）'; fin.className='badge ng'; det.textContent=fmt(r.raw); }
     else{
@@ -225,26 +148,23 @@ a{color:#2563eb}
   async function runOneWithFallback(workerBase, directBase, sJ,tJ,rJ,sI,tI,rI,fId,dId){
     var active=workerBase||directBase;
     var res=await runOne(active, sJ,tJ,rJ,sI,tI,rI,fId,dId);
-    // worker失敗時はdirectで再試行
     if(workerBase && directBase && (!res.ok)){
       document.getElementById(sJ).textContent+=' → Direct再試行中…';
       document.getElementById(sI).textContent+=' → Direct再試行中…';
       await new Promise(function(r){ setTimeout(r, 800); });
-      // clear previous badges
       document.getElementById(sJ).className='badge wait';
       document.getElementById(sJ).textContent='再試行…';
       document.getElementById(sI).className='badge wait';
       document.getElementById(sI).textContent='再試行…';
       var res2=await runOne(directBase, sJ,tJ,rJ,sI,tI,rI,fId,dId);
-      // annotate fallback
       var fin=document.getElementById(fId);
       if(res2.ok) fin.textContent+=' (Worker失敗→Direct成功)';
       else fin.textContent+=' (Worker&Direct共に失敗)';
       return res2;
     }
-    if(workerBase) {
-      var fin=document.getElementById(fId);
-      fin.textContent+=' (Worker)';
+    if(workerBase){
+      var fin2=document.getElementById(fId);
+      fin2.textContent+=' (Worker)';
     }
     return res;
   }

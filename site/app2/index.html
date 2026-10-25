@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://unpkg.com/compromise@13.11.3/builds/compromise.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="../shared/transport.js"></script>
   <style>
     html,
     body {
@@ -623,12 +624,18 @@
     </div>
 
     <div class="field">
-      <label for="fPrompt">プロンプト（任意・自由記入）</label>
-      <textarea id="fPrompt" rows="3" placeholder="例：主人公は料理が得意な小学生にしてください"></textarea>
+      <label for="fPrompt">プロンプト（任意・自由記入・1000文字まで）</label>
+      <textarea id="fPrompt" rows="3" maxlength="1000" placeholder="例：主人公は料理が得意な小学生にしてください"></textarea>
+      <div style="font-size:0.7em;color:#777777;margin-top:4px;">1000文字を超えるとサーバーで受け付けられません（カウンターはありません）。</div>
     </div>
 
     <button id="genBtn" class="gen-btn">英語長文を生成</button>
-    <div id="gis-wrap" style="display:none;margin-top:8px"></div>
+    </div>
+
+    <div id="auth-help" style="display:none;margin:8px 0;font-size:0.8em;line-height:1.6;">
+      <div id="auth-help-text"></div>
+      <div id="gis-wrap" style="display:none;margin-top:6px"></div>
+      <button id="auth-retry" type="button" style="display:none;margin-top:6px;padding:4px 10px;font-family:'Kiwi Maru';background:#ffffff;color:#007700;border:1px solid #00ff00;border-radius:4px;cursor:pointer;">再試行</button>
     </div>
 
     <h1 class="sec">過去の生成物</h1>
@@ -712,13 +719,20 @@
     let GAS_APP_URL = SITE_BACKEND_URL;
     let IS_ALLOWED = false;
     let IS_OWNER = false;
-    function getIdToken(){ try{ return localStorage.getItem('gis_id_token')||''; }catch(e){ return ''; } }
-    function setIdToken(t){ try{ if(t) localStorage.setItem('gis_id_token',t); else localStorage.removeItem('gis_id_token'); }catch(e){} }
+    const T = window.GakusyuTransport;
+    if (T) T.configure({ origins: [WORKER_BASE] });
+    function getIdToken(){ return T ? T.getIdToken() : ''; }
+    function setIdToken(t){ return T ? T.setIdToken(t) : ''; }
     function getDeviceId(){ try{ var k='tadoku_device_id'; var v=localStorage.getItem(k); if(!/^[A-Za-z0-9_-]{8,64}$/.test(v||'')){ v='d-'; var ch='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; for(var i=0;i<21;i++){ v+=ch.charAt(Math.floor(Math.random()*ch.length)); } try{ localStorage.setItem(k,v); }catch(e){} } return v; }catch(e){ return ''; } }
 
     console.log('DOMContentLoaded start');
     window.addEventListener('DOMContentLoaded', () => {
       console.log('DOMContentLoaded fired');
+      if (!T) {
+        const ta = document.getElementById('textContentArea');
+        if (ta) ta.textContent = '通信ヘルパーを読み込めませんでした。ページを再読み込みしてください。';
+        return;
+      }
       const viewer = document.getElementById('textViewer');
       const spinner = document.getElementById('spinner');
       const overlay = document.getElementById('spinner-overlay');
@@ -759,10 +773,15 @@
         spinner.style.display = 'none';
         overlay.style.display = 'none';
       }
-      function showToast(msg) {
+      let toastTimer = null;
+      function showToast(msg, duration) {
         toaster.textContent = msg;
         toaster.style.display = 'block';
-        setTimeout(() => toaster.style.display = 'none', 4000);
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toastTimer = null;
+          toaster.style.display = 'none';
+        }, duration || 4000);
       }
 
       const SERVER = {
@@ -773,127 +792,21 @@
         getFormMap: { path: '/api/getFormMap', method: 'GET', gas: 'getFormMap' },
       };
 
-      function jsonpGet(url, timeoutMs) {
-        return new Promise(function (resolve) {
-          var s = document.createElement('script');
-          var done = false;
-          var timer = setTimeout(function () {
-            if (done) return;
-            done = true;
-            s.remove();
-            var iframe=document.createElement('iframe');
-            iframe.style.display='none';
-            iframe.src=url + (url.indexOf('?')>=0?'&':'?') + 't='+Date.now();
-            var t2=setTimeout(function(){ if(done) return; done=true; iframe.remove(); resolve(null); },4000);
-            function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t2); window.removeEventListener('message',onMsg); iframe.remove(); resolve(res); }
-            window.addEventListener('message',onMsg);
-            document.body.appendChild(iframe);
-          }, timeoutMs);
-          var cbName = '__siteApp2Probe' + Date.now() + '_' + Math.random().toString(36).slice(2);
-          window[cbName] = function (res) {
-            if (done) return;
-            done = true;
-            clearTimeout(timer);
-            s.remove();
-            try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
-            resolve(res);
-          };
-          s.onerror = function () {
-            if (done) return;
-            done = true;
-            clearTimeout(timer);
-            s.remove();
-            var iframe2=document.createElement('iframe');
-            iframe2.style.display='none';
-            iframe2.src=url + (url.indexOf('?')>=0?'&':'?') + 't='+Date.now();
-            var t3=setTimeout(function(){ if(done) return; done=true; iframe2.remove(); resolve(null); },4000);
-            function onMsg2(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t3); window.removeEventListener('message',onMsg2); iframe2.remove(); resolve(res); }
-            window.addEventListener('message',onMsg2);
-            document.body.appendChild(iframe2);
-          };
-          s.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + cbName + '&t=' + Date.now();
-          document.head.appendChild(s);
-        });
-      }
-
-      function doProbePostApp2For(base, cb){
-        var id=getIdToken();
-        var em=id? (function(){ try{ var p=id.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } })() : '';
-        var payload={ probe:1, token:SITE_BACKEND_TOKEN };
-        if(id) payload.id_token=id;
-        if(em) payload.email=em;
-        var iframe=document.createElement('iframe');
-        iframe.style.display='none';
-        iframe.name='__probeApp2'+Date.now()+Math.random().toString(36).slice(2);
-        document.body.appendChild(iframe);
-        var form=document.createElement('form');
-        form.method='POST';
-        form.action=base;
-        form.target=iframe.name;
-        var inp=document.createElement('input');
-        inp.type='hidden'; inp.name='data'; inp.value=JSON.stringify(payload);
-        form.appendChild(inp);
-        document.body.appendChild(form);
-        var done=false;
-        var t=setTimeout(function(){ if(done) return; done=true; try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(null); }, 7500);
-        function onMsg(e){ if(!e.data||!e.data.genkoProbe) return; var res=e.data.payload||e.data; if(done) return; done=true; clearTimeout(t); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(e){} try{ form.remove(); }catch(e){} cb(res); }
-        window.addEventListener('message',onMsg);
-        try{ form.submit(); }catch(e){ clearTimeout(t); window.removeEventListener('message',onMsg); try{ iframe.remove(); }catch(_e){} try{ form.remove(); }catch(_e){} cb(null); }
-      }
-      function doProbePostApp2(cb){ return doProbePostApp2For(SITE_BACKEND_URL, cb); }
-      function doProbePostApp2WithFallback(cb){
-        if(!WORKER_BACKEND_URL){ doProbePostApp2For(DIRECT_BACKEND_URL, cb); return; }
-        var settled=false;
-        var tf=setTimeout(function(){ if(settled) return; settled=true; doProbePostApp2For(DIRECT_BACKEND_URL, cb); }, 8500);
-        doProbePostApp2For(WORKER_BACKEND_URL, function(res){
-          if(settled) return;
-          if(res && res.genkoProbe){ clearTimeout(tf); settled=true; cb(res); return; }
-          clearTimeout(tf); settled=true; doProbePostApp2For(DIRECT_BACKEND_URL, cb);
-        });
-      }
-      async function jsonpGetWithFallback(workerUrl, directUrl, timeoutMs){
-        if(!WORKER_BACKEND_URL) return jsonpGet(directUrl, timeoutMs);
-        var r=await jsonpGet(workerUrl, Math.min(timeoutMs, 7500));
-        if(r && r.genkoProbe) return r;
-        if(r && r.ok!==undefined) return r;
-        // worker failed -> try direct
-        return jsonpGet(directUrl, timeoutMs);
-      }
-      async function fetchWithFallback(workerUrl, directUrl, opts){
-        if(!WORKER_BACKEND_URL) return fetch(directUrl, opts);
-        try{
-          var rw=await fetch(workerUrl, opts);
-          // 429 or 502/503 fallback to direct
-          if(rw.status===429 || rw.status===502 || rw.status===503 || rw.status===504){
-            return fetch(directUrl, opts);
-          }
-          return rw;
-        }catch(e){
-          return fetch(directUrl, opts);
-        }
-      }
       async function probeBackend() {
         if (location.protocol === 'file:') return { state: 'file' };
-        var idt=getIdToken();
-        var res=null;
-        if(idt && idt.length >= 1800){
-          res=await new Promise(function(r){ doProbePostApp2WithFallback(r); });
-        } else if(idt){
-          var em=idt? (function(){ try{ var p=idt.split('.')[1]; p=p.replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='='; var j=JSON.parse(atob(p)); return j.email||''; }catch(e){ return ''; } })() : '';
-          var wUrl2 = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + '&id_token=' + encodeURIComponent(idt) + (em?'&email='+encodeURIComponent(em):'') : '';
-          var dUrl2 = DIRECT_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + '&id_token=' + encodeURIComponent(idt) + (em?'&email='+encodeURIComponent(em):'');
-          if(wUrl2) res = await jsonpGetWithFallback(wUrl2, dUrl2, 7500);
-          else { var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + '&id_token=' + encodeURIComponent(idt) + (em?'&email='+encodeURIComponent(em):''); res = await jsonpGet(url, 7500); }
-        } else {
-          var wUrl = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) : '';
-          var dUrl = DIRECT_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
-          if(wUrl) res = await jsonpGetWithFallback(wUrl, dUrl, 7500);
-          else { var url = SITE_BACKEND_URL + '?probe=1&token=' + encodeURIComponent(SITE_BACKEND_TOKEN); res = await jsonpGet(url, 7500); }
+        const res = await T.probeAuth({
+          workerUrl: WORKER_BACKEND_URL,
+          directUrl: DIRECT_BACKEND_URL,
+          token: SITE_BACKEND_TOKEN,
+          totalMs: 22000
+        });
+        if (res.status === 'ok') {
+          return { state: 'ok', invisible: !res.emailVisible, masked: res.masked, isOwner: !!res.isOwner, open: !!res.open };
         }
-        if (!res || !res.genkoProbe) return { state: 'noauth' };
-        if (!res.ok) return { state: 'error', message: res.error, open: !!res.open };
-        if (!res.allowed) return { state: 'notallowed', masked: res.masked, open: !!res.open };
-        return { state: 'ok', invisible: !res.email_visible, masked: res.masked, isOwner: !!res.is_owner };
+        if (res.status === 'notallowed') return { state: 'notallowed', masked: res.masked, open: !!res.open };
+        if (res.status === 'noauth') return { state: 'noauth', open: !!res.open };
+        if (res.status === 'error') return { state: 'error', message: res.message, open: !!res.open };
+        return { state: 'unreachable' };
       }
 
       function gasCall(name, payload) {
@@ -905,109 +818,148 @@
         });
       }
 
-      async function callServer(name, payload) {
+      // TESTABLE-OPERROR-START
+      function operationError(label, r, mutating) {
+        // 不明（timeout/network/5xx/不正応答）は、成功が確認できるまで常に優先する
+        if (r && r.unknown && mutating) {
+          const err = new Error(T.messages.unknownResult);
+          err.unknownOperation = true;
+          if (r.data && r.data.code) err.code = String(r.data.code);
+          return err;
+        }
+        if (r && r.ok && r.data) {
+          if (r.data.ok === false) {
+            const msg = String(r.data.error || (label + 'に失敗しました'));
+            const code = String(r.data.code || '');
+            const uncertain = /pending|processing|処理中|in_flight|unknown/i.test(msg) || /pending_unknown|in_flight|request_id_conflict/i.test(code);
+            const err = new Error(uncertain
+              ? msg + '（処理結果が確定していません。連続で再送せず、しばらく待って履歴を確認してください）'
+              : msg);
+            err.code = code;
+            if (uncertain) err.unknownOperation = true;
+            return err;
+          }
+          return null;
+        }
+        if (r && r.unknown) {
+          const err = new Error((r.detail || r.error) ? ('通信に失敗しました（' + (r.detail || r.error) + '）') : '通信に失敗しました');
+          return err;
+        }
+        if (r && mutating && r.error === 'invalid_json') {
+          const err = new Error(label + 'の応答を解釈できませんでした。処理結果が確定していないため、連続で再送せず履歴を確認してください。');
+          err.unknownOperation = true;
+          return err;
+        }
+        if (r && r.error === 'invalid_json') return new Error(label + 'の応答を解釈できませんでした（サーバー応答がJSONではありません）');
+        return new Error((r && (r.detail || r.error)) || (label + 'に失敗しました'));
+      }
+      // TESTABLE-OPERROR-END
+      function unwrapResult(r, label, mutating) {
+        const err = operationError(label, r, mutating);
+        if (err) throw err;
+        return r.data;
+      }
+
+      async function callServer(name, payload, requestIdArg) {
         const cfg = SERVER[name];
         if (IS_GAS) {
           return gasCall(cfg.gas, payload);
         }
-        // Pages静的版: site-app2-backend へ TOKEN + id_token 付きで送信（GIS対応）Worker→直 fallback
-        var idt=getIdToken();
-        // generateText は settings をネストして送信（GAS側は body.settings を期待）
+        const idt = getIdToken();
         if (name === 'generateText') {
-          var genBody = { action: name, token: SITE_BACKEND_TOKEN, settings: payload || {}, device_id: getDeviceId() };
+          const requestId = T.isRequestId(requestIdArg) ? requestIdArg : T.newRequestId();
+          const genBody = { action: name, token: SITE_BACKEND_TOKEN, settings: payload || {}, device_id: getDeviceId(), request_id: requestId };
           if (idt) genBody.id_token = idt;
-          var wUrl = WORKER_BACKEND_URL;
-          var dUrl = DIRECT_BACKEND_URL;
-          var targetUrl = SITE_BACKEND_URL;
-          var opts = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(genBody) };
-          var res;
-          if(wUrl){
-            res = await fetchWithFallback(wUrl, dUrl, opts);
-          } else {
-            res = await fetch(targetUrl, opts);
-          }
-          var data = await res.json().catch(function () { return {}; });
-          if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
-          return data;
+          const res = await T.fetchJson({
+            urls: WORKER_BACKEND_URL ? [WORKER_BACKEND_URL, DIRECT_BACKEND_URL] : [DIRECT_BACKEND_URL],
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: genBody,
+            requestId: requestId,
+            // AI生成+審査は長い。1回90s・総130sでDirectへ最低30s以上残す
+            timeoutMs: 90000,
+            totalMs: 130000
+          });
+          return unwrapResult(res, '生成', true);
         }
         if (name === 'deleteText') {
-          var delBody = Object.assign({}, payload || {});
-          delBody.token = SITE_BACKEND_TOKEN;
+          const requestId = T.isRequestId(requestIdArg) ? requestIdArg : T.newRequestId();
+          const delBody = Object.assign({ action: name, token: SITE_BACKEND_TOKEN, request_id: requestId }, payload || {});
           if (idt) delBody.id_token = idt;
-          var wUrlD = WORKER_BACKEND_URL;
-          var dUrlD = DIRECT_BACKEND_URL;
-          var targetUrlD = SITE_BACKEND_URL;
-          var optsD = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action: name }, delBody)) };
-          var resD;
-          if(wUrlD){
-            resD = await fetchWithFallback(wUrlD, dUrlD, optsD);
-          } else {
-            resD = await fetch(targetUrlD, optsD);
-          }
-          var dataD = await resD.json().catch(function () { return {}; });
-          if (!resD.ok || dataD.ok === false) throw new Error(dataD.error || ('HTTP ' + resD.status));
-          return dataD;
+          const res = await T.fetchJson({
+            urls: WORKER_BACKEND_URL ? [WORKER_BACKEND_URL, DIRECT_BACKEND_URL] : [DIRECT_BACKEND_URL],
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: delBody,
+            requestId: requestId,
+            timeoutMs: 9000,
+            totalMs: 20000
+          });
+          return unwrapResult(res, '削除', true);
         }
-        // getSavedTexts は JSONP GET（CORS回避） Worker→直 fallback（ページング・級フィルタ対応）
+        // getSavedTexts は JSONP GET（CORS回避）。失敗時にiframeへ逃げず明示エラーを返す
         if (name === 'getSavedTexts') {
-          var idt2=getIdToken();
-          var qPayload = payload || {};
-          var qLimit = qPayload.limit != null ? String(qPayload.limit) : '';
-          var qOffset = qPayload.offset != null ? String(qPayload.offset) : '';
-          var qLevel = qPayload.level != null ? String(qPayload.level) : '';
-          function buildGetSavedUrl(base){
-            var u = base + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
-            if(idt2) u += '&id_token=' + encodeURIComponent(idt2);
-            if(qLimit) u += '&limit=' + encodeURIComponent(qLimit);
-            if(qOffset) u += '&offset=' + encodeURIComponent(qOffset);
-            if(qLevel) u += '&level=' + encodeURIComponent(qLevel);
+          const q = payload || {};
+          const rid = T.newNonce();
+          function buildSavedUrl(base) {
+            let u = base + '?action=getSavedTexts&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
+            if (idt) u += '&id_token=' + encodeURIComponent(idt);
+            if (q.limit != null) u += '&limit=' + encodeURIComponent(String(q.limit));
+            if (q.offset != null) u += '&offset=' + encodeURIComponent(String(q.offset));
+            if (q.level) u += '&level=' + encodeURIComponent(String(q.level));
+            u += '&rid=' + encodeURIComponent(rid);
             return u;
           }
-          var wUrl2 = WORKER_BACKEND_URL ? buildGetSavedUrl(WORKER_BACKEND_URL) : '';
-          var dUrl2 = DIRECT_BACKEND_URL ? buildGetSavedUrl(DIRECT_BACKEND_URL) : '';
-          var jp;
-          if(wUrl2) jp = await jsonpGetWithFallback(wUrl2, dUrl2, 8000);
-          else { var url = buildGetSavedUrl(SITE_BACKEND_URL); jp = await jsonpGet(url, 8000); }
-          if (jp && jp.ok) return jp;
-          if (jp && jp.ok === false) throw new Error(jp.error || 'not allowed');
-          throw new Error('履歴の読み込みに失敗しました（GAS応答なし: token/FOLDER_ID/共有設定を確認）');
+          const bases = WORKER_BACKEND_URL ? [WORKER_BACKEND_URL, DIRECT_BACKEND_URL] : [DIRECT_BACKEND_URL];
+          for (const base of bases) {
+            const jp = await T.jsonp(buildSavedUrl(base), { timeoutMs: 9000, rid: rid });
+            if (jp.ok && jp.data && typeof jp.data === 'object') {
+              if (jp.data.ok === false) throw new Error(jp.data.error || '履歴の読み込みが許可されていません');
+              return jp.data;
+            }
+          }
+          throw new Error('履歴の読み込みに失敗しました（GAS応答なし: token/FOLDER_ID/共有設定/ログイン状態を確認）');
         }
-        // 辞書は Pages に同梱予定だが、フォールバックでGASから取得。Workerの fetch で直接取得
+        // 辞書・フォーム設定は fetch（JSON）。JSONでない応答は成功扱いにしない
         if (name === 'getDICTIONARY' || name === 'getFormMap') {
-          console.log('callServer '+name+' start fetch');
-          var idt3=getIdToken();
-          var wUrl3 = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'') : '';
-          var dUrl3 = DIRECT_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'');
-          var rUrl = WORKER_BACKEND_URL || DIRECT_BACKEND_URL;
-          var rFull = rUrl + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt3?'&id_token='+encodeURIComponent(idt3):'');
-          var r;
-          if(WORKER_BACKEND_URL) r = await fetchWithFallback(wUrl3, dUrl3, { method: 'GET' });
-          else r = await fetch(rFull);
-          console.log('callServer '+name+' fetch status',r.status, r.url.slice(0,80));
-          var d = await r.json().catch(function (e) { console.error('json parse fail',e.message); return {}; });
-          console.log('callServer '+name+' fetch json keys',Object.keys(d).length, 'ok',d.ok);
-          if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
-          return d;
+          const bases = WORKER_BACKEND_URL ? [WORKER_BACKEND_URL, DIRECT_BACKEND_URL] : [DIRECT_BACKEND_URL];
+          const urls = bases.map(function (base) {
+            return base + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt ? '&id_token=' + encodeURIComponent(idt) : '');
+          });
+          const r = await T.fetchJson({ urls: urls, method: 'GET', timeoutMs: 20000, totalMs: 30000 });
+          return unwrapResult(r, name === 'getDICTIONARY' ? '辞書' : 'フォーム設定');
         }
-        var wUrlX = WORKER_BACKEND_URL ? WORKER_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) : '';
-        var dUrlX = DIRECT_BACKEND_URL + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN);
-        var r;
-        if(wUrlX) r = await fetchWithFallback(wUrlX, dUrlX, { method: 'GET' });
-        else r = await fetch(dUrlX);
-        var d = await r.json().catch(function () { return {}; });
-        if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
-        return d;
+        const bases = WORKER_BACKEND_URL ? [WORKER_BACKEND_URL, DIRECT_BACKEND_URL] : [DIRECT_BACKEND_URL];
+        const urls = bases.map(function (base) {
+          return base + '?action=' + encodeURIComponent(name) + '&token=' + encodeURIComponent(SITE_BACKEND_TOKEN) + (idt ? '&id_token=' + encodeURIComponent(idt) : '');
+        });
+        const r = await T.fetchJson({ urls: urls, method: 'GET', timeoutMs: 8000, totalMs: 16000 });
+        return unwrapResult(r, '通信');
       }
 
+      let formMapLoading = null;
+      let invertLoading = null;
       function loadFormMap() {
-        if (FORM_MAP) return Promise.resolve();
-        console.log('loadFormMap start');
-        return callServer('getFormMap').then(d => { FORM_MAP = d; window.FORM_MAP = d; console.log('loadFormMap success', Object.keys(d).length); }).catch((e) => { console.error('loadFormMap fail', e.message); FORM_MAP = {}; window.FORM_MAP = {}; });
+        if (FORM_MAP) return Promise.resolve(FORM_MAP);
+        if (formMapLoading) return formMapLoading;
+        formMapLoading = callServer('getFormMap').then(function (d) {
+          if (!d || typeof d !== 'object') throw new Error('フォーム設定の応答が不正です');
+          FORM_MAP = d;
+          window.FORM_MAP = d;
+          return d;
+        }).finally(function () { formMapLoading = null; });
+        return formMapLoading;
       }
       function loadInvert() {
-        if (INV) return Promise.resolve();
-        console.log('loadInvert start');
-        return callServer('getDICTIONARY').then(d => { INV = d; window.INV = d; console.log('loadInvert success', Object.keys(d).length); }).catch((e) => { console.error('loadInvert fail', e.message); INV = {}; window.INV = {}; });
+        if (INV) return Promise.resolve(INV);
+        if (invertLoading) return invertLoading;
+        invertLoading = callServer('getDICTIONARY').then(function (d) {
+          if (!d || typeof d !== 'object') throw new Error('辞書の応答が不正です');
+          INV = d;
+          window.INV = d;
+          return d;
+        }).finally(function () { invertLoading = null; });
+        return invertLoading;
       }
       window.testCallServer = callServer;
       window.testLoadFormMap = loadFormMap;
@@ -1053,41 +1005,32 @@
         const historyEl = document.getElementById('historyList');
         const deletedEl = document.getElementById('deletedList');
         if (!historyEl || !deletedEl) return;
-        const sortedHistory = Array.from(viewedWords).sort();
-        const sortedDeleted = Array.from(deletedWords).sort();
-        historyEl.innerHTML = sortedHistory.map(w => `
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span>${w}</span>
-            <button class="delete-word-btn" data-word="${w}" style="
-              background: none; border: none; color: #990000; font-size: 0.9em;
-              cursor: pointer; margin-left: 8px;
-            ">×</button>
-          </div>
-        `).join('');
-        deletedEl.innerHTML = sortedDeleted.map(w => `
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span>${w}</span>
-            <button class="restore-word-btn" data-word="${w}" style="
-              background: none; border: none; color: #0044ff; font-size: 0.9em;
-              cursor: pointer; margin-left: 8px;
-            ">↩</button>
-          </div>
-        `).join('');
-        document.querySelectorAll('.delete-word-btn').forEach(btn => {
-          btn.addEventListener('click', e => {
-            const word = e.target.getAttribute('data-word');
-            viewedWords.delete(word);
-            deletedWords.add(word);
-            updateHistoryDisplay();
+        function renderWords(container, words, btnLabel, btnColor, title, onClick) {
+          container.textContent = '';
+          words.forEach(function (w) {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;';
+            const span = document.createElement('span');
+            span.textContent = w;
+            row.appendChild(span);
+            const btn = document.createElement('button');
+            btn.textContent = btnLabel;
+            btn.title = title;
+            btn.style.cssText = 'background:none;border:none;color:' + btnColor + ';font-size:0.9em;cursor:pointer;margin-left:8px;';
+            btn.addEventListener('click', function () { onClick(w); });
+            row.appendChild(btn);
+            container.appendChild(row);
           });
+        }
+        renderWords(historyEl, Array.from(viewedWords).sort(), '×', '#990000', '削除', function (w) {
+          viewedWords.delete(w);
+          deletedWords.add(w);
+          updateHistoryDisplay();
         });
-        document.querySelectorAll('.restore-word-btn').forEach(btn => {
-          btn.addEventListener('click', e => {
-            const word = e.target.getAttribute('data-word');
-            deletedWords.delete(word);
-            viewedWords.add(word);
-            updateHistoryDisplay();
-          });
+        renderWords(deletedEl, Array.from(deletedWords).sort(), '↩', '#0044ff', '戻す', function (w) {
+          deletedWords.delete(w);
+          viewedWords.add(w);
+          updateHistoryDisplay();
         });
       }
 
@@ -1197,7 +1140,7 @@
           development: val('fDevelopment'),
           ending: val('fEnding'),
           keywords: readKeywords(),
-          prompt: document.getElementById('fPrompt').value.trim(),
+          prompt: document.getElementById('fPrompt').value.trim().slice(0, 1000),
         };
       }
 
@@ -1227,11 +1170,87 @@
         resetViewerScroll();
       }
 
+      const genBusy = T.createBusyFlag();
+      function loadPendingGenerate() {
+        try {
+          const raw = sessionStorage.getItem('tadoku_pending_generate');
+          if (!raw) return null;
+          const p = JSON.parse(raw);
+          if (p && T.isRequestId(p.requestId) && typeof p.settingsKey === 'string') return p;
+        } catch (e) {}
+        return null;
+      }
+      function savePendingGenerate(p) {
+        try {
+          if (p) sessionStorage.setItem('tadoku_pending_generate', JSON.stringify(p));
+          else sessionStorage.removeItem('tadoku_pending_generate');
+        } catch (e) {}
+      }
+      function settingsHash(settings) {
+        // プロンプト等の本文を保存しないための軽量ハッシュ（同一設定判定のみ）
+        const str = JSON.stringify(settings || {});
+        let h = 2166136261;
+        for (let i = 0; i < str.length; i++) {
+          h ^= str.charCodeAt(i);
+          h = Math.imul(h, 16777619);
+        }
+        return ('00000000' + (h >>> 0).toString(16)).slice(-8);
+      }
+      // TESTABLE-GENERATE-DECISION-START
+      function decidePendingGenerate(pending, settingsKey, actorHash) {
+        if (!pending || !T.isRequestId(pending.requestId)) return { action: 'new' };
+        if (pending.actorHash !== actorHash) return { action: 'confirm-actor', requestId: pending.requestId };
+        if (pending.conflict) return { action: 'confirm-conflict', requestId: pending.requestId };
+        if (pending.settingsKey === settingsKey) return { action: 'reuse', requestId: pending.requestId };
+        return { action: 'confirm-settings', requestId: pending.requestId };
+      }
+      function resolvePendingGenerateAction(decision, confirmFn) {
+        if (decision.action === 'reuse') return { action: 'reuse', requestId: decision.requestId };
+        if (decision.action === 'new') return { action: 'new' };
+        var message = '前回の生成結果がまだ確定していません。履歴を確認しましたか？\n確認できた場合のみ「OK」で新しく生成します。';
+        if (decision.action === 'confirm-actor') {
+          message = '前回の生成結果が未確定のまま、アカウントまたは端末が変わりました。\n履歴を確認しましたか？確認できた場合のみ「OK」で新しく生成します。';
+        } else if (decision.action === 'confirm-conflict') {
+          message = '前回と同じ操作IDで内容が一致しませんでした。\n履歴を確認しましたか？確認できた場合のみ「OK」で新しく生成します。';
+        }
+        return confirmFn(message) ? { action: 'new-after-confirm' } : { action: 'cancel' };
+      }
+      // TESTABLE-GENERATE-DECISION-END
+      let pendingGenerate = loadPendingGenerate();
       async function generate() {
+        if (!genBusy.tryEnter()) {
+          showToast('生成中です。完了までお待ちください');
+          return;
+        }
+        const genBtn = document.getElementById('genBtn');
+        if (genBtn) genBtn.disabled = true;
         const settings = readForm();
+        const settingsKey = settingsHash(settings);
+        const actorHash = settingsHash({ a: T.actorKey(getIdToken(), getDeviceId()) });
+        const decision = decidePendingGenerate(pendingGenerate, settingsKey, actorHash);
+        const resolution = resolvePendingGenerateAction(decision, window.confirm);
+        let requestId;
+        let reusing = false;
+        if (resolution.action === 'reuse') {
+          requestId = resolution.requestId;
+          reusing = true;
+        } else if (resolution.action === 'new' || resolution.action === 'new-after-confirm') {
+          if (resolution.action === 'new-after-confirm') {
+            pendingGenerate = null;
+            savePendingGenerate(null);
+          }
+          requestId = T.newRequestId();
+        } else {
+          genBusy.leave();
+          if (genBtn) genBtn.disabled = false;
+          return;
+        }
+        if (reusing) showToast('前回の生成結果を確認しています（同じ操作として処理します）');
         showSpinner();
         try {
-          const res = await callServer('generateText', settings);
+          const res = await callServer('generateText', settings, requestId);
+          pendingGenerate = null;
+          savePendingGenerate(null);
           renderRecord(res.item || res);
           loadSavedList({ reset: true });
           if (window.innerWidth < window.innerHeight) {
@@ -1239,8 +1258,29 @@
             document.getElementById('dict-overlay-fixed').style.display = 'none';
           }
         } catch (e) {
-          showToast(e.message || '生成に失敗しました');
+          // 結果不明のときは同じrequest_idでの確認に限定し、新IDでの無条件再送を避ける
+          if (e && e.unknownOperation) {
+            pendingGenerate = {
+              requestId: requestId,
+              settingsKey: settingsKey,
+              actorHash: actorHash,
+              conflict: e.code === 'request_id_conflict' || !!(pendingGenerate && pendingGenerate.conflict)
+            };
+            savePendingGenerate(pendingGenerate);
+            // 一度だけ履歴を更新し、処理中/確定済みを確認できるようにする
+            loadSavedList({ reset: true });
+          } else {
+            pendingGenerate = null;
+            savePendingGenerate(null);
+          }
+          showToast(e.message || '生成に失敗しました', (e && e.unknownOperation) ? 12000 : 4000);
+          if (/not allowed|noauth|認証|ログイン|token/i.test(String(e && e.message || ''))) {
+            authUi.lastAt = 0;
+            applyProbeToUI();
+          }
         } finally {
+          genBusy.leave();
+          if (genBtn) genBtn.disabled = false;
           hideSpinner();
         }
       }
@@ -1255,6 +1295,42 @@
       });
       applyTextType();
       addKeywordRow('');
+
+      // TESTABLE-DELETE-START
+      const deleteBusy = T.createKeyedBusy();
+      const pendingDeletes = Object.create(null);
+      async function deleteSavedItem(it, delBtn) {
+        const id = String((it && it.id) || '');
+        if (!id) return;
+        if (!deleteBusy.tryEnter(id)) return;
+        if (delBtn) delBtn.disabled = true;
+        let performed = false;
+        let requestId = '';
+        try {
+          if (!window.confirm('この生成物を削除しますか？')) return;
+          performed = true;
+          // 結果不明の同じ削除操作は同じrequest_idで確認する（新IDで無条件再送しない）
+          requestId = pendingDeletes[id];
+          if (!T.isRequestId(requestId)) requestId = T.newRequestId();
+          await callServer('deleteText', { id: id }, requestId);
+          delete pendingDeletes[id];
+        } catch (err) {
+          if (T.isRequestId(requestId)) {
+            if (err && err.unknownOperation) pendingDeletes[id] = requestId;
+            else delete pendingDeletes[id];
+          }
+          showToast(err.message || '削除に失敗しました', (err && err.unknownOperation) ? 12000 : 4000);
+          if (/not allowed|noauth|認証|ログイン|token/i.test(String((err && err.message) || ''))) {
+            authUi.lastAt = 0;
+            applyProbeToUI();
+          }
+        } finally {
+          if (delBtn) delBtn.disabled = false;
+          deleteBusy.leave(id);
+          if (performed) loadSavedList({ reset: true });
+        }
+      }
+      // TESTABLE-DELETE-END
 
       function renderSavedList(items, opts) {
         opts = opts || {};
@@ -1275,13 +1351,7 @@
             delBtn.textContent = '削除';
             delBtn.addEventListener('click', async e => {
               e.stopPropagation();
-              if (!window.confirm('この生成物を削除しますか？')) return;
-              try {
-                await callServer('deleteText', { id: it.id });
-                loadSavedList({ reset: true });
-              } catch (err) {
-                showToast(err.message || '削除に失敗しました');
-              }
+              await deleteSavedItem(it, delBtn);
             });
             li.appendChild(delBtn);
           }
@@ -1320,11 +1390,12 @@
         btn.textContent = savedIsLoading ? '読み込み中…' : 'もっと読む（20件ずつ）';
       }
 
+      const savedLatest = T.createLatestOnly();
       async function loadSavedList(opts) {
         opts = opts || {};
-        if (savedIsLoading) return;
         const isReset = !!opts.reset;
         const isAppend = !!opts.append && !isReset;
+        if (isAppend && savedIsLoading) return;
         if (isReset) {
           savedOffset = 0;
           savedTotal = 0;
@@ -1332,46 +1403,131 @@
         }
         const levelEl = document.getElementById('fFilterLevel');
         const level = levelEl ? levelEl.value : savedLevel;
-        savedLevel = level;
+        if (!isAppend) savedLevel = level;
         const limit = 20;
         const offset = isAppend ? savedOffset : 0;
-        if (!isAppend && isReset) {
-          // クリアは render側で。カウントも一旦クリア
-          document.getElementById('savedList').innerHTML = '<li style="cursor:default; color:#999999;">読み込み中…</li>';
+        const seq = savedLatest.begin();
+        if (isReset) {
+          const list = document.getElementById('savedList');
+          list.textContent = '';
+          const loading = document.createElement('li');
+          loading.style.cssText = 'cursor:default;color:#999999;';
+          loading.textContent = '読み込み中…';
+          list.appendChild(loading);
           updateSavedCount();
-          updateLoadMoreBtn();
         }
         savedIsLoading = true;
         updateLoadMoreBtn();
         try {
           const res = await callServer('getSavedTexts', { limit: limit, offset: offset, level: savedLevel });
+          if (!savedLatest.isLatest(seq)) return;
           const items = (res && res.items) || [];
           savedTotal = (res && typeof res.total === 'number') ? res.total : (offset + items.length + (res && res.hasMore ? 1 : 0));
           savedHasMore = !!(res && res.hasMore);
-          if (isAppend) {
-            renderSavedList(items, { append: true });
-          } else {
-            renderSavedList(items, { append: false });
-          }
+          renderSavedList(items, { append: isAppend });
           savedOffset = offset + items.length;
           updateSavedCount();
-          updateLoadMoreBtn();
         } catch (e) {
-          if (isReset) document.getElementById('savedList').innerHTML = '';
+          if (!savedLatest.isLatest(seq)) return;
+          if (isReset) document.getElementById('savedList').textContent = '';
           showToast(e.message || '履歴の読み込みに失敗しました');
-          updateLoadMoreBtn();
         } finally {
-          savedIsLoading = false;
-          updateLoadMoreBtn();
+          if (savedLatest.isLatest(seq)) {
+            savedIsLoading = false;
+            updateLoadMoreBtn();
+          }
         }
       }
 
+      function appendDictEntry(container, index, def) {
+        const entry = document.createElement('div');
+        entry.className = 'entry';
+        const num = document.createElement('strong');
+        num.textContent = (index + 1) + '.';
+        entry.appendChild(num);
+        entry.appendChild(document.createTextNode(' ' + String(def == null ? '' : def)));
+        container.appendChild(entry);
+      }
+      function appendDictSection(container, className, label, defs) {
+        const sec = document.createElement('div');
+        sec.className = 'dict-section ' + className;
+        if (label) {
+          const head = document.createElement('div');
+          head.style.cssText = 'font-weight:bold;margin:6px 0 4px;color:#004400;';
+          head.textContent = label;
+          sec.appendChild(head);
+        }
+        defs.forEach(function (d, i) { appendDictEntry(sec, i, d); });
+        container.appendChild(sec);
+      }
+      function renderDictPopup(dictDiv, raw, normalized, isNorm, defsNorm, defsRaw) {
+        dictDiv.textContent = '';
+        const header = document.createElement('div');
+        header.className = 'dict-header';
+        header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;';
+        const h4 = document.createElement('h4');
+        h4.style.margin = '4px 0';
+        h4.textContent = raw + (isNorm ? ' → ' + normalized : '');
+        header.appendChild(h4);
+        const close = document.createElement('button');
+        close.id = 'close-dict-btn';
+        close.textContent = '閉じる';
+        close.style.cssText = 'background:#ffffff;color:#007700;border:1px solid #00ff00;padding:2px 6px;border-radius:4px;font-size:0.8em;cursor:pointer;margin-left:8px;';
+        close.addEventListener('click', function () { dictDiv.style.display = 'none'; });
+        header.appendChild(close);
+        dictDiv.appendChild(header);
+        if (!isNorm) {
+          if (defsRaw.length) appendDictSection(dictDiv, 'dict-section--raw', '', defsRaw);
+          else {
+            const p = document.createElement('p');
+            p.textContent = '登録なし';
+            dictDiv.appendChild(p);
+          }
+        } else if (!defsNorm.length && !defsRaw.length) {
+          const p = document.createElement('p');
+          p.textContent = '登録なし';
+          dictDiv.appendChild(p);
+        } else {
+          if (defsNorm.length) appendDictSection(dictDiv, 'dict-section--normalized', normalized, defsNorm);
+          if (defsRaw.length) {
+            if (defsNorm.length) {
+              const hr = document.createElement('hr');
+              hr.style.cssText = 'margin:8px 0;border:none;border-top:1px solid #ddd;';
+              dictDiv.appendChild(hr);
+            }
+            appendDictSection(dictDiv, 'dict-section--raw', lowerLabel(raw), defsRaw);
+          }
+        }
+        const search = document.createElement('div');
+        search.style.marginTop = '8px';
+        search.style.fontSize = '0.9em';
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-magnifying-glass';
+        icon.style.marginRight = '4px';
+        const link = document.createElement('a');
+        link.href = 'https://www.google.com/search?q=' + encodeURIComponent(raw + ' 意味');
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.style.color = '#007700';
+        link.textContent = '「' + raw + '」をGoogleで検索';
+        search.appendChild(icon);
+        search.appendChild(link);
+        dictDiv.appendChild(search);
+      }
+      function lowerLabel(raw) { return String(raw).toLowerCase(); }
+
       viewer.addEventListener('click', async e => {
         const raw = getWordAtPoint(e.clientX, e.clientY);
-        if (!raw || !/^[a-zA-Z\-']+$/.test(raw)) return;
+        if (!raw || !/^[a-zA-Z-']+$/.test(raw)) return;
         const dictDiv = document.getElementById('dict-overlay-fixed');
         dictDiv.style.display = 'block';
-        dictDiv.innerHTML = `<h4>${raw}</h4><p>読み込み中…</p>`;
+        dictDiv.textContent = '';
+        const loadingHeader = document.createElement('h4');
+        loadingHeader.textContent = raw;
+        dictDiv.appendChild(loadingHeader);
+        const loadingText = document.createElement('p');
+        loadingText.textContent = '読み込み中…';
+        dictDiv.appendChild(loadingText);
         try {
           await Promise.all([loadFormMap(), loadInvert()]);
           // Driveファイルが入れ替わっていても自動補正（FORM_MAPは string->string、INVは string->array が正）
@@ -1391,60 +1547,17 @@
           const lower = raw.toLowerCase();
           const normalized = normalize(raw);
           const isNorm = normalized !== lower;
-          let html = `
-            <div class="dict-header" style="display: flex; justify-content: space-between; align-items: center;">
-              <h4 style="margin: 4px 0;">${raw}${isNorm ? ' → ' + normalized : ''}</h4>
-              <button id="close-dict-btn" style="
-                background: #ffffff; color: #007700; border: 1px solid #00ff00;
-                padding: 2px 6px; border-radius: 4px; font-size: 0.8em;
-                cursor: pointer; margin-left: 8px;
-              ">閉じる</button>
-            </div>
-          `;
-          if (isNorm) {
-            const rawNorm = (INV && INV[normalized]);
-            const rawRaw = (INV && INV[lower]);
-            const defsNorm = Array.isArray(rawNorm) ? rawNorm : [];
-            const defsRaw = Array.isArray(rawRaw) ? rawRaw : [];
-            const hasNorm = defsNorm.length > 0;
-            const hasRaw = defsRaw.length > 0;
-            if (!hasNorm && !hasRaw) {
-              html += '<p>登録なし</p>';
-            } else {
-              if (hasNorm) {
-                html += `<div class="dict-section dict-section--normalized"><div style="font-weight:bold; margin:6px 0 4px; color:#004400;">${normalized}</div>`;
-                defsNorm.forEach((d, i) => { html += `<div class='entry'><strong>${i + 1}.</strong> ${d}</div>`; });
-                html += `</div>`;
-              }
-              if (hasRaw) {
-                if (hasNorm) html += `<hr style="margin:8px 0; border:none; border-top:1px solid #ddd;">`;
-                html += `<div class="dict-section dict-section--raw"><div style="font-weight:bold; margin:6px 0 4px; color:#004400;">${lower}</div>`;
-                defsRaw.forEach((d, i) => { html += `<div class='entry'><strong>${i + 1}.</strong> ${d}</div>`; });
-                html += `</div>`;
-              }
-            }
-          } else {
-            const rawDefs = (INV && INV[lower]);
-            const defs = Array.isArray(rawDefs) ? rawDefs : [];
-            if (defs.length) defs.forEach((d, i) => { html += `<div class='entry'><strong>${i + 1}.</strong> ${d}</div>`; });
-            else html += '<p>登録なし</p>';
-          }
-          const encoded = encodeURIComponent(raw) + ' 意味';
-          html += `<div style="margin-top: 8px; font-size: 0.9em;">
-                    <i class="fas fa-magnifying-glass" style="margin-right: 4px;"></i>
-                    <a href="https://www.google.com/search?q=${encoded}" target="_blank" style="color:#007700;">
-                      「${raw}」をGoogleで検索
-                    </a>
-                  </div>`;
-          viewedWords.add(raw.toLowerCase());
+          const defsNorm = (isNorm && INV && Array.isArray(INV[normalized])) ? INV[normalized] : [];
+          const defsRaw = (INV && Array.isArray(INV[lower])) ? INV[lower] : [];
+          renderDictPopup(dictDiv, raw, normalized, isNorm, defsNorm, defsRaw);
+          viewedWords.add(lower);
           updateHistoryDisplay();
-          dictDiv.innerHTML = html;
-          document.getElementById('close-dict-btn').addEventListener('click', () => {
-            dictDiv.style.display = 'none';
-          });
         } catch (err) {
           console.error(err);
-          dictDiv.innerHTML = '<p>辞書の読み込みに失敗しました</p>';
+          dictDiv.textContent = '';
+          const p = document.createElement('p');
+          p.textContent = '辞書の読み込みに失敗しました。もう一度単語をタップすると再試行します。';
+          dictDiv.appendChild(p);
         }
       });
 
@@ -1471,28 +1584,78 @@
       }, { passive: false });
 
       // Pages静的版: 起動時にprobeで表示判定（仕様書_移行案.md 3.4）GIS対応
-      function initGisApp2(){
-        if(GIS_CLIENT_ID.indexOf('REPLACE')===0) return;
-        if(typeof google==='undefined'||!google.accounts||!google.accounts.id) { setTimeout(initGisApp2,500); return; }
-        try{
-          google.accounts.id.initialize({
-            client_id: GIS_CLIENT_ID,
-            callback: function(resp){ if(resp.credential){ setIdToken(resp.credential); applyProbeToUI(); } },
-            auto_select:false, cancel_on_tap_outside:true
-          });
-          var w=document.getElementById('gis-wrap');
-          if(w){ w.style.display='block'; google.accounts.id.renderButton(w,{theme:'outline',size:'medium',text:'signin_with',shape:'pill'}); }
-        }catch(e){}
+      const authUi = { seq: 0, lastAt: 0, gisInitDone: false, gisStarting: false };
+      function setAuthHelpText(text) {
+        const el = document.getElementById('auth-help-text');
+        if (el) el.textContent = text || '';
       }
+      function showAuthHelp(kind) {
+        const box = document.getElementById('auth-help');
+        const retry = document.getElementById('auth-retry');
+        if (!box) return;
+        box.style.display = 'block';
+        if (kind === 'gis-failed') setAuthHelpText('Googleログインの読み込みに失敗しました。通信状態を確認して再試行してください。');
+        else if (kind === 'notallowed') setAuthHelpText('教室外アカウントでは生成できません。教室用アカウントでログインし直してください。');
+        else if (kind === 'unreachable') setAuthHelpText('認証サーバーに接続できませんでした。通信状態を確認して再試行してください。');
+        else if (kind === 'optional') setAuthHelpText('ログインすると教室アカウントとして利用できます（試験運用中のため未ログインでも生成できます）。');
+        else setAuthHelpText('この端末のGoogleログインが必要です。下のボタンでログインすると生成できます。');
+        if (retry) retry.style.display = (kind === 'gis-failed' || kind === 'unreachable') ? 'inline-block' : 'none';
+        // gis-failed は自動リトライしない（再試行ボタンで1回だけ試す）
+        if (kind !== 'gis-failed') initGisApp2();
+        const wrap = document.getElementById('gis-wrap');
+        if (wrap && authUi.gisInitDone) wrap.style.display = 'block';
+      }
+      function hideAuthHelp() {
+        const box = document.getElementById('auth-help');
+        if (box) box.style.display = 'none';
+        const wrap = document.getElementById('gis-wrap');
+        if (wrap) wrap.style.display = 'none';
+      }
+      function initGisApp2() {
+        if (GIS_CLIENT_ID.indexOf('REPLACE') === 0) return;
+        if (authUi.gisInitDone || authUi.gisStarting) return;
+        authUi.gisStarting = true;
+        T.waitForGis({ timeoutMs: 8000, intervalMs: 300 }).then(function (ok) {
+          authUi.gisStarting = false;
+          if (!ok) { showAuthHelp('gis-failed'); return; }
+          try {
+            google.accounts.id.initialize({
+              client_id: GIS_CLIENT_ID,
+              callback: function (resp) {
+                if (!resp || !resp.credential) return;
+                // トークン更新は onAuthChange 経由で probe される（同値なら再probe不要）
+                setIdToken(resp.credential);
+              },
+              auto_select: false,
+              cancel_on_tap_outside: true
+            });
+            const w = document.getElementById('gis-wrap');
+            if (w) {
+              w.style.display = 'block';
+              google.accounts.id.renderButton(w, { theme: 'outline', size: 'medium', text: 'signin_with', shape: 'pill' });
+            }
+            authUi.gisInitDone = true;
+          } catch (e) {
+            authUi.gisInitDone = false;
+            showAuthHelp('gis-failed');
+          }
+        });
+      }
+      const authRetryBtn = document.getElementById('auth-retry');
+      if (authRetryBtn) authRetryBtn.addEventListener('click', function () { authUi.lastAt = 0; applyProbeToUI(); });
       async function applyProbeToUI() {
-        var genSection = document.getElementById('genSection');
-        var textArea = document.getElementById('textContentArea');
-        var gisWrap=document.getElementById('gis-wrap');
+        const t = Date.now();
+        if (authUi.seq > 0 && t - authUi.lastAt < 400) return;
+        authUi.lastAt = t;
+        const seq = ++authUi.seq;
+        const genSection = document.getElementById('genSection');
+        const textArea = document.getElementById('textContentArea');
         genSection.style.display = 'none';
-        if(gisWrap) gisWrap.style.display='none';
+        hideAuthHelp();
         textArea.textContent = '確認中…';
-        var pr = await probeBackend();
-        var trialOpen = !!pr.open;
+        const pr = await probeBackend();
+        if (seq !== authUi.seq) return;
+        const trialOpen = !!pr.open;
         if (pr.state === 'ok') {
           IS_ALLOWED = true;
           IS_OWNER = !!pr.isOwner;
@@ -1503,17 +1666,19 @@
           IS_OWNER = false;
           genSection.style.display = '';
           textArea.textContent = '試験運用中：どなたでも英語長文を生成できます（1端末あたり1日10件・全体で1日100件まで。生成物は全員に公開されます）。\n\n左のパネルで設定を選び、［英語長文を生成］を押してください。\n単語をタップすると辞書を表示します。';
+          showAuthHelp('optional');
         } else if (pr.state === 'notallowed') {
           IS_ALLOWED = false;
           IS_OWNER = false;
           genSection.style.display = 'none';
           textArea.textContent = '教室外アカウントでは生成できません。\n\n左のパネルで過去の生成物を選択してください。\n単語をタップすると辞書を表示します。';
+          showAuthHelp('notallowed');
         } else {
           IS_ALLOWED = false;
           IS_OWNER = false;
           genSection.style.display = 'none';
           textArea.textContent = '左のパネルで過去の生成物を選択してください。\n\n単語をタップすると辞書を表示します。';
-          if(GIS_CLIENT_ID.indexOf('REPLACE')!==0) initGisApp2();
+          showAuthHelp(pr.state === 'unreachable' ? 'unreachable' : 'login');
         }
         loadSavedList({ reset: true });
       }
@@ -1522,10 +1687,12 @@
       document.getElementById('fFilterLevel').addEventListener('change', () => loadSavedList({ reset: true }));
       document.getElementById('loadMoreBtn').addEventListener('click', () => loadSavedList({ append: true }));
 
-      console.log('before Promise.all loadFormMap/loadInvert isAllowed',IS_ALLOWED,'isOwner',IS_OWNER);
       applyZoom();
+      T.onAuthChange(function () { authUi.lastAt = 0; applyProbeToUI(); });
       applyProbeToUI();
-      Promise.all([loadFormMap(), loadInvert()]).then(()=>console.log('Promise.all done FORM_MAP',Object.keys(window.FORM_MAP||{}).length,'INV',Object.keys(window.INV||{}).length)).catch((e) => {console.error('Promise.all fail',e.message)});
+      Promise.all([loadFormMap(), loadInvert()]).then(function () {
+        console.log('dictionary loaded', Object.keys(window.FORM_MAP || {}).length, Object.keys(window.INV || {}).length);
+      }).catch(function (e) { console.error('dictionary load failed', e.message); });
     });
   </script>
 </body>

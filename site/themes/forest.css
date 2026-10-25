@@ -113,7 +113,9 @@ html[data-theme="forest"] .card {
   transition: transform .18s ease, border-color .18s ease !important;
   animation: none !important;
 }
-html[data-theme="forest"] .card:hover {
+/* ポータルのカードだけに hover を限定（教材アプリ内の .card は WAAPI の transform を優先） */
+html[data-theme="forest"] a.card:hover,
+html[data-theme="forest"] .cards > .card:hover {
   transform: translateY(-2px) !important;
   box-shadow: none !important;
   border-color: rgba(15,62,23,.12) !important;
@@ -203,7 +205,7 @@ html[data-theme="forest"] .subj--tool .card__btn {
   background: var(--color-sage-mist) !important;
   color: var(--color-forest-ink) !important;
 }
-html[data-theme="forest"] .card:hover .card__btn {
+html[data-theme="forest"] a.card:hover .card__btn {
   background: #a3cfaa !important;
   color: var(--color-forest-ink) !important;
   transform: none !important;
@@ -728,6 +730,8 @@ html[data-theme="forest"] .card.c-subj,
 html[data-theme="forest"] .card.c-verb,
 html[data-theme="forest"] .card.c-aux,
 html[data-theme="forest"] .card.c-other { box-shadow: none !important; }
+/* 英文カードは Web Animations の transform を CSS transition と競合させない */
+html[data-theme="forest"] .row .card { transition: none !important; }
 
 /* ---- app9 — 原稿用紙メーカー（裏: Sage背景＋白カード） ---- */
 html[data-theme="forest"] body:has(.sheet) {
@@ -838,9 +842,10 @@ html[data-theme="forest"] .pt-marker { border-radius: 0 !important; }
 
 /* Motion */
 @media (prefers-reduced-motion: reduce) {
-  html[data-theme="forest"] .card,
-  html[data-theme="forest"] .card__btn { transition: none !important; }
-  html[data-theme="forest"] .card:hover { transform: none !important; }
+  html[data-theme="forest"] a.card,
+  html[data-theme="forest"] .card__btn,
+  html[data-theme="forest"] .row .card { transition: none !important; }
+  html[data-theme="forest"] a.card:hover { transform: none !important; }
 }
 
 /* App共通変数 */

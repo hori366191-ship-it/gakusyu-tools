@@ -1040,12 +1040,19 @@ function updateInfo(){
   }
 }
 
+var lastCvW=0,lastCvH=0,lastCvDpr=0;
 function resize(){
   var rect=cv.getBoundingClientRect();
   var dpr=Math.min(window.devicePixelRatio||1,2);
-  cv.width=Math.round(rect.width*dpr);
-  cv.height=Math.round(rect.height*dpr);
+  var w=Math.max(1,Math.round(rect.width*dpr));
+  var h=Math.max(1,Math.round(rect.height*dpr));
+  // 実ピクセル寸法・DPRが変わったときだけバッファを再確保する（毎フレームのresetを防ぐ）
+  if(w===lastCvW&&h===lastCvH&&dpr===lastCvDpr) return false;
+  lastCvW=w;lastCvH=h;lastCvDpr=dpr;
+  cv.width=w;
+  cv.height=h;
   ctx.setTransform(dpr,0,0,dpr,0,0);
+  return true;
 }
 var resizeT=null;
 window.addEventListener('resize',function(){
