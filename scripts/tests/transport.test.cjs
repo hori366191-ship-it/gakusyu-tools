@@ -36,6 +36,30 @@ function runTestableBlock(src, name, sandbox, exportCode) {
   return ctx;
 }
 
+/**
+ * 縦長リンクの経路が本文の bbox に入らないことを、線分を細かく標本化して確かめる。
+ * half は stroke 幅の半分（stroke-width: 2 → 1）。strict 比較なので
+ * bbox + half に「接する」だけなら侵入とみなさない。侵入があればその点を返す。
+ */
+function routeHitsText(points, rects, half) {
+  const h = half == null ? 1 : half;
+  const inside = (p, r) => p.x > r.left - h && p.x < r.right + h && p.y > r.top - h && p.y < r.bottom + h;
+  for (let i = 0; i + 1 < points.length; i++) {
+    const a = points[i];
+    const b = points[i + 1];
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+    const steps = Math.max(1, Math.ceil(len / 0.5));
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      const p = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+      for (const r of rects) {
+        if (inside(p, r)) return { segment: i, point: p, rect: r };
+      }
+    }
+  }
+  return null;
+}
+
 function createMiniDom() {
   const byId = new Map();
   function createElement(tag) {
@@ -1081,26 +1105,98 @@ test('app2 bilingual layout: 訳文の段落改行は原文スライスの空白
   assert.strictEqual(ctx.__text(2), '\n\n');
 });
 
-test('app2 bilingual link: 縦長は右 gutter 内だけで描画し、横長は従来のまま', () => {
+test('app2 bilingual link: 縦長は文末文字の右下角→行間余白→右gutter→訳文末の右下角に繋ぎ、横長は従来のまま', () => {
   const app2 = readSiteFile('app2/index.html');
-  const ctx = runTestableBlock(app2, 'BILINGUAL-LINK', {}, 'globalThis.__path = buildBlLinkPath; globalThis.__portrait = blIsPortraitLayout;');
-  const view = { left: 0, top: 0, width: 390, height: 700 };
-  const enPane = { right: 390 };
-  const jaPane = { right: 390 };
-  const enRect = { left: 20, right: 370, top: 100, bottom: 120 };
-  const jaRect = { left: 20, right: 300, top: 400, bottom: 420 };
-  const portraitPath = 'M 378 110 C 386 110, 386 410, 378 410';
-  assert.strictEqual(ctx.__path(true, view, enRect, jaRect, enPane, jaPane), portraitPath);
-  // 端点は pane 側（padding 内）で、本文の右端（enRect.right）は使わない
-  assert.strictEqual(ctx.__path(true, view, { left: 20, right: 200, top: 100, bottom: 120 }, jaRect, enPane, jaPane), portraitPath);
-  // 制御点も含めて viewport 右端（390）をはみ出さない
-  const portraitXs = (portraitPath.match(/^M ([\d.]+) [\d.]+ C ([\d.]+) [\d.]+, ([\d.]+) [\d.]+, ([\d.]+) [\d.]+$/) || [])
-    .slice(1).map(Number);
-  assert.strictEqual(portraitXs.length, 4);
-  assert.ok(portraitXs.every((x) => x <= 390), 'viewport をはみ出さない');
-  assert.ok(portraitXs.every((x) => x >= 378), 'すべて右 gutter 内（本文には戻らない）');
+  const ctx = runTestableBlock(app2, 'BILINGUAL-LINK', {},
+    'globalThis.__path = buildBlLinkPath; globalThis.__portrait = blIsPortraitLayout;'
+    + ' globalThis.__route = blPortraitRoutePoints; globalThis.__round = blRoundedPolyline;'
+    + ' globalThis.__gap = blLineGapY; globalThis.__corner = blEndCorner;'
+    + ' globalThis.__visible = blPointVisible;');
 
-  // 横長は従来どおり英文右端→訳文左端（±40 の制御点）
+  // 390x844 の縦長。上下2ペイン（各 pane は view と同じ幅、padding-right 20px）
+  const view = { left: 0, top: 0, width: 390, height: 700 };
+  const enPane = { left: 0, top: 0, right: 390, bottom: 300 };
+  const jaPane = { left: 0, top: 320, right: 390, bottom: 700 };
+  const lineHeight = 60; // .bl-text の line-height: 3（font-size 20px）
+  const enEnd = { left: 100, right: 122, top: 100, bottom: 120 };
+  const jaEnd = { left: 60, right: 86, top: 400, bottom: 420 };
+  const enLines = [enEnd];
+  const jaLines = [jaEnd];
+  const enGapY = ctx.__gap(enLines, enEnd, lineHeight, enPane, false);
+  const jaGapY = ctx.__gap(jaLines, jaEnd, lineHeight, jaPane, false);
+  assert.strictEqual(enGapY, 140, '文末行の下の行間余白（行送りの半分）');
+  assert.strictEqual(jaGapY, 440);
+
+  // 接続点は文末文字の右下角（bbox の右端 x・下端 +2px）。右中央ではない。
+  const enCorner = ctx.__corner(enEnd, enGapY);
+  const jaCorner = ctx.__corner(jaEnd, jaGapY);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(enCorner)), { x: 122, y: 122 });
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(jaCorner)), { x: 86, y: 422 });
+  // gap が上側（clip の都合）なら右上角から外へ出る
+  const upCorner = ctx.__corner(enEnd, 80);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(upCorner)), { x: 122, y: 98 });
+
+  const route = ctx.__route(view, enCorner, jaCorner, enGapY, jaGapY, 378);
+  const flat = route.map((p) => p.x + ',' + p.y).join(' ');
+  assert.strictEqual(flat, '122,122 122,140 378,140 378,440 86,440 86,422');
+
+  const portraitPath = ctx.__path(true, view, enEnd, jaEnd, enPane, jaPane,
+    { enEnd: enEnd, jaEnd: jaEnd, enGapY: enGapY, jaGapY: jaGapY });
+  assert.match(portraitPath, /^M 122 122 /, '英文の文末文字の右下角から始まる');
+  assert.match(portraitPath, / L 86 422$/, '訳文の文末文字の右下角で終わる');
+  assert.equal(portraitPath.indexOf(' C '), -1, '縦長は3次ベジェで本文を横断しない');
+  assert.match(portraitPath, / Q /, '角は丸める（stroke-linejoin 依存にしない）');
+
+  // 本文側（pane 右端固定 = 378）や文字の右中央（旧: right+2 / 中心 y）へ戻らない
+  assert.notStrictEqual(portraitPath, 'M 378 110 C 386 110, 386 410, 378 410');
+  assert.equal(portraitPath.indexOf('M 124 110'), -1, '右中央の旧端点を使わない');
+  const xs = Array.prototype.map.call(portraitPath.match(/-?\d+(?:\.\d+)?/g), Number)
+    .filter((v, i) => i % 2 === 0);
+  assert.ok(xs.every((x) => x <= 386), 'viewport 右端をはみ出さない');
+  assert.ok(xs.some((x) => x === 122) && xs.some((x) => x === 86), '端点は文末文字の bbox 右端');
+  // gutter の縦経路だけが右余白（本文の右外）を通る
+  assert.ok(378 > view.width - 20, 'gutter は padding-right(20px) の内側');
+  assert.ok(route[2].y === enGapY && route[3].y === jaGapY, '水平移動は行間余白の y だけ');
+
+  // 同じ行に空白なしで後続文が続いても、文字 bbox の外（右下角）から出るので横断しない
+  const sameLineTexts = [
+    { left: 0, right: 122, top: 100, bottom: 120 },   // 選択文（文末文字を含む行）
+    { left: 122, right: 220, top: 100, bottom: 120 }  // 同じ行に続く後続文（間に空白なし）
+  ];
+  assert.strictEqual(routeHitsText(route, sameLineTexts, 1), null, 'stroke が同じ行の本文に入らない');
+  assert.ok(route[0].y > sameLineTexts[1].bottom, '縦線は文字 bbox の下から出る');
+
+  // 行間 y の決め方: 次の行との間 → 無ければ行送り → 下が clip 外なら前の行との間 → どちらも不可なら隠す
+  assert.strictEqual(ctx.__gap([{ left: 0, right: 300, top: 100, bottom: 120 }, { left: 0, right: 300, top: 160, bottom: 180 }],
+    { top: 100, bottom: 120 }, 60, { top: 0, bottom: 300 }, false), 140, '次の行との間の中央');
+  // 文末が折り返して2行目にあるときは、その行（最後の行）の下を使う（先頭行の行間 140 ではない）
+  const wrappedLines = [{ left: 0, right: 300, top: 100, bottom: 120 }, { left: 0, right: 80, top: 160, bottom: 180 }];
+  const wrappedEnd = { left: 0, right: 80, top: 160, bottom: 180 };
+  assert.strictEqual(ctx.__gap(wrappedLines, wrappedEnd, 60, { top: 0, bottom: 320 }, false), 200,
+    '文末が折り返した行の位置で決める');
+  const bottomEnd = { left: 100, right: 122, top: 268, bottom: 288 };
+  assert.strictEqual(ctx.__gap([bottomEnd], bottomEnd, 60, { top: 0, bottom: 320 }, false), 308,
+    '文末が要素の最終行なら行送り（line-height）から求める');
+  assert.strictEqual(ctx.__gap([{ left: 0, right: 300, top: 208, bottom: 228 }, bottomEnd], bottomEnd, 60, { top: 0, bottom: 300 }, false),
+    248, '下の行間が clip 外なら前の行との間（上）を使う');
+  assert.strictEqual(ctx.__gap([{ left: 0, right: 300, top: 208, bottom: 228 }, bottomEnd], bottomEnd, 60,
+    { top: 0, bottom: 300 }, true), 248, 'preferAbove は上を優先する');
+  // 文字サイズが大きく行間が clip に入らないときは、文字 bbox のすぐ外（角 +2px）へ逃がす
+  const bigEnd = { left: 100, right: 200, top: 100, bottom: 200 }; // 文字サイズ 5x（bbox 高 100）
+  assert.strictEqual(ctx.__gap([bigEnd], bigEnd, 300, { top: 0, bottom: 260 }, false), 202,
+    '行間 300 は clip 外 → 文字 bbox の下 +2px');
+  assert.strictEqual(ctx.__gap([], bigEnd, 300, { top: 0, bottom: 150 }, false), 98,
+    '下が不可なら文字 bbox の上 −2px');
+  assert.strictEqual(ctx.__gap([], bigEnd, 300, { top: 120, bottom: 160 }, false), null,
+    '文字 bbox の外が clip に入らないときは隠す');
+
+  // 接続点が pane ∩ view の外（長文の末尾が画面外）なら隠す
+  assert.strictEqual(ctx.__visible(enCorner, enPane, view), true);
+  assert.strictEqual(ctx.__visible({ x: 122, y: 302 }, enPane, view), false);
+  assert.strictEqual(ctx.__visible({ x: 389, y: 122 }, enPane, view), false);
+  assert.strictEqual(ctx.__visible(null, enPane, view), false);
+
+  // 横長は従来どおり英文右端→訳文左端（±40 の制御点）。完全一致で固定する。
   const wideView = { left: 0, top: 0, width: 1000, height: 700 };
   const wide = ctx.__path(false, wideView,
     { left: 20, right: 470, top: 100, bottom: 120 },
@@ -1108,10 +1204,170 @@ test('app2 bilingual link: 縦長は右 gutter 内だけで描画し、横長は
     { right: 500 }, { right: 1000 });
   assert.strictEqual(wide, 'M 470 110 C 510 110, 510 210, 550 210');
 
+  // 縦長でも情報が無ければ描かない（別の文の位置へ黙って戻さない）
+  assert.strictEqual(ctx.__path(true, view, enEnd, jaEnd, enPane, jaPane), '');
+
+  // 角丸ユーティリティ: 角の半径は線分長の半分にクランプし、重複点は落とす
+  assert.strictEqual(ctx.__round([{ x: 0, y: 0 }, { x: 0, y: 2 }, { x: 100, y: 2 }], 6),
+    'M 0 0 L 0 1 Q 0 2, 1 2 L 100 2');
+
   // CSS の @media (orientation: portrait) と同じ判定
   assert.strictEqual(ctx.__portrait({ matchMedia: (q) => ({ matches: /orientation: portrait/.test(q) }) }), true);
   assert.strictEqual(ctx.__portrait({ matchMedia: () => ({ matches: false }) }), false);
   assert.strictEqual(ctx.__portrait({ innerWidth: 390, innerHeight: 844 }), true);
+});
+
+test('app2 bilingual link: 空白なしで同じ行に続く訳文（猫。犬。鳥。）でも route が本文 bbox に入らない', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const ctx = runTestableBlock(app2, 'BILINGUAL-LINK', {},
+    'globalThis.__path = buildBlLinkPath; globalThis.__route = blPortraitRoutePoints;'
+    + ' globalThis.__gap = blLineGapY; globalThis.__corner = blEndCorner; globalThis.__visible = blPointVisible;');
+
+  // 実測 fixture（standard テーマ・font-size 20px・line-height 3 = 60px）
+  // 「猫。犬。鳥。」を1行に並べ、s0=猫。 s1=犬。 s2=鳥。 が空白なしで隣接する
+  const view = { left: 0, top: 0, width: 390, height: 700 };
+  const jaPane = { left: 0, top: 0, right: 390, bottom: 400 };
+  const lineTop = 349.14;
+  const lineBottom = 369.14;
+  const maze = { left: 0, right: 17, top: lineTop, bottom: lineBottom };
+  const kuten0 = { left: 17, right: 34, top: lineTop, bottom: lineBottom }; // s0 の文末「。」
+  const inu = { left: 34, right: 51, top: lineTop, bottom: lineBottom };    // s1 先頭「犬」
+  const kuten1 = { left: 51, right: 68, top: lineTop, bottom: lineBottom };
+  const tori = { left: 68, right: 85, top: lineTop, bottom: lineBottom };
+  const texts = [maze, kuten0, inu, kuten1, tori];
+
+  const jaEnd = kuten0;
+  const jaGapY = ctx.__gap([kuten0], jaEnd, 60, jaPane, false);
+  assert.strictEqual(jaGapY, 389.14, '行間余白（文字中心 359.14 + 行送り 30）');
+  const jaCorner = ctx.__corner(jaEnd, jaGapY);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(jaCorner)), { x: 34, y: 371.14 },
+    '旧実装の (right+2, 中心 y) = (36, 359.14) は「犬」の bbox 内だった');
+  assert.strictEqual(ctx.__visible(jaCorner, jaPane, view), true);
+
+  // 英文側も同じ行に後続文（空白なし）がある想定
+  const enEnd = { left: 300, right: 315, top: 100, bottom: 120 };
+  const enNext = { left: 315, right: 380, top: 100, bottom: 120 };
+  const enPane = { left: 0, top: 0, right: 390, bottom: 300 };
+  const enGapY = ctx.__gap([enEnd], enEnd, 60, enPane, false);
+  const enCorner = ctx.__corner(enEnd, enGapY);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(enCorner)), { x: 315, y: 122 });
+
+  const route = ctx.__route(view, enCorner, jaCorner, enGapY, jaGapY, 378);
+  assert.strictEqual(routeHitsText(route, texts, 1), null, '訳文の本文 bbox に stroke が入らない');
+  assert.strictEqual(routeHitsText(route, [enEnd, enNext], 1), null, '英文の本文 bbox に stroke が入らない');
+  // 旧実装（right+2 / 中心 y）だと同じ行の後続文字に入ることを、同じ検証器で示す
+  const oldRoute = [[36, 359.14], [36, 389.14], [378, 389.14], [378, 440], [86, 440], [86, 359.14]]
+    .map((p) => ({ x: p[0], y: p[1] }));
+  assert.notStrictEqual(routeHitsText(oldRoute, [inu], 1), null, '旧端点は「犬」を貫通する');
+
+  const d = ctx.__path(true, view, enEnd, jaEnd, enPane, jaPane,
+    { enEnd: enEnd, jaEnd: jaEnd, enGapY: enGapY, jaGapY: jaGapY });
+  assert.match(d, /^M 315 122 /);
+  assert.match(d, / L 34 371.1$/, '訳文は「。」の右下角で終わる');
+});
+
+test('app2 bilingual link: 文末の可視文字（末尾空白/CRLF/タブ/絵文字）を測り、Range の最後の行を採る', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const ctx = runTestableBlock(app2, 'BILINGUAL-LINK', {},
+    'globalThis.__range = blLastVisibleRange; globalThis.__end = blSentenceEndRect;');
+  const show = (t) => {
+    const v = ctx.__range(t);
+    return v ? v.start + '-' + v.end + ':' + String(t).slice(v.start, v.end) : null;
+  };
+  // 文末の空白・改行・タブは文の区切りなので除く
+  assert.strictEqual(show('The dog ran.'), '11-12:.');
+  assert.strictEqual(show('The dog ran.  '), '11-12:.');
+  assert.strictEqual(show('The dog ran.\r\n'), '11-12:.');
+  assert.strictEqual(show('The dog ran.\t\n '), '11-12:.');
+  assert.strictEqual(show('The dog ran.\u3000'), '11-12:.');
+  assert.strictEqual(show('猫が座った。\u3000\t\n'), '5-6:。');
+  // 絵文字は書記素クラスタ単位（サロゲートペア・ZWJ・肌色・旗）
+  assert.strictEqual(show('Done 😀'), '5-7:😀');
+  assert.strictEqual(show('Done 👩‍👩‍👧'), '5-13:👩‍👩‍👧');
+  assert.strictEqual(show('   '), null);
+  assert.strictEqual(show(''), null);
+  assert.strictEqual(show(null), null);
+
+  // Intl.Segmenter が無い環境はコードポイント＋結合文字へフォールバック
+  const fb = runTestableBlock(app2, 'BILINGUAL-LINK', { Intl: { Segmenter: undefined } },
+    'globalThis.__range = blLastVisibleRange;');
+  const fbShow = (t) => {
+    const v = fb.__range(t);
+    return v ? v.start + '-' + v.end + ':' + String(t).slice(v.start, v.end) : null;
+  };
+  assert.strictEqual(fbShow('The dog ran.'), '11-12:.');
+  assert.strictEqual(fbShow('Done 👩‍👩‍👧'), '5-13:👩‍👩‍👧');
+  assert.strictEqual(fbShow('👍🏽'), '0-4:👍🏽');
+  assert.strictEqual(fbShow('🇯🇵'), '0-4:🇯🇵');
+  assert.strictEqual(fbShow('🇯🇵🇺🇸'), '4-8:🇺🇸', '隣り合う旗を1クラスタにしない');
+  assert.strictEqual(fbShow('e\u0301'), '0-2:e\u0301');
+  assert.strictEqual(fbShow('1️⃣'), '0-3:1️⃣');
+
+  // 文末 rect: 末尾が空白だけのテキストノードは飛ばし、文末文字の Range を使う
+  function fakeDoc(rectsFor) {
+    const calls = [];
+    return {
+      calls,
+      createRange() {
+        const st = { start: null, end: null };
+        return {
+          setStart(n, i) { st.start = i; },
+          setEnd(n, i) { st.end = i; },
+          getClientRects() { calls.push(st.start + '-' + st.end); return rectsFor(st) || []; }
+        };
+      }
+    };
+  }
+  const textNode = (v) => ({ nodeType: 3, nodeValue: v });
+  const elem = (nodes) => ({ childNodes: nodes });
+  const rect = (right, top, bottom) => ({
+    left: right - 10, right: right, top: top, bottom: bottom, width: 10, height: bottom - top
+  });
+
+  const doc1 = fakeDoc((st) => (st.start === 11 ? [rect(122, 100, 120)] : []));
+  const r1 = ctx.__end(elem([textNode('The dog ran.'), textNode('\r\n')]), doc1);
+  assert.strictEqual(r1.right, 122);
+  assert.strictEqual(r1.top, 100);
+  assert.ok(doc1.calls.indexOf('11-12') >= 0, '文末 "." の範囲を測る');
+
+  const doc2 = fakeDoc(() => [rect(8, 100, 120)]);
+  assert.strictEqual(ctx.__end(elem([textNode('Hi there.'), textNode('   ')]), doc2).right, 8);
+
+  // 折返しでクラスタが2行にまたがる場合は最後（下）の行を採る
+  const doc3 = fakeDoc(() => [rect(24, 100, 120), rect(34, 160, 180)]);
+  const r3 = ctx.__end(elem([textNode('日本語の文😀')]), doc3);
+  assert.strictEqual(r3.right, 34);
+  assert.strictEqual(r3.top, 160);
+
+  // 入れ子の span も末尾から探す。幅0しか無ければ null（誤った位置に繋がない）
+  const nested = { childNodes: [{ nodeType: 1, childNodes: [textNode('Hi.')] }] };
+  assert.strictEqual(ctx.__end(nested, fakeDoc(() => [rect(122, 100, 120)])).right, 122);
+  assert.strictEqual(ctx.__end(elem([textNode('x')]), fakeDoc(() => [{ left: 0, right: 0, top: 0, bottom: 20, width: 0, height: 20 }])), null);
+  assert.strictEqual(ctx.__end(null, doc1), null);
+  assert.strictEqual(ctx.__end(elem([textNode('x')]), null), null);
+});
+
+test('app2 bilingual link: 縦長は文末の実測（DOM Range）と行間余白を使い、pane 右端固定の旧式を残さない', () => {
+  const app2 = readSiteFile('app2/index.html');
+  assert.match(app2, /blSentenceEndRect\(en, document\)/, '英文の文末を実測する');
+  assert.match(app2, /blSentenceEndRect\(ja, document\)/, '訳文の文末を実測する');
+  assert.match(app2, /blLineGapY\(blLineRects\(en\)/, '英文の行間余白を経路に使う');
+  assert.match(app2, /blLineGapY\(blLineRects\(ja\)/, '訳文の行間余白を経路に使う');
+  assert.match(app2, /blEndCorner\(enEnd, enGapY\)/, '接続点は文末文字の右下角');
+  assert.match(app2, /blEndCorner\(jaEnd, jaGapY\)/);
+  assert.match(app2, /blPointVisible\(enCorner, enClip, vr\)/, '端点が画面外なら隠す');
+  assert.match(app2, /blPointVisible\(jaCorner, jaClip, vr\)/);
+  assert.match(app2, /BL_END_STROKE_GAP = 2/, '文字 bbox の外に stroke 余白を取る');
+  // 縦長の pane 右端固定（edgeX / right+2 の右中央端点）の旧式を残さない
+  assert.equal(app2.indexOf('edgeX'), -1, '右端固定の旧式を残さない');
+  assert.equal(app2.indexOf('+ 2)'), -1);
+  // 横長の式は従来のまま（英文右端→訳文左端、±40 の制御点）
+  assert.match(app2, /' C ' \+ blRound\(x1 \+ 40\)/);
+  assert.match(app2, /', ' \+ blRound\(x2 - 40\)/);
+  // 行間は line-height: 3 の余白を使う（本文を横断しない前提）
+  assert.match(app2, /\.bl-text \{[^}]*line-height: 3/);
+  // 向き判定は CSS と同じ orientation
+  assert.match(app2, /matchMedia\('\(orientation: portrait\)'\)/);
 });
 
 test('app2 bilingual scroll: 可視なら動かさず、前の smooth を止めてから最新の選択を優先する', () => {

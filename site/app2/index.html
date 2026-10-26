@@ -571,6 +571,7 @@
       stroke: #00a000;
       stroke-width: 2;
       stroke-linecap: round;
+      stroke-linejoin: round;
       opacity: 0.9;
     }
 
@@ -1797,9 +1798,8 @@
       }
 
       function rectAtLine(el, anchorY) {
-        const all = el.getClientRects ? Array.prototype.slice.call(el.getClientRects()) : [];
         // 行末の改行・空白が作る幅0の矩形は使わない（線が左端に飛ぶ原因）
-        const rects = all.filter(function (r) { return r.width > 0.5 && r.height > 0.5; });
+        const rects = blLineRects(el);
         if (!rects.length) return el.getBoundingClientRect();
         if (anchorY) {
           let best = rects[0];
@@ -1827,13 +1827,276 @@
         return w.innerWidth < w.innerHeight;
       }
 
+      // ── 文末の可視文字を DOM Range で実測する ──────────────
+      // 文末の空白（半角/全角/タブ/CRLF/NBSP/ZWSP）は文の区切りなので除外し、
+      // 最後の書記素クラスタ（絵文字・ZWJ・異体字・肌色・旗）の範囲を返す。
+      function blIsSpaceCode(code) {
+        return code === 0x20 || code === 0x09 || code === 0x0a || code === 0x0d
+          || code === 0x0b || code === 0x0c || code === 0xa0 || code === 0x3000
+          || code === 0x200b || code === 0xfeff;
+      }
+      function blIsLowSurrogate(code) {
+        return code >= 0xdc00 && code <= 0xdfff;
+      }
+      const BL_EXTEND_CHAR_RE = (function () {
+        try {
+          return new RegExp('[\\p{M}\\uFE00-\\uFE0F\\u{E0100}-\\u{E01EF}\\u{1F3FB}-\\u{1F3FF}\\u{E0020}-\\u{E007F}]', 'u');
+        } catch (e) {
+          return /[\u0300-\u036f\ufe00-\ufe0f]/;
+        }
+      })();
+      const BL_REGIONAL_RE = (function () {
+        try { return /[\u{1F1E6}-\u{1F1FF}]/u; } catch (e) { return /\ud83c[\udde6-\uddff]/; }
+      })();
+
+      /** 文字列 s の [0, end) の末尾にあるコードポイントの開始位置 */
+      function blPrevCodePoint(s, end) {
+        if (end <= 1) return 0;
+        if (blIsLowSurrogate(s.charCodeAt(end - 1))) return end - 2;
+        return end - 1;
+      }
+
+      /** 文字列 s の [0, end) の末尾にある書記素クラスタの開始位置 */
+      function blLastGraphemeStart(s, end) {
+        if (!(end > 0)) return 0;
+        try {
+          if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+            const seg = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+            let last = null;
+            for (const part of seg.segment(s.slice(0, end))) last = part;
+            if (last && typeof last.index === 'number') return last.index;
+          }
+        } catch (e) {}
+        // フォールバック（Segmenter 不可の環境）: コードポイント＋結合文字/ZWJ/旗の対/肌色
+        let start = blPrevCodePoint(s, end);
+        for (let guard = 0; guard < 64 && start > 0; guard++) {
+          const prevStart = blPrevCodePoint(s, start);
+          const prev = s.slice(prevStart, start);
+          const head = s.slice(start, end);
+          const pair = blIsLowSurrogate(s.charCodeAt(start + 1));
+          const headCp = head.slice(0, pair ? 2 : 1);
+          const joins = prev === '\u200d' || headCp === '\u200d'
+            || BL_EXTEND_CHAR_RE.test(headCp)
+            || (BL_REGIONAL_RE.test(prev) && BL_REGIONAL_RE.test(headCp) && head.length === headCp.length);
+          if (!joins) break;
+          start = prevStart;
+        }
+        return start;
+      }
+
+      /** 文末の可視文字（末尾の空白・改行・タブを除く最後の書記素クラスタ）の範囲 */
+      function blLastVisibleRange(text) {
+        const s = String(text == null ? '' : text);
+        let end = s.length;
+        while (end > 0 && blIsSpaceCode(s.charCodeAt(end - 1))) end--;
+        if (!end) return null;
+        return { start: blLastGraphemeStart(s, end), end: end };
+      }
+
+      function blTextNodes(el, out) {
+        const list = out || [];
+        if (!el || !el.childNodes) return list;
+        for (let i = 0; i < el.childNodes.length; i++) {
+          const node = el.childNodes[i];
+          if (!node) continue;
+          if (node.nodeType === 3) list.push(node);
+          else if (node.childNodes && node.childNodes.length) blTextNodes(node, list);
+        }
+        return list;
+      }
+
+      /**
+       * 文末の可視文字の実測 rect（ビューポート座標。折返しで行をまたぐ場合は最後の行）。
+       * 末尾が空白だけ・Range 非対応・幅0 のときは null（誤った位置に繋がない）。
+       */
+      function blSentenceEndRect(el, doc) {
+        if (!el || !doc || typeof doc.createRange !== 'function') return null;
+        const nodes = blTextNodes(el);
+        for (let i = nodes.length - 1; i >= 0; i--) {
+          const node = nodes[i];
+          const span = blLastVisibleRange(node.nodeValue);
+          if (!span) continue;
+          let rects = [];
+          try {
+            const range = doc.createRange();
+            range.setStart(node, span.start);
+            range.setEnd(node, span.end);
+            if (range.getClientRects) rects = Array.prototype.slice.call(range.getClientRects());
+            if (!rects.length && range.getBoundingClientRect) {
+              const one = range.getBoundingClientRect();
+              if (one) rects = [one];
+            }
+          } catch (e) {
+            return null;
+          }
+          let best = null;
+          for (const r of rects) {
+            if (!r || !(r.width > 0.5) || !(r.height > 0.5)) continue;
+            if (!best || r.bottom > best.bottom + 0.5
+              || (Math.abs(r.bottom - best.bottom) <= 0.5 && r.right > best.right)) best = r;
+          }
+          if (best) return best;
+        }
+        return null;
+      }
+
+      /** 要素の行ごとの実測矩形（行末の改行・空白が作る幅0の矩形は除く） */
+      function blLineRects(el) {
+        const all = el && el.getClientRects ? Array.prototype.slice.call(el.getClientRects()) : [];
+        return all.filter(function (r) { return r && r.width > 0.5 && r.height > 0.5; });
+      }
+
+      /**
+       * 文末の行の外側（行間余白）の中央 y。次の行との間を優先し、pane の clip に
+       * 入らなければ前の行との間を使う。行間は実測行 rect と行送り（line-height）から求める。
+       * 同 line の後続文を横断しないため、この y を水平移動に使う。
+       */
+      function blLineGapY(lines, endRect, lineHeight, clip, preferAbove) {
+        if (!endRect) return null;
+        const top = Number(endRect.top);
+        const bottom = Number(endRect.bottom);
+        const cy = (top + bottom) / 2;
+        const half = Math.max(0, (bottom - top) / 2);
+        const lh = Number(lineHeight) || 0;
+        const list = (Array.isArray(lines) ? lines : []).filter(function (r) {
+          return r && r.width > 0.5 && r.height > 0.5;
+        });
+        let idx = -1;
+        let bestD = Infinity;
+        for (let i = 0; i < list.length; i++) {
+          const d = Math.abs((list[i].top + list[i].bottom) / 2 - cy);
+          if (d < bestD) { bestD = d; idx = i; }
+        }
+        const line = idx >= 0 ? list[idx] : null;
+        const below = function () {
+          if (line && idx + 1 < list.length && list[idx + 1].top > line.bottom - 1) {
+            return (line.bottom + list[idx + 1].top) / 2;
+          }
+          return lh > 0 ? cy + lh / 2 : null;
+        };
+        const above = function () {
+          if (line && idx > 0 && list[idx - 1].bottom < line.top + 1) {
+            return (list[idx - 1].bottom + line.top) / 2;
+          }
+          return lh > 0 ? cy - lh / 2 : null;
+        };
+        // 行間が clip に入らない（大きな文字サイズ・低いペイン）ときは、文字 bbox の
+        // すぐ外（角 + stroke 余白）へ逃がす。本文へは入らない。
+        const tight = function (dir) {
+          return cy + dir * (half + BL_END_STROKE_GAP);
+        };
+        const inClip = function (y) {
+          if (y == null || !isFinite(y)) return false;
+          if (!clip) return true;
+          return y >= Number(clip.top) + 1 && y <= Number(clip.bottom) - 1;
+        };
+        const candidates = preferAbove
+          ? [above, below, () => tight(-1), () => tight(1)]
+          : [below, above, () => tight(1), () => tight(-1)];
+        for (const candidate of candidates) {
+          const y = candidate();
+          if (inClip(y)) return y;
+        }
+        return null;
+      }
+
+      // 文末文字の bbox の外に取る stroke 余白（stroke 2px の半分 + 1px）。
+      // 端点を「文字の右中央」に置くと、空白なしで同じ行に続く次の文の bbox に入り、
+      // そこから行間へ降りる縦線が隣の文字を貫く。右下（gap が上なら右上）角から
+      // 外へ出せば、同じ行の文字 bbox を横切らない。
+      const BL_END_STROKE_GAP = 2;
+
+      /**
+       * 文末文字の接続点。文字 bbox の右下角（gap が上側なら右上角）+ stroke 余白。
+       * x は文字 bbox の右端、y は bbox の下端+2px / 上端−2px（文字 bbox へ stroke を入れない）。
+       */
+      function blEndCorner(rect, gapY) {
+        if (!rect) return null;
+        const cy = (Number(rect.top) + Number(rect.bottom)) / 2;
+        const below = Number(gapY) >= cy;
+        const edge = below ? Number(rect.bottom) : Number(rect.top);
+        return {
+          x: Number(rect.right),
+          y: edge + (below ? BL_END_STROKE_GAP : -BL_END_STROKE_GAP)
+        };
+      }
+
+      /** 点が pane ∩ view の clip 内（と view の横幅）にあるか */
+      function blPointVisible(point, clip, viewRect) {
+        if (!point || !clip || !viewRect) return false;
+        // DOMRect は right を持つ。素の矩形（left/width）でも判定できるようにする
+        const right = isFinite(Number(viewRect.right))
+          ? Number(viewRect.right)
+          : Number(viewRect.left) + Number(viewRect.width);
+        return point.y >= Number(clip.top) + 1 && point.y <= Number(clip.bottom) - 1
+          && point.x > Number(viewRect.left) + 1 && point.x < right - 1;
+      }
+
+      /** 点列を角丸の SVG パスにする（角は Q で丸め、stroke-linejoin に依存しない） */
+      function blRoundedPolyline(points, radius) {
+        const clean = [];
+        for (const p of (Array.isArray(points) ? points : [])) {
+          if (!p || !isFinite(p.x) || !isFinite(p.y)) continue;
+          const prev = clean[clean.length - 1];
+          if (prev && Math.abs(prev.x - p.x) < 0.01 && Math.abs(prev.y - p.y) < 0.01) continue;
+          clean.push({ x: Number(p.x), y: Number(p.y) });
+        }
+        if (!clean.length) return '';
+        const rMax = Number(radius) > 0 ? Number(radius) : 0;
+        let d = 'M ' + blRound(clean[0].x) + ' ' + blRound(clean[0].y);
+        for (let i = 1; i < clean.length - 1; i++) {
+          const prev = clean[i - 1];
+          const cur = clean[i];
+          const next = clean[i + 1];
+          const inLen = Math.hypot(cur.x - prev.x, cur.y - prev.y);
+          const outLen = Math.hypot(next.x - cur.x, next.y - cur.y);
+          const cut = Math.min(rMax, inLen / 2, outLen / 2);
+          if (!(cut > 0.2)) {
+            d += ' L ' + blRound(cur.x) + ' ' + blRound(cur.y);
+            continue;
+          }
+          const ax = cur.x - ((cur.x - prev.x) / inLen) * cut;
+          const ay = cur.y - ((cur.y - prev.y) / inLen) * cut;
+          const bx = cur.x + ((next.x - cur.x) / outLen) * cut;
+          const by = cur.y + ((next.y - cur.y) / outLen) * cut;
+          d += ' L ' + blRound(ax) + ' ' + blRound(ay)
+            + ' Q ' + blRound(cur.x) + ' ' + blRound(cur.y)
+            + ', ' + blRound(bx) + ' ' + blRound(by);
+        }
+        const last = clean[clean.length - 1];
+        d += ' L ' + blRound(last.x) + ' ' + blRound(last.y);
+        return d;
+      }
+
+      /**
+       * 縦長（上下2ペイン）の経路。文末文字の右下角（gap が上なら右上角）から
+       * その行の行間余白へ出る → 行間内を水平に右gutterへ → gutter を縦に下る →
+       * 訳の行間余白 → 訳文末の角へ戻る。文字の bbox の外から出るので、空白なしで
+       * 同じ行に続く後続文の本文も横断しない。
+       */
+      function blPortraitRoutePoints(view, enCorner, jaCorner, enGapY, jaGapY, gutterX) {
+        const maxX = Math.max(0, Number(view && view.width) - 4);
+        const clampX = function (x) { return Math.max(0, Math.min(maxX, Number(x))); };
+        const ex = clampX(enCorner.x);
+        const jx = clampX(jaCorner.x);
+        const gx = clampX(gutterX);
+        return [
+          { x: ex, y: Number(enCorner.y) },
+          { x: ex, y: Number(enGapY) },
+          { x: gx, y: Number(enGapY) },
+          { x: gx, y: Number(jaGapY) },
+          { x: jx, y: Number(jaGapY) },
+          { x: jx, y: Number(jaCorner.y) }
+        ];
+      }
+
       /**
        * 対訳リンクの SVG パス（座標は #bilingualView の左上基準）。
-       * 横長: 従来どおり英文右端→訳文左端。
-       * 縦長: 両端を pane 内側の右余白（padding-right 内）に置き、制御点も右余白の中だけに
-       * 置く。本文側（enRect.right 等）には戻らず、y は選択文の中心間だけを通す。
+       * 横長: 従来どおり英文右端→訳文左端（変更しない）。
+       * 縦長: 英文の文末文字の右下角→その行の行間余白→右gutter→訳の行間余白→訳文末の右下角。
+       * info（文末の実測 rect と行間 y）が無いときは描かない（誤った位置へ黙って戻さない）。
        */
-      function buildBlLinkPath(portrait, view, enRect, jaRect, enPaneRect, jaPaneRect) {
+      function buildBlLinkPath(portrait, view, enRect, jaRect, enPaneRect, jaPaneRect, info) {
         const y1 = (enRect.top + enRect.bottom) / 2 - view.top;
         const y2 = (jaRect.top + jaRect.bottom) / 2 - view.top;
         if (!portrait) {
@@ -1844,31 +2107,63 @@
             + ', ' + blRound(x2 - 40) + ' ' + blRound(y2)
             + ', ' + blRound(x2) + ' ' + blRound(y2);
         }
-        // 右余白: pane の padding-right(20px) の内側に端点、さらに右寄りに制御点を置く。
-        // すべて viewport 右端から stroke 分を残した位置にクランプする（はみ出さない）。
+        if (!info || !info.enEnd || !info.jaEnd || !isFinite(info.enGapY) || !isFinite(info.jaGapY)) {
+          return '';
+        }
+        const enCorner = blEndCorner(info.enEnd, info.enGapY);
+        const jaCorner = blEndCorner(info.jaEnd, info.jaGapY);
+        if (!enCorner || !jaCorner) return '';
         const maxX = Math.max(0, view.width - 4);
-        const edgeX = Math.max(0, maxX - 8);
-        const enX = Math.max(0, Math.min(edgeX, enPaneRect.right - view.left - 12));
-        const jaX = Math.max(0, Math.min(edgeX, jaPaneRect.right - view.left - 12));
-        return 'M ' + blRound(enX) + ' ' + blRound(y1)
-          + ' C ' + blRound(maxX) + ' ' + blRound(y1)
-          + ', ' + blRound(maxX) + ' ' + blRound(y2)
-          + ', ' + blRound(jaX) + ' ' + blRound(y2);
+        const clampX = function (x) { return Math.max(0, Math.min(maxX, x)); };
+        // 接続点は文末文字の右下角。行間の水平部は文字 bbox の外だけを通す。
+        const enPoint = { x: clampX(enCorner.x - view.left), y: enCorner.y - view.top };
+        const jaPoint = { x: clampX(jaCorner.x - view.left), y: jaCorner.y - view.top };
+        // gutter の縦経路は pane の padding-right 内（本文の右外）。本文側へは戻さない。
+        const gutterX = Math.max(0, Math.min(maxX,
+          Math.min(Number(enPaneRect.right), Number(jaPaneRect.right)) - view.left - 12));
+        if (gutterX < Math.max(enPoint.x, jaPoint.x) - 0.5) return '';
+        const points = blPortraitRoutePoints(
+          view, enPoint, jaPoint, info.enGapY - view.top, info.jaGapY - view.top, gutterX
+        );
+        return blRoundedPolyline(points, 6);
       }
       // TESTABLE-BILINGUAL-LINK-END
+
+      /** 対訳ペインの可視範囲（pane ∩ view の縦範囲） */
+      function blPaneClip(pane, viewRect) {
+        if (!pane || !viewRect) return null;
+        const pr = pane.getBoundingClientRect();
+        return {
+          top: Math.max(Number(pr.top), Number(viewRect.top)),
+          bottom: Math.min(Number(pr.bottom), Number(viewRect.bottom))
+        };
+      }
+
+      /** 行送り（px）。line-height が normal のときは font-size から概算する */
+      function blLineHeightPx(el) {
+        try {
+          const cs = window.getComputedStyle(el);
+          const lh = parseFloat(cs.lineHeight);
+          if (isFinite(lh) && lh > 0) return lh;
+          const fs = parseFloat(cs.fontSize);
+          if (isFinite(fs) && fs > 0) return fs * 1.2;
+        } catch (e) {}
+        return 0;
+      }
 
       function drawBilingualLink() {
         const els = blEls();
         if (!els.path) return;
+        const hideLink = function () { els.path.setAttribute('d', ''); };
         if (!bilingual.active || !bilingual.selectedId) {
-          els.path.setAttribute('d', '');
+          hideLink();
           return;
         }
         const viewer = els.view;
         const en = els.en ? els.en.querySelector('[data-sid="' + bilingual.selectedId + '"]') : null;
         const ja = els.ja ? els.ja.querySelector('[data-sid="' + bilingual.selectedId + '"]') : null;
         if (!viewer || !en || !ja) {
-          els.path.setAttribute('d', '');
+          hideLink();
           return;
         }
         const vr = viewer.getBoundingClientRect();
@@ -1882,18 +2177,50 @@
           // 両端が見えていないときは線を隠す
           return rect.top < bottom - 1 && rect.bottom > top + 1;
         }
-        if (!inPane(enRect, els.enPane) || !inPane(jaRect, els.jaPane)) {
-          els.path.setAttribute('d', '');
+        const portrait = blIsPortraitLayout();
+        let info = null;
+        if (portrait) {
+          // 縦長は「文末の可視文字の右下角」に繋ぐ（pane の右端固定にしない）。
+          // 文末が画面外（長文の末尾など）や実測できないときは、別の文の位置へ
+          // 戻さず線を隠す。
+          const enEnd = blSentenceEndRect(en, document);
+          const jaEnd = blSentenceEndRect(ja, document);
+          const enClip = blPaneClip(els.enPane, vr);
+          const jaClip = blPaneClip(els.jaPane, vr);
+          if (!enEnd || !jaEnd) {
+            hideLink();
+            return;
+          }
+          const enGapY = blLineGapY(blLineRects(en), enEnd, blLineHeightPx(en), enClip, false);
+          const jaGapY = blLineGapY(blLineRects(ja), jaEnd, blLineHeightPx(ja), jaClip, false);
+          if (enGapY == null || jaGapY == null) {
+            hideLink();
+            return;
+          }
+          const enCorner = blEndCorner(enEnd, enGapY);
+          const jaCorner = blEndCorner(jaEnd, jaGapY);
+          if (!blPointVisible(enCorner, enClip, vr) || !blPointVisible(jaCorner, jaClip, vr)) {
+            hideLink();
+            return;
+          }
+          info = { enEnd: enEnd, jaEnd: jaEnd, enGapY: enGapY, jaGapY: jaGapY };
+        } else if (!inPane(enRect, els.enPane) || !inPane(jaRect, els.jaPane)) {
+          hideLink();
           return;
         }
         const d = buildBlLinkPath(
-          blIsPortraitLayout(),
+          portrait,
           vr,
           enRect,
           jaRect,
           els.enPane.getBoundingClientRect(),
-          els.jaPane.getBoundingClientRect()
+          els.jaPane.getBoundingClientRect(),
+          info
         );
+        if (!d) {
+          hideLink();
+          return;
+        }
         els.path.setAttribute('d', d);
       }
 
