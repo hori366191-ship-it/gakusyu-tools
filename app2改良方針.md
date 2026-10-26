@@ -77,9 +77,9 @@
   - なし：`【キーワード】なし`
 - 検証：欄の増減（1→6→上限抑止）、×削除、全空送信、`settings.keywords` の送信、文の種類連動セレクトとの干渉なしを確認。
 
-## 7. AI移行（Ollama Cloud / Gemma4 31B）と対訳表示 — 2026-10-26・ローカル実装のみ
+## 7. AI移行（Ollama Cloud / Gemma4 31B）と対訳表示 — 2026-10-26・app2 `@48` で公開済（実API疎通は未検証）
 
-> 状態: ローカル実装と Node 回帰テスト／モックでの UI スモーク確認まで。`clasp push`・デプロイ版更新・Pages 公開は**未実施**（別作業）。本番 API 課金・本番 Drive 操作も未実施。
+> 状態: ローカル実装・Node 回帰（独立168件）・モック UI スモーク（117 pass）に加え、2026-10-26 に GAS 既存デプロイ **app2 `@47`→`@48`** と Pages を公開（実装 commit `fb8380a82e679ecaa1d61aa745c435e46c585423`）。ただし**実 Ollama Cloud API の呼出（課金）・本番 Drive の生成/保存/削除は行っていない**ため、鍵の実有効性・品質・所要時間・保存実操作は未検証（詳細は 7.7）。
 
 ### 7.1 生成・審査・翻訳の移行
 
@@ -126,7 +126,7 @@
 - XSS 防止のため `textContent` のみを使う。レコード切替・遅延応答・モード終了は `seq` と `recordId` で無効化し、選択・線もリセットする。
 - 標準/pop/forest の各テーマに `site/themes/pop.css` / `forest.css` で対訳用スタイルを追加。
 
-### 7.5 テスト（ローカル・モックのみ）
+### 7.5 テスト（ローカル・モック＋公開後の read-only 検証）
 
 - `scripts/tests/security-backends.test.cjs`: AI モックを Ollama 形式（`message.content` / `done`）へ変更。Ollama の HTTP 失敗・非JSON・切断・打ち切り・空・think 400 の再試行、ZEN 非フォールバック、翻訳の取得/作成/再利用/同一ID再送/並行予約/不正出力/中国語疑い/常用漢字の正常系/moderation/保存不明（永続 unknown）/入力検証の実行順/削除連動を追加。
 - `scripts/tests/transport.test.cjs`: `translateText` の送信契約（get は request_id 不要、create は必須、record_id のみ送信）と対訳 UI の静的検証を追加。
@@ -155,6 +155,19 @@
 
 ### 7.6 残課題
 
-- 実 Ollama Cloud での生成・翻訳の品質/所要時間の確認（GAS `UrlFetchApp` の実時間上限に注意）。
+- 実 Ollama Cloud での生成・翻訳の品質/所要時間の確認（GAS `UrlFetchApp` の実時間上限に注意）。鍵 `OLLAMA_API_KEY` の実有効性も未確認。
 - 翻訳 moderation の判定粒度（教材としての自然さ）の実サンプル確認。
-- 本番反映（`clasp push` → 既存デプロイの版更新 → Pages）は未実施。手順は `AGENTS.md`「デプロイ・公開のルール」に従う。
+- 本番 Drive での保存・生成・削除の実操作（実データを伴うため、別途ユーザーの確認を得てから行う）。
+- 本番反映（`clasp push` → 既存デプロイの版更新 → Pages）は 2026-10-26 に完了（7.7）。手順の正本は `AGENTS.md`「デプロイ・公開のルール」。
+
+### 7.7 公開結果（2026-10-26・app2 `@48`／Pages公開済・実API疎通は未検証）
+
+- 対象: `site-app2-backend` の既存デプロイ **app2 のみ** `@47` → `@48`（実装 commit `fb8380a82e679ecaa1d61aa745c435e46c585423`）。`site-pdfdrop` は不変（`@27`）。新規デプロイ作成・アクセス設定変更はしていない。
+- version: `updateTime 2026-10-26T11:46:18.133Z`。code `69975b63` / bundle `096b73af` / manifest `923fb7bb` の整合を確認。
+- 設定の保持: `deploymentConfig` は `versionNumber` 以外（`scriptId` / `manifestFileName` / `description`）を保持。Deployment側 `entryPoints` 全体（`webApp.entryPointConfig` の `access` / `executeAs` を含む）・入口URL・`access` / `executeAs` は前後で一致し、他デプロイも不変。
+- stale snapshot: 作成済み v48 の初回 list が stale だったため安全停止。**再 version 作成も再 PUT もしない**まま、read-only の複数経路（`fields` 違い・`prettyPrint`・no-cache 等）で version 48 / `updateTime` の一致を再照合し、整合確認後に切替。
+- 認証: `-A` 相当の専用認証のみ使用。共有認証は変更なし（実パス・鍵・メールは記載しない）。
+- CI / Pages: Tests `40317706811` success、Pages `40317706784` success。公開 artifact commit は `fb8380a`。
+- 検証: 独立回帰 168件・モックUI 117 pass（オフライン）。公開後は read-only で、`app2` / pop / forest が HTTP 200 かつ commit と byte 単位で SHA 一致、実Chrome PC（1280x900）/ mobile（390x844）× 3テーマで overflow 0・error 0・通常辞書操作成功、無効 token の `getSavedTexts` / `translateText(get)` は `bad_token`、匿名 probe は `noauth`。
+- **未検証（明示）**: 実 Ollama Cloud API の呼出（課金）、鍵 `OLLAMA_API_KEY` の実有効性、生成/翻訳の品質・所要時間、本番 Drive への保存・生成・削除の実操作。検証中に本番データの作成・削除はしておらず、出力も残していない。このため「全て本番疎通済み」とは扱わない。
+- 以降の確認はユーザー合意を得てから別作業で行い、`仕様書_移行案.md` 8.3 の追加公開記録と整合させる。
