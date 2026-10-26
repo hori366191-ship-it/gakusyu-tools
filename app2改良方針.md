@@ -77,9 +77,9 @@
   - なし：`【キーワード】なし`
 - 検証：欄の増減（1→6→上限抑止）、×削除、全空送信、`settings.keywords` の送信、文の種類連動セレクトとの干渉なしを確認。
 
-## 7. AI移行（Ollama Cloud / Gemma4 31B）と対訳表示 — 2026-10-26・app2 `@49` で公開済・実 API smoke 確認済
+## 7. AI移行（Ollama Cloud / Gemma4 31B）と対訳表示 — 2026-10-26・app2 `@50` で公開済・実 API smoke 確認済（`@49`）
 
-> 状態: ローカル実装・Node 回帰・モック UI スモークに加え、2026-10-26 に GAS 既存デプロイ **app2 `@47`→`@48`** と Pages を公開（実装 commit `fb8380a82e679ecaa1d61aa745c435e46c585423`）、続けて言語境界修正を **`@49`** で公開（`fc65c08`）。`@48` 時点では実 API 未検証だったが、`@49` 公開後にユーザー承認の実 smoke を実施し、**生成・翻訳・保存再利用まで確認済み**（7.9）。課金額と Ollama 内部呼出回数は未取得、語数の厳密性と時制の揺れは残課題。その後 2026-10-26 に対訳 UI と翻訳バックエンド（記号保持）の改善をローカル実装した（7.10。**未 push・未デプロイ・Pages 未反映**）。
+> 状態: ローカル実装・Node 回帰・モック UI スモークに加え、2026-10-26 に GAS 既存デプロイ **app2 `@47`→`@48`** と Pages を公開（実装 commit `fb8380a82e679ecaa1d61aa745c435e46c585423`）、続けて言語境界修正を **`@49`** で公開（`fc65c08`）。`@48` 時点では実 API 未検証だったが、`@49` 公開後にユーザー承認の実 smoke を実施し、**生成・翻訳・保存再利用まで確認済み**（7.9）。課金額と Ollama 内部呼出回数は未取得、語数の厳密性と時制の揺れは残課題。その後 2026-10-26 に対訳 UI と翻訳バックエンド（記号保持）の改善を実装し、commit `878ae1d` として app2 `@50` と Pages で公開した（7.10）。実 AI による記号混在翻訳の追加課金検証と本番 Drive 書込みは未実施。
 
 ### 7.1 生成・審査・翻訳の移行
 
@@ -120,7 +120,7 @@
 
 ### 7.4 対訳 UI（`site/app2/index.html`）
 
-> 2026-10-26 のローカル変更（未公開）を反映した現方針。公開済み `@49` は変更前の挙動で、次回公開時に反映する（7.10）。
+> 2026-10-26 の変更は app2 `@50` と Pages で公開済み（7.10）。`@49` までは変更前の挙動だった。
 
 - 通常表示は従来どおり（段落・自然折返し）。対訳中も英文は offset の **inline span** で描画し、原文を改変せず文ごとの改行もしない。訳文も inline span（ID 維持）で、文間は連結し、原文スライスの先頭/末尾空白ランにある改行を**LFへ正規化して数だけ保持**する（CRLF は改行1つ、空行はその数だけ。原文先頭も同様、同段落内の文間スペースは入れない）。
 - 対訳ボタン: 表示/非表示、取得中、作成中、失敗（破損・未作成・権限なし・結果不明）を表示する。
@@ -136,10 +136,10 @@
 
 ### 7.5 テスト（ローカル・モック＋公開後の read-only 検証）
 
-- `scripts/tests/security-backends.test.cjs`: AI モックを Ollama 形式（`message.content` / `done`）へ変更。Ollama の HTTP 失敗・非JSON・切断・打ち切り・空・think 400 の再試行、ZEN 非フォールバック、翻訳の取得/作成/再利用/同一ID再送/並行予約/不正出力/中国語疑い/常用漢字の正常系/moderation/保存不明（永続 unknown）/入力検証の実行順/削除連動を追加。2026-10-26 のローカル変更（記号保持）では、記号だけスパンの AI 除外と原文 trim 保持、新形式の完全一致検証、旧 cache 互換、通常英文への記号のみ応答の拒否、合成後全訳の moderation（全記号時も審査1回・明示 OK のみ）、`TRANS_VERSION` 不変を追加。
-- `scripts/tests/transport.test.cjs`: `translateText` の送信契約（get は request_id 不要、create は必須、record_id のみ送信）と対訳 UI の静的検証を追加。2026-10-26 のローカル変更では、段落の改行数（LF/CRLF/空行/インデント/先頭末尾/文間スペース）、縦長/横長のリンク座標、辞書の遅延応答（モード/レコード切替/連打/close）、smooth の中断と reduced motion を追加。
+- `scripts/tests/security-backends.test.cjs`: AI モックを Ollama 形式（`message.content` / `done`）へ変更。Ollama の HTTP 失敗・非JSON・切断・打ち切り・空・think 400 の再試行、ZEN 非フォールバック、翻訳の取得/作成/再利用/同一ID再送/並行予約/不正出力/中国語疑い/常用漢字の正常系/moderation/保存不明（永続 unknown）/入力検証の実行順/削除連動を追加。2026-10-26 の変更（記号保持。app2 `@50` で公開済）では、記号だけスパンの AI 除外と原文 trim 保持、新形式の完全一致検証、旧 cache 互換、通常英文への記号のみ応答の拒否、合成後全訳の moderation（全記号時も審査1回・明示 OK のみ）、`TRANS_VERSION` 不変を追加。
+- `scripts/tests/transport.test.cjs`: `translateText` の送信契約（get は request_id 不要、create は必須、record_id のみ送信）と対訳 UI の静的検証を追加。2026-10-26 の変更（app2 `@50` で公開済）では、段落の改行数（LF/CRLF/空行/インデント/先頭末尾/文間スペース）、縦長/横長のリンク座標、辞書の遅延応答（モード/レコード切替/連打/close）、smooth の中断と reduced motion を追加。
 - 実ブラウザ確認はモック（ローカル `http.server` + `window.test*` フック）で PC 1280x900 / スマホ 390x844 / 3テーマを確認。最終の実機・実 API 回帰は `test` 担当。
-- 2026-10-26 ローカル変更の個別結果は code（`security-backends`）114 pass / UI transport 38 pass（いずれもオフライン）。実ブラウザの全回帰は `test` 担当で結果待ちのため、**合計件数は確定値として記載しない**。
+- 2026-10-26 の変更は、ローカル段階で code（`security-backends`）114 pass / UI transport 38 pass、公開時の最終回帰で**独立 188 pass / UI 144 pass**（いずれもオフライン）。実 API・本番 Drive は使っていない（7.10）。
 
 #### モックでの UI 確認手順（test 引継ぎ用）
 
@@ -168,7 +168,7 @@
 - 翻訳 moderation の判定粒度: 実 1 件は通過し重大な誤訳なし。サンプル追加は未実施。
 - 本番 Drive: 教材1件＋訳1件の作成と再読込での再利用を確認（7.9）。削除の実操作は未実施。
 - 料金額・Ollama 内部呼出回数は未取得。
-- 本番反映は 2026-10-26 に完了（`@48` は 7.7、`@49` は 7.9）。手順の正本は `AGENTS.md`「デプロイ・公開のルール」。
+- 本番反映は 2026-10-26 に完了（`@48` は 7.7、`@49` は 7.9、`@50` は 7.10）。手順の正本は `AGENTS.md`「デプロイ・公開のルール」。
 
 ### 7.7 `@48` 公開結果（2026-10-26・当時点では実 API 疎通は未検証）
 
@@ -257,21 +257,26 @@
 
 **残課題**: 語数の厳密性（100 words 指定 → 83 words）、時制の揺れ、料金額・Ollama 内部呼出回数の取得。真因（当初の `moderation_rejected`）は未確定のまま。
 
-### 7.10 対訳UI＋翻訳バックエンドの追加改善（2026-10-26・ローカル実装のみ）
+### 7.10 対訳UI＋翻訳バックエンドの追加改善（2026-10-26・app2 `@50`／Pages 公開済）
 
-> 7.10 は当初「UI のみ」の記録だったが、同じローカル作業で **バックエンド（記号だけスパンの原文保持）も変更**したため、本節を UI＋backend の記録に更新する。段階は下表のとおりで、**公開準備前**。
+> 7.10 は当初「UI のみ」の記録だったが、同じ作業で **バックエンド（記号だけスパンの原文保持）も変更**したため、本節を UI＋backend の記録に更新する。2026-10-26 に commit `878ae1d` として app2 `@50` と Pages へ公開し、公開後 read-only 検証まで完了した。旧 `@49` の smoke 記録（7.9）は当時の記録としてそのまま保持する。
 
 **段階の区別**:
 
 | 段階 | 状態 | 補足 |
 |---|---|---|
 | コード修正 | 完了 | `site/app2/index.html` / `site-gas/site-app2-backend/Code.js` / `scripts/tests/transport.test.cjs` / `scripts/tests/security-backends.test.cjs` / 本docs。テーマCSSは変更なし。Script Properties・URL・認証・`request_id` 冪等・未知 state の扱いは不変 |
-| ローカル検証 | 一部完了 | オフライン unit/static と app2 inline script の構文確認のみ（code 114 pass / UI transport 38 pass を個別確認）。実ブラウザの全回帰は `test` 担当で結果待ち（合計件数は未確定） |
-| GAS HEAD への push | 未実施 | — |
-| 本番 GAS 公開（版更新） | 未実施 | 公開済み app2 `@49` の挙動は変更前のまま |
-| Pages 反映 | 未実施 | 次回公開時に本節の変更を反映する |
-| git commit / push | 未実施 | — |
-| 公開準備 | 未開始 | 上記のローカル検証結果を待ってから着手する |
+| ローカル検証 | 完了 | オフライン unit/static。公開時の最終回帰は**独立 188 pass / UI 144 pass**（実 API・本番 Drive 不使用） |
+| GAS HEAD への push | 完了 | 公開 `@50` の code `72602a06` / bundle `3cbf8dcc` が commit `878ae1d` の source と全整合。manifest は `@49` と同一（不変） |
+| 本番 GAS 公開（既存版更新） | 完了（2026-10-26T14:47:01.855Z） | app2 `@49`→`@50`。version 作成は1回・切替 PUT は1回のみ |
+| `deploymentConfig` / `entryPoints` | 保持・不変 | `versionNumber` 以外（`scriptId` / `manifestFileName` / `description`）を保持。`entryPoints` 全体（`access` / `executeAs` 含む）・入口URL・`access` / `executeAs` は前後一致、他デプロイも不変 |
+| stale version snapshot | read-only reconcile で復旧 | 作成済み version の list が stale だったため証拠付きで停止し、再 version 作成をせず read-only の複数経路（最新 GET/list・`fields` 違い・`prettyPrint`・no-cache 等）で最新 version / `updateTime` の一致を再照合して復旧。切替 PUT は1回 |
+| PUT 前の 503 | 送信前停止と判定して実行 | 切替 PUT 前の 503 は送信前の停止と証拠を確認したうえで実行。成功後の再 PUT はしていない |
+| 認証 | 専用 auth のみ | 共有認証は変更なし（実パス・鍵・メールは記載しない） |
+| CI（Tests） | 完了 | Tests `40343276658` success |
+| Pages 反映 | 完了 | Pages `40343276499` success。公開 artifact commit は `878ae1d` |
+| 公開後検証（read-only） | 完了（66 pass） | 公開 `app2` の HTML が commit と byte 単位で SHA 一致。実Chrome PC（1280x900）/ mobile（390x844）× 3テーマで、原文の段落数（LF/CRLF）保持、記号スパンで二重改行が出ないこと、対訳中の辞書・履歴抑止、右gutterの線、smooth の中断を確認。無効 token は従来どおり拒否 |
+| 実 AI の追加課金検証 | 未実施 | 記号混在本文の実翻訳・追加課金の検証はしていない。本番 Drive への書込みもしていない（read-only のみ） |
 
 **変更内容（UI）**:
 
@@ -280,7 +285,7 @@
 3. 横長の曲線は従来どおり。縦長は英文ペイン右余白→右gutter→訳文ペイン右余白へ通し、端点・制御点をすべて pane の `padding-right`（20px）内に収める。`enRect.right` などの本文端は使わず、y は選択文の中心間だけを通す。viewport 右端からはみ出さず、両端が見えていないときは従来どおり線を隠す。向きの判定は CSS と同じ `orientation: portrait` を `matchMedia` で見る。
 4. 訳ペインの自動スクロールは見切れるときだけ smooth。`prefers-reduced-motion: reduce` では即時。新しい選択では前の smooth を停止してから可視判定するため、旧移動先へ続かない（途中で新選択が可視のケースを含む）。モード終了・レコード切替でも停止する。pane より高い文は先頭を合わせて揺れない。スクロールイベントの rAF 線追従は維持。
 
-**変更内容（バックエンド・今回追加）**:
+**変更内容（バックエンド）**:
 
 5. 記号だけのスパン（Unicode の `P`/`S`/`Z`/`Cf`、絵文字・異体字セレクタ・囲み文字等。キーキャップ絵文字は1要素扱い）は翻訳 AI に渡さず、原文を trim したまま `ja` に保存する。数字・数式・化学式・日本語を含むスパンは従来どおり対象。property escape 不可の環境では同等の範囲表へフォールバックし、表に無い文字は対象に倒す。
 6. 通常文の応答は件数・ID 完全一致のまま（欠落・重複・未知 ID・記号だけの応答は拒否）。記号スパンを除いた対象だけを ID そのままで AI に渡し、戻り値を元の並びへ合成。プロンプトに「記号だけの行・リストに無い ID を出力しない」を追加。
@@ -288,6 +293,6 @@
 8. 保存形式に `symbols:'verbatim'` を追加（含有フラグではなく、記号保持対応版で生成した訳の目印）。`TRANS_VERSION` は不変。新 cache だけ記号スパンの原文 trim との完全一致を要求し、旧 cache は訳文を許容する。**新旧 cache の削除・再生成は不要**。
 9. 通常の英文スパンに記号だけの応答が返った場合は、訳の欠落として拒否（`translation_invalid`）。数字・数式・化学式・日本語であることを必須にはせず、従来の ASCII のみ・制御文字・中国語疑い等の検査を維持。
 
-**テスト（オフラインのみ）**: `scripts/tests/transport.test.cjs` に段落の改行数（LF/CRLF/空行/インデント/先頭末尾/文間スペース）、縦長・横長のリンク座標と向き判定、辞書の遅延応答（モード/レコード切替/連打/close）、smooth の中断・最新可視優先・reduced motion の回帰を追加。`scripts/tests/security-backends.test.cjs` に記号保持（AI 除外・trim 保持・`symbols:'verbatim'` 完全一致・旧 cache 互換・合成後 moderation・全記号時の審査/quota・通常英文への記号のみ応答拒否・`TRANS_VERSION` 不変）を追加。実 API・本番 Drive・実ブラウザは使っていない。
+**テスト（オフライン回帰＋公開後 read-only）**: `scripts/tests/transport.test.cjs` に段落の改行数（LF/CRLF/空行/インデント/先頭末尾/文間スペース）、縦長・横長のリンク座標と向き判定、辞書の遅延応答（モード/レコード切替/連打/close）、smooth の中断・最新可視優先・reduced motion の回帰を追加。`scripts/tests/security-backends.test.cjs` に記号保持（AI 除外・trim 保持・`symbols:'verbatim'` 完全一致・旧 cache 互換・合成後 moderation・全記号時の審査/quota・通常英文への記号のみ応答拒否・`TRANS_VERSION` 不変）を追加。公開時の最終回帰は独立 188 pass / UI 144 pass。公開後は read-only で 66 pass（実 AI・本番 Drive は使っていない）。
 
-**未確認・懸念**: 実 API・本番 Drive・実ブラウザ最終回帰・GAS push・版更新・Pages 反映はいずれも未実施。記号判定は property escape 依存（フォールバックあり）。旧 cache の記号スパンには従来の訳文が残るため、表示は「訳文」のまま（再生成しない方針）。
+**未確認・懸念**: 実 AI による記号混在翻訳の追加課金検証と本番 Drive 書込みは未実施（公開後の検証は read-only）。記号判定は property escape 依存（フォールバックあり）。旧 cache の記号スパンには従来の訳文が残るため、表示は「訳文」のまま（再生成しない方針）。
