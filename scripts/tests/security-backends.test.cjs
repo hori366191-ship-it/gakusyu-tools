@@ -1191,6 +1191,297 @@ test('app2 translate: 文分割は省略語・小数・会話の省略・段落�
   assert.equal(tail.map((s) => 'One two.  '.slice(s.start, s.end)).join(''), 'One two.  ');
 });
 
+// ────────────────────────────── app2 translate: 記号だけのスパン ──────────────────────────────
+
+const SYMBOL_SENTENCE_TEXT = 'First sentence.\n\n***\n\nNext sentence.';
+
+function ollamaPayloadOf(rt, index) {
+  const calls = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0);
+  return JSON.parse(calls[index || 0].opts.payload);
+}
+function payloadText(payload, role) {
+  return payload.messages.filter((m) => m.role === role).map((m) => m.content).join('\n');
+}
+function getTranslation(rt, recordId) {
+  return rt.postJson({
+    action: 'translateText', token: TOKEN, id_token: tokenFor(rt, TEACHER),
+    record_id: recordId, mode: 'get',
+  });
+}
+function addTranslationFile(rt, recordId, obj) {
+  rt.drive.addFile('生成済み長文_index', 'tadoku-trans-' + recordId + '.json', JSON.stringify(obj));
+}
+
+test('app2 translate: 記号だけのスパンは AI に渡さず、原文をそのまま合成して保存する', () => {
+  const rt = setupApp2();
+  const rec = seedRecord(rt, SYMBOL_SENTENCE_TEXT);
+  const spans = rt.ctx.buildSentenceSpans_(SYMBOL_SENTENCE_TEXT);
+  assert.equal(spans.length, 3);
+  rt.net.ai.push(chatReply(JSON.stringify({ items: [
+    { id: 's2', ja: '次の文です。' },
+    { id: 's0', ja: '最初の文です。' },
+  ] })), modOk());
+  const res = rt.postJson(trBody(rt, rec.id));
+  assert.equal(res.json.ok, true, JSON.stringify(res.json).slice(0, 200));
+  const tr = res.json.translation;
+  assert.deepEqual(tr.spans.map((s) => s.id), ['s0', 's1', 's2']);
+  assert.equal(tr.spans.map((s) => s.start).join(','), spans.map((s) => s.start).join(','), 'offset は原文のまま');
+  assert.equal(tr.spans.map((s) => s.end).join(','), spans.map((s) => s.end).join(','), 'offset は原文のまま');
+  assert.deepEqual(tr.items.map((i) => i.ja), ['最初の文です。', '***', '次の文です。'], 'AI の順序に関係なく元の並びへ合成する');
+  assert.equal(tr.spans.map((s) => SYMBOL_SENTENCE_TEXT.slice(s.start, s.end)).join(''), SYMBOL_SENTENCE_TEXT, '原文を復元できる');
+  assert.equal(rt.net.aiCalls(), 2, '翻訳1 + 審査1（記号の再生成はしない）');
+
+  const user = payloadText(ollamaPayloadOf(rt, 0), 'user');
+  assert.equal(user.indexOf('s1:'), -1, '記号スパンは AI の文リストに含めない');
+  assert.ok(user.indexOf('s0: First sentence.') !== -1);
+  assert.ok(user.indexOf('s2: Next sentence.') !== -1);
+
+  const saved = JSON.parse(trFile(rt, rec.id).content);
+  assert.equal(saved.symbols, 'verbatim', '記号は原文保持であることを保存データに残す');
+  assert.equal(saved.moderation, 'ok');
+  assert.equal(saved.items[1].ja, '***', '末尾の段落空白は ja に含めない（client が spans から復元する）');
+  assert.equal(saved.spans[1].end - saved.spans[1].start, 5, '原文 offset は段落改行を含む');
+  assert.equal(savedCount(rt), 1);
+});
+
+test('app2 translate: 本文が記号だけでも翻訳AIは0回・審査1回（明示OKのみ保存）で、枠は事前消費し再送はAIなし', () => {
+  const texts = ['***', '---', '...', '…', '"..."', '「」', '——', '（）', '＋×÷=', '€£¥',
+    '🙂', '👨‍👩‍👧', '👍🏽', '1️⃣', '***\n\n---', '\u200b\u200b', '\u00ad'];
+  for (const bodyText of texts) {
+    const rt = setupApp2({ props: { OPEN_GENERATE: 'true', MAX_GEN_PER_DEVICE: '3' } });
+    const rec = seedRecord(rt, bodyText);
+    assert.equal(rt.ctx.isSymbolOnlySource_(bodyText), true, bodyText + ': 記号だけと判定する');
+    rt.net.ai.push(modOk());
+    const requestId = rid('sym');
+    const res = rt.postJson(trBody(rt, rec.id, { id_token: '', request_id: requestId }));
+    assert.equal(res.json.ok, true, bodyText + ': ' + JSON.stringify(res.json).slice(0, 200));
+    assert.equal(rt.net.aiCalls(), 1, bodyText + ': 翻訳AIは呼ばず、審査だけを1回呼ぶ');
+    assert.equal(genStateCount(rt), 1, bodyText + ': 匿名の試行枠は API 前に消費する');
+    assert.equal(rt.props.get(rt.ctx.transReserveKey_(rec.id)), undefined, bodyText + ': 予約を残さない');
+
+    const tr = res.json.translation;
+    assert.equal(tr.spans.map((s) => bodyText.slice(s.start, s.end)).join(''), bodyText, bodyText + ': 原文を復元できる');
+    for (let i = 0; i < tr.items.length; i++) {
+      const expect = bodyText.slice(tr.spans[i].start, tr.spans[i].end).trim();
+      assert.equal(tr.items[i].ja, expect, bodyText + ': 原文の記号をそのまま保持する');
+    }
+    const saved = JSON.parse(trFile(rt, rec.id).content);
+    assert.equal(saved.symbols, 'verbatim');
+    assert.equal(saved.moderation, 'ok', bodyText + ': 保存データの moderation は従来どおり ok');
+    assert.equal(translatedFileCount(rt), 1);
+
+    const again = rt.postJson(trBody(rt, rec.id, { id_token: '', request_id: requestId }));
+    assert.equal(again.json.ok, true, bodyText);
+    assert.equal(again.json.replayed, true, bodyText);
+    assert.equal(rt.net.aiCalls(), 1, bodyText + ': 再送では審査も呼ばない');
+    assert.equal(genStateCount(rt), 1, bodyText + ': 再送でも枠を消費しない');
+  }
+});
+
+test('app2 translate: 記号だけの本文でも審査 NG / 判定不能なら保存0で、失敗も試行枠を消費する', () => {
+  const cases = [
+    { name: 'ng', mod: modNg('sexual'), code: 'moderation_rejected' },
+    { name: 'http503', mod: { code: 503, body: { error: 'down' } }, code: 'moderation_unavailable' },
+    { name: 'unrecognized', mod: chatReply('MAYBE'), code: 'moderation_unavailable' },
+  ];
+  for (const c of cases) {
+    const rt = setupApp2({ props: { OPEN_GENERATE: 'true', MAX_GEN_PER_DEVICE: '1' } });
+    const rec = seedRecord(rt, '***\n\n---');
+    rt.net.ai.push(c.mod);
+    const res = rt.postJson(trBody(rt, rec.id, { id_token: '' }));
+    assert.equal(res.json.ok, false, c.name);
+    assert.equal(res.json.code, c.code, c.name + ': ' + res.json.code);
+    assert.equal(rt.net.aiCalls(), 1, c.name + ': 翻訳AIは呼ばず審査だけ');
+    assert.equal(translatedFileCount(rt), 0, c.name + ': 保存しない');
+    assert.equal(genStateCount(rt), 1, c.name + ': 失敗しても枠は消費（費用保護）');
+
+    // 枠を使い切っているので、別の記号だけ教材でも API 前に拒否する
+    const other = seedRecord(rt, '...', 'tadoku-1700000011000');
+    const capped = rt.postJson(trBody(rt, other.id, { id_token: '', request_id: rid('cap') }));
+    assert.equal(capped.json.ok, false, c.name + ': cap');
+    assert.equal(capped.json.code, 'cap_reached', c.name + ': ' + capped.json.code);
+    assert.equal(rt.net.aiCalls(), 1, c.name + ': 上限時は審査も呼ばない');
+    assert.equal(translatedFileCount(rt), 0, c.name + ': 追加保存もしない');
+  }
+});
+
+test('app2 translate: 数字だけの原文は記号扱いせず、記号だけの翻訳応答は欠落として拒否する', () => {
+  const rt = setupApp2();
+  assert.equal(rt.ctx.isSymbolOnlySource_('42'), false);
+  assert.equal(rt.ctx.isSymbolOnlySource_('2024'), false);
+  assert.equal(rt.ctx.isSymbolOnlySource_('3.14'), false, '数字を含む文は翻訳対象');
+  assert.equal(rt.ctx.isSymbolOnlySource_('***'), true);
+  assert.equal(rt.ctx.isSymbolOnlySource_('1️⃣'), true, 'キーキャップ絵文字は記号');
+
+  // 通常文の原文に記号だけを返したら、翻訳の欠落として保存しない
+  const rec = seedRecord(rt);
+  const spans = rt.ctx.buildSentenceSpans_(TRANS_TEXT);
+  const items = spans.map((s, i) => ({ id: s.id, ja: i === 0 ? '……' : 'これは訳' + i }));
+  rt.net.ai.push(chatReply(JSON.stringify({ items })), modOk());
+  const res = rt.postJson(trBody(rt, rec.id));
+  assert.equal(res.json.ok, false);
+  assert.equal(res.json.code, 'translation_invalid');
+  assert.equal(rt.net.aiCalls(), 1, '検証失敗では審査に進まない');
+  assert.equal(translatedFileCount(rt), 0);
+
+  // 数字だけの原文も自動通過させない（AI 応答が日本語でなければ従来どおり失敗）
+  const rt2 = setupApp2();
+  const rec2 = seedRecord(rt2, '42', 'tadoku-1700000004000');
+  rt2.net.ai.push(chatReply(JSON.stringify({ items: [{ id: 's0', ja: '42' }] })), modOk());
+  const digits = rt2.postJson(trBody(rt2, rec2.id));
+  assert.equal(digits.json.ok, false);
+  assert.equal(digits.json.code, 'translation_invalid');
+  assert.equal(rt2.net.aiCalls(), 1, '数字だけでも AI に渡す（記号として自動通過させない）');
+
+  // 不可視文字（Cf）だけを返した場合も訳の欠落として拒否する
+  const rt3 = setupApp2();
+  const rec3 = seedRecord(rt3, 'Short part.', 'tadoku-1700000013000');
+  rt3.net.ai.push(chatReply(JSON.stringify({ items: [{ id: 's0', ja: '\u200b\u200b' }] })), modOk());
+  const cfOnly = rt3.postJson(trBody(rt3, rec3.id));
+  assert.equal(cfOnly.json.ok, false);
+  assert.equal(cfOnly.json.code, 'translation_invalid');
+  assert.equal(rt3.net.aiCalls(), 1);
+  assert.equal(translatedFileCount(rt3), 0);
+});
+
+test('app2 translate: 数値・数式・化学式の表示は訳として認め、日本語文字の有無を要求しない', () => {
+  const rt = setupApp2();
+  const text = '2 + 2 = 4. H2O is water. The year 1990.';
+  const rec = seedRecord(rt, text, 'tadoku-1700000012000');
+  const spans = rt.ctx.buildSentenceSpans_(text);
+  assert.equal(spans.length, 3);
+  const ja = ['2＋2＝4', 'H₂O', '１９９０'];
+  assert.equal(rt.ctx.isSymbolOnlySource_(ja[0]), false, '全角数字・数学記号は記号だけではない');
+  assert.equal(rt.ctx.isSymbolOnlySource_(ja[1]), false, '化学式は記号だけではない');
+  assert.equal(rt.ctx.isSymbolOnlySource_(ja[2]), false, '全角数字は記号だけではない');
+  rt.net.ai.push(chatReply(JSON.stringify({ items: spans.map((s, i) => ({ id: s.id, ja: ja[i] })) })), modOk());
+  const res = rt.postJson(trBody(rt, rec.id));
+  assert.equal(res.json.ok, true, JSON.stringify(res.json).slice(0, 200));
+  assert.deepEqual(res.json.translation.items.map((i) => i.ja), ja);
+  assert.equal(translatedFileCount(rt), 1);
+  assert.equal(rt.net.aiCalls(), 2);
+});
+
+test('app2 translate: Cf（soft hyphen/ZWSP/LRM/RLM/bidi/word joiner）は記号として原文保持し、VT/FF は空白扱いしない', () => {
+  const rt = setupApp2();
+  const cf = ['\u00ad', '\u061c', '\u180e', '\u200b', '\u200c', '\u200d', '\u200e', '\u200f',
+    '\u202a', '\u202b', '\u202c', '\u202d', '\u202e', '\u2060', '\u2061', '\u2062', '\u2063',
+    '\u2064', '\u2066', '\u2067', '\u2068', '\u2069'];
+  const notSymbol = ['\u000b', '\u000c', 'A', 'a', '1', '４', '\u0301', '2＋2＝4', 'H₂O'];
+  const check = (label) => {
+    for (const ch of cf) {
+      assert.equal(rt.ctx.isSymbolOnlySource_(ch), true, label + ' U+' + ch.codePointAt(0).toString(16));
+    }
+    for (const ch of notSymbol) {
+      assert.equal(rt.ctx.isSymbolOnlySource_(ch), false, label + ' U+' + ch.codePointAt(0).toString(16));
+    }
+    // VT / FF は記号に挟まれても空白として扱わない（制御文字検証と整合）。TAB / LF は空白。
+    assert.equal(rt.ctx.isSymbolOnlySource_('***\u000b***'), false, label + ': VT');
+    assert.equal(rt.ctx.isSymbolOnlySource_('***\u000c***'), false, label + ': FF');
+    assert.equal(rt.ctx.isSymbolOnlySource_('***\t***'), true, label + ': TAB');
+    assert.equal(rt.ctx.isSymbolOnlySource_('***\n***'), true, label + ': LF');
+  };
+  check('property escape');
+  // property escape 非対応環境のフォールバックでも同じ判定（文字・数字は許可しない）
+  const savedRe = rt.ctx.SYMBOL_ONLY_CHAR_RE;
+  try {
+    rt.ctx.SYMBOL_ONLY_CHAR_RE = null;
+    check('fallback');
+  } finally {
+    rt.ctx.SYMBOL_ONLY_CHAR_RE = savedRe;
+  }
+
+  // 不可視文字だけの段落は AI に渡さず、原文のまま保持して保存できる
+  const text = 'A cat sat.\n\n\u200b\u200b\n\nNext one.';
+  const rec = seedRecord(rt, text, 'tadoku-1700000014000');
+  const spans = rt.ctx.buildSentenceSpans_(text);
+  assert.equal(spans.length, 3);
+  rt.net.ai.push(chatReply(JSON.stringify({ items: [
+    { id: 's0', ja: '猫が座りました。' }, { id: 's2', ja: '次の文です。' },
+  ] })), modOk());
+  const res = rt.postJson(trBody(rt, rec.id));
+  assert.equal(res.json.ok, true, JSON.stringify(res.json).slice(0, 200));
+  assert.deepEqual(res.json.translation.items.map((i) => i.ja), ['猫が座りました。', '\u200b\u200b', '次の文です。']);
+  assert.equal(rt.ctx.isSymbolOnlySource_(text.slice(spans[1].start, spans[1].end)), true);
+  assert.equal(payloadText(ollamaPayloadOf(rt, 0), 'user').indexOf('s1:'), -1, '不可視だけの段落も AI に渡さない');
+});
+
+test('app2 translate: AI の ID 照合は翻訳対象だけを厳格に扱い、記号ID・重複・欠落・余分は fail closed', () => {
+  const cases = [
+    { name: 'symbol-id', items: [{ id: 's0', ja: '最初の文です。' }, { id: 's1', ja: '***' }] },
+    { name: 'missing', items: [{ id: 's0', ja: '最初の文です。' }] },
+    { name: 'duplicate', items: [{ id: 's0', ja: '最初の文です。' }, { id: 's0', ja: '次の文です。' }] },
+    { name: 'extra', items: [
+      { id: 's0', ja: '最初の文です。' }, { id: 's2', ja: '次の文です。' }, { id: 's3', ja: '余分な訳です。' },
+    ] },
+  ];
+  for (const c of cases) {
+    const rt = setupApp2();
+    const rec = seedRecord(rt, SYMBOL_SENTENCE_TEXT);
+    rt.net.ai.push(chatReply(JSON.stringify({ items: c.items })), modOk());
+    const res = rt.postJson(trBody(rt, rec.id));
+    assert.equal(res.json.ok, false, c.name);
+    assert.equal(res.json.code, 'translation_invalid', c.name + ': ' + res.json.code);
+    assert.equal(rt.net.aiCalls(), 1, c.name + ': 審査に進まない');
+    assert.equal(translatedFileCount(rt), 0, c.name + ': 保存しない');
+  }
+});
+
+test('app2 translate: 記号保持の保存データは再利用し、旧cacheの訳文は壊さず新形式の不一致だけ corrupt にする', () => {
+  // 新規作成 → get は AI なしで同じ内容を返す
+  const rt = setupApp2();
+  const rec = seedRecord(rt, SYMBOL_SENTENCE_TEXT);
+  rt.net.ai.push(chatReply(JSON.stringify({ items: [
+    { id: 's0', ja: '最初の文です。' }, { id: 's2', ja: '次の文です。' },
+  ] })), modOk());
+  assert.equal(rt.postJson(trBody(rt, rec.id)).json.ok, true);
+  const got = getTranslation(rt, rec.id);
+  assert.equal(got.json.ok, true);
+  assert.equal(got.json.replayed, true);
+  assert.equal(got.json.translation.items[1].ja, '***');
+  assert.equal(rt.net.aiCalls(), 2, '取得は AI なし');
+
+  // 旧cache（symbols なし・記号スパンに『場面転換』）は有効なまま（corrupt にしない）
+  const rt2 = setupApp2();
+  const rec2 = seedRecord(rt2, SYMBOL_SENTENCE_TEXT, 'tadoku-1700000008000');
+  const spans2 = rt2.ctx.buildSentenceSpans_(SYMBOL_SENTENCE_TEXT);
+  const legacy = rt2.ctx.buildTranslationObject_(rec2, spans2, ['最初の文です。', '場面転換', '次の文です。']);
+  delete legacy.symbols;
+  legacy.moderation = 'ok';
+  addTranslationFile(rt2, rec2.id, legacy);
+  const legacyGet = getTranslation(rt2, rec2.id);
+  assert.equal(legacyGet.json.ok, true, JSON.stringify(legacyGet.json).slice(0, 200));
+  assert.equal(legacyGet.json.translation.items[1].ja, '場面転換');
+  assert.equal(rt2.net.aiCalls(), 0, '旧cacheは再生成しない');
+
+  // 新形式（symbols:'verbatim'）で記号が原文と違えば corrupt（黙って直さない）
+  const rt3 = setupApp2();
+  const rec3 = seedRecord(rt3, SYMBOL_SENTENCE_TEXT, 'tadoku-1700000009000');
+  const spans3 = rt3.ctx.buildSentenceSpans_(SYMBOL_SENTENCE_TEXT);
+  const bad = rt3.ctx.buildTranslationObject_(rec3, spans3, ['最初の文です。', '場面転換', '次の文です。']);
+  addTranslationFile(rt3, rec3.id, bad);
+  const badGet = getTranslation(rt3, rec3.id);
+  assert.equal(badGet.json.code, 'translation_corrupt');
+  assert.equal(rt3.net.aiCalls(), 0);
+});
+
+test('app2 translate: 審査は記号を合成した全訳を対象にし、NG なら保存しない', () => {
+  const rt = setupApp2();
+  const rec = seedRecord(rt, SYMBOL_SENTENCE_TEXT);
+  rt.net.ai.push(chatReply(JSON.stringify({ items: [
+    { id: 's0', ja: '最初の文です。' }, { id: 's2', ja: '次の文です。' },
+  ] })), modNg('sexual'));
+  const res = rt.postJson(trBody(rt, rec.id));
+  assert.equal(res.json.ok, false);
+  assert.equal(res.json.code, 'moderation_rejected');
+  assert.equal(translatedFileCount(rt), 0, '保存しない');
+  assert.equal(rt.net.aiCalls(), 2);
+  const user = payloadText(ollamaPayloadOf(rt, 1), 'user');
+  assert.ok(user.indexOf('***') !== -1, '合成済みの記号も審査対象');
+  assert.ok(user.indexOf('最初の文です。') !== -1);
+  assert.ok(user.indexOf('次の文です。') !== -1);
+});
+
 test('app2 translate: 保存不明の予約はTTL後も別request_idで再AIせず、保存済みなら回復する', () => {
   const rt = setupApp2({ props: { OPEN_GENERATE: 'true', MAX_GEN_PER_DEVICE: '5' } });
   const rec = seedRecord(rt);

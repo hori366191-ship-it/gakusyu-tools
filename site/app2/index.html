@@ -1447,6 +1447,10 @@
         bilingual.active = false;
         bilingual.seq++;
         clearBilingualSelection();
+        // モード終了・レコード切替では自動スクロールの残りと辞書の遅延応答を止める
+        // （読み込み中の辞書DOMも消して、遅延応答でloading表示だけが残らないようにする）
+        cancelJaAutoScroll();
+        dictUiClose();
         bilingual.anchorY = 0;
         document.body.classList.remove('bilingual-mode');
         if (els.view) els.view.classList.remove('is-active');
@@ -1516,6 +1520,53 @@
         return '';
       }
 
+      // TESTABLE-BILINGUAL-LAYOUT-START
+      // 訳文ペインの段落再現。原文スライスの先頭/末尾の空白ランに改行があれば
+      // 段落境界とみなし、連続改行は1つの改行として扱う（文間の空白だけでは改行しない）。
+      function blWhitespaceRun(slice, edge) {
+        const s = String(slice == null ? '' : slice);
+        // サーバーの文分割（isSpaceChar_）と同じ空白集合。CRLF もそのまま取り出す
+        const m = (edge === 'lead' ? /^[ \t\r\n\u00a0\u3000]*/ : /[ \t\r\n\u00a0\u3000]*$/).exec(s);
+        return m ? m[0] : '';
+      }
+
+      function blNewlineCount(run) {
+        const s = String(run == null ? '' : run).replace(/\r\n?/g, '\n');
+        let n = 0;
+        for (let i = 0; i < s.length; i++) {
+          if (s.charAt(i) === '\n') n++;
+        }
+        return n;
+      }
+
+      /** 正規化後の改行数ぶんの LF を返す（空行もその数だけ保持する） */
+      function blNewlineText(count) {
+        const n = Math.floor(Number(count) || 0);
+        return n > 0 ? '\n'.repeat(n) : '';
+      }
+
+      /**
+       * spans と原文から訳文ペインの段落境界を求める。
+       * leading: 原文先頭の空白ランにある改行数（先頭の空行を維持）
+       * after[i]: s_i の後ろ（元英文スライス末尾）の改行数（0 なら同段落）
+       * CRLF は LF 1つに正規化し、連続改行・空行はその数を保持する。
+       */
+      function blParagraphBreaks(text, spans) {
+        const src = String(text == null ? '' : text);
+        const out = { leading: 0, after: [] };
+        if (!Array.isArray(spans) || !spans.length) return out;
+        const first = spans[0] || {};
+        out.leading = blNewlineCount(blWhitespaceRun(src.slice(Number(first.start) || 0, Number(first.end) || 0), 'lead'));
+        for (let i = 0; i < spans.length; i++) {
+          const sp = spans[i] || {};
+          const start = Number(sp.start) || 0;
+          const end = Number(sp.end) || 0;
+          out.after[i] = blNewlineCount(blWhitespaceRun(src.slice(start, end), 'trail'));
+        }
+        return out;
+      }
+      // TESTABLE-BILINGUAL-LAYOUT-END
+
       function showBilingual(translation) {
         const rec = currentRecord;
         const err = translationError(translation, rec);
@@ -1540,21 +1591,25 @@
 
         const byId = Object.create(null);
         for (const it of translation.items) byId[String(it.id)] = String(it.ja);
+        // 文ごとの改行はせず、原文スライスの末尾空白ランにある改行数（LF正規化）だけを再現する
+        const breaks = blParagraphBreaks(text, translation.spans);
         els.ja.textContent = '';
         const jaFrag = document.createDocumentFragment();
-        for (const sp of translation.spans) {
+        if (breaks.leading) jaFrag.appendChild(document.createTextNode(blNewlineText(breaks.leading)));
+        for (let i = 0; i < translation.spans.length; i++) {
+          const sp = translation.spans[i];
           const span = document.createElement('span');
           span.className = 'bl-sentence';
           span.setAttribute('data-sid', String(sp.id));
           span.textContent = byId[String(sp.id)] || '';
           jaFrag.appendChild(span);
-          jaFrag.appendChild(document.createTextNode('\n'));
-          if (text.slice(sp.start, sp.end).indexOf('\n') !== -1) {
-            jaFrag.appendChild(document.createTextNode('\n'));
-          }
+          if (breaks.after[i]) jaFrag.appendChild(document.createTextNode(blNewlineText(breaks.after[i])));
         }
         els.ja.appendChild(jaFrag);
 
+        // 対訳モードへ入る: 既存の辞書ポップアップを閉じ、遅延取得と自動スクロールを無効化する
+        dictUiClose();
+        cancelJaAutoScroll();
         bilingual.data = { recordId: rec.id, translation: translation };
         bilingual.recordId = rec.id;
         bilingual.active = true;
@@ -1656,13 +1711,73 @@
         return null;
       }
 
+      // TESTABLE-BILINGUAL-SCROLL-START
+      /**
+       * 訳ペインの自動スクロール位置。すでに見えている（pane内に収まっている）なら null。
+       * pane より高い文は先頭を合わせ、再計算しても同じ位置なら null（揺れない）。
+       */
+      function blJaScrollTop(paneRect, targetRect, scrollTop) {
+        if (!paneRect || !targetRect) return null;
+        const paneTop = Number(paneRect.top);
+        const paneBottom = Number(paneRect.bottom);
+        const targetTop = Number(targetRect.top);
+        const targetBottom = Number(targetRect.bottom);
+        const st = Number(scrollTop) || 0;
+        if (targetTop >= paneTop + 2 && targetBottom <= paneBottom - 2) return null;
+        const next = Math.max(0, st + (targetTop - paneTop) - 8);
+        if (Math.abs(next - st) < 1) return null;
+        return next;
+      }
+
+      function blPrefersReducedMotion(win) {
+        try {
+          const w = win || window;
+          return !!(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        } catch (e) {
+          return false;
+        }
+      }
+
+      /** 進行中の smooth スクロールを停止する（新しい選択・モード終了・レコード切替で使う） */
+      function blCancelPaneScroll(pane) {
+        if (!pane) return;
+        try {
+          pane.scrollTo({ top: pane.scrollTop, left: pane.scrollLeft, behavior: 'instant' });
+        } catch (e) {
+          try { pane.scrollTop = pane.scrollTop; } catch (e2) {}
+        }
+      }
+
+      /**
+       * 前回の smooth を必ず停止してから可視判定し、必要時だけ移動する。
+       * 途中まで動いた状態で新しい選択が可視なら、旧 smooth の移動先へは続かない。
+       */
+      function blApplyJaScroll(pane, paneRect, targetRect, opts) {
+        opts = opts || {};
+        if (!pane) return { action: 'none' };
+        blCancelPaneScroll(pane);
+        const next = blJaScrollTop(paneRect, targetRect, pane.scrollTop);
+        if (next == null) return { action: 'visible' };
+        const behavior = blPrefersReducedMotion(opts.win) ? 'instant' : 'smooth';
+        try {
+          pane.scrollTo({ top: next, left: pane.scrollLeft, behavior: behavior });
+        } catch (e) {
+          try { pane.scrollTop = next; } catch (e2) {}
+        }
+        return { action: 'scroll', top: next, behavior: behavior };
+      }
+      // TESTABLE-BILINGUAL-SCROLL-END
+
+      function cancelJaAutoScroll() {
+        blCancelPaneScroll(blEls().jaPane);
+      }
+
       function scrollJaIntoView(ja) {
         const pane = blEls().jaPane;
         if (!pane || !ja) return;
         const pr = pane.getBoundingClientRect();
         const jr = ja.getBoundingClientRect();
-        if (jr.top >= pr.top + 2 && jr.bottom <= pr.bottom - 2) return; // 見えている
-        try { pane.scrollTop = Math.max(0, pane.scrollTop + (jr.top - pr.top) - 8); } catch (e) {}
+        blApplyJaScroll(pane, pr, jr, { win: window });
       }
 
       function selectSentencePair(id, anchorY) {
@@ -1698,9 +1813,49 @@
         return rects[0];
       }
 
+      // TESTABLE-BILINGUAL-LINK-START
       function blRound(n) {
         return Math.round(n * 10) / 10;
       }
+
+      /** CSS の @media (orientation: portrait) と同じ判定にする（innerWidth 比較だけにしない） */
+      function blIsPortraitLayout(win) {
+        const w = win || window;
+        try {
+          if (w.matchMedia) return !!w.matchMedia('(orientation: portrait)').matches;
+        } catch (e) {}
+        return w.innerWidth < w.innerHeight;
+      }
+
+      /**
+       * 対訳リンクの SVG パス（座標は #bilingualView の左上基準）。
+       * 横長: 従来どおり英文右端→訳文左端。
+       * 縦長: 両端を pane 内側の右余白（padding-right 内）に置き、制御点も右余白の中だけに
+       * 置く。本文側（enRect.right 等）には戻らず、y は選択文の中心間だけを通す。
+       */
+      function buildBlLinkPath(portrait, view, enRect, jaRect, enPaneRect, jaPaneRect) {
+        const y1 = (enRect.top + enRect.bottom) / 2 - view.top;
+        const y2 = (jaRect.top + jaRect.bottom) / 2 - view.top;
+        if (!portrait) {
+          const x1 = enRect.right - view.left;
+          const x2 = jaRect.left - view.left;
+          return 'M ' + blRound(x1) + ' ' + blRound(y1)
+            + ' C ' + blRound(x1 + 40) + ' ' + blRound(y1)
+            + ', ' + blRound(x2 - 40) + ' ' + blRound(y2)
+            + ', ' + blRound(x2) + ' ' + blRound(y2);
+        }
+        // 右余白: pane の padding-right(20px) の内側に端点、さらに右寄りに制御点を置く。
+        // すべて viewport 右端から stroke 分を残した位置にクランプする（はみ出さない）。
+        const maxX = Math.max(0, view.width - 4);
+        const edgeX = Math.max(0, maxX - 8);
+        const enX = Math.max(0, Math.min(edgeX, enPaneRect.right - view.left - 12));
+        const jaX = Math.max(0, Math.min(edgeX, jaPaneRect.right - view.left - 12));
+        return 'M ' + blRound(enX) + ' ' + blRound(y1)
+          + ' C ' + blRound(maxX) + ' ' + blRound(y1)
+          + ', ' + blRound(maxX) + ' ' + blRound(y2)
+          + ', ' + blRound(jaX) + ' ' + blRound(y2);
+      }
+      // TESTABLE-BILINGUAL-LINK-END
 
       function drawBilingualLink() {
         const els = blEls();
@@ -1731,24 +1886,14 @@
           els.path.setAttribute('d', '');
           return;
         }
-        const x1 = enRect.right - vr.left;
-        const y1 = (enRect.top + enRect.bottom) / 2 - vr.top;
-        const x2 = jaRect.left - vr.left;
-        const y2 = (jaRect.top + jaRect.bottom) / 2 - vr.top;
-        let d;
-        if (window.innerWidth < window.innerHeight) {
-          // スマホ: 右側の余白を通して必ず表示する（上下レイアウトでも見える）
-          const gutter = Math.max(8, vr.width - 8);
-          d = 'M ' + blRound(x1) + ' ' + blRound(y1)
-            + ' C ' + blRound(gutter) + ' ' + blRound(y1)
-            + ', ' + blRound(gutter) + ' ' + blRound(y2)
-            + ', ' + blRound(x2) + ' ' + blRound(y2);
-        } else {
-          d = 'M ' + blRound(x1) + ' ' + blRound(y1)
-            + ' C ' + blRound(x1 + 40) + ' ' + blRound(y1)
-            + ', ' + blRound(x2 - 40) + ' ' + blRound(y2)
-            + ', ' + blRound(x2) + ' ' + blRound(y2);
-        }
+        const d = buildBlLinkPath(
+          blIsPortraitLayout(),
+          vr,
+          enRect,
+          jaRect,
+          els.enPane.getBoundingClientRect(),
+          els.jaPane.getBoundingClientRect()
+        );
         els.path.setAttribute('d', d);
       }
 
@@ -2087,7 +2232,7 @@
         close.id = 'close-dict-btn';
         close.textContent = '閉じる';
         close.style.cssText = 'background:#ffffff;color:#007700;border:1px solid #00ff00;padding:2px 6px;border-radius:4px;font-size:0.8em;cursor:pointer;margin-left:8px;';
-        close.addEventListener('click', function () { dictDiv.style.display = 'none'; });
+        close.addEventListener('click', function () { dictUiClose(); });
         header.appendChild(close);
         dictDiv.appendChild(header);
         if (!isNorm) {
@@ -2130,25 +2275,68 @@
       }
       function lowerLabel(raw) { return String(raw).toLowerCase(); }
 
+      // TESTABLE-DICT-RACE-START
+      // 辞書ポップアップの世代管理。対訳モードへの切替・レコード切替・辞書close・連打で
+      // 世代を進め、遅れて返った古い応答がポップアップや履歴を復活させないようにする。
+      const dictUi = { seq: 0 };
+
+      function dictUiNext() {
+        dictUi.seq += 1;
+        return dictUi.seq;
+      }
+
+      function dictUiIsCurrent(seq, recordId) {
+        if (seq !== dictUi.seq) return false;
+        if (bilingual.active) return false;
+        if (!currentRecord || currentRecord.id == null) return false;
+        return String(currentRecord.id) === String(recordId);
+      }
+
+      function dictUiClose() {
+        dictUiNext();
+        const div = document.getElementById('dict-overlay-fixed');
+        if (div) {
+          div.textContent = '';
+          div.style.display = 'none';
+        }
+      }
+      // TESTABLE-DICT-RACE-END
+
       viewer.addEventListener('click', async e => {
-        // 対訳モード: 単語タップで「文の選択」と「辞書」を同時に発火する
+        // 対訳モード中は文の選択だけ。辞書のロード/表示・履歴追加は行わない
         if (bilingual.active) {
           const hit = sentenceSpanFromEvent(e);
           if (hit) selectSentencePair(hit.getAttribute('data-sid'), e.clientY);
+          return;
         }
         const raw = getWordAtPoint(e.clientX, e.clientY);
         if (!raw || !/^[a-zA-Z-']+$/.test(raw)) return;
+        // 連打は最新の要求だけを反映する（古い応答はDOMも履歴も変更しない）
+        const recordId = currentRecord && currentRecord.id;
+        const token = dictUiNext();
         const dictDiv = document.getElementById('dict-overlay-fixed');
         dictDiv.style.display = 'block';
         dictDiv.textContent = '';
-        const loadingHeader = document.createElement('h4');
-        loadingHeader.textContent = raw;
+        const loadingHeader = document.createElement('div');
+        loadingHeader.style.cssText = 'display:flex;justify-content:space-between;align-items:center;';
+        const loadingTitle = document.createElement('h4');
+        loadingTitle.style.margin = '4px 0';
+        loadingTitle.textContent = raw;
+        const loadingClose = document.createElement('button');
+        loadingClose.id = 'close-dict-btn';
+        loadingClose.textContent = '閉じる';
+        loadingClose.style.cssText = 'background:#ffffff;color:#007700;border:1px solid #00ff00;padding:2px 6px;border-radius:4px;font-size:0.8em;cursor:pointer;margin-left:8px;';
+        loadingClose.addEventListener('click', function () { dictUiClose(); });
+        loadingHeader.appendChild(loadingTitle);
+        loadingHeader.appendChild(loadingClose);
         dictDiv.appendChild(loadingHeader);
         const loadingText = document.createElement('p');
         loadingText.textContent = '読み込み中…';
         dictDiv.appendChild(loadingText);
         try {
           await Promise.all([loadFormMap(), loadInvert()]);
+          // 遅れて返った取得結果は、モード切替・レコード切替・連打・close の後では反映しない
+          if (!dictUiIsCurrent(token, recordId)) return;
           // Driveファイルが入れ替わっていても自動補正（FORM_MAPは string->string、INVは string->array が正）
           if (FORM_MAP && INV) {
             const fVals = Object.values(FORM_MAP);
@@ -2173,6 +2361,7 @@
           updateHistoryDisplay();
         } catch (err) {
           console.error(err);
+          if (!dictUiIsCurrent(token, recordId)) return;
           dictDiv.textContent = '';
           const p = document.createElement('p');
           p.textContent = '辞書の読み込みに失敗しました。もう一度単語をタップすると再試行します。';

@@ -29,6 +29,13 @@ function extractBetween(src, startMarker, endMarker) {
   return src.slice(i + startMarker.length, j);
 }
 
+function runTestableBlock(src, name, sandbox, exportCode) {
+  const block = extractBetween(src, '// TESTABLE-' + name + '-START', '// TESTABLE-' + name + '-END');
+  const ctx = vm.createContext(sandbox || {});
+  vm.runInContext(block + '\n' + (exportCode || ''), ctx);
+  return ctx;
+}
+
 function createMiniDom() {
   const byId = new Map();
   function createElement(tag) {
@@ -1028,10 +1035,247 @@ test('app2 bilingual: 英文は offset の inline span で描画し、innerHTML 
   assert.equal(block.indexOf('.innerHTML'), -1, 'XSS 防止のため textContent のみ');
   assert.match(app2, /textContent = text\.slice\(sp\.start, sp\.end\)/, '原文を offset で切り出す');
   assert.match(app2, /body\.bilingual-mode #dict-overlay-fixed/, 'スマホの対訳中は辞書を上側に出す');
-  assert.match(app2, /const gutter = Math\.max\(8, vr\.width - 8\)/, 'スマホは右余白を通す');
+  assert.match(app2, /matchMedia\('\(orientation: portrait\)'\)/, 'CSS と同じ orientation 判定を使う');
+  assert.match(app2, /buildBlLinkPath\(/, 'リンクのパスは純関数で組み立てる');
   assert.match(app2, /scrollJaIntoView\(ja\)/, '訳が見切れるときだけ自動スクロール');
   assert.match(block, /scrollJaIntoView/, 'スクロール補助がある');
   assert.match(block, /is-selected/, '選択は1ペアだけ強調');
+  assert.match(block, /blParagraphBreaks\(text, translation\.spans\)/, '段落境界は保存 spans から求める');
+  const show = extractBetween(app2, 'function showBilingual(translation) {', 'async function openBilingual() {');
+  assert.match(show, /createTextNode\(blNewlineText\(breaks\.leading\)\)/, '先頭の改行数を再現する');
+  assert.match(show, /createTextNode\(blNewlineText\(breaks\.after\[i\]\)\)/, '文間は段落の改行数のときだけ再現する');
+  assert.equal(show.includes("createTextNode('\\n')"), false, '固定の毎文改行を残さない');
+});
+
+test('app2 bilingual layout: 訳文の段落改行は原文スライスの空白ランから改行数を復元する', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const ctx = runTestableBlock(app2, 'BILINGUAL-LAYOUT', {},
+    'globalThis.__breaks = blParagraphBreaks; globalThis.__text = blNewlineText;');
+  const br = (text, spans) => {
+    const r = ctx.__breaks(text, spans);
+    return r.leading + '|' + Array.from(r.after).join(',');
+  };
+
+  // 同一段落内: 文間が空白だけなら改行しない
+  assert.strictEqual(br('A. B.', [{ start: 0, end: 3 }, { start: 3, end: 5 }]), '0|0,0');
+  assert.strictEqual(br('A.  B.', [{ start: 0, end: 4 }, { start: 4, end: 6 }]), '0|0,0');
+  // 段落境界: LF / CRLF の改行数をそのまま数える（CRLF は1つ）
+  assert.strictEqual(br('A.\nB.', [{ start: 0, end: 3 }, { start: 3, end: 5 }]), '0|1,0');
+  assert.strictEqual(br('A.\r\nB.', [{ start: 0, end: 4 }, { start: 4, end: 6 }]), '0|1,0');
+  // 空行は2つとして保持する
+  assert.strictEqual(br('A.\n\nB.', [{ start: 0, end: 4 }, { start: 4, end: 6 }]), '0|2,0');
+  assert.strictEqual(br('A.\r\n\r\nB.', [{ start: 0, end: 6 }, { start: 6, end: 8 }]), '0|2,0');
+  // 段落先頭のインデントは改行数に影響しない
+  assert.strictEqual(br('A.\n  B.', [{ start: 0, end: 5 }, { start: 5, end: 7 }]), '0|1,0');
+  // 原文先頭の改行数も維持し、末尾の改行も再現する
+  assert.strictEqual(br('\n\nA.', [{ start: 0, end: 4 }]), '2|0');
+  assert.strictEqual(br('\r\n\r\nA.', [{ start: 0, end: 6 }]), '2|0');
+  assert.strictEqual(br('A.\n', [{ start: 0, end: 3 }]), '0|1');
+  // 先頭のインデントだけでは段落境界にしない
+  assert.strictEqual(br('  A.', [{ start: 0, end: 4 }]), '0|0');
+  assert.strictEqual(br('A.', []), '0|');
+
+  // 改行数から LF を組み立てる（空行保持）
+  assert.strictEqual(ctx.__text(0), '');
+  assert.strictEqual(ctx.__text(1), '\n');
+  assert.strictEqual(ctx.__text(2), '\n\n');
+});
+
+test('app2 bilingual link: 縦長は右 gutter 内だけで描画し、横長は従来のまま', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const ctx = runTestableBlock(app2, 'BILINGUAL-LINK', {}, 'globalThis.__path = buildBlLinkPath; globalThis.__portrait = blIsPortraitLayout;');
+  const view = { left: 0, top: 0, width: 390, height: 700 };
+  const enPane = { right: 390 };
+  const jaPane = { right: 390 };
+  const enRect = { left: 20, right: 370, top: 100, bottom: 120 };
+  const jaRect = { left: 20, right: 300, top: 400, bottom: 420 };
+  const portraitPath = 'M 378 110 C 386 110, 386 410, 378 410';
+  assert.strictEqual(ctx.__path(true, view, enRect, jaRect, enPane, jaPane), portraitPath);
+  // 端点は pane 側（padding 内）で、本文の右端（enRect.right）は使わない
+  assert.strictEqual(ctx.__path(true, view, { left: 20, right: 200, top: 100, bottom: 120 }, jaRect, enPane, jaPane), portraitPath);
+  // 制御点も含めて viewport 右端（390）をはみ出さない
+  const portraitXs = (portraitPath.match(/^M ([\d.]+) [\d.]+ C ([\d.]+) [\d.]+, ([\d.]+) [\d.]+, ([\d.]+) [\d.]+$/) || [])
+    .slice(1).map(Number);
+  assert.strictEqual(portraitXs.length, 4);
+  assert.ok(portraitXs.every((x) => x <= 390), 'viewport をはみ出さない');
+  assert.ok(portraitXs.every((x) => x >= 378), 'すべて右 gutter 内（本文には戻らない）');
+
+  // 横長は従来どおり英文右端→訳文左端（±40 の制御点）
+  const wideView = { left: 0, top: 0, width: 1000, height: 700 };
+  const wide = ctx.__path(false, wideView,
+    { left: 20, right: 470, top: 100, bottom: 120 },
+    { left: 550, right: 900, top: 200, bottom: 220 },
+    { right: 500 }, { right: 1000 });
+  assert.strictEqual(wide, 'M 470 110 C 510 110, 510 210, 550 210');
+
+  // CSS の @media (orientation: portrait) と同じ判定
+  assert.strictEqual(ctx.__portrait({ matchMedia: (q) => ({ matches: /orientation: portrait/.test(q) }) }), true);
+  assert.strictEqual(ctx.__portrait({ matchMedia: () => ({ matches: false }) }), false);
+  assert.strictEqual(ctx.__portrait({ innerWidth: 390, innerHeight: 844 }), true);
+});
+
+test('app2 bilingual scroll: 可視なら動かさず、前の smooth を止めてから最新の選択を優先する', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const ctx = runTestableBlock(app2, 'BILINGUAL-SCROLL', {},
+    'globalThis.__top = blJaScrollTop; globalThis.__apply = blApplyJaScroll; globalThis.__reduced = blPrefersReducedMotion;');
+  const paneRect = { top: 0, bottom: 500 };
+  assert.strictEqual(ctx.__top(paneRect, { top: 100, bottom: 150 }, 0), null, '見えている文はスクロールしない');
+  assert.strictEqual(ctx.__top(paneRect, { top: 600, bottom: 650 }, 0), 592, '見切れる文だけ移動する');
+  assert.strictEqual(ctx.__top(paneRect, { top: 8, bottom: 900 }, 8), null, 'pane より高い文は先頭で安定する');
+
+  const calls = [];
+  const pane = {
+    scrollTop: 100,
+    scrollLeft: 0,
+    scrollTo(opts) {
+      calls.push(opts);
+      if (opts.behavior === 'instant') this.scrollTop = opts.top;
+    }
+  };
+  const noReduce = { matchMedia: () => ({ matches: false }) };
+  const reduce = { matchMedia: (q) => ({ matches: /prefers-reduced-motion/.test(q) }) };
+  // 前の smooth の途中でも、新しい選択が可視なら cancel だけして旧移動先へ進まない
+  const visible = ctx.__apply(pane, paneRect, { top: 150, bottom: 200 }, { win: noReduce });
+  assert.strictEqual(visible.action, 'visible');
+  assert.strictEqual(calls.length, 1);
+  assert.strictEqual(calls[0].behavior, 'instant', '可視でも前の smooth は必ず停止する');
+  assert.strictEqual(calls.some((c) => c.behavior === 'smooth'), false);
+
+  pane.scrollTop = 0; // 次の検証は先頭から（新しい要求として最新だけ反映する）
+  calls.length = 0;
+  const smooth = ctx.__apply(pane, paneRect, { top: 600, bottom: 650 }, { win: noReduce });
+  assert.strictEqual(smooth.action, 'scroll');
+  assert.strictEqual(smooth.top, 592);
+  assert.strictEqual(calls[calls.length - 1].behavior, 'smooth');
+
+  pane.scrollTop = 0;
+  calls.length = 0;
+  const instant = ctx.__apply(pane, paneRect, { top: 600, bottom: 650 }, { win: reduce });
+  assert.strictEqual(instant.action, 'scroll');
+  assert.strictEqual(calls[calls.length - 1].behavior, 'instant', 'reduced motion は即時');
+  assert.strictEqual(ctx.__reduced(noReduce), false);
+  assert.strictEqual(ctx.__reduced(reduce), true);
+});
+
+test('app2 dict: 対訳モード/レコード切替/連打/close で遅延辞書応答を反映しない', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const popup = { style: { display: 'block' }, textContent: '' };
+  const sandbox = {
+    bilingual: { active: false },
+    currentRecord: { id: 'rec-1' },
+    document: { getElementById: (id) => (id === 'dict-overlay-fixed' ? popup : null) }
+  };
+  const ctx = runTestableBlock(app2, 'DICT-RACE', sandbox,
+    'globalThis.__next = dictUiNext; globalThis.__current = dictUiIsCurrent; globalThis.__close = dictUiClose;');
+  const token1 = ctx.__next();
+  assert.strictEqual(ctx.__current(token1, 'rec-1'), true);
+
+  // 対訳モードへ入る（showBilingual は dictUiClose を呼び、loading/定義DOMを閉じて世代を進める）
+  popup.textContent = 'The読み込み中…';
+  popup.style.display = 'block';
+  sandbox.bilingual.active = true;
+  ctx.__close();
+  assert.strictEqual(popup.style.display, 'none');
+  assert.strictEqual(popup.textContent, '', 'loading DOM を消す');
+  assert.strictEqual(ctx.__current(token1, 'rec-1'), false, 'モード中は遅延応答を反映しない');
+  const inMode = ctx.__next();
+  assert.strictEqual(ctx.__current(inMode, 'rec-1'), false, 'モード中の新しい取得も反映しない');
+
+  // モード終了後も、その前の世代は復活しない
+  sandbox.bilingual.active = false;
+  ctx.__close(); // closeBilingual 相当
+  assert.strictEqual(ctx.__current(inMode, 'rec-1'), false);
+  const afterClose = ctx.__next();
+  assert.strictEqual(ctx.__current(afterClose, 'rec-1'), true);
+
+  // 通常辞書の初回ロード中に別レコードへ切替: loadingを残さず、遅延定義/履歴を出さない
+  popup.textContent = 'The読み込み中…';
+  popup.style.display = 'block';
+  const beforeSwitch = ctx.__next();
+  sandbox.currentRecord = { id: 'rec-2' };
+  ctx.__close(); // renderRecord -> closeBilingual -> dictUiClose
+  assert.strictEqual(popup.style.display, 'none', 'レコード切替でloadingを非表示');
+  assert.strictEqual(popup.textContent, '', 'レコード切替でloading DOMを消す');
+  assert.strictEqual(ctx.__current(beforeSwitch, 'rec-1'), false);
+  assert.strictEqual(ctx.__current(beforeSwitch, 'rec-2'), false);
+  const afterSwitch = ctx.__next();
+  assert.strictEqual(ctx.__current(afterSwitch, 'rec-2'), true);
+
+  // 連打: 最新の要求だけを反映する
+  const rapid1 = ctx.__next();
+  const rapid2 = ctx.__next();
+  assert.strictEqual(ctx.__current(rapid1, 'rec-2'), false);
+  assert.strictEqual(ctx.__current(rapid2, 'rec-2'), true);
+
+  // 辞書 close: 読み込み中でも閉じられ、進行中の取得を無効化する
+  popup.textContent = 'The読み込み中…';
+  popup.style.display = 'block';
+  const beforeClose = ctx.__next();
+  ctx.__close();
+  assert.strictEqual(popup.style.display, 'none');
+  assert.strictEqual(popup.textContent, '');
+  assert.strictEqual(ctx.__current(beforeClose, 'rec-2'), false);
+
+  // 実装の配線: 対訳中は早期 return、遅延応答の判定より前に履歴追加しない
+  const handler = extractBetween(app2, "viewer.addEventListener('click', async e => {", 'function applyZoom() {');
+  const branchEnd = handler.indexOf('const raw = getWordAtPoint');
+  assert.ok(branchEnd > 0, '対訳モードの分岐を抽出できる');
+  assert.equal(handler.slice(0, branchEnd).indexOf('getWordAtPoint'), -1, '対訳中は辞書をロードしない');
+  assert.match(handler, /if \(bilingual\.active\) \{[\s\S]*?return;/, '対訳中は文選択だけで早期 return');
+  assert.ok(handler.indexOf('dictUiIsCurrent(token, recordId)') < handler.indexOf('viewedWords.add'), '遅延応答の判定後にだけ履歴追加する');
+  assert.match(handler, /loadingClose\.id = 'close-dict-btn'/, '読み込み中もcloseボタンを出す');
+  assert.match(handler, /loadingClose\.addEventListener\('click', function \(\) \{ dictUiClose\(\); \}\)/, '読み込み中のcloseで無効化する');
+  assert.match(app2, /close\.addEventListener\('click', function \(\) \{ dictUiClose\(\); \}\)/, '辞書 close でも世代を進める');
+  const closeBlock = extractBetween(app2, 'function closeBilingual(clearData) {', '// 作成中の request_id');
+  assert.match(closeBlock, /cancelJaAutoScroll\(\)/, 'モード終了/レコード切替でスクロールを止める');
+  assert.match(closeBlock, /dictUiClose\(\)/, 'モード終了/レコード切替でloadingも閉じる');
+  const showBlock = extractBetween(app2, 'function showBilingual(translation) {', 'async function openBilingual() {');
+  assert.match(showBlock, /dictUiClose\(\)/, '対訳ONでloading/定義DOMを閉じる');
+  const recordBlock = extractBetween(app2, 'function renderRecord(rec) {', 'const genBusy');
+  assert.match(recordBlock, /closeBilingual\(true\)/, 'レコード切替はcloseBilingual経由で無効化する');
+});
+
+test('app2 dict loading: 初回ロード保留中のレコード切替/対訳ON/辞書closeでloading DOMを残さない', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const popup = { style: { display: 'block' }, textContent: '' };
+  const sandbox = {
+    bilingual: { active: false },
+    currentRecord: { id: 'rec-1' },
+    document: { getElementById: (id) => (id === 'dict-overlay-fixed' ? popup : null) }
+  };
+  const ctx = runTestableBlock(app2, 'DICT-RACE', sandbox,
+    'globalThis.__next = dictUiNext; globalThis.__current = dictUiIsCurrent; globalThis.__close = dictUiClose;');
+  const showLoading = () => {
+    popup.textContent = 'The読み込み中…';
+    popup.style.display = 'block';
+  };
+
+  // 通常辞書の初回ロード保留中に別recordへ切替（renderRecord -> closeBilingual -> dictUiClose）
+  const pendingSwitch = ctx.__next();
+  showLoading();
+  sandbox.currentRecord = { id: 'rec-2' };
+  ctx.__close();
+  assert.strictEqual(popup.style.display, 'none', 'レコード切替でloadingを非表示');
+  assert.strictEqual(popup.textContent, '', 'レコード切替でloading DOMをclear');
+  assert.strictEqual(ctx.__current(pendingSwitch, 'rec-1'), false, '遅延定義/履歴を出さない');
+
+  // 対訳ON（showBilingual -> dictUiClose）
+  const pendingMode = ctx.__next();
+  showLoading();
+  sandbox.bilingual.active = true;
+  ctx.__close();
+  assert.strictEqual(popup.style.display, 'none', '対訳ONでloadingを非表示');
+  assert.strictEqual(popup.textContent, '', '対訳ONでloading DOMをclear');
+  assert.strictEqual(ctx.__current(pendingMode, 'rec-2'), false);
+
+  // 読み込み中の辞書closeボタン（dictUiClose）
+  sandbox.bilingual.active = false;
+  const pendingClose = ctx.__next();
+  showLoading();
+  ctx.__close();
+  assert.strictEqual(popup.style.display, 'none', '辞書closeでloadingを非表示');
+  assert.strictEqual(popup.textContent, '', '辞書closeでloading DOMをclear');
+  assert.strictEqual(ctx.__current(pendingClose, 'rec-2'), false);
 });
 
 test('app9 PDF生成: CDN script timeoutとhtml2canvas watchdogでcallback一回・zoom復元・送信開始なし', async () => {

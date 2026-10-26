@@ -2145,6 +2145,97 @@ function buildSentenceSpans_(text) {
   return spans;
 }
 
+// ── 記号だけのスパン（訳さず原文を保持する） ─────────────────
+// 句読点(P)・記号(S)・空白(Z)・書式文字(Cf: soft hyphen/ZWSP/ZWNJ/ZWJ/LRM/RLM/bidi制御/
+// word joiner 等) と絵文字の構成要素（異体字セレクタ/囲み文字/タグ文字）だけで出来ている
+// スパンは「訳す文字が無い」ので翻訳 AI には渡さず、原文（trim 済み）を ja に置く。
+// 保存の可否は従来どおりで、合成後の全訳に対する審査（明示 OK のみ保存）と匿名の試行枠は必ず通す。
+// 文字・数字を含むスパンは従来どおり翻訳対象（数字だけの文を自動で通すことはしない）。
+// Cf は「表示に影響しうる不可視文字も原文の一部として保持する」意図で許可し、文字・数字へは広げない。
+// Unicode property escape は GAS V8 / Node の V8 で使える。使えない環境でも、代表的な記号と
+// 上記 Cf は同じ判定になるようフォールバック表を持つ（表に無い文字は「翻訳対象」に倒す＝安全側）。
+var SYMBOL_ONLY_CHAR_RE = null;
+try {
+  SYMBOL_ONLY_CHAR_RE = new RegExp('[\\p{P}\\p{S}\\p{Z}'
+    + '\\u00ad\\u061c\\u180e\\u200b-\\u200f\\u202a-\\u202e\\u2060-\\u206f'
+    + '\\u20d0-\\u20ff\\ufe00-\\ufe0f\\ufe20-\\ufe2f\\ufeff\\ufff9-\\ufffb'
+    + '\\u{e0020}-\\u{e007f}]', 'u');
+} catch (eSymbolRe) {
+  SYMBOL_ONLY_CHAR_RE = null;
+}
+// property escape が使えない環境用。文字・数字を含まない範囲だけを並べた保守的な部分集合で、
+// Cf は property escape 側と同じ範囲（00AD/061C/180E/200B-200F/202A-202E/2060-206F/FEFF/FFF9-FFFB）を許す。
+var SYMBOL_ONLY_FALLBACK_RANGES = [
+  [0x0009, 0x000a], [0x000d, 0x000d], [0x0020, 0x0020],
+  [0x0021, 0x002f], [0x003a, 0x0040], [0x005b, 0x0060], [0x007b, 0x007e],
+  [0x00a0, 0x00a0], [0x00a1, 0x00a9], [0x00ab, 0x00ac], [0x00ad, 0x00ad],
+  [0x00ae, 0x00b1], [0x00b4, 0x00b4], [0x00b6, 0x00b8], [0x00bb, 0x00bb],
+  [0x00bf, 0x00bf], [0x00d7, 0x00d7], [0x00f7, 0x00f7], [0x061c, 0x061c],
+  [0x180e, 0x180e], [0x2000, 0x206f], [0x20a0, 0x20cf], [0x20d0, 0x20ff],
+  [0x2190, 0x23ff], [0x2500, 0x2775], [0x2794, 0x27bf], [0x2900, 0x2bff],
+  [0x2e00, 0x2e2e], [0x2e30, 0x2e7f],
+  [0x3000, 0x3000], [0x3001, 0x3003], [0x3008, 0x3011], [0x3014, 0x301f],
+  [0x3030, 0x3030], [0x303d, 0x303d], [0x30a0, 0x30a0], [0x30fb, 0x30fb],
+  [0xfe00, 0xfe0f], [0xfe20, 0xfe2f], [0xfe30, 0xfe6b], [0xfeff, 0xfeff],
+  [0xff01, 0xff0f], [0xff1a, 0xff20], [0xff3b, 0xff40], [0xff5b, 0xff65],
+  [0xffe0, 0xffee], [0xfff9, 0xfffb],
+  [0x1f000, 0x1f0ff], [0x1f110, 0x1f2ff], [0x1f300, 0x1faff],
+  [0xe0020, 0xe007f]
+];
+
+/** コードポイント1つが記号・空白として扱えるか */
+function isSymbolOrSpaceCodePoint_(cp, ch) {
+  if (cp === 0x09 || cp === 0x0a || cp === 0x0d || cp === 0x20) return true;
+  if (SYMBOL_ONLY_CHAR_RE) return SYMBOL_ONLY_CHAR_RE.test(ch);
+  for (var i = 0; i < SYMBOL_ONLY_FALLBACK_RANGES.length; i++) {
+    if (cp >= SYMBOL_ONLY_FALLBACK_RANGES[i][0] && cp <= SYMBOL_ONLY_FALLBACK_RANGES[i][1]) return true;
+  }
+  return false;
+}
+
+/** キーキャップ絵文字（1️⃣ / #️⃣ など）の長さ。数字+異体字セレクタ+囲み文字で1つの記号とみなす */
+function keycapEmojiLengthAt_(s, i) {
+  var c = s.charAt(i);
+  if (!(c >= '0' && c <= '9') && c !== '#' && c !== '*') return 0;
+  var j = i + 1;
+  if (s.charAt(j) === '\ufe0f') j++;
+  if (s.charAt(j) === '\u20e3') return j + 1 - i;
+  return 0;
+}
+
+/** 原文が記号・空白だけで出来ているか（文字・数字を含むなら false） */
+function isSymbolOnlySource_(value) {
+  var s = String(value == null ? '' : value);
+  var visible = false;
+  for (var i = 0; i < s.length;) {
+    var capLen = keycapEmojiLengthAt_(s, i);
+    if (capLen) { visible = true; i += capLen; continue; }
+    // ES5 でも動くようサロゲートペアを手動でコードポイントへ直す（絵文字は 1 文字として扱う）
+    var cp = s.charCodeAt(i);
+    var size = 1;
+    if (cp >= 0xd800 && cp <= 0xdbff && i + 1 < s.length) {
+      var lo = s.charCodeAt(i + 1);
+      if (lo >= 0xdc00 && lo <= 0xdfff) {
+        cp = (cp - 0xd800) * 0x400 + (lo - 0xdc00) + 0x10000;
+        size = 2;
+      }
+    }
+    var ch = s.substr(i, size);
+    if (!isSymbolOrSpaceCodePoint_(cp, ch)) return false;
+    if (ch.trim()) visible = true;
+    i += size;
+  }
+  return visible;
+}
+
+/** 記号だけのスパンを保持する ja。末尾の段落空白は client が spans から復元するので含めない */
+function symbolJaText_(piece) {
+  var s = String(piece == null ? '' : piece).trim();
+  if (!s) throw appError_('本文を文に分割できませんでした', 'translation_segmentation_failed');
+  if (hasControlChars_(s)) throw appError_('本文に使用できない文字が含まれています', 'translation_invalid');
+  return s;
+}
+
 // 簡体字特有の文字（日本語の常用漢字は入れない。例: 健・体・会・国 は日本語でも使う）
 var SIMPLIFIED_ONLY_CHARS = '们这说对时问题实际发动经济门见观听读语还应让给从个为么无开张种样关认识觉务气车东马鸟鱼龙长间儿华';
 
@@ -2168,7 +2259,7 @@ function hasControlChars_(value) {
   return /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(String(value == null ? '' : value));
 }
 
-/** 1文の訳を検証・正規化する（空・制御文字・異常長・英語のみ・中国語疑いを拒否） */
+/** 1文の訳を検証・正規化する（空・制御文字・異常長・英語のみ・記号のみ・中国語疑いを拒否） */
 function normalizeJapanese_(value) {
   var s = String(value == null ? '' : value).replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
   // 文単位の訳なので内部改行は空白へ畳む（表示の文ごとレイアウトを壊さない）
@@ -2177,6 +2268,9 @@ function normalizeJapanese_(value) {
   if (s.length > TRANS_MAX_JA_LEN) throw appError_('翻訳結果の1文が長すぎます', 'translation_invalid');
   if (hasControlChars_(s)) throw appError_('翻訳結果に使用できない文字が含まれています', 'translation_invalid');
   if (/^[\x20-\x7E]+$/.test(s)) throw appError_('翻訳結果が日本語ではありません', 'translation_invalid');
+  // 通常文の原文に記号・不可視文字だけを返した場合は翻訳の欠落として扱う（数字・数式・化学式の
+  // 表示は文字/数字を含むので通す。server が記号を勝手に合成することはない）
+  if (isSymbolOnlySource_(s)) throw appError_('翻訳結果に訳文がありません', 'translation_invalid');
   if (looksLikeChineseOnly_(s)) throw appError_('翻訳結果が日本語として扱えません', 'translation_invalid');
   return s;
 }
@@ -2191,7 +2285,7 @@ function buildTranslatePrompt_(record, spans) {
     text,
     '【英文全体ここまで】',
     '',
-    '【文リスト】（このIDをそのまま使う）'
+    '【文リスト】（このIDをそのまま使う。記号だけの文は訳さないため含まれていない）'
   ];
   for (var i = 0; i < spans.length; i++) {
     lines.push(spans[i].id + ': ' + text.slice(spans[i].start, spans[i].end));
@@ -2202,6 +2296,7 @@ function buildTranslatePrompt_(record, spans) {
   lines.push('次の形のJSONオブジェクトだけを出力する。前後に説明・あいさつ・コードフェンスを付けない。');
   lines.push('{"items":[{"id":"s0","ja":"..."},{"id":"s1","ja":"..."}]}');
   lines.push('・items は文リストと件数・IDが完全に一致すること（重複・欠落・追加IDは無効）。');
+  lines.push('・文リストに無いID（記号だけの行のIDなど）は出力しないこと。');
   lines.push('・ja は必ず日本語（ひらがな・カタカナ・漢字）で書く。英語や中国語（簡体字）は不可。');
   lines.push('・各 ja にはその文の訳だけを書く（段落・改行・原文の記号は持ち込まない）。');
   return lines.join('\n');
@@ -2274,12 +2369,40 @@ function checkTranslation_(record, jaTexts) {
 /** 翻訳を実行して ID ごとの日本語配列を返す（保存はしない） */
 function translateSentences_(record, spans) {
   var text = String(record.text || '');
-  var numPredict = Math.min(8192, 1200 + Math.ceil(text.length * 1.2));
-  var content = ollamaChat_([
-    { role: 'system', content: TRANS_SYSTEM_PROMPT },
-    { role: 'user', content: buildTranslatePrompt_(record, spans) }
-  ], { temperature: 0.2, numPredict: numPredict });
-  var jaTexts = parseTranslationOutput_(content, spans);
+  var jaTexts = [];
+  var targets = [];
+  var targetIdx = [];
+  var i;
+  // 記号だけのスパンは翻訳 AI に渡さず、原文（trim 済み）をそのまま ja として保持する。
+  // 訳す文字を含むスパンだけを ID そのままで AI に渡し、戻り値を元の並びへ合成する。
+  for (i = 0; i < spans.length; i++) {
+    var piece = text.slice(spans[i].start, spans[i].end);
+    if (isSymbolOnlySource_(piece)) {
+      jaTexts[i] = symbolJaText_(piece);
+    } else {
+      jaTexts[i] = '';
+      targets.push(spans[i]);
+      targetIdx.push(i);
+    }
+  }
+  if (targets.length) {
+    var targetChars = 0;
+    for (i = 0; i < targets.length; i++) targetChars += (targets[i].end - targets[i].start);
+    var numPredict = Math.min(8192, 1200 + Math.ceil(targetChars * 1.2));
+    var content = ollamaChat_([
+      { role: 'system', content: TRANS_SYSTEM_PROMPT },
+      { role: 'user', content: buildTranslatePrompt_(record, targets) }
+    ], { temperature: 0.2, numPredict: numPredict });
+    var parsed = parseTranslationOutput_(content, targets);
+    for (i = 0; i < parsed.length; i++) jaTexts[targetIdx[i]] = parsed[i];
+  }
+  var total = 0;
+  for (i = 0; i < jaTexts.length; i++) {
+    total += String(jaTexts[i] || '').length;
+    if (total > TRANS_MAX_TOTAL_JA) throw appError_('翻訳結果が長すぎます', 'translation_invalid');
+  }
+  // 審査は合成済みの全訳を対象にする。翻訳 AI を使わなかった（全スパンが記号だけ）場合も
+  // 保存してよいのは明示 OK のときだけ（NG・判定不能・失敗は保存しない）。
   var mod = checkTranslation_(record, jaTexts);
   if (mod.unavailable) throw appError_('翻訳の教材チェックを実行できなかったため保存しませんでした', 'moderation_unavailable');
   if (!mod.ok) throw appError_('翻訳の教材チェックで不適切と判定されたため保存しませんでした', 'moderation_rejected');
@@ -2304,6 +2427,7 @@ function isFiniteIndex_(value) {
 
 /**
  * 保存済み訳の検証。record 本文・sourceHash・offset 連続性・ID・件数・空/異常長/中国語疑いを確認する。
+ * 記号だけのスパンは原文（trim 済み）と一致することを確認する（新形式のみ。旧cache は訳文を許容）。
  * 1つでも崩れていれば corrupt（呼び出し側は再生成しない）。
  */
 function validateTranslationObject_(obj, recordId, sourceHash, text) {
@@ -2318,6 +2442,8 @@ function validateTranslationObject_(obj, recordId, sourceHash, text) {
   var items = obj.items;
   if (!Array.isArray(spans) || !spans.length || spans.length > TRANS_MAX_SENTENCES) return { ok: false, reason: 'spans' };
   if (!Array.isArray(items) || items.length !== spans.length) return { ok: false, reason: 'items' };
+  // 新形式（symbols:'verbatim'）だけ記号スパンの完全一致を要求する。旧cache（例: 『場面転換』訳）は壊さない。
+  var symbolMode = String(obj.symbols || '') === 'verbatim';
   var body = String(text == null ? '' : text);
   var expect = 0;
   var total = 0;
@@ -2330,8 +2456,16 @@ function validateTranslationObject_(obj, recordId, sourceHash, text) {
     var it = items[i] || {};
     if (String(it.id || '') !== sp.id) return { ok: false, reason: 'item_id' };
     var ja = typeof it.ja === 'string' ? it.ja : '';
-    if (!ja.trim() || ja.length > TRANS_MAX_JA_LEN) return { ok: false, reason: 'item_text' };
-    if (hasControlChars_(ja)) return { ok: false, reason: 'item_text' };
+    if (!ja.trim() || hasControlChars_(ja)) return { ok: false, reason: 'item_text' };
+    var piece = body.slice(sp.start, sp.end);
+    var symbolOnly = isSymbolOnlySource_(piece);
+    var symbolExpect = '';
+    if (symbolOnly) {
+      try { symbolExpect = symbolJaText_(piece); } catch (eSym) { symbolExpect = ''; }
+    }
+    // 記号の保持分は原文長まで許す（1文の日本語上限は AI 生成分にだけ効かせる）
+    if (ja.length > Math.max(TRANS_MAX_JA_LEN, symbolExpect.length)) return { ok: false, reason: 'item_text' };
+    if (symbolMode && symbolOnly && ja !== symbolExpect) return { ok: false, reason: 'item_symbol' };
     if (looksLikeChineseOnly_(ja)) return { ok: false, reason: 'item_lang' };
     total += ja.length;
     if (total > TRANS_MAX_TOTAL_JA) return { ok: false, reason: 'total' };
@@ -2372,6 +2506,8 @@ function buildTranslationObject_(record, spans, jaTexts) {
     model: TRANS_MODEL_LABEL,
     lang: 'ja',
     createdAt: new Date().toISOString(),
+    // 記号だけのスパンは原文をそのまま保持する（検証側で完全一致を要求するための目印）
+    symbols: 'verbatim',
     spans: outSpans,
     items: items,
     moderation: 'ok'
