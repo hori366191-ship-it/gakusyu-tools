@@ -71,38 +71,52 @@ Windows PowerShell 5.1 環境。
 - 操作は対象フォルダを workdir にして実行:
 
 ```powershell
-clasp.cmd push -f          # コードをアップロード(HEAD更新)
-clasp.cmd version "説明"    # バージョン作成
-clasp.cmd deployments      # デプロイ一覧確認
-clasp.cmd login            # 再認証(トークン失効時)
+clasp.cmd -A "<AUTH_FILE>" push -f                        # コードをアップロード(HEAD更新)
+clasp.cmd -A "<AUTH_FILE>" version "release description"  # バージョン作成(immutable)
+clasp.cmd -A "<AUTH_FILE>" deployments                    # デプロイ一覧確認
+clasp.cmd -A "<AUTH_FILE>" login                          # 専用authの再認証(トークン失効時)
 ```
 
-- トークン失効(`invalid_rapt` エラー)時: `~/.clasprc.json` をリネーム退避 → `clasp.cmd login` → ブラウザで認証
-- **日本語を含む引数をコマンドラインで渡さない**こと(PowerShell 5.1で文字化けし、JSONが壊れる)。APIに渡すJSONは必ずファイルに書いて `--data-binary "@path"` で渡す
+- **既存デプロイのバージョン更新（version作成→既存デプロイへの切替）の標準手順と参考コマンドは「デプロイ・公開のルール」を参照**（コンソールCLI/APIが標準。本節では重複記載しない）
+- トークン失効(`invalid_rapt` エラー)時: 今回使う**専用auth（`<AUTH_FILE>`）だけ**をバックアップ → `clasp.cmd -A "<AUTH_FILE>" login` → ブラウザで認証。**共有の `~/.clasprc.json` は変更しない**（他セッション・他作業の認証に影響させない）
+- **日本語を含む引数をコマンドラインで渡さない**こと(PowerShell 5.1で文字化けし、JSONが壊れる)。`version` の説明もASCII（例: `"release description"`）にする。APIに渡すJSONは必ずファイルに書いて `--data-binary "@path"` で渡す
 
-## ⚠️ 絶対にやらないこと
+## ⚠️ デプロイ・公開のルール（禁止事項と標準手順）
 
-1. **新規デプロイ作成・アクセス設定変更はCLI/APIで行わない**
+公開・デプロイ手順の**正本はこの節**。`仕様書_移行案.md` 側は本節を参照する（二重管理しない）。
+
+### 標準手順: 既存デプロイのバージョン更新（コンソールCLI/API）
+
+- **既存デプロイのバージョン更新は、コンソールのCLI/APIで行うのを標準とする**。ユーザーから更新・公開を依頼された作業はその範囲内で本手順により実施してよい。**通常更新のたびに特別な承認やUI操作をユーザーへ求めない**
+- GASエディタUIでの更新も、CLI/APIが使えない障害時の代替として可（従来のUI手順はそのまま使える）
+- 更新のたびに次を守る:
+  1. **更新前backup**: remote HEAD更新前の状態を退避し、git HEADと一致・無関係な変更がないことを確認。あわせて `deploymentConfig`（`scriptId` / `versionNumber` / `manifestFileName` / `description` のみ）と、Deployment側の `entryPoints` 全体（`webApp.entryPointConfig` の `access` / `executeAs` と入口URLを含む）を取得して保存する
+  2. **immutableなversion作成と切替の分離**: versionは各デプロイ1つだけ作り、内容と manifest / source hash の整合を確認してから切り替える
+  3. **既存 `deploymentId` を固定**: 既存 `deploymentConfig` は `versionNumber` 以外（`scriptId` / `manifestFileName` / `description`）を保持したまま更新し、Deployment側の `entryPoints` 全体 / 入口URL / `access` / `executeAs` が前後で不変であることを確認する。**新規デプロイを誤って作らない**
+  4. **専用認証のみ使用**: `-A` 相当の専用authを使い、他セッションが使う共有認証は変更しない（認証ファイルのパス・トークン・実メールは記載しない）
+  5. **更新後の検証**: version / source hash / Deployment側の `entryPoints` 全体（深い比較）/ 入口URL / `access` / `executeAs` を確認する
+  6. **公式GETの複数経路で一致確認**: list・`fields` 違い・`prettyPrint`・no-cache 等で最新 version と `updateTime` が一致することを確認する。**staleな旧snapshotは成功判定に使わない**
+  7. **結果不明・不一致なら再PUTしない**（安全停止）。復旧が必要な場合のみUIで行う
+- **参考コマンド（clasp 3.3系）**: `clasp.cmd -A "<AUTH_FILE>" version "release description"` → `clasp.cmd -A "<AUTH_FILE>" redeploy <DEPLOYMENT_ID> -V <VERSION_NUMBER>`
+  - 2026-10-26に実証したのは**同じApps Script APIをコンソールのNode runnerから呼ぶ更新**であり、上記claspコマンド自体は実行検証していない（claspの動作を検証済みとは扱わない）。APIを直接叩く場合も、既存 `deploymentConfig` は `versionNumber` だけを差し替えて他項目を保持し、Deployment側の `entryPoints`（`webApp.entryPointConfig` の `access` / `executeAs` を含む）は変更しない
+  - CLI/API一般の安全性や過去404の解消を断定しない
+- **canaryによる実版切替テストは、通常更新の必須条件ではない**。次の場合に推奨する:
+  - 更新方式・使用ツール・manifest が変わる場合
+  - そのデプロイの初回運用時
+  - 経路・権限など不明な条件が残る場合
+  - canaryは**切替手順**の安全確認であり、`access` 変更自体をcanaryで許可する意味ではない（`access` 変更は下記のとおりUIの別作業）
+- **契約変更を伴う更新**（認証・応答仕様の変更）は、`site-gas` 2本 → `site/`（Pages）→ 再ログイン/疎通確認 の順で行う
+
+### 禁止事項
+
+1. **新規デプロイ作成・アクセス設定変更はCLI/APIで行わない**（既存版のバージョン更新とは別作業）
    - 過去にclaspが作成・更新したデプロイが webAppエントリポイント(アクセス設定)を持たず、実行URLが **404** になった実測例がある（履歴。解消を断定しない）
    - アクセス設定自体は既存デプロイの版更新では書き換えられない。**GASエディタUIのみ**で設定できる
-2. **既存デプロイの版更新は原則UI。例外は明示承認＋検証済み手順のみ**
-   - 通常は `clasp push` までとし、GASエディタUIで「新しいバージョン」を作成する
-   - CLI/APIで既存版を更新できるのは、ユーザーの明示承認があり、かつ次をすべて満たす場合だけ:
-     - 更新前バックアップ（remote HEAD更新前を含む）
-     - immutableなversion作成とデプロイ切替の分離（新versionは各1つ）
-     - 既存 `deploymentId` の固定とconfig保持
-     - canary等で実版切替テストを行い、入口URL・access・executeAs・URL deepと設定保持を確認してから本番へ
-     - 専用authのみを使い、共有authは変更しない
-     - 入口URL・access・executeAs・deep linkの前後確認
-     - 公式GET複数経路（list/別fields/prettyPrint/no-cache等）で最新version・updateTimeの一致確認
-     - 不明・不一致時は再PUTしない（安全停止）
-   - 上記を満たせない場合はUIで行う。CLI/API一般の安全性や過去404の解消を断定しない
-   - 参考: clasp 3.3系は `clasp version` → `clasp redeploy <deploymentId> -V <version>`。ただし2026-10-26の実証はclasp自体ではなく、同APIをconsoleのNode runnerから呼んだもの。claspの動作を検証済みとは扱わない
-3. 公開URLの確認に `/dev` 形式を使わない(エディタ用)。`/exec` が公開用
-4. **`site-worker/targets` のデプロイIDを旧GASに戻さない** — `site-worker/worker.js:13-16` の `AKfycbwj7q...` / `AKfycbxj8q...` は新GAS2本のID。旧 `AKfycbxP6...` / `AKfycbxvo...` に戻すと新 `site/` が全滅する
-5. **認証フォールバック・旧公開面を再導入しない** — 未検証JWTや `aud`/`iss` 文字列一致だけの許可、`p.email` での認可、allowlist空の許可、旧HTML/旧RPC配信の復活は禁止（下記「セキュリティ不変条件」）
-6. **セキュリティ修正に便乗した構造変更をしない** — 認証・公開面の修正は最小差分にとどめ、フォルダ構成・URL・全面リファクタを同時に変えない
-7. **機密・個人情報を不用意に追記しない** — 実メールアドレスや生徒/保護者の情報などを docs・コード・ログに追加しない（既存の記載は履歴として維持）
+2. 公開URLの確認に `/dev` 形式を使わない(エディタ用)。`/exec` が公開用
+3. **`site-worker/targets` のデプロイIDを旧GASに戻さない** — `site-worker/worker.js:13-16` の `AKfycbwj7q...` / `AKfycbxj8q...` は新GAS2本のID。旧 `AKfycbxP6...` / `AKfycbxvo...` に戻すと新 `site/` が全滅する
+4. **認証フォールバック・旧公開面を再導入しない** — 未検証JWTや `aud`/`iss` 文字列一致だけの許可、`p.email` での認可、allowlist空の許可、旧HTML/旧RPC配信の復活は禁止（下記「セキュリティ不変条件」）
+5. **セキュリティ修正に便乗した構造変更をしない** — 認証・公開面の修正は最小差分にとどめ、フォルダ構成・URL・全面リファクタを同時に変えない
+6. **機密・個人情報を不用意に追記しない** — 実メールアドレスや生徒/保護者の情報などを docs・コード・ログに追加しない（既存の記載は履歴として維持）
 
 ## 🔐 セキュリティ不変条件（`site-gas` 2本）
 
@@ -187,8 +201,8 @@ curl.exe -s -L -o NUL -w "%{http_code} -> %{url_effective}`n" "https://script.go
 ## 運用メモ
 
 - ポータルのカード追加: `site/index.html` の該当教科セクション(ツール/英語/数学/理科)の `.cards` 内にカード1ブロックを追加(リンクはPages相対 `./appN/` + `target="_blank"`)。カードには教科色クラス(`subj--tool/eng/math/sci`)と学年タグ(`<span class="card__grade">`)を付与。新セクション追加時は `.sec--*`/`.subj--*` の色定義も追加すること（旧 `apps/portal` は最小リダイレクト済みのため追加不要）
-- 変更後は必ずヘッドレス検証 → `clasp push`（`site-gas` のみ）→ デプロイ更新。通常はUIで行う。明示承認下で上記「絶対にやらないこと」2の検証済み手順を満たす場合のみCLI/API例外可（`apps/` は最小リダイレクトのため通常は `site/` のみ）
-- **セキュリティ修正の記録**: コード修正・ローカル検証、GAS HEADへの `clasp push`、公開デプロイ更新（UIまたは明示承認下のCLI/API）を区別して記録する。公開確認（metadata・実疎通）まで「本番反映済」と書かない（`仕様書_移行案.md` 8.3 に日付と範囲を追記）
+- 変更後は必ずヘッドレス検証 → `clasp push`（`site-gas` のみ）→ 既存デプロイの版更新（**コンソールCLI/APIが標準**。上記「デプロイ・公開のルール」の標準手順を守る。UIは障害時の代替）。`apps/` は最小リダイレクトのため通常は `site/` のみ
+- **セキュリティ修正の記録**: コード修正・ローカル検証、GAS HEADへの `clasp push`、公開デプロイ更新（コンソールCLI/API、または障害時のUI）を区別して記録する。公開確認（metadata・実疎通）まで「本番反映済」と書かない（`仕様書_移行案.md` 8.3 に日付と範囲を追記）
 - 詳細な権限・ガード・トークン運用・トラブルシュートは `仕様書_移行案.md` を参照（旧GAS版の詳細は `仕様書.md` を参照）
 - Gmailアカウント(別途管理)の別アプリが存在するが、このリポジトリでは管理対象外(共有URLは`/a/*/`形式を使用)
 
