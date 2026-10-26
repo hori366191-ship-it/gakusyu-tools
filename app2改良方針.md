@@ -76,3 +76,85 @@
   - あり：`【キーワード】猫、school、冒険（上記の言葉・概念を本文中で必ず使うこと。日本語の場合は意味に合う英語で使うこと）`
   - なし：`【キーワード】なし`
 - 検証：欄の増減（1→6→上限抑止）、×削除、全空送信、`settings.keywords` の送信、文の種類連動セレクトとの干渉なしを確認。
+
+## 7. AI移行（Ollama Cloud / Gemma4 31B）と対訳表示 — 2026-10-26・ローカル実装のみ
+
+> 状態: ローカル実装と Node 回帰テスト／モックでの UI スモーク確認まで。`clasp push`・デプロイ版更新・Pages 公開は**未実施**（別作業）。本番 API 課金・本番 Drive 操作も未実施。
+
+### 7.1 生成・審査・翻訳の移行
+
+- 生成（`generatePassage_`）・審査（`checkPassage_`）・新規翻訳（`translateSentences_` / `checkTranslation_`）は Ollama Cloud 公式 API `POST https://ollama.com/api/chat` を使う。
+- モデルは `gemma4:31b`（API 名。CLI の `gemma4:cloud` とは別名）。`stream:false` / `think:false`（思考無効）。
+- 認証は Script Properties `OLLAMA_API_KEY` のみ。`ZEN_API_KEY` / `OPENCODE_API_KEY` へは**暗黙フォールバックしない**（未設定は `api_key_missing` で AI を呼ばない）。
+- Cloud は Structured Outputs 非対応のため `format` / JSON Schema は送らない。JSON はプロンプトで要求し、サーバーで厳格検証する。
+- 応答は `message.content` のみ。HTTP 失敗・非 JSON・空・`done:false`・`done_reason=length`・接続例外は保存しない（fail closed）。
+- 既存の不変条件（共通トークン＋厳格 ID トークン検証＋`ALLOWED_EMAILS`、`request_id` 台帳、匿名 quota の API 前予約、moderation 明示 OK のみ保存、保存結果不明時 fail closed）は変更しない。
+
+### 7.2 `OLLAMA_API_KEY` の設定（値は書かない）
+
+1. Ollama Cloud の API キーを発行する（ollama.com のアカウント設定 → API keys）。
+2. GAS `site-app2-backend` の「プロジェクトの設定 → スクリプト プロパティ」に `OLLAMA_API_KEY` を追加し、発行した値を貼り付ける。
+3. 旧 `ZEN_API_KEY` / `OPENCODE_API_KEY` は削除するか空にする（コードは読まない）。
+4. 確認: オーナー限定の GET（`action=debugIndexInfo`）で `ollama_key_set:true` のみを確認する。鍵の値は返さないが、応答には index 情報などの内部情報が含まれるため、内容は表示・共有しない。実 API を呼ぶ生成・翻訳は課金と本番 Drive 保存を伴うため、確認はモックテスト（`scripts/tests`）を優先する。
+5. キーはコード・docs・ログ・チャットに書かない。
+
+### 7.3 翻訳 API（`action=translateText`）
+
+- POST。`{ token, id_token?, device_id?, record_id, mode: 'get'|'create', request_id? }`。本文・訳文はクライアントから受け取らず、サーバー保有 record と LLM 応答だけを使う。
+- 決定的文分割: 省略語（Mr./Dr./e.g. 等）・イニシャル・小数・会話の引用符・句読点・改行を考慮し、`[0, len)` を隙間なく覆う `{id, start, end}`（`s0..`）を作る。連結が原文と一致しなければ保存しない。
+- 保存: index とは別の Drive JSON `tadoku-trans-<recordId>.json`。`version` / `recordId` / `sourceHash`（本文 SHA-256）/ `model` / `createdAt` / `lang=ja` / `spans` / `items` を保存。index には訳を入れない（肥大防止）。
+- 取得（`mode=get`）: 共通トークンのみ。record が現存し sourceHash が一致する訳だけを返す（本文は `getSavedTexts` で公開済みのため公開範囲を広げない）。未作成は `translation_missing`（`can_create` 付き）。
+- 作成（`mode=create`）: 生成と同じ認可。匿名生成が閉じていれば匿名に LLM 実行を許可しない。匿名の試行枠は生成と共通で、API 前に一括予約し以後の失敗も消費する。
+- 冪等・並行: `request_id` 台帳に加え、同一 record を Script Properties の予約（`TTRANS_`）で直列化。複数 `request_id` の並行でも LLM 実行・保存は1回だけ。
+- 入力検証の順序: 文分割・文数/長さの検証は**台帳・予約・quota・AI より前**に行う。確定失敗（`translation_too_long` 等）は副作用ゼロで返し、匿名枠を消費しない。
+- 保存結果不明（`translation_save_uncertain`）: 予約を**永続 unknown**（`u:1`）に固定し、`request_id` が別でも新しい AI を開始しない。TTL や absence だけでは自動解除しない。保存ファイルが確定していれば取得/作成時にそれを返して予約を解放する（LLMなし）。確定できなければ `translation_recovery_required` を返し、管理者の確認を要求する。
+- 停止した `in_flight`（5分超）も永続 unknown に固定する（自動再実行しない）。破損した予約も fail closed。
+- 検証: 件数・ID（未知/重複/欠落）・空・制御文字・異常長・英語のみ・中国語疑いを拒否。中国語判定は**簡体字特有の文字を含み、かつかなを含まない**場合だけ（日本語の常用漢字 `健康` `保健室` や、漢字だけの `国際連合安全保障理事会` は許可）。既存訳の破損・sourceHash 不一致は**黙って再生成せず** `translation_corrupt`。
+- moderation: 翻訳文にも明示 OK を要求（判定不能・失敗・NG は保存しない）。
+- 削除連動: `deleteText` は墓標の永続化後に訳ファイルと翻訳予約を片付ける。翻訳保存は同じ script lock 内で record の現存・本文一致を再確認し、削除後の保存を拒否する。
+
+
+### 7.4 対訳 UI（`site/app2/index.html`）
+
+- 通常表示は従来どおり（段落・自然折返し）。対訳中も英文は offset の **inline span** で描画し、文ごとの改行はしない（原文の空白・段落を保持）。
+- 対訳ボタン: 表示/非表示、取得中、作成中、失敗（破損・未作成・権限なし・結果不明）を表示する。
+- PC: 左右2ペイン（英文・訳文とも全文、各独立スクロール）。選択は**1ペアだけ**強調し、SVG 曲線を英文右端（内側）→訳文左端（内側）に接続。
+- スマホ: 上下2ペイン（各独立スクロール、下は訳全文）。曲線は右側余白を通して必ず表示。両端が見えていないときは線を隠す。
+- 英文の単語タップで既存辞書と文選択を同時発火。訳が見切れる場合だけ訳ペインを自動スクロール。
+- スクロール・リサイズ・文字サイズ・テーマ変更・フォント読込で線を再計算する。
+- 対訳中スマホは辞書を上側（内部スクロール、最大32dvh）。通常時は従来どおり下側。PC は従来位置。
+- XSS 防止のため `textContent` のみを使う。レコード切替・遅延応答・モード終了は `seq` と `recordId` で無効化し、選択・線もリセットする。
+- 標準/pop/forest の各テーマに `site/themes/pop.css` / `forest.css` で対訳用スタイルを追加。
+
+### 7.5 テスト（ローカル・モックのみ）
+
+- `scripts/tests/security-backends.test.cjs`: AI モックを Ollama 形式（`message.content` / `done`）へ変更。Ollama の HTTP 失敗・非JSON・切断・打ち切り・空・think 400 の再試行、ZEN 非フォールバック、翻訳の取得/作成/再利用/同一ID再送/並行予約/不正出力/中国語疑い/常用漢字の正常系/moderation/保存不明（永続 unknown）/入力検証の実行順/削除連動を追加。
+- `scripts/tests/transport.test.cjs`: `translateText` の送信契約（get は request_id 不要、create は必須、record_id のみ送信）と対訳 UI の静的検証を追加。
+- 実ブラウザ確認はモック（ローカル `http.server` + `window.test*` フック）で PC 1280x900 / スマホ 390x844 / 3テーマを確認。最終の実機・実 API 回帰は `test` 担当。
+
+#### モックでの UI 確認手順（test 引継ぎ用）
+
+1. リポジトリ直下で `python -m http.server 8123 --bind 127.0.0.1` を起動し、`http://127.0.0.1:8123/site/app2/` を開く（外部リクエストは遮断してよい。probe 失敗でも表示フックは使える）。
+2. 表示専用フックでレコードと訳を注入する（本文と spans は一致させる）。
+   - `window.testRenderRecord({ id:'tadoku-1700000001000', title:'Fixture', text:'The cat sat. The dog ran.\n\nA bird flew.', settings:{level:'3級'} })`
+   - `window.testBilingualShow({ record_id:'tadoku-1700000001000', model:'gemma4:31b', lang:'ja', version:1, created_at:'...', spans:[{id:'s0',start:0,end:13},{id:'s1',start:13,end:27},{id:'s2',start:27,end:39}], items:[{id:'s0',ja:'猫が座った。'},{id:'s1',ja:'犬が走った。'},{id:'s2',ja:'鳥が飛んだ。'}] })`
+   - `window.testBilingualSelect('s1', 200)` で1ペア選択＋線を描画。
+3. 確認項目: 英文が inline span で文ごとに改行されない／PCは左右2ペイン／390x844 は上下2ペインで線が右余白（`#blLinkPath` の x がビュー幅-8）を通る／選択は2要素だけ／辞書は対訳中スマホで上側（`fixed`・最大32dvh）／モード終了で選択・線が消える／pop・forest で色とフォントが切り替わる。
+4. ボタンからの取得・作成フローは Worker/GAS のモック（`translateText` の get→missing→create）を返して確認する。実 API・本番 Drive は使わない。
+
+#### 保存不明（`translation_recovery_required`）の管理者向け復旧
+
+- **TTL・時間経過だけを理由に予約や receipt を消さない**。absence は「保存されていない証拠」ではない。
+- まず対象 record の `tadoku-trans-<recordId>.json`（`INDEX_FOLDER_ID` 配下）をオーナー権限で確認する。
+  - ファイルが存在し、`recordId` と `sourceHash` が現在の record 本文に一致し、`spans`/`items` が壊れていなければ**そのまま再取得**する（`translateText` の get で返り、予約は自動で解放される。LLM は呼ばれない）。
+  - ファイルが無い／壊れている場合は、GAS の実行ログ、Drive の変更履歴、該当 `request_id` の台帳 receipt を確認し、保存が成立していないことを**確認してから**判断する。
+- 保存が成立していないと確認でき、オーナーが再実行を承認した場合だけ、対象 record の `TTRANS_` 予約と該当 `request_id` の `IDEM_` receipt を**手動で**削除して1回だけ再試行する。削除対象は対象 record／request に限定し、他の receipt は触らない。
+- 判断がつかない場合は**ブロックしたまま**にする（fail closed）。推測で予約を消して再 AI 実行しない。
+- 復旧作業でも実メール・APIキー・ファイルID・本文を docs／チャット／ログに記録しない。
+
+
+### 7.6 残課題
+
+- 実 Ollama Cloud での生成・翻訳の品質/所要時間の確認（GAS `UrlFetchApp` の実時間上限に注意）。
+- 翻訳 moderation の判定粒度（教材としての自然さ）の実サンプル確認。
+- 本番反映（`clasp push` → 既存デプロイの版更新 → Pages）は未実施。手順は `AGENTS.md`「デプロイ・公開のルール」に従う。

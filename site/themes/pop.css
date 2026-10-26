@@ -388,6 +388,48 @@ html[data-theme="pop"] #close-dict-btn:hover {
   background: var(--color-sky-crayon) !important;
   color: var(--color-charcoal-ink) !important;
 }
+/* app2: 対訳（bilingual） */
+html[data-theme="pop"] #bilingualBar {
+  background: var(--color-frost-white) !important;
+  border-bottom: 1.5px solid var(--color-charcoal-ink) !important;
+}
+html[data-theme="pop"] #translateButton {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono) !important;
+  opacity: 1 !important;
+}
+html[data-theme="pop"] #translateButton:hover:not(:disabled) {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="pop"] #translateButton:disabled {
+  opacity: .4 !important;
+  box-shadow: none !important;
+}
+html[data-theme="pop"] #translateButton.is-active {
+  background: var(--color-sky-crayon) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="pop"] #translateStatus {
+  color: var(--color-graphite) !important;
+  font-family: var(--font-jp-mono) !important;
+}
+html[data-theme="pop"] #jaPane { border-left: 1.5px dashed var(--color-charcoal-ink) !important; }
+html[data-theme="pop"] .bl-sentence.is-selected {
+  background: var(--color-sky-crayon) !important;
+  box-shadow: 0 0 0 2px rgba(56, 56, 56, .35) !important;
+}
+html[data-theme="pop"] #blLinkPath { stroke: var(--color-charcoal-ink) !important; }
+@media (orientation: portrait) {
+  html[data-theme="pop"] #jaPane {
+    border-left: none !important;
+    border-top: 1.5px dashed var(--color-charcoal-ink) !important;
+  }
+}
 @media (orientation: portrait) {
   html[data-theme="pop"] #form-container { border-bottom: 1.5px solid var(--color-charcoal-ink) !important; }
 }

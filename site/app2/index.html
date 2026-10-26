@@ -85,6 +85,7 @@
       flex-direction: column;
       background-color: #ffffff;
       min-width: 0;
+      min-height: 0;
     }
 
     #preview-container h1 {
@@ -430,6 +431,149 @@
       color: #999999;
     }
 
+    /* ── 対訳（bilingual） ───────────────────── */
+    #bilingualBar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: #ffffff;
+      border-bottom: 1px solid #00ff00;
+      box-sizing: border-box;
+      flex: 0 0 auto;
+    }
+
+    body.has-record #bilingualBar {
+      display: flex;
+    }
+
+    #translateButton {
+      background: #ffffff;
+      color: #007700;
+      border: 1px solid #00ff00;
+      border-radius: 4px;
+      font-family: 'Kiwi Maru', 'Courier New', monospace;
+      font-size: 0.85em;
+      padding: 4px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    #translateButton:hover:not(:disabled) {
+      background: #eeffee;
+    }
+
+    #translateButton:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    #translateButton.is-active {
+      background: #00ff00;
+      color: #000000;
+    }
+
+    #translateStatus {
+      min-width: 0;
+      font-size: 0.72em;
+      color: #777777;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #textViewer {
+      flex: 1 1 auto;
+      min-height: 0;
+      position: relative;
+      /* 原文の改行保持は本文側で行い、要素間の空白は通常どおり無視する */
+      white-space: normal !important;
+    }
+
+    #textContentArea {
+      white-space: pre-wrap;
+    }
+
+    #bilingualView {
+      display: none;
+      position: relative;
+      gap: 24px;
+      min-height: 0;
+    }
+
+    #bilingualView.is-active {
+      display: flex;
+      flex: 1 1 auto;
+    }
+
+    body.bilingual-mode #textContentArea {
+      display: none;
+    }
+
+    body.bilingual-mode #textViewer {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden !important;
+    }
+
+    body.bilingual-mode #wordFooter {
+      flex: 0 0 auto;
+      max-height: 22%;
+      overflow: auto;
+    }
+
+    .bl-pane {
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      padding-right: 16px;
+      box-sizing: border-box;
+    }
+
+    #jaPane {
+      border-left: 1px dashed #99e699;
+      padding-left: 16px;
+    }
+
+    .bl-text {
+      white-space: pre-wrap;
+      line-height: 3;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .bl-sentence {
+      display: inline;
+      border-radius: 3px;
+    }
+
+    .bl-sentence.is-selected {
+      background: rgba(0, 255, 0, 0.22);
+      box-shadow: 0 0 0 2px rgba(0, 170, 0, 0.35);
+    }
+
+    #blLinkSvg {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    #blLinkPath {
+      fill: none;
+      stroke: #00a000;
+      stroke-width: 2;
+      stroke-linecap: round;
+      opacity: 0.9;
+    }
+
     @media (orientation: portrait) {
       html,
       body {
@@ -506,6 +650,52 @@
 
       body.mobile-preview #backButton {
         display: block;
+      }
+
+      #bilingualBar {
+        padding: 4px 8px;
+      }
+
+      #translateButton {
+        font-size: 0.8em;
+      }
+
+      #translateStatus {
+        font-size: 0.68em;
+      }
+
+      #bilingualView.is-active {
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .bl-pane {
+        padding-right: 20px;
+      }
+
+      #jaPane {
+        border-left: none;
+        border-top: 1px dashed #99e699;
+        padding-left: 0;
+        padding-right: 20px;
+        padding-top: 6px;
+      }
+
+      body.bilingual-mode #wordFooter {
+        max-height: 16%;
+      }
+
+      body.bilingual-mode #dict-overlay-fixed {
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 0px) + 8px);
+        bottom: auto;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+        max-height: 32dvh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
       }
     }
   </style>
@@ -688,9 +878,25 @@
       </div>
     </h1>
 
+    <div id="bilingualBar">
+      <button id="translateButton" type="button">対訳を表示</button>
+      <span id="translateStatus"></span>
+    </div>
+
     <div id="textViewer" style="padding:10px; overflow:auto; white-space:pre-wrap; color:#007700; background:#ffffff;">
       <div id="textContentArea"></div>
-      <div style="display: flex; width: 100%; margin-top: 20px; border-top: 1px solid #00ff00; color: #007700; line-height: 0.7;">
+      <div id="bilingualView">
+        <div id="enPane" class="bl-pane">
+          <div id="enContent" class="bl-text"></div>
+        </div>
+        <div id="jaPane" class="bl-pane">
+          <div id="jaContent" class="bl-text"></div>
+        </div>
+        <svg id="blLinkSvg" aria-hidden="true" focusable="false">
+          <path id="blLinkPath" d=""></path>
+        </svg>
+      </div>
+      <div id="wordFooter" style="display: flex; width: 100%; margin-top: 20px; border-top: 1px solid #00ff00; color: #007700; line-height: 0.7;">
         <div style="flex: 1; padding-right: 20px;">
           <div style="font-weight: bold; margin-bottom: 4px; color:#007700;">調べた単語：</div>
           <div id="historyList" style="font-weight: bold; color:#007700;"></div>
@@ -755,6 +961,11 @@
         if (!v) return;
         try { v.scrollTo({ top: 0, left: 0, behavior: 'instant' }); } catch (e) { v.scrollTop = 0; v.scrollLeft = 0; }
         v.scrollTop = 0;
+        const en = document.getElementById('enPane');
+        const ja = document.getElementById('jaPane');
+        if (en) en.scrollTop = 0;
+        if (ja) ja.scrollTop = 0;
+        if (document.getElementById('blLinkPath')) document.getElementById('blLinkPath').setAttribute('d', '');
       }
 
       const dotEl = document.getElementById('dot-anim');
@@ -787,6 +998,7 @@
       const SERVER = {
         generateText: { path: '/api/generateText', method: 'POST', gas: 'generateText' },
         getSavedTexts: { path: '/api/getSavedTexts', method: 'GET', gas: 'getSavedTexts' },
+        translateText: { path: '/api/translateText', method: 'POST', gas: 'translateText' },
         deleteText: { path: '/api/deleteText', method: 'DELETE', gas: 'deleteText' },
         getDICTIONARY: { path: '/api/getDICTIONARY', method: 'GET', gas: 'getDICTIONARY' },
         getFormMap: { path: '/api/getFormMap', method: 'GET', gas: 'getFormMap' },
@@ -836,6 +1048,7 @@
               ? msg + '（処理結果が確定していません。連続で再送せず、しばらく待って履歴を確認してください）'
               : msg);
             err.code = code;
+            if (r.data.can_create != null) err.canCreate = !!r.data.can_create;
             if (uncertain) err.unknownOperation = true;
             return err;
           }
@@ -896,6 +1109,29 @@
             totalMs: 20000
           });
           return unwrapResult(res, '削除', true);
+        }
+        // 対訳: mode=get は閲覧（共通トークンのみ）／mode=create は生成と同じ認可で LLM 実行
+        if (name === 'translateText') {
+          const mode = (payload && payload.mode) === 'create' ? 'create' : 'get';
+          const requestId = T.isRequestId(requestIdArg) ? requestIdArg : T.newRequestId();
+          const trBody = { action: name, token: SITE_BACKEND_TOKEN, record_id: String((payload && payload.record_id) || ''), mode: mode };
+          if (mode === 'create') {
+            trBody.request_id = requestId;
+            trBody.device_id = getDeviceId();
+          }
+          if (idt) trBody.id_token = idt;
+          const res = await T.fetchJson({
+            urls: WORKER_BACKEND_URL ? [WORKER_BACKEND_URL, DIRECT_BACKEND_URL] : [DIRECT_BACKEND_URL],
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: trBody,
+            requestId: requestId,
+            requestIdRequired: mode === 'create',
+            // 翻訳+審査は生成と同じく長い。取得は短く打ち切る
+            timeoutMs: mode === 'create' ? 90000 : 20000,
+            totalMs: mode === 'create' ? 130000 : 30000
+          });
+          return unwrapResult(res, mode === 'create' ? '翻訳の作成' : '翻訳の取得', mode === 'create');
         }
         // getSavedTexts は JSONP GET（CORS回避）。失敗時にiframeへ逃げず明示エラーを返す
         if (name === 'getSavedTexts') {
@@ -1032,6 +1268,7 @@
           viewedWords.add(w);
           updateHistoryDisplay();
         });
+        scheduleLinkDraw();
       }
 
       // 文の種類連動セレクト（app2改良方針.md §3: ラベル＋選択肢を掛け替え）
@@ -1158,8 +1395,384 @@
         return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
       }
 
+      // ── 対訳（bilingual） ─────────────────────────
+      // ・英文は inline span（offset で原文を切り出す）で描画し、文ごとの改行はしない
+      // ・選択は1ペアだけ。PCは左右、スマホは上下の独立スクロールで、線は右余白を通す
+      // ・レコード切替・遅延応答・モード終了は seq と recordId で無効化する
+      const bilingual = {
+        active: false,
+        recordId: '',
+        seq: 0,
+        data: null,
+        selectedId: '',
+        anchorY: 0
+      };
+      const translateBusy = { running: false };
+      const BL_ID_RE = /^s\d{1,4}$/;
+
+      function blEls() {
+        return {
+          button: document.getElementById('translateButton'),
+          status: document.getElementById('translateStatus'),
+          view: document.getElementById('bilingualView'),
+          enPane: document.getElementById('enPane'),
+          jaPane: document.getElementById('jaPane'),
+          en: document.getElementById('enContent'),
+          ja: document.getElementById('jaContent'),
+          path: document.getElementById('blLinkPath'),
+          plain: document.getElementById('textContentArea')
+        };
+      }
+
+      function setTranslateButton(label, disabled, active, statusText) {
+        const els = blEls();
+        if (els.button) {
+          els.button.textContent = label;
+          els.button.disabled = !!disabled;
+          els.button.classList.toggle('is-active', !!active);
+        }
+        if (els.status) els.status.textContent = statusText || '';
+      }
+
+      function clearBilingualSelection() {
+        const els = blEls();
+        if (els.en) els.en.querySelectorAll('.bl-sentence.is-selected').forEach(function (n) { n.classList.remove('is-selected'); });
+        if (els.ja) els.ja.querySelectorAll('.bl-sentence.is-selected').forEach(function (n) { n.classList.remove('is-selected'); });
+        bilingual.selectedId = '';
+        if (els.path) els.path.setAttribute('d', '');
+      }
+
+      function closeBilingual(clearData) {
+        const els = blEls();
+        bilingual.active = false;
+        bilingual.seq++;
+        clearBilingualSelection();
+        bilingual.anchorY = 0;
+        document.body.classList.remove('bilingual-mode');
+        if (els.view) els.view.classList.remove('is-active');
+        if (clearData) bilingual.data = null;
+        setTranslateButton('対訳を表示', false, false, '');
+      }
+
+      // 作成中の request_id は結果不明時に同じIDで確認する（セッション内で保持）
+      const pendingTranslate = (function () {
+        const out = Object.create(null);
+        try {
+          const raw = sessionStorage.getItem('tadoku_pending_translate');
+          if (raw) {
+            const obj = JSON.parse(raw);
+            if (obj && typeof obj === 'object') {
+              Object.keys(obj).forEach(function (k) {
+                if (T.isRequestId(obj[k])) out[k] = obj[k];
+              });
+            }
+          }
+        } catch (e) {}
+        return out;
+      })();
+      function savePendingTranslate() {
+        try {
+          const plain = {};
+          Object.keys(pendingTranslate).forEach(function (k) { plain[k] = pendingTranslate[k]; });
+          if (Object.keys(plain).length) sessionStorage.setItem('tadoku_pending_translate', JSON.stringify(plain));
+          else sessionStorage.removeItem('tadoku_pending_translate');
+        } catch (e) {}
+      }
+      function takeTranslateRequestId(recordId) {
+        const cur = pendingTranslate[recordId];
+        if (T.isRequestId(cur)) return cur;
+        const created = T.newRequestId();
+        pendingTranslate[recordId] = created;
+        savePendingTranslate();
+        return created;
+      }
+      function clearTranslateRequestId(recordId) {
+        if (!pendingTranslate[recordId]) return;
+        delete pendingTranslate[recordId];
+        savePendingTranslate();
+      }
+
+      /** サーバー応答の訳を本文と突き合わせる（offset 連続・ID・件数・空を検証） */
+      function translationError(translation, rec) {
+        if (!translation || !rec) return '訳データがありません';
+        if (String(translation.record_id || '') !== String(rec.id)) return '別の教材の訳データです';
+        const text = String(rec.text || '');
+        const spans = Array.isArray(translation.spans) ? translation.spans : null;
+        const items = Array.isArray(translation.items) ? translation.items : null;
+        if (!spans || !items || !spans.length || spans.length !== items.length) return '訳データの件数が不正です';
+        let expect = 0;
+        for (let i = 0; i < spans.length; i++) {
+          const sp = spans[i] || {};
+          const it = items[i] || {};
+          const id = String(sp.id || '');
+          if (!BL_ID_RE.test(id) || id !== String(it.id || '')) return '訳データのIDが不正です';
+          if (sp.start !== expect || typeof sp.end !== 'number' || sp.end <= sp.start || sp.end > text.length) {
+            return '訳データの位置が本文と一致しません';
+          }
+          expect = sp.end;
+          if (typeof it.ja !== 'string' || !it.ja.trim()) return '訳データに空の訳があります';
+        }
+        if (expect !== text.length) return '訳データが本文全体を覆っていません';
+        return '';
+      }
+
+      function showBilingual(translation) {
+        const rec = currentRecord;
+        const err = translationError(translation, rec);
+        if (err) {
+          setTranslateButton('対訳を表示', false, false, err);
+          showToast(err, 7000);
+          return;
+        }
+        const els = blEls();
+        const text = String(rec.text || '');
+        clearBilingualSelection();
+        els.en.textContent = '';
+        const enFrag = document.createDocumentFragment();
+        for (const sp of translation.spans) {
+          const span = document.createElement('span');
+          span.className = 'bl-sentence';
+          span.setAttribute('data-sid', String(sp.id));
+          span.textContent = text.slice(sp.start, sp.end);
+          enFrag.appendChild(span);
+        }
+        els.en.appendChild(enFrag);
+
+        const byId = Object.create(null);
+        for (const it of translation.items) byId[String(it.id)] = String(it.ja);
+        els.ja.textContent = '';
+        const jaFrag = document.createDocumentFragment();
+        for (const sp of translation.spans) {
+          const span = document.createElement('span');
+          span.className = 'bl-sentence';
+          span.setAttribute('data-sid', String(sp.id));
+          span.textContent = byId[String(sp.id)] || '';
+          jaFrag.appendChild(span);
+          jaFrag.appendChild(document.createTextNode('\n'));
+          if (text.slice(sp.start, sp.end).indexOf('\n') !== -1) {
+            jaFrag.appendChild(document.createTextNode('\n'));
+          }
+        }
+        els.ja.appendChild(jaFrag);
+
+        bilingual.data = { recordId: rec.id, translation: translation };
+        bilingual.recordId = rec.id;
+        bilingual.active = true;
+        bilingual.seq++;
+        document.body.classList.add('bilingual-mode');
+        els.view.classList.add('is-active');
+        els.enPane.scrollTop = 0;
+        els.jaPane.scrollTop = 0;
+        setTranslateButton('対訳を隠す', false, true, '英文の文をタップすると対訳を示します');
+        requestAnimationFrame(drawBilingualLink);
+      }
+
+      async function openBilingual() {
+        const rec = currentRecord;
+        if (!rec || !rec.id) return;
+        if (bilingual.data && bilingual.data.recordId === rec.id) {
+          showBilingual(bilingual.data.translation);
+          return;
+        }
+        if (translateBusy.running) return;
+        translateBusy.running = true;
+        const seq = ++bilingual.seq;
+        const sameRecord = function () {
+          return seq === bilingual.seq && currentRecord && currentRecord.id === rec.id;
+        };
+        try {
+          setTranslateButton('取得中…', true, false, '訳を確認しています…');
+          let res;
+          try {
+            res = await callServer('translateText', { record_id: rec.id, mode: 'get' });
+          } catch (eGet) {
+            if (!sameRecord()) return;
+            if (eGet && eGet.code === 'translation_corrupt') {
+              setTranslateButton('対訳を表示', false, false, '保存済みの訳が破損しています（自動修正しません）');
+              showToast('保存済みの訳が破損しているため表示できません', 7000);
+              return;
+            }
+            if (eGet && eGet.code === 'translation_missing') {
+              // 匿名生成が閉じている場合、サーバーは can_create:false を返す
+              if (!eGet.canCreate) {
+                setTranslateButton('対訳を表示', false, false, 'この教材の訳はまだありません');
+                showToast('この教材の訳はまだありません。訳の作成は教室アカウントで行えます。', 7000);
+                return;
+              }
+              const requestId = takeTranslateRequestId(rec.id);
+              setTranslateButton('作成中…', true, false, '翻訳を作成しています。少し時間がかかります…');
+              res = await callServer('translateText', { record_id: rec.id, mode: 'create' }, requestId);
+              clearTranslateRequestId(rec.id);
+              if (!sameRecord()) return;
+              showBilingual(res.translation);
+              return;
+            }
+            throw eGet;
+          }
+          if (!sameRecord()) return;
+          showBilingual(res.translation);
+        } catch (e) {
+          if (!sameRecord()) return;
+          if (e && e.code === 'translation_recovery_required') {
+            setTranslateButton('対訳を表示', false, false, '保存結果を確認できません（管理者の確認が必要です）');
+            showToast('翻訳の保存結果を自動で確認できませんでした。自動での再実行は行いません。管理者に連絡してください。', 15000);
+            return;
+          }
+          if (e && e.unknownOperation) {
+            setTranslateButton('対訳を表示', false, false, '結果を確認できません。待っても直らない場合は管理者に連絡してください');
+            showToast(e.message + '（待っても直らない場合は管理者に連絡してください）', 15000);
+          } else {
+            setTranslateButton('対訳を表示', false, false, '翻訳を表示できませんでした');
+            showToast(e.message || '翻訳の取得に失敗しました', 7000);
+          }
+        } finally {
+          translateBusy.running = false;
+        }
+      }
+
+      function toggleBilingual() {
+        if (!currentRecord || !currentRecord.id) return;
+        if (bilingual.active) {
+          closeBilingual(false);
+          return;
+        }
+        openBilingual();
+      }
+
+      function sentenceSpanFromEvent(e) {
+        let node = e.target;
+        if (node && node.nodeType === 3) node = node.parentElement;
+        if (node && node.closest) {
+          const hit = node.closest('#enContent [data-sid]');
+          if (hit) return hit;
+        }
+        try {
+          const range = document.caretRangeFromPoint ? document.caretRangeFromPoint(e.clientX, e.clientY) : null;
+          if (range && range.startContainer) {
+            const el = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer;
+            if (el && el.closest) return el.closest('#enContent [data-sid]');
+          }
+        } catch (err) {}
+        return null;
+      }
+
+      function scrollJaIntoView(ja) {
+        const pane = blEls().jaPane;
+        if (!pane || !ja) return;
+        const pr = pane.getBoundingClientRect();
+        const jr = ja.getBoundingClientRect();
+        if (jr.top >= pr.top + 2 && jr.bottom <= pr.bottom - 2) return; // 見えている
+        try { pane.scrollTop = Math.max(0, pane.scrollTop + (jr.top - pr.top) - 8); } catch (e) {}
+      }
+
+      function selectSentencePair(id, anchorY) {
+        clearBilingualSelection();
+        if (!id || !BL_ID_RE.test(String(id))) return;
+        const els = blEls();
+        const en = els.en ? els.en.querySelector('[data-sid="' + id + '"]') : null;
+        const ja = els.ja ? els.ja.querySelector('[data-sid="' + id + '"]') : null;
+        if (!en || !ja) return;
+        en.classList.add('is-selected');
+        ja.classList.add('is-selected');
+        bilingual.selectedId = id;
+        bilingual.anchorY = typeof anchorY === 'number' ? anchorY : 0;
+        // 訳が見切れる場合だけ訳ペインを自動スクロール
+        scrollJaIntoView(ja);
+        drawBilingualLink();
+      }
+
+      function rectAtLine(el, anchorY) {
+        const all = el.getClientRects ? Array.prototype.slice.call(el.getClientRects()) : [];
+        // 行末の改行・空白が作る幅0の矩形は使わない（線が左端に飛ぶ原因）
+        const rects = all.filter(function (r) { return r.width > 0.5 && r.height > 0.5; });
+        if (!rects.length) return el.getBoundingClientRect();
+        if (anchorY) {
+          let best = rects[0];
+          let bestD = Infinity;
+          for (const r of rects) {
+            const d = Math.abs((r.top + r.bottom) / 2 - anchorY);
+            if (d < bestD) { bestD = d; best = r; }
+          }
+          return best;
+        }
+        return rects[0];
+      }
+
+      function blRound(n) {
+        return Math.round(n * 10) / 10;
+      }
+
+      function drawBilingualLink() {
+        const els = blEls();
+        if (!els.path) return;
+        if (!bilingual.active || !bilingual.selectedId) {
+          els.path.setAttribute('d', '');
+          return;
+        }
+        const viewer = els.view;
+        const en = els.en ? els.en.querySelector('[data-sid="' + bilingual.selectedId + '"]') : null;
+        const ja = els.ja ? els.ja.querySelector('[data-sid="' + bilingual.selectedId + '"]') : null;
+        if (!viewer || !en || !ja) {
+          els.path.setAttribute('d', '');
+          return;
+        }
+        const vr = viewer.getBoundingClientRect();
+        const enRect = rectAtLine(en, bilingual.anchorY);
+        const jaRect = rectAtLine(ja, 0);
+        function inPane(rect, pane) {
+          if (!pane) return false;
+          const pr = pane.getBoundingClientRect();
+          const top = Math.max(pr.top, vr.top);
+          const bottom = Math.min(pr.bottom, vr.bottom);
+          // 両端が見えていないときは線を隠す
+          return rect.top < bottom - 1 && rect.bottom > top + 1;
+        }
+        if (!inPane(enRect, els.enPane) || !inPane(jaRect, els.jaPane)) {
+          els.path.setAttribute('d', '');
+          return;
+        }
+        const x1 = enRect.right - vr.left;
+        const y1 = (enRect.top + enRect.bottom) / 2 - vr.top;
+        const x2 = jaRect.left - vr.left;
+        const y2 = (jaRect.top + jaRect.bottom) / 2 - vr.top;
+        let d;
+        if (window.innerWidth < window.innerHeight) {
+          // スマホ: 右側の余白を通して必ず表示する（上下レイアウトでも見える）
+          const gutter = Math.max(8, vr.width - 8);
+          d = 'M ' + blRound(x1) + ' ' + blRound(y1)
+            + ' C ' + blRound(gutter) + ' ' + blRound(y1)
+            + ', ' + blRound(gutter) + ' ' + blRound(y2)
+            + ', ' + blRound(x2) + ' ' + blRound(y2);
+        } else {
+          d = 'M ' + blRound(x1) + ' ' + blRound(y1)
+            + ' C ' + blRound(x1 + 40) + ' ' + blRound(y1)
+            + ', ' + blRound(x2 - 40) + ' ' + blRound(y2)
+            + ', ' + blRound(x2) + ' ' + blRound(y2);
+        }
+        els.path.setAttribute('d', d);
+      }
+
+      function scheduleLinkDraw() {
+        if (!bilingual.active || !bilingual.selectedId) return;
+        if (scheduleLinkDraw.raf) return;
+        scheduleLinkDraw.raf = requestAnimationFrame(function () {
+          scheduleLinkDraw.raf = 0;
+          drawBilingualLink();
+        });
+      }
+
+      // 実ブラウザ回帰テスト用フック（表示専用。認可・保存はサーバー側で担保する）
+      window.testRenderRecord = renderRecord;
+      window.testBilingualShow = showBilingual;
+      window.testBilingualClose = closeBilingual;
+      window.testBilingualSelect = selectSentencePair;
+      window.testBilingualState = bilingual;
+
       function renderRecord(rec) {
+        closeBilingual(true);
+        translateBusy.running = false;
         currentRecord = rec;
+        document.body.classList.add('has-record');
         document.getElementById('preview-title').textContent = rec.title || '生成結果';
         document.getElementById('preview-subtitle').textContent = settingsSummary(rec.settings || {});
         document.getElementById('textContentArea').textContent =
@@ -1168,6 +1781,7 @@
         deletedWords.clear();
         updateHistoryDisplay();
         resetViewerScroll();
+        setTranslateButton('対訳を表示', false, false, '');
       }
 
       const genBusy = T.createBusyFlag();
@@ -1517,6 +2131,11 @@
       function lowerLabel(raw) { return String(raw).toLowerCase(); }
 
       viewer.addEventListener('click', async e => {
+        // 対訳モード: 単語タップで「文の選択」と「辞書」を同時に発火する
+        if (bilingual.active) {
+          const hit = sentenceSpanFromEvent(e);
+          if (hit) selectSentencePair(hit.getAttribute('data-sid'), e.clientY);
+        }
         const raw = getWordAtPoint(e.clientX, e.clientY);
         if (!raw || !/^[a-zA-Z-']+$/.test(raw)) return;
         const dictDiv = document.getElementById('dict-overlay-fixed');
@@ -1564,6 +2183,7 @@
       function applyZoom() {
         viewer.style.fontSize = textScale + 'em';
         document.getElementById('zoomLabel').textContent = textScale.toFixed(1) + 'x';
+        scheduleLinkDraw();
       }
       document.getElementById('zoomInButton').addEventListener('click', () => {
         textScale = Math.min(textScale * 1.2, 5.0);
@@ -1574,9 +2194,25 @@
         applyZoom();
       });
 
+      // 対訳の位置は scroll / resize / 文字サイズ / テーマ変更のたびに再計算する
+      document.getElementById('translateButton').addEventListener('click', toggleBilingual);
+      ['enPane', 'jaPane'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('scroll', scheduleLinkDraw, { passive: true });
+      });
+      window.addEventListener('resize', scheduleLinkDraw);
+      window.addEventListener('orientationchange', scheduleLinkDraw);
+      window.addEventListener('gakusyu-theme-change', scheduleLinkDraw);
+      try {
+        if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+          document.fonts.ready.then(scheduleLinkDraw).catch(function () {});
+        }
+      } catch (e) {}
+
       backBtn.addEventListener('click', () => {
         document.body.classList.remove('mobile-preview');
         document.getElementById('dict-overlay-fixed').style.display = 'none';
+        scheduleLinkDraw();
       });
 
       viewer.addEventListener('touchstart', e => {

@@ -231,15 +231,15 @@ function createNet() {
         if (resp.throw) throw new Error('network down');
         return response(resp.code || 200, typeof resp.body === 'string' ? resp.body : JSON.stringify(resp.body));
       }
-      if (u.indexOf('https://opencode.ai/zen/v1') === 0) {
-        const next = ai.length ? ai.shift() : { code: 500, body: { error: { message: 'no queued ai response' } } };
+      if (u.indexOf('https://ollama.com/api/chat') === 0) {
+        const next = ai.length ? ai.shift() : { code: 500, body: { error: 'no queued ai response' } };
         if (next.throw) throw new Error('ai network down');
         return response(next.code || 200, typeof next.body === 'string' ? next.body : JSON.stringify(next.body));
       }
       return response(404, '{}');
     },
     aiCalls() {
-      return calls.filter((c) => c.url.indexOf('https://opencode.ai/zen/v1') === 0).length;
+      return calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0).length;
     },
     tokeninfoCalls() {
       return calls.filter((c) => c.url.indexOf('https://oauth2.googleapis.com/tokeninfo') === 0).length;
@@ -430,14 +430,26 @@ function forgedJwt(claims) {
   return enc({ alg: 'none', typ: 'JWT' }) + '.' + enc(claims) + '.' + 'sig';
 }
 
+function chatReply(content, extra) {
+  return {
+    code: 200,
+    body: Object.assign({
+      model: 'gemma4:31b',
+      created_at: '2026-10-27T00:00:00Z',
+      message: { role: 'assistant', content: String(content) },
+      done: true,
+      done_reason: 'stop',
+    }, extra || {}),
+  };
+}
 function genOk(text) {
-  return { code: 200, body: { output_text: text || 'A Cat Story\n\nA cat sat on a mat. The cat was happy.' } };
+  return chatReply(text || 'A Cat Story\n\nA cat sat on a mat. The cat was happy.');
 }
 function modOk() {
-  return { code: 200, body: { output_text: 'OK' } };
+  return chatReply('OK');
 }
 function modNg(reason) {
-  return { code: 200, body: { output_text: 'NG:' + (reason || 'inappropriate') } };
+  return chatReply('NG:' + (reason || 'inappropriate'));
 }
 
 const BASE_SETTINGS = {
@@ -461,7 +473,7 @@ function setupApp2(opts) {
     DROP_TOKEN: TOKEN,
     ALLOWED_EMAILS: TEACHER,
     OWNER_EMAIL: TEACHER,
-    ZEN_API_KEY: 'sk-test-key',
+    OLLAMA_API_KEY: 'test-key',
     OPEN_GENERATE: 'false',
   }, opts.props || {}), APP2_PATH);
   return rt;
@@ -798,12 +810,16 @@ test('app2: moderation が 503 なら保存ゼロ（再生成もしない）', (
   assert.equal(savedCount(rt), 0, '保存ゼロ');
 });
 
-test('app2: moderation が JSON 異常 / incomplete / 判定不能 でも保存しない', () => {
-  for (const mod of [{ code: 200, body: 'not-json' }, { code: 200, body: { status: 'incomplete' } }, { code: 200, body: { output_text: 'MAYBE' } }]) {
+test('app2: moderation が JSON 異常 / 打ち切り / 判定不能 でも保存しない', () => {
+  for (const mod of [
+    { code: 200, body: 'not-json' },
+    { code: 200, body: { message: { role: 'assistant', content: 'OK' }, done: false } },
+    chatReply('MAYBE'),
+  ]) {
     const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
     rt.net.ai.push(genOk(RECORD_TEXT), mod);
     const res = rt.postJson(genBody(rt, { id_token: '' }));
-    assert.equal(res.json.ok, false, JSON.stringify(mod));
+    assert.equal(res.json.ok, false, JSON.stringify(mod).slice(0, 80));
     assert.equal(res.json.code, 'moderation_unavailable');
     assert.equal(rt.net.aiCalls(), 2, '審査不能では再生成しない');
     assert.equal(savedCount(rt), 0);
@@ -827,17 +843,480 @@ test('app2: NG が2回続けば保存しない（再生成は1回まで）', () 
   assert.equal(rt.net.aiCalls(), 4);
 });
 
-test('app2: 審査対象は instructions に混ぜず input に分離する', () => {
+test('app2: Ollama へ system/user を分離して送り、審査本文を system に混ぜない', () => {
   const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
   rt.net.ai.push(genOk(RECORD_TEXT), modOk());
   rt.postJson(genBody(rt));
-  const aiCall = rt.net.calls.filter((c) => c.url.indexOf('https://opencode.ai/zen/v1') === 0)[1];
+  const aiCall = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[1];
   const payload = JSON.parse(aiCall.opts.payload);
-  assert.ok(payload.input.indexOf('審査対象データ') !== -1, '本文は input 側');
-  assert.equal(payload.instructions.indexOf('A cat sat on a mat'), -1, '本文を instructions に混ぜない');
+  assert.equal(payload.model, 'gemma4:31b');
+  assert.equal(payload.stream, false, 'stream=false で message.content を読む');
+  assert.equal(payload.think, false, '思考を無効化する');
+  assert.equal(payload.format, undefined, 'Cloud 非対応の format を送らない');
+  const sys = payload.messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n');
+  const usr = payload.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
+  assert.ok(usr.indexOf('審査対象データ') !== -1, '本文は user 側');
+  assert.equal(sys.indexOf('A cat sat on a mat'), -1, '本文を system に混ぜない');
 });
 
-// ────────────────────────────── app2: index / legacy ──────────────────────────────
+// ────────────────────────────── app2: Ollama / 対訳 ──────────────────────────────
+
+const TRANS_TEXT = 'Mr. Smith went to Tokyo. He said, "Hello!" Then he left.\n\nThe next day, he came back.';
+function seedRecord(rt, text, id) {
+  const record = {
+    id: id || 'tadoku-1700000001000',
+    createdAt: '2025-01-01T00:00:00.000Z',
+    settings: { level: '3級' },
+    title: 'Sample Story',
+    text: text == null ? TRANS_TEXT : text,
+  };
+  rt.ctx.saveRecord_(record);
+  return record;
+}
+function trItems(spans, ja) {
+  return spans.map((s, i) => ({ id: s.id, ja: ja ? ja(s, i) : ('これは' + (i + 1) + '番目の訳です') }));
+}
+function trReply(rt, text, ja) {
+  const spans = rt.ctx.buildSentenceSpans_(text == null ? TRANS_TEXT : text);
+  return chatReply(JSON.stringify({ items: trItems(spans, ja) }));
+}
+function trBody(rt, recordId, over) {
+  return Object.assign({
+    action: 'translateText',
+    token: TOKEN,
+    id_token: tokenFor(rt, TEACHER),
+    record_id: recordId,
+    mode: 'create',
+    request_id: rid('tr'),
+    device_id: 'd-abcdefgh1234567',
+  }, over || {});
+}
+function trFile(rt, id) {
+  return rt.drive.findByName('tadoku-trans-' + id + '.json');
+}
+function translatedFileCount(rt) {
+  return rt.drive.activeFiles().filter((f) => f.name.indexOf('tadoku-trans-') === 0).length;
+}
+
+test('app2: OLLAMA_API_KEY のみを使い、ZEN/OPENCODE へ暗黙フォールバックしない', () => {
+  const rt = setupApp2({ props: { OLLAMA_API_KEY: '', ZEN_API_KEY: 'zen-key', OPENCODE_API_KEY: 'oc-key' } });
+  const res = rt.postJson(genBody(rt));
+  assert.equal(res.json.ok, false);
+  assert.equal(res.json.code, 'api_key_missing');
+  assert.equal(rt.net.aiCalls(), 0, '鍵が無ければ AI を呼ばない');
+
+  const rt2 = setupApp2({ props: { OLLAMA_API_KEY: 'ollama-key' } });
+  rt2.net.ai.push(genOk(RECORD_TEXT), modOk());
+  assert.equal(rt2.postJson(genBody(rt2)).json.ok, true);
+  const call = rt2.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[0];
+  assert.equal(call.opts.headers.Authorization, 'Bearer ollama-key');
+});
+
+test('app2: Ollama の HTTP失敗 / 非JSON / 切断 / 打ち切り / 空 は保存しない', () => {
+  const cases = [
+    { name: 'http500', nexts: [{ code: 500, body: { error: 'down' } }], code: 'ai_http_error', calls: 1 },
+    { name: 'badjson', nexts: [{ code: 200, body: 'not-json' }], code: 'ai_bad_json', calls: 1 },
+    { name: 'done-false', nexts: [{ code: 200, body: { message: { role: 'assistant', content: 'A Cat Story\n\nA cat.' }, done: false } }], code: 'ai_incomplete', calls: 1 },
+    { name: 'length', nexts: [chatReply('A Cat Story\n\nA cat.', { done_reason: 'length' })], code: 'ai_incomplete', calls: 1 },
+    { name: 'empty', nexts: [chatReply('   ')], code: 'ai_empty', calls: 1 },
+  ];
+  for (const c of cases) {
+    const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+    rt.net.ai.push(...c.nexts);
+    const res = rt.postJson(genBody(rt));
+    assert.equal(res.json.ok, false, c.name);
+    assert.equal(res.json.code, c.code, c.name);
+    assert.equal(rt.net.aiCalls(), c.calls, c.name);
+    assert.equal(savedCount(rt), 0, c.name + ': 保存しない');
+  }
+});
+
+test('app2: think 非対応の 400 は think を外して1回だけ再試行する', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  rt.net.ai.push({ code: 400, body: { error: 'think is not supported by this model' } }, genOk(RECORD_TEXT), modOk());
+  const res = rt.postJson(genBody(rt));
+  assert.equal(res.json.ok, true, JSON.stringify(res.json));
+  const calls = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0);
+  assert.equal(calls.length, 3, '400 + 再試行 + 審査');
+  assert.equal(JSON.parse(calls[0].opts.payload).think, false);
+  assert.equal(JSON.parse(calls[1].opts.payload).think, undefined, '再試行では think を送らない');
+});
+
+test('app2 translate: get は未作成なら LLM なしで translation_missing を返す', () => {
+  const rt = setupApp2();
+  const rec = seedRecord(rt);
+  const res = rt.postJson({
+    action: 'translateText', token: TOKEN, id_token: tokenFor(rt, TEACHER),
+    record_id: rec.id, mode: 'get',
+  });
+  assert.equal(res.json.ok, false);
+  assert.equal(res.json.code, 'translation_missing');
+  assert.equal(res.json.can_create, true);
+  assert.equal(rt.net.aiCalls(), 0);
+
+  // 匿名生成が閉じていれば匿名に新規LLM実行を許可しない
+  const anon = rt.postJson({ action: 'translateText', token: TOKEN, record_id: rec.id, mode: 'get' });
+  assert.equal(anon.json.code, 'translation_missing');
+  assert.equal(anon.json.can_create, false);
+
+  const badMode = rt.postJson({ action: 'translateText', token: TOKEN, id_token: tokenFor(rt, TEACHER), record_id: rec.id, mode: 'bogus' });
+  assert.equal(badMode.json.code, 'invalid_mode');
+  assert.equal(rt.net.aiCalls(), 0);
+});
+
+test('app2 translate: 作成は LLM 2回（翻訳+審査）で別JSONに保存し、取得は LLM なしで再利用', () => {
+  const rt = setupApp2();
+  const rec = seedRecord(rt);
+  const spans = rt.ctx.buildSentenceSpans_(TRANS_TEXT);
+  rt.net.ai.push(trReply(rt, TRANS_TEXT), modOk());
+  const created = rt.postJson(trBody(rt, rec.id));
+  assert.equal(created.json.ok, true, JSON.stringify(created.json));
+  const tr = created.json.translation;
+  assert.equal(tr.record_id, rec.id);
+  assert.equal(tr.model, 'gemma4:31b');
+  assert.equal(tr.source_hash, rt.ctx.sourceHashOf_(TRANS_TEXT));
+  assert.equal(tr.items.length, spans.length);
+  assert.equal(tr.spans.map((s) => s.start).join(','), spans.map((s) => s.start).join(','));
+  assert.equal(tr.spans.map((s) => s.end).join(','), spans.map((s) => s.end).join(','));
+  assert.equal(rt.net.aiCalls(), 2);
+
+  const file = trFile(rt, rec.id);
+  assert.ok(file, '別JSONに保存する');
+  const saved = JSON.parse(file.content);
+  assert.equal(saved.version, 1);
+  assert.equal(saved.lang, 'ja');
+  assert.equal(saved.moderation, 'ok');
+  assert.equal(saved.createdAt.length > 0, true);
+  const index = JSON.parse(rt.drive.findByName('tadoku-index.json').content);
+  assert.equal(index.items.length, 1);
+  assert.equal(index.items[0].translation, undefined, 'index を肥大させない');
+
+  const got = rt.postJson({
+    action: 'translateText', token: TOKEN, id_token: tokenFor(rt, TEACHER),
+    record_id: rec.id, mode: 'get',
+  });
+  assert.equal(got.json.ok, true);
+  assert.equal(got.json.replayed, true);
+  assert.deepEqual(got.json.translation.items.map((i) => i.ja), tr.items.map((i) => i.ja));
+  assert.equal(rt.net.aiCalls(), 2, '既存訳の取得は LLM なし');
+});
+
+test('app2 translate: 同一 request_id の再送は LLM・保存を増やさない / 別 record は conflict', () => {
+  const rt = setupApp2();
+  const rec = seedRecord(rt);
+  const requestId = rid('trreplay');
+  rt.net.ai.push(trReply(rt, TRANS_TEXT), modOk());
+  assert.equal(rt.postJson(trBody(rt, rec.id, { request_id: requestId })).json.ok, true);
+  const aiAfter = rt.net.aiCalls();
+  const filesAfter = translatedFileCount(rt);
+
+  const again = rt.postJson(trBody(rt, rec.id, { request_id: requestId }));
+  assert.equal(again.json.ok, true);
+  assert.equal(again.json.replayed, true);
+  assert.equal(rt.net.aiCalls(), aiAfter);
+  assert.equal(translatedFileCount(rt), filesAfter);
+
+  const other = seedRecord(rt, 'Another story. It is short.', 'tadoku-1700000002000');
+  const conflict = rt.postJson(trBody(rt, other.id, { request_id: requestId }));
+  assert.equal(conflict.json.code, 'request_id_conflict');
+  assert.equal(rt.net.aiCalls(), aiAfter);
+});
+
+test('app2 translate: 同一 record の並行作成は予約で直列化し、stale は pending（LLM を呼ばない）', () => {
+  const rt = setupApp2();
+  const rec = seedRecord(rt);
+  const key = rt.ctx.transReserveKey_(rec.id);
+  const sourceHash = rt.ctx.sourceHashOf_(TRANS_TEXT);
+
+  rt.props.set(key, JSON.stringify({ r: rid('trbusy'), h: sourceHash, t: Date.now() }));
+  const busy = rt.postJson(trBody(rt, rec.id, { request_id: rid('trnew') }));
+  assert.equal(busy.json.code, 'in_flight');
+  assert.equal(busy.json.retryable, true);
+  assert.equal(rt.net.aiCalls(), 0);
+  assert.equal(rt.ctx.countLiveLedgerEntries_(), 0, '実行しない新規 receipt は残さない');
+
+  rt.props.set(key, JSON.stringify({ r: rid('trstale'), h: sourceHash, t: Date.now() - 360000 }));
+  const stale = rt.postJson(trBody(rt, rec.id, { request_id: rid('trnew2') }));
+  assert.equal(stale.json.code, 'translation_recovery_required', '停止した処理は自動再実行しない');
+  assert.equal(stale.json.retryable, false);
+  assert.equal(rt.net.aiCalls(), 0);
+  assert.equal(JSON.parse(rt.props.get(key)).u, 1, '送信不明として永続化する');
+});
+
+test('app2 translate: 不正JSON/件数/未知ID/重複/空/異常長/英語のみ/中国語疑い は保存しない', () => {
+  const spanProbe = setupApp2();
+  const spans = spanProbe.ctx.buildSentenceSpans_(TRANS_TEXT);
+  const okItems = trItems(spans);
+  const cases = [
+    ['not-json', 'これはJSONではない'],
+    ['count', JSON.stringify({ items: [okItems[0]] })],
+    ['unknown-id', JSON.stringify({ items: okItems.map((it, i) => ({ id: 'x' + i, ja: it.ja })) })],
+    ['duplicate-id', JSON.stringify({ items: okItems.map(() => ({ id: spans[0].id, ja: 'これは訳です' })) })],
+    ['empty', JSON.stringify({ items: okItems.map((it) => ({ id: it.id, ja: '   ' })) })],
+    ['too-long', JSON.stringify({ items: okItems.map((it) => ({ id: it.id, ja: 'あ'.repeat(4001) })) })],
+    ['english', JSON.stringify({ items: okItems.map((it, i) => ({ id: it.id, ja: i === 0 ? 'This is English.' : it.ja })) })],
+    ['chinese', JSON.stringify({ items: okItems.map((it, i) => ({ id: it.id, ja: i === 0 ? '这个学生说的是中文。' : it.ja })) })],
+  ];
+  for (const [name, content] of cases) {
+    const rt = setupApp2();
+    const rec = seedRecord(rt);
+    rt.net.ai.push(chatReply(content));
+    const res = rt.postJson(trBody(rt, rec.id));
+    assert.equal(res.json.ok, false, name);
+    assert.equal(res.json.code, 'translation_invalid', name + ': ' + JSON.stringify(res.json).slice(0, 160));
+    assert.equal(rt.net.aiCalls(), 1, name + ': 検証失敗では審査に進まない');
+    assert.equal(translatedFileCount(rt), 0, name + ': 保存しない');
+    assert.equal(savedCount(rt), 1, name + ': index は不変');
+  }
+});
+
+test('app2 translate: 文分割は省略語・小数・会話の省略・段落を壊さず原文を完全復元する', () => {
+  const rt = setupApp2();
+  const text = 'Mr. Smith paid 3.14 dollars. He said, "Wait... What?"\n\nDr. J. K. Rowling wrote it (e.g. novels). The end.';
+  const spans = rt.ctx.buildSentenceSpans_(text);
+  const pieces = spans.map((s) => text.slice(s.start, s.end));
+  assert.equal(pieces.join(''), text, '原文を完全復元できる');
+  assert.equal(spans[0].start, 0);
+  assert.equal(spans[spans.length - 1].end, text.length);
+  assert.equal(pieces.some((p) => p.trim() === 'Mr.'), false, 'Mr. で切らない');
+  assert.equal(pieces.some((p) => p.trim() === 'Dr.'), false, 'Dr. で切らない');
+  assert.equal(pieces.some((p) => /3\.$/.test(p.trim())), false, '小数で切らない');
+  assert.equal(pieces.some((p) => /Wait\.\.\.$/.test(p.trim())), false, '会話中の省略記号で切らない');
+  const quoted = rt.ctx.buildSentenceSpans_('\t"Really? No." She left.');
+  const quotedPieces = quoted.map((s) => '\t"Really? No." She left.'.slice(s.start, s.end));
+  assert.equal(quotedPieces[0].trim(), '"Really? No."', '引用符内の ? で切らない');
+  assert.equal(quotedPieces.map((p) => p.trim()).join(''), '"Really? No."She left.', '引用符内を1単位にする');
+  // 段落の空行は直前の span に含める（原文の空白を落とさない）
+  assert.ok(pieces.some((p) => p.indexOf('\n\n') !== -1));
+
+  // 末尾が空白だけでも連結は原文と一致する
+  const tail = rt.ctx.buildSentenceSpans_('One two.  ');
+  assert.equal(tail.map((s) => 'One two.  '.slice(s.start, s.end)).join(''), 'One two.  ');
+});
+
+test('app2 translate: 保存不明の予約はTTL後も別request_idで再AIせず、保存済みなら回復する', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true', MAX_GEN_PER_DEVICE: '5' } });
+  const rec = seedRecord(rt);
+  const key = rt.ctx.transReserveKey_(rec.id);
+  const sourceHash = rt.ctx.sourceHashOf_(TRANS_TEXT);
+
+  // 保存不明（u:1）。10分超でも自動解除しない
+  rt.props.set(key, JSON.stringify({ r: rid('unknown'), h: sourceHash, t: Date.now() - 11 * 60 * 1000, u: 1 }));
+  rt.ctx.countLiveLedgerEntries_();
+  assert.ok(rt.props.get(key), '台帳スナップショットでも消さない');
+  const res = rt.postJson(trBody(rt, rec.id, { id_token: '', request_id: rid('newid') }));
+  assert.equal(res.json.code, 'translation_recovery_required');
+  assert.equal(res.json.retryable, false);
+  assert.equal(rt.net.aiCalls(), 0, '別request_idでもAIを呼ばない');
+  assert.equal(genStateCount(rt), 0, 'quotaを消費しない');
+  assert.equal(rt.ctx.countLiveLedgerEntries_(), 0, '未実行のreceiptを残さない');
+  assert.ok(rt.props.get(key), '予約は残す');
+  const blockedGet = rt.postJson({
+    action: 'translateText', token: TOKEN, id_token: tokenFor(rt, TEACHER),
+    record_id: rec.id, mode: 'get',
+  });
+  assert.equal(blockedGet.json.code, 'translation_recovery_required', '取得でも管理者確認を要求');
+  assert.equal(rt.net.aiCalls(), 0);
+
+  // 通常の in_flight が古い場合も永続 unknown に固定する（TTL後でも再AIしない）
+  const rt2 = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  const rec2 = seedRecord(rt2);
+  const key2 = rt2.ctx.transReserveKey_(rec2.id);
+  rt2.props.set(key2, JSON.stringify({ r: rid('stale'), h: rt2.ctx.sourceHashOf_(TRANS_TEXT), t: Date.now() - 11 * 60 * 1000 }));
+  const stale = rt2.postJson(trBody(rt2, rec2.id, { id_token: '', request_id: rid('newid2') }));
+  assert.equal(stale.json.code, 'translation_recovery_required');
+  assert.equal(rt2.net.aiCalls(), 0);
+  assert.equal(rt2.ctx.countLiveLedgerEntries_(), 0, '未実行のreceiptを残さない');
+  assert.equal(JSON.parse(rt2.props.get(key2)).u, 1);
+
+  // 保存ファイルが確定していれば get で回復し、予約を解放する（LLMなし）
+  const spans = rt2.ctx.buildSentenceSpans_(TRANS_TEXT);
+  const obj = rt2.ctx.buildTranslationObject_(rec2, spans, spans.map((s, i) => 'これは訳' + i));
+  rt2.drive.addFile('生成済み長文_index', 'tadoku-trans-' + rec2.id + '.json', JSON.stringify(obj));
+  const got = rt2.postJson({ action: 'translateText', token: TOKEN, id_token: tokenFor(rt2, TEACHER), record_id: rec2.id, mode: 'get' });
+  assert.equal(got.json.ok, true, JSON.stringify(got.json));
+  assert.equal(got.json.translation.items.length, spans.length);
+  assert.equal(rt2.props.get(key2), undefined, '保存確定で予約を解放');
+  assert.equal(rt2.net.aiCalls(), 0, '回復はLLMなし');
+});
+
+test('app2 translate: 常用漢字（健康/保健室）や漢字だけの長い語を中国語扱いしない', () => {
+  const rt = setupApp2();
+  assert.equal(rt.ctx.looksLikeChineseOnly_('健康'), false);
+  assert.equal(rt.ctx.looksLikeChineseOnly_('保健室'), false);
+  assert.equal(rt.ctx.looksLikeChineseOnly_('健康診断の結果'), false);
+  assert.equal(rt.ctx.looksLikeChineseOnly_('国際連合安全保障理事会'), false);
+  assert.equal(rt.ctx.looksLikeChineseOnly_('这个学生说的是中文。'), true, '簡体字は拒否');
+  assert.equal(rt.ctx.looksLikeChineseOnly_('她说这是健康的'), true, 'かな無しの簡体字文は拒否');
+
+  // 保存経路でも正常な日本語として通る（健康・保健室・漢字だけの長い語）
+  const rec = seedRecord(rt);
+  rt.net.ai.push(
+    trReply(rt, TRANS_TEXT, (s, i) => ['健康', '保健室', '国際連合安全保障理事会', 'これは訳です'][i] || 'これは訳です'),
+    modOk()
+  );
+  const res = rt.postJson(trBody(rt, rec.id));
+  assert.equal(res.json.ok, true, JSON.stringify(res.json));
+  assert.equal(res.json.translation.items[0].ja, '健康');
+  assert.equal(res.json.translation.items[1].ja, '保健室');
+  assert.equal(res.json.translation.items[2].ja, '国際連合安全保障理事会');
+});
+
+test('app2 translate: 文分割の確定失敗は台帳・予約・quota前に拒否する', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  const rec = seedRecord(rt, 'A cat sat. '.repeat(401), 'tadoku-1700000003000');
+  const res = rt.postJson(trBody(rt, rec.id, { id_token: '' }));
+  assert.equal(res.json.ok, false);
+  assert.equal(res.json.code, 'translation_too_long');
+  assert.equal(rt.net.aiCalls(), 0);
+  assert.equal(genStateCount(rt), 0, 'quotaを消費しない');
+  assert.equal(rt.ctx.countLiveLedgerEntries_(), 0, '台帳にreceiptを残さない');
+  assert.equal(rt.props.get(rt.ctx.transReserveKey_(rec.id)), undefined, '予約を残さない');
+});
+
+test('app2 translate: 翻訳 moderation が NG / 503 / 判定不能 なら保存しない', () => {
+  const cases = [
+    { name: 'ng', mod: modNg('sexual') },
+    { name: 'http503', mod: { code: 503, body: { error: 'down' } } },
+    { name: 'unrecognized', mod: chatReply('MAYBE') },
+  ];
+  for (const c of cases) {
+    const rt = setupApp2();
+    const rec = seedRecord(rt);
+    rt.net.ai.push(trReply(rt, TRANS_TEXT), c.mod);
+    const res = rt.postJson(trBody(rt, rec.id));
+    assert.equal(res.json.ok, false, c.name);
+    assert.ok(
+      res.json.code === 'moderation_rejected' || res.json.code === 'moderation_unavailable',
+      c.name + ': ' + res.json.code
+    );
+    assert.equal(rt.net.aiCalls(), 2, c.name);
+    assert.equal(translatedFileCount(rt), 0, c.name + ': 保存しない');
+  }
+});
+
+test('app2 translate: 匿名は OPEN_GENERATE=false で作成不可 / true は API 前に枠を消費し失敗も消費', () => {
+  const closed = setupApp2();
+  const recClosed = seedRecord(closed);
+  const denied = closed.postJson(trBody(closed, recClosed.id, { id_token: '' }));
+  assert.equal(denied.json.code, 'not_allowed');
+  assert.equal(closed.net.aiCalls(), 0);
+  assert.ok(!closed.props.get('GEN_STATE'), '枠を消費しない');
+
+  const open = setupApp2({ props: { OPEN_GENERATE: 'true', MAX_GEN_PER_DEVICE: '2' } });
+  const rec = seedRecord(open);
+  open.net.ai.push({ code: 500, body: { error: 'down' } });
+  const failed = open.postJson(trBody(open, rec.id, { id_token: '' }));
+  assert.equal(failed.json.ok, false);
+  assert.equal(genStateCount(open), 1, '失敗しても枠は消費（費用保護）');
+
+  open.net.ai.push(trReply(open, TRANS_TEXT), modOk());
+  const ok = open.postJson(trBody(open, rec.id, { id_token: '', request_id: failed.json.request_id }));
+  assert.equal(ok.json.ok, true, JSON.stringify(ok.json));
+  assert.equal(genStateCount(open), 2);
+});
+
+test('app2 translate: 保存済み訳が破損・sourceHash不一致なら translation_corrupt（再生成なし）', () => {
+  const rt = setupApp2();
+  const rec = seedRecord(rt);
+  const folderId = rt.drive.ensureFolder('生成済み長文_index');
+  rt.drive.addFile('生成済み長文_index', 'tadoku-trans-' + rec.id + '.json', '{broken json');
+  const get = rt.postJson({ action: 'translateText', token: TOKEN, id_token: tokenFor(rt, TEACHER), record_id: rec.id, mode: 'get' });
+  assert.equal(get.json.code, 'translation_corrupt');
+  assert.equal(rt.net.aiCalls(), 0);
+
+  const create = rt.postJson(trBody(rt, rec.id));
+  assert.equal(create.json.code, 'translation_corrupt');
+  assert.equal(rt.net.aiCalls(), 0, '破損訳は黙って再生成しない');
+
+  // sourceHash 不一致も破損扱い
+  const rt2 = setupApp2();
+  const rec2 = seedRecord(rt2);
+  const spans = rt2.ctx.buildSentenceSpans_(TRANS_TEXT);
+  const obj = rt2.ctx.buildTranslationObject_(rec2, spans, spans.map((s, i) => 'これは訳' + i));
+  obj.sourceHash = 'deadbeef';
+  rt2.drive.addFile('生成済み長文_index', 'tadoku-trans-' + rec2.id + '.json', JSON.stringify(obj));
+  const mismatch = rt2.postJson({ action: 'translateText', token: TOKEN, id_token: tokenFor(rt2, TEACHER), record_id: rec2.id, mode: 'get' });
+  assert.equal(mismatch.json.code, 'translation_corrupt');
+  assert.equal(rt2.net.aiCalls(), 0);
+});
+
+test('app2 translate: クライアントの本文・訳は使わず、record 本文だけを翻訳する', () => {
+  const rt = setupApp2();
+  const rec = seedRecord(rt);
+  rt.net.ai.push(trReply(rt, TRANS_TEXT), modOk());
+  const res = rt.postJson(trBody(rt, rec.id, { text: 'CLIENT INJECTED TEXT', ja: '偽の訳', translation: { items: [] } }));
+  assert.equal(res.json.ok, true);
+  const transCall = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[0];
+  const payload = JSON.parse(transCall.opts.payload);
+  const user = payload.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
+  assert.ok(user.indexOf(TRANS_TEXT) !== -1, 'サーバー保有本文を使う');
+  assert.equal(user.indexOf('CLIENT INJECTED TEXT'), -1, 'クライアント本文を使わない');
+});
+
+test('app2 translate: 保存結果不明は永続unknownで別IDも再実行せず、保存済みなら回復する', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  const rec = seedRecord(rt);
+  const requestId = rid('truncertain');
+  rt.net.ai.push(trReply(rt, TRANS_TEXT), modOk());
+  rt.drive.failNextCreateFile = true;
+  const res = rt.postJson(trBody(rt, rec.id, { request_id: requestId }));
+  assert.equal(res.json.code, 'translation_recovery_required');
+  assert.equal(res.json.retryable, false);
+  const key = rt.ctx.ledgerKey_('user:' + TEACHER, 'translateText', requestId);
+  assert.equal(JSON.parse(rt.props.get(key)).state, 'in_flight', 'in_flight を維持');
+  const reserveKey = rt.ctx.transReserveKey_(rec.id);
+  assert.equal(JSON.parse(rt.props.get(reserveKey)).u, 1, '永続unknownにする');
+  const aiAfter = rt.net.aiCalls();
+
+  const again = rt.postJson(trBody(rt, rec.id, { request_id: requestId }));
+  assert.equal(again.json.code, 'in_flight');
+  const other = rt.postJson(trBody(rt, rec.id));
+  assert.equal(other.json.code, 'translation_recovery_required', '別IDでも再実行しない');
+  assert.equal(rt.net.aiCalls(), aiAfter);
+
+  // TTL（10分）を過ぎても自動解除されず、別IDで AI を呼ばない
+  const cur = JSON.parse(rt.props.get(reserveKey));
+  cur.t = Date.now() - 11 * 60 * 1000;
+  rt.props.set(reserveKey, JSON.stringify(cur));
+  const later = rt.postJson(trBody(rt, rec.id));
+  assert.equal(later.json.code, 'translation_recovery_required');
+  assert.equal(rt.net.aiCalls(), aiAfter);
+  assert.ok(rt.props.get(reserveKey), '予約を残す');
+
+  // 保存ファイルが存在すれば回復（LLMなし・予約解放）
+  const spans = rt.ctx.buildSentenceSpans_(TRANS_TEXT);
+  const obj = rt.ctx.buildTranslationObject_(rec, spans, spans.map((s, i) => 'これは訳' + i));
+  rt.drive.addFile('生成済み長文_index', 'tadoku-trans-' + rec.id + '.json', JSON.stringify(obj));
+  const got = rt.postJson({ action: 'translateText', token: TOKEN, id_token: tokenFor(rt, TEACHER), record_id: rec.id, mode: 'get' });
+  assert.equal(got.json.ok, true, JSON.stringify(got.json));
+  assert.equal(rt.props.get(reserveKey), undefined, '保存確定で予約を解放');
+  assert.equal(rt.net.aiCalls(), aiAfter);
+});
+
+test('app2 translate: 削除すると訳ファイルも消え、翻訳取得は record_unavailable', () => {
+  const rt = setupApp2();
+  const rec = seedRecord(rt);
+  rt.net.ai.push(trReply(rt, TRANS_TEXT), modOk());
+  assert.equal(rt.postJson(trBody(rt, rec.id)).json.ok, true);
+  assert.ok(trFile(rt, rec.id));
+  // 保存不明の予約が残っていても、record 削除時に片付ける
+  const reserveKey = rt.ctx.transReserveKey_(rec.id);
+  rt.props.set(reserveKey, JSON.stringify({ r: rid('left'), h: rt.ctx.sourceHashOf_(TRANS_TEXT), t: Date.now(), u: 1 }));
+
+  const del = rt.postJson({
+    action: 'deleteText', token: TOKEN, id_token: tokenFor(rt, TEACHER),
+    request_id: rid('trdel'), id: rec.id,
+  });
+  assert.equal(del.json.ok, true, JSON.stringify(del.json));
+  assert.equal(trFile(rt, rec.id), null, '訳ファイルはゴミ箱へ');
+  assert.equal(rt.props.get(reserveKey), undefined, '予約も片付ける');
+
+  const got = rt.postJson({ action: 'translateText', token: TOKEN, id_token: tokenFor(rt, TEACHER), record_id: rec.id, mode: 'get' });
+  assert.equal(got.json.code, 'record_unavailable');
+  assert.equal(rt.net.aiCalls(), 2, '削除で再生成しない');
+});
+
 
 function setupApp2WithLegacy(opts) {
   const rt = setupApp2(opts);

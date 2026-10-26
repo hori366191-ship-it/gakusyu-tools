@@ -632,6 +632,47 @@ html[data-theme="forest"] #close-dict-btn {
   box-shadow: none !important;
 }
 html[data-theme="forest"] #close-dict-btn:hover { background: var(--color-forest-ink) !important; color: var(--color-cream-paper) !important; }
+/* app2: 対訳（bilingual） */
+html[data-theme="forest"] #bilingualBar {
+  background: var(--color-slate-hush) !important;
+  border-bottom: 1px solid var(--color-border-mist) !important;
+}
+html[data-theme="forest"] #translateButton {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-forest-ink) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-buttons) !important;
+  font-family: var(--font-suisse-intl) !important;
+  opacity: 1 !important;
+}
+html[data-theme="forest"] #translateButton:hover:not(:disabled) {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+}
+html[data-theme="forest"] #translateButton:disabled {
+  opacity: .4 !important;
+}
+html[data-theme="forest"] #translateButton.is-active {
+  background: var(--color-forest-ink) !important;
+  color: var(--color-cream-paper) !important;
+}
+html[data-theme="forest"] #translateStatus {
+  color: var(--color-charcoal) !important;
+  opacity: .7;
+  font-family: var(--font-suisse-intl) !important;
+}
+html[data-theme="forest"] #jaPane { border-left: 1px dashed var(--color-border-mist) !important; }
+html[data-theme="forest"] .bl-sentence.is-selected {
+  background: var(--color-keylime-wash) !important;
+  box-shadow: 0 0 0 2px rgba(31, 61, 43, .35) !important;
+}
+html[data-theme="forest"] #blLinkPath { stroke: var(--color-forest-ink) !important; }
+@media (orientation: portrait) {
+  html[data-theme="forest"] #jaPane {
+    border-left: none !important;
+    border-top: 1px dashed var(--color-border-mist) !important;
+  }
+}
 @media (orientation: portrait) { html[data-theme="forest"] #form-container { border-bottom: 1px solid var(--color-border-mist) !important; } }
 
 /* ---- app8 — 英文法ビジュアライザー（裏: Mint背景＋白カード） ---- */

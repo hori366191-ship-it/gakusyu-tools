@@ -998,7 +998,7 @@ test('app2 generate: 長時間AI向け予算（90s/130s）でDirectに30s以上�
   const gen = extractBetween(app2, "if (name === 'generateText') {", "if (name === 'deleteText') {");
   assert.match(gen, /timeoutMs:\s*90000/);
   assert.match(gen, /totalMs:\s*130000/);
-  const del = extractBetween(app2, "if (name === 'deleteText') {", "// getSavedTexts は JSONP GET");
+  const del = extractBetween(app2, "if (name === 'deleteText') {", "// 対訳: mode=get は閲覧");
   assert.match(del, /timeoutMs:\s*9000/);
   assert.match(del, /totalMs:\s*20000/);
   const history = extractBetween(app2, "if (name === 'getSavedTexts') {", "// 辞書・フォーム設定は fetch");
@@ -1008,6 +1008,30 @@ test('app2 generate: 長時間AI向け予算（90s/130s）でDirectに30s以上�
   const genBlock = extractBetween(app2, 'async function generate() {', "document.getElementById('genBtn').addEventListener('click', generate);");
   assert.match(genBlock, /pendingGenerate = \{[\s\S]*actorHash/);
   assert.match(genBlock, /loadSavedList\(\{ reset: true \}\)/);
+});
+
+test('app2 translate: 取得は request_id 不要・作成は必須で、record_id だけ送る', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const block = extractBetween(app2, "if (name === 'translateText') {", "// getSavedTexts は JSONP GET");
+  assert.match(block, /record_id:/);
+  assert.match(block, /requestIdRequired: mode === 'create'/);
+  assert.match(block, /timeoutMs: mode === 'create' \? 90000 : 20000/);
+  assert.match(block, /totalMs: mode === 'create' \? 130000 : 30000/);
+  assert.equal(block.indexOf('payload.text'), -1, 'クライアント本文を送らない');
+  assert.equal(block.indexOf('payload.ja'), -1, 'クライアント訳を送らない');
+});
+
+test('app2 bilingual: 英文は offset の inline span で描画し、innerHTML を使わない', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const block = extractBetween(app2, 'const bilingual = {', 'function renderRecord(rec) {');
+  assert.ok(block.length > 1000, '対訳ブロックを抽出できる');
+  assert.equal(block.indexOf('.innerHTML'), -1, 'XSS 防止のため textContent のみ');
+  assert.match(app2, /textContent = text\.slice\(sp\.start, sp\.end\)/, '原文を offset で切り出す');
+  assert.match(app2, /body\.bilingual-mode #dict-overlay-fixed/, 'スマホの対訳中は辞書を上側に出す');
+  assert.match(app2, /const gutter = Math\.max\(8, vr\.width - 8\)/, 'スマホは右余白を通す');
+  assert.match(app2, /scrollJaIntoView\(ja\)/, '訳が見切れるときだけ自動スクロール');
+  assert.match(block, /scrollJaIntoView/, 'スクロール補助がある');
+  assert.match(block, /is-selected/, '選択は1ペアだけ強調');
 });
 
 test('app9 PDF生成: CDN script timeoutとhtml2canvas watchdogでcallback一回・zoom復元・送信開始なし', async () => {
