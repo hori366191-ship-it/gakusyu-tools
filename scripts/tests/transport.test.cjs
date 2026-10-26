@@ -1979,3 +1979,211 @@ test('portal GIS retry: 失敗表示後も#gis-btnを作り直し、再試行で
   assert.strictEqual(dom.byId.get('gis-btn').__rendered, true);
   assert.strictEqual(findNodeByText(dom.banner, '再試行'), null, '成功後は再試行を消す');
 });
+
+// ── app2: 向き（横⇔縦）の変化で読書を継続する ─────────────────
+test('app2 orientation: 横→縦は本文表示中だけ本文モードにし、明示backは同縦長で覆さない', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const ctx = runTestableBlock(app2, 'ORIENTATION', {},
+    'globalThis.__action = readingOrientationAction; globalThis.__portrait = readingIsPortrait;'
+    + ' globalThis.__create = createReadingOrientation;');
+
+  // 純関数: 向きの遷移だけを決める
+  const act = ctx.__action;
+  assert.strictEqual(act(null, true, true, false), 'idle', '起動直後は現在の設定を尊重する');
+  assert.strictEqual(act(null, false, true, false), 'idle');
+  assert.strictEqual(act(false, true, false, false), 'idle', '未選択で起動した縦長は設定のまま');
+  assert.strictEqual(act(false, true, true, false), 'enter', '横→縦で本文表示中なら本文モード');
+  assert.strictEqual(act(false, true, true, true), 'idle', '明示backの意思を同じ縦長で奪わない');
+  assert.strictEqual(act(true, true, true, false), 'idle', '同方向の重複イベントは何もしない');
+  assert.strictEqual(act(false, false, false, false), 'idle');
+  assert.strictEqual(act(true, false, true, false), 'leave', '縦→横は設定へ戻す');
+  assert.strictEqual(act(true, false, false, true), 'leave');
+
+  // CSS と同じ orientation 判定（matchMedia 優先・無ければ寸法比）
+  assert.strictEqual(ctx.__portrait({ matchMedia: () => ({ matches: true }) }), true);
+  assert.strictEqual(ctx.__portrait({ matchMedia: () => ({ matches: false }) }), false);
+  assert.strictEqual(ctx.__portrait({ innerWidth: 390, innerHeight: 844 }), true);
+  assert.strictEqual(ctx.__portrait({ innerWidth: 1280, innerHeight: 900 }), false);
+
+  function harness(initialPortrait, initialReading) {
+    const cls = new Set();
+    const body = { classList: { add: (c) => cls.add(c), remove: (c) => cls.delete(c), contains: (c) => cls.has(c) } };
+    const dict = { style: { display: 'block' } };
+    const log = [];
+    const queue = [];
+    const flags = { portrait: initialPortrait, reading: initialReading, stale: 0 };
+    const ctrl = ctx.__create({
+      isPortrait: () => {
+        if (flags.stale > 0) { flags.stale--; return !flags.portrait; }
+        return flags.portrait;
+      },
+      hasReading: () => flags.reading,
+      showReader: () => { body.classList.add('mobile-preview'); dict.style.display = 'none'; log.push('show'); },
+      hideReader: () => { body.classList.remove('mobile-preview'); dict.style.display = 'none'; log.push('hide'); },
+      restoreScroll: () => log.push('restore'),
+      captureScroll: () => log.push('capture'),
+      onTransition: (a) => log.push('transition:' + a),
+      schedule: (fn) => queue.push(fn)
+    });
+    const flush = () => { while (queue.length) queue.shift()(); };
+    return { cls, dict, log, queue, flags, ctrl, flush };
+  }
+
+  // 未選択で起動した縦長: イベントが重複しても設定（sidebar）のまま
+  const none = harness(true, false);
+  assert.strictEqual(none.ctrl.sync(), 'idle');
+  assert.strictEqual(none.ctrl.schedule(), 'idle');
+  none.flush();
+  assert.strictEqual(none.cls.has('mobile-preview'), false);
+  // レコードを描画したときだけ本文モードへ入る
+  none.flags.reading = true;
+  assert.strictEqual(none.ctrl.enterIfPortrait(), true);
+  assert.strictEqual(none.cls.has('mobile-preview'), true);
+  assert.strictEqual(none.dict.style.display, 'none');
+
+  // 横向きで本文を表示中 → 縦長で本文モード（重複イベントでも1回だけ）
+  const h = harness(false, true);
+  assert.strictEqual(h.ctrl.sync(), 'idle');
+  h.flags.portrait = true;
+  assert.strictEqual(h.ctrl.schedule(), 'enter');
+  assert.strictEqual(h.cls.has('mobile-preview'), true);
+  const enters = () => h.log.filter((x) => x === 'transition:enter').length;
+  assert.strictEqual(enters(), 1);
+  h.ctrl.schedule();
+  h.ctrl.schedule();
+  h.flush();
+  assert.strictEqual(enters(), 1, 'resize/orientationchange/matchMedia の重複で再遷移しない');
+  assert.strictEqual(h.log.filter((x) => x === 'show').length, 1);
+
+  // イベント直後に古い向きを読んでも settle の再確認で収束する
+  h.flags.portrait = false;
+  h.flags.stale = 1;
+  assert.strictEqual(h.ctrl.schedule(), 'idle');
+  h.flush();
+  assert.strictEqual(h.ctrl.state.portrait, false);
+
+  h.flags.portrait = true;
+  h.flags.stale = 1;
+  assert.strictEqual(h.ctrl.schedule(), 'idle');
+  assert.strictEqual(h.ctrl.state.portrait, false, '古い値では遷移しない');
+  h.flush();
+  assert.strictEqual(h.ctrl.state.portrait, true, 'settle で新しい向きへ収束する');
+  assert.strictEqual(h.ctrl.state.reader, true);
+
+  // 明示back: 同じ縦長の resize / キーボードイベントでは奪わない
+  h.ctrl.back();
+  assert.strictEqual(h.cls.has('mobile-preview'), false);
+  assert.strictEqual(h.log[h.log.indexOf('hide') - 1], 'capture', '戻る直前の読書位置を保存する');
+  h.ctrl.schedule();
+  h.flush();
+  assert.strictEqual(h.cls.has('mobile-preview'), false, '同縦長では設定画面のまま');
+
+  // back → 横向き → 縦向き（読書の意思なし）は設定継続を優先する
+  h.flags.portrait = false;
+  h.ctrl.schedule(); h.flush();
+  h.flags.portrait = true;
+  h.ctrl.schedule(); h.flush();
+  assert.strictEqual(h.cls.has('mobile-preview'), false, '設定継続の意思を優先する');
+
+  // 横向きで本文をクリック（読書の意思）→ 次の縦長は本文へ復帰
+  h.ctrl.noteReadingIntent();
+  h.flags.portrait = false;
+  h.ctrl.schedule(); h.flush();
+  h.flags.portrait = true;
+  h.ctrl.schedule(); h.flush();
+  assert.strictEqual(h.cls.has('mobile-preview'), true, '横向きで読み始めたら次の縦長は本文');
+  assert.strictEqual(h.log.filter((x) => x === 'show').length, 2);
+});
+
+test('app2 reading scroll: 回転で隠れた 0 は保存せず、実測 0 のときだけ snapshot へ戻す', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const ctx = runTestableBlock(app2, 'READING-SCROLL', {},
+    'globalThis.__store = createReadingScrollStore; globalThis.__visible = readingElementVisible;');
+
+  function fake(scrollTop, visible) {
+    const el = {
+      scrollTop: scrollTop,
+      clientHeight: visible ? 400 : 0,
+      calls: [],
+      getClientRects: () => (visible ? [{}] : []),
+      scrollTo(opts) { this.calls.push(opts); this.scrollTop = opts.top; }
+    };
+    return el;
+  }
+  const view = fake(820, true);
+  const en = fake(120, false); // 通常モードで非表示の pane
+  const store = ctx.__store(() => ({ view: view, en: en }), undefined);
+  store.capture();
+  assert.strictEqual(store.saved.view, 820);
+  assert.strictEqual(store.saved.en, undefined, '非表示の pane は保存しない');
+  assert.strictEqual(ctx.__visible({ getClientRects: () => [], clientHeight: 0 }), false);
+
+  // 回転で CSS 非表示 → scrollTop は 0 に戻る。その 0 で保存値を上書きしない
+  view.scrollTop = 0;
+  view.clientHeight = 0;
+  view.getClientRects = () => [];
+  store.capture();
+  assert.strictEqual(store.saved.view, 820, '非表示中の 0 で保存値を上書きしない');
+
+  // 回転後（表示された）実測 0 のときだけ snapshot へ戻す
+  view.clientHeight = 400;
+  view.getClientRects = () => [{}];
+  store.restore();
+  assert.strictEqual(view.scrollTop, 820);
+  assert.strictEqual(view.calls[0].behavior, 'instant', '回転の復旧は smooth にしない');
+
+  // 実測が残っている（読書中）なら触らない
+  view.scrollTop = 300;
+  view.calls.length = 0;
+  store.restore();
+  assert.strictEqual(view.calls.length, 0, '回転後の実測 0 でなければ上書きしない');
+  assert.strictEqual(view.scrollTop, 300);
+
+  // レコード切替（reset）後は先頭のまま
+  store.reset();
+  view.scrollTop = 0;
+  store.restore();
+  assert.strictEqual(view.scrollTop, 0);
+});
+
+test('app2 orientation wiring: 回転で再描画・再取得せず、辞書と対訳線だけ後始末する', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const block = extractBetween(app2, '// TESTABLE-ORIENTATION-START', '// TESTABLE-ORIENTATION-END');
+  assert.equal(/renderRecord|showBilingual|callServer|loadSavedList|translateText/.test(block), false,
+    '回転で本文の再描画・AI/サーバー呼び直しをしない');
+  assert.equal(/resetViewerScroll|textScale|viewedWords|deletedWords/.test(block), false,
+    '回転で scroll/zoom/履歴を初期化しない');
+  assert.match(block, /orientation: portrait/, 'CSS と同じ matchMedia 判定を使う');
+
+  const scrollBlock = extractBetween(app2, '// TESTABLE-READING-SCROLL-START', '// TESTABLE-READING-SCROLL-END');
+  assert.match(scrollBlock, /behavior: 'instant'/, '復旧は即時（無用な smooth を残さない）');
+  assert.match(scrollBlock, /if \(\(Number\(el\.scrollTop\) \|\| 0\) !== 0\) return;/, '実測 0 のときだけ復旧する');
+
+  // レコード描画 = 読書の意思。描画時だけ snapshot を戻して本文モードへ入る
+  const render = extractBetween(app2, 'function renderRecord(rec) {', 'const genBusy = T.createBusyFlag();');
+  assert.match(render, /resetViewerScroll\(\);\s*readingScroll\.reset\(\);/, '切替時は snapshot も先頭へ戻す');
+  assert.match(render, /readingOrientation\.noteReadingIntent\(\);/, '描画は明示backの抑制を解除する');
+  assert.match(render, /readingOrientation\.enterIfPortrait\(\);/, '縦長なら本文モードへ入る');
+  assert.match(render, /closeBilingual\(true\)/, '従来のレコード切替は不変');
+
+  // 向きのイベントは CSS と同じ判定で、重複しても同じ状態に収束する
+  assert.match(app2, /addEventListener\('resize', function \(\) \{ readingOrientation\.schedule\(\); \}\)/);
+  assert.match(app2, /addEventListener\('orientationchange', function \(\) \{ readingOrientation\.schedule\(\); \}\)/);
+  assert.match(app2, /matchMedia\('\(orientation: portrait\)'\)/, 'matchMedia の change も監視する');
+  assert.match(app2, /mq\.addEventListener\('change', onChange\)/);
+  assert.match(app2, /readingOrientation\.sync\(\);/, '起動時の向きを基準にする');
+  assert.match(block, /deps\.schedule\(function \(\) \{/, 'settle の再確認を持つ');
+
+  // 明示back は向きコントローラ経由（class の直接操作を残さない）
+  const back = extractBetween(app2, "backBtn.addEventListener('click', () => {", '});');
+  assert.match(back, /readingOrientation\.back\(\)/);
+  assert.equal(/classList\.(add|remove)\(/.test(back), false, 'back の DOM 操作はコントローラへ集約');
+  assert.equal(/window\.innerWidth < window\.innerHeight/.test(app2), false, '向き判定を matchMedia に一本化');
+
+  // 回転時: 残留 smooth を止め、辞書は dictUiClose（世代を進める）、線は引き直す
+  assert.match(app2, /cancelJaAutoScroll\(\);\s*dictUiClose\(\);\s*scheduleLinkDraw\(\);/, '後始末の順序');
+  // 通常スクロールでは従来どおり snapshot と線の再計算を続ける
+  assert.match(app2, /el\.addEventListener\('scroll', function \(\) \{ readingScroll\.capture\(\); scheduleLinkDraw\(\); \}, \{ passive: true \}\)/);
+  assert.match(app2, /if \(viewer\) viewer\.addEventListener\('scroll', function \(\) \{ readingScroll\.capture\(\); \}, \{ passive: true \}\)/);
+  assert.match(app2, /window\.addEventListener\('resize', scheduleLinkDraw\)/, '対訳線の再描画は維持する');
+});

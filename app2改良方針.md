@@ -151,6 +151,7 @@
    - `window.testRenderRecord({ id:'tadoku-1700000001000', title:'Fixture', text:'The cat sat. The dog ran.\n\nA bird flew.', settings:{level:'3級'} })`
    - `window.testBilingualShow({ record_id:'tadoku-1700000001000', model:'gemma4:31b', lang:'ja', version:1, created_at:'...', spans:[{id:'s0',start:0,end:13},{id:'s1',start:13,end:27},{id:'s2',start:27,end:39}], items:[{id:'s0',ja:'猫が座った。'},{id:'s1',ja:'犬が走った。'},{id:'s2',ja:'鳥が飛んだ。'}] })`
    - `window.testBilingualSelect('s1', 200)` で1ペア選択＋線を描画。
+   - 縦長（例 390x844）では `testRenderRecord` が本文モード（`mobile-preview`）へ入る（7.12）。設定画面側の確認は `#backButton` で戻る。
 3. 確認項目: 英文が inline span で文ごとに改行されない／訳文は文間が連結され「The dog ran.」の後の空行（改行2つ）がそのまま保持される（CRLF・先頭改行の fixture も確認）／PCは左右2ペインで従来の曲線（英文右端→訳文左端）／390x844 は上下2ペインで、曲線の始点・終点が**文末文字の右下角（bbox の右端・下端 +2px）**に付き、水平部は行間余白の中だけを通って本文（空白なしで同じ行に続く後続文を含む）に stroke が入らず、gutter の縦経路だけが pane の右余白（view 幅-4〜-12）を通る／`猫。犬。鳥。`のように空白なしで詰まった訳文で線が「犬」を貫かない／文字サイズを上げて行間が clip に入らないときも bbox のすぐ外を通る（消えない）／文末が画面外の長文では線が出ない／選択は2要素だけ／対訳中の英文タップで辞書が開かず履歴も増えない（通常モードの辞書・履歴は従来どおり）／辞書は対訳中スマホで上側（`fixed`・最大32dvh）／モード終了で選択・線が消える／pop・forest で色とフォントが切り替わる／記号だけの span（例 `***`）を含む fixture は原文のまま表示され、隣接文の改行保持を壊さない。
 4. ボタンからの取得・作成フローは Worker/GAS のモック（`translateText` の get→missing→create）を返して確認する。実 API・本番 Drive は使わない。
 
@@ -330,3 +331,23 @@
 **テスト（オフライン unit/static）**: `scripts/tests/transport.test.cjs` の `app2 bilingual link` 系を新仕様へ更新し、(a) 文末の可視文字の範囲（末尾空白/CRLF/タブ/全角空白/絵文字/ZWJ/肌色/旗、`Intl.Segmenter` 不可時のフォールバック）、(b) `Range` の最後の行の採用と、空白だけのノード・幅0・`Range` 非対応時の null、(c) 接続点＝文末文字の右下角（+2px、gap が上なら右上角 −2px）と旧「右中央」の不採用、(d) 行間 y の決め方（次の行→行送り→前の行→clip 外なら bbox のすぐ外→不可なら非表示）、(e) 接続点が clip 外なら非表示、(f) 縦長の経路（水平部は行間余白だけ、gutter は本文の右外、viewport をはみ出さない）、(g) **`猫。犬。鳥。` の実 bbox fixture で、route（0.5px 刻みの標本化＋stroke 半径1px）が本文 rect に入らない**こと。(h) 横長 path の完全一致、(i) 旧式（`edgeX`・右中央端点）が残っていないことを検証する。実ブラウザの操作確認は `test` 担当が実施済み（PC 1280x900 / スマホ 390x844 / 3テーマ・resize/zoom/orientation を含む。結果は本節冒頭の公開表）。実 API・本番 Drive・課金は使っていない。
 
 **未確認・懸念**: 実ブラウザでの見た目は公開後に確認済み（PC 1280x900 / スマホ 390x844 × 3テーマ。本節冒頭の「公開」を参照）。実 API・本番 Drive は使っていない（課金なし）。初回のローカル版（文末文字の右中央から降りる形）は、独立 `test` の UI 確認（`猫。犬。鳥。`・3テーマ・resize/zoom/orientation）で**空白なしの隣接文字を貫く**ことが検出されたため、本節のとおり右下角へ変更した（再確認は `test` で実施）。長文の訳で末尾が画面外になると線が出ない（仕様どおりだが体感は要確認）。行間の計算は `line-height`（現在 3）と実測 rect に依存するため、将来 line-height を小さくすると余白が減る。
+
+### 7.12 横→縦の回転で本文モードを継続（2026-10-27・ローカルのみ未公開）
+
+> 本節はローカル実装の記録。commit/push・GAS HEAD への push・Pages 反映は行っていない。**GAS（`site-app2-backend`）は変更なしで app2 `@50` のまま**（version 作成・切替 PUT・`entryPoints` 変更なし。`@51` は存在しない）。対象は `site/app2/index.html`（向き UI）、`scripts/tests/transport.test.cjs`、本 docs。
+
+**背景**: CSS の `@media (orientation: portrait)` は `body.mobile-preview` が無いと設定画面（sidebar）を出し、`#preview-container` は非表示になる。従来 `mobile-preview` は生成成功（`innerWidth < innerHeight`）と履歴クリックのときだけ付与していたため、横向きで読んでいる長文を縦向きに回すと sidebar に戻り、読書位置も失われていた。向きのイベント（resize / orientationchange）は対訳線を描き直すだけで、本文モードへは戻していなかった。
+
+**変更**:
+
+1. 向き判定を CSS と同じ `matchMedia('(orientation: portrait)')`（無ければ寸法比）に統一し、`mobile-preview` の付与をレコード描画時と向き変化時の1か所へ集約（`innerWidth` 比較を削除）。
+2. 横→縦で本文を表示中（`currentRecord` があり本文が空でない）なら `body.mobile-preview` を付与して縦本文モードで読書を継続。**未選択で起動した縦長は設定のまま**。遷移の判断は純関数 `readingOrientationAction`、DOM は deps 注入の `createReadingOrientation` に分離。
+3. 明示「戻る」は同じ縦長の間は resize / キーボードイベントで奪わない（suppressed）。戻る→横向き→縦向きで読書の意思（本文クリック・レコード描画）が無ければ設定継続を優先し、横向きで読書を再開したら次の縦向きは本文へ復帰。
+4. 重複イベント（resize / orientationchange / matchMedia change）は状態遷移が無ければ `idle`。イベント直後に matchMedia / 寸法が未確定でも、rAF＋160ms の settle 再確認で同じ結論へ収束。
+5. 回転で `renderRecord` / `showBilingual` / AI・サーバー呼び直しはしない。`bilingual.active`・選択・zoom・段落・履歴は保持。辞書は `dictUiClose`（世代を進め遅延応答も無効化）で閉じ、残留 smooth は停止し、対訳線は新しい向きで引き直す（選択末端が画面外なら既存どおり線を隠す）。
+6. CSS 非表示で失われる scroll は、表示中の値だけを snapshot（`readingScroll`）し、回転後の実測が 0 のときだけ即時復旧する。0 の読みで保存値を上書きしない。レコード切替時は snapshot も先頭へ戻す。
+7. PC の細長いウィンドウも同じ CSS の縦長判定に従う（touch デバイス判定は追加しない）。
+
+**テスト（オフライン unit/static）**: `scripts/tests/transport.test.cjs` に (a) 向き遷移の純関数（未観測・未選択・横→縦・縦→横・重複・back）、(b) DOM mock のコントローラ（`mobile-preview` の付け外し、重複イベントで再遷移しない、back が同縦長で覆されない、back→横→縦で設定継続、横向き本文クリック後の縦向き復帰、settle 収束）、(c) scroll snapshot/復旧（非表示の 0 を保存しない・実測 0 のときだけ即時復旧・実測が残っていれば触らない・reset）、(d) static（回転ブロックに `renderRecord` / `showBilingual` / `callServer` が無い、matchMedia の change 監視、back の一本化、`cancelJaAutoScroll` → `dictUiClose` → `scheduleLinkDraw` の順序、`innerWidth` 比較の除去）を追加。`node --test scripts/tests/transport.test.cjs` は 44 pass（実 API・本番 Drive 不使用）。実ブラウザの操作確認（縦横回転・ソフトキーボード・3テーマ）は `test` で行う。
+
+**未確認・懸念**: 実端末の回転・ソフトキーボードでの見え方は未確認（`test` で確認する）。回転直後に matchMedia が古い値を返す環境では settle（最大160ms）で復帰するが、その間だけ設定画面が見える場合がある。iOS Safari の `orientationchange` と `matchMedia` の順序は環境依存のため実機確認を要する。回転後の scroll 復旧で選択文が画面外になった場合は、既存どおり対訳線を隠す。

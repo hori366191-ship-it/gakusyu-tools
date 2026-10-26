@@ -969,6 +969,188 @@
         if (document.getElementById('blLinkPath')) document.getElementById('blLinkPath').setAttribute('d', '');
       }
 
+      // TESTABLE-ORIENTATION-START
+      // ── 向き（横⇔縦）の変化で読書を継続する ──────────────────
+      // CSS の @media (orientation: portrait) は body.mobile-preview が無いと設定画面
+      // （sidebar）を出す。横→縦の回転時に本文を表示中なら mobile-preview を付与し、
+      // 明示的な「戻る」の意思は同じ縦長の間は resize / キーボードで奪わない。
+      /** CSS と同じ orientation 判定（matchMedia 優先・無ければ寸法比） */
+      function readingIsPortrait(win) {
+        const w = win || window;
+        try {
+          if (w.matchMedia) return !!w.matchMedia('(orientation: portrait)').matches;
+        } catch (e) {}
+        return w.innerWidth < w.innerHeight;
+      }
+
+      /**
+       * 向きの状態遷移だけを決める純関数。
+       * prev は直前の向き（true=縦長 / false=横長 / null=未観測）。
+       * - 同じ向きの重複イベント（resize / orientationchange / matchMedia）は 'idle'
+       * - 横→縦: 本文表示中（hasReading）かつ明示backが無い（!suppressed）ときだけ 'enter'
+       * - 縦→横: 'leave'（CSS は縦長メディアだけなので DOM の付け替えはしない）
+       */
+      function readingOrientationAction(prev, cur, hasReading, suppressed) {
+        if (prev == null) return 'idle';   // 起動直後は現在の設定を尊重する
+        if (prev === cur) return 'idle';
+        if (!cur) return 'leave';
+        if (!hasReading) return 'idle';    // 未選択で起動した縦長は設定のまま
+        if (suppressed) return 'idle';     // 明示backの意思を同じ縦長で奪わない
+        return 'enter';
+      }
+
+      /**
+       * 向きイベントのコントローラ。DOM は deps 経由なので単体で検証できる。
+       * イベント直後に matchMedia / 寸法が未確定でも、settle の再確認で同じ結論へ収束する。
+       */
+      function createReadingOrientation(deps) {
+        const state = { portrait: null, reader: false, suppressed: false, pending: false, lastAction: 'idle' };
+        function sync() {
+          // 向きが変わる直前の読書位置を保存する（CSS で隠れた後の 0 は保存しない）
+          if (deps.captureScroll) deps.captureScroll();
+          const portrait = !!deps.isPortrait();
+          const action = readingOrientationAction(state.portrait, portrait, !!deps.hasReading(), state.suppressed);
+          state.portrait = portrait;
+          state.lastAction = action;
+          if (action === 'enter' && !state.reader) {
+            state.reader = true;
+            deps.showReader();
+          }
+          // 回転で CSS 非表示になった scroll は、実測が 0 のときだけ snapshot へ戻す
+          if (portrait && state.reader) deps.restoreScroll();
+          if (action !== 'idle' && deps.onTransition) deps.onTransition(action);
+          return action;
+        }
+        function schedule() {
+          const action = sync();
+          if (state.pending) return action;
+          state.pending = true;
+          deps.schedule(function () {
+            state.pending = false;
+            sync();
+          });
+          return action;
+        }
+        function enterIfPortrait() {
+          if (state.reader || state.suppressed) return false;
+          if (!deps.isPortrait()) return false;
+          state.reader = true;
+          state.portrait = true;
+          state.lastAction = 'enter';
+          deps.showReader();
+          deps.restoreScroll();
+          if (deps.onTransition) deps.onTransition('enter');
+          return true;
+        }
+        function back() {
+          state.suppressed = true;
+          if (!state.reader) return;
+          if (deps.captureScroll) deps.captureScroll();
+          state.reader = false;
+          deps.hideReader();
+          if (deps.onTransition) deps.onTransition('back');
+        }
+        function noteReadingIntent() {
+          state.suppressed = false;
+        }
+        return { state: state, sync: sync, schedule: schedule, enterIfPortrait: enterIfPortrait, back: back, noteReadingIntent: noteReadingIntent };
+      }
+      // TESTABLE-ORIENTATION-END
+
+      // TESTABLE-READING-SCROLL-START
+      /** 要素が実際にレイアウトされているか（CSS で隠れた要素の 0 を保存値へ書かない） */
+      function readingElementVisible(el) {
+        try {
+          if (!el) return false;
+          if (typeof el.getClientRects === 'function' && el.getClientRects().length === 0) return false;
+          if (typeof el.clientHeight === 'number' && el.clientHeight <= 0) return false;
+          return true;
+        } catch (e) { return false; }
+      }
+
+      /**
+       * 読書位置（scroll）の snapshot。回転で CSS 非表示になると scrollTop は 0 に戻るため、
+       * 表示されている間の値だけを保存し、回転後の実測が 0 のときだけ復旧する。
+       */
+      function createReadingScrollStore(getEls, isVisible) {
+        const saved = Object.create(null);
+        const visible = isVisible || readingElementVisible;
+        function capture() {
+          const els = getEls() || {};
+          Object.keys(els).forEach(function (k) {
+            const el = els[k];
+            if (!visible(el)) return;
+            saved[k] = Math.max(0, Number(el.scrollTop) || 0);
+          });
+        }
+        function reset() {
+          Object.keys(saved).forEach(function (k) { saved[k] = 0; });
+        }
+        function restore() {
+          const els = getEls() || {};
+          Object.keys(els).forEach(function (k) {
+            const el = els[k];
+            const want = Number(saved[k]) || 0;
+            if (want <= 0 || !visible(el)) return;
+            // 回転後の実測が残っているなら触らない（0 の読みで保存値を上書きしない）
+            if ((Number(el.scrollTop) || 0) !== 0) return;
+            try { el.scrollTo({ top: want, left: 0, behavior: 'instant' }); } catch (e) {}
+            if (!(Number(el.scrollTop) > 0)) { try { el.scrollTop = want; } catch (e2) {} }
+          });
+        }
+        return { capture: capture, reset: reset, restore: restore, saved: saved };
+      }
+      // TESTABLE-READING-SCROLL-END
+
+      const readingScroll = createReadingScrollStore(function () {
+        return {
+          view: document.getElementById('textViewer'),
+          en: document.getElementById('enPane'),
+          ja: document.getElementById('jaPane')
+        };
+      });
+
+      const readingOrientation = createReadingOrientation({
+        isPortrait: function () { return readingIsPortrait(window); },
+        hasReading: function () {
+          if (!currentRecord || currentRecord.id == null) return false;
+          const area = document.getElementById('textContentArea');
+          if (area && String(area.textContent || '').trim() !== '') return true;
+          return String(currentRecord.text || '').trim() !== '';
+        },
+        showReader: function () {
+          document.body.classList.add('mobile-preview');
+          const dict = document.getElementById('dict-overlay-fixed');
+          if (dict) dict.style.display = 'none';
+        },
+        hideReader: function () {
+          document.body.classList.remove('mobile-preview');
+          const dict = document.getElementById('dict-overlay-fixed');
+          if (dict) dict.style.display = 'none';
+          scheduleLinkDraw();
+        },
+        restoreScroll: function () { readingScroll.restore(); },
+        captureScroll: function () { readingScroll.capture(); },
+        onTransition: function () {
+          // 回転で残った smooth を止め、辞書は閉じ、対訳線は新しい向きで引き直す
+          cancelJaAutoScroll();
+          dictUiClose();
+          scheduleLinkDraw();
+        },
+        schedule: function (fn) {
+          // 直後の寸法確定（rAF）と、遅れて matchMedia が落ち着く場合の再確認の2回
+          try { requestAnimationFrame(function () { fn(); }); } catch (e) {}
+          setTimeout(fn, 160);
+        }
+      });
+
+      // 実ブラウザ回帰テスト用フック（表示専用。認可・保存はサーバー側で担保する）
+      window.testReadingOrientation = {
+        state: readingOrientation.state,
+        sync: readingOrientation.sync,
+        isPortrait: function () { return readingIsPortrait(window); }
+      };
+
       const dotEl = document.getElementById('dot-anim');
       let frame = 0;
       setInterval(() => {
@@ -2253,6 +2435,10 @@
         deletedWords.clear();
         updateHistoryDisplay();
         resetViewerScroll();
+        readingScroll.reset();
+        // レコード描画は読書の意思。縦長なら設定画面へ戻さず本文を表示する
+        readingOrientation.noteReadingIntent();
+        readingOrientation.enterIfPortrait();
         setTranslateButton('対訳を表示', false, false, '');
       }
 
@@ -2339,10 +2525,6 @@
           savePendingGenerate(null);
           renderRecord(res.item || res);
           loadSavedList({ reset: true });
-          if (window.innerWidth < window.innerHeight) {
-            document.body.classList.add('mobile-preview');
-            document.getElementById('dict-overlay-fixed').style.display = 'none';
-          }
         } catch (e) {
           // 結果不明のときは同じrequest_idでの確認に限定し、新IDでの無条件再送を避ける
           if (e && e.unknownOperation) {
@@ -2451,10 +2633,6 @@
           li.appendChild(metaEl);
           li.addEventListener('click', () => {
             renderRecord(it);
-            if (window.innerWidth < window.innerHeight) {
-              document.body.classList.add('mobile-preview');
-              document.getElementById('dict-overlay-fixed').style.display = 'none';
-            }
           });
           ul.appendChild(li);
         }
@@ -2630,6 +2808,8 @@
       // TESTABLE-DICT-RACE-END
 
       viewer.addEventListener('click', async e => {
+        // 本文への操作は読書の意思（戻る→横向き→再読→縦向きで本文表示に復帰する）
+        readingOrientation.noteReadingIntent();
         // 対訳モード中は文の選択だけ。辞書のロード/表示・履歴追加は行わない
         if (bilingual.active) {
           const hit = sentenceSpanFromEvent(e);
@@ -2714,11 +2894,26 @@
       document.getElementById('translateButton').addEventListener('click', toggleBilingual);
       ['enPane', 'jaPane'].forEach(function (id) {
         const el = document.getElementById(id);
-        if (el) el.addEventListener('scroll', scheduleLinkDraw, { passive: true });
+        if (el) el.addEventListener('scroll', function () { readingScroll.capture(); scheduleLinkDraw(); }, { passive: true });
       });
+      if (viewer) viewer.addEventListener('scroll', function () { readingScroll.capture(); }, { passive: true });
       window.addEventListener('resize', scheduleLinkDraw);
       window.addEventListener('orientationchange', scheduleLinkDraw);
       window.addEventListener('gakusyu-theme-change', scheduleLinkDraw);
+      // 向きの変化は CSS と同じ matchMedia（無ければ寸法比）で見る。resize / orientationchange /
+      // matchMedia の change が重複して届いても、状態遷移が無ければ何もしない（冪等）。
+      window.addEventListener('resize', function () { readingOrientation.schedule(); });
+      window.addEventListener('orientationchange', function () { readingOrientation.schedule(); });
+      (function () {
+        let mq = null;
+        try { mq = window.matchMedia ? window.matchMedia('(orientation: portrait)') : null; } catch (e) {}
+        if (!mq) return;
+        const onChange = function () { readingOrientation.schedule(); };
+        if (typeof mq.addEventListener === 'function') mq.addEventListener('change', onChange);
+        else if (typeof mq.addListener === 'function') mq.addListener(onChange);
+      })();
+      // 起動時の向きを基準として記録する（本文未選択なので設定画面のまま）
+      readingOrientation.sync();
       try {
         if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
           document.fonts.ready.then(scheduleLinkDraw).catch(function () {});
@@ -2726,9 +2921,8 @@
       } catch (e) {}
 
       backBtn.addEventListener('click', () => {
-        document.body.classList.remove('mobile-preview');
-        document.getElementById('dict-overlay-fixed').style.display = 'none';
-        scheduleLinkDraw();
+        // 明示的な「戻る」は同じ縦長の間は resize / キーボードで覆さない
+        readingOrientation.back();
       });
 
       viewer.addEventListener('touchstart', e => {
