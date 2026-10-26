@@ -855,8 +855,89 @@ test('app2: Ollama へ system/user を分離して送り、審査本文を syste
   assert.equal(payload.format, undefined, 'Cloud 非対応の format を送らない');
   const sys = payload.messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n');
   const usr = payload.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
-  assert.ok(usr.indexOf('審査対象データ') !== -1, '本文は user 側');
+  assert.ok(usr.indexOf('-----BEGIN BODY-----') !== -1, '本文は user 側');
   assert.equal(sys.indexOf('A cat sat on a mat'), -1, '本文を system に混ぜない');
+});
+
+test('app2: 生成 system は英語のみ・出力は英語タイトルと本文だけと明示する（EIKEN定義は設定として保持）', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  rt.net.ai.push(genOk(RECORD_TEXT), modOk());
+  rt.postJson(genBody(rt));
+  const genCall = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[0];
+  const payload = JSON.parse(genCall.opts.payload);
+  const sys = payload.messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n');
+  const usr = payload.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
+  assert.ok(!/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(sys), '生成 system に日本語を混ぜない');
+  assert.match(sys, /English only/i);
+  assert.match(sys, /title/i);
+  assert.match(sys, /body/i);
+  assert.match(usr, /English only/i, 'user 指示にも英語のみ出力を明示する');
+  assert.match(usr, /Japanese/i, '日本語を出力しない指示を含む');
+  assert.ok(usr.indexOf('英検3級') !== -1, 'EIKEN 定義（日本語）は設定として保持する');
+});
+
+test('app2: 生成物にかな・漢字が混入したら審査・再生成をせず保存しない（エラーに本文を出さない）', () => {
+  const cases = [
+    { out: 'A Cat Story\n\n猫がマットに座った。The cat was happy.', label: '本文', marker: '猫が' },
+    { out: 'A Cat Story 猫\n\nA cat sat on a mat.', label: 'タイトル', marker: '猫' },
+  ];
+  for (const c of cases) {
+    const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+    rt.net.ai.push(genOk(c.out), modOk());
+    const res = rt.postJson(genBody(rt, { id_token: '' }));
+    assert.equal(res.json.ok, false, c.label);
+    assert.equal(res.json.code, 'language_rejected', c.label);
+    assert.equal(res.json.retryable, false, c.label + ': 再試行を促さない');
+    assert.ok(res.json.error.indexOf(c.label) !== -1, c.label + ': 理由はタイトル/本文の言語だけ');
+    assert.ok(res.json.error.indexOf(c.marker) === -1, c.label + ': 本文を露出しない');
+    assert.ok(res.json.error.indexOf('A Cat') === -1 && res.json.error.indexOf('A cat') === -1, c.label + ': 生成物の文面を露出しない');
+    assert.equal(rt.net.aiCalls(), 1, c.label + ': 審査・再生成の API を呼ばない');
+    assert.equal(savedCount(rt), 0, c.label + ': 保存ゼロ');
+  }
+});
+
+test('app2: 英語だけの生成物は言語検査を通り保存される', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  rt.net.ai.push(genOk('A Day at School\n\nTom walked to school. He saw a bird.'), modOk());
+  const res = rt.postJson(genBody(rt));
+  assert.equal(res.json.ok, true);
+  assert.equal(res.json.item.title, 'A Day at School');
+  assert.equal(savedCount(rt), 1);
+});
+
+test('app2: 審査 user は TITLE/BODY の ASCII 区切りだけ・設定メタや日本語の枠文を混ぜない', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  rt.net.ai.push(genOk(RECORD_TEXT), modOk());
+  rt.postJson(genBody(rt));
+  const modCall = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[1];
+  const payload = JSON.parse(modCall.opts.payload);
+  const sys = payload.messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n');
+  const usr = payload.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
+  assert.equal(usr, [
+    '-----BEGIN TITLE-----',
+    'A Cat Story',
+    '-----END TITLE-----',
+    '-----BEGIN BODY-----',
+    'A cat sat on a mat. The cat was happy.',
+    '-----END BODY-----',
+  ].join('\n'));
+  assert.ok(!/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(usr), '英語本文の審査 user は完全 ASCII');
+  assert.equal(usr.indexOf('英検'), -1, '設定メタ（級）を user に混ぜない');
+  assert.equal(usr.indexOf('3級'), -1, '設定メタ（級）を user に混ぜない');
+  assert.ok(sys.indexOf('TITLE') !== -1 && sys.indexOf('BODY') !== -1, 'system に審査対象を TITLE/BODY と明記');
+  assert.ok(sys.indexOf('審査対象ではない') !== -1, 'ルール/枠文は対象外と明記');
+  assert.equal(sys.indexOf('A cat sat on a mat'), -1, '本文を system に混ぜない');
+});
+
+test('app2: NG→再生成→審査失敗は fail closed（保存0・AI呼出4回）', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  rt.net.ai.push(genOk(RECORD_TEXT), modNg('sexual'), genOk(RECORD_TEXT), { code: 503, body: { error: { message: 'unavailable' } } });
+  const res = rt.postJson(genBody(rt));
+  assert.equal(res.json.ok, false);
+  assert.equal(res.json.code, 'moderation_unavailable');
+  assert.equal(rt.net.aiCalls(), 4, '生成1 + 審査1 + 再生成1 + 再審査1 を超えない');
+  assert.equal(savedCount(rt), 0, '保存ゼロ');
+  assert.ok(res.json.error.indexOf('A cat sat') === -1, 'エラーに本文を出さない');
 });
 
 // ────────────────────────────── app2: Ollama / 対訳 ──────────────────────────────
@@ -999,6 +1080,22 @@ test('app2 translate: 作成は LLM 2回（翻訳+審査）で別JSONに保存�
   assert.equal(got.json.replayed, true);
   assert.deepEqual(got.json.translation.items.map((i) => i.ja), tr.items.map((i) => i.ja));
   assert.equal(rt.net.aiCalls(), 2, '既存訳の取得は LLM なし');
+});
+
+test('app2 translate: 審査 user は ASCII 区切り（TITLE/BODY）だけで、日本語の枠文・ラベルを混ぜない', () => {
+  const rt = setupApp2();
+  const rec = seedRecord(rt);
+  rt.net.ai.push(trReply(rt, TRANS_TEXT), modOk());
+  const res = rt.postJson(trBody(rt, rec.id));
+  assert.equal(res.json.ok, true);
+  const modCall = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[1];
+  const payload = JSON.parse(modCall.opts.payload);
+  const usr = payload.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
+  assert.ok(usr.indexOf('-----BEGIN TITLE-----') === 0, 'TITLE の ASCII 区切りで始まる');
+  assert.ok(usr.indexOf('-----END BODY-----') !== -1, 'BODY の ASCII 区切りで終わる');
+  assert.equal(usr.indexOf('タイトル：'), -1, '日本語ラベルを混ぜない');
+  assert.equal(usr.indexOf('以下は'), -1, '日本語の枠文を混ぜない');
+  assert.equal(usr.indexOf('3級'), -1, '設定メタを混ぜない');
 });
 
 test('app2 translate: 同一 request_id の再送は LLM・保存を増やさない / 別 record は conflict', () => {
