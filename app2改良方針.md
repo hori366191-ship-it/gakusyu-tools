@@ -332,9 +332,22 @@
 
 **未確認・懸念**: 実ブラウザでの見た目は公開後に確認済み（PC 1280x900 / スマホ 390x844 × 3テーマ。本節冒頭の「公開」を参照）。実 API・本番 Drive は使っていない（課金なし）。初回のローカル版（文末文字の右中央から降りる形）は、独立 `test` の UI 確認（`猫。犬。鳥。`・3テーマ・resize/zoom/orientation）で**空白なしの隣接文字を貫く**ことが検出されたため、本節のとおり右下角へ変更した（再確認は `test` で実施）。長文の訳で末尾が画面外になると線が出ない（仕様どおりだが体感は要確認）。行間の計算は `line-height`（現在 3）と実測 rect に依存するため、将来 line-height を小さくすると余白が減る。
 
-### 7.12 横→縦の回転で本文モードを継続（2026-10-27・ローカルのみ未公開）
+### 7.12 横→縦の回転で本文モードを継続（2026-10-27・commit `fb3b218` で Pages 公開済み）
 
-> 本節はローカル実装の記録。commit/push・GAS HEAD への push・Pages 反映は行っていない。**GAS（`site-app2-backend`）は変更なしで app2 `@50` のまま**（version 作成・切替 PUT・`entryPoints` 変更なし。`@51` は存在しない）。対象は `site/app2/index.html`（向き UI）、`scripts/tests/transport.test.cjs`、本 docs。
+> 実装直後は**ローカルのみで未公開**だった。その後 commit `fb3b218` として **Pages のみ**公開し、公開後の read-only 検証まで完了した（下の「公開」）。GAS HEAD への push・既存デプロイの版更新は行っていない。**GAS（`site-app2-backend`）は変更なしで app2 `@50` のまま**（version 作成・切替 PUT・`entryPoints` 変更なし。`@51` は存在しない）。対象は `site/app2/index.html`（向き UI）、`scripts/tests/transport.test.cjs`、本 docs。
+
+**公開（2026-10-27・Pages のみ）**:
+
+| 段階 | 状態 | 補足 |
+|---|---|---|
+| コード修正 | 完了 | commit `fb3b218`（横→縦の回転で本文モードを継続） |
+| ローカル検証 | 完了 | Node 194 pass / 回転 UI 57 pass / 対訳線 UI 195 pass（オフライン。実 API・本番 Drive 不使用） |
+| CI（Tests） | 完了 | Tests `40357726954` success |
+| Pages 反映 | 完了 | Pages `40357727362` success。公開 artifact commit は `fb3b218` |
+| 公開後検証（read-only） | 完了 | 公開 `app2/` は HTTP 200・125,350 byte で commit `fb3b218` の source と SHA 一致。公開版モックは 3テーマ 57 pass。Chrome viewport（390x844）で landscape→portrait に回すと設定画面（sidebar）へ戻らず本文モードを継続し、本文 scroll・対訳線（active）・zoom・選択・panes を保持。未選択で起動した縦長は設定のまま、明示「戻る」後の縦長も設定を保持。回転による追加 GET / create 0・overflow 0・error 0 |
+| GAS / デプロイ | 変更なし | app2 は `@50` のまま（version 作成・切替 PUT・`entryPoints` 変更なし。`site-app2-backend` は不変） |
+| 実 iOS 回転・実キーボード | 未確認 | 検証は Chrome の viewport 代替。実端末の回転・ソフトキーボード表示は未確認 |
+| 実 API 課金・本番 Drive | 未実施 | 検証は read-only（実 AI・本番 Drive 操作なし） |
 
 **背景**: CSS の `@media (orientation: portrait)` は `body.mobile-preview` が無いと設定画面（sidebar）を出し、`#preview-container` は非表示になる。従来 `mobile-preview` は生成成功（`innerWidth < innerHeight`）と履歴クリックのときだけ付与していたため、横向きで読んでいる長文を縦向きに回すと sidebar に戻り、読書位置も失われていた。向きのイベント（resize / orientationchange）は対訳線を描き直すだけで、本文モードへは戻していなかった。
 
@@ -348,6 +361,6 @@
 6. CSS 非表示で失われる scroll は、表示中の値だけを snapshot（`readingScroll`）し、回転後の実測が 0 のときだけ即時復旧する。0 の読みで保存値を上書きしない。レコード切替時は snapshot も先頭へ戻す。
 7. PC の細長いウィンドウも同じ CSS の縦長判定に従う（touch デバイス判定は追加しない）。
 
-**テスト（オフライン unit/static）**: `scripts/tests/transport.test.cjs` に (a) 向き遷移の純関数（未観測・未選択・横→縦・縦→横・重複・back）、(b) DOM mock のコントローラ（`mobile-preview` の付け外し、重複イベントで再遷移しない、back が同縦長で覆されない、back→横→縦で設定継続、横向き本文クリック後の縦向き復帰、settle 収束）、(c) scroll snapshot/復旧（非表示の 0 を保存しない・実測 0 のときだけ即時復旧・実測が残っていれば触らない・reset）、(d) static（回転ブロックに `renderRecord` / `showBilingual` / `callServer` が無い、matchMedia の change 監視、back の一本化、`cancelJaAutoScroll` → `dictUiClose` → `scheduleLinkDraw` の順序、`innerWidth` 比較の除去）を追加。`node --test scripts/tests/transport.test.cjs` は 44 pass（実 API・本番 Drive 不使用）。実ブラウザの操作確認（縦横回転・ソフトキーボード・3テーマ）は `test` で行う。
+**テスト（オフライン unit/static）**: `scripts/tests/transport.test.cjs` に (a) 向き遷移の純関数（未観測・未選択・横→縦・縦→横・重複・back）、(b) DOM mock のコントローラ（`mobile-preview` の付け外し、重複イベントで再遷移しない、back が同縦長で覆されない、back→横→縦で設定継続、横向き本文クリック後の縦向き復帰、settle 収束）、(c) scroll snapshot/復旧（非表示の 0 を保存しない・実測 0 のときだけ即時復旧・実測が残っていれば触らない・reset）、(d) static（回転ブロックに `renderRecord` / `showBilingual` / `callServer` が無い、matchMedia の change 監視、back の一本化、`cancelJaAutoScroll` → `dictUiClose` → `scheduleLinkDraw` の順序、`innerWidth` 比較の除去）を追加。`node --test` は Node 194 pass（うち回転 UI 57 pass。実 API・本番 Drive 不使用）。公開後の確認は、公開版モック（3テーマ）で 57 pass、対訳線を含む UI 195 pass。回転の実操作は `test` 担当が Chrome viewport（390x844）の landscape→portrait で確認済み（回転で追加 GET / create 0・overflow 0・error 0）。実 iOS 端末の回転・実キーボードは未確認。
 
-**未確認・懸念**: 実端末の回転・ソフトキーボードでの見え方は未確認（`test` で確認する）。回転直後に matchMedia が古い値を返す環境では settle（最大160ms）で復帰するが、その間だけ設定画面が見える場合がある。iOS Safari の `orientationchange` と `matchMedia` の順序は環境依存のため実機確認を要する。回転後の scroll 復旧で選択文が画面外になった場合は、既存どおり対訳線を隠す。
+**未確認・懸念**: 実 iOS 端末の回転・ソフトキーボードでの見え方は未確認（Chrome viewport 代替での確認のみ）。回転直後に matchMedia が古い値を返す環境では settle（最大160ms）で復帰するが、その間だけ設定画面が見える場合がある。iOS Safari の `orientationchange` と `matchMedia` の順序は環境依存のため実機確認を要する。回転後の scroll 復旧で選択文が画面外になった場合は、既存どおり対訳線を隠す。実 API・本番 Drive 書き込みは行っていない（課金なし）。
