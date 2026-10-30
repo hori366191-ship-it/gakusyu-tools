@@ -36,6 +36,28 @@ function runTestableBlock(src, name, sandbox, exportCode) {
   return ctx;
 }
 
+/** CSS 内の @media (orientation: portrait) ブロックを抽出する（波括弧の対応を数える） */
+function portraitMediaBlocks(css) {
+  const out = [];
+  const marker = '@media (orientation: portrait)';
+  let i = 0;
+  while ((i = css.indexOf(marker, i)) >= 0) {
+    const open = css.indexOf('{', i);
+    let depth = 0;
+    let j = open;
+    for (; j < css.length; j++) {
+      if (css[j] === '{') depth++;
+      else if (css[j] === '}') {
+        depth--;
+        if (depth === 0) { j++; break; }
+      }
+    }
+    out.push(css.slice(i, j));
+    i = j;
+  }
+  return out;
+}
+
 /**
  * 縦長リンクの経路が本文の bbox に入らないことを、線分を細かく標本化して確かめる。
  * half は stroke 幅の半分（stroke-width: 2 → 1）。strict 比較なので
@@ -1109,6 +1131,7 @@ test('app2 bilingual link: 縦長は文末文字の右下角→行間余白→�
   const app2 = readSiteFile('app2/index.html');
   const ctx = runTestableBlock(app2, 'BILINGUAL-LINK', {},
     'globalThis.__path = buildBlLinkPath; globalThis.__portrait = blIsPortraitLayout;'
+    + ' globalThis.__stacked = blIsStackedPanes;'
     + ' globalThis.__route = blPortraitRoutePoints; globalThis.__round = blRoundedPolyline;'
     + ' globalThis.__gap = blLineGapY; globalThis.__corner = blEndCorner;'
     + ' globalThis.__visible = blPointVisible;');
@@ -1361,14 +1384,121 @@ test('app2 bilingual link: 縦長は文末の実測（DOM Range）と行間余�
   // 縦長の pane 右端固定（edgeX / right+2 の右中央端点）の旧式を残さない
   assert.equal(app2.indexOf('edgeX'), -1, '右端固定の旧式を残さない');
   assert.equal(app2.indexOf('+ 2)'), -1);
-  // 横長の式は従来のまま（英文右端→訳文左端、±40 の制御点）
-  assert.match(app2, /' C ' \+ blRound\(x1 \+ 40\)/);
-  assert.match(app2, /', ' \+ blRound\(x2 - 40\)/);
+  // 左右の式は従来のまま（英文右端→訳文左端）。制御点は gutter 幅に合わせて 0..40 に詰める
+  assert.match(app2, /Math\.min\(40, Math\.max\(0, \(x2 - x1\) \/ 2\)\)/);
+  assert.match(app2, /' C ' \+ blRound\(x1 \+ ctrl\)/);
+  assert.match(app2, /', ' \+ blRound\(x2 - ctrl\)/);
   // 行間は line-height: 3 の余白を使う（本文を横断しない前提）
   assert.match(app2, /\.bl-text \{[^}]*line-height: 3/);
-  // 向き判定は CSS と同じ orientation
+  // 向き判定は CSS と同じ orientation（回転で本文を維持する readingIsPortrait 用）
   assert.match(app2, /matchMedia\('\(orientation: portrait\)'\)/);
 });
+
+test('app2 bilingual layout: 縦長も左右2ペイン（row・12px gutter・中央 border-left）で、全テーマとも border-top にしない', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const cssEnd = app2.indexOf('</style>');
+  const portraitCss = app2.slice(app2.indexOf('@media (orientation: portrait) {'), cssEnd);
+
+  // 縦長でも左右2ペイン（縦積みにしない）
+  const viewRule = (portraitCss.match(/#bilingualView\.is-active \{[^}]*\}/) || [''])[0];
+  assert.match(viewRule, /flex-direction: row/, '縦長の対訳は row');
+  assert.equal(viewRule.indexOf('flex-direction: column'), -1, '上下に積まない');
+  assert.match(viewRule, /gap: 12px/, 'gutter は控えめな 12px');
+  assert.match(viewRule, /align-items: stretch/);
+
+  // 左右等幅・各ペイン独立スクロール（base の overflow: auto を維持）
+  const paneRule = (portraitCss.match(/\.bl-pane \{[^}]*\}/) || [''])[0];
+  assert.match(paneRule, /flex: 1 1 50%/, '基準 50% の border-box 等幅');
+  assert.match(paneRule, /box-sizing: border-box/, 'padding/border を外幅に含める');
+  assert.match(paneRule, /min-width: 0/, 'min-width 0 で縮められる');
+  assert.match(paneRule, /min-height: 0/);
+  assert.match(app2, /\.bl-pane \{[^}]*overflow: auto/, '各ペインは独立スクロールのまま');
+  assert.equal(paneRule.indexOf('overflow'), -1, '縦長で overflow を上書きしない');
+  // PC も同じ等幅（base から flex-basis 50% + border-box。0 だと padding/border 差が外寸差になる）
+  const basePane = (app2.match(/\.bl-pane \{[^}]*\}/) || [''])[0];
+  assert.match(basePane, /flex: 1 1 50%/, 'PC も等幅');
+  assert.match(basePane, /box-sizing: border-box/);
+  assert.match(basePane, /min-width: 0/);
+  assert.equal(app2.indexOf('flex: 1 1 0'), -1, '外寸差が出る flex-basis 0 を残さない');
+
+  // 中央境界線は base と同じ border-left（border-top の上下区切りは付けない）
+  const jaRule = (portraitCss.match(/#jaPane \{[^}]*\}/) || [''])[0];
+  assert.match(jaRule, /border-left: 1px dashed #99e699/, '中央の境界線は border-left');
+  assert.equal(/border-top/.test(jaRule), false, '縦長でも border-top にしない');
+  assert.match(jaRule, /padding-left: 12px/);
+
+  // 文字サイズは維持（対訳ペインへ font-size を足さない）
+  for (const rule of [viewRule, paneRule, jaRule]) {
+    assert.equal(/font-size/.test(rule), false, '対訳の文字サイズは変更しない');
+  }
+  assert.match(portraitCss, /font-size: clamp\(18px, 3vw, 22px\)/, '本文の文字サイズは従来のまま');
+
+  // 3テーマとも縦長で base の border-left を残す（上書きして border-top にしない）
+  for (const file of ['themes/pop.css', 'themes/forest.css']) {
+    const css = readSiteFile(file);
+    const base = css.match(/html\[data-theme="[a-z]+"\] #jaPane \{[^}]*\}/g) || [];
+    assert.strictEqual(base.length, 1, file + ': #jaPane の base ルールは1つ');
+    assert.match(base[0], /border-left: [^;]*dashed/, file + ': base は border-left');
+    assert.equal(base[0].indexOf('border-top'), -1);
+    for (const block of portraitMediaBlocks(css)) {
+      assert.equal(block.indexOf('#jaPane'), -1, file + ': 縦長で #jaPane を上書きしない');
+    }
+  }
+});
+
+test('app2 bilingual link: 経路は向きではなく実 pane 配置（stacked）で選び、狭い gutter の制御点は 0..40 に詰める', () => {
+  const app2 = readSiteFile('app2/index.html');
+  const ctx = runTestableBlock(app2, 'BILINGUAL-LINK', {},
+    'globalThis.__path = buildBlLinkPath; globalThis.__stacked = blIsStackedPanes;'
+    + ' globalThis.__portrait = blIsPortraitLayout;');
+
+  // 上下に積まれているときだけ stacked。左右並びは（縦長でも）side-by-side
+  assert.strictEqual(ctx.__stacked(
+    { left: 0, top: 0, right: 390, bottom: 300 },
+    { left: 0, top: 312, right: 390, bottom: 700 }), true);
+  assert.strictEqual(ctx.__stacked(
+    { left: 0, top: 312, right: 390, bottom: 700 },
+    { left: 0, top: 0, right: 390, bottom: 300 }), true, '訳が上でも stacked');
+  assert.strictEqual(ctx.__stacked(
+    { left: 0, top: 120, right: 183, bottom: 700 },
+    { left: 195, top: 120, right: 390, bottom: 700 }), false, '縦長の左右2ペインは stacked ではない');
+  assert.strictEqual(ctx.__stacked(null, { top: 0, bottom: 100 }), false);
+  assert.strictEqual(ctx.__stacked({ top: 0, bottom: 0 }, { top: 0, bottom: 100 }), false);
+
+  // drawBilingualLink は orientation を見ず、実 pane 矩形で経路を選ぶ
+  const draw = extractBetween(app2, 'function drawBilingualLink() {', 'function scheduleLinkDraw() {');
+  assert.equal(draw.indexOf('blIsPortraitLayout'), -1, '向きで上下用 path を選ばない');
+  assert.match(draw, /blIsStackedPanes\(enPaneRect, jaPaneRect\)/);
+  assert.match(draw, /buildBlLinkPath\(\s*stacked,/, '配置判定を path へ渡す');
+  // 縦長の線（文末接続）の実装は残す（stacked のときだけ使う）
+  assert.match(draw, /blSentenceEndRect\(en, document\)/);
+  // 回転で本文を維持する向き制御は変更しない
+  assert.match(app2, /function blIsPortraitLayout/);
+  assert.match(app2, /readingOrientation\.sync\(\)/);
+  assert.match(app2, /readingOrientation\.enterIfPortrait\(\)/);
+
+  // 狭幅（390px・pane 等幅・gutter 12px）: 制御点を 0..40 に詰め、本文へ張り出さない
+  const view = { left: 0, top: 0, width: 390, height: 700 };
+  const narrow = ctx.__path(false, view,
+    { left: 60, right: 173, top: 100, bottom: 120 },
+    { left: 185, right: 260, top: 300, bottom: 320 });
+  assert.strictEqual(narrow, 'M 173 110 C 179 110, 179 310, 185 310', 'gutter の中央を通る');
+  const xs = narrow.match(/-?\d+(?:\.\d+)?/g).map(Number).filter((v, i) => i % 2 === 0);
+  assert.ok(xs.every((x) => x >= 173 && x <= 185), '制御点が本文側へ張り出さない');
+  assert.notStrictEqual(narrow, 'M 173 110 C 213 110, 145 310, 185 310', '旧 ±40 の制御点にしない');
+
+  // 広い横長（gutter 80px）は従来どおり ±40 で完全一致
+  const wide = ctx.__path(false, { left: 0, top: 0, width: 1000, height: 700 },
+    { left: 20, right: 470, top: 100, bottom: 120 },
+    { left: 550, right: 900, top: 200, bottom: 220 });
+  assert.strictEqual(wide, 'M 470 110 C 510 110, 510 210, 550 210');
+  // pane が接する（gutter 0）なら制御点も 0
+  assert.strictEqual(ctx.__path(false, view,
+    { left: 0, right: 173, top: 100, bottom: 120 },
+    { left: 173, right: 300, top: 200, bottom: 220 }),
+  'M 173 110 C 173 110, 173 210, 173 210');
+});
+
 
 test('app2 bilingual scroll: 可視なら動かさず、前の smooth を止めてから最新の選択を優先する', () => {
   const app2 = readSiteFile('app2/index.html');

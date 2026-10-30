@@ -523,7 +523,7 @@
     }
 
     .bl-pane {
-      flex: 1 1 0;
+      flex: 1 1 50%;
       min-width: 0;
       min-height: 0;
       overflow: auto;
@@ -665,21 +665,25 @@
         font-size: 0.68em;
       }
 
+      /* 縦長でも対訳は左右2ペイン（全幅で同じ配置）。文字サイズは変えない。 */
       #bilingualView.is-active {
-        flex-direction: column;
-        gap: 6px;
+        flex-direction: row;
+        gap: 12px;
+        align-items: stretch;
       }
 
       .bl-pane {
-        padding-right: 20px;
+        flex: 1 1 50%;
+        min-width: 0;
+        min-height: 0;
+        padding-right: 12px;
+        box-sizing: border-box;
       }
 
       #jaPane {
-        border-left: none;
-        border-top: 1px dashed #99e699;
-        padding-left: 0;
-        padding-right: 20px;
-        padding-top: 6px;
+        border-left: 1px dashed #99e699;
+        padding-left: 12px;
+        padding-right: 12px;
       }
 
       body.bilingual-mode #wordFooter {
@@ -2000,7 +2004,10 @@
         return Math.round(n * 10) / 10;
       }
 
-      /** CSS の @media (orientation: portrait) と同じ判定にする（innerWidth 比較だけにしない） */
+      /**
+       * CSS の @media (orientation: portrait) と同じ判定（向きの状態用）。
+       * 対訳リンクの経路選択は実 pane の配置（blIsStackedPanes）で行い、この値は使わない。
+       */
       function blIsPortraitLayout(win) {
         const w = win || window;
         try {
@@ -2273,20 +2280,39 @@
       }
 
       /**
+       * 実際の pane 矩形が上下に積まれているか。向き（orientation）ではなく配置で
+       * 決めるので、縦長でも左右2ペインなら false（左右の曲線を使う）。
+       */
+      function blIsStackedPanes(enPaneRect, jaPaneRect) {
+        if (!enPaneRect || !jaPaneRect) return false;
+        const enTop = Number(enPaneRect.top);
+        const enBottom = Number(enPaneRect.bottom);
+        const jaTop = Number(jaPaneRect.top);
+        const jaBottom = Number(jaPaneRect.bottom);
+        if (![enTop, enBottom, jaTop, jaBottom].every(function (v) { return isFinite(v); })) return false;
+        if (enBottom - enTop <= 0 || jaBottom - jaTop <= 0) return false;
+        // 上下のどちらかが完全に他方の外（縦に並ぶ）なら stacked。左右並びは上下が重なる。
+        return jaTop >= enBottom - 1 || enTop >= jaBottom - 1;
+      }
+
+      /**
        * 対訳リンクの SVG パス（座標は #bilingualView の左上基準）。
-       * 横長: 従来どおり英文右端→訳文左端（変更しない）。
-       * 縦長: 英文の文末文字の右下角→その行の行間余白→右gutter→訳の行間余白→訳文末の右下角。
+       * stacked=false: 英文の選択文 fragment 右端→訳文の選択文 fragment 左端。
+       *   gutter が狭いときは制御点を 0..40 に詰め、本文へ張り出さない。
+       * stacked=true: 英文の文末文字の右下角→その行の行間余白→右gutter→訳の行間余白→訳文末の右下角。
        * info（文末の実測 rect と行間 y）が無いときは描かない（誤った位置へ黙って戻さない）。
        */
-      function buildBlLinkPath(portrait, view, enRect, jaRect, enPaneRect, jaPaneRect, info) {
+      function buildBlLinkPath(stacked, view, enRect, jaRect, enPaneRect, jaPaneRect, info) {
         const y1 = (enRect.top + enRect.bottom) / 2 - view.top;
         const y2 = (jaRect.top + jaRect.bottom) / 2 - view.top;
-        if (!portrait) {
+        if (!stacked) {
           const x1 = enRect.right - view.left;
           const x2 = jaRect.left - view.left;
+          // 左右の gutter が 80px 未満なら制御点を詰める（広い横長は従来どおり ±40）
+          const ctrl = Math.min(40, Math.max(0, (x2 - x1) / 2));
           return 'M ' + blRound(x1) + ' ' + blRound(y1)
-            + ' C ' + blRound(x1 + 40) + ' ' + blRound(y1)
-            + ', ' + blRound(x2 - 40) + ' ' + blRound(y2)
+            + ' C ' + blRound(x1 + ctrl) + ' ' + blRound(y1)
+            + ', ' + blRound(x2 - ctrl) + ' ' + blRound(y2)
             + ', ' + blRound(x2) + ' ' + blRound(y2);
         }
         if (!info || !info.enEnd || !info.jaEnd || !isFinite(info.enGapY) || !isFinite(info.jaGapY)) {
@@ -2349,6 +2375,10 @@
           return;
         }
         const vr = viewer.getBoundingClientRect();
+        const enPaneRect = els.enPane.getBoundingClientRect();
+        const jaPaneRect = els.jaPane.getBoundingClientRect();
+        // 経路は向きではなく実際の pane 配置で選ぶ（縦長でも左右2ペインなら左右の曲線）
+        const stacked = blIsStackedPanes(enPaneRect, jaPaneRect);
         const enRect = rectAtLine(en, bilingual.anchorY);
         const jaRect = rectAtLine(ja, 0);
         function inPane(rect, pane) {
@@ -2359,10 +2389,9 @@
           // 両端が見えていないときは線を隠す
           return rect.top < bottom - 1 && rect.bottom > top + 1;
         }
-        const portrait = blIsPortraitLayout();
         let info = null;
-        if (portrait) {
-          // 縦長は「文末の可視文字の右下角」に繋ぐ（pane の右端固定にしない）。
+        if (stacked) {
+          // 上下2ペインのときだけ「文末の可視文字の右下角」に繋ぐ（対象の文の実測位置）。
           // 文末が画面外（長文の末尾など）や実測できないときは、別の文の位置へ
           // 戻さず線を隠す。
           const enEnd = blSentenceEndRect(en, document);
@@ -2391,12 +2420,12 @@
           return;
         }
         const d = buildBlLinkPath(
-          portrait,
+          stacked,
           vr,
           enRect,
           jaRect,
-          els.enPane.getBoundingClientRect(),
-          els.jaPane.getBoundingClientRect(),
+          enPaneRect,
+          jaPaneRect,
           info
         );
         if (!d) {

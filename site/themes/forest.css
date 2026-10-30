@@ -667,12 +667,6 @@ html[data-theme="forest"] .bl-sentence.is-selected {
   box-shadow: 0 0 0 2px rgba(31, 61, 43, .35) !important;
 }
 html[data-theme="forest"] #blLinkPath { stroke: var(--color-forest-ink) !important; }
-@media (orientation: portrait) {
-  html[data-theme="forest"] #jaPane {
-    border-left: none !important;
-    border-top: 1px dashed var(--color-border-mist) !important;
-  }
-}
 @media (orientation: portrait) { html[data-theme="forest"] #form-container { border-bottom: 1px solid var(--color-border-mist) !important; } }
 
 /* ---- app8 — 英文法ビジュアライザー（裏: Mint背景＋白カード） ---- */

@@ -425,12 +425,6 @@ html[data-theme="pop"] .bl-sentence.is-selected {
 }
 html[data-theme="pop"] #blLinkPath { stroke: var(--color-charcoal-ink) !important; }
 @media (orientation: portrait) {
-  html[data-theme="pop"] #jaPane {
-    border-left: none !important;
-    border-top: 1.5px dashed var(--color-charcoal-ink) !important;
-  }
-}
-@media (orientation: portrait) {
   html[data-theme="pop"] #form-container { border-bottom: 1.5px solid var(--color-charcoal-ink) !important; }
 }
 

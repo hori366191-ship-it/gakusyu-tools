@@ -122,18 +122,19 @@
 
 > 2026-10-26 の変更は app2 `@50` と Pages で公開済み（7.10）。`@49` までは変更前の挙動だった。
 > **2026-10-27 の縦長リンクの変更（文末へ接続）は Pages で公開済み**（commit `08110ba`。7.11）。修正当時はローカルのみで未公開で、公開済み `@50` の縦長は pane の右余白固定だった（その後の Pages 反映で文末接続へ変わり、GAS は `@50` のまま）。
+> **2026-10-30 の全幅左右統一（7.13）はローカルのみ・未公開**。以降は PC/横長・スマホ/縦長とも左右2ペインで、向きはサイドバー（設定⇄本文）の制御だけに使う。GAS は `@50` のまま不変（schema/API/旧訳再利用は変わらない）。
 
 - 通常表示は従来どおり（段落・自然折返し）。対訳中も英文は offset の **inline span** で描画し、原文を改変せず文ごとの改行もしない。訳文も inline span（ID 維持）で、文間は連結し、原文スライスの先頭/末尾空白ランにある改行を**LFへ正規化して数だけ保持**する（CRLF は改行1つ、空行はその数だけ。原文先頭も同様、同段落内の文間スペースは入れない）。
 - 対訳ボタン: 表示/非表示、取得中、作成中、失敗（破損・未作成・権限なし・結果不明）を表示する。
-- PC/横長: 左右2ペイン（英文・訳文とも全文、各独立スクロール）。選択は**1ペアだけ**強調し、SVG 曲線を英文右端（内側）→訳文左端（内側）に接続する（**従来どおり。2026-10-27 の変更でも不変**）。
-- スマホ/縦長: 上下2ペイン（各独立スクロール、下は訳全文）。曲線は**その文の最後の可視文字の実測位置**へ繋ぐ（pane の右端固定にしない）。末尾の空白・タブ・全角空白・CRLF は除いた最後の書記素クラスタ（絵文字・ZWJ・異体字・肌色・旗。`Intl.Segmenter`、無ければコードポイント＋結合文字のフォールバック）に `Range` を張り、`getClientRects()` の実測 rect（折返しは最後の行）を使う。英文も訳文も同じ方法で文末を測る。**接続点は文末文字の右下角**（x = 文字 bbox の右端、y = bbox の下端 +2px。行間が上側になるときは右上角 −2px）で、文字 bbox へ stroke（2px）を入れない。文末の後に**空白なしで同じ行に次の文が続く**場合（例「猫。犬。鳥。」）、右中央から縦に降りると隣の文字の bbox を貫くため、右下角＝文字 bbox の外から出す。経路は **右下角 → その行の行間余白（`line-height: 3`）→ 行間内を水平に右gutter → gutter を縦に下る → 訳の行間余白 → 訳文末の右下角**（単純な3次ベジェや H→V→H は使わない）。行間 y は実測行 rect と行送りから「次の行との間 → 行送り → 前の行との間」の順に求め、文字サイズが大きくてどれも pane ∩ view の clip に入らないときは文字 bbox のすぐ外（角 +2px）へ逃がす（そこも不可なら隠す）。角は `Q` で丸め（`stroke-linejoin: round` 併用）、gutter の縦経路だけが pane の `padding-right` 内（本文の右外）を通り、viewport 右端からはみ出さない。文末が画面外（長文の末尾など）・`Range` を取れない・接続点が clip 外のときは**線を隠す**（行タップ位置や別の行へ黙って戻さない）。向きの判定は CSS と同じ `orientation: portrait`（JS は `matchMedia`）に揃える。接続点が文末であることは右下角の位置で示す（小さい dot は付けていない）。
+- 全幅（PC/横長・スマホ/縦長とも）: 左右2ペイン（英文・訳文とも全文、各独立スクロール、`flex: 1 1 50%` + `box-sizing: border-box` の外寸等幅、中央は訳ペインの `border-left`）。選択は**1ペアだけ**強調し、SVG 曲線を英文の選択文 fragment 右端→訳文の選択文 fragment 左端に接続する。gutter が狭いときは制御点を `0..40` に詰めて本文へ張り出さない（広い横長は従来の ±40 で不変）。
+- （2026-10-26 の app2 `@50`〜2026-10-29 の Pages 公開版の履歴）スマホ/縦長: 上下2ペインだった。当時の曲線は**その文の最後の可視文字の実測位置**へ繋いでいた（pane の右端固定にしない）。末尾の空白・タブ・全角空白・CRLF は除いた最後の書記素クラスタ（絵文字・ZWJ・異体字・肌色・旗。`Intl.Segmenter`、無ければコードポイント＋結合文字のフォールバック）に `Range` を張り、`getClientRects()` の実測 rect（折返しは最後の行）を使った。英文も訳文も同じ方法で文末を測った。**接続点は文末文字の右下角**（x = 文字 bbox の右端、y = bbox の下端 +2px。行間が上側になるときは右上角 −2px）で、文字 bbox へ stroke（2px）を入れない。文末の後に**空白なしで同じ行に次の文が続く**場合（例「猫。犬。鳥。」）、右中央から縦に降りると隣の文字の bbox を貫くため、右下角＝文字 bbox の外から出した。経路は **右下角 → その行の行間余白（`line-height: 3`）→ 行間内を水平に右gutter → gutter を縦に下る → 訳の行間余白 → 訳文末の右下角**（単純な3次ベジェや H→V→H は使わない）。行間 y は実測行 rect と行送りから「次の行との間 → 行送り → 前の行との間」の順に求め、文字サイズが大きくてどれも pane ∩ view の clip に入らないときは文字 bbox のすぐ外（角 +2px）へ逃がす（そこも不可なら隠す）。角は `Q` で丸め、gutter の縦経路だけが pane の `padding-right` 内（本文の右外）を通り、viewport 右端からはみ出さない。文末が画面外・`Range` を取れない・接続点が clip 外のときは**線を隠す**。向きの判定は CSS と同じ `orientation: portrait`（JS は `matchMedia`）に揃えていた。**2026-10-30 以降は上下2ペインを使わないため、この経路は pane が実際に上下に積まれたときだけのフォールバック**（7.13）。
 - 英文の単語タップは、通常モードでは従来どおり既存辞書と履歴。**対訳モード中は文選択だけ**で、辞書のロード/表示・履歴追加をせず早期 return する。
 - 対訳モードへ入るときは既存の辞書ポップアップを閉じ、辞書取得の世代tokenを進める。遅れて返った取得結果は、モード中・レコード切替後・辞書close後・連打で古くなった要求では表示も履歴追加もしない。通常モードの履歴は消さない。
 - 訳が見切れる場合だけ訳ペインを自動スクロールする（smooth）。`prefers-reduced-motion: reduce` では即時。新しい選択では**前の smooth を停止してから**可視判定する（旧移動先が残っても続かない）。モード終了・レコード切替でも停止する。pane より高い文は先頭を合わせ、再計算で同じ位置なら再スクロールしない（揺れない）。
 - スクロール・リサイズ・文字サイズ・テーマ変更・フォント読込で線を再計算する（スクロールイベントの rAF 追従は維持）。
 - 対訳中スマホは辞書を上側（内部スクロール、最大32dvh）。通常時は従来どおり下側。PC は従来位置。
 - XSS 防止のため `textContent` のみを使う。レコード切替・遅延応答・モード終了は `seq` と `recordId` で無効化し、選択・線もリセットする。
-- 標準/pop/forest の各テーマに `site/themes/pop.css` / `forest.css` で対訳用スタイルを追加。縦長の曲線は既存の `padding-right`・`line-height` の範囲内で、テーマCSSの追加変更は不要（`#blLinkPath` の stroke だけ各テーマが上書き）。
+- 標準/pop/forest の各テーマに `site/themes/pop.css` / `forest.css` で対訳用スタイルを追加。中央の境界線は全テーマとも base の `#jaPane { border-left }` を維持し、縦長でも `border-top` へ切り替えない（2026-10-30 に pop/forest の portrait 上書きを削除。7.13）。曲線は既存の `padding-right`・`line-height` の範囲内で、テーマCSSの追加変更は不要（`#blLinkPath` の stroke だけ各テーマが上書き）。
 
 ### 7.5 テスト（ローカル・モック＋公開後の read-only 検証）
 
@@ -143,6 +144,7 @@
 - 実ブラウザ確認はモック（ローカル `http.server` + `window.test*` フック）で PC 1280x900 / スマホ 390x844 / 3テーマを確認。最終の実機・実 API 回帰は `test` 担当。
 - 2026-10-26 の変更は、ローカル段階で code（`security-backends`）114 pass / UI transport 38 pass、公開時の最終回帰で**独立 188 pass / UI 144 pass**（いずれもオフライン）。実 API・本番 Drive は使っていない（7.10）。
 - 2026-10-27 の縦長リンクの変更（7.11）は、ローカル段階で **Node 191 pass / UI 195 pass**、公開版（commit `08110ba`）の最終回帰で **UI 195 pass**（いずれもオフライン）。実 API・本番 Drive・課金は使っていない。
+- 2026-10-30 の全幅左右統一（7.13。ローカルのみ・未公開）では、`@media (orientation: portrait)` の `#bilingualView.is-active` が `row`・`gap: 12px`・外寸等幅（`flex: 1 1 50%` / `box-sizing: border-box` / `min-width: 0`。PC の base も同じ）で、各ペインの独立 `overflow` と中央の `border-left` を維持すること、pop/forest の portrait に `#jaPane` の `border-top` 上書きが無いこと、`blIsStackedPanes` が実 pane 矩形で stacked を判定し（向きに依存しない）、狭い gutter の制御点が `0..40` に収まること、`drawBilingualLink` が向きではなく配置で経路を選ぶこと、回転で本文を維持する向き制御（7.12）が変わらないことを追加した。`node --test scripts/tests/transport.test.cjs` は 46 pass（オフライン）。実ブラウザの bbox 実測（等幅）は `test` 担当（未実施）。なお当初の `flex: 1 1 0` は padding/border の差が外寸差（std 390 で 13px、PC で 17px）になったため、`flex-basis: 50%` + `box-sizing: border-box` へ修正した（`test` の実測で検出）。
 
 #### モックでの UI 確認手順（test 引継ぎ用）
 
@@ -152,7 +154,7 @@
    - `window.testBilingualShow({ record_id:'tadoku-1700000001000', model:'gemma4:31b', lang:'ja', version:1, created_at:'...', spans:[{id:'s0',start:0,end:13},{id:'s1',start:13,end:27},{id:'s2',start:27,end:39}], items:[{id:'s0',ja:'猫が座った。'},{id:'s1',ja:'犬が走った。'},{id:'s2',ja:'鳥が飛んだ。'}] })`
    - `window.testBilingualSelect('s1', 200)` で1ペア選択＋線を描画。
    - 縦長（例 390x844）では `testRenderRecord` が本文モード（`mobile-preview`）へ入る（7.12）。設定画面側の確認は `#backButton` で戻る。
-3. 確認項目: 英文が inline span で文ごとに改行されない／訳文は文間が連結され「The dog ran.」の後の空行（改行2つ）がそのまま保持される（CRLF・先頭改行の fixture も確認）／PCは左右2ペインで従来の曲線（英文右端→訳文左端）／390x844 は上下2ペインで、曲線の始点・終点が**文末文字の右下角（bbox の右端・下端 +2px）**に付き、水平部は行間余白の中だけを通って本文（空白なしで同じ行に続く後続文を含む）に stroke が入らず、gutter の縦経路だけが pane の右余白（view 幅-4〜-12）を通る／`猫。犬。鳥。`のように空白なしで詰まった訳文で線が「犬」を貫かない／文字サイズを上げて行間が clip に入らないときも bbox のすぐ外を通る（消えない）／文末が画面外の長文では線が出ない／選択は2要素だけ／対訳中の英文タップで辞書が開かず履歴も増えない（通常モードの辞書・履歴は従来どおり）／辞書は対訳中スマホで上側（`fixed`・最大32dvh）／モード終了で選択・線が消える／pop・forest で色とフォントが切り替わる／記号だけの span（例 `***`）を含む fixture は原文のまま表示され、隣接文の改行保持を壊さない。
+3. 確認項目: 英文が inline span で文ごとに改行されない／訳文は文間が連結され「The dog ran.」の後の空行（改行2つ）がそのまま保持される（CRLF・先頭改行の fixture も確認）／PC・スマホとも左右2ペイン（等幅・中央 `border-left`・各独立スクロール）で、曲線は英文の選択文 fragment 右端→訳文 fragment 左端（狭い gutter は制御点 `0..40` で本文へ張り出さない。広い PC は ±40 の従来値）／`猫。犬。鳥。`のように空白なしで詰まった訳文でも線は選択文 fragment の端に接続する／選択は2要素だけ／対訳中の英文タップで辞書が開かず履歴も増えない（通常モードの辞書・履歴は従来どおり）／辞書は対訳中スマホで上側（`fixed`・最大32dvh）／モード終了で選択・線が消える／pop・forest で色とフォント・中央境界線が切り替わる／記号だけの span（例 `***`）を含む fixture は原文のまま表示され、隣接文の改行保持を壊さない。pane が実際に上下へ積まれた場合だけ、文末文字の右下角→行間余白→gutter の経路（7.11 の実装）をフォールバックとして使う。
 4. ボタンからの取得・作成フローは Worker/GAS のモック（`translateText` の get→missing→create）を返して確認する。実 API・本番 Drive は使わない。
 
 #### 保存不明（`translation_recovery_required`）の管理者向け復旧
@@ -301,7 +303,7 @@
 
 **未確認・懸念**: 実 AI による記号混在翻訳の追加課金検証と本番 Drive 書込みは未実施（公開後の検証は read-only）。記号判定は property escape 依存（フォールバックあり）。旧 cache の記号スパンには従来の訳文が残るため、表示は「訳文」のまま（再生成しない方針）。
 
-### 7.11 縦長の対訳線を文末へ接続（2026-10-27・Pages 公開済み）
+### 7.11 縦長の対訳線を文末へ接続（2026-10-27・Pages 公開済み／当時。2026-10-30 の全幅左右統一で上下2ペインは現行UIから外れ、この経路は stacked 時のフォールバック。7.13）
 
 > 修正直後は**ローカルのみで未公開**だった。その後 commit `08110ba` として **Pages のみ**公開し、公開後の read-only 検証まで完了した（下の「公開」）。GAS HEAD への push・既存デプロイの版更新は行っていない。**GAS（`site-app2-backend`）は変更なしで app2 `@50` のまま**（新しい version は作成しておらず `@51` は存在しない）。対象は `site/app2/index.html`（対訳 UI）、`scripts/tests/transport.test.cjs`、本 docs。
 
@@ -364,3 +366,24 @@
 **テスト（オフライン unit/static）**: `scripts/tests/transport.test.cjs` に (a) 向き遷移の純関数（未観測・未選択・横→縦・縦→横・重複・back）、(b) DOM mock のコントローラ（`mobile-preview` の付け外し、重複イベントで再遷移しない、back が同縦長で覆されない、back→横→縦で設定継続、横向き本文クリック後の縦向き復帰、settle 収束）、(c) scroll snapshot/復旧（非表示の 0 を保存しない・実測 0 のときだけ即時復旧・実測が残っていれば触らない・reset）、(d) static（回転ブロックに `renderRecord` / `showBilingual` / `callServer` が無い、matchMedia の change 監視、back の一本化、`cancelJaAutoScroll` → `dictUiClose` → `scheduleLinkDraw` の順序、`innerWidth` 比較の除去）を追加。`node --test` は Node 194 pass（うち回転 UI 57 pass。実 API・本番 Drive 不使用）。公開後の確認は、公開版モック（3テーマ）で 57 pass、対訳線を含む UI 195 pass。回転の実操作は `test` 担当が Chrome viewport（390x844）の landscape→portrait で確認済み（回転で追加 GET / create 0・overflow 0・error 0）。実 iOS 端末の回転・実キーボードは未確認。
 
 **未確認・懸念**: 実 iOS 端末の回転・ソフトキーボードでの見え方は未確認（Chrome viewport 代替での確認のみ）。回転直後に matchMedia が古い値を返す環境では settle（最大160ms）で復帰するが、その間だけ設定画面が見える場合がある。iOS Safari の `orientationchange` と `matchMedia` の順序は環境依存のため実機確認を要する。回転後の scroll 復旧で選択文が画面外になった場合は、既存どおり対訳線を隠す。実 API・本番 Drive 書き込みは行っていない（課金なし）。
+
+### 7.13 対訳を全幅で左右2ペインへ統一（2026-10-30・ローカルのみ・未公開）
+
+> 本節は実装時点の記録。**git commit/push・GAS HEAD への push・既存デプロイの版更新・Pages 反映は行っていない**（ローカル未公開）。**GAS（`site-app2-backend`）は変更なしで app2 `@50` のまま**（version 作成・切替 PUT・`entryPoints` 変更なし。`@51` は存在しない）。スキーマ・API・翻訳の旧訳再利用（`sourceHash` 一致で LLM なし）は変わらない。
+
+**範囲**: `site/app2/index.html`（対訳の CSS とリンク経路選択）、`site/themes/pop.css` / `forest.css`（縦長の `#jaPane` 上書きのみ）、`scripts/tests/transport.test.cjs`、docs。バックエンド・Worker・GAS・他アプリは触っていない。
+
+**背景**: 縦長（`@media (orientation: portrait)`）だけ対訳を上下2ペインにし、リンク経路も向きで上下用（文末接続）へ切り替えていた。スマホでも左右2ペインに統一し、向きはサイドバー（設定⇄本文）の制御（7.12）だけに使う。
+
+**変更**:
+
+1. CSS: 縦長の `#bilingualView.is-active` を `flex-direction: row`・`gap: 12px`・`align-items: stretch` にし、`.bl-pane` は `flex: 1 1 50%` / `box-sizing: border-box` / `min-width: 0` / `min-height: 0` の外寸等幅（各ペインの独立 `overflow: auto` は base のまま。PC の base も同じ等幅）。`#jaPane` は `border-left: 1px dashed #99e699`（中央境界線）と左右 12px の padding を維持し、縦長用の `border-top`・`padding-top` は付けない。文字サイズ（`font-size: clamp(18px, 3vw, 22px)` と各要素の指定）は変えない。
+2. テーマ: `pop.css` / `forest.css` の `@media (orientation: portrait)` から `#jaPane` の `border-left: none` + `border-top` 上書きを削除し、base の `border-left` を全幅で使う（`#form-container` の portrait 指定はそのまま）。
+3. リンク経路: `drawBilingualLink` は `blIsPortraitLayout`（向き）ではなく、実測した `#enPane` / `#jaPane` の矩形を純関数 `blIsStackedPanes` で判定した `stacked` で経路を選ぶ。左右2ペインでは向きに関係なく英文の選択文 fragment 右端→訳文 fragment 左端の3次ベジェ。狭い gutter（< 80px）は制御点を `0..40` に詰めて本文へ張り出さない（広い横長は ±40 のまま完全一致）。inline 文選択の実 fragment へ接続する既存挙動は維持する。
+4. 上下2ペイン用の実装（`blPortraitRoutePoints` / 文末の実測 / 行間余白 / 角丸）は削除せず、`blIsStackedPanes` が true のときだけ使うフォールバックとして残す（現行 CSS では左右2ペインのため通常は通らない）。
+5. 向き制御は変更しない: `readingIsPortrait` / `readingOrientation` / `readingOrientationAction` / sidebar（`mobile-preview`）の遷移・scroll 復旧・辞書/線の後始末は 7.12 のまま。回転しても本文モード・選択・対訳線を維持する。
+6. show/選択/smooth（reduced motion）/辞書・履歴抑止/段落改行/scroll 永続化は変更しない。
+
+**テスト（オフライン unit/static）**: `scripts/tests/transport.test.cjs` に (a) 縦長 CSS が `row`・`gap: 12px`・外寸等幅（`flex: 1 1 50%` / `box-sizing: border-box` / `min-width: 0`。PC の base も同じ）で、`.bl-pane` の独立 `overflow` と `#jaPane` の `border-left` を維持し `border-top` を付けないこと、(b) pop/forest の portrait ブロックに `#jaPane` 上書きが無く base が `border-left` であること、(c) `blIsStackedPanes` が左右並び（縦長 390x844 想定）で false・上下積みで true になり、`drawBilingualLink` が向きを見ず `stacked` を `buildBlLinkPath` へ渡すこと、(d) 狭い gutter 12px の制御点が `0..40` に収まり、広い横長の path が完全一致のままであること、(e) 向き制御（`readingOrientation`）が残っていることを追加した。`node --test scripts/tests/transport.test.cjs` は 46 pass（オフライン。実 API・本番 Drive 不使用）。pane 外寸の bbox 実測（std/pop/forest × 390/320/PC）は `test` 担当に委譲する。
+
+**未確認・懸念**: 実ブラウザの pane 外寸（等幅）は `test` 担当の再実測待ち（PC 1280x900 / スマホ 390x844・320 / 3テーマ）。当初の `flex: 1 1 0` は padding/border の差が外寸差（std 390 で 13px、320 で 13px、pop/forest で 13px、PC で 17px）になったため、`flex-basis: 50%` + `box-sizing: border-box` に修正した。狭い左右2ペインでは1行の文字数が減るため、英文・訳文の折返しと縦スクロール量が増える（意図した変更）。左右の曲線は選択文 fragment の端から gutter へ出るため、同じ行に続く後続文の上を横切る場合がある（2026-10-27 以前の横長と同じ既存挙動。上下用の行間経路は使わない）。公開・commit/push・実 API・本番 Drive 操作は行っていない。
