@@ -122,7 +122,7 @@
 
 > 2026-10-26 の変更は app2 `@50` と Pages で公開済み（7.10）。`@49` までは変更前の挙動だった。
 > **2026-10-27 の縦長リンクの変更（文末へ接続）は Pages で公開済み**（commit `08110ba`。7.11）。修正当時はローカルのみで未公開で、公開済み `@50` の縦長は pane の右余白固定だった（その後の Pages 反映で文末接続へ変わり、GAS は `@50` のまま）。
-> **2026-10-30 の全幅左右統一（7.13）はローカルのみ・未公開**。以降は PC/横長・スマホ/縦長とも左右2ペインで、向きはサイドバー（設定⇄本文）の制御だけに使う。GAS は `@50` のまま不変（schema/API/旧訳再利用は変わらない）。
+> **2026-10-30 の全幅左右統一（7.13）は commit `139bb59` で Pages 公開済み**（公開後の read-only 検証まで完了）。以降は PC/横長・スマホ/縦長とも左右2ペインで、向きはサイドバー（設定⇄本文）の制御だけに使う。GAS は `@50` のまま不変（schema/API/旧訳再利用は変わらない）。
 
 - 通常表示は従来どおり（段落・自然折返し）。対訳中も英文は offset の **inline span** で描画し、原文を改変せず文ごとの改行もしない。訳文も inline span（ID 維持）で、文間は連結し、原文スライスの先頭/末尾空白ランにある改行を**LFへ正規化して数だけ保持**する（CRLF は改行1つ、空行はその数だけ。原文先頭も同様、同段落内の文間スペースは入れない）。
 - 対訳ボタン: 表示/非表示、取得中、作成中、失敗（破損・未作成・権限なし・結果不明）を表示する。
@@ -144,7 +144,7 @@
 - 実ブラウザ確認はモック（ローカル `http.server` + `window.test*` フック）で PC 1280x900 / スマホ 390x844 / 3テーマを確認。最終の実機・実 API 回帰は `test` 担当。
 - 2026-10-26 の変更は、ローカル段階で code（`security-backends`）114 pass / UI transport 38 pass、公開時の最終回帰で**独立 188 pass / UI 144 pass**（いずれもオフライン）。実 API・本番 Drive は使っていない（7.10）。
 - 2026-10-27 の縦長リンクの変更（7.11）は、ローカル段階で **Node 191 pass / UI 195 pass**、公開版（commit `08110ba`）の最終回帰で **UI 195 pass**（いずれもオフライン）。実 API・本番 Drive・課金は使っていない。
-- 2026-10-30 の全幅左右統一（7.13。ローカルのみ・未公開）では、`@media (orientation: portrait)` の `#bilingualView.is-active` が `row`・`gap: 12px`・外寸等幅（`flex: 1 1 50%` / `box-sizing: border-box` / `min-width: 0`。PC の base も同じ）で、各ペインの独立 `overflow` と中央の `border-left` を維持すること、pop/forest の portrait に `#jaPane` の `border-top` 上書きが無いこと、`blIsStackedPanes` が実 pane 矩形で stacked を判定し（向きに依存しない）、狭い gutter の制御点が `0..40` に収まること、`drawBilingualLink` が向きではなく配置で経路を選ぶこと、回転で本文を維持する向き制御（7.12）が変わらないことを追加した。`node --test scripts/tests/transport.test.cjs` は 46 pass（オフライン）。実ブラウザの bbox 実測（等幅）は `test` 担当（未実施）。なお当初の `flex: 1 1 0` は padding/border の差が外寸差（std 390 で 13px、PC で 17px）になったため、`flex-basis: 50%` + `box-sizing: border-box` へ修正した（`test` の実測で検出）。
+- 2026-10-30 の全幅左右統一（7.13。実装時はローカル・未公開 → commit `139bb59` で Pages 公開済み）では、`@media (orientation: portrait)` の `#bilingualView.is-active` が `row`・`gap: 12px`・外寸等幅（`flex: 1 1 50%` / `box-sizing: border-box` / `min-width: 0`。PC の base も同じ）で、各ペインの独立 `overflow` と中央の `border-left` を維持すること、pop/forest の portrait に `#jaPane` の `border-top` 上書きが無いこと、`blIsStackedPanes` が実 pane 矩形で stacked を判定し（向きに依存しない）、狭い gutter の制御点が `0..40` に収まること、`drawBilingualLink` が向きではなく配置で経路を選ぶこと、回転で本文を維持する向き制御（7.12）が変わらないことを追加した。最終のオフライン回帰は **Node 196 pass / UI 216 pass / 配置 147 pass / 回転 57 pass / long 6 pass**、公開版（commit `139bb59`）で **UI 216 pass / 配置 87 pass / 回転 57 pass**。実ブラウザの bbox 実測（等幅）は `test` 担当が公開後に完了（PC 1280x900 / スマホ 390x844・320 × 3テーマで外寸差 1px 未満。7.13 の公開表）。なお当初の `flex: 1 1 0` は padding/border の差が外寸差（std 390 で 13px、PC で 17px）になったため、`flex-basis: 50%` + `box-sizing: border-box` へ修正した（`test` の実測で検出）。
 
 #### モックでの UI 確認手順（test 引継ぎ用）
 
@@ -367,9 +367,23 @@
 
 **未確認・懸念**: 実 iOS 端末の回転・ソフトキーボードでの見え方は未確認（Chrome viewport 代替での確認のみ）。回転直後に matchMedia が古い値を返す環境では settle（最大160ms）で復帰するが、その間だけ設定画面が見える場合がある。iOS Safari の `orientationchange` と `matchMedia` の順序は環境依存のため実機確認を要する。回転後の scroll 復旧で選択文が画面外になった場合は、既存どおり対訳線を隠す。実 API・本番 Drive 書き込みは行っていない（課金なし）。
 
-### 7.13 対訳を全幅で左右2ペインへ統一（2026-10-30・ローカルのみ・未公開）
+### 7.13 対訳を全幅で左右2ペインへ統一（2026-10-30・commit `139bb59` で Pages 公開済み）
 
-> 本節は実装時点の記録。**git commit/push・GAS HEAD への push・既存デプロイの版更新・Pages 反映は行っていない**（ローカル未公開）。**GAS（`site-app2-backend`）は変更なしで app2 `@50` のまま**（version 作成・切替 PUT・`entryPoints` 変更なし。`@51` は存在しない）。スキーマ・API・翻訳の旧訳再利用（`sourceHash` 一致で LLM なし）は変わらない。
+> 実装直後は**ローカルのみで未公開**だった。その後 commit `139bb59` として **Pages のみ**公開し、公開後の read-only 検証まで完了した（下の「公開」）。GAS HEAD への push・既存デプロイの版更新は行っていない。**GAS（`site-app2-backend`）は変更なしで app2 `@50` のまま**（version 作成・切替 PUT・`entryPoints` 変更なし。`@51` は存在しない）。スキーマ・API・翻訳の旧訳再利用（`sourceHash` 一致で LLM なし）は変わらない。
+
+**公開（2026-10-30・Pages のみ）**:
+
+| 段階 | 状態 | 補足 |
+|---|---|---|
+| コード修正 | 完了 | commit `139bb59`（対訳を全幅で左右2ペインへ統一） |
+| ローカル検証 | 完了 | Node 196 pass / UI 216 pass / 配置 147 pass / 回転 57 pass / long 6 pass（オフライン。実 API・本番 Drive 不使用） |
+| CI（Tests） | 完了 | Tests `41006704580` success |
+| Pages 反映 | 完了 | Pages `41006704452` success。公開 artifact commit は `139bb59` |
+| 公開後検証（read-only） | 完了 | 公開 `app2/` の HTML と `themes/pop.css` / `forest.css` は HTTP 200 で commit `139bb59` の source と byte/SHA 一致。公開版は UI 216 pass / 配置 87 pass / 回転 57 pass |
+| 実ブラウザ確認 | 完了（公開後） | PC 1280x900 / スマホ 390x844・320 × 3テーマ。左右ペインの外寸差 1px 未満（等幅）・中央の破線境界線・各ペイン独立スクロール・段落記号・辞書/履歴抑止・回転後の状態維持を確認。overflow 0・error 0 |
+| GAS / デプロイ | 変更なし | app2 は `@50` のまま（version 作成・切替 PUT・`entryPoints` 変更なし。`site-app2-backend` は不変） |
+| 実機スマートフォン | 未確認 | 検証は Chrome viewport 代替（390x844 / 320）。実端末では未確認 |
+| 実 API 課金・本番 Drive | 未実施 | mock/block による read-only 検証（実 AI・本番 Drive 書込みなし） |
 
 **範囲**: `site/app2/index.html`（対訳の CSS とリンク経路選択）、`site/themes/pop.css` / `forest.css`（縦長の `#jaPane` 上書きのみ）、`scripts/tests/transport.test.cjs`、docs。バックエンド・Worker・GAS・他アプリは触っていない。
 
@@ -384,6 +398,6 @@
 5. 向き制御は変更しない: `readingIsPortrait` / `readingOrientation` / `readingOrientationAction` / sidebar（`mobile-preview`）の遷移・scroll 復旧・辞書/線の後始末は 7.12 のまま。回転しても本文モード・選択・対訳線を維持する。
 6. show/選択/smooth（reduced motion）/辞書・履歴抑止/段落改行/scroll 永続化は変更しない。
 
-**テスト（オフライン unit/static）**: `scripts/tests/transport.test.cjs` に (a) 縦長 CSS が `row`・`gap: 12px`・外寸等幅（`flex: 1 1 50%` / `box-sizing: border-box` / `min-width: 0`。PC の base も同じ）で、`.bl-pane` の独立 `overflow` と `#jaPane` の `border-left` を維持し `border-top` を付けないこと、(b) pop/forest の portrait ブロックに `#jaPane` 上書きが無く base が `border-left` であること、(c) `blIsStackedPanes` が左右並び（縦長 390x844 想定）で false・上下積みで true になり、`drawBilingualLink` が向きを見ず `stacked` を `buildBlLinkPath` へ渡すこと、(d) 狭い gutter 12px の制御点が `0..40` に収まり、広い横長の path が完全一致のままであること、(e) 向き制御（`readingOrientation`）が残っていることを追加した。`node --test scripts/tests/transport.test.cjs` は 46 pass（オフライン。実 API・本番 Drive 不使用）。pane 外寸の bbox 実測（std/pop/forest × 390/320/PC）は `test` 担当に委譲する。
+**テスト（オフライン unit/static）**: `scripts/tests/transport.test.cjs` に (a) 縦長 CSS が `row`・`gap: 12px`・外寸等幅（`flex: 1 1 50%` / `box-sizing: border-box` / `min-width: 0`。PC の base も同じ）で、`.bl-pane` の独立 `overflow` と `#jaPane` の `border-left` を維持し `border-top` を付けないこと、(b) pop/forest の portrait ブロックに `#jaPane` 上書きが無く base が `border-left` であること、(c) `blIsStackedPanes` が左右並び（縦長 390x844 想定）で false・上下積みで true になり、`drawBilingualLink` が向きを見ず `stacked` を `buildBlLinkPath` へ渡すこと、(d) 狭い gutter 12px の制御点が `0..40` に収まり、広い横長の path が完全一致のままであること、(e) 向き制御（`readingOrientation`）が残っていることを追加した。最終のオフライン回帰は **Node 196 pass / UI 216 pass / 配置 147 pass / 回転 57 pass / long 6 pass**（実 API・本番 Drive 不使用）。公開版（commit `139bb59`）でも **UI 216 pass / 配置 87 pass / 回転 57 pass**。pane 外寸の bbox 実測（std/pop/forest × 390/320/PC）は `test` 担当が公開後に完了した（本節冒頭の「公開」）。
 
-**未確認・懸念**: 実ブラウザの pane 外寸（等幅）は `test` 担当の再実測待ち（PC 1280x900 / スマホ 390x844・320 / 3テーマ）。当初の `flex: 1 1 0` は padding/border の差が外寸差（std 390 で 13px、320 で 13px、pop/forest で 13px、PC で 17px）になったため、`flex-basis: 50%` + `box-sizing: border-box` に修正した。狭い左右2ペインでは1行の文字数が減るため、英文・訳文の折返しと縦スクロール量が増える（意図した変更）。左右の曲線は選択文 fragment の端から gutter へ出るため、同じ行に続く後続文の上を横切る場合がある（2026-10-27 以前の横長と同じ既存挙動。上下用の行間経路は使わない）。公開・commit/push・実 API・本番 Drive 操作は行っていない。
+**未確認・懸念**: 実ブラウザの pane 外寸（等幅）は公開後に確認済み（PC 1280x900 / スマホ 390x844・320 / 3テーマで外寸差 1px 未満、中央の破線境界線・独立スクロール・段落記号・辞書/履歴抑止・回転後の状態維持、overflow 0・error 0。本節冒頭の「公開」を参照）。**実機スマートフォン（実端末）は未確認**（Chrome viewport 代替）。当初の `flex: 1 1 0` は padding/border の差が外寸差（std 390 で 13px、320 で 13px、pop/forest で 13px、PC で 17px）になったため、`flex-basis: 50%` + `box-sizing: border-box` に修正した。狭い左右2ペインでは1行の文字数が減るため、英文・訳文の折返しと縦スクロール量が増える（意図した変更）。左右の曲線は選択文 fragment の端から gutter へ出るため、同じ行に続く後続文の上を横切る場合がある（2026-10-27 以前の横長と同じ既存挙動。上下用の行間経路は使わない）。実 API・本番 Drive 操作（課金・書込み）は行っていない。
