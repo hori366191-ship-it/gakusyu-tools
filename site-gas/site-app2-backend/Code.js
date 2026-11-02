@@ -5,7 +5,9 @@
 //   ただし OPEN_GENERATE=true の試験期間中は匿名生成も可（端末上限＋全体上限つき。削除は従来通りオーナーのみ）
 // ・生成物の削除はオーナーのみ（Script Properties: OWNER_EMAIL）
 // ・AI 生成/審査/翻訳（Script Properties: OLLAMA_API_KEY のみ。Ollama Cloud 公式 API https://ollama.com/api/chat、
-//   model=gemma4:31b、stream=false、think=false。ZEN/OPENCODE への暗黙フォールバックはしない）
+//   生成の既定 model=gemma4:31b、審査・翻訳は gemma4:31b 固定。stream=false、think=false。
+//   生成モデルの切替はオーナー限定の benchmark_model だけ（許可: gemma4:31b / deepseek-v4.1-flash）。
+//   ZEN/OPENCODE への暗黙フォールバックはしない）
 // ・Ollama Cloud は Structured Outputs 非対応のため format/schema は送らない。JSON はプロンプトで要求し厳格検証する
 // ・生成物は共有フォルダに保存（Script Properties: FOLDER_ID。未設定なら「生成済み長文」を自動作成）
 // ・生成物フォルダ（FOLDER_ID）は全員に閲覧可 + 許可ユーザーに編集可で共有しておくこと
@@ -40,7 +42,10 @@ var INDEX_FILE_NAME   = 'tadoku-index.json';
 var INDEX_CACHE_KEY   = 'tadoku_index_cache';
 var INDEX_CACHE_TTL   = 60;
 var API_BASE      = 'https://ollama.com/api';
-var MODEL         = 'gemma4:31b'; // Ollama Cloud 公式。ローカルCLIの gemma4:cloud とは別名（APIはこの名前）
+var MODEL         = 'gemma4:31b'; // 生成の既定。Ollama Cloud 公式。ローカルCLIの gemma4:cloud とは別名（APIはこの名前）
+var AI_GENERATION_MODELS = ['gemma4:31b', 'deepseek-v4.1-flash']; // benchmark_model で指定できる生成モデル
+var AI_JUDGE_MODEL = 'gemma4:31b'; // 審査は固定（MODEL を変えても引きずらない）
+var AI_TRANS_MODEL = 'gemma4:31b'; // 翻訳は固定（MODEL を変えても引きずらない）
 var OLLAMA_KEY_PROP = 'OLLAMA_API_KEY';
 // 生成 system は英語で固定する（日本語の指示文をモデルが書き写し、生成物へ日本語が混入するのを避ける）
 var SYSTEM_PROMPT = 'You are a writer of English reading materials for Japanese learners. '
@@ -59,7 +64,7 @@ var TRANS_MAX_TOTAL_JA = 120000;         // 翻訳全体の上限
 var TRANS_MAX_RECORD_CHARS = 40 * 1024;  // 翻訳対象の本文上限
 var TRANS_RESERVE_PREFIX = 'TTRANS_';
 var TRANS_RESERVE_STALE_MS = 5 * 60 * 1000; // これ以上続く in_flight は「送信不明」として永続 unknown にする
-var TRANS_MODEL_LABEL = MODEL;
+var TRANS_MODEL_LABEL = AI_TRANS_MODEL; // 翻訳保存ラベルも翻訳モデルに固定
 var TRANS_SYSTEM_PROMPT = 'あなたは英語教材の日本語翻訳者です。入力の英文を、学習者が読む自然な日本語に翻訳してください。出力は指定されたJSONのみとし、説明・注釈・マークダウン・コードフェンスは一切含めないこと。';
 var ABBREVIATIONS = ('mr mrs ms dr prof sr jr st etc vs no fig dept univ ave blvd inc ltd co corp '
   + 'jan feb mar apr jun jul aug sep sept oct nov dec mt ft oz lb hr min sec approx al ed eds vol ch '
@@ -106,8 +111,8 @@ var PARENT_ORIGIN_ALLOWLIST = [
 var EIKEN_LEVELS = {
   "7級": { vocabulary: "約300語の超基礎語彙（数字・色・家族・動物・食べ物・曜日など、身近なものの名前。暫定値。CEFRの枠外。本アプリ独自の入門区分）", grammar: "be動詞（am/is/are）、一般動詞の現在形（I like… / I have…）、can（できること・基本的な依頼）、want＋名詞（I want new shoes.等）、like＋名詞、基本的な命令文（Go straight. / Turn right.等）、be動詞・助動詞can・doで始まる基本疑問文、who/what/when/where/why/howで始まる基本疑問文、基本的な代名詞", allowedExpressions: ["want to＋動詞原形（希望。I want to play soccer.等。この登録が許可するのはwant to＋動詞原形のみで、want＋人＋toはこの登録の対象外。可否は対象級のgrammar/forbiddenで判定する。want to be / want to joinは同じ型の用例）", "I'd like＋名詞 / What would you like?（注文の定型。この登録が許可するのは注文の定型のみで、wouldの仮定法はこの登録の対象外。可否は対象級のgrammar/forbiddenで判定する）", "go fishing等、小学校資料で確認した具体的な定型句と同型のgo shopping（この登録は確認済みの定型句と同型のgo shoppingのみを対象とし、go＋任意の-ingはこの登録の対象外。可否は対象級のgrammar/forbiddenで判定する。go shoppingの個別記載は未確認で、教材設計上の同型扱い）"], forbidden: "過去形、比較級・最上級、動名詞、受動態、現在完了、関係代名詞、仮定法、分詞構文・分詞の形容詞的用法", sentenceLength: "1文3〜8語", note: "公式の英検に7級・6級は存在しない。本アプリ独自の5級未満入門区分。小学5年までに習う基本表現（小3・小4で扱う表現を含む）の範囲で、文法の全用法を解禁するのではなく学校で扱う基本的用例に限定する。学年配置は全国一律ではないため、学習指導要領（5・6年一括）と東京書籍2024〜2027年度NEW HORIZON Elementary年間指導計画を参照資料とする。現在進行形・未来表現（be going to / will）は参照資料で主要学習項目として確認していないが、不在を禁止の根拠にしない。want to・I'd like・go fishing等はallowedExpressionsの型に限って可（文法全般の解禁ではない）。ほとんど1音節・2音節の短い単語を使う。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
   "6級": { vocabulary: "約450語の基礎語彙（学校・家・体・動作など、小学高学年レベルの身近な語。暫定値。CEFR Pre-A1相当を目安とする独自区分）", grammar: "7級の基本（be動詞・一般動詞の現在形・can・want＋名詞・like＋名詞・基本疑問文・基本命令文・基本的な代名詞）を含む。基本の過去形（規則変化を中心に不規則動詞の基本も可）、頻度を表す副詞（always / usually / sometimes / never等）、and等の基本接続詞", allowedExpressions: ["enjoy＋動詞-ing（基本動名詞の限定許可。I enjoyed watching a baseball game.等。この登録が例外許可するのはenjoy＋-ingの部分のみで、他の動名詞の可否は対象級のgrammar/forbiddenで判定する）"], forbidden: "比較級・最上級、受動態、現在完了、関係代名詞、仮定法、分詞構文・分詞の形容詞的用法", sentenceLength: "1文4〜10語", note: "小学6年までに習う基本表現の範囲。文法の全用法を解禁するのではなく学校で扱う基本的用例に限定する。学年配置は全国一律ではないため、学習指導要領（5・6年一括）と東京書籍2024〜2027年度NEW HORIZON Elementary年間指導計画を参照資料とする。will・because・be going to・現在進行形は参照資料で主要学習項目として確認していないが、不在を禁止の根拠にしない。動名詞はenjoy＋-ingの型だけを6級で登録し、5級へ継承する（継承するのは表現型のみ。grammar/forbidden全体の自動継承ではない）。want to be / want to joinは7級のwant to許可型の用例として扱い、grammarの独立項目・別の型としては登録しない。公式に存在しない独自区分。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
-  "5級": { vocabulary: "約600語（中学1年レベルの基礎語彙。CEFR Pre-A1〜A1相当を目安）", grammar: "現在形・過去形（規則・不規則の基本）・進行形・未来（be going to中心。実測1件は移動の進行形とも解釈でき、未来の根拠としては弱い）・命令形、助動詞（can）、不定詞は一般に用いない（allowedExpressionsの許可型を除く）、接続詞（and, but, so等の等位接続詞）", allowedExpressions: ["like to＋動詞原形（この登録はlike toの許可であり、like doingの許可を意味しない。like doingの可否は対象級のgrammar/forbiddenで判定する）"], forbidden: "不定詞、比較級・最上級、助動詞must、動名詞、受動態、現在完了、関係代名詞、仮定法、分詞構文・分詞の形容詞的用法", sentenceLength: "1文5〜12語", note: "中学1年生の教科書で読める範囲の語彙・文法に限る。比較級・最上級・must・動名詞は教材方針として禁止（過去問3回分の観測は公式の禁止の証拠ではない。比較級・最上級の個別内訳は未詳）。動名詞の禁止には継承した許可表現（enjoy＋-ing等）の例外がある。不定詞は一般に不可だが、許可型（want to＝7級から継承、like to＝この級で追加）は可。like doingは不可。ただし-ing文字列の一律禁止ではなく、進行形、-ing形の形容詞（interesting等）、名詞（morning等）は可。分詞（分詞構文・分詞の形容詞的用法）も不可。go fishing等は継承した許可型として可（go＋任意の-ingへ拡張しない）。I want to buy a bigger car.は比較級のため不可。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
-  "4級": { vocabulary: "約1,300語（中学2年レベルの語彙。CEFR A1相当を目安）", grammar: "過去進行形、不定詞（to do）、動名詞（doing）、助動詞（can, will, must。mustは過去問3回分で0件のため多用しない。shouldは3件で原則回避・少数許容）、比較級・最上級、接続詞（because, when等）、感嘆文（How…! / What a…!）", allowedExpressions: ["be interested in＋名詞等、既存で明示された形容詞化過去分詞の型（既存記述に個別の根拠がある型に限る。今回の根拠データにbe surprised at等の記載はなく、根拠なく追加しない。この登録が例外許可するのは当該の形容詞化過去分詞の部分のみで、他の分詞・受動態の可否は対象級のgrammar/forbiddenで判定する）"], forbidden: "受動態、現在完了、関係代名詞、分詞の形容詞的用法、仮定法、分詞構文", sentenceLength: "1文6〜15語", note: "中学2年生の教科書で読める範囲に限る。mustは0件のため多用しない。形容詞化した過去分詞はallowedExpressionsの型のみ可（受動態・分詞全般は不可）。新規の型を大量に追加しない。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
+  "5級": { vocabulary: "約600語（中学1年レベルの基礎語彙。CEFR Pre-A1〜A1相当を目安）", grammar: "現在形・過去形（規則・不規則の基本）・進行形・未来（be going to中心。実測1件は移動の進行形とも解釈でき、未来の根拠としては弱い）・命令形、助動詞（can）、不定詞は一般に用いない（allowedExpressionsの許可型を除く）、接続詞（and, but, so等の等位接続詞）", allowedExpressions: ["like to＋動詞原形（この登録はlike toの許可であり、like doingの許可を意味しない。like doingの可否は対象級のgrammar/forbiddenで判定する）"], forbidden: "不定詞、比較級・最上級、助動詞must、動名詞、受動態、現在完了、関係代名詞、仮定法、分詞構文・分詞の形容詞的用法", sentenceLength: "1文5〜12語", note: "中学1年生の教科書で読める範囲の語彙・文法に限る。比較級・最上級・must・動名詞は教材方針として禁止（過去問3回分の観測は公式の禁止の証拠ではない。比較級・最上級の個別内訳は未詳）。動名詞の禁止には継承した許可表現（enjoy＋-ing等）の例外がある。不定詞は一般に不可だが、許可型（want to＝7級から継承、like to＝この級で追加）は可。like doingは不可。ただし-ing文字列の一律禁止ではなく、進行形、-ing形の形容詞（interesting等）、名詞（morning等）は可。分詞（分詞構文・分詞の形容詞的用法）も不可。ただし surprised / tired / excited など辞書に形容詞として載る基本語は、語源が過去分詞でも一律に禁止しない（対象級の語彙としての適切さは評価する。by句等を伴う受動態や複雑な分詞修飾は不可）。go fishing等は継承した許可型として可（go＋任意の-ingへ拡張しない）。I want to buy a bigger car.は比較級のため不可。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
+  "4級": { vocabulary: "約1,300語（中学2年レベルの語彙。CEFR A1相当を目安）", grammar: "過去進行形、不定詞（to do）、動名詞（doing）、助動詞（can, will, must。mustは過去問3回分で0件のため多用しない。shouldは3件で原則回避・少数許容）、比較級・最上級、接続詞（because, when等）、感嘆文（How…! / What a…!）", allowedExpressions: ["be interested in＋名詞等（interested を形容詞として使う型のうち、in＋名詞等を伴う用法を4級で明示する登録。この登録は surprised / tired / excited など基本形容詞の使用を禁止するものではなく、他の分詞・受動態の可否は対象級のgrammar/forbiddenで判定する）"], forbidden: "受動態、現在完了、関係代名詞、分詞の形容詞的用法、仮定法、分詞構文", sentenceLength: "1文6〜15語", note: "中学2年生の教科書で読める範囲に限る。mustは0件のため多用しない。surprised / tired / excited / interested など辞書に形容詞として載る基本語は、語源が過去分詞でも一律に禁止しない（対象級の語彙としての適切さは評価する）。一方、by句等を伴う受動態や、目的語・修飾語を伴う複雑な分詞修飾・分詞構文は不可。新規の許可型を大量に追加しない。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
   "3級": { vocabulary: "約2,100語（中学卒業レベルの語彙。CEFR A1〜A2相当を目安）", grammar: "受動態、現在完了形（経験・継続・完了）、関係代名詞（who, which, that）、分詞の形容詞的用法（the running boy等）、間接疑問文", allowedExpressions: [], forbidden: "仮定法、分詞構文、過去完了、完了進行形、関係副詞、強調構文", sentenceLength: "1文8〜18語", note: "中学3年間で学習する範囲の語彙・文法に限る。現在完了・間接疑問文は中3既習だが過去問3回分での出題は稀（現在完了0〜1件・間接疑問文0件）。原則避け、少数は許容。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
   "準2級": { vocabulary: "約3,600語（高校中級レベルの語彙。CEFR A2相当を目安）", grammar: "分詞構文（基礎）、過去完了形、関係副詞（when, where）、使役動詞（基礎）、比較表現の応用", allowedExpressions: [], forbidden: "仮定法過去完了、強調構文、倒置、無生物主語など高度な構文", sentenceLength: "1文10〜20語", note: "高校1〜2年で読める範囲の語彙・文法に限る。仮定法過去・完了進行形は既習だが過去問3回分では稀（仮定法0件・完了進行形1件）。grammarに主要項目として列挙しないが、原則避け少数は許容（削除＝禁止ではない。高度構文の禁止とは区別）。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
   "準2級プラス": { vocabulary: "約4,000語（準2級と2級の中間レベルの語彙。CEFR A2〜B1相当を目安）", grammar: "準2級の全項目＋形式主語It（It is 〜 to do…）、第4文型の応用、使役動詞の応用、分詞構文（応用）、受動態の応用", allowedExpressions: [], forbidden: "仮定法過去完了、倒置、強調構文、省略・挿入など複雑な構文", sentenceLength: "1文12〜22語", note: "高校上級レベル。2級の手前の橋渡しとして、語彙はやや豊富に。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
@@ -249,7 +254,8 @@ function settingConsistencyLines_(settings, forModeration) {
 
 /**
  * 生成・審査で共有する級別ルール。allowedExpressions の優先ルールに、
- * forbidden に「分詞の形容詞的用法」がある級だけ過去分詞由来の形容詞の扱いを足す。
+ * forbidden に「分詞の形容詞的用法」がある級だけ分詞構文・分詞句・受動態と
+ * 語彙的形容詞（lexical adjective）の区別を足す。
  * 3級以上は grammar が分詞の形容詞的用法を認めるため、追加の禁止を出さない（許可を狭めない）。
  * プロンプトによる誘導であり、生成AIの出力を完全に保証するものではない。
  */
@@ -266,14 +272,17 @@ function levelRuleLines_(level, def, resolved) {
     }
   }
   lines.push('【分詞の形容詞的用法の禁止（対象級の forbidden に該当）】');
-  lines.push('- be / feel / look + surprised, excited, tired など、過去分詞由来の形容詞（形容詞化した過去分詞。例：be surprised / feel tired / look excited）も、forbidden の「分詞の形容詞的用法」に含める。受動態の be + 過去分詞だけを見て見逃さない。');
-  lines.push('- -ing 形の語彙的形容詞（interesting, exciting, boring 等）はこの禁止に含めない。進行形・動名詞の可否は対象級の grammar/forbidden に従う（この行で新たに許可・禁止しない）。');
+  lines.push('- 禁止するのは分詞構文と、分詞が名詞を修飾する用法（分詞の形容詞的用法。例：the running boy / a sleeping baby / the boy standing at the gate / a letter written in English / the window broken by Tom）、および受動態の be + 過去分詞（例：The window was broken.）。目的語・副詞句・by句等を伴う複雑な分詞句も対象級の grammar/forbidden に従って禁止する。');
+  lines.push('- 語源が過去分詞でも、surprised / tired / excited / interested / worried / bored など辞書に形容詞として載り状態や気持ちを表す基本形容詞（lexical adjective）は、語源で一律に禁止しない（この禁止に含めない）。be / feel / look + surprised 等の叙述用法も、a surprised look のような名詞修飾も、分詞構文・複雑な分詞句・受動態に当たらなければ、この禁止を理由に NG にしない。');
+  lines.push('- 基本形容詞を叙述用法だけに限定する追加ルールは設けない。叙述・限定のどちらの用法かではなく、語彙的形容詞か分詞構文・分詞句・受動態かで判定する。');
+  lines.push('- ただし、対象級の vocabulary / note に照らした語彙の適切さは評価する。基本形容詞を使えることは、級外語を無制限に使えることを意味しない。');
+  lines.push('- -ing 形の語彙的形容詞（interesting, exciting, boring 等）もこの禁止に含めない。進行形・動名詞の可否は対象級の grammar/forbidden に従う（この行で新たに許可・禁止しない）。');
   if (interestedAllowed) {
-    lines.push('- 対象級で有効な allowedExpressions に be interested in＋名詞等の型がある場合は、この禁止の例外として許可する（4級で追加される型）。型にない be surprised / be excited / be tired 等は許可しない。');
+    lines.push('- 対象級の allowedExpressions に be interested in＋名詞等の型がある（4級で追加）。この型は interested の in＋名詞等の用法を明示する追加許可であり、上記の基本形容詞の扱いと矛盾しない。型にない be surprised at 等を「型の例外」として扱う必要はなく、基本形容詞として語彙的に適切なら使える。');
   } else {
-    lines.push('- be interested in は4級で追加される許可型であり、' + level + 'では継承前のため許可しない（4級の型を先取りしない）。');
+    lines.push('- be interested in＋名詞等の型は4級で追加される。' + level + 'ではこの型を先取りしないが、interested 自体を語源で一律に禁止しない（対象級の語彙としての適切さで評価する）。');
   }
-  lines.push('- allowedExpressions の want to＋動詞原形や enjoy＋動詞-ing は別の型の許可であり、be surprised / be excited / be tired 等の形容詞化過去分詞を免除しない。');
+  lines.push('- allowedExpressions の want to＋動詞原形や enjoy＋動詞-ing は別の型の許可であり、基本形容詞の可否を左右しない（基本形容詞は上記のとおり、分詞構文・複雑な分詞句・受動態に当たらなければ語彙の適切さで評価する）。');
   return lines;
 }
 
@@ -1127,6 +1136,20 @@ function handleGenerateRequest_(body, auth, rid) {
     return jsonOut_({ ok: false, error: 'request_id が必要です', code: 'request_id_required', rid: rid });
   }
 
+  // オーナー限定の生成モデル指定（benchmark_model）。厳格検証済みの auth.ok と OWNER_EMAIL 一致だけを認め、
+  // 台帳・匿名 quota・AI より前に拒否する。settings.model など未検証キーでは切り替えない。
+  var benchmarkRequested = Object.prototype.hasOwnProperty.call(body, 'benchmark_model');
+  var requestedModel = '';
+  if (benchmarkRequested) {
+    if (!(auth && auth.ok && isOwnerForEmail_(auth.email))) {
+      return jsonOut_({ ok: false, error: '生成モデルの指定はオーナーのみ利用できます', code: 'not_allowed', rid: rid });
+    }
+    requestedModel = normalizeAiModel_(body.benchmark_model);
+    if (!requestedModel) {
+      return jsonOut_({ ok: false, error: '生成モデルの指定が不正です', code: 'invalid_model', rid: rid });
+    }
+  }
+
   // 入力・APIキーの事前検証は API 前・予約前（無駄な AI 呼出と枠消費を防ぐ）
   var settings;
   try {
@@ -1155,7 +1178,7 @@ function handleGenerateRequest_(body, auth, rid) {
     actor = 'anon:' + deviceId;
   }
 
-  var payloadHash = sha256Hex_('generateText\n' + JSON.stringify(settings));
+  var payloadHash = generationPayloadHash_(settings, requestedModel);
   var begun = beginIdempotent_(actor, 'generateText', requestId, payloadHash);
   var begunBlock = idempotencyBlockedResponse_(begun, rid, requestId);
   if (begunBlock) return begunBlock;
@@ -1207,7 +1230,9 @@ function handleGenerateRequest_(body, auth, rid) {
       });
     }
     if (recovered) {
-      finishIdempotentDone_(begun.key, begun.entry, { id: recovered.id });
+      var recoveredResult = { id: recovered.id };
+      if (recovered.model) recoveredResult.model = recovered.model;
+      finishIdempotentDone_(begun.key, begun.entry, recoveredResult);
       return jsonOut_({ ok: true, item: publicRecord_(recovered), request_id: requestId, replayed: true, recovered: true, rid: rid });
     }
     return jsonOut_({
@@ -1239,8 +1264,10 @@ function handleGenerateRequest_(body, auth, rid) {
         });
       }
     }
-    var created = generateTextInternal_(settings, requestId);
-    finishIdempotentDone_(begun.key, begun.entry, { id: created.id });
+    var created = generateTextInternal_(settings, requestId, requestedModel);
+    var createdResult = { id: created.id };
+    if (created.model) createdResult.model = created.model;
+    finishIdempotentDone_(begun.key, begun.entry, createdResult);
     return jsonOut_({ ok: true, item: publicRecord_(created), request_id: requestId, rid: rid });
   } catch (errGen) {
     if (errGen && errGen.appCode === 'save_uncertain') {
@@ -1699,6 +1726,18 @@ function normalizeSettings_(body) {
   };
 }
 
+/**
+ * generateText の payloadHash。通常の Gemma 生成（benchmark_model なし）は
+ * 旧実装と同じ文字列で計算し、既存 receipt との互換を保つ。
+ * benchmark_model を明示した場合だけモデル名を末尾に足し、同じ request_id でも
+ * モデルが違えば conflict になるようにする。
+ */
+function generationPayloadHash_(settings, benchmarkModel) {
+  var base = 'generateText\n' + JSON.stringify(settings);
+  if (benchmarkModel) return sha256Hex_(base + '\nmodel:' + String(benchmarkModel));
+  return sha256Hex_(base);
+}
+
 // ── 匿名試行の上限（全体・端末） ──────────────────
 
 /**
@@ -1826,13 +1865,41 @@ function truncateUnicode_(value, maxLen) {
 // 思考は think=false で無効化する。Cloud は Structured Outputs 非対応のため format/schema は送らない。
 // 秘密（APIキー・応答全文・プロンプト）はログに出さない。
 
+/**
+ * 生成モデル名の allowlist 正規化。文字列以外・許可外・空は '' を返す（例外にしない）。
+ * String() で配列/object を文字列化して許可名に一致させる迂回をしない。
+ * 生成の benchmark_model 検証と、内部呼出しの防御に使う。
+ */
+function normalizeAiModel_(value) {
+  if (typeof value !== 'string') return '';
+  var s = value.trim();
+  if (!s) return '';
+  for (var i = 0; i < AI_GENERATION_MODELS.length; i++) {
+    if (AI_GENERATION_MODELS[i] === s) return s;
+  }
+  return '';
+}
+
+/**
+ * 実際に AI へ渡すモデルを決める。内部呼出しの opts 欠落（null / undefined / 空）だけは
+ * 生成の既定 MODEL にする。文字列以外（配列・object・number・boolean）は拒否し、
+ * 許可外は例外（リクエスト検証を迂回した内部呼出しでも任意モデルを送らせない）。
+ */
+function resolveAiModel_(value) {
+  var raw = value == null ? MODEL : value;
+  if (typeof raw !== 'string') throw appError_('生成モデルの指定が不正です', 'invalid_model');
+  var model = normalizeAiModel_(raw.trim() || MODEL);
+  if (!model) throw appError_('生成モデルの指定が不正です', 'invalid_model');
+  return model;
+}
+
 function ollamaPayload_(messages, opts) {
   opts = opts || {};
   var options = {};
   if (opts.temperature != null) options.temperature = opts.temperature;
   if (opts.numPredict != null) options.num_predict = opts.numPredict;
   if (opts.seed != null) options.seed = opts.seed;
-  var payload = { model: MODEL, messages: messages, stream: false, think: false };
+  var payload = { model: resolveAiModel_(opts.model), messages: messages, stream: false, think: false };
   if (Object.keys(options).length) payload.options = options;
   return payload;
 }
@@ -1929,8 +1996,9 @@ function aiVerdictLine_(content) {
  * 審査不能（HTTP エラー・incomplete・JSON 異常・例外）は保存しない（fail closed）。
  * NG のときだけ 1 回だけ作り直す。
  */
-function generateTextInternal_(settings, requestId) {
-  var first = generatePassage_(settings);
+function generateTextInternal_(settings, requestId, generationModel) {
+  var model = resolveAiModel_(generationModel);
+  var first = generatePassage_(settings, model);
   assertEnglishPassage_(first);
   var chk = checkPassage_(settings, first.title, first.text);
   var final = first;
@@ -1938,7 +2006,7 @@ function generateTextInternal_(settings, requestId) {
     throw appError_('教材チェックを実行できなかったため保存しませんでした（' + (chk.reason || '理由不明') + '）', 'moderation_unavailable');
   }
   if (!chk.ok) {
-    var second = generatePassage_(settings);
+    var second = generatePassage_(settings, model);
     assertEnglishPassage_(second);
     var chk2 = checkPassage_(settings, second.title, second.text);
     if (chk2.unavailable) {
@@ -1954,6 +2022,7 @@ function generateTextInternal_(settings, requestId) {
     createdAt: new Date().toISOString(),
     request_id: String(requestId || ''),
     settings: settings,
+    model: model,
     title: truncateUnicode_(final.title, MAX_TITLE_LEN),
     text: final.text
   };
@@ -1962,8 +2031,9 @@ function generateTextInternal_(settings, requestId) {
   return record;
 }
 
-function generatePassage_(settings) {
+function generatePassage_(settings, generationModel) {
   if (!getOllamaKey_()) throw appError_(OLLAMA_KEY_PROP + ' が設定されていません', 'api_key_missing');
+  var model = resolveAiModel_(generationModel);
   var retryHint = 'IMPORTANT: Do not output your reasoning, any reference to the user, a copy of these instructions, or headings. '
     + 'Output only the English title (first line), one blank line, then the English body. The previous output was invalid.';
   var content = '';
@@ -1973,7 +2043,7 @@ function generatePassage_(settings) {
       { role: 'system', content: attempt === 0 ? SYSTEM_PROMPT : SYSTEM_PROMPT + ' ' + retryHint },
       { role: 'user', content: prompt }
     ];
-    var raw = ollamaChat_(messages, { temperature: 0.9, numPredict: AI_GEN_NUM_PREDICT });
+    var raw = ollamaChat_(messages, { temperature: 0.9, numPredict: AI_GEN_NUM_PREDICT, model: model });
     content = String(raw || '').replace(/```[\s\S]*?```/g, '').trim();
     if (content && !looksLikeThinking_(content)) break;
     content = '';
@@ -2070,7 +2140,7 @@ function checkPassage_(settings, title, text) {
     content = ollamaChat_([
       { role: 'system', content: lines.join('\n') },
       { role: 'user', content: input }
-    ], { temperature: 0, numPredict: AI_MOD_NUM_PREDICT });
+    ], { model: AI_JUDGE_MODEL, temperature: 0, numPredict: AI_MOD_NUM_PREDICT });
   } catch (eMod) {
     var code = (eMod && eMod.appCode) || '';
     if (code === 'api_key_missing') return { ok: false, unavailable: true, reason: 'api key missing' };
@@ -2547,7 +2617,7 @@ function checkTranslation_(record, jaTexts) {
     content = ollamaChat_([
       { role: 'system', content: lines.join('\n') },
       { role: 'user', content: input }
-    ], { temperature: 0, numPredict: AI_MOD_NUM_PREDICT });
+    ], { model: AI_JUDGE_MODEL, temperature: 0, numPredict: AI_MOD_NUM_PREDICT });
   } catch (eMod) {
     if ((eMod && eMod.appCode) === 'api_key_missing') return { ok: false, unavailable: true, reason: 'api key missing' };
     return { ok: false, unavailable: true, reason: 'translation moderation failure' };
@@ -2585,7 +2655,7 @@ function translateSentences_(record, spans) {
     var content = ollamaChat_([
       { role: 'system', content: TRANS_SYSTEM_PROMPT },
       { role: 'user', content: buildTranslatePrompt_(record, targets) }
-    ], { temperature: 0.2, numPredict: numPredict });
+    ], { model: AI_TRANS_MODEL, temperature: 0.2, numPredict: numPredict });
     var parsed = parseTranslationOutput_(content, targets);
     for (i = 0; i < parsed.length; i++) jaTexts[targetIdx[i]] = parsed[i];
   }
