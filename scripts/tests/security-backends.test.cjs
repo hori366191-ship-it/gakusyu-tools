@@ -940,6 +940,189 @@ test('app2: NG→再生成→審査失敗は fail closed（保存0・AI呼出4�
   assert.ok(res.json.error.indexOf('A cat sat') === -1, 'エラーに本文を出さない');
 });
 
+// ────────────────────────────── app2: EIKEN_LEVELS / allowedExpressions ──────────────────────────────
+
+const EIKEN_ORDER = ['7級', '6級', '5級', '4級', '3級', '準2級', '準2級プラス', '2級', '準1級', '1級'];
+const EIKEN_TYPE_COUNTS = {
+  '7級': 3, '6級': 4, '5級': 5, '4級': 6, '3級': 6,
+  '準2級': 6, '準2級プラス': 6, '2級': 6, '準1級': 6, '1級': 6,
+};
+
+function resolvedList(rt, level) {
+  return Array.from(rt.ctx.resolveAllowedExpressions_(level));
+}
+
+function aiPayloads(rt) {
+  return rt.net.calls
+    .filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)
+    .map((c) => JSON.parse(c.opts.payload));
+}
+
+test('app2: allowedExpressions は全10級で解決でき、下位級から順に継承される', () => {
+  const rt = setupApp2();
+  for (const level of EIKEN_ORDER) {
+    const list = resolvedList(rt, level);
+    assert.equal(list.length, EIKEN_TYPE_COUNTS[level], level);
+    assert.equal(list[0].level, '7級', level + ': 先頭は7級');
+    const indexes = list.map((e) => EIKEN_ORDER.indexOf(e.level));
+    assert.deepEqual(indexes, [...indexes].sort((a, b) => a - b), level + ': 下位級から順');
+    for (const e of list) {
+      assert.ok(typeof e.type === 'string' && e.type.trim().length > 0, level + ': 型は非空文字列');
+    }
+  }
+  assert.equal(resolvedList(rt, '1級').length, 6, '1級は全下位級の6型を継承');
+});
+
+test('app2: 登録が空の級でも下位級の許可型を継承する', () => {
+  const rt = setupApp2();
+  for (const level of ['3級', '準2級', '準2級プラス', '2級', '準1級', '1級']) {
+    assert.equal(Array.from(rt.ctx.EIKEN_LEVELS[level].allowedExpressions).length, 0, level + ': 追加登録なし');
+    const list = resolvedList(rt, level);
+    assert.equal(list.length, 6, level + ': 継承6型');
+    assert.ok(list.some((e) => e.type.indexOf('enjoy＋動詞-ing') !== -1), level + ': 下位級の型を含む');
+  }
+});
+
+test('app2: 級単位の禁止と限定許可が定義されている（7/6/5/4級）', () => {
+  const rt = setupApp2();
+  const L = rt.ctx.EIKEN_LEVELS;
+  const allowedText = (level) => Array.from(L[level].allowedExpressions).join('\n');
+
+  assert.match(L['7級'].grammar, /can/);
+  assert.equal(/want to/.test(L['7級'].grammar), false, 'want to は grammar ではなく許可型');
+  assert.match(allowedText('7級'), /want to/);
+  assert.match(allowedText('7級'), /I'd like/);
+  assert.match(allowedText('7級'), /go shopping/);
+
+  assert.match(L['6級'].grammar, /過去形/);
+  assert.equal(/動名詞/.test(L['6級'].grammar), false, '動名詞の一般許可は grammar から外す');
+  assert.match(allowedText('6級'), /enjoy＋動詞-ing/);
+
+  assert.match(L['5級'].forbidden, /不定詞/);
+  assert.match(L['5級'].forbidden, /比較級・最上級/);
+  assert.match(L['5級'].forbidden, /助動詞must/);
+  assert.match(L['5級'].forbidden, /動名詞/);
+  assert.match(allowedText('5級'), /like to/);
+  assert.equal(/want to/.test(allowedText('5級')), false, 'want to は7級から継承し再登録しない');
+
+  assert.match(allowedText('4級'), /be interested in/);
+  assert.equal(/形容詞化した過去分詞/.test(L['4級'].forbidden), false, '例外は allowedExpressions へ移動');
+  assert.match(L['4級'].forbidden, /受動態/);
+});
+
+test('app2: 生成と審査に同じ継承許可型・優先ルール・grammar/note/文長を渡す', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  rt.net.ai.push(genOk(RECORD_TEXT), modOk());
+  const settings = Object.assign({}, BASE_SETTINGS, { level: '4級' });
+  const res = rt.postJson(genBody(rt, { settings }));
+  assert.equal(res.json.ok, true, JSON.stringify(res.json));
+
+  const payloads = aiPayloads(rt);
+  assert.equal(payloads.length, 2);
+  const genUser = payloads[0].messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
+  const modSys = payloads[1].messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n');
+
+  for (const item of resolvedList(rt, '4級')) {
+    assert.ok(genUser.indexOf(item.type) !== -1, '生成に ' + item.level + ' の許可型');
+    assert.ok(modSys.indexOf(item.type) !== -1, '審査に ' + item.level + ' の許可型');
+  }
+  for (const [label, text] of [['生成', genUser], ['審査', modSys]]) {
+    assert.match(text, /forbidden/, label + ': forbidden より優先を明示');
+    assert.match(text, /同じ文/, label + ': 同じ文の別禁止を免除しない');
+    assert.match(text, /広く認める用法を制限しない/, label + ': 下位表現の境界で grammar を狭めない');
+    assert.ok(
+      text.indexOf('比較級が forbidden の5級では、want to が許可型でも同じ文の比較級は不可') !== -1,
+      label + ': 比較級の例は5級の forbidden 条件つき'
+    );
+  }
+  assert.match(rt.ctx.EIKEN_LEVELS['4級'].grammar, /比較級・最上級/, '4級は比較級を grammar で許可');
+  assert.ok(
+    genUser.indexOf('対象級の使える文法（grammar）が広く認める用法を制限しない') !== -1,
+    '4級の生成でも grammar の広い許可を狭めない'
+  );
+  assert.ok(
+    modSys.indexOf('対象級の使える文法（grammar）が広く認める用法を制限しない') !== -1,
+    '4級の審査でも grammar の広い許可を狭めない'
+  );
+
+  const def = rt.ctx.EIKEN_LEVELS['4級'];
+  assert.ok(genUser.indexOf(def.grammar) !== -1, '生成に grammar');
+  assert.ok(genUser.indexOf(def.sentenceLength) !== -1, '生成に文長');
+  assert.ok(genUser.indexOf(def.note) !== -1, '生成に note');
+  assert.ok(modSys.indexOf(def.grammar) !== -1, '審査に grammar');
+  assert.ok(modSys.indexOf(def.sentenceLength) !== -1, '審査に文長');
+  assert.ok(modSys.indexOf(def.note) !== -1, '審査に note');
+  assert.match(modSys, /通常目標帯/);
+  assert.match(modSys, /絶対上限として扱わず/);
+  assert.match(modSys, /下限を課さない/);
+  assert.match(modSys, /少数の使用を NG にしない/);
+  assert.match(modSys, /同じ文に他の禁止文法があれば NG/);
+  assert.match(genUser, /同じ文の別の禁止文法は使わない/);
+});
+
+test('app2: 全10級で生成・審査が通り保存される（継承定義が実処理を壊さない）', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  for (const level of EIKEN_ORDER) {
+    rt.net.ai.push(genOk(RECORD_TEXT), modOk());
+    const res = rt.postJson(genBody(rt, {
+      id_token: '',
+      settings: Object.assign({}, BASE_SETTINGS, { level }),
+    }));
+    assert.equal(res.json.ok, true, level + ': ' + JSON.stringify(res.json).slice(0, 120));
+  }
+  assert.equal(savedCount(rt), 10);
+});
+
+test('app2: 未知・破損の級定義は AI 0・保存0・匿名枠0で拒否する（invalid_settings）', () => {
+  const cases = [
+    { label: 'missing level', mutate: (L) => { delete L['7級']; } },
+    { label: 'missing allowedExpressions', mutate: (L) => { delete L['7級'].allowedExpressions; } },
+    { label: 'non-array', mutate: (L) => { L['7級'].allowedExpressions = 'want to'; } },
+    { label: 'empty string', mutate: (L) => { L['7級'].allowedExpressions = ['']; } },
+    { label: 'unknown level', level: '99級', mutate: () => {} },
+  ];
+  for (const c of cases) {
+    const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+    c.mutate(rt.ctx.EIKEN_LEVELS);
+    const res = rt.postJson(genBody(rt, {
+      id_token: '',
+      settings: Object.assign({}, BASE_SETTINGS, { level: c.level || '4級' }),
+    }));
+    assert.equal(res.json.ok, false, c.label);
+    assert.equal(res.json.code, 'invalid_settings', c.label + ': ' + res.json.error);
+    assert.equal(rt.net.aiCalls(), 0, c.label + ': AI 0');
+    assert.equal(savedCount(rt), 0, c.label + ': 保存0');
+    assert.equal(genStateCount(rt), 0, c.label + ': 匿名枠0');
+    assert.equal(
+      Array.from(rt.props.keys()).filter((k) => String(k).indexOf('IDEM_') === 0).length,
+      0,
+      c.label + ': 台帳0'
+    );
+  }
+});
+
+test('app2: normalizeSettings_ は継承検証を冪等に行い、settings に許可型を追加しない', () => {
+  const rt = setupApp2();
+  const body = { settings: Object.assign({}, BASE_SETTINGS) };
+  const beforeProps = Array.from(rt.props.keys()).sort();
+  const first = rt.ctx.normalizeSettings_(body);
+  const second = rt.ctx.normalizeSettings_(body);
+
+  assert.deepEqual(JSON.parse(JSON.stringify(first)), JSON.parse(JSON.stringify(second)));
+  assert.equal(Object.prototype.hasOwnProperty.call(first, 'allowedExpressions'), false);
+  assert.deepEqual(Array.from(rt.props.keys()).sort(), beforeProps, '検証で副作用を作らない');
+  assert.deepEqual(JSON.parse(JSON.stringify(first)), Object.assign({}, BASE_SETTINGS));
+});
+
+test('app2: 定義破損時の審査は AI を呼ばず unavailable（保存しない）', () => {
+  const rt = setupApp2();
+  rt.ctx.EIKEN_LEVELS['7級'].allowedExpressions = ['', 'x'];
+  const chk = rt.ctx.checkPassage_(Object.assign({}, BASE_SETTINGS, { level: '4級' }), 'T', 'B');
+  assert.equal(chk.ok, false);
+  assert.equal(chk.unavailable, true);
+  assert.equal(rt.net.aiCalls(), 0);
+});
+
 // ────────────────────────────── app2: Ollama / 対訳 ──────────────────────────────
 
 const TRANS_TEXT = 'Mr. Smith went to Tokyo. He said, "Hello!" Then he left.\n\nThe next day, he came back.';

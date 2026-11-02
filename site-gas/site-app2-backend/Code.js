@@ -104,17 +104,77 @@ var PARENT_ORIGIN_ALLOWLIST = [
 ];
 
 var EIKEN_LEVELS = {
-  "7級": { vocabulary: "約300語の超基礎語彙（数字・色・家族・動物・食べ物・曜日など、身近なものの名前）", grammar: "be動詞（am/is/are）、一般動詞の現在形（I like… / I have…）、簡単な現在進行形、簡単な命令文", forbidden: "過去形、未来表現、助動詞（can等）、比較、現在完了、受動態など、上級の時制・文法", sentenceLength: "1文3〜8語", note: "ほとんど1音節・2音節の短い単語を使う" },
-  "6級": { vocabulary: "約450語の基礎語彙（学校・家・体・動作など、小学高学年レベルの身近な語）", grammar: "現在形・現在進行形、基本の過去形（規則変化を中心に不規則動詞の基本も可）、未来（will / be going to）、基本の命令文", forbidden: "助動詞（must等）、比較級・最上級、不定詞・動名詞、受動態、現在完了", sentenceLength: "1文4〜10語", note: "簡単な接続詞（and, but, because）でつなぐ文は可" },
-  "5級": { vocabulary: "約600語（中学1年レベルの基礎語彙）", grammar: "現在形・過去形（規則・不規則の基本）・進行形・未来・命令形、助動詞（can, must）、比較級・最上級（基本）、簡単な接続詞（when, if, because）", forbidden: "不定詞・動名詞、受動態、現在完了、関係代名詞、仮定法、分詞", sentenceLength: "1文5〜12語", note: "中学1年生の教科書で読める範囲の語彙・文法に限る" },
-  "4級": { vocabulary: "約1,300語（中学2年レベルの語彙）", grammar: "過去進行形、不定詞（to do）、動名詞（doing）、助動詞（should, may等）、比較・最上級の応用、感嘆文（How…! / What a…!）", forbidden: "受動態、現在完了、関係代名詞、分詞の形容詞的用法、仮定法、分詞構文", sentenceLength: "1文6〜14語", note: "中学2年生の教科書で読める範囲に限る" },
-  "3級": { vocabulary: "約2,100語（中学卒業レベルの語彙）", grammar: "受動態、現在完了形（経験・継続・完了）、関係代名詞（who, which, that）、分詞の形容詞的用法（the running boy等）、間接疑問文", forbidden: "仮定法、分詞構文、過去完了、完了進行形、関係副詞、強調構文", sentenceLength: "1文8〜16語", note: "中学3年間で学習する範囲の語彙・文法に限る" },
-  "準2級": { vocabulary: "約3,500語（高校中級レベルの語彙）", grammar: "仮定法過去（if I were…）、分詞構文（基礎）、過去完了形、完了進行形、関係副詞（when, where）、使役動詞（基礎）、比較表現の応用", forbidden: "仮定法過去完了、強調構文、倒置、無生物主語など高度な構文", sentenceLength: "1文10〜20語", note: "高校1〜2年で読める範囲の語彙・文法に限る" },
-  "準2級プラス": { vocabulary: "約4,000語（準2級と2級の中間レベルの語彙）", grammar: "準2級の全項目＋形式主語It（It is 〜 to do…）、第4文型の応用、使役動詞の応用、分詞構文（応用）、受動態の応用", forbidden: "仮定法過去完了、倒置、強調構文、省略・挿入など複雑な構文", sentenceLength: "1文12〜22語", note: "高校上級レベル。2級の手前の橋渡しとして、語彙はやや豊富に" },
-  "2級": { vocabulary: "約5,100語（高校卒業レベルの語彙。社会生活・時事・科学など幅広い題材の語を含む）", grammar: "仮定法過去完了、完了進行形、無生物主語、強調構文（It is 〜 that…）、倒置（初歩）、高度な分詞構文、比較の応用", forbidden: "省略・挿入・複雑な倒置など文語的な高度な構文", sentenceLength: "1文12〜25語", note: "高校卒業・大学入試レベル" },
-  "準1級": { vocabulary: "約7,500語（大学中級レベルの語彙。アカデミックな語彙・抽象概念の語を含む）", grammar: "倒置、強調構文、省略・挿入など複雑な構文の運用、抽象的・学術的な表現、句動詞・慣用表現", forbidden: "文語的な古風な表現や極端に難解な文学語は避け、現代英語として自然であること", sentenceLength: "1文15〜35語", note: "難関大学入試レベル" },
-  "1級": { vocabulary: "約10,000語以上（大学上級レベルの語彙。専門的な語彙・文学語・イディオムを含む）", grammar: "複雑な構文・イディオム・比喩表現・文語表現も可（現代の英語として自然な範囲で）", forbidden: "特に制限なし（ただし不自然に難解な表現ばかりにしないこと）", sentenceLength: "1文18〜45語", note: "英語圏の大学で専門的な学びができるレベル" }
+  "7級": { vocabulary: "約300語の超基礎語彙（数字・色・家族・動物・食べ物・曜日など、身近なものの名前。暫定値。CEFRの枠外。本アプリ独自の入門区分）", grammar: "be動詞（am/is/are）、一般動詞の現在形（I like… / I have…）、can（できること・基本的な依頼）、want＋名詞（I want new shoes.等）、like＋名詞、基本的な命令文（Go straight. / Turn right.等）、be動詞・助動詞can・doで始まる基本疑問文、who/what/when/where/why/howで始まる基本疑問文、基本的な代名詞", allowedExpressions: ["want to＋動詞原形（希望。I want to play soccer.等。この登録が許可するのはwant to＋動詞原形のみで、want＋人＋toはこの登録の対象外。可否は対象級のgrammar/forbiddenで判定する。want to be / want to joinは同じ型の用例）", "I'd like＋名詞 / What would you like?（注文の定型。この登録が許可するのは注文の定型のみで、wouldの仮定法はこの登録の対象外。可否は対象級のgrammar/forbiddenで判定する）", "go fishing等、小学校資料で確認した具体的な定型句と同型のgo shopping（この登録は確認済みの定型句と同型のgo shoppingのみを対象とし、go＋任意の-ingはこの登録の対象外。可否は対象級のgrammar/forbiddenで判定する。go shoppingの個別記載は未確認で、教材設計上の同型扱い）"], forbidden: "過去形、比較級・最上級、動名詞、受動態、現在完了、関係代名詞、仮定法、分詞構文・分詞の形容詞的用法", sentenceLength: "1文3〜8語", note: "公式の英検に7級・6級は存在しない。本アプリ独自の5級未満入門区分。小学5年までに習う基本表現（小3・小4で扱う表現を含む）の範囲で、文法の全用法を解禁するのではなく学校で扱う基本的用例に限定する。学年配置は全国一律ではないため、学習指導要領（5・6年一括）と東京書籍2024〜2027年度NEW HORIZON Elementary年間指導計画を参照資料とする。現在進行形・未来表現（be going to / will）は参照資料で主要学習項目として確認していないが、不在を禁止の根拠にしない。want to・I'd like・go fishing等はallowedExpressionsの型に限って可（文法全般の解禁ではない）。ほとんど1音節・2音節の短い単語を使う。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
+  "6級": { vocabulary: "約450語の基礎語彙（学校・家・体・動作など、小学高学年レベルの身近な語。暫定値。CEFR Pre-A1相当を目安とする独自区分）", grammar: "7級の基本（be動詞・一般動詞の現在形・can・want＋名詞・like＋名詞・基本疑問文・基本命令文・基本的な代名詞）を含む。基本の過去形（規則変化を中心に不規則動詞の基本も可）、頻度を表す副詞（always / usually / sometimes / never等）、and等の基本接続詞", allowedExpressions: ["enjoy＋動詞-ing（基本動名詞の限定許可。I enjoyed watching a baseball game.等。この登録が例外許可するのはenjoy＋-ingの部分のみで、他の動名詞の可否は対象級のgrammar/forbiddenで判定する）"], forbidden: "比較級・最上級、受動態、現在完了、関係代名詞、仮定法、分詞構文・分詞の形容詞的用法", sentenceLength: "1文4〜10語", note: "小学6年までに習う基本表現の範囲。文法の全用法を解禁するのではなく学校で扱う基本的用例に限定する。学年配置は全国一律ではないため、学習指導要領（5・6年一括）と東京書籍2024〜2027年度NEW HORIZON Elementary年間指導計画を参照資料とする。will・because・be going to・現在進行形は参照資料で主要学習項目として確認していないが、不在を禁止の根拠にしない。動名詞はenjoy＋-ingの型だけを6級で登録し、5級へ継承する（継承するのは表現型のみ。grammar/forbidden全体の自動継承ではない）。want to be / want to joinは7級のwant to許可型の用例として扱い、grammarの独立項目・別の型としては登録しない。公式に存在しない独自区分。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
+  "5級": { vocabulary: "約600語（中学1年レベルの基礎語彙。CEFR Pre-A1〜A1相当を目安）", grammar: "現在形・過去形（規則・不規則の基本）・進行形・未来（be going to中心。実測1件は移動の進行形とも解釈でき、未来の根拠としては弱い）・命令形、助動詞（can）、不定詞は一般に用いない（allowedExpressionsの許可型を除く）、接続詞（and, but, so等の等位接続詞）", allowedExpressions: ["like to＋動詞原形（この登録はlike toの許可であり、like doingの許可を意味しない。like doingの可否は対象級のgrammar/forbiddenで判定する）"], forbidden: "不定詞、比較級・最上級、助動詞must、動名詞、受動態、現在完了、関係代名詞、仮定法、分詞構文・分詞の形容詞的用法", sentenceLength: "1文5〜12語", note: "中学1年生の教科書で読める範囲の語彙・文法に限る。比較級・最上級・must・動名詞は教材方針として禁止（過去問3回分の観測は公式の禁止の証拠ではない。比較級・最上級の個別内訳は未詳）。動名詞の禁止には継承した許可表現（enjoy＋-ing等）の例外がある。不定詞は一般に不可だが、許可型（want to＝7級から継承、like to＝この級で追加）は可。like doingは不可。ただし-ing文字列の一律禁止ではなく、進行形、-ing形の形容詞（interesting等）、名詞（morning等）は可。分詞（分詞構文・分詞の形容詞的用法）も不可。go fishing等は継承した許可型として可（go＋任意の-ingへ拡張しない）。I want to buy a bigger car.は比較級のため不可。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
+  "4級": { vocabulary: "約1,300語（中学2年レベルの語彙。CEFR A1相当を目安）", grammar: "過去進行形、不定詞（to do）、動名詞（doing）、助動詞（can, will, must。mustは過去問3回分で0件のため多用しない。shouldは3件で原則回避・少数許容）、比較級・最上級、接続詞（because, when等）、感嘆文（How…! / What a…!）", allowedExpressions: ["be interested in＋名詞等、既存で明示された形容詞化過去分詞の型（既存記述に個別の根拠がある型に限る。今回の根拠データにbe surprised at等の記載はなく、根拠なく追加しない。この登録が例外許可するのは当該の形容詞化過去分詞の部分のみで、他の分詞・受動態の可否は対象級のgrammar/forbiddenで判定する）"], forbidden: "受動態、現在完了、関係代名詞、分詞の形容詞的用法、仮定法、分詞構文", sentenceLength: "1文6〜15語", note: "中学2年生の教科書で読める範囲に限る。mustは0件のため多用しない。形容詞化した過去分詞はallowedExpressionsの型のみ可（受動態・分詞全般は不可）。新規の型を大量に追加しない。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
+  "3級": { vocabulary: "約2,100語（中学卒業レベルの語彙。CEFR A1〜A2相当を目安）", grammar: "受動態、現在完了形（経験・継続・完了）、関係代名詞（who, which, that）、分詞の形容詞的用法（the running boy等）、間接疑問文", allowedExpressions: [], forbidden: "仮定法、分詞構文、過去完了、完了進行形、関係副詞、強調構文", sentenceLength: "1文8〜18語", note: "中学3年間で学習する範囲の語彙・文法に限る。現在完了・間接疑問文は中3既習だが過去問3回分での出題は稀（現在完了0〜1件・間接疑問文0件）。原則避け、少数は許容。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
+  "準2級": { vocabulary: "約3,600語（高校中級レベルの語彙。CEFR A2相当を目安）", grammar: "分詞構文（基礎）、過去完了形、関係副詞（when, where）、使役動詞（基礎）、比較表現の応用", allowedExpressions: [], forbidden: "仮定法過去完了、強調構文、倒置、無生物主語など高度な構文", sentenceLength: "1文10〜20語", note: "高校1〜2年で読める範囲の語彙・文法に限る。仮定法過去・完了進行形は既習だが過去問3回分では稀（仮定法0件・完了進行形1件）。grammarに主要項目として列挙しないが、原則避け少数は許容（削除＝禁止ではない。高度構文の禁止とは区別）。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
+  "準2級プラス": { vocabulary: "約4,000語（準2級と2級の中間レベルの語彙。CEFR A2〜B1相当を目安）", grammar: "準2級の全項目＋形式主語It（It is 〜 to do…）、第4文型の応用、使役動詞の応用、分詞構文（応用）、受動態の応用", allowedExpressions: [], forbidden: "仮定法過去完了、倒置、強調構文、省略・挿入など複雑な構文", sentenceLength: "1文12〜22語", note: "高校上級レベル。2級の手前の橋渡しとして、語彙はやや豊富に。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
+  "2級": { vocabulary: "約5,100語（高校卒業レベルの語彙。社会生活・時事・科学など幅広い題材の語を含む。CEFR B1相当を目安）", grammar: "仮定法（if I were…／wish等の基本）、無生物主語、形式主語It＋that節（It is said / clear that…）、高度な分詞構文、比較の応用。仮定法過去完了・完了進行形・強調構文・倒置（初歩）は原則回避・少数許容。複雑な倒置は禁止", allowedExpressions: [], forbidden: "省略・挿入・複雑な倒置など文語的な高度な構文", sentenceLength: "1文12〜25語", note: "高校卒業・大学入試レベル。仮定法過去完了・完了進行形・強調構文・倒置（初歩）は原則回避・少数許容。複雑な倒置は禁止。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
+  "準1級": { vocabulary: "約7,500語（大学中級レベルの語彙。アカデミックな語彙・抽象概念の語を含む。CEFR B2相当を目安）", grammar: "倒置、強調構文、省略・挿入など複雑な構文の運用、抽象的・学術的な表現、句動詞・慣用表現", allowedExpressions: [], forbidden: "文語的な古風な表現や極端に難解な文学語は避け、現代英語として自然であること", sentenceLength: "1文15〜35語", note: "難関大学入試レベル。倒置は過去問3回分で0件であり、多用を求めない（不在は示唆に留まる。倒置以外の複雑構文や強調構文・省略等の出題状況は未確認・未断定）。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" },
+  "1級": { vocabulary: "約10,000語以上（大学上級レベルの語彙。専門的な語彙・文学語・イディオムを含む。CEFR B2〜C1相当を目安）", grammar: "複雑な構文・イディオム・比喩表現・文語表現も可（現代の英語として自然な範囲で）", allowedExpressions: [], forbidden: "特に制限なし（ただし不自然に難解な表現ばかりにしないこと）", sentenceLength: "1文18〜45語", note: "英語圏の大学で専門的な学びができるレベル。文長は通常目標帯が目安（易しい語彙・構文なら多少超過可、絶対上限は未設定、短い応答に下限なし）。級外テーマ語は文脈・簡単な説明で理解できる少数のみ可（許容率未決）。" }
 };
+
+// allowedExpressions の継承順（下位級 → 上位級）
+var EIKEN_LEVEL_ORDER = ["7級", "6級", "5級", "4級", "3級", "準2級", "準2級プラス", "2級", "準1級", "1級"];
+
+/**
+ * その級で有効な allowedExpressions を下位級から継承して解決する。
+ * 未知の級・定義欠落・配列でない・空文字列は例外にする（空配列で成功継続しない）。
+ * settings へは追加しない（保存構造と payloadHash を変えない）。
+ */
+function resolveAllowedExpressions_(level) {
+  var target = -1;
+  for (var i = 0; i < EIKEN_LEVEL_ORDER.length; i++) {
+    if (EIKEN_LEVEL_ORDER[i] === level) { target = i; break; }
+  }
+  if (target < 0) throw appError_('難易度（英検級）の指定が不正です', 'invalid_level');
+
+  var out = [];
+  for (var j = 0; j <= target; j++) {
+    var name = EIKEN_LEVEL_ORDER[j];
+    if (!Object.prototype.hasOwnProperty.call(EIKEN_LEVELS, name)) {
+      throw appError_('難易度の定義が不正です', 'invalid_level_definition');
+    }
+    var def = EIKEN_LEVELS[name];
+    if (!def || !Array.isArray(def.allowedExpressions)) {
+      throw appError_('難易度の定義が不正です', 'invalid_level_definition');
+    }
+    for (var k = 0; k < def.allowedExpressions.length; k++) {
+      var type = def.allowedExpressions[k];
+      if (typeof type !== 'string' || !type.trim()) {
+        throw appError_('難易度の定義が不正です', 'invalid_level_definition');
+      }
+      out.push({ level: name, type: type });
+    }
+  }
+  return out;
+}
+
+/**
+ * 生成プロンプトと審査プロンプトが共有する許可型の一覧と優先ルール。
+ * 例外は型に必要な部分だけとし、同じ文の別の禁止文法や、対象級 grammar の広い許可を狭めない。
+ */
+function allowedExpressionRuleLines_(resolved) {
+  var lines = [
+    '【許可表現型（allowedExpressions）】',
+    '- 許可表現型は「使えない文法（forbidden）」より優先する。許可型に合致する部分は、その型に必要な用法・該当部分だけを forbidden の例外として扱う。',
+    '- 例外は型に必要な部分だけに及ぶ。同じ文の中の別の禁止文法は免除しない（例：比較級が forbidden の5級では、want to が許可型でも同じ文の比較級は不可。比較級が forbidden でない級では、その級の grammar の可否に従う）。',
+    '- 許可型を任意の用法へ広げない（例：go fishing / go shopping から go＋任意の-ing を許可しない）。',
+    '- この一覧は追加の許可であり、対象級の使える文法（grammar）が広く認める用法を制限しない。',
+    '- 許可型との一致は意味評価で判断する（機械的な構文判定はしない）。'
+  ];
+  if (!resolved || !resolved.length) {
+    lines.push('- 有効な許可型：なし');
+  } else {
+    lines.push('- 有効な許可型（下位級から継承。各型の括弧内の境界を守る）：');
+    for (var i = 0; i < resolved.length; i++) {
+      lines.push('  - [' + resolved[i].level + '] ' + resolved[i].type);
+    }
+  }
+  return lines;
+}
 
 // ── 基本ヘルパー ──────────────────────────────
 
@@ -1517,6 +1577,9 @@ function normalizeSettings_(body) {
   if (!Object.prototype.hasOwnProperty.call(EIKEN_LEVELS, level)) {
     throw appError_('難易度（英検級）の指定が不正です', 'invalid_level');
   }
+  // 生成・審査・予約の前に継承定義を検証する（不正なら AI も匿名枠も使わない）。
+  // settings へは解決結果を保存しない（保存構造と payloadHash は従来どおり）。
+  resolveAllowedExpressions_(level);
   var wordCount = parseInt(src.wordCount, 10);
   if (!isFinite(wordCount) || wordCount < MIN_WORD_COUNT || wordCount > MAX_WORD_COUNT) {
     throw appError_('語数の指定が不正です', 'invalid_word_count');
@@ -1871,14 +1934,29 @@ function moderationEnvelope_(title, body) {
 function checkPassage_(settings, title, text) {
   if (!getOllamaKey_()) return { ok: false, unavailable: true, reason: 'api key missing' };
   var def = EIKEN_LEVELS[settings.level];
+  if (!def) return { ok: false, unavailable: true, reason: 'invalid level definition' };
+  var resolved;
+  try {
+    resolved = resolveAllowedExpressions_(settings.level);
+  } catch (eResolve) {
+    return { ok: false, unavailable: true, reason: 'invalid level definition' };
+  }
   var extra = [
     '【教材適合性】',
-    '- 英検' + settings.level + 'レベルの語彙・文法・文長に収まっていること'
+    '- 対象は英検' + settings.level + 'レベルの学習者。以下の語彙・文法・文長の定義を目安に、無理なく読める自然な教材かを判定する。',
+    '- 文長は通常目標帯を目安とする。絶対上限として扱わず、易しい語彙・構文なら多少の超過は NG にしない。短い会話応答・あいさつ文に下限を課さない。',
+    '- 級外のテーマ語・指定キーワードは、文脈や簡単な説明で理解できる少数のみ許容する（少数の混入だけを理由に NG にしない）。',
+    '- 「原則避け、少数は許容」とある既習事項は、少数の使用を NG にしない（多用は避ける）。',
+    '- 文法一覧に列挙がないだけの既習事項（will・because・be going to等）は、forbidden に該当しない限り NG にしない。',
+    '- 語彙：' + def.vocabulary,
+    '- 使える文法：' + (def.grammar || 'なし'),
+    '- 使えない文法（forbidden）：' + (def.forbidden || 'なし'),
+    '- 一文の長さ（通常目標帯）：' + (def.sentenceLength || '指定なし'),
+    '- 注意：' + (def.note || '特になし')
   ];
-  if (def) {
-    extra.push('- 語彙：' + def.vocabulary);
-    extra.push('- 使えない文法：' + (def.forbidden || 'なし'));
-  }
+  var allowedLines = allowedExpressionRuleLines_(resolved);
+  for (var ai = 0; ai < allowedLines.length; ai++) extra.push(allowedLines[ai]);
+  extra.push('- 許可型に合致しても、同じ文に他の禁止文法があれば NG とする。');
   extra.push('- 日本語・注釈・解説の混入がないこと');
   var lines = moderationRulesLines_(extra);
 
@@ -1925,16 +2003,26 @@ function buildPrompt_(s) {
     buildKeywordsLine_(s)
   ];
   var def = EIKEN_LEVELS[s.level];
+  var resolved = resolveAllowedExpressions_(s.level); // 未知・破損は生成前に例外（AI を呼ばない）
   if (def) {
     lines = lines.concat([
       '',
-      '【レベル定義】（英検' + s.level + '。以下の定義を厳守すること）',
+      '【レベル定義】（英検' + s.level + '。以下の定義を目安として守ること）',
       '- 語彙：' + def.vocabulary,
       '- 使える文法：' + def.grammar,
-      '- 使えない文法：' + (def.forbidden || 'なし'),
-      '- 一文の長さ：' + def.sentenceLength,
-      '- 注意：' + (def.note || '特になし'),
-      '上記の定義を超える語彙・文法・文長は使わないこと。この定義が最も優先される。'
+      '- 使えない文法（forbidden）：' + (def.forbidden || 'なし'),
+      '- 一文の長さ（通常目標帯）：' + def.sentenceLength,
+      '- 注意：' + (def.note || '特になし')
+    ]);
+    lines = lines.concat(allowedExpressionRuleLines_(resolved));
+    lines = lines.concat([
+      '',
+      '【文長・語彙の目安】',
+      '- 文長は通常目標帯を基本とし、易しい語彙・構文なら多少の超過は可（絶対上限は設けない）。短い会話応答・あいさつ文には下限を課さない。',
+      '- 級外のテーマ語・指定キーワードは、文脈や簡単な説明で理解できる少数のみ使う。',
+      '- 注意に「原則避け、少数は許容」とある既習事項は多用しない（少数の使用は可）。',
+      '- 文法一覧に列挙がないだけの既習事項（will・because・be going to等）も、forbidden に該当しなければ使ってよい。',
+      '許可表現型は forbidden より優先する追加の許可であり、文法・文長の目安を超えて広く解禁するものではない。同じ文の別の禁止文法は使わない。'
     ]);
   }
   lines = lines.concat([
