@@ -401,3 +401,39 @@
 **テスト（オフライン unit/static）**: `scripts/tests/transport.test.cjs` に (a) 縦長 CSS が `row`・`gap: 12px`・外寸等幅（`flex: 1 1 50%` / `box-sizing: border-box` / `min-width: 0`。PC の base も同じ）で、`.bl-pane` の独立 `overflow` と `#jaPane` の `border-left` を維持し `border-top` を付けないこと、(b) pop/forest の portrait ブロックに `#jaPane` 上書きが無く base が `border-left` であること、(c) `blIsStackedPanes` が左右並び（縦長 390x844 想定）で false・上下積みで true になり、`drawBilingualLink` が向きを見ず `stacked` を `buildBlLinkPath` へ渡すこと、(d) 狭い gutter 12px の制御点が `0..40` に収まり、広い横長の path が完全一致のままであること、(e) 向き制御（`readingOrientation`）が残っていることを追加した。最終のオフライン回帰は **Node 196 pass / UI 216 pass / 配置 147 pass / 回転 57 pass / long 6 pass**（実 API・本番 Drive 不使用）。公開版（commit `139bb59`）でも **UI 216 pass / 配置 87 pass / 回転 57 pass**。pane 外寸の bbox 実測（std/pop/forest × 390/320/PC）は `test` 担当が公開後に完了した（本節冒頭の「公開」）。
 
 **未確認・懸念**: 実ブラウザの pane 外寸（等幅）は公開後に確認済み（PC 1280x900 / スマホ 390x844・320 / 3テーマで外寸差 1px 未満、中央の破線境界線・独立スクロール・段落記号・辞書/履歴抑止・回転後の状態維持、overflow 0・error 0。本節冒頭の「公開」を参照）。**実機スマートフォン（実端末）は未確認**（Chrome viewport 代替）。当初の `flex: 1 1 0` は padding/border の差が外寸差（std 390 で 13px、320 で 13px、pop/forest で 13px、PC で 17px）になったため、`flex-basis: 50%` + `box-sizing: border-box` に修正した。狭い左右2ペインでは1行の文字数が減るため、英文・訳文の折返しと縦スクロール量が増える（意図した変更）。左右の曲線は選択文 fragment の端から gutter へ出るため、同じ行に続く後続文の上を横切る場合がある（2026-10-27 以前の横長と同じ既存挙動。上下用の行間経路は使わない）。実 API・本番 Drive 操作（課金・書込み）は行っていない。
+
+## 8. EIKEN_LEVELS 全10級＋allowedExpressions の実装（2026-11-03・未 push・未公開）
+
+> 本節は **2026-11-03 時点の実装・検証記録**。実装は commit `ffcb7ad`（backend `Code.js` と tests のみ）で確定済み。GAS HEAD への push・既存デプロイの版更新（version PUT）・公開・実 AI smoke は**未実施**で、本番 GAS は app2 `@50` のまま。公開前 read-only preflight は成功し baseline を確保済み。構造・認証・公開面の変更はしていない。定義と継承の実装に限定し、語彙リスト・機械的文長/語彙検査などの未設計タスクを完了扱いにしない。
+
+**段階の区別**（`AGENTS.md`「セキュリティ修正の記録」に従う）:
+
+| 段階 | 状態 | 補足 |
+|---|---|---|
+| 定義・継承のローカル実装 | 完了 | `site-gas/site-app2-backend/Code.js`。`EIKEN_LEVELS` 全10級（`allowedExpressions` 含む）、`EIKEN_LEVEL_ORDER` / `resolveAllowedExpressions_`、生成・審査の共通指示 helper、`normalizeSettings_` の事前検証 |
+| 正本との一致 | 確認済 | `EIKEN_LEVELS改訂案.md` §3 の JS ブロックと `Code.js` の `EIKEN_LEVELS` が一致 |
+| git commit | 完了（main） | `ffcb7ad`（`site-app2-backend/Code.js` と `scripts/tests` のみ）。push は未実施 |
+| ローカル unit 回帰 | 完了（coder） | 122/122 pass |
+| 独立最終回帰 | 完了（test） | **204 pass / 0 fail / 0 skip**、最終 backend **122 pass**。Code SHA-256 `a7d5c144fd86af0941271ca88a6b37e01c308837052c582a8df44795ba96c127`、test SHA `8d887d68a6ffc1be8a138ce0f42ad407a0391a4925301fdabf226c90c9f2eb3e` |
+| UI モック確認（外部遮断） | 完了（test） | PC 1280x900 / mobile 390x844。全10級を選択でき、overflow 0・pageerror 0。証拠はローカル Temp `eiken-final-offline-20261103`（リポジトリ外） |
+| 専用 auth | 再認証済み | 当初の `invalid_rapt` は再認証で解消。共有 auth は変更なし（実パス・鍵・メールは記載しない） |
+| 公開前 read-only preflight | 成功 | remote HEAD は旧 git と一致（code `72602a06`）。本番 app2 は `@50`・`updateTime 2026-10-26T14:47:01.855Z`・versions 50 / max 50。候補 code `a7d5c144` / bundle `035236fe`。baseline 確保済み |
+| 公開runner の独立検証 | 成功 | stub 60/60・recovery 20/20（公開手順側の別枠。アプリ回帰とは合算しない） |
+| GAS HEAD への push | 未実施 | 今回は preflight のみ |
+| 本番 GAS 公開（version PUT） | 未実施 | app2 は `@50` のまま。version 作成・切替 PUT・`entryPoints` 変更なし |
+| 実 AI smoke・生成サンプル目視 | 未実施 | 実 API・課金・本番 Drive 操作をしていない |
+| 機械的文長/語彙検査・語彙リスト | 未着手 | 従来どおり後続（`EIKEN_LEVELS改訂案.md` §8.3） |
+
+**実装内容**:
+
+1. `EIKEN_LEVELS` を全10級で改訂（7級→…→1級）。`allowedExpressions` は各級の**追加分のみ**を文字列配列で登録し、3級〜1級は空配列。
+2. 級順 `EIKEN_LEVEL_ORDER` と `resolveAllowedExpressions_(level)` を追加。有効リストは**下位級すべて＋その級の和集合**。未知の級・定義欠落・配列でない・空文字列は `appError_`（`invalid_level` / `invalid_level_definition`）で停止し、空配列で成功継続しない。解決結果は `settings` に足さない（保存構造と payloadHash を変えない）。
+3. 生成と審査が共有する指示 helper（`allowedExpressionRuleLines_`）を追加。**許可型は `forbidden` より優先**、**例外は型に必要な用法・該当部分だけ**（同じ文の別の禁止文法は免除しない）、**対象級 `grammar` が広く認める用法を許可型の境界で狭めない**、`go＋任意の-ing` 等へ広げない、一致判定は意味評価（構文パーサなし）を明記。
+4. `normalizeSettings_` で級の妥当性に続けて継承定義を検証。**quota・`request_id` 台帳（receipt）・AI の前**に拒否し、`invalid_settings` で AI 0・保存0・匿名枠0・台帳0。
+5. `buildPrompt_` に継承後の許可型と優先ルールを渡し、`grammar` / `forbidden` / `sentenceLength` / `note` と合わせて「文長は通常目標帯・絶対上限なし・短い応答に下限なし」「級外テーマ語は文脈/簡単な説明で理解できる少数のみ」「原則避け少数許容」「列挙がない既習事項は forbidden でなければ可」を明示。
+6. `checkPassage_`（審査）にも同じ許可型リスト・優先ルールを渡し、**`grammar` / `sentenceLength` / `note` も審査に追加**。「許可型に合致しても同じ文に他の禁止文法があれば NG」「少数の使用を NG にしない」を明示。解決失敗時は AI を呼ばず unavailable（保存しない）。
+7. 既存の不変条件は変更なし: 認証・`ALLOWED_EMAILS`・匿名 quota の API 前予約・`request_id` 冪等・明示 OK のみ保存・保存結果不明の fail closed・翻訳/記号保持の契約。
+
+**テスト（ローカル）**: `scripts/tests/security-backends.test.cjs` に、全10級の継承型数（3→4→5→6→6…）と下位級順、空級でも継承されること、級単位の禁止/限定許可、生成・審査の両方に同じ継承リストと優先ルールが入ること、審査への `grammar`/文長/`note` 追加、全10級で生成・審査・保存が通ること、未知・破損定義の拒否（AI 0・保存0・枠0・台帳0）、`normalizeSettings_` の冪等性を追加。coder 実行の **unit 122/122 pass** に加え、独立 `test` の最終回帰は **204 pass / 0 fail / 0 skip**、最終 backend **122 pass**。UI モック（外部遮断）は PC 1280x900 / mobile 390x844 で全10級を選択でき、overflow 0・pageerror 0。unit（coder 122）と独立最終回帰（test 204、backend 122）は**別の実行**として扱い、合算・混同しない。証拠はローカル Temp `eiken-final-offline-20261103`（リポジトリ外）。公開runner の独立検証（stub 60/60・recovery 20/20）は公開手順側の別枠で、アプリ回帰とは合算しない。
+
+**未確認・懸念**: 実 AI での各級サンプル（語彙・文法・文長・許可型の効き方）は未確認。許可型の一致判定は AI の意味評価に依存し、機械保証はない。文長の絶対上限・級外語の許容率・稀出頻度は未決のまま（適用をブロックしない方針）。push・version PUT・公開・実 AI smoke は未実施で、read-only preflight と公開runner の独立検証のみ完了。詳細な定義・根拠はローカル文書 `EIKEN_LEVELS改訂案.md` / `収集メモ.md`（GitHub非同期）。
