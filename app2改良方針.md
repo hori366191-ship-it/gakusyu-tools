@@ -402,9 +402,9 @@
 
 **未確認・懸念**: 実ブラウザの pane 外寸（等幅）は公開後に確認済み（PC 1280x900 / スマホ 390x844・320 / 3テーマで外寸差 1px 未満、中央の破線境界線・独立スクロール・段落記号・辞書/履歴抑止・回転後の状態維持、overflow 0・error 0。本節冒頭の「公開」を参照）。**実機スマートフォン（実端末）は未確認**（Chrome viewport 代替）。当初の `flex: 1 1 0` は padding/border の差が外寸差（std 390 で 13px、320 で 13px、pop/forest で 13px、PC で 17px）になったため、`flex-basis: 50%` + `box-sizing: border-box` に修正した。狭い左右2ペインでは1行の文字数が減るため、英文・訳文の折返しと縦スクロール量が増える（意図した変更）。左右の曲線は選択文 fragment の端から gutter へ出るため、同じ行に続く後続文の上を横切る場合がある（2026-10-27 以前の横長と同じ既存挙動。上下用の行間経路は使わない）。実 API・本番 Drive 操作（課金・書込み）は行っていない。
 
-## 8. EIKEN_LEVELS 全10級＋allowedExpressions の実装と公開（2026-11-03 JST・app2 `@51`）
+## 8. EIKEN_LEVELS 全10級＋allowedExpressions の実装と公開（2026-11-03 JST・app2 `@51`→`@52`）
 
-> 本節は **2026-11-03（JST）時点の実装・検証・公開記録**。実装 commit `ffcb7ad`、公開候補 commit `7d93937`。GAS HEAD への push・version 作成・切替 PUT は各1回で完了し、本番 app2 は **`@50` → `@51`**（`updateTime 2026-11-02T16:29:46.318Z`＝JST 2026-11-03）。新 deployment 作成・access 変更・Pages/Worker 変更・GitHub push はしていない。v51 実 AI smoke は 7/6/5級 各1件（計3件）の生成・保存・reload 再利用に成功したが、**保存成功のみで品質合格ではない**（7級 概ね合格、6/5級 不合格）。全級実 AI・機械的文長/語彙検査・語彙リストは未達。補正版の公開・再 smoke は未実施。
+> 本節は **2026-11-03（JST）時点の実装・検証・公開記録**。実装 commit `ffcb7ad`、公開候補 commit `7d93937`。GAS HEAD への push・version 作成・切替 PUT は各1回で完了し、本番 app2 は **`@50` → `@51`**（`updateTime 2026-11-02T16:29:46.318Z`＝JST 2026-11-03）。新 deployment 作成・access 変更・Pages/Worker 変更・GitHub push はしていない。v51 実 AI smoke は 7/6/5級 各1件（計3件）の生成・保存・reload 再利用に成功したが、**保存成功のみで品質合格ではない**（7級 概ね合格、6/5級 不合格）。全級実 AI・機械的文長/語彙検査・語彙リストは未達。その後、品質補正 commit `1416d97` を **`@51` → `@52`**（`updateTime 2026-11-02T17:03:55.788Z`＝JST 2026-11-03）で公開。v52 の追加実 smoke（6/5級 各1）は 2/2 成功し、**5級 概ね合格・6級 禁止適合だが総合要注意**。**v51 の品質不合格は履歴として維持し、成功で上書きしない**。全品質保証・全級実 AI 検証ではない。
 
 **段階の区別**（`AGENTS.md`「セキュリティ修正の記録」に従う）:
 
@@ -422,9 +422,12 @@
 | 公開runner の修正と独立検証 | 完了 | 版一覧50件の paging と fields mask の `nextPageToken` 欠落で fail closed。**runner のみ修正**し独立 **74+83+20=177 pass**。version 再作成・PUT 再送なし |
 | GAS HEAD への push | 完了（1回） | 公開候補 `7d93937` を push。remote HEAD の code は candidate と一致 |
 | 本番 GAS 公開（version 作成→PUT） | 完了（v51） | `@50`→`@51`、`updateTime 2026-11-02T16:29:46.318Z`（JST 2026-11-03）。version 作成1回・切替 PUT 1回。`deploymentConfig` は `versionNumber` 以外保持、`entryPoints` 全体を深く比較し URL/access/executeAs 不変、他 deployment 不変。`--finalize` applied/verified・gate true |
+| v52 補正 commit | 完了 | `1416d97`（code `9633a6d9…` / bundle `0fb54b58`、test `ac0ceaa0…`）。**許可範囲の変更なし** |
+| v52 検証 | 完了 | 独立全回帰 **209 pass / 0 fail / 0 skip**。正本10級定義の一致、UI allowlist の一致、攻撃入力の再現解消。parser 21 pass |
+| v52 本番 GAS 公開 | 完了（v52） | `@51`→`@52`、`updateTime 2026-11-02T17:03:55.788Z`（JST 2026-11-03）。push・version 作成・PUT 各1回。version 直後の stale 一覧で停止→read-only reconcile（max 52 content 一致）でローカル version stage 復旧、**再 version なし**。初回 PUT 200 applied/verified、`--verify` 成功（全経路 latest）、`--finalize` applied/verified・gate true。`deploymentConfig` は version 以外保持、`entryPoints` deep 比較・URL/access/executeAs 不変、他 deployment 不変。新規 deployment・Pages/Worker/GitHub push・共有 auth 変更なし |
 | 実 AI smoke（v51） | 実行済（保存成功／品質は未合格） | 7/6/5級 各1件（計3件）の生成・保存・reload 再利用に成功。7級は parser 誤判定から ack 復旧、6/5級は継続成功。品質は 7級 概ね合格・6/5級 不合格 |
-| 追加 smoke（承認済み） | 未実施 | 6級/5級 各1件。実 AI＋Drive 保存は承認済みだが実行していない |
-| 生成・審査指示の補正 | ローカル作業中（別 coder） | 許可範囲の緩和なし・機械パーサ追加なし。補正版の公開・再 smoke は未実施 |
+| 追加 smoke（v52・6/5級 各1） | 実行済（2/2 成功） | 各1クリック・1 POST で 200 / ok true / saved true / reloadSaved true / pendingCleared true。SUMMARY 2件・pass 2 / fail 0、generatePosts 2、translateCreate 0 / translatePosts 0 / deletes 0、pending false / guard complete、doneLevels 2、JSONP 失敗 0。6級 92語13文・最長11、5級 88語15文・最長10 |
+| v52 品質判定 | 5級 概ね合格／6級 要注意 | 両級とも禁止の分詞形容詞・比較・must・例外外の動名詞なし。不定詞は許可された希望表現のみ、enjoy＋-ing は自然な継承、魔法の逸脱なし。5級 概ね合格。6級は禁止適合だが、動物の登場・命名の唐突さ、命名構文/調理・動物語彙の補助余地、動物への菓子の描写に動物用安全食品の明示なし、危険材料の明記なし |
 | 機械的文長/語彙検査・語彙リスト | 未着手 | 従来どおり後続（`EIKEN_LEVELS改訂案.md` §8.3） |
 
 **公開手順の履歴（fail-closed と reconcile）**:
@@ -449,7 +452,25 @@
 - 全文目視: 7級は概ね合格（話題の飛び・語の補助の余地あり）。6級は**不合格**（禁止の形容詞化過去分詞、目的の不定詞の不適合候補、現代日本の日常設定に対する魔法の鳥・金貨の逸脱・唐突さ）。5級は**不合格**（禁止の形容詞化過去分詞）。継承した enjoy＋-ing / want to / like to の使用自体は自然だが、**許可型が同じ文の別の禁止文法を免除しない**ことを審査が通した残欠陥がある。
 - go fishing は未出・未検証。全級の実 AI 確認は未実施。
 - 証拠はローカル `eiken-live-20261103/evidence/run-20261102-163325-xhop` / `run-20261102-163950-o2ep`（リポジトリ外）。本文・タイトル・実IDは記載しない。
-- 現在は別 coder が生成・審査指示を最小補正中（**許可範囲の緩和なし・機械パーサ追加なし**）。補正版の公開・再 smoke は未実施で、公開済み v51 とローカル補正作業を区別する。
+- v51 の補正は v52 として実装・公開し、追加実 smoke（6/5級 各1）も 2/2 成功（下記）。v51 の品質不合格は履歴として維持する。
+
+**v52 補正と公開（2026-11-03）**:
+
+- 補正 commit `1416d97`。**許可範囲の変更なし**。
+- 分詞形容詞の禁止を 7/6/5/4級に明示（be / feel / look＋surprised / excited / tired 等）。4級の be interested 例外は維持し、3級以上の grammar も維持する。
+- `want to` の許可を**目的の to へ拡張しない**。
+- 生成・審査で world / genre を共有し、**現実の設定と架空の設定を区別**する。
+- `normalizeSettings_` は長さだけを見るため、新 helper で **UI の world 8 値 / genre 46 値に完全一致する値だけ**を審査 system に渡す。未知の raw 値や prompt は混ぜない（未知値を新契約として拒否するのではなく、system の根拠にしない）。
+- 金貨などの語は**一律禁止せず、非現実的な文脈だけ**を対象にする。
+- 独立全回帰 **209 pass / 0 fail / 0 skip**。正本10級定義の一致、UI allowlist の一致、攻撃入力の再現解消を確認。parser 21 pass。
+- 公開: `@51`→`@52`、`updateTime 2026-11-02T17:03:55.788Z`（JST 2026-11-03）。push・version 作成・PUT 各1回。version 直後の stale 一覧で停止 → read-only reconcile（max 52 content 一致）でローカル version stage 復旧、**再 version なし**。初回 PUT 200 applied/verified、`--verify` 成功（全経路 latest）、`--finalize` applied/verified・gate true。`deploymentConfig` は version 以外保持、`entryPoints` deep 比較・URL/access/executeAs 不変、他 deployment 不変。新規 deployment・Pages/Worker/GitHub push・共有 auth 変更なし。
+- **v52 追加実 smoke（6/5級 各1）は 2/2 成功**。各1クリック・1 POST で 200 / ok true / saved true / reloadSaved true / pendingCleared true。SUMMARY 2件・pass 2 / fail 0、generatePosts 2、translateCreate 0 / translatePosts 0 / deletes 0、pending false / guard complete、doneLevels 2、JSONP 失敗 0。parser 21 pass。
+- **v52 品質判定**: 6級 92語13文・最長11、5級 88語15文・最長10。両級とも禁止の分詞形容詞・比較・must・例外外の動名詞なし。不定詞は許可された希望表現のみ、enjoy＋-ing は自然な継承、魔法の逸脱なし。**5級 概ね合格**。**6級は禁止適合だが総合要注意**（動物の登場・命名が唐突、命名構文/調理・動物語彙に補助の余地、動物に菓子を与える描写に動物用安全食品の明示なし、危険材料の明記なし）。日本固有描写はないが日常設定の矛盾もない。
+- like to / go fishing は今回の追加2件で未出のため実品質未検証（v51 では like to が出現済み。全 smoke 一律未検証とはしない）。**全品質保証・全級実 AI 検証ではない**。
+- 本番の新教材は合計5件（旧3＋追加2）。旧3は削除・変更なし。追加生成はしない。語数100の厳密性は未達だが生成目標として許容。請求額・内部 AI call count は未取得。
+- **v51 の品質不合格（6/5級）は履歴として維持し、成功で上書きしない**。
+- 証拠はローカル `eiken-quality-offline-20261103/final`（オフライン）と `eiken-quality-live-20261103/evidence/run-20261102-170542-1aqe`（実 smoke）。新 runner namespace は `eiken-quality-release-20261103`（旧 evidence のコピーなし・ページング修正済み）。parser 21 pass、namespace 差分確認済み。本文・実タイトル・メール・鍵・実ID・認証パスは記載しない。
+- 今回の要求範囲（実装・回帰・既存デプロイ更新・承認実 AI 検証）は実施済み。教材採用前の目視と機械語彙・文長検査は後続。本記録は docs のみで、本番コードは v52 のまま・ソース未変更、GitHub push なし。
 
 **実装内容**:
 
@@ -461,6 +482,6 @@
 6. `checkPassage_`（審査）にも同じ許可型リスト・優先ルールを渡し、**`grammar` / `sentenceLength` / `note` も審査に追加**。「許可型に合致しても同じ文に他の禁止文法があれば NG」「少数の使用を NG にしない」を明示。解決失敗時は AI を呼ばず unavailable（保存しない）。
 7. 既存の不変条件は変更なし: 認証・`ALLOWED_EMAILS`・匿名 quota の API 前予約・`request_id` 冪等・明示 OK のみ保存・保存結果不明の fail closed・翻訳/記号保持の契約。
 
-**テスト（ローカル）**: `scripts/tests/security-backends.test.cjs` に、全10級の継承型数（3→4→5→6→6…）と下位級順、空級でも継承されること、級単位の禁止/限定許可、生成・審査の両方に同じ継承リストと優先ルールが入ること、審査への `grammar`/文長/`note` 追加、全10級で生成・審査・保存が通ること、未知・破損定義の拒否（AI 0・保存0・枠0・台帳0）、`normalizeSettings_` の冪等性を追加。coder 実行の **unit 122/122 pass** に加え、独立 `test` の最終回帰は **204 pass / 0 fail / 0 skip**、最終 backend **122 pass**。UI モック（外部遮断）は PC 1280x900 / mobile 390x844 で全10級を選択でき、overflow 0・pageerror 0。unit（coder 122）と独立最終回帰（test 204、backend 122）は**別の実行**として扱い、合算・混同しない。証拠はローカル Temp `eiken-final-offline-20261103`（リポジトリ外）。公開runner の独立検証（修正前 stub 60/60・recovery 20/20 → 修正後 74+83+20=177 pass）は公開手順側の別枠で、アプリ回帰とは合算しない。実 AI smoke の 7級で見つかった JSONP 履歴 parser の誤判定は、17 unit pass（callback/rid の厳格対応を含む）で修正を確認した。これはアプリ回帰の 204/122 とは別の実行で、合算しない。
+**テスト（ローカル）**: `scripts/tests/security-backends.test.cjs` に、全10級の継承型数（3→4→5→6→6…）と下位級順、空級でも継承されること、級単位の禁止/限定許可、生成・審査の両方に同じ継承リストと優先ルールが入ること、審査への `grammar`/文長/`note` 追加、全10級で生成・審査・保存が通ること、未知・破損定義の拒否（AI 0・保存0・枠0・台帳0）、`normalizeSettings_` の冪等性を追加。coder 実行の **unit 122/122 pass** に加え、v51 の独立 `test` 回帰は **204 pass / 0 fail / 0 skip**、最終 backend **122 pass**。UI モック（外部遮断）は PC 1280x900 / mobile 390x844 で全10級を選択でき、overflow 0・pageerror 0。unit（coder 122）と独立最終回帰（test 204、backend 122）は**別の実行**として扱い、合算・混同しない。証拠はローカル Temp `eiken-final-offline-20261103`（リポジトリ外）。公開runner の独立検証（修正前 stub 60/60・recovery 20/20 → 修正後 74+83+20=177 pass）は公開手順側の別枠で、アプリ回帰とは合算しない。実 AI smoke の 7級で見つかった JSONP 履歴 parser の誤判定は、17 unit pass（callback/rid の厳格対応を含む）で修正を確認した。これはアプリ回帰の 204/122 とは別の実行で、合算しない。**v52 は独立全回帰 209 pass / 0 fail / 0 skip、parser 21 pass**（正本10級定義の一致、UI allowlist の一致、攻撃入力の再現解消を含む）。v52 の 209 は v51 の 204/122・公開runner 177・parser 17 とは別実行で、合算しない。
 
-**未確認・懸念**: v51 実 AI smoke は 3件の生成・保存・reload 再利用に成功したが、**保存成功のみで品質合格ではない**。7級は概ね合格（話題の飛び・語の補助の余地）、6級は不合格（禁止の形容詞化過去分詞、目的の不定詞の不適合候補、現代日本の日常設定に対する魔法の鳥・金貨の逸脱・唐突さ）、5級は不合格（禁止の形容詞化過去分詞）。継承した許可型の使用は自然だが、**許可型が同じ文の別の禁止文法を免除しない**ことを審査が通した残欠陥がある。go fishing は未出・未検証、全級の実 AI 確認は未達。補正版の公開・再 smoke は未実施。許可型の一致判定は AI の意味評価に依存し、機械保証はない。文長の絶対上限・級外語の許容率・稀出頻度は未決のまま（適用をブロックしない方針）。詳細な定義・根拠はローカル文書 `EIKEN_LEVELS改訂案.md` / `収集メモ.md`（GitHub非同期）。
+**未確認・懸念**: v51 実 AI smoke は 3件の生成・保存・reload 再利用に成功したが、**保存成功のみで品質合格ではない**。7級は概ね合格（話題の飛び・語の補助の余地）、6級は不合格（禁止の形容詞化過去分詞、目的の不定詞の不適合候補、現代日本の日常設定に対する魔法の鳥・金貨の逸脱・唐突さ）、5級は不合格（禁止の形容詞化過去分詞）。継承した許可型の使用は自然だが、**許可型が同じ文の別の禁止文法を免除しない**ことを審査が通した残欠陥がある。v52 の追加2件は 2/2 成功し、5級 概ね合格・6級 禁止適合だが総合要注意（動物の登場・命名の唐突さ、語彙補助の余地、動物への菓子の安全食品明示なし、危険材料の明記なし）。like to / go fishing は今回未出で実品質未検証（v51 では like to 出現済み）。go fishing は未出・未検証、全級の実 AI 確認は未達。**全品質保証ではなく、教材採用前の目視が必要**。語数100の厳密性は未達だが生成目標として許容。請求額・内部 AI call count は未取得。機械語彙・文長検査は後続。v51 の品質不合格は履歴として維持し、成功で上書きしない。許可型の一致判定は AI の意味評価に依存し、機械保証はない。文長の絶対上限・級外語の許容率・稀出頻度は未決のまま（適用をブロックしない方針）。詳細な定義・根拠はローカル文書 `EIKEN_LEVELS改訂案.md` / `収集メモ.md`（GitHub非同期）。
