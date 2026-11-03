@@ -1601,6 +1601,7 @@
       const RK_BANDS = ['basic', 'middle', 'advanced'];
       const RK_CATEGORIES = ['actions', 'animals', 'feelings', 'food', 'items', 'nature', 'people', 'places', 'school', 'travel'];
       const RK_WORD_RE = /^[a-z]{3,20}$/;
+      const RK_FETCH_TIMEOUT_MS = 10000;
       const RK_LEVEL_BANDS = {
         '7級': 'basic', '6級': 'basic',
         '5級': 'middle', '4級': 'middle', '3級': 'middle',
@@ -1628,13 +1629,17 @@
         for (let i = 0; i < raw.words.length; i++) {
           const item = raw.words[i];
           if (!item || typeof item !== 'object' || Array.isArray(item)) return { ok: false, error: 'item' };
-          const rawWord = String(item.word == null ? '' : item.word).trim();
+          // word/band/category は素の string のみ（配列・オブジェクト・数値の String 強制変換を拒否）
+          if (typeof item.word !== 'string') return { ok: false, error: 'word' };
+          const rawWord = item.word;
           const word = rkNormalizeWord(rawWord);
           // 小文字・3〜20字を満たさない語は受け付けない（大文字や記号入りはデータ側の誤り）
-          if (!word || rawWord !== word) return { ok: false, error: 'word' };
-          const band = String(item.band == null ? '' : item.band);
+          if (!word || rawWord.trim() !== word) return { ok: false, error: 'word' };
+          if (typeof item.band !== 'string') return { ok: false, error: 'band' };
+          const band = item.band;
           if (RK_BANDS.indexOf(band) === -1) return { ok: false, error: 'band' };
-          const category = String(item.category == null ? '' : item.category);
+          if (typeof item.category !== 'string') return { ok: false, error: 'category' };
+          const category = item.category;
           if (RK_CATEGORIES.indexOf(category) === -1) return { ok: false, error: 'category' };
           if (seen[word]) return { ok: false, error: 'duplicate' };
           seen[word] = true;
@@ -1750,13 +1755,54 @@
         return onlySet;
       }
 
-      /** same-origin のプールを取得（fetch は注入可能） */
-      function rkFetchPool(fetchImpl) {
+      /** same-origin のプールを取得（fetch/タイマーは注入可能。10秒で打ち切る） */
+      function rkFetchPool(fetchImpl, opts) {
+        opts = opts || {};
         const f = fetchImpl || (typeof fetch === 'function' ? fetch : null);
         if (!f) return Promise.reject(new Error('keyword-pool fetch unavailable'));
-        return Promise.resolve(f(RK_POOL_URL, { credentials: 'same-origin' })).then(function (res) {
-          if (!res || !res.ok) throw new Error('keyword-pool http ' + (res && res.status));
-          return res.json();
+        const timeoutMs = (typeof opts.timeoutMs === 'number' && opts.timeoutMs > 0) ? opts.timeoutMs : RK_FETCH_TIMEOUT_MS;
+        const setTimer = typeof opts.setTimeout === 'function' ? opts.setTimeout : (typeof setTimeout === 'function' ? setTimeout : null);
+        const clearTimer = typeof opts.clearTimeout === 'function' ? opts.clearTimeout : (typeof clearTimeout === 'function' ? clearTimeout : null);
+        let controller = null;
+        if (typeof AbortController === 'function') {
+          try { controller = new AbortController(); } catch (e) { controller = null; }
+        }
+        const init = { credentials: 'same-origin' };
+        if (controller) init.signal = controller.signal;
+        return new Promise(function (resolve, reject) {
+          let done = false;
+          let timer = null;
+          function finish(ok, value) {
+            if (done) return;
+            done = true;
+            if (timer !== null && clearTimer) clearTimer(timer);
+            timer = null;
+            if (ok) resolve(value); else reject(value);
+          }
+          if (setTimer) {
+            timer = setTimer(function () {
+              // fetch が abort を無視しても race 側で必ず失敗させる
+              if (controller) { try { controller.abort(); } catch (e) {} }
+              const err = new Error('keyword-pool timeout');
+              err.code = 'keyword_pool_timeout';
+              finish(false, err);
+            }, timeoutMs);
+          }
+          let work;
+          try {
+            work = Promise.resolve(f(RK_POOL_URL, init));
+          } catch (e) {
+            finish(false, e);
+            return;
+          }
+          work.then(function (res) {
+            if (!res || !res.ok) throw new Error('keyword-pool http ' + (res && res.status));
+            return res.json();
+          }).then(function (data) {
+            finish(true, data);  // timeout後の遅延応答は done=true で捨てる
+          }, function (err) {
+            finish(false, err);
+          });
         });
       }
 

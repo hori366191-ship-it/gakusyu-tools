@@ -44,11 +44,44 @@ function randomKeywordsBlock() {
   );
 }
 
-function loadBlock() {
+function loadBlock(sandbox) {
   const block = randomKeywordsBlock();
-  const ctx = vm.createContext({});
+  const ctx = vm.createContext(sandbox || {});
   vm.runInContext(block + '\n;globalThis.__rk = { rkValidatePool, rkPickKeywords, rkSetKey, rkFetchPool, rkCreateController };', ctx);
   return { block, api: ctx.__rk };
+}
+
+function createFakeTimers() {
+  const timers = [];
+  return {
+    timers: timers,
+    setTimeout: function (fn, ms) {
+      const t = { fn: fn, ms: ms, cleared: false };
+      timers.push(t);
+      return t;
+    },
+    clearTimeout: function (t) { if (t) t.cleared = true; },
+    pending: function () { return timers.filter(function (t) { return !t.cleared; }); }
+  };
+}
+
+function makeAbortControllerClass(onCreate) {
+  return function AbortController() {
+    const ctrl = {
+      signal: { aborted: false },
+      aborted: false,
+      abort: function () {
+        ctrl.aborted = true;
+        ctrl.signal.aborted = true;
+      }
+    };
+    if (onCreate) onCreate(ctrl);
+    return ctrl;
+  };
+}
+
+function flush() {
+  return new Promise(function (resolve) { setImmediate(resolve); });
 }
 
 const POOL = JSON.parse(read('app2/keyword-pool.json'));
@@ -119,6 +152,19 @@ test('rkValidatePool: version/band/category/lowercase/長さ/重複/不足をfai
   rejects(function (r) { r.words[0].word = 'Cat'; }, 'word');
   // 前後空白は正規化して重複判定する（プール内の cat と衝突）
   rejects(function (r) { r.words[0].word = ' cat'; }, 'duplicate');
+  // String 強制変換で通る配列・オブジェクト・数値は拒否する
+  rejects(function (r) { r.words[0].word = ['cat']; }, 'word');
+  rejects(function (r) { r.words[0].word = 42; }, 'word');
+  rejects(function (r) { r.words[0].word = { toString: function () { return 'cat'; } }; }, 'word');
+  rejects(function (r) { r.words[0].word = new String('cat'); }, 'word');
+  rejects(function (r) { r.words[0].band = ['basic']; }, 'band');
+  rejects(function (r) { r.words[0].band = 1; }, 'band');
+  rejects(function (r) { r.words[0].band = { toString: function () { return 'basic'; } }; }, 'band');
+  rejects(function (r) { r.words[0].category = ['animals']; }, 'category');
+  rejects(function (r) { r.words[0].category = 1; }, 'category');
+  rejects(function (r) { r.words[0].category = { toString: function () { return 'animals'; } }; }, 'category');
+  rejects(function (r) { delete r.words[0].category; }, 'category');
+  rejects(function (r) { delete r.words[0].band; }, 'band');
   rejects(function (r) { r.words[0].word = 'ab'; }, 'word');
   rejects(function (r) { r.words[0].word = 'a'.repeat(21); }, 'word');
   rejects(function (r) { r.words[0].word = 'cat1'; }, 'word');
@@ -217,6 +263,60 @@ test('rkFetchPool: same-origin相対URLで取得し、HTTP/JSON失敗はreject',
   assert.ok(parseError && /bad json/.test(parseError.message));
 });
 
+test('rkFetchPool: 10秒timeoutで必ずreject・abort・timer後始末・遅延応答を捨てる', async () => {
+  let abortCtrl = null;
+  const api = loadBlock({ AbortController: makeAbortControllerClass(function (c) { abortCtrl = c; }) }).api;
+  const timers = createFakeTimers();
+  let resolveFetch = null;
+  const promise = api.rkFetchPool(function (url, init) {
+    assert.equal(init.credentials, 'same-origin');
+    assert.ok(init.signal, 'AbortController の signal を渡す');
+    return new Promise(function (resolve) { resolveFetch = resolve; });
+  }, { timeoutMs: 10000, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
+
+  assert.equal(timers.timers.length, 1, '取得開始でtimeoutを1つ張る');
+  assert.equal(timers.timers[0].ms, 10000, '約10秒');
+  let timeoutError = null;
+  const observed = promise.then(function () { return 'resolved'; }, function (e) { timeoutError = e; return 'rejected'; });
+  timers.timers[0].fn();
+  assert.equal(await observed, 'rejected', 'mockがabortを無視しても必ずreject');
+  assert.match(timeoutError.message, /timeout/);
+  assert.equal(timeoutError.code, 'keyword_pool_timeout');
+  assert.equal(abortCtrl.aborted, true, 'timeoutでabortする');
+  assert.equal(timers.pending().length, 0, 'timeout後にtimerを残さない');
+
+  // 遅れて届いた応答は結果も状態も変えない
+  resolveFetch({ ok: true, json: function () { return Promise.resolve(clonePool()); } });
+  await flush();
+  assert.match(timeoutError.message, /timeout/, '遅延応答で結果は変わらない');
+  assert.equal(timers.pending().length, 0);
+});
+
+test('rkFetchPool: 成功/HTTP失敗でtimerをclearし、fetch無しは従来どおりreject', async () => {
+  const api = loadBlock().api;
+  const timers = createFakeTimers();
+  const pool = await api.rkFetchPool(function () {
+    return Promise.resolve({ ok: true, json: function () { return Promise.resolve(POOL); } });
+  }, { timeoutMs: 10000, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
+  assert.equal(pool.words.length, 300);
+  assert.equal(timers.pending().length, 0, '成功時にtimerを残さない');
+
+  const httpTimers = createFakeTimers();
+  let httpError = null;
+  try {
+    await api.rkFetchPool(function () { return Promise.resolve({ ok: false, status: 503 }); },
+      { timeoutMs: 10000, setTimeout: httpTimers.setTimeout, clearTimeout: httpTimers.clearTimeout });
+  } catch (e) { httpError = e; }
+  assert.match(httpError.message, /http 503/);
+  assert.equal(httpTimers.pending().length, 0, '失敗時もtimerを残さない');
+
+  let noFetch = null;
+  try {
+    await api.rkFetchPool(null, { timeoutMs: 10000, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
+  } catch (e) { noFetch = e; }
+  assert.ok(noFetch && /fetch unavailable/.test(noFetch.message));
+});
+
 // ── コントローラ ────────────────────────────────────────
 test('rkCreateController: 1回取得をキャッシュ・3語置換・busy/status・連打は1回だけ', async () => {
   const loaded = loadBlock();
@@ -303,6 +403,63 @@ test('rkCreateController: 取得/解析/検証の失敗は置換せず、次押�
   assert.equal(ctrl.state.pool.words.length, 300);
 });
 
+test('rkCreateController: timeoutで入力保持・busy復帰・次押下retry、遅延応答はpool/入力を書き換えない', async () => {
+  let abortCtrl = null;
+  const api = loadBlock({ AbortController: makeAbortControllerClass(function (c) { abortCtrl = c; }) }).api;
+  const timers = createFakeTimers();
+  let call = 0;
+  let resolveFirst = null;
+  const replaced = [];
+  const errors = [];
+  const busy = [];
+  const statuses = [];
+  const ctrl = api.rkCreateController({
+    fetchPool: function () {
+      call++;
+      if (call === 1) {
+        return api.rkFetchPool(function () {
+          return new Promise(function (resolve) { resolveFirst = resolve; });
+        }, { timeoutMs: 10000, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
+      }
+      return api.rkFetchPool(function () {
+        return Promise.resolve({ ok: true, json: function () { return Promise.resolve(clonePool()); } });
+      }, { timeoutMs: 10000, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
+    },
+    getLevel: function () { return '3級'; },
+    replaceKeywords: function (words) { replaced.push(words); },
+    setBusy: function (on) { busy.push(on); },
+    setStatus: function (msg) { statuses.push(msg); },
+    onError: function (err) { errors.push(err); },
+    random: function () { return 0.31; }
+  });
+
+  const p = ctrl.run();
+  await flush();
+  assert.equal(timers.timers.length, 1);
+  timers.timers[0].fn();
+  assert.equal(await p, false);
+  assert.equal(replaced.length, 0, 'timeout時は既存入力を触らない');
+  assert.equal(ctrl.state.pool, null, 'timeoutはキャッシュしない');
+  assert.deepEqual(busy, [true, false], 'busyを戻す');
+  assert.equal(errors.length, 1);
+  assert.equal(errors[0].code, 'keyword_pool_timeout');
+  assert.equal(abortCtrl.aborted, true);
+  assert.equal(statuses[statuses.length - 1], '', 'statusを読み込み中のままにしない');
+
+  // timeout後に届いた応答でpool/入力が書き換わらない
+  resolveFirst({ ok: true, json: function () { return Promise.resolve(clonePool()); } });
+  await flush();
+  assert.equal(ctrl.state.pool, null, '遅延応答でpoolを設定しない');
+  assert.equal(replaced.length, 0, '遅延応答で入力を置換しない');
+
+  // 次押下で再取得できる
+  assert.equal(await ctrl.run(), true);
+  assert.equal(call, 2);
+  assert.equal(replaced.length, 1);
+  assert.equal(ctrl.state.pool.words.length, 300);
+  assert.equal(timers.pending().length, 0, '成功時にtimerを残さない');
+});
+
 test('rkCreateController: 読込中に級が変わったら最新の級で選び直す', async () => {
   const api = loadBlock().api;
   let level = '7級';
@@ -364,6 +521,8 @@ test('app2 wiring: type=button/aria-live/hint・max6/maxlength20/送信契約は
   assert.match(html, /現在のキーワードを置き換えます/);
   assert.match(html, /id="randomKeywordStatus" class="keyword-status" role="status" aria-live="polite"/);
   assert.match(html, /const RK_POOL_URL = 'keyword-pool\.json';/);
+  assert.match(html, /const RK_FETCH_TIMEOUT_MS = 10000;/, '取得は約10秒で打ち切る');
+  assert.match(html, /credentials: 'same-origin'/, 'same-origin取得を維持');
   assert.match(html, /const MAX_KEYWORDS = 6;/);
   assert.match(html, /const KEYWORD_MAXLEN = 20;/);
   assert.match(html, /keywords: readKeywords\(\)/);
@@ -375,6 +534,7 @@ test('app2 wiring: type=button/aria-live/hint・max6/maxlength20/送信契約は
   assert.match(wiring, /randomKeywords\.run\(\)/);
 
   const config = extractBetween(html, 'const randomKeywords = rkCreateController({', 'if (randomKeywordBtn) {');
+  assert.match(config, /fetchPool: function \(\) \{ return rkFetchPool\(\); \}/, '既定timeoutで取得');
   assert.match(config, /randomKeywordBtn\.disabled = !!on/, '読込中は連打を止める');
   assert.match(config, /setAttribute\('aria-busy'/);
   assert.match(config, /randomKeywordStatus\.textContent = msg/, 'aria-live は textContent で更新');
