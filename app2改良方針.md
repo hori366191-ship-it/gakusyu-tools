@@ -406,7 +406,7 @@
 
 > 本節は **2026-11-03（JST）時点の実装・検証・公開記録**。実装 commit `ffcb7ad`、公開候補 commit `7d93937`。GAS HEAD への push・version 作成・切替 PUT は各1回で完了し、本番 app2 は **`@50` → `@51`**（`updateTime 2026-11-02T16:29:46.318Z`＝JST 2026-11-03）。新 deployment 作成・access 変更・Pages/Worker 変更・GitHub push はしていない。v51 実 AI smoke は 7/6/5級 各1件（計3件）の生成・保存・reload 再利用に成功したが、**保存成功のみで品質合格ではない**（7級 概ね合格、6/5級 不合格）。全級実 AI・機械的文長/語彙検査・語彙リストは未達。その後、品質補正 commit `1416d97` を **`@51` → `@52`**（`updateTime 2026-11-02T17:03:55.788Z`＝JST 2026-11-03）で公開。v52 の追加実 smoke（6/5級 各1）は 2/2 成功し、**5級 概ね合格・6級 禁止適合だが総合要注意**。**v51 の品質不合格は履歴として維持し、成功で上書きしない**。全品質保証・全級実 AI 検証ではない。
 >
-> **2026-11-03 最新修正（ローカル実装済・unit 136 pass／独立全回帰 219 pass 0 fail、runner stub 83 / browser 5 pass。準備GAS v53 公開済／最終deploy・GitHub push は未実施）**: v52 の「形容詞化過去分詞（surprised / tired / excited 等）を一律禁止」は**過剰制限**だったため撤回する。基本形容詞は叙述用法・名詞修飾とも、複雑な分詞句・受動態・分詞構文に当たらなければ**語彙として級適合を評価**する（叙述用法だけの制限などの新規制限は設けない。文法全般の解禁ではない）。実装は `levelRuleLines_` に、語彙的形容詞（lexical adjective）と分詞構文・複雑な分詞句・受動態の区別、叙述・限定のどちらかではなく語彙的形容詞かどうかで判定する旨、級の語彙としての適切さを評価する旨を明記している。v51/v52 の品質判定は当時の履歴として保持し、削除・上書きしない。**本番 app2 は準備版 v53 で公開済み**。
+> **2026-11-03 最新修正（ローカル実装済・unit 136 pass／独立全回帰 219 pass 0 fail、runner stub 83 / browser 5 pass。v53 準備公開・v54 最終公開済／GitHub push は pending）**: v52 の「形容詞化過去分詞（surprised / tired / excited 等）を一律禁止」は**過剰制限**だったため撤回する。基本形容詞は叙述用法・名詞修飾とも、複雑な分詞句・受動態・分詞構文に当たらなければ**語彙として級適合を評価**する（叙述用法だけの制限などの新規制限は設けない。文法全般の解禁ではない）。実装は `levelRuleLines_` に、語彙的形容詞（lexical adjective）と分詞構文・複雑な分詞句・受動態の区別、叙述・限定のどちらかではなく語彙的形容詞かどうかで判定する旨、級の語彙としての適切さを評価する旨を明記している。v51/v52 の品質判定は当時の履歴として保持し、削除・上書きしない。**本番 app2 は v54 で公開済み（GitHub push は pending）**。
 
 **段階の区別**（`AGENTS.md`「セキュリティ修正の記録」に従う）:
 
@@ -472,7 +472,7 @@
 - 本番の新教材は合計5件（旧3＋追加2）。旧3は削除・変更なし。追加生成はしない。語数100の厳密性は未達だが生成目標として許容。請求額・内部 AI call count は未取得。
 - **v51 の品質不合格（6/5級）は履歴として維持し、成功で上書きしない**。
 - 証拠はローカル `eiken-quality-offline-20261103/final`（オフライン）と `eiken-quality-live-20261103/evidence/run-20261102-170542-1aqe`（実 smoke）。新 runner namespace は `eiken-quality-release-20261103`（旧 evidence のコピーなし・ページング修正済み）。parser 21 pass、namespace 差分確認済み。本文・実タイトル・メール・鍵・実ID・認証パスは記載しない。
-- 今回の要求範囲（実装・回帰・既存デプロイ更新・承認実 AI 検証）は実施済み。教材採用前の目視と機械語彙・文長検査は後続。本記録は docs のみで、**当時**の本番コードは v52・ソース未変更、GitHub push なし（現在は基本形容詞修正ほかを含む準備版 v53 が公開済み）。
+- 今回の要求範囲（実装・回帰・既存デプロイ更新・承認実 AI 検証）は実施済み。教材採用前の目視と機械語彙・文長検査は後続。本記録は docs のみで、**当時**の本番コードは v52・ソース未変更、GitHub push なし（現在は基本形容詞修正ほかを含む v54 が公開済み）。
 
 **実装内容**:
 
@@ -486,11 +486,11 @@
 
 **テスト（ローカル）**: `scripts/tests/security-backends.test.cjs` に、全10級の継承型数（3→4→5→6→6…）と下位級順、空級でも継承されること、級単位の禁止/限定許可、生成・審査の両方に同じ継承リストと優先ルールが入ること、審査への `grammar`/文長/`note` 追加、全10級で生成・審査・保存が通ること、未知・破損定義の拒否（AI 0・保存0・枠0・台帳0）、`normalizeSettings_` の冪等性を追加。coder 実行の **unit 122/122 pass** に加え、v51 の独立 `test` 回帰は **204 pass / 0 fail / 0 skip**、最終 backend **122 pass**。UI モック（外部遮断）は PC 1280x900 / mobile 390x844 で全10級を選択でき、overflow 0・pageerror 0。unit（coder 122）と独立最終回帰（test 204、backend 122）は**別の実行**として扱い、合算・混同しない。証拠はローカル Temp `eiken-final-offline-20261103`（リポジトリ外）。公開runner の独立検証（修正前 stub 60/60・recovery 20/20 → 修正後 74+83+20=177 pass）は公開手順側の別枠で、アプリ回帰とは合算しない。実 AI smoke の 7級で見つかった JSONP 履歴 parser の誤判定は、17 unit pass（callback/rid の厳格対応を含む）で修正を確認した。これはアプリ回帰の 204/122 とは別の実行で、合算しない。**v52 は独立全回帰 209 pass / 0 fail / 0 skip、parser 21 pass**（正本10級定義の一致、UI allowlist の一致、攻撃入力の再現解消を含む）。v52 の 209 は v51 の 204/122・公開runner 177・parser 17 とは別実行で、合算しない。
 
-**未確認・懸念**: v51 実 AI smoke は 3件の生成・保存・reload 再利用に成功したが、**保存成功のみで品質合格ではない**。7級は概ね合格（話題の飛び・語の補助の余地）、6級は不合格（禁止の形容詞化過去分詞、目的の不定詞の不適合候補、現代日本の日常設定に対する魔法の鳥・金貨の逸脱・唐突さ）、5級は不合格（禁止の形容詞化過去分詞）。継承した許可型の使用は自然だが、**許可型が同じ文の別の禁止文法を免除しない**ことを審査が通した残欠陥がある。v52 の追加2件は 2/2 成功し、5級 概ね合格・6級 禁止適合だが総合要注意（動物の登場・命名の唐突さ、語彙補助の余地、動物への菓子の安全食品明示なし、危険材料の明記なし）。like to / go fishing は今回未出で実品質未検証（v51 では like to 出現済み）。go fishing は未出・未検証、全級の実 AI 確認は未達。**全品質保証ではなく、教材採用前の目視が必要**。語数100の厳密性は未達だが生成目標として許容。請求額・内部 AI call count は未取得。機械語彙・文長検査は後続。v51 の品質不合格は履歴として維持し、成功で上書きしない。許可型の一致判定は AI の意味評価に依存し、機械保証はない。文長の絶対上限・級外語の許容率・稀出頻度は未決のまま（適用をブロックしない方針）。**最新修正（2026-11-03・ローカル実装済／unit 136 pass、独立全回帰 219 pass 0 fail／runner stub 83・browser 5 pass。準備GAS v53 公開済）: v51/v52 で surprised / tired / excited 等の基本形容詞を過去分詞由来で一律に不合格としたのは過剰制限。基本形容詞は叙述用法・名詞修飾とも、複雑な分詞句・受動態・分詞構文に当たらなければ語彙として級適合を評価する（叙述用法だけの制限などの新規制限は設けない。文法全般の解禁ではない）。4級の be interested 型は基本形容詞の一般許容を妨げず、be surprised at を新しい型として根拠なく追加しない。`levelRuleLines_` に語彙的形容詞と分詞構文・複雑な分詞句・受動態の区別を明記済み。**最終deploy・GitHub pushはpending**。詳細な定義・根拠はローカル文書 `EIKEN_LEVELS改訂案.md` / `収集メモ.md`（GitHub非同期）。
+**未確認・懸念**: v51 実 AI smoke は 3件の生成・保存・reload 再利用に成功したが、**保存成功のみで品質合格ではない**。7級は概ね合格（話題の飛び・語の補助の余地）、6級は不合格（禁止の形容詞化過去分詞、目的の不定詞の不適合候補、現代日本の日常設定に対する魔法の鳥・金貨の逸脱・唐突さ）、5級は不合格（禁止の形容詞化過去分詞）。継承した許可型の使用は自然だが、**許可型が同じ文の別の禁止文法を免除しない**ことを審査が通した残欠陥がある。v52 の追加2件は 2/2 成功し、5級 概ね合格・6級 禁止適合だが総合要注意（動物の登場・命名の唐突さ、語彙補助の余地、動物への菓子の安全食品明示なし、危険材料の明記なし）。like to / go fishing は今回未出で実品質未検証（v51 では like to 出現済み）。go fishing は未出・未検証、全級の実 AI 確認は未達。**全品質保証ではなく、教材採用前の目視が必要**。語数100の厳密性は未達だが生成目標として許容。請求額・内部 AI call count は未取得。機械語彙・文長検査は後続。v51 の品質不合格は履歴として維持し、成功で上書きしない。許可型の一致判定は AI の意味評価に依存し、機械保証はない。文長の絶対上限・級外語の許容率・稀出頻度は未決のまま（適用をブロックしない方針）。**最新修正（2026-11-03・ローカル実装済／unit 136 pass、独立全回帰 219 pass 0 fail／runner stub 83・browser 5 pass。v53 準備公開・v54 最終公開済）: v51/v52 で surprised / tired / excited 等の基本形容詞を過去分詞由来で一律に不合格としたのは過剰制限。基本形容詞は叙述用法・名詞修飾とも、複雑な分詞句・受動態・分詞構文に当たらなければ語彙として級適合を評価する（叙述用法だけの制限などの新規制限は設けない。文法全般の解禁ではない）。4級の be interested 型は基本形容詞の一般許容を妨げず、be surprised at を新しい型として根拠なく追加しない。`levelRuleLines_` に語彙的形容詞と分詞構文・複雑な分詞句・受動態の区別を明記済み。**GitHub pushはpending**。詳細な定義・根拠はローカル文書 `EIKEN_LEVELS改訂案.md` / `収集メモ.md`（GitHub非同期）。
 
 ## 9. 生成モデル比較（2026-11-03 実行済・採点/unblind確定／Gemma維持）
 
-> 状態: **20件生成・保存・ブラインド採点・unblind確定。Gemma4:31b維持を決定。cleanup実行PASS（DS10削除成功、GM10 hash不変、保護既存59/59、最終DB69）。最終コードは source commit `5c8ee7a` / code `b6907392` / bundle `3e8f6bff`、独立 **221 pass / 0 fail / 0 skip**。最終deploy・GitHub pushはpending。本番 app2 は準備版 **v53**（最終反映前）。結果は下記 §9.6・§12。**
+> 状態: **20件生成・保存・ブラインド採点・unblind確定。Gemma4:31b維持を決定。cleanup実行PASS（DS10削除成功、GM10 hash不変、保護既存59/59、最終DB69）。実装・比較・cleanup・**v54公開まで完了**。最終コードは source commit `5c8ee7a` / code `b6907392` / bundle `3e8f6bff`、独立 **221 pass / 0 fail / 0 skip**。本番 app2 は **v54**（最終deploy済）、**GitHub pushはpending**。結果は下記 §9.6・§12。**
 
 ### 9.1 比較条件
 
@@ -526,7 +526,7 @@
 
 - owner ログインは最新で `ownertrue` / `validtrue`。**owner 認証は完了し、専用 auth / clasp は有効**。
 - git は本準備の起点（コード実装前）で HEAD `2de4304` clean（開始時 ahead 4。直近の push は既存4コミットを含めて承認済み）。**現HEADは準備実装 commit `c936708`**。本節の文書作業では git 操作・公開を行っていない。
-- **ローカル実装は完了（unit 136 pass）**。**v53 時点の独立全回帰 219 pass / 0 fail、runner stub 83 pass、browser 5 pass**。準備GAS **v53** を公開済み。**採点・モデル決定・cleanupは完了（Gemma維持）**。**最終コードは独立 221 pass / 0 fail / 0 skip**。最終deploy・GitHub pushは**pending**。
+- **ローカル実装は完了（unit 136 pass）**。**v53 時点の独立全回帰 219 pass / 0 fail、runner stub 83 pass、browser 5 pass**。**v53 は準備版として公開済み、最終版 v54 も公開済み（2026-11-03T02:58:21.620Z）**。**採点・モデル決定・cleanupは完了（Gemma維持）**。**最終コードは独立 221 pass / 0 fail / 0 skip**。**GitHub pushはpending**。
 
 ### 9.5 実行結果（2026-11-03・20件生成／採点済み）
 
@@ -562,11 +562,11 @@
 - **3級 science critical**: 両モデルにcritical 1件（月の誤認、周回・虫の一般化、因果の断定を含む）。Fabian 2024 Nature Communications DOI `10.1038/s41467-024-44785-3` / PMID `38291028` の一次資料で裏付け。教材利用前に修正が必要。**採用Gemma側は3級の教材1件**で、scientific warningは**比較評価レポート**に記録し、原文は不変・hash20維持のため編集しない。
 - **分析ファイル**: 正式Drive root `model-comparison-20261103` に全文20。`analysis/REPORT.md` / `report.json` / `scores.csv` / `scores-frozen.json` / `scores.sha256` / `repertoire`。条件hash `ba7ba0…`、mapping seal `80b7938b…`。freeze順序はレポート参照。
 
-## 10. owner 専用 benchmark override（準備版・v53 公開済）
+## 10. owner 専用 benchmark override（準備版 v53 → 最終 v54 で無効化）
 
-> 状態: 準備版 **v53** では owner override を公開済み。**最終コード（ローカル、`b6907392`）では無効化フラグを追加**し、最終deploy・pushは未実施。一般利用者向けの機能ではない。
+> 状態: 準備版 **v53** では owner override を公開済み。**最終コード（`b6907392`）では無効化フラグを追加し、v54 で公開済み**。**GitHub pushはpending**。一般利用者向けの機能ではない。
 
-- **最終コードの無効化（未公開）**: `BENCHMARK_MODEL_OVERRIDE_ENABLED=false` を追加。strict owner チェック後でも owner には `benchmark_disabled` を**台帳・quota・AI の前**に返す。一般・匿名は `not_allowed`。通常のGemma生成は `model` metadata を保存できる。比較用helperは廃止せず、大規模リファクタもしていない。
+- **最終コードの無効化（v54 公開済）**: `BENCHMARK_MODEL_OVERRIDE_ENABLED=false` を追加。strict owner チェック後でも owner には `benchmark_disabled` を**台帳・quota・AI の前**に返す。一般・匿名は `not_allowed`。通常のGemma生成は `model` metadata を保存できる。比較用helperは廃止せず、大規模リファクタもしていない。
 - **検証**: coder unit **139 pass**。独立最終回帰 **221 pass / 0 fail / 0 skip**。code `b6907392f2df62e86eec64198f5a03fe5024266e5fed3613e2d16fdb492426bb`、tests `e91d9de368fd8988e89fced264a6f867a6d0e12f78a49b725f25e877caa7e244`、最終source commit `5c8ee7a`。
 
 - **目的**: モデル比較のため、owner だけが生成モデルを限定切替できるようにする。対象モデルを限定した最小実装とし、大規模な設定機構は作らない。
@@ -575,11 +575,11 @@
 - **認可**: owner のみ。**匿名・一般利用者は切替不可**。一般利用の切替 UI は作らない。
 - **記録**: 生成 record に使用モデルを `model` metadata として保存する。**旧レコードの metadata 欠落は変更しない**（遡及補完しない）。
 - **冪等・保護**: `request_id` の payloadHash は通常生成（benchmark_model なし）で旧実装と同一文字列を維持し、`benchmark_model` 明示時だけモデル名を末尾に足す。**同じ request_id でもモデルが違えば conflict** とし、receipt をモデル区別して保護する。既存の認証・`ALLOWED_EMAILS`・匿名 quota・明示 OK のみ保存・保存結果不明の fail closed は変更しない。
-- **状態**: v53 は公開済み。最終コードは **source commit `5c8ee7a` / code `b6907392…` / bundle `3e8f6bff`**、override無効化、独立 **221 pass / 0 fail / 0 skip**。**最終deploy・GitHub pushはpending**。
+- **状態**: 準備版 v53 と最終版 v54 を公開済み。最終コードは **source commit `5c8ee7a` / code `b6907392…` / bundle `3e8f6bff…`**、override無効化、独立 **221 pass / 0 fail / 0 skip**。**GitHub pushはpending**。
 
-## 11. 準備GAS v53 公開記録（2026-11-03）
+## 11. 準備GAS v53 公開記録（2026-11-03・準備版。最終v54は§12）
 
-> 準備実装 commit **`c936708`**。本番 app2 は **v52→v53**。独立全回帰 **219 pass / 0 fail**、runner stub **83 pass**、browser **5 pass**。基本形容詞修正・モデル分離・owner benchmark override・model metadata を含む。
+> 準備実装 commit **`c936708`**。本番 app2 は **v52→v53**（準備版）。**最終v54は§12で公開済み**。独立全回帰 **219 pass / 0 fail**、runner stub **83 pass**、browser **5 pass**。基本形容詞修正・モデル分離・owner benchmark override・model metadata を含む。
 
 | 段階 | 状態 | 補足 |
 |---|---|---|
@@ -593,15 +593,17 @@
 | 公開 version | v53 | `updateTime 2026-11-02T18:16:02.194Z`（reconcile summary） |
 
 - 証拠: ローカル `eiken-benchmark-release-20261103/reconcile/2026-11-02T18-24-36-350Z`（リポジトリ外）。実ID・メール・鍵・認証パスは記載しない。
-- **未実施**: 最終deploy、GitHub push。比較採点・モデル決定・cleanupは完了（cleanup PASS）。
+- **未実施**: GitHub push（main次実施）。比較採点・モデル決定・cleanup・v54公開は完了（cleanup PASS）。
 
-## 12. 最終コード・クリーンアップ完了（2026-11-03・最終deploy/push待ち）
+## 12. 最終コード・クリーンアップ・v54公開完了（2026-11-03・GitHub push待ち）
 
-- **最終コード**: source commit `5c8ee7a`、code `b6907392f2df62e86eec64198f5a03fe5024266e5fed3613e2d16fdb492426bb`、bundle `3e8f6bff`、tests `e91d9de368fd8988e89fced264a6f867a6d0e12f78a49b725f25e877caa7e244`。`BENCHMARK_MODEL_OVERRIDE_ENABLED=false` を追加。
+- **最終コード**: source commit `5c8ee7a`、code `b6907392f2df62e86eec64198f5a03fe5024266e5fed3613e2d16fdb492426bb`、bundle `3e8f6bffe8f4b1b6329859c003f01c0890b1e457053a1ef14d25354ce13a754e`、tests `e91d9de368fd8988e89fced264a6f867a6d0e12f78a49b725f25e877caa7e244`。`BENCHMARK_MODEL_OVERRIDE_ENABLED=false` を追加。
 - **override 無効化**: strict owner チェック後でも owner には `benchmark_disabled` を**台帳・quota・AI の前**に返す。一般・匿名は `not_allowed`。通常のGemma生成は `model` metadata を保存できる。比較用helperは廃止せず、大規模リファクタもしていない。
 - **検証**: coder unit **139 pass**。独立最終回帰 **221 pass / 0 fail / 0 skip**。
-- **release preflight**: 成功。baseline v53 source code `68da6179` とローカル git `c936708` の一致を捕捉済み。candidate `b6907392` / bundle `3e8f6bff`。**最終source commit `5c8ee7a` 済み。最終deploy・GitHub pushはpending。公開はまだ v53 で最終反映前**。
+- **release preflight**: 成功。baseline v53 source code `68da6179` とローカル git `c936708` の一致を捕捉済み。candidate `b6907392` / bundle `3e8f6bff…`。最終source commit `5c8ee7a` 済み。
+- **v54 公開（2026-11-03T02:58:21.620Z / JST 11:58:21）**: **v53→v54**。push・version 作成・PUT 各1回、PUT 200 で再送なし。version list stale は read-only reconcile / dryrun / apply でローカル復旧。verify の旧 v53 混在は**再PUTせず**、最新8経路（GET4 / list4）で v54 time 一致、HEAD/source/version 一致、config は version 以外保持、entryPoints / URL / access / executeAs / 他 deployment 不変、finalize applied/verified exit0 gate true。証拠は `eiken-selected-model-release-20261103/state/result.json`、reconcile `2026-11-03T02-59-09-922Z/result.json`（sha `35b86fd6004334afcf44c8c91409b01fcc4a186037f75a01a402e661e22f531e`）、version復旧 `2026-11-03T02-56-46-008Z`。
+- **公開内容**: 通常生成Gemma、審査・翻訳Gemma固定、benchmark override disabled。公開sourceは独立221 passのもののみで、**random keywordsは未含む**。
 - **cleanup 実行PASS**: delete POST **10件: success 10 / unknown 0**、対象DS残**0**、採用GM10現存（hash不変）、保護既存**59/59現存**、最終DB**69**、ローカル全文20 hash不変、delete guard complete、追加生成・翻訳対象の削除なし。`decision.json` の planHash `28646…` は事前確認済み。証拠は `eiken-benchmark-run-audit-20261103/delete-loser-execute.log` / `cleanup-final-verification.json`、root `analysis/CLEANUP-RESULT.md` / `.json`。
 - **Gemma warning**: 採用Gemma側のscientific warningは**3級の教材1件**（両モデルそれぞれ3級1件critical）。**比較評価レポートに記録**し、原文は不変・hash20維持のため編集しない。今回はDS10限定削除のため削除していない。
-- **対象外**: 新ユーザー向けrandom keyword計画は**別件調査のみ**。今回のdocs・codeへ便乗実装しない。
-- **最終公開**: 次mainで実施予定。今回の **v53 準備版**と区別する。最終deploy・push・最終記録の結果は追って追記する。
+- **対象外**: 新ユーザー向けrandom keyword計画は**別件worktreeで実装中・未公開**。v54 scope外で、今回のdocs・codeへ便乗実装しない。
+- **状態**: 実装・比較・cleanup・**v54公開まで完了**。**GitHub pushはpending**（main次実施）。作業HEADは `5a6c8e833ef288e8dfcdce83f750cc09c92413c8` clean（2 docs commit済み）。
