@@ -355,6 +355,30 @@ html[data-theme="pop"] #addKeywordBtn:disabled {
   opacity: .4 !important;
   box-shadow: none !important;
 }
+html[data-theme="pop"] #randomKeywordBtn {
+  background: var(--color-frost-white) !important;
+  color: var(--color-charcoal-ink) !important;
+  border: 1.5px dashed var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+  font-family: var(--font-jp-mono) !important;
+  opacity: 1 !important;
+}
+html[data-theme="pop"] #randomKeywordBtn:hover:not(:disabled) {
+  background: var(--color-ice-wash) !important;
+}
+html[data-theme="pop"] #randomKeywordBtn:disabled {
+  opacity: .4 !important;
+  box-shadow: none !important;
+}
+html[data-theme="pop"] .keyword-hint {
+  color: var(--color-graphite) !important;
+  font-family: var(--font-jp-sans) !important;
+}
+html[data-theme="pop"] .keyword-status {
+  color: var(--color-charcoal-ink) !important;
+  font-family: var(--font-jp-mono) !important;
+}
 html[data-theme="pop"] .keyword-del {
   background: var(--color-frost-white) !important;
   color: var(--color-charcoal-ink) !important;

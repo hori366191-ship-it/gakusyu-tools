@@ -418,6 +418,41 @@
       cursor: default;
     }
 
+    #randomKeywordBtn {
+      width: 100%;
+      margin-top: 6px;
+      padding: 8px;
+      font-family: 'Kiwi Maru', 'Courier New', monospace;
+      font-size: 0.9em;
+      background: #ffffff;
+      color: #007700;
+      border: 1px dashed #99e699;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #randomKeywordBtn:hover:not(:disabled) {
+      background: #eeffee;
+    }
+
+    #randomKeywordBtn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .keyword-hint {
+      margin-top: 4px;
+      font-size: 0.7em;
+      color: #777777;
+    }
+
+    .keyword-status {
+      margin-top: 2px;
+      min-height: 1em;
+      font-size: 0.7em;
+      color: #007700;
+    }
+
     #credit {
       margin-top: 20px;
       font-size: 0.5em;
@@ -816,6 +851,9 @@
       <label>キーワード（任意・文章に使いたい言葉）</label>
       <div id="keywordList"></div>
       <button id="addKeywordBtn" type="button">＋ キーワードを追加（最大6個）</button>
+      <button id="randomKeywordBtn" type="button">🎲 ランダムに3語</button>
+      <div class="keyword-hint">現在のキーワードを置き換えます</div>
+      <div id="randomKeywordStatus" class="keyword-status" role="status" aria-live="polite"></div>
     </div>
 
     <div class="field">
@@ -1551,6 +1589,246 @@
         list.appendChild(row);
         updateAddKeywordBtn();
       }
+
+      // TESTABLE-RANDOM-KEYWORDS-START
+      // ── ランダム3語（教室向けに手選定したプール） ─────────────
+      // ・候補は same-origin の keyword-pool.json。成功だけメモリにキャッシュする
+      // ・取得→検証→選択が揃ってから置換する（失敗時は既存入力を触らない）
+      // ・band は難易度の目安で、英検/CEFR の公式判定ではない
+      const RK_POOL_URL = 'keyword-pool.json';
+      const RK_POOL_VERSION = 1;
+      const RK_COUNT = 3;
+      const RK_BANDS = ['basic', 'middle', 'advanced'];
+      const RK_CATEGORIES = ['actions', 'animals', 'feelings', 'food', 'items', 'nature', 'people', 'places', 'school', 'travel'];
+      const RK_WORD_RE = /^[a-z]{3,20}$/;
+      const RK_LEVEL_BANDS = {
+        '7級': 'basic', '6級': 'basic',
+        '5級': 'middle', '4級': 'middle', '3級': 'middle',
+        '準2級': 'advanced', '準2級プラス': 'advanced', '2級': 'advanced', '準1級': 'advanced', '1級': 'advanced'
+      };
+      const RK_CHAINS = {
+        basic: ['basic'],
+        middle: ['basic', 'middle'],
+        advanced: ['basic', 'middle', 'advanced']
+      };
+
+      function rkNormalizeWord(value) {
+        const w = String(value == null ? '' : value).trim().toLowerCase();
+        return RK_WORD_RE.test(w) ? w : '';
+      }
+
+      /** プールJSONを検証する。1件でも不正なら全体を拒否する（fail-closed） */
+      function rkValidatePool(raw) {
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { ok: false, error: 'shape' };
+        if (raw.version !== RK_POOL_VERSION) return { ok: false, error: 'version' };
+        if (!Array.isArray(raw.words)) return { ok: false, error: 'words' };
+        const words = [];
+        const seen = Object.create(null);
+        const cats = Object.create(null);
+        for (let i = 0; i < raw.words.length; i++) {
+          const item = raw.words[i];
+          if (!item || typeof item !== 'object' || Array.isArray(item)) return { ok: false, error: 'item' };
+          const rawWord = String(item.word == null ? '' : item.word).trim();
+          const word = rkNormalizeWord(rawWord);
+          // 小文字・3〜20字を満たさない語は受け付けない（大文字や記号入りはデータ側の誤り）
+          if (!word || rawWord !== word) return { ok: false, error: 'word' };
+          const band = String(item.band == null ? '' : item.band);
+          if (RK_BANDS.indexOf(band) === -1) return { ok: false, error: 'band' };
+          const category = String(item.category == null ? '' : item.category);
+          if (RK_CATEGORIES.indexOf(category) === -1) return { ok: false, error: 'category' };
+          if (seen[word]) return { ok: false, error: 'duplicate' };
+          seen[word] = true;
+          cats[category] = true;
+          words.push({ word: word, band: band, category: category });
+        }
+        if (words.length < RK_COUNT) return { ok: false, error: 'short' };
+        if (Object.keys(cats).length < RK_COUNT) return { ok: false, error: 'categories' };
+        for (let i = 0; i < RK_BANDS.length; i++) {
+          if (!words.some(function (w) { return w.band === RK_BANDS[i]; })) return { ok: false, error: 'bands' };
+        }
+        return { ok: true, pool: { version: RK_POOL_VERSION, words: words } };
+      }
+
+      function rkSetKey(words) {
+        return (Array.isArray(words) ? words : []).map(function (w) {
+          return String((w && w.word) || w || '').toLowerCase();
+        }).sort().join('|');
+      }
+
+      function rkChainForLevel(level) {
+        return RK_CHAINS[RK_LEVEL_BANDS[String(level == null ? '' : level)] || ''] || null;
+      }
+
+      /** 3語・別カテゴリ・basic を最低1語、を満たすか */
+      function rkValidSet(set, chain) {
+        if (!Array.isArray(set) || set.length !== RK_COUNT) return false;
+        const cats = Object.create(null);
+        const words = Object.create(null);
+        let basic = 0;
+        for (let i = 0; i < set.length; i++) {
+          const w = set[i] || {};
+          if (chain.indexOf(w.band) === -1) return false;
+          if (!w.word || words[w.word]) return false;
+          words[w.word] = true;
+          if (!w.category || cats[w.category]) return false;
+          cats[w.category] = true;
+          if (w.band === 'basic') basic++;
+        }
+        return basic > 0;
+      }
+
+      function rkIndex(rnd, n) {
+        const v = Math.floor((typeof rnd === 'function' ? rnd() : Math.random()) * n);
+        return (v >= 0 && v < n) ? v : 0;
+      }
+
+      /**
+       * 3語を選ぶ。乱数は opts.random で注入できる。
+       * ランダム試行（24回）→ カテゴリ3つの決定的走査（件数上限）の順で有限に終わる。
+       * 代替が1組しかない極小プールでは同じsetを返し、無限ループにも失敗にもしない。
+       */
+      function rkPickKeywords(pool, opts) {
+        opts = opts || {};
+        const chain = rkChainForLevel(opts.level);
+        if (!chain) return null;  // 未知の級は置換しない
+        const source = (pool && Array.isArray(pool.words)) ? pool.words : [];
+        const allowed = source.filter(function (w) { return w && chain.indexOf(w.band) !== -1; });
+        if (allowed.length < RK_COUNT) return null;
+        const basics = allowed.filter(function (w) { return w.band === 'basic'; });
+        if (!basics.length) return null;
+        const rnd = typeof opts.random === 'function' ? opts.random : Math.random;
+        const previous = (Array.isArray(opts.previous) && opts.previous.length === RK_COUNT) ? rkSetKey(opts.previous) : '';
+
+        for (let attempt = 0; attempt < 24; attempt++) {
+          const base = basics[rkIndex(rnd, basics.length)];
+          if (!base) continue;
+          const set = [base];
+          const cats = Object.create(null);
+          cats[base.category] = true;
+          let guard = 0;
+          while (set.length < RK_COUNT && guard++ < allowed.length * 2) {
+            const w = allowed[rkIndex(rnd, allowed.length)];
+            if (!w || cats[w.category]) continue;
+            let dup = false;
+            for (let i = 0; i < set.length; i++) if (set[i].word === w.word) dup = true;
+            if (dup) continue;
+            cats[w.category] = true;
+            set.push(w);
+          }
+          if (rkValidSet(set, chain) && (!previous || rkSetKey(set) !== previous)) return set;
+        }
+
+        const byCat = Object.create(null);
+        const catOrder = [];
+        allowed.forEach(function (w) {
+          if (!byCat[w.category]) { byCat[w.category] = []; catOrder.push(w.category); }
+          byCat[w.category].push(w);
+        });
+        catOrder.sort();
+        let budget = 60000;
+        let onlySet = null;
+        for (let a = 0; a < catOrder.length - 2 && budget > 0; a++) {
+          for (let b = a + 1; b < catOrder.length - 1 && budget > 0; b++) {
+            for (let c = b + 1; c < catOrder.length && budget > 0; c++) {
+              const ga = byCat[catOrder[a]];
+              const gb = byCat[catOrder[b]];
+              const gc = byCat[catOrder[c]];
+              for (let i = 0; i < ga.length && budget > 0; i++) {
+                for (let j = 0; j < gb.length && budget > 0; j++) {
+                  for (let k = 0; k < gc.length && budget > 0; k++) {
+                    budget--;
+                    const set = [ga[i], gb[j], gc[k]];
+                    if (!rkValidSet(set, chain)) continue;
+                    if (!onlySet) onlySet = set;
+                    if (!previous || rkSetKey(set) !== previous) return set;
+                  }
+                }
+              }
+            }
+          }
+        }
+        return onlySet;
+      }
+
+      /** same-origin のプールを取得（fetch は注入可能） */
+      function rkFetchPool(fetchImpl) {
+        const f = fetchImpl || (typeof fetch === 'function' ? fetch : null);
+        if (!f) return Promise.reject(new Error('keyword-pool fetch unavailable'));
+        return Promise.resolve(f(RK_POOL_URL, { credentials: 'same-origin' })).then(function (res) {
+          if (!res || !res.ok) throw new Error('keyword-pool http ' + (res && res.status));
+          return res.json();
+        });
+      }
+
+      /**
+       * 取得→検証→選択が揃ってから deps.replaceKeywords を1回だけ呼ぶ。
+       * 失敗時はキャッシュも入力も変えない（次の押下で再取得できる）。
+       * 読み込み中は busy で連打を1回にまとめ、級が変わっていれば最新の級で選び直す。
+       */
+      function rkCreateController(deps) {
+        deps = deps || {};
+        const state = { pool: null, loading: null, busy: false, seq: 0, last: [] };
+        function setBusy(on) { if (deps.setBusy) deps.setBusy(!!on); }
+        function setStatus(msg) { if (deps.setStatus) deps.setStatus(msg || ''); }
+        function load() {
+          if (state.pool) return Promise.resolve(state.pool);
+          if (state.loading) return state.loading;
+          const p = Promise.resolve()
+            .then(function () { return deps.fetchPool ? deps.fetchPool() : rkFetchPool(); })
+            .then(function (raw) {
+              const checked = rkValidatePool(raw);
+              if (!checked.ok) {
+                const err = new Error('keyword-pool ' + checked.error);
+                err.code = 'keyword_pool_' + checked.error;
+                throw err;
+              }
+              state.pool = checked.pool;
+              return state.pool;
+            });
+          state.loading = p.then(function (pool) {
+            state.loading = null;
+            return pool;
+          }, function (err) {
+            state.loading = null;  // 失敗は固定しない
+            throw err;
+          });
+          return state.loading;
+        }
+        async function run() {
+          if (state.busy) return false;
+          const seq = ++state.seq;
+          state.busy = true;
+          setBusy(true);
+          setStatus('読み込み中…');
+          try {
+            const pool = await load();
+            if (seq !== state.seq) return false;  // 古い世代の応答は捨てる
+            const words = rkPickKeywords(pool, {
+              level: deps.getLevel ? deps.getLevel() : '',
+              previous: state.last,
+              random: deps.random
+            });
+            if (!words) {
+              const err = new Error('keyword-pool selection');
+              err.code = 'keyword_pool_selection';
+              throw err;
+            }
+            if (deps.replaceKeywords) deps.replaceKeywords(words.map(function (w) { return w.word; }));
+            state.last = words;
+            setStatus('3語に置き換えました');
+            return true;
+          } catch (err) {
+            setStatus('');
+            if (deps.onError) deps.onError(err);
+            return false;
+          } finally {
+            state.busy = false;
+            setBusy(false);
+          }
+        }
+        return { run: run, load: load, state: state };
+      }
+      // TESTABLE-RANDOM-KEYWORDS-END
 
       function readForm() {
         const val = id => document.getElementById(id).value;
@@ -2590,6 +2868,34 @@
         const inputs = keywordInputs();
         if (inputs.length) inputs[inputs.length - 1].focus();
       });
+
+      const randomKeywordBtn = document.getElementById('randomKeywordBtn');
+      const randomKeywordStatus = document.getElementById('randomKeywordStatus');
+      // 置換は「全削除→3語追加」を1操作で行い、入力欄へは focus しない
+      function replaceKeywordRows(words) {
+        const list = document.getElementById('keywordList');
+        if (!list) return;
+        while (list.firstChild) list.removeChild(list.firstChild);
+        for (const w of words) addKeywordRow(w);
+        updateAddKeywordBtn();
+      }
+      const randomKeywords = rkCreateController({
+        fetchPool: function () { return rkFetchPool(); },
+        getLevel: function () { return document.getElementById('fLevel').value; },
+        replaceKeywords: replaceKeywordRows,
+        setBusy: function (on) {
+          if (!randomKeywordBtn) return;
+          randomKeywordBtn.disabled = !!on;
+          randomKeywordBtn.setAttribute('aria-busy', on ? 'true' : 'false');
+        },
+        setStatus: function (msg) { if (randomKeywordStatus) randomKeywordStatus.textContent = msg; },
+        onError: function () {
+          showToast('キーワード候補を読み込めませんでした。通信環境を確認してもう一度お試しください', 5000);
+        }
+      });
+      if (randomKeywordBtn) {
+        randomKeywordBtn.addEventListener('click', function () { randomKeywords.run(); });
+      }
       applyTextType();
       addKeywordRow('');
 

@@ -605,6 +605,29 @@ html[data-theme="forest"] #addKeywordBtn:hover:not(:disabled) {
 html[data-theme="forest"] #addKeywordBtn:disabled {
   opacity: .4 !important;
 }
+html[data-theme="forest"] #randomKeywordBtn {
+  background: var(--color-cream-paper) !important;
+  color: var(--color-forest-ink) !important;
+  border: 1px dashed var(--color-border-mist) !important;
+  border-radius: var(--radius-buttons) !important;
+  box-shadow: none !important;
+  font-family: var(--font-suisse-intl) !important;
+  opacity: 1 !important;
+}
+html[data-theme="forest"] #randomKeywordBtn:hover:not(:disabled) {
+  background: var(--color-keylime-wash) !important;
+}
+html[data-theme="forest"] #randomKeywordBtn:disabled {
+  opacity: .4 !important;
+}
+html[data-theme="forest"] .keyword-hint {
+  color: var(--color-charcoal) !important;
+  font-family: var(--font-jp-sans) !important;
+}
+html[data-theme="forest"] .keyword-status {
+  color: var(--color-forest-ink) !important;
+  font-family: var(--font-suisse-intl) !important;
+}
 html[data-theme="forest"] .keyword-del {
   background: var(--color-cream-paper) !important;
   color: var(--color-charcoal) !important;

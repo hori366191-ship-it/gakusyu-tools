@@ -1,0 +1,1507 @@
+{
+  "version": 1,
+  "source": "classroom-handpicked",
+  "note": "教室向けに手選定した300語。辞書データの転載ではなく、bandは難易度の目安（英検/CEFRの公式判定ではありません）。",
+  "words": [
+    {
+      "word": "run",
+      "band": "basic",
+      "category": "actions"
+    },
+    {
+      "word": "walk",
+      "band": "basic",
+      "category": "actions"
+    },
+    {
+      "word": "jump",
+      "band": "basic",
+      "category": "actions"
+    },
+    {
+      "word": "read",
+      "band": "basic",
+      "category": "actions"
+    },
+    {
+      "word": "write",
+      "band": "basic",
+      "category": "actions"
+    },
+    {
+      "word": "swim",
+      "band": "basic",
+      "category": "actions"
+    },
+    {
+      "word": "sing",
+      "band": "basic",
+      "category": "actions"
+    },
+    {
+      "word": "play",
+      "band": "basic",
+      "category": "actions"
+    },
+    {
+      "word": "help",
+      "band": "basic",
+      "category": "actions"
+    },
+    {
+      "word": "climb",
+      "band": "middle",
+      "category": "actions"
+    },
+    {
+      "word": "borrow",
+      "band": "middle",
+      "category": "actions"
+    },
+    {
+      "word": "gather",
+      "band": "middle",
+      "category": "actions"
+    },
+    {
+      "word": "choose",
+      "band": "middle",
+      "category": "actions"
+    },
+    {
+      "word": "arrive",
+      "band": "middle",
+      "category": "actions"
+    },
+    {
+      "word": "explain",
+      "band": "middle",
+      "category": "actions"
+    },
+    {
+      "word": "prepare",
+      "band": "middle",
+      "category": "actions"
+    },
+    {
+      "word": "repair",
+      "band": "middle",
+      "category": "actions"
+    },
+    {
+      "word": "invite",
+      "band": "middle",
+      "category": "actions"
+    },
+    {
+      "word": "compare",
+      "band": "middle",
+      "category": "actions"
+    },
+    {
+      "word": "analyze",
+      "band": "advanced",
+      "category": "actions"
+    },
+    {
+      "word": "persuade",
+      "band": "advanced",
+      "category": "actions"
+    },
+    {
+      "word": "negotiate",
+      "band": "advanced",
+      "category": "actions"
+    },
+    {
+      "word": "emphasize",
+      "band": "advanced",
+      "category": "actions"
+    },
+    {
+      "word": "illustrate",
+      "band": "advanced",
+      "category": "actions"
+    },
+    {
+      "word": "investigate",
+      "band": "advanced",
+      "category": "actions"
+    },
+    {
+      "word": "demonstrate",
+      "band": "advanced",
+      "category": "actions"
+    },
+    {
+      "word": "accomplish",
+      "band": "advanced",
+      "category": "actions"
+    },
+    {
+      "word": "appreciate",
+      "band": "advanced",
+      "category": "actions"
+    },
+    {
+      "word": "hesitate",
+      "band": "advanced",
+      "category": "actions"
+    },
+    {
+      "word": "contribute",
+      "band": "advanced",
+      "category": "actions"
+    },
+    {
+      "word": "cat",
+      "band": "basic",
+      "category": "animals"
+    },
+    {
+      "word": "dog",
+      "band": "basic",
+      "category": "animals"
+    },
+    {
+      "word": "bird",
+      "band": "basic",
+      "category": "animals"
+    },
+    {
+      "word": "fish",
+      "band": "basic",
+      "category": "animals"
+    },
+    {
+      "word": "horse",
+      "band": "basic",
+      "category": "animals"
+    },
+    {
+      "word": "rabbit",
+      "band": "basic",
+      "category": "animals"
+    },
+    {
+      "word": "sheep",
+      "band": "basic",
+      "category": "animals"
+    },
+    {
+      "word": "mouse",
+      "band": "basic",
+      "category": "animals"
+    },
+    {
+      "word": "frog",
+      "band": "basic",
+      "category": "animals"
+    },
+    {
+      "word": "tiger",
+      "band": "middle",
+      "category": "animals"
+    },
+    {
+      "word": "monkey",
+      "band": "middle",
+      "category": "animals"
+    },
+    {
+      "word": "dolphin",
+      "band": "middle",
+      "category": "animals"
+    },
+    {
+      "word": "elephant",
+      "band": "middle",
+      "category": "animals"
+    },
+    {
+      "word": "chicken",
+      "band": "middle",
+      "category": "animals"
+    },
+    {
+      "word": "insect",
+      "band": "middle",
+      "category": "animals"
+    },
+    {
+      "word": "turtle",
+      "band": "middle",
+      "category": "animals"
+    },
+    {
+      "word": "spider",
+      "band": "middle",
+      "category": "animals"
+    },
+    {
+      "word": "penguin",
+      "band": "middle",
+      "category": "animals"
+    },
+    {
+      "word": "kangaroo",
+      "band": "middle",
+      "category": "animals"
+    },
+    {
+      "word": "habitat",
+      "band": "advanced",
+      "category": "animals"
+    },
+    {
+      "word": "predator",
+      "band": "advanced",
+      "category": "animals"
+    },
+    {
+      "word": "species",
+      "band": "advanced",
+      "category": "animals"
+    },
+    {
+      "word": "mammal",
+      "band": "advanced",
+      "category": "animals"
+    },
+    {
+      "word": "migration",
+      "band": "advanced",
+      "category": "animals"
+    },
+    {
+      "word": "wildlife",
+      "band": "advanced",
+      "category": "animals"
+    },
+    {
+      "word": "endangered",
+      "band": "advanced",
+      "category": "animals"
+    },
+    {
+      "word": "creature",
+      "band": "advanced",
+      "category": "animals"
+    },
+    {
+      "word": "livestock",
+      "band": "advanced",
+      "category": "animals"
+    },
+    {
+      "word": "instinct",
+      "band": "advanced",
+      "category": "animals"
+    },
+    {
+      "word": "amphibian",
+      "band": "advanced",
+      "category": "animals"
+    },
+    {
+      "word": "happy",
+      "band": "basic",
+      "category": "feelings"
+    },
+    {
+      "word": "sad",
+      "band": "basic",
+      "category": "feelings"
+    },
+    {
+      "word": "angry",
+      "band": "basic",
+      "category": "feelings"
+    },
+    {
+      "word": "tired",
+      "band": "basic",
+      "category": "feelings"
+    },
+    {
+      "word": "kind",
+      "band": "basic",
+      "category": "feelings"
+    },
+    {
+      "word": "brave",
+      "band": "basic",
+      "category": "feelings"
+    },
+    {
+      "word": "afraid",
+      "band": "basic",
+      "category": "feelings"
+    },
+    {
+      "word": "proud",
+      "band": "basic",
+      "category": "feelings"
+    },
+    {
+      "word": "calm",
+      "band": "basic",
+      "category": "feelings"
+    },
+    {
+      "word": "nervous",
+      "band": "middle",
+      "category": "feelings"
+    },
+    {
+      "word": "curious",
+      "band": "middle",
+      "category": "feelings"
+    },
+    {
+      "word": "lonely",
+      "band": "middle",
+      "category": "feelings"
+    },
+    {
+      "word": "excited",
+      "band": "middle",
+      "category": "feelings"
+    },
+    {
+      "word": "jealous",
+      "band": "middle",
+      "category": "feelings"
+    },
+    {
+      "word": "grateful",
+      "band": "middle",
+      "category": "feelings"
+    },
+    {
+      "word": "worried",
+      "band": "middle",
+      "category": "feelings"
+    },
+    {
+      "word": "cheerful",
+      "band": "middle",
+      "category": "feelings"
+    },
+    {
+      "word": "patient",
+      "band": "middle",
+      "category": "feelings"
+    },
+    {
+      "word": "surprised",
+      "band": "middle",
+      "category": "feelings"
+    },
+    {
+      "word": "anxious",
+      "band": "advanced",
+      "category": "feelings"
+    },
+    {
+      "word": "ambitious",
+      "band": "advanced",
+      "category": "feelings"
+    },
+    {
+      "word": "embarrassed",
+      "band": "advanced",
+      "category": "feelings"
+    },
+    {
+      "word": "disappointed",
+      "band": "advanced",
+      "category": "feelings"
+    },
+    {
+      "word": "frustrated",
+      "band": "advanced",
+      "category": "feelings"
+    },
+    {
+      "word": "enthusiastic",
+      "band": "advanced",
+      "category": "feelings"
+    },
+    {
+      "word": "reluctant",
+      "band": "advanced",
+      "category": "feelings"
+    },
+    {
+      "word": "sympathetic",
+      "band": "advanced",
+      "category": "feelings"
+    },
+    {
+      "word": "overwhelmed",
+      "band": "advanced",
+      "category": "feelings"
+    },
+    {
+      "word": "admiration",
+      "band": "advanced",
+      "category": "feelings"
+    },
+    {
+      "word": "gratitude",
+      "band": "advanced",
+      "category": "feelings"
+    },
+    {
+      "word": "rice",
+      "band": "basic",
+      "category": "food"
+    },
+    {
+      "word": "bread",
+      "band": "basic",
+      "category": "food"
+    },
+    {
+      "word": "milk",
+      "band": "basic",
+      "category": "food"
+    },
+    {
+      "word": "egg",
+      "band": "basic",
+      "category": "food"
+    },
+    {
+      "word": "apple",
+      "band": "basic",
+      "category": "food"
+    },
+    {
+      "word": "cake",
+      "band": "basic",
+      "category": "food"
+    },
+    {
+      "word": "soup",
+      "band": "basic",
+      "category": "food"
+    },
+    {
+      "word": "meat",
+      "band": "basic",
+      "category": "food"
+    },
+    {
+      "word": "fruit",
+      "band": "basic",
+      "category": "food"
+    },
+    {
+      "word": "cheese",
+      "band": "middle",
+      "category": "food"
+    },
+    {
+      "word": "butter",
+      "band": "middle",
+      "category": "food"
+    },
+    {
+      "word": "orange",
+      "band": "middle",
+      "category": "food"
+    },
+    {
+      "word": "banana",
+      "band": "middle",
+      "category": "food"
+    },
+    {
+      "word": "tomato",
+      "band": "middle",
+      "category": "food"
+    },
+    {
+      "word": "noodle",
+      "band": "middle",
+      "category": "food"
+    },
+    {
+      "word": "cookie",
+      "band": "middle",
+      "category": "food"
+    },
+    {
+      "word": "dinner",
+      "band": "middle",
+      "category": "food"
+    },
+    {
+      "word": "breakfast",
+      "band": "middle",
+      "category": "food"
+    },
+    {
+      "word": "vegetable",
+      "band": "middle",
+      "category": "food"
+    },
+    {
+      "word": "ingredient",
+      "band": "advanced",
+      "category": "food"
+    },
+    {
+      "word": "nutrition",
+      "band": "advanced",
+      "category": "food"
+    },
+    {
+      "word": "recipe",
+      "band": "advanced",
+      "category": "food"
+    },
+    {
+      "word": "beverage",
+      "band": "advanced",
+      "category": "food"
+    },
+    {
+      "word": "harvest",
+      "band": "advanced",
+      "category": "food"
+    },
+    {
+      "word": "cuisine",
+      "band": "advanced",
+      "category": "food"
+    },
+    {
+      "word": "flavor",
+      "band": "advanced",
+      "category": "food"
+    },
+    {
+      "word": "protein",
+      "band": "advanced",
+      "category": "food"
+    },
+    {
+      "word": "vitamin",
+      "band": "advanced",
+      "category": "food"
+    },
+    {
+      "word": "dessert",
+      "band": "advanced",
+      "category": "food"
+    },
+    {
+      "word": "appetite",
+      "band": "advanced",
+      "category": "food"
+    },
+    {
+      "word": "book",
+      "band": "basic",
+      "category": "items"
+    },
+    {
+      "word": "ball",
+      "band": "basic",
+      "category": "items"
+    },
+    {
+      "word": "cup",
+      "band": "basic",
+      "category": "items"
+    },
+    {
+      "word": "key",
+      "band": "basic",
+      "category": "items"
+    },
+    {
+      "word": "box",
+      "band": "basic",
+      "category": "items"
+    },
+    {
+      "word": "bag",
+      "band": "basic",
+      "category": "items"
+    },
+    {
+      "word": "pen",
+      "band": "basic",
+      "category": "items"
+    },
+    {
+      "word": "toy",
+      "band": "basic",
+      "category": "items"
+    },
+    {
+      "word": "chair",
+      "band": "basic",
+      "category": "items"
+    },
+    {
+      "word": "bottle",
+      "band": "middle",
+      "category": "items"
+    },
+    {
+      "word": "camera",
+      "band": "middle",
+      "category": "items"
+    },
+    {
+      "word": "jacket",
+      "band": "middle",
+      "category": "items"
+    },
+    {
+      "word": "ticket",
+      "band": "middle",
+      "category": "items"
+    },
+    {
+      "word": "wallet",
+      "band": "middle",
+      "category": "items"
+    },
+    {
+      "word": "umbrella",
+      "band": "middle",
+      "category": "items"
+    },
+    {
+      "word": "scissors",
+      "band": "middle",
+      "category": "items"
+    },
+    {
+      "word": "ladder",
+      "band": "middle",
+      "category": "items"
+    },
+    {
+      "word": "blanket",
+      "band": "middle",
+      "category": "items"
+    },
+    {
+      "word": "envelope",
+      "band": "middle",
+      "category": "items"
+    },
+    {
+      "word": "device",
+      "band": "advanced",
+      "category": "items"
+    },
+    {
+      "word": "gadget",
+      "band": "advanced",
+      "category": "items"
+    },
+    {
+      "word": "furniture",
+      "band": "advanced",
+      "category": "items"
+    },
+    {
+      "word": "equipment",
+      "band": "advanced",
+      "category": "items"
+    },
+    {
+      "word": "container",
+      "band": "advanced",
+      "category": "items"
+    },
+    {
+      "word": "ornament",
+      "band": "advanced",
+      "category": "items"
+    },
+    {
+      "word": "appliance",
+      "band": "advanced",
+      "category": "items"
+    },
+    {
+      "word": "mechanism",
+      "band": "advanced",
+      "category": "items"
+    },
+    {
+      "word": "accessory",
+      "band": "advanced",
+      "category": "items"
+    },
+    {
+      "word": "utensil",
+      "band": "advanced",
+      "category": "items"
+    },
+    {
+      "word": "parcel",
+      "band": "advanced",
+      "category": "items"
+    },
+    {
+      "word": "sun",
+      "band": "basic",
+      "category": "nature"
+    },
+    {
+      "word": "sky",
+      "band": "basic",
+      "category": "nature"
+    },
+    {
+      "word": "sea",
+      "band": "basic",
+      "category": "nature"
+    },
+    {
+      "word": "tree",
+      "band": "basic",
+      "category": "nature"
+    },
+    {
+      "word": "rain",
+      "band": "basic",
+      "category": "nature"
+    },
+    {
+      "word": "star",
+      "band": "basic",
+      "category": "nature"
+    },
+    {
+      "word": "moon",
+      "band": "basic",
+      "category": "nature"
+    },
+    {
+      "word": "wind",
+      "band": "basic",
+      "category": "nature"
+    },
+    {
+      "word": "leaf",
+      "band": "basic",
+      "category": "nature"
+    },
+    {
+      "word": "forest",
+      "band": "middle",
+      "category": "nature"
+    },
+    {
+      "word": "river",
+      "band": "middle",
+      "category": "nature"
+    },
+    {
+      "word": "mountain",
+      "band": "middle",
+      "category": "nature"
+    },
+    {
+      "word": "island",
+      "band": "middle",
+      "category": "nature"
+    },
+    {
+      "word": "flower",
+      "band": "middle",
+      "category": "nature"
+    },
+    {
+      "word": "cloud",
+      "band": "middle",
+      "category": "nature"
+    },
+    {
+      "word": "storm",
+      "band": "middle",
+      "category": "nature"
+    },
+    {
+      "word": "desert",
+      "band": "middle",
+      "category": "nature"
+    },
+    {
+      "word": "valley",
+      "band": "middle",
+      "category": "nature"
+    },
+    {
+      "word": "ocean",
+      "band": "middle",
+      "category": "nature"
+    },
+    {
+      "word": "climate",
+      "band": "advanced",
+      "category": "nature"
+    },
+    {
+      "word": "drought",
+      "band": "advanced",
+      "category": "nature"
+    },
+    {
+      "word": "glacier",
+      "band": "advanced",
+      "category": "nature"
+    },
+    {
+      "word": "wetland",
+      "band": "advanced",
+      "category": "nature"
+    },
+    {
+      "word": "ecosystem",
+      "band": "advanced",
+      "category": "nature"
+    },
+    {
+      "word": "erosion",
+      "band": "advanced",
+      "category": "nature"
+    },
+    {
+      "word": "altitude",
+      "band": "advanced",
+      "category": "nature"
+    },
+    {
+      "word": "peninsula",
+      "band": "advanced",
+      "category": "nature"
+    },
+    {
+      "word": "vegetation",
+      "band": "advanced",
+      "category": "nature"
+    },
+    {
+      "word": "horizon",
+      "band": "advanced",
+      "category": "nature"
+    },
+    {
+      "word": "wilderness",
+      "band": "advanced",
+      "category": "nature"
+    },
+    {
+      "word": "baby",
+      "band": "basic",
+      "category": "people"
+    },
+    {
+      "word": "girl",
+      "band": "basic",
+      "category": "people"
+    },
+    {
+      "word": "boy",
+      "band": "basic",
+      "category": "people"
+    },
+    {
+      "word": "friend",
+      "band": "basic",
+      "category": "people"
+    },
+    {
+      "word": "mother",
+      "band": "basic",
+      "category": "people"
+    },
+    {
+      "word": "father",
+      "band": "basic",
+      "category": "people"
+    },
+    {
+      "word": "family",
+      "band": "basic",
+      "category": "people"
+    },
+    {
+      "word": "doctor",
+      "band": "basic",
+      "category": "people"
+    },
+    {
+      "word": "sister",
+      "band": "basic",
+      "category": "people"
+    },
+    {
+      "word": "neighbor",
+      "band": "middle",
+      "category": "people"
+    },
+    {
+      "word": "cousin",
+      "band": "middle",
+      "category": "people"
+    },
+    {
+      "word": "stranger",
+      "band": "middle",
+      "category": "people"
+    },
+    {
+      "word": "captain",
+      "band": "middle",
+      "category": "people"
+    },
+    {
+      "word": "artist",
+      "band": "middle",
+      "category": "people"
+    },
+    {
+      "word": "farmer",
+      "band": "middle",
+      "category": "people"
+    },
+    {
+      "word": "visitor",
+      "band": "middle",
+      "category": "people"
+    },
+    {
+      "word": "passenger",
+      "band": "middle",
+      "category": "people"
+    },
+    {
+      "word": "customer",
+      "band": "middle",
+      "category": "people"
+    },
+    {
+      "word": "audience",
+      "band": "middle",
+      "category": "people"
+    },
+    {
+      "word": "ancestor",
+      "band": "advanced",
+      "category": "people"
+    },
+    {
+      "word": "colleague",
+      "band": "advanced",
+      "category": "people"
+    },
+    {
+      "word": "guardian",
+      "band": "advanced",
+      "category": "people"
+    },
+    {
+      "word": "opponent",
+      "band": "advanced",
+      "category": "people"
+    },
+    {
+      "word": "volunteer",
+      "band": "advanced",
+      "category": "people"
+    },
+    {
+      "word": "companion",
+      "band": "advanced",
+      "category": "people"
+    },
+    {
+      "word": "immigrant",
+      "band": "advanced",
+      "category": "people"
+    },
+    {
+      "word": "descendant",
+      "band": "advanced",
+      "category": "people"
+    },
+    {
+      "word": "specialist",
+      "band": "advanced",
+      "category": "people"
+    },
+    {
+      "word": "politician",
+      "band": "advanced",
+      "category": "people"
+    },
+    {
+      "word": "celebrity",
+      "band": "advanced",
+      "category": "people"
+    },
+    {
+      "word": "home",
+      "band": "basic",
+      "category": "places"
+    },
+    {
+      "word": "park",
+      "band": "basic",
+      "category": "places"
+    },
+    {
+      "word": "shop",
+      "band": "basic",
+      "category": "places"
+    },
+    {
+      "word": "city",
+      "band": "basic",
+      "category": "places"
+    },
+    {
+      "word": "town",
+      "band": "basic",
+      "category": "places"
+    },
+    {
+      "word": "farm",
+      "band": "basic",
+      "category": "places"
+    },
+    {
+      "word": "beach",
+      "band": "basic",
+      "category": "places"
+    },
+    {
+      "word": "house",
+      "band": "basic",
+      "category": "places"
+    },
+    {
+      "word": "street",
+      "band": "basic",
+      "category": "places"
+    },
+    {
+      "word": "village",
+      "band": "middle",
+      "category": "places"
+    },
+    {
+      "word": "station",
+      "band": "middle",
+      "category": "places"
+    },
+    {
+      "word": "museum",
+      "band": "middle",
+      "category": "places"
+    },
+    {
+      "word": "library",
+      "band": "middle",
+      "category": "places"
+    },
+    {
+      "word": "market",
+      "band": "middle",
+      "category": "places"
+    },
+    {
+      "word": "factory",
+      "band": "middle",
+      "category": "places"
+    },
+    {
+      "word": "castle",
+      "band": "middle",
+      "category": "places"
+    },
+    {
+      "word": "harbor",
+      "band": "middle",
+      "category": "places"
+    },
+    {
+      "word": "airport",
+      "band": "middle",
+      "category": "places"
+    },
+    {
+      "word": "stadium",
+      "band": "middle",
+      "category": "places"
+    },
+    {
+      "word": "landmark",
+      "band": "advanced",
+      "category": "places"
+    },
+    {
+      "word": "monument",
+      "band": "advanced",
+      "category": "places"
+    },
+    {
+      "word": "suburb",
+      "band": "advanced",
+      "category": "places"
+    },
+    {
+      "word": "settlement",
+      "band": "advanced",
+      "category": "places"
+    },
+    {
+      "word": "residence",
+      "band": "advanced",
+      "category": "places"
+    },
+    {
+      "word": "premises",
+      "band": "advanced",
+      "category": "places"
+    },
+    {
+      "word": "facility",
+      "band": "advanced",
+      "category": "places"
+    },
+    {
+      "word": "outskirts",
+      "band": "advanced",
+      "category": "places"
+    },
+    {
+      "word": "territory",
+      "band": "advanced",
+      "category": "places"
+    },
+    {
+      "word": "neighborhood",
+      "band": "advanced",
+      "category": "places"
+    },
+    {
+      "word": "skyscraper",
+      "band": "advanced",
+      "category": "places"
+    },
+    {
+      "word": "class",
+      "band": "basic",
+      "category": "school"
+    },
+    {
+      "word": "desk",
+      "band": "basic",
+      "category": "school"
+    },
+    {
+      "word": "test",
+      "band": "basic",
+      "category": "school"
+    },
+    {
+      "word": "math",
+      "band": "basic",
+      "category": "school"
+    },
+    {
+      "word": "word",
+      "band": "basic",
+      "category": "school"
+    },
+    {
+      "word": "page",
+      "band": "basic",
+      "category": "school"
+    },
+    {
+      "word": "note",
+      "band": "basic",
+      "category": "school"
+    },
+    {
+      "word": "rule",
+      "band": "basic",
+      "category": "school"
+    },
+    {
+      "word": "team",
+      "band": "basic",
+      "category": "school"
+    },
+    {
+      "word": "lesson",
+      "band": "middle",
+      "category": "school"
+    },
+    {
+      "word": "homework",
+      "band": "middle",
+      "category": "school"
+    },
+    {
+      "word": "subject",
+      "band": "middle",
+      "category": "school"
+    },
+    {
+      "word": "grade",
+      "band": "middle",
+      "category": "school"
+    },
+    {
+      "word": "project",
+      "band": "middle",
+      "category": "school"
+    },
+    {
+      "word": "science",
+      "band": "middle",
+      "category": "school"
+    },
+    {
+      "word": "history",
+      "band": "middle",
+      "category": "school"
+    },
+    {
+      "word": "question",
+      "band": "middle",
+      "category": "school"
+    },
+    {
+      "word": "answer",
+      "band": "middle",
+      "category": "school"
+    },
+    {
+      "word": "student",
+      "band": "middle",
+      "category": "school"
+    },
+    {
+      "word": "curriculum",
+      "band": "advanced",
+      "category": "school"
+    },
+    {
+      "word": "assignment",
+      "band": "advanced",
+      "category": "school"
+    },
+    {
+      "word": "scholarship",
+      "band": "advanced",
+      "category": "school"
+    },
+    {
+      "word": "semester",
+      "band": "advanced",
+      "category": "school"
+    },
+    {
+      "word": "tuition",
+      "band": "advanced",
+      "category": "school"
+    },
+    {
+      "word": "discipline",
+      "band": "advanced",
+      "category": "school"
+    },
+    {
+      "word": "academic",
+      "band": "advanced",
+      "category": "school"
+    },
+    {
+      "word": "graduate",
+      "band": "advanced",
+      "category": "school"
+    },
+    {
+      "word": "attendance",
+      "band": "advanced",
+      "category": "school"
+    },
+    {
+      "word": "examination",
+      "band": "advanced",
+      "category": "school"
+    },
+    {
+      "word": "lecture",
+      "band": "advanced",
+      "category": "school"
+    },
+    {
+      "word": "bus",
+      "band": "basic",
+      "category": "travel"
+    },
+    {
+      "word": "car",
+      "band": "basic",
+      "category": "travel"
+    },
+    {
+      "word": "boat",
+      "band": "basic",
+      "category": "travel"
+    },
+    {
+      "word": "road",
+      "band": "basic",
+      "category": "travel"
+    },
+    {
+      "word": "trip",
+      "band": "basic",
+      "category": "travel"
+    },
+    {
+      "word": "map",
+      "band": "basic",
+      "category": "travel"
+    },
+    {
+      "word": "plane",
+      "band": "basic",
+      "category": "travel"
+    },
+    {
+      "word": "bike",
+      "band": "basic",
+      "category": "travel"
+    },
+    {
+      "word": "tour",
+      "band": "basic",
+      "category": "travel"
+    },
+    {
+      "word": "travel",
+      "band": "middle",
+      "category": "travel"
+    },
+    {
+      "word": "journey",
+      "band": "middle",
+      "category": "travel"
+    },
+    {
+      "word": "luggage",
+      "band": "middle",
+      "category": "travel"
+    },
+    {
+      "word": "hotel",
+      "band": "middle",
+      "category": "travel"
+    },
+    {
+      "word": "passport",
+      "band": "middle",
+      "category": "travel"
+    },
+    {
+      "word": "suitcase",
+      "band": "middle",
+      "category": "travel"
+    },
+    {
+      "word": "voyage",
+      "band": "middle",
+      "category": "travel"
+    },
+    {
+      "word": "tourist",
+      "band": "middle",
+      "category": "travel"
+    },
+    {
+      "word": "guide",
+      "band": "middle",
+      "category": "travel"
+    },
+    {
+      "word": "distance",
+      "band": "middle",
+      "category": "travel"
+    },
+    {
+      "word": "destination",
+      "band": "advanced",
+      "category": "travel"
+    },
+    {
+      "word": "itinerary",
+      "band": "advanced",
+      "category": "travel"
+    },
+    {
+      "word": "expedition",
+      "band": "advanced",
+      "category": "travel"
+    },
+    {
+      "word": "transportation",
+      "band": "advanced",
+      "category": "travel"
+    },
+    {
+      "word": "accommodation",
+      "band": "advanced",
+      "category": "travel"
+    },
+    {
+      "word": "departure",
+      "band": "advanced",
+      "category": "travel"
+    },
+    {
+      "word": "arrival",
+      "band": "advanced",
+      "category": "travel"
+    },
+    {
+      "word": "transit",
+      "band": "advanced",
+      "category": "travel"
+    },
+    {
+      "word": "commuting",
+      "band": "advanced",
+      "category": "travel"
+    },
+    {
+      "word": "adventure",
+      "band": "advanced",
+      "category": "travel"
+    },
+    {
+      "word": "passage",
+      "band": "advanced",
+      "category": "travel"
+    }
+  ]
+}
