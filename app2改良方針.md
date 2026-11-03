@@ -77,9 +77,9 @@
   - なし：`【キーワード】なし`
 - 検証：欄の増減（1→6→上限抑止）、×削除、全空送信、`settings.keywords` の送信、文の種類連動セレクトとの干渉なしを確認。
 
-### 6.1 ランダム3語（2026-11-03 実装・Pages 公開待ち）
+### 6.1 ランダム3語（2026-11-03 実装・Pages 公開済）
 
-> 状態: ローカル実装・独立テスト済み。実装 commit `273dc43`（初期）＋`0344598`（検証硬化・timeout）。**Pages への公開は未実施**（main の push が次の操作）。GAS / Worker は変更なしで、本番 app2 は **v54** のまま。GAS 側に新しい API・設定は追加せず、選んだ3語を通常の `keywords` として送るだけ。
+> 状態: 実装・独立テスト・Pages 公開・公開後 read-only 検証まで完了。実装 commit `273dc43`（初期）＋`0344598`（検証硬化・timeout）、公開 artifact commit は **`84726d2`**（Tests `41572478690` / Pages `41572478695` success）。GAS / Worker は変更なしで、本番 app2 は **v54** のまま。GAS 側に新しい API・設定は追加せず、選んだ3語を通常の `keywords` として送るだけ。
 
 - 配置: `＋ キーワードを追加（最大6個）` ボタンの直下に `🎲 ランダムに3語` ボタンと補足「現在のキーワードを置き換えます」。押すと確認ダイアログなしで、既存のキーワード欄を**全削除→3語**に置換する（追記ではない）。置換後にキーワード入力へ focus しない（モバイルのキーボードを出さない。実 iOS は未確認）。キーワード以外の設定・履歴・プレビューは変更しない。
 - 候補: `site/app2/keyword-pool.json`（same-origin）。教室向けに手選定した**300語**で、内訳は basic 90 / middle 100 / advanced 110、10カテゴリ（actions / animals / feelings / food / items / nature / people / places / school / travel）各30語。`band` は**難度帯の目安**（basic ≒ 7〜6級、middle ≒ 5〜4〜3級、advanced ≒ 準2〜1級）で、**英検・CEFR の公式判定ではない**。意味・例文は持たない。既存辞書 `INV` とは独立（300語中293語が収録、未収録7語は README に記載）。
@@ -88,7 +88,8 @@
 - アクセシビリティ / テーマ: 状態は `role="status"` ＋ `aria-live="polite"`、実行中はボタンを `disabled` ＋ `aria-busy="true"`。標準・ポップ・フォレストの3テーマに対応（pop / forest は `site/themes/*.css` で上書き）。
 - 変更ファイル: `site/app2/index.html`、`site/app2/keyword-pool.json`、`site/app2/keyword-pool.README.md`、`site/themes/pop.css` / `forest.css`、`scripts/tests/app2-random-keywords.test.cjs`。GAS (`site-gas/site-app2-backend`) と Worker は変更なし。
 - 検証（独立 `test`）: **235/235 pass**。3テーマ × 2サイズの UI **174 assert** ＋ timeout **12 assert**、overflow 0・想定外エラー 0（注入した404を除く）。headless では押下後の focus は `BODY`（実 iOS キーボードは未確認）。証拠はローカル Temp `app2-random-keywords-final-20261103/final`（リポジトリ外）。実 AI 生成・本番 Drive の追加操作はこの機能のテストでは行っていない。
-- 未確認・懸念: Pages 公開と公開後の read-only 検証、実機スマートフォンのキーボード・タップ、実データでの見た目。語の意味の教材適切性はプールの手選定に依存する。
+- 公開後 read-only 検証（2026-11-03）: 公開版で **90 assert pass**（3テーマ × 2サイズ）。HTML・`keyword-pool.json`・pop/forest CSS・transport の**全5 asset が HTTP 200** で git HEAD の blob と byte/SHA 一致。overflow 0・押下後のキーワード入力 focus なし・想定外エラー 0・network failure 0。公開 UI テストは認証・辞書・履歴のみ stub で、picker / pool / CSS は実物。backend AI 呼出・mutation は 0（UI からの生成 AI 追加もなし）。証拠はローカル Temp `app2-random-keywords-published-20261103/REPORT`（リポジトリ外）。
+- 未確認・懸念: 実機スマートフォンのキーボード・タップ、実データでの見た目。語の意味の教材適切性はプールの手選定に依存する。
 
 ## 7. AI移行（Ollama Cloud / Gemma4 31B）と対訳表示 — 2026-10-26・app2 `@50` で公開済・実 API smoke 確認済（`@49`）
 
@@ -608,7 +609,7 @@
 - 証拠: ローカル `eiken-benchmark-release-20261103/reconcile/2026-11-02T18-24-36-350Z`（リポジトリ外）。実ID・メール・鍵・認証パスは記載しない。
 - **未実施**: GitHub push（main次実施）。比較採点・モデル決定・cleanup・v54公開は完了（cleanup PASS）。
 
-## 12. 最終コード・クリーンアップ・v54公開完了（2026-11-03・比較docsのpush完了／ランダム3語はPages公開待ち）
+## 12. 最終コード・クリーンアップ・v54公開・ランダム3語Pages公開完了（2026-11-03）
 
 - **最終コード**: source commit `5c8ee7a`、code `b6907392f2df62e86eec64198f5a03fe5024266e5fed3613e2d16fdb492426bb`、bundle `3e8f6bffe8f4b1b6329859c003f01c0890b1e457053a1ef14d25354ce13a754e`、tests `e91d9de368fd8988e89fced264a6f867a6d0e12f78a49b725f25e877caa7e244`。`BENCHMARK_MODEL_OVERRIDE_ENABLED=false` を追加。
 - **override 無効化**: strict owner チェック後でも owner には `benchmark_disabled` を**台帳・quota・AI の前**に返す。一般・匿名は `not_allowed`。通常のGemma生成は `model` metadata を保存できる。比較用helperは廃止せず、大規模リファクタもしていない。
@@ -618,5 +619,6 @@
 - **公開内容**: 通常生成Gemma、審査・翻訳Gemma固定、benchmark override disabled。公開sourceは独立221 passのもののみで、**random keywordsは未含む**。
 - **cleanup 実行PASS**: delete POST **10件: success 10 / unknown 0**、対象DS残**0**、採用GM10現存（hash不変）、保護既存**59/59現存**、最終DB**69**、ローカル全文20 hash不変、delete guard complete、追加生成・翻訳対象の削除なし。`decision.json` の planHash `28646…` は事前確認済み。証拠は `eiken-benchmark-run-audit-20261103/delete-loser-execute.log` / `cleanup-final-verification.json`、root `analysis/CLEANUP-RESULT.md` / `.json`。
 - **Gemma warning**: 採用Gemma側のscientific warningは**3級の教材1件**（両モデルそれぞれ3級1件critical）。**比較評価レポートに記録**し、原文は不変・hash20維持のため編集しない。今回はDS10限定削除のため削除していない。
-- **対象外（当時）**: 新ユーザー向けrandom keyword計画は当時**別件worktreeで実装中・未公開**で、v54 scope外として当時のdocs・codeへ便乗実装しなかった。**現在は `273dc43`＋`0344598` で実装済み（§6.1）だが、v54公開sourceには未含のまま。Pages公開は未実施**。
-- **状態**: 実装・比較・cleanup・**v54公開まで完了**。比較docsは **commit `00d1c86` までGitHub push済み**（Tests `41570312141` / Pages `41570312069` success）。以降の `273dc43`＋`0344598`（ランダム3語）はmainローカルにあり、本docs更新（未コミット）と合わせて**Pages公開は未実施**（mainの次の操作）。本節より前の各節に残る「GitHub pushはpending」は当時の記録として保持する。docs更新前のHEADは `0344598` clean。
+- **対象外（当時）**: 新ユーザー向けrandom keyword計画は当時**別件worktreeで実装中・未公開**で、v54 scope外として当時のdocs・codeへ便乗実装しなかった。**後続で `273dc43`＋`0344598` として実装し、Pages 公開済み（公開 artifact commit `84726d2`。§6.1）。v54公開sourceには未含のまま**。
+- **残課題**: 採用Gemma側の3級1件は science fact-check が必要（削除scope外・原文/hashは不変）。モデル比較は n=1 のため普遍的な優劣を断定しない。`band` は難度帯の目安で、英検・CEFR の公式数値保証ではない。
+- **状態**: 実装・比較・cleanup・**v54公開**・**ランダム3語のPages公開と公開後検証まで完了**。比較docsは commit `00d1c86`、ランダム3語の実装は `273dc43`＋`0344598`、docs は **`84726d2` までGitHub push済み**（Tests `41570312141` / Pages `41570312069` success、続く Tests `41572478690` / Pages `41572478695` success）。**Pages 公開 artifact commit は `84726d2`**。本docsの今回更新は main が `[skip ci]` で commit 予定で、その新 docs commit の SHA は未確定（創作しない）。本節より前の各節に残る「GitHub pushはpending」は当時の記録として保持する。
