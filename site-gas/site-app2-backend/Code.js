@@ -7,6 +7,7 @@
 // ・AI 生成/審査/翻訳（Script Properties: OLLAMA_API_KEY のみ。Ollama Cloud 公式 API https://ollama.com/api/chat、
 //   生成の既定 model=gemma4:31b、審査・翻訳は gemma4:31b 固定。stream=false、think=false。
 //   生成モデルの切替はオーナー限定の benchmark_model だけ（許可: gemma4:31b / deepseek-v4.1-flash）。
+//   ただし比較用APIは既定で無効（BENCHMARK_MODEL_OVERRIDE_ENABLED=false）。通常UIには出さない。
 //   ZEN/OPENCODE への暗黙フォールバックはしない）
 // ・Ollama Cloud は Structured Outputs 非対応のため format/schema は送らない。JSON はプロンプトで要求し厳格検証する
 // ・生成物は共有フォルダに保存（Script Properties: FOLDER_ID。未設定なら「生成済み長文」を自動作成）
@@ -44,6 +45,7 @@ var INDEX_CACHE_TTL   = 60;
 var API_BASE      = 'https://ollama.com/api';
 var MODEL         = 'gemma4:31b'; // 生成の既定。Ollama Cloud 公式。ローカルCLIの gemma4:cloud とは別名（APIはこの名前）
 var AI_GENERATION_MODELS = ['gemma4:31b', 'deepseek-v4.1-flash']; // benchmark_model で指定できる生成モデル
+var BENCHMARK_MODEL_OVERRIDE_ENABLED = false; // 比較専用API。通常運用は常時false（有効化はsourceで明示変更）
 var AI_JUDGE_MODEL = 'gemma4:31b'; // 審査は固定（MODEL を変えても引きずらない）
 var AI_TRANS_MODEL = 'gemma4:31b'; // 翻訳は固定（MODEL を変えても引きずらない）
 var OLLAMA_KEY_PROP = 'OLLAMA_API_KEY';
@@ -1137,12 +1139,15 @@ function handleGenerateRequest_(body, auth, rid) {
   }
 
   // オーナー限定の生成モデル指定（benchmark_model）。厳格検証済みの auth.ok と OWNER_EMAIL 一致だけを認め、
-  // 台帳・匿名 quota・AI より前に拒否する。settings.model など未検証キーでは切り替えない。
+  // 台帳・匿名 quota・AI より前に拒否する。比較専用APIは通常運用では無効（flag false）。
   var benchmarkRequested = Object.prototype.hasOwnProperty.call(body, 'benchmark_model');
   var requestedModel = '';
   if (benchmarkRequested) {
     if (!(auth && auth.ok && isOwnerForEmail_(auth.email))) {
       return jsonOut_({ ok: false, error: '生成モデルの指定はオーナーのみ利用できます', code: 'not_allowed', rid: rid });
+    }
+    if (!isBenchmarkModelOverrideEnabled_()) {
+      return jsonOut_({ ok: false, error: '生成モデルの切り替えは現在無効です', code: 'benchmark_disabled', rid: rid });
     }
     requestedModel = normalizeAiModel_(body.benchmark_model);
     if (!requestedModel) {
@@ -1864,6 +1869,14 @@ function truncateUnicode_(value, maxLen) {
 // 公式: POST https://ollama.com/api/chat（Bearer OLLAMA_API_KEY）。stream=false で message.content を読む。
 // 思考は think=false で無効化する。Cloud は Structured Outputs 非対応のため format/schema は送らない。
 // 秘密（APIキー・応答全文・プロンプト）はログに出さない。
+
+/**
+ * 比較専用 benchmark_model を有効にするか。本番既定は false。
+ * 再有効化は source の BENCHMARK_MODEL_OVERRIDE_ENABLED を明示的に true へ変える。
+ */
+function isBenchmarkModelOverrideEnabled_() {
+  return BENCHMARK_MODEL_OVERRIDE_ENABLED === true;
+}
 
 /**
  * 生成モデル名の allowlist 正規化。文字列以外・許可外・空は '' を返す（例外にしない）。

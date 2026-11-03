@@ -487,6 +487,12 @@ function setupPdfdrop(opts) {
   }, opts.props || {}), PDFDROP_PATH);
 }
 
+/** 比較専用APIは本番既定 false。benchmark の既存unitだけ fixture で有効化する */
+function enableBenchmarkOverride(rt) {
+  rt.ctx.BENCHMARK_MODEL_OVERRIDE_ENABLED = true;
+  return rt;
+}
+
 function tokenFor(rt, email, extra) {
   const token = 'idt-' + sha256Hex(email + '|' + Math.random()).slice(0, 24);
   rt.net.registerToken(token, Object.assign({ email }, extra || {}));
@@ -946,8 +952,59 @@ function idemEntryCount(rt) {
   return Array.from(rt.props.keys()).filter((k) => String(k).indexOf('IDEM_') === 0).length;
 }
 
-test('app2: オーナーの benchmark_model は生成だけ切り替え、審査は Gemma 固定・record/receipt に実モデルを残す', () => {
+function assertNoGenSideEffects(rt, label) {
+  assert.equal(rt.net.aiCalls(), 0, label + ': AI 0');
+  assert.equal(genStateCount(rt), 0, label + ': 匿名枠0');
+  assert.equal(savedCount(rt), 0, label + ': 保存0');
+  assert.equal(idemEntryCount(rt), 0, label + ': 台帳0');
+}
+
+test('app2: 既定では benchmark_model を閉じ、strict owner チェック→benchmark_disabled の順で副作用前に拒否する', () => {
+  const owner = setupApp2();
+  assert.equal(owner.ctx.BENCHMARK_MODEL_OVERRIDE_ENABLED, false, '本番既定はfalse');
+  const ownerRes = owner.postJson(genBody(owner, { benchmark_model: 'deepseek-v4.1-flash' }));
+  assert.equal(ownerRes.json.ok, false);
+  assert.equal(ownerRes.json.code, 'benchmark_disabled');
+  assertNoGenSideEffects(owner, 'owner valid model');
+
+  // flag が閉じていれば、モデル値の検証より先に benchmark_disabled（配列でも同じ）
+  const ownerBad = setupApp2();
+  const ownerBadRes = ownerBad.postJson(genBody(ownerBad, { benchmark_model: ['gemma4:31b'] }));
+  assert.equal(ownerBadRes.json.ok, false);
+  assert.equal(ownerBadRes.json.code, 'benchmark_disabled');
+  assertNoGenSideEffects(ownerBad, 'owner invalid model');
+
+  // strict owner チェックは flag より先。非オーナー許可教師・匿名は not_allowed
+  const teacher = setupApp2({ props: { ALLOWED_EMAILS: TEACHER + ',' + STUDENT, OPEN_GENERATE: 'true' } });
+  const teacherRes = teacher.postJson(genBody(teacher, {
+    id_token: tokenFor(teacher, STUDENT),
+    benchmark_model: 'deepseek-v4.1-flash',
+  }));
+  assert.equal(teacherRes.json.ok, false);
+  assert.equal(teacherRes.json.code, 'not_allowed');
+  assertNoGenSideEffects(teacher, 'non-owner teacher');
+
+  const anon = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  const anonRes = anon.postJson(genBody(anon, { id_token: '', benchmark_model: 'deepseek-v4.1-flash' }));
+  assert.equal(anonRes.json.ok, false);
+  assert.equal(anonRes.json.code, 'not_allowed');
+  assertNoGenSideEffects(anon, 'anonymous');
+});
+
+test('app2: benchmark 無効時も通常 Gemma 生成は従来どおり保存できる', () => {
   const rt = setupApp2();
+  assert.equal(rt.ctx.BENCHMARK_MODEL_OVERRIDE_ENABLED, false);
+  rt.net.ai.push(genOk(RECORD_TEXT), modOk());
+  const res = rt.postJson(genBody(rt));
+  assert.equal(res.json.ok, true, JSON.stringify(res.json));
+  assert.equal(res.json.item.model, 'gemma4:31b', '既定MODELはGemma');
+  assert.deepEqual(aiPayloads(rt).map((p) => p.model), ['gemma4:31b', 'gemma4:31b']);
+  assert.equal(savedCount(rt), 1);
+  assert.equal(Object.prototype.hasOwnProperty.call(res.json.item.settings, 'model'), false, 'settings に model を残さない');
+});
+
+test('app2: オーナーの benchmark_model は生成だけ切り替え、審査は Gemma 固定・record/receipt に実モデルを残す', () => {
+  const rt = enableBenchmarkOverride(setupApp2());
   rt.net.ai.push(genOk(RECORD_TEXT), modOk());
   const body = genBody(rt, { benchmark_model: 'deepseek-v4.1-flash' });
   const res = rt.postJson(body);
@@ -967,7 +1024,7 @@ test('app2: オーナーの benchmark_model は生成だけ切り替え、審査
 });
 
 test('app2: benchmark_model は gemma4:31b も明示でき、通常 Gemma と同じ生成モデルで保存する', () => {
-  const rt = setupApp2();
+  const rt = enableBenchmarkOverride(setupApp2());
   rt.net.ai.push(genOk(RECORD_TEXT), modOk());
   const body = genBody(rt, { benchmark_model: 'gemma4:31b' });
   const res = rt.postJson(body);
@@ -986,7 +1043,7 @@ test('app2: benchmark_model はオーナー以外・匿名・不正トークン�
     {
       label: 'allowed teacher (non-owner)',
       make() {
-        const rt = setupApp2({ props: { ALLOWED_EMAILS: TEACHER + ',' + STUDENT, OPEN_GENERATE: 'true' } });
+        const rt = enableBenchmarkOverride(setupApp2({ props: { ALLOWED_EMAILS: TEACHER + ',' + STUDENT, OPEN_GENERATE: 'true' } }));
         return { rt, res: rt.postJson(genBody(rt, { id_token: tokenFor(rt, STUDENT), benchmark_model: 'deepseek-v4.1-flash' })) };
       },
       code: 'not_allowed',
@@ -994,7 +1051,7 @@ test('app2: benchmark_model はオーナー以外・匿名・不正トークン�
     {
       label: 'anonymous',
       make() {
-        const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+        const rt = enableBenchmarkOverride(setupApp2({ props: { OPEN_GENERATE: 'true' } }));
         return { rt, res: rt.postJson(genBody(rt, { id_token: '', benchmark_model: 'deepseek-v4.1-flash' })) };
       },
       code: 'not_allowed',
@@ -1002,7 +1059,7 @@ test('app2: benchmark_model はオーナー以外・匿名・不正トークン�
     {
       label: 'invalid token',
       make() {
-        const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+        const rt = enableBenchmarkOverride(setupApp2({ props: { OPEN_GENERATE: 'true' } }));
         const jwt = forgedJwt({ email: TEACHER, aud: CLIENT_ID, iss: 'https://accounts.google.com', exp: Math.floor(Date.now() / 1000) + 3600, email_verified: true });
         return { rt, res: rt.postJson(genBody(rt, { id_token: jwt, benchmark_model: 'deepseek-v4.1-flash' })) };
       },
@@ -1011,7 +1068,7 @@ test('app2: benchmark_model はオーナー以外・匿名・不正トークン�
     {
       label: 'unverified email token',
       make() {
-        const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+        const rt = enableBenchmarkOverride(setupApp2({ props: { OPEN_GENERATE: 'true' } }));
         const token = 'idt-unverified-benchmark';
         rt.net.registerToken(token, { email: TEACHER, email_verified: 'false' });
         return { rt, res: rt.postJson(genBody(rt, { id_token: token, benchmark_model: 'deepseek-v4.1-flash' })) };
@@ -1021,7 +1078,7 @@ test('app2: benchmark_model はオーナー以外・匿名・不正トークン�
     {
       label: 'owner invalid model',
       make() {
-        const rt = setupApp2();
+        const rt = enableBenchmarkOverride(setupApp2());
         return { rt, res: rt.postJson(genBody(rt, { benchmark_model: 'gemma4:cloud' })) };
       },
       code: 'invalid_model',
@@ -1029,7 +1086,7 @@ test('app2: benchmark_model はオーナー以外・匿名・不正トークン�
     {
       label: 'owner empty model',
       make() {
-        const rt = setupApp2();
+        const rt = enableBenchmarkOverride(setupApp2());
         return { rt, res: rt.postJson(genBody(rt, { benchmark_model: '' })) };
       },
       code: 'invalid_model',
@@ -1037,7 +1094,7 @@ test('app2: benchmark_model はオーナー以外・匿名・不正トークン�
     {
       label: 'owner null model',
       make() {
-        const rt = setupApp2();
+        const rt = enableBenchmarkOverride(setupApp2());
         return { rt, res: rt.postJson(genBody(rt, { benchmark_model: null })) };
       },
       code: 'invalid_model',
@@ -1045,7 +1102,7 @@ test('app2: benchmark_model はオーナー以外・匿名・不正トークン�
     {
       label: 'owner numeric model',
       make() {
-        const rt = setupApp2();
+        const rt = enableBenchmarkOverride(setupApp2());
         return { rt, res: rt.postJson(genBody(rt, { benchmark_model: 123 })) };
       },
       code: 'invalid_model',
@@ -1053,7 +1110,7 @@ test('app2: benchmark_model はオーナー以外・匿名・不正トークン�
     {
       label: 'owner array model',
       make() {
-        const rt = setupApp2();
+        const rt = enableBenchmarkOverride(setupApp2());
         return { rt, res: rt.postJson(genBody(rt, { benchmark_model: ['gemma4:31b'] })) };
       },
       code: 'invalid_model',
@@ -1061,7 +1118,7 @@ test('app2: benchmark_model はオーナー以外・匿名・不正トークン�
     {
       label: 'owner object model',
       make() {
-        const rt = setupApp2();
+        const rt = enableBenchmarkOverride(setupApp2());
         return { rt, res: rt.postJson(genBody(rt, { benchmark_model: { model: 'gemma4:31b' } })) };
       },
       code: 'invalid_model',
@@ -1069,7 +1126,7 @@ test('app2: benchmark_model はオーナー以外・匿名・不正トークン�
     {
       label: 'owner boolean model',
       make() {
-        const rt = setupApp2();
+        const rt = enableBenchmarkOverride(setupApp2());
         return { rt, res: rt.postJson(genBody(rt, { benchmark_model: true })) };
       },
       code: 'invalid_model',
@@ -1101,7 +1158,7 @@ test('app2: settings.model など未検証キーでは生成モデルを切り�
 });
 
 test('app2: 同じ request_id は同一モデルだけ replay し、別モデル・通常 Gemma は conflict にする', () => {
-  const rt = setupApp2();
+  const rt = enableBenchmarkOverride(setupApp2());
   const requestId = rid('modelreplay');
   rt.net.ai.push(genOk(RECORD_TEXT), modOk());
   const first = rt.postJson(genBody(rt, { request_id: requestId, benchmark_model: 'deepseek-v4.1-flash' }));
@@ -1156,7 +1213,7 @@ test('app2: 通常 Gemma は旧 payloadHash の receipt と互換で、旧 recor
 });
 
 test('app2: NG 再生成でも benchmark_model を維持し、再生成は1回まで', () => {
-  const rt = setupApp2();
+  const rt = enableBenchmarkOverride(setupApp2());
   rt.net.ai.push(genOk(RECORD_TEXT), modNg('sexual'), genOk(RECORD_TEXT), modOk());
   const res = rt.postJson(genBody(rt, { benchmark_model: 'deepseek-v4.1-flash' }));
   assert.equal(res.json.ok, true, JSON.stringify(res.json));
