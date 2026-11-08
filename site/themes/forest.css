@@ -912,3 +912,165 @@ html[data-theme="forest"] {
   --app-border: 1px solid var(--color-border-mist);
   --app-shadow: none;
 }
+
+/* ============================================================
+   app10 — 有機化学ビルダー
+   Keylime Wash 背景 + Cream Paper カード + Forest Ink
+   ============================================================ */
+html[data-theme="forest"] body.oc-app {
+  --oc-bg: var(--color-keylime-wash);
+  --oc-panel: var(--color-cream-paper);
+  --oc-panel-2: var(--color-keylime-wash);
+  --oc-ink: var(--color-forest-ink);
+  --oc-muted: var(--color-charcoal);
+  --oc-line: var(--color-border-mist);
+  --oc-accent: var(--color-forest-ink);
+  --oc-accent-bg: var(--color-mint-veil);
+  --oc-accent-ink: var(--color-forest-ink);
+  --oc-warn: #6b4a00;
+  --oc-warn-bg: #fff7e6;
+  --oc-radius: var(--radius-cards);
+  --oc-radius-sm: var(--radius-sm);
+  --oc-shadow: none;
+  --oc-panel-border: 1px solid var(--color-border-mist);
+  --oc-font-head: var(--font-jp-serif);
+  --oc-svg-ink: var(--color-forest-ink);
+  --oc-svg-muted: var(--color-charcoal);
+  --oc-header-bg: var(--color-cream-paper);
+  --oc-header-ink: var(--color-forest-ink);
+  --oc-header-line: 1px solid var(--color-border-mist);
+  background: var(--color-keylime-wash) !important;
+  color: var(--color-forest-ink) !important;
+}
+html[data-theme="forest"] body.oc-app::before { background-image: none !important; }
+html[data-theme="forest"] .oc-header { background: var(--color-cream-paper) !important; }
+html[data-theme="forest"] .oc-brandmark {
+  background: var(--color-sage-mist) !important;
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-sm) !important;
+}
+html[data-theme="forest"] .oc-brandmark svg polygon,
+html[data-theme="forest"] .oc-brandmark svg path { stroke: var(--color-forest-ink) !important; }
+html[data-theme="forest"] .oc-brandmark svg circle { fill: var(--color-forest-ink) !important; }
+html[data-theme="forest"] .oc-brand h1,
+html[data-theme="forest"] .oc-brand__title { font-family: var(--font-jp-serif), var(--font-faire-octave); font-weight: 400; letter-spacing: -.01em; }
+html[data-theme="forest"] .oc-brand p { color: var(--color-charcoal) !important; opacity: .8; }
+html[data-theme="forest"] .oc-header__link {
+  border: 1px solid var(--color-border-mist);
+  border-radius: var(--radius-badges);
+  background: var(--color-cream-paper);
+  color: var(--color-forest-ink);
+  font-family: var(--font-suisse-intl);
+}
+html[data-theme="forest"] .oc-header__link:hover { background: var(--color-sage-mist); }
+html[data-theme="forest"] .oc-notice {
+  border: 1px solid var(--color-border-mist) !important;
+  border-left: 4px solid var(--color-forest-ink) !important;
+  border-radius: var(--radius-cards) !important;
+  box-shadow: none !important;
+  background: var(--color-cream-paper);
+  color: var(--color-charcoal);
+}
+html[data-theme="forest"] .oc-panel,
+html[data-theme="forest"] .oc-info section,
+html[data-theme="forest"] .oc-card {
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-cards) !important;
+  box-shadow: none !important;
+  background: var(--color-cream-paper);
+}
+html[data-theme="forest"] .oc-panel__head h2,
+html[data-theme="forest"] .oc-results__head h2,
+html[data-theme="forest"] .oc-info h2,
+html[data-theme="forest"] .oc-ledger__head h1,
+html[data-theme="forest"] .oc-ledger__section h2 {
+  font-family: var(--font-jp-serif), var(--font-faire-octave);
+  font-weight: 400;
+  letter-spacing: -.01em;
+}
+html[data-theme="forest"] .oc-num {
+  background: var(--color-mint-veil);
+  color: var(--color-forest-ink);
+  border: 1px solid var(--color-border-mist);
+}
+html[data-theme="forest"] .oc-list {
+  border: 1px solid var(--color-border-mist);
+  border-radius: var(--radius-sm);
+  background: var(--color-keylime-wash);
+}
+html[data-theme="forest"] .oc-pick[aria-pressed="true"] {
+  background: var(--color-forest-ink);
+  color: var(--color-cream-paper);
+  border-color: var(--color-forest-ink);
+}
+html[data-theme="forest"] .oc-pick:hover:not(:disabled) { background: var(--color-sage-mist); }
+html[data-theme="forest"] .oc-tag {
+  border: 1px solid var(--color-border-mist);
+  border-radius: var(--radius-badges);
+  background: var(--color-cream-paper);
+  color: var(--color-charcoal);
+  font-family: var(--font-suisse-intl);
+}
+html[data-theme="forest"] .oc-pick[aria-pressed="true"] .oc-tag {
+  background: var(--color-cream-paper);
+  color: var(--color-forest-ink);
+  border-color: var(--color-border-mist);
+}
+html[data-theme="forest"] .oc-preview,
+html[data-theme="forest"] .oc-mini,
+html[data-theme="forest"] .oc-fig {
+  border: 1px solid var(--color-border-mist);
+  border-radius: var(--radius-cards);
+  background: var(--color-cream-paper);
+}
+html[data-theme="forest"] .oc-preview { background: var(--color-keylime-wash); }
+html[data-theme="forest"] .oc-mini,
+html[data-theme="forest"] .oc-fig { background: var(--color-cream-paper); }
+html[data-theme="forest"] .oc-group-formula { font-family: var(--font-suisse-intl); color: var(--color-forest-ink); }
+html[data-theme="forest"] .oc-connector__line { background: var(--color-border-mist); }
+html[data-theme="forest"] .oc-connector__plus { color: var(--color-forest-ink); }
+html[data-theme="forest"] .oc-results__head { border-bottom: 1px solid var(--color-border-mist); }
+html[data-theme="forest"] .oc-count-pill {
+  background: var(--color-mint-veil);
+  color: var(--color-forest-ink);
+  border: 1px solid var(--color-border-mist);
+  border-radius: var(--radius-badges);
+  font-family: var(--font-suisse-intl);
+}
+html[data-theme="forest"] .oc-card__eyebrow { color: var(--color-forest-ink); }
+html[data-theme="forest"] .oc-card__eyebrow .oc-badge {
+  background: var(--color-mint-veil);
+  color: var(--color-forest-ink);
+  border: 1px solid var(--color-border-mist);
+  border-radius: var(--radius-badges);
+  font-family: var(--font-suisse-intl);
+}
+html[data-theme="forest"] .oc-card__formula,
+html[data-theme="forest"] .oc-fact strong,
+html[data-theme="forest"] .oc-card__foot { font-family: var(--font-suisse-intl); }
+html[data-theme="forest"] .oc-card__note {
+  background: #fff7e6;
+  border-left: 3px solid var(--color-sage-mist);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+html[data-theme="forest"] .oc-empty {
+  border: 1px dashed var(--color-border-mist);
+  border-radius: var(--radius-cards);
+  background: var(--color-cream-paper);
+}
+html[data-theme="forest"] .oc-filter,
+html[data-theme="forest"] .oc-table-wrap,
+html[data-theme="forest"] .oc-stat,
+html[data-theme="forest"] .oc-coverage__item {
+  border: 1px solid var(--color-border-mist) !important;
+  border-radius: var(--radius-cards) !important;
+  box-shadow: none !important;
+  background: var(--color-cream-paper);
+}
+html[data-theme="forest"] .oc-table th {
+  background: var(--color-keylime-wash);
+  font-family: var(--font-suisse-intl);
+}
+html[data-theme="forest"] .oc-table td { border-bottom-color: var(--color-border-mist); }
+html[data-theme="forest"] .oc-table .oc-ok { color: #2f6b4f !important; }
+html[data-theme="forest"] .oc-table .oc-ng { color: #a33a2b !important; }

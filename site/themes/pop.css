@@ -846,3 +846,159 @@ html[data-theme="pop"] {
   --app-border: 1.5px solid var(--color-charcoal-ink);
   --app-shadow: var(--shadow-subtle-sm);
 }
+
+/* ============================================================
+   app10 — 有機化学ビルダー
+   参考: cream paper / 2px hard shadow / sky-crayon accent
+   ============================================================ */
+html[data-theme="pop"] body.oc-app {
+  --oc-bg: var(--color-cream-paper);
+  --oc-panel: var(--color-frost-white);
+  --oc-panel-2: var(--color-cream-paper);
+  --oc-ink: var(--color-charcoal-ink);
+  --oc-muted: #5f5f5f;
+  --oc-line: var(--color-charcoal-ink);
+  --oc-accent: var(--color-charcoal-ink);
+  --oc-accent-bg: var(--color-sky-crayon);
+  --oc-accent-ink: var(--color-charcoal-ink);
+  --oc-warn: #6b4a00;
+  --oc-warn-bg: #fff3d6;
+  --oc-radius: var(--radius-sm);
+  --oc-radius-sm: var(--radius-sm);
+  --oc-shadow: var(--shadow-subtle);
+  --oc-panel-border: 1.5px solid var(--color-charcoal-ink);
+  --oc-font-head: var(--font-jp-mono);
+  --oc-svg-ink: var(--color-charcoal-ink);
+  --oc-svg-muted: #5f5f5f;
+  --oc-header-bg: var(--color-frost-white);
+  --oc-header-ink: var(--color-charcoal-ink);
+  --oc-header-line: 1.5px solid var(--color-charcoal-ink);
+  background: var(--color-cream-paper) !important;
+  color: var(--color-charcoal-ink) !important;
+}
+html[data-theme="pop"] body.oc-app::before { background-image:
+  linear-gradient(to right, rgba(56,56,56,.045) 1px, transparent 1px),
+  linear-gradient(to bottom, rgba(56,56,56,.045) 1px, transparent 1px) !important;
+  background-size: 28px 28px !important; }
+html[data-theme="pop"] .oc-header { background: var(--color-frost-white) !important; }
+html[data-theme="pop"] .oc-brandmark {
+  background: var(--color-sky-crayon) !important;
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+}
+html[data-theme="pop"] .oc-brandmark svg polygon,
+html[data-theme="pop"] .oc-brandmark svg path { stroke: var(--color-charcoal-ink) !important; }
+html[data-theme="pop"] .oc-brandmark svg circle { fill: var(--color-charcoal-ink) !important; }
+html[data-theme="pop"] .oc-brand h1,
+html[data-theme="pop"] .oc-brand__title { font-family: var(--font-jp-mono); letter-spacing: .01em; }
+html[data-theme="pop"] .oc-header__link {
+  border: 1.5px solid var(--color-charcoal-ink);
+  border-radius: var(--radius-sm);
+  background: var(--color-frost-white);
+  color: var(--color-charcoal-ink);
+  font-family: var(--font-jp-mono);
+  box-shadow: var(--shadow-subtle-sm);
+}
+html[data-theme="pop"] .oc-header__link:hover { background: var(--color-sky-crayon); }
+html[data-theme="pop"] .oc-notice {
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-left: 5px solid var(--color-sky-crayon) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="pop"] .oc-panel,
+html[data-theme="pop"] .oc-info section {
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle) !important;
+}
+html[data-theme="pop"] .oc-panel__head h2,
+html[data-theme="pop"] .oc-results__head h2,
+html[data-theme="pop"] .oc-info h2,
+html[data-theme="pop"] .oc-ledger__head h1,
+html[data-theme="pop"] .oc-ledger__section h2 { font-family: var(--font-jp-mono); }
+html[data-theme="pop"] .oc-num {
+  background: var(--color-sky-crayon);
+  color: var(--color-charcoal-ink);
+  border: 1px solid var(--color-charcoal-ink);
+}
+html[data-theme="pop"] .oc-list {
+  border: 1.5px solid var(--color-charcoal-ink);
+  border-radius: var(--radius-sm);
+  background: var(--color-frost-white);
+}
+html[data-theme="pop"] .oc-pick[aria-pressed="true"] {
+  background: var(--color-sky-crayon);
+  color: var(--color-charcoal-ink);
+  border-color: var(--color-charcoal-ink);
+}
+html[data-theme="pop"] .oc-pick:hover:not(:disabled) { background: var(--color-cream-paper); }
+html[data-theme="pop"] .oc-tag {
+  border: 1px solid var(--color-charcoal-ink);
+  border-radius: var(--radius-sm);
+  background: var(--color-frost-white);
+  color: var(--color-charcoal-ink);
+  font-family: var(--font-jp-mono);
+}
+html[data-theme="pop"] .oc-pick[aria-pressed="true"] .oc-tag { background: var(--color-frost-white); border-color: var(--color-charcoal-ink); }
+html[data-theme="pop"] .oc-preview,
+html[data-theme="pop"] .oc-mini,
+html[data-theme="pop"] .oc-fig {
+  border: 1.5px solid var(--color-charcoal-ink);
+  border-radius: var(--radius-sm);
+  background: var(--color-frost-white);
+}
+html[data-theme="pop"] .oc-preview { background: var(--color-cream-paper); }
+html[data-theme="pop"] .oc-mini { background: var(--color-frost-white); }
+html[data-theme="pop"] .oc-fig { background: var(--color-cream-paper); }
+html[data-theme="pop"] .oc-group-formula { font-family: var(--font-jp-mono); color: var(--color-charcoal-ink); }
+html[data-theme="pop"] .oc-connector__line { background: var(--color-charcoal-ink); }
+html[data-theme="pop"] .oc-connector__plus { color: var(--color-charcoal-ink); font-family: var(--font-jp-mono); }
+html[data-theme="pop"] .oc-results__head { border-bottom: 1.5px solid var(--color-charcoal-ink); }
+html[data-theme="pop"] .oc-count-pill {
+  background: var(--color-sky-crayon);
+  color: var(--color-charcoal-ink);
+  border: 1px solid var(--color-charcoal-ink);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-jp-mono);
+}
+html[data-theme="pop"] .oc-card {
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle) !important;
+  background: var(--color-frost-white);
+}
+html[data-theme="pop"] .oc-card__eyebrow .oc-badge,
+html[data-theme="pop"] .oc-fig__caption { font-family: var(--font-jp-mono); }
+html[data-theme="pop"] .oc-card__eyebrow .oc-badge {
+  background: var(--color-sky-crayon);
+  color: var(--color-charcoal-ink);
+  border: 1px solid var(--color-charcoal-ink);
+  border-radius: var(--radius-sm);
+}
+html[data-theme="pop"] .oc-card__formula,
+html[data-theme="pop"] .oc-fact strong,
+html[data-theme="pop"] .oc-card__foot { font-family: var(--font-jp-mono); }
+html[data-theme="pop"] .oc-card__note {
+  background: #fff3d6;
+  border-left: 4px solid var(--color-charcoal-ink);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+html[data-theme="pop"] .oc-empty {
+  border: 1.5px dashed var(--color-charcoal-ink);
+  border-radius: var(--radius-sm);
+  background: var(--color-frost-white);
+}
+html[data-theme="pop"] .oc-info section { background: var(--color-frost-white); }
+html[data-theme="pop"] .oc-filter,
+html[data-theme="pop"] .oc-table-wrap,
+html[data-theme="pop"] .oc-stat,
+html[data-theme="pop"] .oc-coverage__item {
+  border: 1.5px solid var(--color-charcoal-ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-subtle-sm) !important;
+}
+html[data-theme="pop"] .oc-table th { background: var(--color-cream-paper); font-family: var(--font-jp-mono); }
+html[data-theme="pop"] .oc-table td { border-bottom-color: var(--color-chalk-gray); }
+html[data-theme="pop"] .oc-ok { color: #1f7a4d !important; }
+html[data-theme="pop"] .oc-ng { color: #a33a2b !important; }

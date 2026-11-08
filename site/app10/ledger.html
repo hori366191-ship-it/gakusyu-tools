@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>収録台帳 - 有機化学ビルダー</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script src="../themes/theme.js"></script>
+<link rel="stylesheet" href="../themes/pop.css">
+<link rel="stylesheet" href="../themes/forest.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=M+PLUS+1+Code:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body class="oc-app">
+<a class="oc-skip" href="#ledger-main">収録台帳の本文へスキップ</a>
+<header class="oc-header">
+  <div class="oc-header__in">
+    <div class="oc-brand">
+      <div class="oc-brandmark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linejoin="round">
+          <polygon points="32,6 55,19 55,45 32,58 9,45 9,19"/>
+          <path d="M32 6 L32 20 M55 19 L43 26 M55 45 L43 38 M32 58 L32 44 M9 45 L21 38 M9 19 L21 26" stroke-width="2.2" opacity=".85"/>
+          <circle cx="32" cy="32" r="3.2" fill="#ffffff" stroke="none"/>
+        </svg>
+      </div>
+      <div>
+        <div class="oc-brand__title">有機化学ビルダー</div>
+        <p>収録台帳（収録範囲・検証状況・出典）</p>
+      </div>
+    </div>
+    <div class="oc-header__links">
+      <a class="oc-header__link" href="./">← 有機化学ビルダー</a>
+      <a class="oc-header__link" href="../">ポータル</a>
+    </div>
+  </div>
+</header>
+
+<main class="oc-ledger" id="ledger-main" tabindex="-1">
+  <p class="oc-ledger__back"><a href="./">← 有機化学ビルダーに戻る</a></p>
+  <div class="oc-ledger__head">
+    <h1>収録台帳</h1>
+    <p>高校「化学」の有機化学19分野を対象に、登録済みの構造と学習用データを一覧化しています。構造は原子数・結合価・分子式の検証を行い、PubChemのCIDと照合できるものはCIDを記載しています。</p>
+  </div>
+
+  <div class="oc-stats" id="ledger-stats"></div>
+  <p class="oc-ledger__note" id="ledger-verification-note"></p>
+
+  <section class="oc-ledger__section">
+    <h2>19分野の収録状況</h2>
+    <p>「収録件数」は化合物データの件数です。同じ化合物が複数の分類にまたがる場合は、主分類に1件として数えています。</p>
+    <div class="oc-coverage" id="ledger-coverage"></div>
+  </section>
+
+  <section class="oc-ledger__section">
+    <h2>化合物一覧</h2>
+    <p>名称・分子式・収録方式・検証方法・説明データの登録状況・出典を確認できます。行のIDはアプリのカードから直接リンクされます。説明データの「詳細あり」は性質・用途・由来を個別に記載、「分類相当」は分類レベルの情報、「最小限」は構造と基本情報のみであることを示します。</p>
+    <div class="oc-filter">
+      <label for="ledger-search">検索</label>
+      <input type="search" id="ledger-search" placeholder="名称・ID・分子式で絞り込み" autocomplete="off">
+      <label for="ledger-category">分類</label>
+      <select id="ledger-category"><option value="">すべて</option></select>
+      <span class="oc-micro" id="ledger-filter-count" aria-live="polite"></span>
+    </div>
+    <div class="oc-table-wrap">
+      <table class="oc-table">
+        <caption class="oc-sr-only">収録化合物の一覧</caption>
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">名称</th>
+            <th scope="col">分類</th>
+            <th scope="col">分子式/一般式</th>
+            <th scope="col">収録方式</th>
+            <th scope="col">構造・異性体・由来</th>
+            <th scope="col">検証方法</th>
+            <th scope="col">説明データ</th>
+            <th scope="col">出典</th>
+          </tr>
+        </thead>
+        <tbody id="ledger-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="oc-ledger__section">
+    <h2>未対応の組み合わせ</h2>
+    <p>組合せ生成に対応していない骨格・官能基の組み合わせと、その理由です。アプリで該当の組合せを選ぶと、同じ理由が表示されます。</p>
+    <div id="ledger-unsupported"></div>
+  </section>
+
+  <section class="oc-ledger__section">
+    <h2>本版の範囲と注意</h2>
+    <ul class="oc-notes" id="ledger-notes"></ul>
+  </section>
+
+  <section class="oc-ledger__section">
+    <h2>出典・検証方法</h2>
+    <ul class="oc-sources" id="ledger-sources"></ul>
+  </section>
+</main>
+
+<footer class="oc-footer">
+  <p><a href="./">有機化学ビルダー</a> ・ <a href="../">学習ツール ポータル</a> ・ <a href="../credits.html">クレジット</a></p>
+  <p>本台帳は静的な収録データから生成しています。外部APIへの常時接続はありません。</p>
+</footer>
+
+<noscript>
+  <p style="padding:20px;text-align:center">このページはJavaScriptを有効にすると利用できます。</p>
+</noscript>
+
+<script src="./data.js"></script>
+<script src="./draw.js"></script>
+<script src="./ledger.js"></script>
+</body>
+</html>

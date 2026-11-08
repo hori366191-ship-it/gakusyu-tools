@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>有機化学ビルダー</title>
+<meta name="description" content="炭素骨格と官能基を選ぶと、高校化学の有機化合物を構造式・分子式・性質・用途で比較できる学習ツールです。">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script src="../themes/theme.js"></script>
+<link rel="stylesheet" href="../themes/pop.css">
+<link rel="stylesheet" href="../themes/forest.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=M+PLUS+1+Code:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body class="oc-app">
+<a class="oc-skip" href="#results">生成結果へスキップ</a>
+
+<header class="oc-header">
+  <div class="oc-header__in">
+    <div class="oc-brand">
+      <div class="oc-brandmark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linejoin="round">
+          <polygon points="32,6 55,19 55,45 32,58 9,45 9,19"/>
+          <path d="M32 6 L32 20 M55 19 L43 26 M55 45 L43 38 M32 58 L32 44 M9 45 L21 38 M9 19 L21 26" stroke-width="2.2" opacity=".85"/>
+          <circle cx="32" cy="32" r="3.2" fill="#ffffff" stroke="none"/>
+        </svg>
+      </div>
+      <div>
+        <h1>有機化学ビルダー</h1>
+        <p>炭素骨格と官能基から、化合物の違いを発見する。</p>
+      </div>
+    </div>
+    <div class="oc-header__links">
+      <a class="oc-header__link" href="../">← ポータル</a>
+      <a class="oc-header__link" href="./ledger.html">収録台帳</a>
+    </div>
+  </div>
+</header>
+
+<main class="oc-wrap">
+  <div class="oc-notice">
+    高校「化学」の有機化合物を、<strong>登録済みの構造データ</strong>から表示します。未収録の組み合わせは、誤った構造を作らずに理由を表示します。
+    構造式は、グラフ構造では原子数・結合価・分子式、投影式・簡略式等では分子式・一般式と登録データの整合を確認しています。描画は目視確認を併用しています。
+  </div>
+
+  <section class="oc-top" aria-label="化合物の組み立て">
+    <article class="oc-panel">
+      <div class="oc-panel__head">
+        <h2><span class="oc-num">1</span>炭素骨格・化合物を選ぶ</h2>
+        <span class="oc-micro">分類 → 炭素数</span>
+      </div>
+      <div class="oc-panel__body">
+        <div class="oc-two">
+          <nav class="oc-list" id="skeleton-list" aria-label="炭素骨格・化合物リスト"></nav>
+          <div class="oc-preview" id="skeleton-preview-wrap">
+            <span class="oc-preview__label">炭素骨格プレビュー</span>
+            <div class="oc-preview__stack" id="skeleton-preview"></div>
+            <span class="oc-preview__hint" id="skeleton-hint"></span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="oc-panel">
+      <div class="oc-panel__head">
+        <h2><span class="oc-num">2</span>官能基・置換基を選ぶ</h2>
+        <span class="oc-micro">「追加なし」も選べる</span>
+      </div>
+      <div class="oc-panel__body">
+        <div class="oc-two">
+          <nav class="oc-list" id="group-list" aria-label="官能基・置換基リスト"></nav>
+          <div class="oc-preview" id="group-preview"></div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <div class="oc-connector" aria-hidden="true">
+    <span class="oc-connector__line"></span>
+    <span class="oc-connector__plus">＋</span>
+    <span>組み合わせて表示</span>
+    <span class="oc-connector__line"></span>
+  </div>
+
+  <section class="oc-panel oc-results" id="results" tabindex="-1" aria-label="生成された化合物" aria-live="polite" aria-atomic="true">
+    <div class="oc-results__head">
+      <div>
+        <h2><span class="oc-num">3</span>生成された化合物</h2>
+        <p class="oc-results__sub" id="result-description">選択に対応する化合物を一覧で比較</p>
+      </div>
+      <span class="oc-count-pill" id="result-count">0 種類</span>
+    </div>
+    <div class="oc-results__body" id="results-body"></div>
+  </section>
+
+  <section class="oc-info" aria-label="使い方と収録範囲">
+    <section>
+      <h2>使い方</h2>
+      <p>左で炭素骨格（炭素数や個別化合物）を選び、右で官能基・置換基を選びます。選んだ組合せに対応する化合物が下に並びます。</p>
+      <p>同じ分子式でも構造が異なる<strong>異性体</strong>は、由来する炭素骨格ごとにグループ分けして表示します。</p>
+      <p>「追加なし」は、<strong>新しい官能基を追加しない</strong>という意味です。化合物自体に官能基がないという意味ではありません。</p>
+    </section>
+    <section>
+      <h2>収録範囲</h2>
+      <p>高校「化学」の有機化学で扱う19分野を対象に、炭素数1〜5のアルカンとC1〜C4の置換生成を中心に収録しています。</p>
+      <p>異性体は骨格異性体・位置異性体・高校化学で重要な官能基異性体を扱います。幾何異性体（シス/トランス）と光学異性体（R/S）は本版の対象外です。</p>
+      <p><a href="./ledger.html">収録台帳</a>で、化合物一覧・検証状況・未対応事項・出典を確認できます。</p>
+    </section>
+    <section>
+      <h2>注意</h2>
+      <p>このアプリは構造と分類を学ぶための教材です。実際の物質の混合・合成・実験手順を示すものではありません。</p>
+      <p>危険性・毒性の記載は代表的な情報です。実験・使用の判断には、必ず最新の安全データシート（SDS）や専門家の指示を確認してください。</p>
+      <p>構造式は高校化学の教科書で使われる2次元表示に合わせ、ベンゼン環はケクレ式で描画しています。</p>
+    </section>
+  </section>
+
+  <footer class="oc-footer">
+    <p><a href="../">学習ツール ポータル</a> ・ <a href="./ledger.html">収録台帳</a> ・ <a href="../credits.html">クレジット</a></p>
+    <p id="oc-data-status">収録データを確認中…</p>
+    <p>構造式は登録データからSVGで描画しています。グルコースの投影式は教科書標準の配置に基づきます。</p>
+  </footer>
+</main>
+
+<noscript>
+  <p style="padding:20px;text-align:center">このアプリはJavaScriptを有効にすると利用できます。</p>
+</noscript>
+
+<script src="./data.js"></script>
+<script src="./draw.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

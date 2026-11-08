@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>有機化学ビルダー — UIモック</title>
+<style>
+:root{--ink:#15263a;--muted:#64748b;--line:#dae3ec;--paper:#fff;--bg:#f3f6fa;--accent:#146d75;--accent-bg:#e9f6f5;--shadow:0 6px 24px rgba(26,43,65,.045)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:14px;line-height:1.6}button{font:inherit}button:focus-visible{outline:3px solid #67c3c9;outline-offset:2px}
+.shell{max-width:1240px;margin:auto;padding:30px 28px 64px}.masthead{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:23px}.brand{display:flex;align-items:center;gap:13px}.brandmark{width:44px;height:44px;border-radius:13px;background:#143e4c;color:#fff;display:grid;place-items:center;font-size:24px;font-weight:700}.brand h1{font-size:23px;line-height:1.28;letter-spacing:.01em;margin:0}.brand p{font-size:12px;color:var(--muted);margin:4px 0 0}.mockchip{border:1px solid #cee0df;background:#eef8f6;color:#246568;letter-spacing:.1em;border-radius:25px;font-size:11px;font-weight:800;padding:7px 12px;white-space:nowrap}.notice{border:1px solid #dce4ed;border-left:3px solid #7ba3b2;border-radius:7px;background:#fff;padding:11px 14px;color:#526476;font-size:12px;margin-bottom:18px}
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:stretch}.panel{background:var(--paper);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);min-width:0;overflow:hidden}.panel-title{padding:18px 20px 14px;border-bottom:1px solid #e7edf2;display:flex;justify-content:space-between;align-items:center;gap:10px}.panel-title h2{font-size:16px;margin:0;font-weight:750}.num{display:inline-flex;align-items:center;justify-content:center;background:#e6f4f4;color:#17646a;font-size:11px;font-weight:800;width:23px;height:23px;border-radius:50%;margin-right:9px}.micro{font-size:11px;color:var(--muted)}.panel-body{padding:17px 18px 19px}
+.two{display:grid;grid-template-columns:minmax(140px,46%) minmax(0,54%);gap:13px}.listbox{border:1px solid var(--line);border-radius:10px;padding:9px;background:#fcfdff;max-height:300px;overflow:auto}.group-title{font-size:10px;font-weight:800;color:#798a9b;letter-spacing:.05em;margin:9px 7px 5px}.group-title:first-child{margin-top:3px}.pick{display:flex;text-align:left;align-items:center;justify-content:space-between;gap:6px;border:1px solid transparent;background:none;color:var(--ink);border-radius:8px;width:100%;padding:8px 9px;cursor:pointer;min-height:36px;font-size:12px}.pick:hover:not(:disabled){background:#f0f5f7}.pick.active{background:#e8f5f5;color:#105b63;border-color:#c4e5e3;font-weight:800}.pick:disabled{opacity:.45;cursor:not-allowed}.tag{font-size:10px;border:1px solid #d8e3ea;border-radius:5px;padding:0 5px;color:#718399;background:white;white-space:nowrap}.pick.active .tag{background:#d4eeee;color:#14626b;border-color:#bbdedc}.preview{border-radius:10px;background:#f8fafc;min-height:244px;padding:13px 10px 10px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}.preview-label{font-size:10px;color:#788a99;font-weight:800;letter-spacing:.04em}.molecule-mini{width:100%;display:grid;place-items:center;gap:1px;padding:5px 4px;background:#fff;border:1px solid #e7edf2;border-radius:8px;min-height:87px}.molecule-mini .mol-art{height:75px;max-width:100%}.molecule-mini .mol-title{font-size:11px;font-weight:800;line-height:1.2}.preview-count{font-size:11px;color:#66788a}.functional-preview{display:flex;justify-content:center;align-items:center;flex:1;width:100%;min-height:130px}.functional-visual{font-size:33px;font-weight:700;letter-spacing:.015em;color:#153f48}.func-caption{font-size:12px;color:#617487;max-width:230px}.locked{background:#f2f5f8}.locked-note{font-size:12px;color:#7c8998;max-width:220px}
+.connector{display:flex;align-items:center;justify-content:center;gap:14px;height:56px;color:#5a7780;font-size:12px;font-weight:750}.connector .line{height:1px;background:#ccd8df;width:80px}.connector .plus{font-size:24px;color:#207880}.results{padding-bottom:10px}.results-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px 14px;border-bottom:1px solid #e7edf2}.results-head h2{font-size:17px;margin:0}.results-sub{font-size:12px;color:var(--muted);margin:3px 0 0}.count{white-space:nowrap;background:#eaf5f3;color:#17636b;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:800}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:17px}.chemcard{border:1px solid #dce5ed;border-radius:12px;overflow:hidden;background:#fff;min-width:0}.card-top{padding:14px 15px 10px}.eyebrow{font-size:10px;letter-spacing:.03em;color:#508088;font-weight:800}.card-name{font-size:17px;font-weight:800;margin:2px 0 2px;line-height:1.4}.card-formula{color:#657888;font-size:12px}.chem-figure{background:#f8fafc;margin:0 13px 12px;border:1px solid #edf1f5;border-radius:9px;min-height:142px;display:flex;justify-content:center;align-items:center;flex-direction:column;padding:7px 8px 5px}.chem-figure .mol-art{width:100%;height:126px}.fig-note{font-size:10px;color:#84909b}.facts{padding:0 15px 14px;display:grid;gap:8px}.fact{display:grid;grid-template-columns:67px minmax(0,1fr);gap:9px;font-size:12px}.fact strong{font-size:11px;color:#607483;font-weight:750}.fact span{color:#263f4e}.empty{margin:17px;border:1px dashed #cbd8e2;border-radius:12px;padding:28px;text-align:center;color:#718395}.bottomline{font-size:11px;color:#7c8d9a;margin:3px 20px 14px}.footer{margin-top:20px;color:#76899a;font-size:11px;text-align:center}.mol-art{text-align:center;max-width:100%}.mol-art svg{width:100%;height:100%;display:block;overflow:visible}.mono{font-family:Arial,"Noto Sans JP",sans-serif}
+@media(max-width:850px){.shell{padding:19px 13px 48px}.top{grid-template-columns:1fr}.brand h1{font-size:20px}.cards{grid-template-columns:1fr}.two{grid-template-columns:minmax(150px,46%) minmax(0,54%)}.panel-title{padding:15px}.panel-body{padding:13px}.listbox{max-height:255px}}@media(min-width:851px) and (max-width:1080px){.two{grid-template-columns:1fr}.listbox{max-height:152px}.preview{min-height:200px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:400px){.two{grid-template-columns:1fr}.listbox{max-height:145px}.preview{min-height:180px}.masthead{align-items:flex-start}.mockchip{font-size:9px;padding:6px 8px}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="masthead"><div class="brand"><div class="brandmark" aria-hidden="true">C</div><div><h1>有機化学ビルダー</h1><p>炭素骨格と官能基から、化合物の違いを発見する。</p></div></div><span class="mockchip">INTERACTIVE MOCK</span></header>
+  <div class="notice">これは <strong>OpenCode向けのUI確認用モック</strong> です。少数の登録例だけを使用し、見た目と選択時の動作を示しています。化合物の完全な網羅や汎用的な自動生成は行いません。</div>
+  <section class="top" aria-label="化合物の組み立て">
+    <article class="panel"><div class="panel-title"><h2><span class="num">1</span>炭素骨格・化合物を選ぶ</h2><span class="micro">分類 → 炭素数</span></div><div class="panel-body two"><nav class="listbox" id="bone-list" aria-label="炭素骨格リスト"></nav><div class="preview"><span class="preview-label">炭素骨格プレビュー</span><div id="bone-preview" style="width:100%;display:grid;gap:7px"></div><span class="preview-count" id="bone-hint"></span></div></div></article>
+    <article class="panel"><div class="panel-title"><h2><span class="num">2</span>官能基・置換基を選ぶ</h2><span class="micro">追加なしも選べる</span></div><div class="panel-body two"><nav class="listbox" id="group-list" aria-label="官能基リスト"></nav><div class="preview" id="group-preview"></div></div></article>
+  </section>
+  <div class="connector" aria-hidden="true"><span class="line"></span><span class="plus">＋</span><span>組み合わせて表示</span><span class="line"></span></div>
+  <section class="panel results" aria-live="polite"><div class="results-head"><div><h2><span class="num">3</span>生成された化合物</h2><p class="results-sub" id="result-description">選択に対応する化合物を一覧で比較</p></div><span class="count" id="result-count"></span></div><div class="cards" id="result-cards"></div><p class="bottomline">※ 構造を組み合わせる学習用の表示であり、実際に物質を混ぜて合成することを意味しません。</p></section>
+  <footer class="footer">HTML / CSS / JavaScriptだけで動作する独立した参考モックです。構造表示は説明用の模式図を含みます。</footer>
+</main>
+<script>
+'use strict';
+const B=[
+ {id:'c1',label:'炭素数 1',tag:'C1',section:'アルカン',ids:['methane']},
+ {id:'c2',label:'炭素数 2',tag:'C2',section:'アルカン',ids:['ethane']},
+ {id:'c3',label:'炭素数 3',tag:'C3',section:'アルカン',ids:['propane']},
+ {id:'c4',label:'炭素数 4',tag:'2種類',section:'アルカン',ids:['butane','isobutane']},
+ {id:'benz',label:'ベンゼン',tag:'C6',section:'芳香族',ids:['benzene']},
+ {id:'gluc',label:'グルコース',tag:'個別',section:'その他の有機化合物',ids:['glucose'],locked:true}
+];
+const G=[{id:'none',label:'追加なし',formula:'＋ なし',description:'炭素骨格そのものの物質を表示します。'},
+ {id:'oh',label:'ヒドロキシ基',formula:'−OH',description:'アルコールなどに見られる官能基。'},
+ {id:'cooh',label:'カルボキシ基',formula:'−COOH',description:'カルボン酸に見られる官能基。'},
+ {id:'methyl',label:'メチル基',formula:'−CH₃',description:'炭素原子を1つ含む置換基。'}];
+const M={
+ methane:{n:'メタン',f:'CH₄',cat:'アルカン',p:'無色・無臭の可燃性気体。',use:'天然ガスの主成分として燃料に利用。',nature:'天然ガス田や湿地などで見られる。',fig:'methane'},
+ ethane:{n:'エタン',f:'C₂H₆',cat:'アルカン',p:'無色の可燃性気体。',use:'エチレンなどの化学工業原料。',nature:'天然ガスに含まれる。',fig:'ethane'},
+ propane:{n:'プロパン',f:'C₃H₈',cat:'アルカン',p:'無色の可燃性気体。加圧により液化しやすい。',use:'LPガスとして燃料に利用。',nature:'天然ガスや石油から得られる。',fig:'propane'},
+ butane:{n:'ブタン',f:'C₄H₁₀',cat:'アルカン（骨格異性体）',p:'無色の可燃性気体。',use:'燃料、ライター用ガスなど。',nature:'天然ガスや石油に含まれる。',fig:'butane'},
+ isobutane:{n:'2-メチルプロパン',f:'C₄H₁₀',cat:'アルカン（骨格異性体）',p:'無色の可燃性気体。',use:'冷媒、燃料など。',nature:'天然ガスや石油に含まれる。',fig:'isobutane'},
+ methanol:{n:'メタノール',f:'CH₄O',cat:'アルコール',p:'無色の可燃性液体。飲用すると危険。',use:'化学原料、溶剤、燃料など。',nature:'主に工業的に製造される。',fig:'methanol'},
+ ethanol:{n:'エタノール',f:'C₂H₆O',cat:'アルコール',p:'水とよく混ざる可燃性液体。',use:'消毒、溶剤、酒類など。',nature:'糖のアルコール発酵で生成。',fig:'ethanol'},
+ acetic:{n:'酢酸',f:'C₂H₄O₂',cat:'カルボン酸',p:'刺激臭を持つ弱酸。',use:'食酢の酸味成分、化学製品の原料。',nature:'酢酸菌による発酵で生成。',fig:'acetic'},
+ propionic:{n:'プロピオン酸',f:'C₃H₆O₂',cat:'カルボン酸',p:'特有の刺激臭を持つ液体。',use:'保存料の原料など。',nature:'一部の発酵食品にも存在。',fig:'propionic'},
+ propanol1:{n:'1-プロパノール',f:'C₃H₈O',cat:'アルコール（位置異性体）',p:'無色の可燃性液体。',use:'溶剤や有機合成の原料。',nature:'主に工業的に製造される。',fig:'propanol1'},
+ propanol2:{n:'2-プロパノール',f:'C₃H₈O',cat:'アルコール（位置異性体）',p:'無色で揮発性のある可燃性液体。',use:'消毒や洗浄に利用。',nature:'主に工業的に製造される。',fig:'propanol2'},
+ butanol1:{n:'1-ブタノール',f:'C₄H₁₀O',cat:'アルコール（構造異性体）',p:'無色の可燃性液体。',use:'溶剤や化学原料。',nature:'主に工業的に製造される。',fig:'butanol1'},
+ butanol2:{n:'2-ブタノール',f:'C₄H₁₀O',cat:'アルコール（構造異性体）',p:'無色の可燃性液体。',use:'溶剤など。',nature:'主に工業的に製造される。',fig:'butanol2'},
+ isobutanol:{n:'2-メチル-1-プロパノール',f:'C₄H₁₀O',cat:'アルコール（構造異性体）',p:'無色の可燃性液体。',use:'溶剤、香料原料など。',nature:'主に工業的に製造される。',fig:'isobutanol'},
+ tertbutanol:{n:'2-メチル-2-プロパノール',f:'C₄H₁₀O',cat:'アルコール（構造異性体）',p:'常温付近で液体または固体（融点約26℃）。',use:'溶剤や化学合成の原料。',nature:'主に工業的に製造される。',fig:'tertbutanol'},
+ benzene:{n:'ベンゼン',f:'C₆H₆',cat:'芳香族炭化水素',p:'無色の可燃性液体。発がん性がある。',use:'各種化学製品の原料。',nature:'原油などに含まれる。',fig:'benzene'},
+ phenol:{n:'フェノール',f:'C₆H₆O',cat:'フェノール類',p:'弱い酸性を示す。皮膚に有害。',use:'樹脂や化学製品の原料。',nature:'主に工業的に製造される。',fig:'phenol'},
+ toluene:{n:'トルエン',f:'C₇H₈',cat:'芳香族炭化水素',p:'無色の可燃性液体。',use:'溶剤、化学原料など。',nature:'石油などに含まれる。',fig:'toluene'},
+ benzoic:{n:'安息香酸',f:'C₇H₆O₂',cat:'芳香族カルボン酸',p:'白色の固体。弱酸性を示す。',use:'保存料などに利用。',nature:'一部の植物や果実に存在。',fig:'benzoic'},
+ glucose:{n:'グルコース（ブドウ糖）',f:'C₆H₁₂O₆',cat:'糖類（単糖）',p:'水に溶けやすい糖。',use:'生物の重要なエネルギー源。食品にも利用。',nature:'果実や蜂蜜などに含まれる。',fig:'glucose'},
+ butanoic:{n:'酪酸（ブタン酸）',f:'C₄H₈O₂',cat:'カルボン酸（構造異性体）',p:'強い独特のにおいを持つ。',use:'香料や化学合成の原料。',nature:'発酵食品などに存在。',fig:'butanoic'},
+ isobutyric:{n:'2-メチルプロパン酸',f:'C₄H₈O₂',cat:'カルボン酸（構造異性体）',p:'特有のにおいを持つ。',use:'エステルなどの合成原料。',nature:'一部の植物などに存在。',fig:'isobutyric'}
+};
+const R={
+ c1:{none:['methane'],oh:['methanol'],cooh:['acetic'],methyl:['ethane']},
+ c2:{none:['ethane'],oh:['ethanol'],cooh:['propionic'],methyl:['propane']},
+ c3:{none:['propane'],oh:['propanol1','propanol2'],cooh:['butanoic','isobutyric'],methyl:['butane','isobutane']},
+ c4:{none:['butane','isobutane'],oh:['butanol1','butanol2','isobutanol','tertbutanol']},
+ benz:{none:['benzene'],oh:['phenol'],cooh:['benzoic'],methyl:['toluene']},
+ gluc:{none:['glucose']}
+};
+let state={bone:'c3',group:'oh'};
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function atom(x,y,t){return `<text x="${x}" y="${y+7}" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="500" fill="#172735" stroke="#fff" stroke-width="5" paint-order="stroke">${escapeHTML(t)}</text>`}
+function bond(x1,y1,x2,y2,n=1,r=18){const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,px=-uy,py=ux,xx1=x1+ux*r,yy1=y1+uy*r,xx2=x2-ux*r,yy2=y2-uy*r;let s='';for(let i=0;i<n;i++){let off=(i-(n-1)/2)*7;s+=`<line x1="${xx1+px*off}" y1="${yy1+py*off}" x2="${xx2+px*off}" y2="${yy2+py*off}" stroke="#172735" stroke-width="3" stroke-linecap="round"/>`;}return s}
+function diagram(kind){let a=[],e=[],small=false, note='';let w=360,h=180;
+ const A=(x,y,t)=>{a.push({x,y,t});return a.length-1}; const E=(i,j,n=1,r=20)=>e.push({i,j,n,r});
+ if(['methane','ethane','propane','methanol','ethanol','propanol1','propanol2'].includes(kind)){
+  if(kind==='methane'||kind==='methanol'){
+   let c=A(151,90,'C'), l=A(68,90,'H'), t=A(151,24,'H'), d=A(151,154,'H');E(c,l);E(c,t);E(c,d);
+   if(kind==='methane'){let right=A(235,90,'H');E(c,right)}else{let o=A(231,90,'O'),hr=A(302,90,'H');E(c,o);E(o,hr);}
+  }else{
+   let n=['propane','propanol1','propanol2'].includes(kind)?3:2; let xs=n===3?[80,170,260]:[125,225], cs=xs.map(x=>A(x,91,'C'));
+   for(let i=1;i<cs.length;i++)E(cs[i-1],cs[i]);
+   cs.forEach((ci,i)=>{let top=A(xs[i],25,(kind==='propanol2'&&i===1)?'O':'H'),down=A(xs[i],158,'H');E(ci,top);E(ci,down);if(kind==='propanol2'&&i===1){let h=A(xs[i]+57,25,'H');E(top,h)}});
+   let left=A(xs[0]-59,91,'H');E(cs[0],left);
+   if(kind==='ethanol'||kind==='propanol1'){let o=A(xs[n-1]+62,91,'O'),h2=A(xs[n-1]+122,91,'H');E(cs[n-1],o);E(o,h2);if(kind==='propanol1')w=410}else{let r=A(xs[n-1]+59,91,'H');E(cs[n-1],r)}
+  }
+ }else if(['benzene','phenol','toluene','benzoic'].includes(kind)){
+    const cx=175,cy=104,r=63;let pts=[];
+    for(let i=0;i<6;i++){const theta=-Math.PI/2+i*Math.PI/3;pts.push([cx+r*Math.cos(theta),cy+r*Math.sin(theta)]);}
+    let s='<polygon points="'+pts.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="#172735" stroke-width="3.2" stroke-linejoin="round"/>';
+    for(const [p,q] of [[0,1],[2,3],[4,5]]){let [x1,y1]=pts[p],[x2,y2]=pts[q];const mx=(x1+x2)/2,my=(y1+y2)/2,dx=cx-mx,dy=cy-my,l=Math.hypot(dx,dy),inX=dx/l*8,inY=dy/l*8; s+=`<line x1="${x1+(x2-x1)*.17+inX}" y1="${y1+(y2-y1)*.17+inY}" x2="${x2-(x2-x1)*.17+inX}" y2="${y2-(y2-y1)*.17+inY}" stroke="#172735" stroke-width="3" stroke-linecap="round"/>`}
+    if(kind!=='benzene'){let lbl={phenol:'OH',toluene:'CH₃',benzoic:'COOH'}[kind];s+=`<line x1="175" y1="41" x2="175" y2="19" stroke="#172735" stroke-width="3"/>`+`<text x="175" y="14" text-anchor="middle" font-size="21" font-family="Arial,sans-serif" fill="#172735">${lbl}</text>`;}
+    return svg(s,360,192);
+ }else{
+  let texts={butane:['CH₃','CH₂','CH₂','CH₃'],isobutane:['CH₃','CH','CH₃'],propanol1:['CH₃','CH₂','CH₂','OH'],propanol2:['CH₃','CH','CH₃'],acetic:['CH₃','C','OH'],propionic:['CH₃','CH₂','C','OH'],butanol1:['CH₃','CH₂','CH₂','CH₂','OH'],butanol2:['CH₃','CH','CH₂','CH₃'],isobutanol:['CH₃','CH','CH₂','OH'],tertbutanol:['CH₃','C','CH₃'],butanoic:['CH₃','CH₂','CH₂','C','OH'],isobutyric:['CH₃','CH','C','OH']}[kind];
+  if(kind==='glucose'){return svg(`<text x="180" y="82" text-anchor="middle" font-size="24" font-family="Arial,sans-serif" fill="#172735">CHO−(CHOH)₄−CH₂OH</text><text x="180" y="124" text-anchor="middle" font-size="14" fill="#718596" font-family="Arial,sans-serif">鎖状形の模式図（立体配置省略）</text>`,360,170)}
+  if(!texts){return svg('<text x="180" y="90" text-anchor="middle">構造プレビュー未登録</text>',360,180)}
+  let len=texts.length, step=Math.min(85,300/(len-1)), start=180-(len-1)*step/2, y=100;
+  let idx=texts.map((t,i)=>A(start+i*step,y,t));
+  for(let i=1;i<len;i++)E(idx[i-1],idx[i],1,25);
+  const branch=(from,text,side='up')=>{let x=a[idx[from]].x,y2=side==='up'?33:158;let j=A(x,y2,text);E(idx[from],j,1,24)};
+  if(kind==='isobutane')branch(1,'CH₃');
+  if(kind==='propanol2'||kind==='butanol2')branch(1,'OH','down');
+  if(kind==='isobutanol')branch(1,'CH₃');
+  if(kind==='tertbutanol'){branch(1,'CH₃');branch(1,'OH','down');}
+  if(kind==='acetic'||kind==='propionic'||kind==='butanoic'||kind==='isobutyric'){let j=kind==='acetic'?1:kind==='propionic'?2:kind==='butanoic'?3:2;branch(j,'O');e[e.length-1].n=2;}
+  if(kind==='isobutyric')branch(1,'CH₃','down');
+ }
+ let markup=e.map(({i,j,n,r})=>bond(a[i].x,a[i].y,a[j].x,a[j].y,n,r)).join('')+a.map(v=>atom(v.x,v.y,v.t)).join('');return svg(markup,w,h);
+}
+function svg(content,w,h){return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="分子構造の模式図" preserveAspectRatio="xMidYMid meet">${content}</svg>`}
+function molDiv(id,title=''){return `<div class="mol-art" aria-label="${escapeHTML(title||id)}の構造式">${diagram(M[id]?.fig||id)}</div>`}
+function render(){let selected=B.find(x=>x.id===state.bone),g=G.find(x=>x.id===state.group);if(selected.locked){state.group='none';g=G[0];}
+ let lists='',prevSection='';B.forEach(b=>{if(b.section!==prevSection){prevSection=b.section;lists+=`<div class="group-title">${escapeHTML(b.section)}</div>`}lists+=`<button class="pick ${state.bone===b.id?'active':''}" data-bone="${b.id}" aria-pressed="${state.bone===b.id}"><span>${escapeHTML(b.label)}</span><span class="tag">${escapeHTML(b.tag)}</span></button>`});document.getElementById('bone-list').innerHTML=lists;
+ document.getElementById('bone-preview').innerHTML=selected.ids.map(id=>`<div class="molecule-mini"><span class="mol-title">${escapeHTML(M[id].n)}</span>${molDiv(id,M[id].n)}</div>`).join('');document.getElementById('bone-hint').textContent=selected.locked?'個別登録された化合物':selected.ids.length>1?`${selected.ids.length}種類の骨格異性体`:'選択した骨格の構造式';
+ document.getElementById('group-list').innerHTML=`<div class="group-title">官能基・置換基</div>`+G.map(v=>`<button class="pick ${state.group===v.id?'active':''}" data-group="${v.id}" aria-pressed="${state.group===v.id}" ${selected.locked?'disabled':''}><span>${escapeHTML(v.label)}</span><span class="tag">${escapeHTML(v.formula.replace('＋ ',''))}</span></button>`).join('');
+ document.getElementById('group-preview').className='preview'+(selected.locked?' locked':'');document.getElementById('group-preview').innerHTML=selected.locked?`<span class="preview-label">官能基プレビュー</span><div class="functional-preview"><div><div class="functional-visual" style="color:#98a7b2">追加なし</div><div class="locked-note" style="margin:15px auto">個別登録された化合物です。官能基の追加はできません。</div></div></div>`:`<span class="preview-label">官能基プレビュー</span><div class="functional-preview"><div class="functional-visual mono">${escapeHTML(g.formula)}</div></div><div class="func-caption">${escapeHTML(g.description)}</div>`;
+ const ids=R[state.bone]?.[state.group]||[];document.getElementById('result-count').textContent=`${ids.length} 種類`;document.getElementById('result-description').textContent=selected.locked?'個別登録された化合物の説明':state.group==='none'?'炭素骨格そのものの物質を表示中':'選択に対応する登録済み化合物を表示中';
+ document.getElementById('result-cards').innerHTML=ids.length?ids.map(id=>{let v=M[id];return `<article class="chemcard"><div class="card-top"><div class="eyebrow">${escapeHTML(v.cat)}</div><h3 class="card-name">${escapeHTML(v.n)}</h3><div class="card-formula">分子式：${escapeHTML(v.f)}</div></div><div class="chem-figure">${molDiv(id,v.n)}${id==='glucose'?'<span class="fig-note">構造は簡略表示</span>':''}</div><div class="facts"><div class="fact"><strong>性質</strong><span>${escapeHTML(v.p)}</span></div><div class="fact"><strong>主な用途</strong><span>${escapeHTML(v.use)}</span></div><div class="fact"><strong>自然界・由来</strong><span>${escapeHTML(v.nature)}</span></div></div></article>`}).join(''):`<div class="empty" style="grid-column:1/-1"><strong>この組み合わせはモック未収録です</strong><br>製品版では収録台帳に基づき候補を拡充します。</div>`;
+ document.querySelectorAll('[data-bone]').forEach(el=>el.addEventListener('click',()=>{state.bone=el.dataset.bone;render()}));document.querySelectorAll('[data-group]').forEach(el=>el.addEventListener('click',()=>{state.group=el.dataset.group;render()}));
+}
+render();
+</script>
+</body></html>
