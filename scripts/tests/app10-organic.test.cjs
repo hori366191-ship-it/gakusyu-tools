@@ -925,6 +925,7 @@ test('[external] 台帳は9列・URL・title・section・取得日・domainを�
   const js = read('app10/ledger.js');
   assert.match(js, /E\.audit\(D\)/);
   assert.match(js, /未対応/);
+  assert.match(js, /D\.normalizeName\(search\.value/);
   const css = read('app10/app.css');
   assert.match(css, /\.oc-ext-table \{/);
   assert.match(css, /\.oc-ext-table td \{/);

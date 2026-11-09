@@ -231,7 +231,8 @@
   }
 
   function renderRows() {
-    var q = (search.value || '').trim().toLowerCase();
+    var rawQuery = (search.value || '').trim().toLowerCase();
+    var normQuery = D.normalizeName ? D.normalizeName(search.value || '') : rawQuery;
     var cat = catSelect.value;
     var shown = 0;
     var html = '';
@@ -239,8 +240,9 @@
       var c = D.COMPOUNDS[id];
       var v = validation[id];
       if (cat && c.category !== cat) return;
-      var hay = (c.name + ' ' + id + ' ' + c.formula + ' ' + (c.formulaDisplay || R.formatFormula(c.formula)) + ' ' + (D.categoryById(c.category) || {}).name + ' ' + (c.subcategory || '') + ' ' + (D.searchTermsFor ? D.searchTermsFor(id).join(' ') : '')).toLowerCase();
-      if (q && hay.indexOf(q) === -1) return;
+      var rawHay = (c.name + ' ' + id + ' ' + c.formula + ' ' + (c.formulaDisplay || R.formatFormula(c.formula)) + ' ' + (D.categoryById(c.category) || {}).name + ' ' + (c.subcategory || '') + ' ' + (D.searchTermsFor ? D.searchTermsFor(id).join(' ') : '')).toLowerCase();
+      var normHay = D.normalizeName ? D.normalizeName(rawHay) : rawHay;
+      if (rawQuery && rawHay.indexOf(rawQuery) === -1 && normHay.indexOf(normQuery) === -1) return;
       shown++;
       var catName = D.categoryById(c.category) ? D.categoryById(c.category).name : c.category;
       if (c.subcategory) catName += '・' + c.subcategory;
