@@ -21,11 +21,13 @@
 
   var state = {
     mode: 'chain',
-    chainFamily: 'amine',
-    chainCarbon: 2,
-    chainStructure: 'saturated',
+    chainPartialC: 2,
+    chainShape: 'd-ethane-c2',
+    chainFamily: 'alkane',
+    chainStructure: 'all', // 旧URLの移行判定用（新UIでは選択しない）
+    chainCarbon: null, // 旧URLの総炭素数（新UIでは選択しない）
     ringSystem: 'benzene',
-    ringGroup: 'none',
+    ringPreset: 'none',
     otherCategory: 'sugar',
     otherFamily: 'monosaccharide',
     focus: '',
@@ -33,18 +35,19 @@
   };
 
   var els = {
-    modeNote: document.getElementById('mode-note'),
     chainPanels: document.getElementById('chain-panels'),
     ringPanels: document.getElementById('ring-panels'),
     otherPanels: document.getElementById('other-panels'),
     carbonList: document.getElementById('carbon-list'),
-    chainStructureList: document.getElementById('chain-structure-list'),
+    chainShapeList: document.getElementById('chain-shape-list'),
     chainFamilyList: document.getElementById('chain-family-list'),
     chainSelection: document.getElementById('chain-selection'),
+    chainLeftFigure: document.getElementById('chain-left-figure'),
     chainPreview: document.getElementById('chain-preview'),
     ringList: document.getElementById('ring-list'),
     ringGroupList: document.getElementById('ring-group-list'),
     ringSelection: document.getElementById('ring-selection'),
+    ringLeftFigure: document.getElementById('ring-left-figure'),
     ringPreview: document.getElementById('ring-preview'),
     ringFoot: document.getElementById('ring-foot'),
     otherCategoryList: document.getElementById('other-category-list'),
@@ -263,77 +266,161 @@
    * 鎖式
    * ------------------------------------------------------------------ */
   function buildChainFamilyList() {
-    els.chainFamilyList.innerHTML = C.CHAIN_FAMILIES.map(function (f) {
-      return '<button type="button" class="oc-pick" data-chain-family="' + esc(f.id) + '" aria-pressed="false">' +
-        '<span class="oc-pick__label">' + esc(f.label) + '</span>' +
-        '<span class="oc-tag oc-tag--count" data-chain-count="' + esc(f.id) + '">—</span></button>';
-    }).join('');
+    // 実際の表示は renderChainFamilyList()。ここではコンテナを空にするだけ。
+    if (els.chainFamilyList) els.chainFamilyList.innerHTML = '';
   }
 
-  var STRUCTURE_OPTIONS = [
-    { id: 'saturated', label: '飽和鎖式' },
-    { id: 'unsaturated', label: '不飽和鎖式' },
-    { id: 'all', label: 'すべて' }
-  ];
-
-  function buildChainStructureList() {
-    if (!els.chainStructureList) return;
-    els.chainStructureList.innerHTML = STRUCTURE_OPTIONS.map(function (o) {
-      return '<button type="button" class="oc-seg__btn" data-chain-structure="' + o.id + '" aria-pressed="false">' + esc(o.label) + '</button>';
-    }).join('');
+  function chainShapeLabel(shape) {
+    return shape ? C.chainDescriptorLabel(shape) : '';
   }
 
-  function structureLabel(id) {
-    var o = STRUCTURE_OPTIONS.filter(function (x) { return x.id === id; })[0];
-    return o ? o.label : id;
+  function partialLabel(n) {
+    return Number(n) === 0 ? '炭化水素基なし〈H〉' : 'C' + n;
   }
 
-  function syncChainStructure() {
-    if (!els.chainStructureList) return;
-    els.chainStructureList.querySelectorAll('[data-chain-structure]').forEach(function (btn) {
-      btn.setAttribute('aria-pressed', btn.getAttribute('data-chain-structure') === state.chainStructure ? 'true' : 'false');
-    });
-  }
-
-  function ensureFamilyStructure(family) {
-    // アルケン/アルキンは不飽和、アルカンは飽和が自然な初期条件。
-    // 多官能familyは「すべて」で表示し、単官能条件の0件と混同しない。
-    var next = state.chainStructure;
-    if ((family === 'alkene' || family === 'alkyne') && next === 'saturated') next = 'unsaturated';
-    else if ((family === 'alkane' || family === 'polyol') && next === 'unsaturated') next = 'saturated';
-    else if (family === 'amino-alcohol' && next === 'saturated') next = 'all';
-    if (next !== state.chainStructure) {
-      state.chainStructure = next;
-      state.notice = '「' + familyName(family) + '」に合わせて構造条件を「' + structureLabel(next) + '」に切り替えました。';
+  function reconcileChainFamily() {
+    if (!state.chainShape) {
+      state.chainFamily = '';
+      return;
+    }
+    if (state.chainFamily && !C.chainDescriptorFamilyValid(state.chainShape, state.chainFamily)) {
+      state.chainFamily = '';
+      state.notice = '骨格の形に該当しない化合物分類だったため、分類の選択を解除しました。分類を選び直してください。';
     }
   }
 
   function renderCarbonList() {
-    var options = C.carbonOptions(state.chainFamily);
-    if (!options.length) options = [state.chainCarbon];
-    if (options.indexOf(state.chainCarbon) === -1) state.chainCarbon = options[0];
+    // ①は「官能基に結合する炭化水素部分」のC数。分類（②）には依存しない。
+    var options = C.chainPartialOptions();
+    if (!options.length) options = [state.chainPartialC];
+    if (options.indexOf(state.chainPartialC) === -1) {
+      state.chainPartialC = options.indexOf(C.INITIAL_CHAIN_PARTIAL) !== -1 ? C.INITIAL_CHAIN_PARTIAL : options[0];
+    }
+    var active = document.activeElement && document.activeElement.closest ? document.activeElement.closest('[data-chain-partial]') : null;
+    var activeCarbon = active ? active.getAttribute('data-chain-partial') : null;
     els.carbonList.innerHTML = options.map(function (n) {
-      return '<button type="button" class="oc-carbon' + (n === state.chainCarbon ? ' is-current' : '') +
-        '" data-carbon="' + n + '" aria-pressed="' + (n === state.chainCarbon ? 'true' : 'false') + '">' +
+      var label = partialLabel(n);
+      return '<button type="button" class="oc-carbon' + (n === state.chainPartialC ? ' is-current' : '') +
+        '" data-chain-partial="' + n + '" aria-pressed="' + (n === state.chainPartialC ? 'true' : 'false') + '">' +
         '<span class="oc-carbon__main">C' + n + '</span>' +
-        '<span class="oc-carbon__sub">' + n + '個</span></button>';
+        '<span class="oc-carbon__sub">' + esc(n === 0 ? 'H' : n + '個') + '</span></button>';
     }).join('');
-    var f = C.CHAIN_FAMILY_LABEL[state.chainFamily] || state.chainFamily;
-    els.chainSelection.textContent = '選択中: 鎖式 ／ 総炭素数 C' + state.chainCarbon + ' ／ ' + f +
-      ' ／ 構造: ' + structureLabel(state.chainStructure);
+    if (activeCarbon) {
+      var focusBtn = els.carbonList.querySelector('[data-chain-partial="' + activeCarbon + '"]');
+      if (focusBtn) focusBtn.focus();
+    }
+    var f = state.chainFamily ? (C.CHAIN_FAMILY_LABEL[state.chainFamily] || state.chainFamily) : '未選択';
+    var shape = state.chainShape ? chainShapeLabel(state.chainShape) : '未選択';
+    els.chainSelection.textContent = '選択中: 鎖式 ／ 炭化水素部分 ' + partialLabel(state.chainPartialC) +
+      ' ／ 骨格: ' + shape + ' ／ 分類: ' + f;
   }
 
-  function syncChainCounts() {
-    C.CHAIN_FAMILIES.forEach(function (f) {
-      var el = els.chainFamilyList.querySelector('[data-chain-count="' + f.id + '"]');
-      if (!el) return;
-      var n = C.chainIdsFor(f.id, state.chainCarbon, state.chainStructure).length;
-      el.textContent = n ? String(n) : '—';
-    });
-    els.chainFamilyList.querySelectorAll('[data-chain-family]').forEach(function (btn) {
-      btn.setAttribute('aria-pressed', btn.getAttribute('data-chain-family') === state.chainFamily ? 'true' : 'false');
-    });
+  function renderChainShapeList() {
+    if (!els.chainShapeList) return;
+    var shapes = C.chainShapeOptions(state.chainPartialC);
+    if (state.chainShape && !shapes.some(function (d) { return d.id === state.chainShape; })) {
+      state.chainShape = '';
+      state.chainFamily = '';
+      state.notice = '炭化水素部分の炭素数が変わったため、骨格の形の選択を解除しました。骨格の形を選んでください。';
+    }
+    var active = document.activeElement && document.activeElement.closest ? document.activeElement.closest('[data-chain-shape]') : null;
+    var activeShape = active ? active.getAttribute('data-chain-shape') : null;
+    if (!shapes.length) {
+      els.chainShapeList.innerHTML = '<p class="oc-empty-note">この炭素数に該当する炭化水素骨格がありません。炭素数を変えてください。</p>';
+      return;
+    }
+    els.chainShapeList.innerHTML = shapes.map(function (d) {
+      return '<button type="button" class="oc-pick' + (d.id === state.chainShape ? ' is-current' : '') + '" data-chain-shape="' + esc(d.id) + '" aria-pressed="' +
+        (d.id === state.chainShape ? 'true' : 'false') + '">' +
+        '<span class="oc-pick__label">' + esc(d.label) + '</span>' +
+        '<span class="oc-tag oc-tag--count">' + d.compoundIds.length + '</span></button>';
+    }).join('');
+    if (activeShape) {
+      var focusShape = els.chainShapeList.querySelector('[data-chain-shape="' + activeShape + '"]');
+      if (focusShape) focusShape.focus();
+    }
   }
+
+  function markAttachmentSvg(svg, marks) {
+    if (!marks || !marks.length) return svg;
+    var circles = marks.map(function (m) {
+      return '<circle class="oc-attach-mark" cx="' + Number(m.x).toFixed(1) + '" cy="' + Number(m.y).toFixed(1) + '" r="17" />';
+    }).join('');
+    var end = svg.lastIndexOf('</svg>');
+    if (end === -1) return svg;
+    return svg.slice(0, end) + circles + svg.slice(end);
+  }
+
+  function renderFragmentTile(tile) {
+    if (tile.kind === 'hydrogen') {
+      return '<div class="oc-frag-tile oc-frag-tile--h">' +
+        '<div class="oc-frag-tile__fig"><span class="oc-frag-h">H</span></div>' +
+        '<div class="oc-frag-tile__label">H</div></div>';
+    }
+    var svg = R.renderStructure(tile.structure, tile.label);
+    svg = markAttachmentSvg(svg, tile.marks);
+    return '<div class="oc-frag-tile">' +
+      '<div class="oc-frag-tile__fig">' + svg + '</div>' +
+      '<div class="oc-frag-tile__label">' + esc(tile.label) +
+      '<span>' + esc(tile.origin || '') + '</span></div></div>';
+  }
+
+  function renderChainLeftFigure() {
+    if (!els.chainLeftFigure) return;
+    if (!state.chainShape) {
+      els.chainLeftFigure.innerHTML = '<span class="oc-left-figure__label">親炭化水素</span>' +
+        '<p class="oc-left-figure__note">骨格の形を選んでください。炭化水素部分の炭素数を選ぶと、そのC数で可能な骨格の形が表示されます。' +
+        (state.chainPartialC === 0 ? 'C0は「炭化水素基なし〈H〉」として、ギ酸・ホルムアルデヒド・シュウ酸に対応します。' : '') + '</p>';
+      return;
+    }
+    var tiles = C.chainDescriptorPreview(state.chainShape);
+    var html = '<span class="oc-left-figure__label">親炭化水素（接続点にHを補う）</span><div class="oc-frag-preview">';
+    tiles.forEach(function (tile, i) {
+      if (i) html += '<span class="oc-frag-plus" aria-hidden="true">＋</span>';
+      html += renderFragmentTile(tile);
+    });
+    html += '</div><div class="oc-left-figure__legend"><span class="oc-attach-legend">○</span> 官能基とつながる位置（Hを補って親炭化水素として表示）</div>' +
+      '<p class="oc-left-figure__note"><b>' + esc(chainShapeLabel(state.chainShape)) + '</b>。' +
+      (state.chainPartialC === 0
+        ? '炭化水素部分がないため、接続点はありません。官能基そのものの分類は②で選びます。'
+        : (tiles.some(function (t) { return t.marks && t.marks.length; })
+          ? '○は、この骨格のどこかが官能基とつながる位置です。同じ骨格でも、どの位置につくかで異性体になります。'
+          : 'この骨格だけが分子全体になる場合、接続点はありません。')) +
+      '</p>';
+    els.chainLeftFigure.innerHTML = html;
+  }
+
+  function renderChainFamilyList() {
+    if (!state.chainShape) {
+      els.chainFamilyList.innerHTML = '<p class="oc-empty-note">先に①で骨格の形を選んでください。炭素数を変えた場合は、骨格の形を選び直します（別の骨格へ自動では移動しません）。</p>';
+      return;
+    }
+    var families = C.chainFamiliesForDescriptor(state.chainShape);
+    if (state.chainFamily && !families.some(function (f) { return f.id === state.chainFamily; })) {
+      reconcileChainFamily();
+    }
+    var active = document.activeElement && document.activeElement.closest ? document.activeElement.closest('[data-chain-family]') : null;
+    var activeFamily = active ? active.getAttribute('data-chain-family') : null;
+    if (!families.length) {
+      els.chainFamilyList.innerHTML = '<p class="oc-empty-note">この骨格に該当する鎖式の分類がありません。骨格の形を変えてください（未収録・化学的不存在とは断定しません）。</p>';
+      return;
+    }
+    els.chainFamilyList.innerHTML = families.map(function (f) {
+      // 表示だけ分類ごとに差し替える（アルデヒドは −CHO を主表示）。
+      // 選択値・結果の分類名は f.id / CHAIN_FAMILY_LABEL のまま変えない。
+      var pick = C.chainFamilyPick(f.id);
+      return '<button type="button" class="oc-pick' + (f.id === state.chainFamily ? ' is-current' : '') + '" data-chain-family="' + esc(f.id) + '" aria-pressed="' +
+        (f.id === state.chainFamily ? 'true' : 'false') + '">' +
+        '<span class="oc-pick__label">' + esc(pick.main) +
+        (pick.sub ? '<span class="oc-pick__sub">' + esc(pick.sub) + '</span>' : '') + '</span>' +
+        '<span class="oc-tag oc-tag--count">' + f.count + '</span></button>';
+    }).join('');
+    if (activeFamily) {
+      var focusFamily = els.chainFamilyList.querySelector('[data-chain-family="' + activeFamily + '"]');
+      if (focusFamily) focusFamily.focus();
+    }
+  }
+
 
   function genCard(title, formula, meta, note, empty) {
     return '<article class="oc-gen' + (empty ? ' is-empty' : '') + '">' +
@@ -343,131 +430,145 @@
       '<p class="oc-gen__note">' + esc(note) + '</p></article>';
   }
 
+  var ROLE_GENERAL = {
+    alkane: ['CₙH₂ₙ₊₂', '単結合だけの鎖式炭化水素。'],
+    alkene: ['R–CH=CH₂ / R–CH=CH–R′', 'C=Cを1本以上もつ鎖式炭化水素。'],
+    alkyne: ['R–C≡CH / R–C≡C–R′', 'C≡Cを1本以上もつ鎖式炭化水素。'],
+    monohalogen: ['R–X', 'XはCl・Br・I。ハロゲン化アルキル・ハロゲン化アルケニルを含む。'],
+    multihalogen: ['R–Xₙ（n≥2）', '同じ分子にハロゲンが2個以上。一ハロゲン化物とは別の役割として表示する。'],
+    alcohol: ['R–OH', '一価アルコール。O–Hの結合線は省略し、OHとまとめて表す。'],
+    polyol: ['R–(OH)ₙ（n≥2）', '1分子に2個以上のOHをもつ多価アルコール。'],
+    ether: ['R–O–R′', '炭素を2つのRに分けて数える。C–C結合を保つ表記ではない。'],
+    aldehyde: ['R−C(=O)−H', '末端のカルボニル基。C=Oの炭素にHが結合する（O–Hではない）。'],
+    ketone: ['R–CO–R′', 'C=Oが炭素鎖の途中にある。'],
+    monocarboxy: ['R–COOH', 'COOHの炭素は官能基側。炭化水素部分のC数とは別に数える。'],
+    dicarboxy: ['HOOC–R–COOH', 'COOHが2つ。シュウ酸（Rなし）も一価カルボン酸と混ぜず、この役割で表示する。'],
+    'hydroxy-acid': ['HO–R–COOH', 'ヒドロキシ基とカルボキシ基を併せもつ。一価カルボン酸の一般式だけを当てはめない。'],
+    'hydroxy-polycarboxy': ['HOOC–R(OH)–COOH など', 'ヒドロキシ基と2つ以上のカルボキシ基をもつ。'],
+    'keto-acid': ['R–CO–COOH', 'ケトンとカルボン酸を併せもつ。'],
+    'acid-chloride': ['R–COCl', 'カルボキシ基のOHをClで置き換えた酸塩化物。'],
+    anhydride: ['R–CO–O–CO–R′', '2分子のカルボン酸から水がとれた構造。'],
+    monoester: ['R–COO–R′', 'カルボン酸とアルコールの脱水縮合でできる構造。'],
+    triester: ['R–COO–CH₂–CH(OCO–R′)–CH₂–OCO–R″', '3つのエステル結合をもつ。トリアセチンなど。'],
+    'amine-1': ['R–NH₂', 'Nに炭化水素基が1つ。'],
+    'amine-2': ['R–NH–R′', 'Nに炭化水素基が2つ。左右を入れ替えても同じ化合物。'],
+    'amine-3': ['R–N(R′)–R″', 'Nに炭化水素基が3つ。'],
+    nitrile: ['R–C≡N', 'CNの炭素は官能基側。炭化水素部分のC数とは別に数える。'],
+    nitro: ['R–NO₂', 'ニトロ基を炭素に結合した化合物。'],
+    'amino-alcohol': ['HO–R–NH₂', 'アミノ基とヒドロキシ基を併せもつ多官能化合物。']
+  };
+
+  function generalForRole(role) {
+    return ROLE_GENERAL[role] || ['—', ''];
+  }
+
+  function roleNote(role) {
+    var general = ROLE_GENERAL[role];
+    return general ? general[1] : '';
+  }
+
   function renderChainPreview() {
+    if (!state.chainShape) {
+      els.chainPreview.innerHTML = '<span class="oc-preview__label">化合物分類</span>' +
+        '<p class="oc-preview__locked-note">先に①で骨格の形を選んでください。<br>①の炭素数と骨格に合わせて、0件でない分類だけを表示します。</p>';
+      return;
+    }
+    if (!state.chainFamily) {
+      els.chainPreview.innerHTML = '<span class="oc-preview__label">化合物分類</span>' +
+        '<p class="oc-preview__locked-note">化合物分類を選んでください。<br>②を選んでも①の骨格・炭素数は書き換えません。</p>';
+      return;
+    }
     var family = state.chainFamily;
-    var c = state.chainCarbon;
-    var rawIds = C.chainIds(family, c);
-    var ids = C.chainIdsFor(family, c, state.chainStructure);
     var label = C.CHAIN_FAMILY_LABEL[family] || family;
+    var ids = C.chainIdsForDescriptor(state.chainShape, family);
+    var roles = C.chainDescriptorRoles(state.chainShape, family);
     var html = '<span class="oc-preview__label">' + esc(label) + 'の一般構造</span>' +
-      '<p class="oc-gen-lead">構造条件: <b>' + esc(structureLabel(state.chainStructure)) + '</b>（' +
-      esc('飽和/不飽和はC=C・C≡Cのみで判定。一価/多価は分類で分離') + '）</p>';
+      '<p class="oc-gen-lead">炭化水素部分: <b>' + esc(chainShapeLabel(state.chainShape)) + '</b>' +
+      '（C' + state.chainPartialC + '）／ 分子全体のC数は結果カードに表示</p>';
 
     if (family === 'amine') {
-      var counts = [1, 2, 3].map(function (degree) {
-        return ids.filter(function (id) { return (C.AMINE_DEGREE[id] || 0) === degree; }).length;
+      var degreeCounts = { 1: 0, 2: 0, 3: 0 };
+      ids.forEach(function (id) {
+        var role = C.chainRoleFor(id);
+        if (role && role.indexOf('amine-') === 0) degreeCounts[Number(role.slice(6))]++;
       });
       html += '<p class="oc-gen-lead">Nに結合する炭化水素基の数で級が決まります。一般構造は常に3つ表示し、該当しない級は条件不足と明記します。</p>' +
         '<div class="oc-gen-grid">' +
-        genCard('第一級アミン', 'R–NH₂', counts[0] + ' 種', 'NにRが1つ。総炭素数はRの炭素数の合計。', counts[0] === 0) +
-        genCard('第二級アミン', 'R–NH–R′', counts[1] + ' 種', 'NにRが2つ。左右を入れ替えても同じ化合物。', counts[1] === 0) +
-        genCard('第三級アミン', 'R–N(R′)–R″', counts[2] + ' 種',
-          counts[2] === 0 ? (c < 3 ? '条件不足: 第三級アミンはNに3つの炭素が必要で、総炭素数3以上で表示されます。' : 'この条件では0種。') : 'NにRが3つ。',
-          counts[2] === 0) +
+        genCard('第一級アミン', 'R–NH₂', degreeCounts[1] + ' 種', 'NにRが1つ。', degreeCounts[1] === 0) +
+        genCard('第二級アミン', 'R–NH–R′', degreeCounts[2] + ' 種', 'NにRが2つ。左右を入れ替えても同じ化合物。', degreeCounts[2] === 0) +
+        genCard('第三級アミン', 'R–N(R′)–R″', degreeCounts[3] + ' 種',
+          degreeCounts[3] === 0 ? 'この条件では第三級アミンがありません。Nに3つの炭化水素基が必要です。' : 'NにRが3つ。',
+          degreeCounts[3] === 0) +
         '</div>';
       els.chainPreview.innerHTML = html;
       return;
     }
 
-    var general = {
-      ether: ['R–O–R′', '炭素を2つのRに分けて数える。C–C結合を保つ表記ではなく、合成手順でもない。'],
-      alcohol: ['R–OH', '一価アルコール。O–Hの結合線は省略し、OHとまとめて表す。'],
-      polyol: ['R–(OH)ₙ（n≥2）', '多価アルコール。OH数は飽和/不飽和とは独立で、C=C・C≡Cの有無は構造条件で判定する。'],
-      carboxylic: ['R–COOH', 'COOHの炭素も総炭素数に含める。'],
-      ester: ['R–COO–R′', 'カルボン酸とアルコールの脱水縮合でできる構造。'],
-      aldehyde: ['R–CHO', '末端のカルボニル基。'],
-      ketone: ['R–CO–R′', 'C=Oが炭素鎖の途中にある。'],
-      nitrile: ['R–C≡N', 'CNの炭素も総炭素数に含める。'],
-      halogen: ['R–X', 'XはCl・Br・I。ハロゲン化アルキル・ハロゲン化アルケニルを含む。'],
-      alkene: ['R–CH=CH₂ / R–CH=CH–R′', 'C=Cを1本以上もつ鎖式炭化水素。'],
-      alkyne: ['R–C≡CH / R–C≡C–R′', 'C≡Cを1本以上もつ鎖式炭化水素。'],
-      alkane: ['C' + c + 'H' + (2 * c + 2), '単結合だけの鎖式炭化水素。'],
-      nitro: ['R–NO₂', 'ニトロ基を炭素に結合した化合物。'],
-      anhydride: ['R–CO–O–CO–R′', '2分子のカルボン酸から水がとれた構造。'],
-      'amino-alcohol': ['HO–R–NH₂', 'アミノ基とヒドロキシ基を併せもつ多官能化合物。モノアミン R–NH₂ の飽和一般式とは別に扱う。']
-    }[family] || ['—', ''];
-
-    html += '<div class="oc-gen-grid">' +
-      genCard(label, general[0], ids.length ? ids.length + ' 種' : '0 種', general[1], !ids.length) +
-      '</div>';
-    if (family === 'ether') {
-      var splits = [];
-      for (var a = 1; a <= c - 1; a++) {
-        var b = c - a;
-        if (a > b) continue;
-        splits.push('C' + a + ' + C' + b);
-      }
-      html += '<div class="oc-note-box"><p><b>C–C結合を保つ表記ではありません。</b> R–O–R′ は、エタンなどのC–C結合を残したままOを差し込む、という骨格の見方ではありません。炭素を2つのRに分けて数え、実際の合成手順を示すものでもありません。</p>' +
-        (splits.length ? '<p>この条件の分け方: <b>' + esc(splits.join(' / ')) + '</b>（左右を入れ替えた同じ化合物は重複して数えない）。</p>' : '') + '</div>';
-    } else if (family === 'alcohol' || family === 'carboxylic' || family === 'ester' || family === 'nitrile') {
-      html += '<div class="oc-note-box"><p>官能基の炭素を含めた分子全体の総炭素数で抽出しています。同じ総炭素数でも、官能基が異なる異性体（例: エタノールとジメチルエーテル）は別のfamilyに分け、同じ結果一覧に混ぜません。</p></div>';
+    html += '<div class="oc-gen-grid">' + roles.map(function (r) {
+      return genCard(r.label, generalForRole(r.role)[0], r.count + ' 種', roleNote(r.role), r.count === 0);
+    }).join('') + '</div>';
+    if (family === 'aldehyde') {
+      html += '<div class="oc-note-box"><p><b>末端の −CHO:</b> R−C(=O)−H。C=O の炭素に H が結合しており、O–H ではありません。' +
+        '左①は CHO の炭素を除いた炭化水素部分だけを示します（炭化水素基がない場合は H）。</p></div>';
+    }
+    if (roles.length > 1) {
+      html += '<div class="oc-note-box"><p><b>複数の官能基役割があります。</b> この分類には ' +
+        roles.map(function (r) { return esc(r.label) + '（' + r.count + '件）'; }).join(' / ') +
+        ' が含まれます。一価の一般式だけを当てはめず、結果カードのbadgeで役割を区別します。</p></div>';
     }
     if (!ids.length) {
-      html += '<p class="oc-preview__hint">' +
-        (rawIds.length
-          ? 'この構造条件では0件ですが、同じ総炭素数・分類の登録済み化合物は ' + rawIds.length + ' 件あります。構造条件を「すべて」または該当する条件に切り替えてください（未収録ではありません）。'
-          : 'この条件に該当する登録済み化合物はありません。化学的に存在しないという意味ではなく、教材範囲内の登録データに該当がない状態です。') +
-        '</p>';
+      html += '<p class="oc-preview__hint">この条件に該当する登録済み化合物はありません。化学的に存在しないという意味ではありません。</p>';
     }
     els.chainPreview.innerHTML = html;
   }
 
+  function chainCardBadges(id) {
+    var c = D.COMPOUNDS[id];
+    var badges = [];
+    var role = C.chainRoleFor(id);
+    if (role) badges.push(C.chainRoleLabel(role));
+    badges.push(c.formulaDisplay || R.formatFormula(c.formula));
+    badges.push('分子全体 C' + C.carbonCount(c));
+    return badges;
+  }
+
   function renderChainResults() {
-    var family = state.chainFamily;
-    var c = state.chainCarbon;
-    var rawIds = C.chainIds(family, c);
-    var ids = C.chainIdsFor(family, c, state.chainStructure);
-    var label = C.CHAIN_FAMILY_LABEL[family] || family;
-    els.resultDescription.textContent = '鎖式 ／ 総炭素数 C' + c + ' ／ ' + label + ' ／ 構造: ' + structureLabel(state.chainStructure);
+    if (!state.chainShape) {
+      els.resultDescription.textContent = '炭化水素部分の骨格を選んでください';
+      els.resultCount.textContent = '0 種類';
+      els.results.innerHTML = '<div class="oc-empty"><strong>骨格の形が未選択です</strong>' +
+        '<p>①で炭化水素部分の炭素数を選び、そのC数に合う骨格の形を選んでください。別の骨格へは自動で移動しません。</p></div>';
+      return;
+    }
+    if (!state.chainFamily) {
+      els.resultDescription.textContent = '化合物分類を選んでください';
+      els.resultCount.textContent = '0 種類';
+      els.results.innerHTML = '<div class="oc-empty"><strong>化合物分類が未選択です</strong>' +
+        '<p>①の炭素数と骨格はそのままに、②で化合物分類を選んでください。分類は自動では切り替えません。</p></div>';
+      return;
+    }
+    var ids = C.chainIdsForDescriptor(state.chainShape, state.chainFamily);
+    var label = C.CHAIN_FAMILY_LABEL[state.chainFamily] || state.chainFamily;
+    els.resultDescription.textContent = '鎖式 ／ 炭化水素部分 C' + state.chainPartialC +
+      '（' + chainShapeLabel(state.chainShape) + '） ／ ' + label +
+      ' ／ 分子全体Cは各カード';
     els.resultCount.textContent = ids.length + ' 種類';
     if (!ids.length) {
-      var hint = family === 'amine' && c < 3
-        ? '第三級アミンはNに3つの炭素が必要なため、総炭素数' + c + 'では条件不足です。'
-        : (rawIds.length
-          ? '構造条件「' + structureLabel(state.chainStructure) + '」では0件ですが、同じ総炭素数・分類の登録済み化合物は ' + rawIds.length + ' 件あります。構造条件を「すべて」または該当する条件に切り替えてください。未収録・化学的不存在ではありません。'
-          : 'この条件に該当する登録済み化合物がありません。化学的に存在しない、または高校外であると断定せず、登録データの範囲を示しています。');
-      els.results.innerHTML = '<div class="oc-empty"><strong>この条件では0種類です</strong><p>' + esc(hint) + '</p>' +
-        '<p>条件を変えるか、<a href="./ledger.html">収録台帳</a>で登録範囲を確認してください。</p></div>';
+      els.results.innerHTML = '<div class="oc-empty"><strong>この条件では0種類です</strong><p>' +
+        'この骨格と分類に該当する登録済み化合物がありません。化学的に存在しない、または高校外であると断定せず、登録データの範囲を示しています。</p>' +
+        '<p>骨格の形または分類を変えるか、<a href="./ledger.html">収録台帳</a>で登録範囲を確認してください。</p></div>';
       return;
     }
 
-    var html = '';
-    if (family === 'amine') {
-      [1, 2, 3].forEach(function (degree) {
-        var group = ids.filter(function (id) { return (C.AMINE_DEGREE[id] || 0) === degree; });
-        var title = degree === 1 ? '第一級アミン' : (degree === 2 ? '第二級アミン' : '第三級アミン');
-        html += '<div class="oc-subgroup"><h4 class="oc-subgroup__title">' + title + ' <span class="oc-micro">' + group.length + ' 種</span></h4>';
-        if (!group.length) {
-          html += '<p class="oc-empty-note">この条件では0種。' +
-            (degree === 3 && c < 3 ? '第三級アミンはNに3つの炭素が必要なため、総炭素数3以上で表示されます。' : '該当する登録済み化合物はありません。') + '</p>';
-        } else {
-          html += '<div class="oc-cards' + (group.length === 1 ? ' oc-cards--single' : '') + '">' +
-            group.map(function (id) { return renderCard(D.COMPOUNDS[id], { mode: 'chain' }); }).join('') + '</div>';
-        }
-        html += '</div>';
-      });
-    } else {
-      // 同じ総炭素数・同じ分類でも、多価アルコールやエノールなど分子式が異なる場合がある。
-      // 分子式ごとに分け、異性体の比較と別組成の混在を区別する。
-      var byFormula = {};
-      var formulaOrder = [];
-      ids.forEach(function (id) {
-        var f = D.COMPOUNDS[id].formula;
-        if (!byFormula[f]) { byFormula[f] = []; formulaOrder.push(f); }
-        byFormula[f].push(id);
-      });
-      formulaOrder.sort();
-      formulaOrder.forEach(function (formula) {
-        var group = byFormula[formula];
-        html += '<div class="oc-subgroup"><h4 class="oc-subgroup__title">' + esc(R.formatFormula(formula)) +
-          ' <span class="oc-micro">' + group.length + ' 種</span></h4>' +
-          '<div class="oc-cards' + (group.length === 1 ? ' oc-cards--single' : '') + '">' +
-          group.map(function (id) { return renderCard(D.COMPOUNDS[id], { mode: 'chain' }); }).join('') + '</div></div>';
-      });
-    }
-    if (rawIds.length > ids.length) {
-      html += '<p class="oc-results__note">※ 構造条件「' + esc(structureLabel(state.chainStructure)) + '」により ' +
-        (rawIds.length - ids.length) + ' 件を表示から除外しています。未収録・化学的不存在ではありません。「すべて」で全登録を確認できます。</p>';
+    // 結果カードは、分類・級・分子式ごとの別グリッドに分けず、
+    // 全選択を通して同じ2列グリッドに並べる。級・分子式・役割はカードのbadgeで残す。
+    var html = '<div class="oc-cards' + (ids.length === 1 ? ' oc-cards--single' : '') + '">' +
+      ids.map(function (id) {
+        return renderCard(D.COMPOUNDS[id], { mode: 'chain', badges: chainCardBadges(id) });
+      }).join('') + '</div>';
+    if (ids.length > 1) {
+      html += '<p class="oc-results__note">同じ骨格・同じ分類でも、級・官能基の役割・分子式が異なる場合があります。カード上部のbadgeで区別し、分子全体のC数も併記しています。' +
+        '二重結合・三重結合の位置が異なる骨格は①でも別に扱います。同じ①shapeにまとめるのは、接続点にHを補うと同一の親炭化水素になる場合（プロパン-1-オール / プロパン-2-オールなど）だけです。</p>';
     }
     html += resultsNote();
     els.results.innerHTML = html;
@@ -511,28 +612,48 @@
     bindDetails(els.ringList);
   }
 
-  function availableRingGroups(rs) {
-    if (!rs.skeletonId || !D.COMBOS[rs.skeletonId]) return [];
-    var groups = [];
-    Object.keys(D.COMBOS[rs.skeletonId]).forEach(function (gid) {
-      if ((D.COMBOS[rs.skeletonId][gid] || []).length) groups.push(gid);
-    });
-    return groups;
+  function ringPresets() {
+    return ringSystem().presets || [];
+  }
+
+  function ringPreset() {
+    var list = ringPresets();
+    return list.filter(function (p) { return p.id === state.ringPreset; })[0] || list[0] ||
+      { id: 'none', kind: 'none', label: '追加なし', subs: [], ids: [] };
   }
 
   function renderRingGroupList() {
     var rs = ringSystem();
-    var groups = availableRingGroups(rs);
-    if (!groups.length) {
-      els.ringGroupList.innerHTML = '<p class="oc-empty-note">この骨格は一置換生成の登録がありません。登録済みの化合物を結果に表示します。</p>';
-      return;
+    var presets = ringPresets();
+    var kinds = [
+      { key: 'single', label: '置換基1つ' },
+      { key: 'same', label: '同じ置換基を複数' },
+      { key: 'combo', label: '異なる置換基組み合わせ' },
+      { key: 'tray', label: 'その他の登録済み化合物' }
+    ];
+    function button(p) {
+      var n = p.ids.length;
+      return '<button type="button" class="oc-pick' + (p.id === state.ringPreset ? ' is-current' : '') + '" data-ring-preset="' + esc(p.id) + '" aria-pressed="' +
+        (p.id === state.ringPreset ? 'true' : 'false') + '">' +
+        '<span class="oc-pick__label">' + esc(p.label) + '</span>' +
+        '<span class="oc-tag oc-tag--count">' + (n ? n : '—') + '</span></button>';
     }
-    els.ringGroupList.innerHTML = groups.map(function (gid) {
-      var g = D.groupById(gid);
-      return '<button type="button" class="oc-pick" data-ring-group="' + esc(gid) + '" aria-pressed="false">' +
-        '<span class="oc-pick__label">' + esc(g ? g.label : gid) + '</span>' +
-        '<span class="oc-tag oc-tag--count">' + ((D.COMBOS[rs.skeletonId][gid] || []).length) + '</span></button>';
-    }).join('');
+    var html = '<div class="oc-preset-row">' + button(presets[0]) + '</div>';
+    kinds.forEach(function (kind) {
+      var list = presets.filter(function (p) { return p.kind === kind.key; });
+      if (!list.length) return;
+      html += '<div class="oc-preset-section"><h4 class="oc-preset-heading">' + esc(kind.label) +
+        ' <span class="oc-micro">' + list.length + '</span></h4><div class="oc-preset-row">' +
+        list.map(button).join('') + '</div></div>';
+    });
+    if (!presets.length) html = '<p class="oc-empty-note">この骨格の置換基プリセットがありません。</p>';
+    var active = document.activeElement && document.activeElement.closest ? document.activeElement.closest('[data-ring-preset]') : null;
+    var activePreset = active ? active.getAttribute('data-ring-preset') : null;
+    els.ringGroupList.innerHTML = html;
+    if (activePreset) {
+      var focusPreset = els.ringGroupList.querySelector('[data-ring-preset="' + activePreset + '"]');
+      if (focusPreset) focusPreset.focus();
+    }
   }
 
   function syncRing() {
@@ -540,16 +661,12 @@
     els.ringList.querySelectorAll('[data-ring-system]').forEach(function (btn) {
       btn.setAttribute('aria-pressed', btn.getAttribute('data-ring-system') === rs.id ? 'true' : 'false');
     });
-    var groups = availableRingGroups(rs);
-    if (groups.length && groups.indexOf(state.ringGroup) === -1) state.ringGroup = groups[0];
-    if (!groups.length) state.ringGroup = 'none';
-    els.ringGroupList.querySelectorAll('[data-ring-group]').forEach(function (btn) {
-      btn.setAttribute('aria-pressed', btn.getAttribute('data-ring-group') === state.ringGroup ? 'true' : 'false');
-    });
-    var carbonText = rs.baseCarbon ? 'C' + rs.baseCarbon : '複合';
-    els.ringSelection.textContent = '選択中: 芳香族・環式 ／ ' + rs.label + '（' + carbonText + '）' +
-      (groups.length ? ' ／ ' + groupLabel(state.ringGroup) : ' ／ 置換基生成なし');
+    if (!ringPresets().some(function (p) { return p.id === state.ringPreset; })) state.ringPreset = 'none';
     renderRingGroupList();
+    var preset = ringPreset();
+    var carbonText = rs.baseCarbon ? 'C' + rs.baseCarbon : '複合';
+    els.ringSelection.textContent = '選択中: 芳香族・環式 ／ ' + rs.label + '（' + carbonText + '） ／ ' +
+      (preset.kind === 'none' ? '追加なし' : preset.label) + ' ／ ' + preset.ids.length + ' 種';
   }
 
   function baseRingStructure(rs) {
@@ -564,74 +681,78 @@
     return null;
   }
 
+  function ringSubPreviewHtml(preset) {
+    var html = '<span class="oc-preview__label">置換基・組み合わせ</span>';
+    html += '<div class="oc-sub-list">';
+    preset.subs.forEach(function (s) {
+      var meta = C.ringSubMeta(s.key);
+      html += '<div class="oc-sub">' +
+        '<div class="oc-sub__head"><strong>' + esc(meta.label) + '</strong><span>' + esc(meta.name) + '</span>' +
+        (s.count > 1 ? '<span class="oc-badge">×' + s.count + '</span>' : '') + '</div>' +
+        '<code class="oc-sub__formula">' + esc(meta.formula) + '</code>' +
+        '<p class="oc-sub__note">' + esc(meta.note) + '</p></div>';
+    });
+    html += '</div><p class="oc-micro">結合点は左端の「−」が環のHと置き換わる位置です。位置異性体は結果にまとめて表示します。</p>';
+    return html;
+  }
+
+  function renderRingLeftFigure() {
+    if (!els.ringLeftFigure) return;
+    var rs = ringSystem();
+    var base = baseRingStructure(rs);
+    els.ringLeftFigure.innerHTML = '<span class="oc-left-figure__label">固定した骨格</span>' +
+      (base
+        ? '<div class="oc-left-figure__svg">' + R.renderStructure(base, rs.label + 'の構造') + '</div>'
+        : '<p class="oc-left-figure__note">複合芳香族・その他は固定した単一骨格をもたないため、左の骨格図はありません。右の一覧から登録済み化合物を選びます。</p>');
+  }
+
   function renderRingPreview() {
     var rs = ringSystem();
-    var groups = availableRingGroups(rs);
-    var base = baseRingStructure(rs);
-    var html = '<span class="oc-preview__label">固定した骨格</span>';
-    html += '<div class="oc-ring-preview">' +
-      '<div class="oc-ring-preview__fig">' + (base ? R.renderStructure(base, rs.label + 'の構造') : '<p class="oc-preview__hint">複合芳香族・その他の環は、下の結果で個別の構造を表示します。</p>') + '</div>' +
-      '<div class="oc-ring-preview__meta"><strong>' + esc(rs.label) + '</strong><p>' + esc(rs.note) + '</p>' +
-      '<p class="oc-micro">' + (rs.baseCarbon ? '環の炭素数 ' + rs.baseCarbon + ' を固定' : '固定した単一骨格としては扱わない') + '</p></div></div>';
-    if (groups.length) {
-      var gid = state.ringGroup;
-      var g = D.groupById(gid);
-      var entries = ((D.COMBOS[rs.skeletonId] || {})[gid] || []);
-      html += '<div class="oc-ring-preview__sub"><b>置換基:</b> ' + esc(g ? g.label : gid) + ' ／ ' +
-        '<b>一置換生成:</b> ' + entries.length + ' 種</div>';
-      if (gid !== 'none' && g) {
-        html += '<p class="oc-panel-foot">' + esc(g.description) + ' Rは環との結合位置を表します。環の炭素数は変わりません。</p>';
-      }
+    var preset = ringPreset();
+    var html = '';
+    if (preset.kind === 'none') {
+      html += rs.id === 'complex-ring'
+        ? '<p class="oc-preview__locked-note">複合芳香族・その他は固定した単一骨格をもたないため、「追加なし」の結果はありません。<br>「その他の登録済み化合物」から選んでください。</p>'
+        : '<p class="oc-preview__locked-note">置換基を追加しません。<br>固定した骨格そのものだけを結果に表示します。</p>';
+    } else if (preset.kind === 'tray') {
+      html += '<div class="oc-ring-preview__sub"><b>その他の登録済み化合物:</b> ' + preset.ids.length +
+        ' 種<br><span class="oc-micro">単純な置換基プリセットに分類できない、または塩・複雑な置換基をもつ登録済み化合物です。</span></div>';
+    } else {
+      html += ringSubPreviewHtml(preset);
     }
     els.ringPreview.innerHTML = html;
-    els.ringFoot.textContent = groups.length
-      ? '置換基が変わっても、固定した環の炭素数はそのままです。登録済みの多置換体は、一置換生成とは別familyとして結果に表示します。'
-      : 'この骨格は一置換生成の登録がありません。結果には登録済みの化合物を表示します。';
+    els.ringFoot.textContent = preset.kind === 'none'
+      ? '「追加なし」は骨格単体だけを表示します。登録済みの誘導体は置換基のプリセットから選びます。'
+      : '同じ置換基構成の位置異性体は、1つのプリセットにまとめて結果へ表示します。置換基が変わっても、固定した環の炭素数はそのままです。';
   }
 
   function renderRingResults() {
     var rs = ringSystem();
-    var groups = availableRingGroups(rs);
-    var generated = [];
-    if (groups.length) {
-      generated = ((D.COMBOS[rs.skeletonId] || {})[state.ringGroup] || []).map(function (e) { return e.id; });
-    }
-    var showRegistered = state.ringGroup === 'none' || !groups.length;
-    var registered = showRegistered
-      ? rs.registeredSingle.concat(rs.registeredMulti, rs.registeredOther)
-      : [];
-    var total = generated.length + registered.length;
-    els.resultDescription.textContent = '芳香族・環式 ／ ' + rs.label + (groups.length ? ' ／ ' + groupLabel(state.ringGroup) : ' ／ 置換基生成なし');
-    els.resultCount.textContent = total + ' 種類';
+    var preset = ringPreset();
+    var ids = preset.ids.slice();
+    els.resultDescription.textContent = '芳香族・環式 ／ ' + rs.label + ' ／ ' +
+      (preset.kind === 'none' ? '追加なし' : preset.label);
+    els.resultCount.textContent = ids.length + ' 種類';
 
     var html = '';
-    if (generated.length) {
-      html += '<div class="oc-subgroup"><h4 class="oc-subgroup__title">一置換体（固定した環のHを置換） <span class="oc-micro">' + generated.length + ' 種</span></h4>' +
-        '<div class="oc-cards' + (generated.length === 1 ? ' oc-cards--single' : '') + '">' +
-        generated.map(function (id) { return renderCard(D.COMPOUNDS[id], { mode: 'ring' }); }).join('') + '</div></div>';
-    } else if (groups.length) {
-      html += '<div class="oc-subgroup"><h4 class="oc-subgroup__title">一置換体（固定した環のHを置換）</h4>' +
-        '<p class="oc-empty-note">この置換基の一置換生成は登録されていません。</p></div>';
-    }
-
-    if (rs.registeredMulti.length && (state.ringGroup === 'none' || !groups.length)) {
-      html += '<div class="oc-subgroup"><h4 class="oc-subgroup__title">登録済みの多置換体（一置換生成とは別family） <span class="oc-micro">' + rs.registeredMulti.length + ' 種</span></h4>' +
-        '<p class="oc-subgroup__note">多置換体は、一置換生成の結果に混ぜず、別familyとして表示します。</p>' +
-        '<div class="oc-cards">' + rs.registeredMulti.map(function (id) { return renderCard(D.COMPOUNDS[id], { mode: 'ring', multi: true }); }).join('') + '</div></div>';
-    }
-
-    if (rs.registeredSingle.length && (state.ringGroup === 'none' || !groups.length)) {
-      html += '<div class="oc-subgroup"><h4 class="oc-subgroup__title">登録済みの一置換誘導体（組合せ生成とは別） <span class="oc-micro">' + rs.registeredSingle.length + ' 種</span></h4>' +
-        '<div class="oc-cards">' + rs.registeredSingle.map(function (id) { return renderCard(D.COMPOUNDS[id], { mode: 'ring' }); }).join('') + '</div></div>';
-    }
-
-    if (rs.registeredOther.length && (state.ringGroup === 'none' || !groups.length)) {
-      html += '<div class="oc-subgroup"><h4 class="oc-subgroup__title">登録済みの関連化合物 <span class="oc-micro">' + rs.registeredOther.length + ' 種</span></h4>' +
-        '<div class="oc-cards">' + rs.registeredOther.map(function (id) { return renderCard(D.COMPOUNDS[id], { mode: 'ring' }); }).join('') + '</div></div>';
-    }
-
-    if (!html) {
-      html = '<div class="oc-empty"><strong>この条件では0種類です</strong><p>固定した環と置換基の組合せに、登録済みの化合物がありません。化学的に成立しない、または高校外であると断定せず、登録データの範囲を示しています。</p></div>';
+    if (!ids.length) {
+      html = '<div class="oc-empty"><strong>この条件では0種類です</strong><p>' +
+        (preset.kind === 'none'
+          ? 'この骨格は単体の登録がありません。置換基のプリセットを選ぶか、別の骨格を選んでください。'
+          : 'このプリセットに該当する登録済み化合物がありません。化学的に成立しない、または高校外であると断定せず、登録データの範囲を示しています。') +
+        '</p></div>';
+    } else {
+      // 位置異性体のカードも、同じ2列グリッドに並べる。
+      html += '<div class="oc-cards' + (ids.length === 1 ? ' oc-cards--single' : '') + '">' + ids.map(function (id) {
+        return renderCard(D.COMPOUNDS[id], {
+          mode: 'ring',
+          multi: preset.kind === 'same' || preset.kind === 'combo',
+          badges: [preset.kind === 'none' ? '骨格単体' : preset.label]
+        });
+      }).join('') + '</div>';
+      if (preset.kind !== 'none') {
+        html += '<p class="oc-results__note">同じ置換基構成の位置異性体をまとめて表示します。位置は各カードの「置換位置」で確認できます。</p>';
+      }
     }
     html += resultsNote();
     els.results.innerHTML = html;
@@ -704,21 +825,15 @@
     var total = ids.length + familyIds.length + materialIds.length;
     els.resultDescription.textContent = 'その他 ／ ' + cat.label + ' ／ ' + fam.label;
     els.resultCount.textContent = total + ' 件';
-    var html = '<div class="oc-subgroup"><h4 class="oc-subgroup__title">' + esc(fam.label) + ' <span class="oc-micro">' + total + ' 件</span></h4>';
-    if (ids.length) {
-      html += '<div class="oc-cards' + (ids.length === 1 ? ' oc-cards--single' : '') + '">' +
-        ids.map(function (id) { return renderCard(D.COMPOUNDS[id], { mode: 'other' }); }).join('') + '</div>';
-    }
-    if (familyIds.length) {
-      html += '<div class="oc-cards">' + familyIds.map(function (fid) { return renderFamilyCard(D.familyById(fid)); }).join('') + '</div>';
-    }
-    if (materialIds.length) {
-      html += '<div class="oc-cards">' + materialIds.map(function (mid) { return renderMaterialCard(D.materialById(mid)); }).join('') + '</div>';
-    }
+    var cards = [];
+    ids.forEach(function (id) { cards.push(renderCard(D.COMPOUNDS[id], { mode: 'other', badges: [fam.label] })); });
+    familyIds.forEach(function (fid) { cards.push(renderFamilyCard(D.familyById(fid))); });
+    materialIds.forEach(function (mid) { cards.push(renderMaterialCard(D.materialById(mid))); });
+    var html = '<div class="oc-cards' + (cards.length === 1 ? ' oc-cards--single' : '') + '">' + cards.join('') + '</div>';
     if (!total) {
       html += '<p class="oc-empty-note">このfamilyには代表化合物・材料の登録がありません。familyの説明のみ表示しています。</p>';
     }
-    html += '</div>' + resultsNote();
+    html += resultsNote();
     els.results.innerHTML = html;
     focusResultCard();
   }
@@ -742,6 +857,40 @@
       (missing ? '情報未登録' : html) + '</span></div>';
   }
 
+  var RING_BASE_INFO = {
+    benzene: { c: 6, h: 6 },
+    naphthalene: { c: 10, h: 8 },
+    cyclopropane: { c: 3, h: 6 },
+    cyclobutane: { c: 4, h: 8 },
+    cyclopentane: { c: 5, h: 10 },
+    cyclohexane: { c: 6, h: 12 },
+    cyclohexene: { c: 6, h: 10 },
+    anthracene: { c: 14, h: 10 }
+  };
+
+  function ringSubText(c) {
+    if (!C.ringSubsFor || !C.routeFor) return '';
+    var subs = C.ringSubsFor(c.id);
+    if (!subs || !subs.length) return '';
+    var route = C.routeFor(c.id);
+    if (!route || route.mode !== 'ring' || !RING_BASE_INFO[route.system]) return '';
+    var info = RING_BASE_INFO[route.system];
+    var total = subs.reduce(function (n, s) { return n + (s.count || 1); }, 0);
+    var h = Math.max(0, info.h - total);
+    var text = 'C' + info.c + (h ? 'H' + h : '');
+    subs.forEach(function (s) {
+      var meta = C.ringSubMeta(s.key);
+      text += '(' + meta.label + (s.count > 1 ? '×' + s.count : '') + ')';
+    });
+    return text;
+  }
+
+  function cardCondensedText(c) {
+    var text = ringSubText(c);
+    if (text) return { text: text, note: '' };
+    return R.condensedTextFor ? R.condensedTextFor(c) : { text: '', note: '' };
+  }
+
   function renderCard(c, opts) {
     opts = opts || {};
     var check = validation[c.id] || {};
@@ -759,8 +908,19 @@
     var formulaLabel = c.formulaVariable ? '組成・一般式' : '分子式';
     var badges = ['<span class="oc-badge">' + esc(modeLabel(opts.mode || 'other')) + '</span>'];
     if (opts.multi) badges.push('<span class="oc-badge">多置換体</span>');
+    (opts.badges || []).forEach(function (b) {
+      if (b) badges.push('<span class="oc-badge">' + esc(b) + '</span>');
+    });
     if (c.figures && c.figures.length > 1) badges.push('<span class="oc-badge">' + c.figures.length + '形態</span>');
     var note = c.notes || '';
+    var positionText = (opts.mode === 'ring' && C.ringPositionText) ? C.ringPositionText(c.id) : '';
+    var condensed = R.condensedTextFor ? cardCondensedText(c) : { text: '', note: '' };
+    var condensedBlock = '';
+    if (condensed && (condensed.text || condensed.note)) {
+      condensedBlock = '<div class="oc-condensed-text" aria-label="簡略構造式"><strong>簡略構造式</strong>' +
+        (condensed.text ? '<code>' + esc(condensed.text) + '</code>' : '') +
+        (condensed.note ? '<span>' + esc(condensed.note) + '</span>' : '') + '</div>';
+    }
     var pubchem = c.pubchem
       ? '<a href="https://pubchem.ncbi.nlm.nih.gov/compound/' + encodeURIComponent(c.pubchem) +
         '" target="_blank" rel="noopener">出典: PubChem CID ' + esc(c.pubchem) + '</a>'
@@ -771,11 +931,13 @@
         '<h3 class="oc-card__name">' + esc(c.name) + '</h3>' +
         '<div class="oc-card__formula">' + formulaLabel + '：' + esc(formulaText) + '</div>' +
       '</div>' +
-      '<div class="oc-card__figs' + (c.figures && c.figures.length >= 3 ? ' oc-card__figs--stack' : '') + '">' + R.renderCompound(c) + '</div>' +
+      condensedBlock +
+      '<div class="oc-card__figs">' + R.renderCompound(c) + '</div>' +
       '<div class="oc-facts">' +
         fact('性質', c.properties) +
         fact('主な用途', c.uses) +
         fact('自然界・由来', c.nature) +
+        (positionText ? fact('置換位置', positionText) : '') +
         (c.precursors ? fact('主な前駆体・生成', c.precursors) : '') +
         (c.reactions ? fact('主な反応', c.reactions) : '') +
         (c.hazards ? fact('危険性', c.hazards, { warn: true }) : '') +
@@ -792,11 +954,12 @@
     var q = ['mode=' + encodeURIComponent(r.mode)];
     if (r.mode === 'chain') {
       q.push('family=' + encodeURIComponent(r.family));
-      q.push('c=' + encodeURIComponent(r.carbon));
-      if (r.structure) q.push('structure=' + encodeURIComponent(r.structure));
+      q.push('cpartial=' + encodeURIComponent(r.partialC));
+      if (r.shape) q.push('shape=' + encodeURIComponent(r.shape));
     } else if (r.mode === 'ring') {
       q.push('system=' + encodeURIComponent(r.system));
-      if (r.group) q.push('group=' + encodeURIComponent(r.group));
+      if (r.preset) q.push('preset=' + encodeURIComponent(r.preset));
+      else if (r.group) q.push('preset=' + encodeURIComponent(r.group));
     } else {
       q.push('category=' + encodeURIComponent(r.category));
       if (r.family) q.push('family=' + encodeURIComponent(r.family));
@@ -881,11 +1044,6 @@
     els.chainPanels.hidden = state.mode !== 'chain';
     els.ringPanels.hidden = state.mode !== 'ring';
     els.otherPanels.hidden = state.mode !== 'other';
-    els.modeNote.textContent = state.mode === 'chain'
-      ? 'いまは鎖式。分子全体の総炭素数と化合物分類から、当てはまる構造をまとめて表示します。'
-      : (state.mode === 'ring'
-        ? 'いまは芳香族・環式。固定した環のHを置換基で置き換えて表示します。'
-        : 'いまはその他。糖・アミノ酸・脂質・天然/合成高分子・材料などのfamilyから表示します。');
   }
 
   function renderDataStatus() {
@@ -900,19 +1058,21 @@
     var cov = C.auditCoverage();
     els.dataStatus.textContent = '収録 ' + total + ' 化合物／分子式・登録データ整合 ' + ok +
       ' 件（原子レベル ' + atomCount + '）／経路 ' + cov.modes.chain + ' 鎖式・' + cov.modes.ring + ' 環式・' + cov.modes.other + ' その他' +
-      '／family ' + D.FAMILIES.length + '・材料 ' + D.MATERIALS.length;
+      '／鎖式デスクリプタ ' + C.CHAIN_DESCRIPTOR_LIST.length + '／family ' + D.FAMILIES.length + '・材料 ' + D.MATERIALS.length;
   }
 
   function update() {
     syncMode();
     if (state.mode === 'chain') {
       renderCarbonList();
-      syncChainStructure();
-      syncChainCounts();
+      renderChainShapeList();
+      renderChainFamilyList();
+      renderChainLeftFigure();
       animateHeight(els.chainPreview, renderChainPreview);
       animateHeight(els.results, renderChainResults);
     } else if (state.mode === 'ring') {
       syncRing();
+      renderRingLeftFigure();
       renderRingPreview();
       animateHeight(els.ringPreview, renderRingPreview);
       animateHeight(els.results, renderRingResults);
@@ -940,24 +1100,40 @@
   }
 
   function selectChainFamily(family) {
-    if (!C.CHAIN_INDEX[family]) return;
+    if (!state.chainShape) return;
+    // ②から①（炭化水素部分・骨格）を書き換えない。
+    if (!C.chainDescriptorFamilyValid(state.chainShape, family)) return;
     state.chainFamily = family;
     state.notice = '';
-    ensureFamilyStructure(family);
     state.focus = '';
     update();
   }
 
-  function selectChainStructure(condition) {
-    if (['saturated', 'unsaturated', 'all'].indexOf(condition) === -1) return;
-    state.chainStructure = condition;
+  function selectChainPartial(n) {
+    var value = Number(n);
+    if (C.chainPartialOptions().indexOf(value) === -1) return;
+    if (value === state.chainPartialC) return;
+    state.chainPartialC = value;
+    // ①のC数が変わると、それまでの骨格の形は原則として別のC数用になる。
+    // 勝手に別の骨格へ飛ばさず、shapeと②を解除して選び直してもらう。
+    state.chainShape = '';
+    state.chainFamily = '';
+    state.notice = '炭化水素部分の炭素数を' + (value === 0 ? '炭化水素基なし〈H〉' : 'C' + value) + 'に変えたため、骨格の形の選択を解除しました。骨格の形を選んでください。';
+    state.focus = '';
+    update();
+  }
+
+  function selectChainShape(shape) {
+    var descriptor = C.chainDescriptorById(shape);
+    if (!descriptor) return;
+    if (descriptor.partialC !== state.chainPartialC) return;
+    var previousFamily = state.chainFamily;
+    state.chainShape = shape;
     state.notice = '';
-    state.focus = '';
-    update();
-  }
-
-  function selectCarbon(n) {
-    state.chainCarbon = Number(n);
+    if (previousFamily && !C.chainDescriptorFamilyValid(shape, previousFamily)) {
+      state.chainFamily = '';
+      state.notice = '骨格の形が変わったため、化合物分類の選択を解除しました。分類を選び直してください。';
+    }
     state.focus = '';
     update();
   }
@@ -965,14 +1141,16 @@
   function selectRingSystem(system) {
     if (!C.RING_SYSTEM_MAP[system]) return;
     state.ringSystem = system;
+    // 骨格を変えたら置換基は「追加なし」から始める（別familyを勝手に選ばない）。
+    state.ringPreset = 'none';
     state.focus = '';
     update();
   }
 
-  function selectRingGroup(group) {
+  function selectRingPreset(preset) {
     var rs = ringSystem();
-    if (availableRingGroups(rs).indexOf(group) === -1) return;
-    state.ringGroup = group;
+    if (!rs.presets.some(function (p) { return p.id === preset; })) return;
+    state.ringPreset = preset;
     state.focus = '';
     update();
   }
@@ -998,14 +1176,18 @@
     if (!route) return false;
     if (route.mode === 'chain') {
       state.mode = 'chain';
+      if (route.partialC != null) state.chainPartialC = route.partialC;
+      if (route.shape && C.chainDescriptorById(route.shape)) state.chainShape = route.shape;
       if (route.family) state.chainFamily = route.family;
-      if (route.carbon) state.chainCarbon = route.carbon;
-      if (route.structure) state.chainStructure = route.structure;
-      else ensureFamilyStructure(state.chainFamily);
+      reconcileChainFamily();
     } else if (route.mode === 'ring') {
       state.mode = 'ring';
       if (route.system) state.ringSystem = route.system;
-      if (route.group) state.ringGroup = route.group;
+      state.ringPreset = route.preset || route.group || 'none';
+      if (!ringPresets().some(function (p) { return p.id === state.ringPreset; })) {
+        state.ringPreset = 'none';
+        state.notice = 'URLの置換基条件は現在の骨格にないため、「追加なし」に戻しました。';
+      }
     } else {
       state.mode = 'other';
       if (route.category) state.otherCategory = route.category;
@@ -1015,37 +1197,129 @@
     return true;
   }
 
+  function legacyPresetForGroup(system, group) {
+    if (!group) return 'none';
+    var rs = C.RING_SYSTEM_MAP[system];
+    if (!rs) return 'none';
+    if (rs.presets.some(function (p) { return p.id === group; })) return group;
+    var keyMap = { oh: 'OH', cooh: 'COOH', nh2: 'NH2', cho: 'CHO', no2: 'NO2', ch3: 'CH3', cl: 'Cl', br: 'Br', cn: 'CN' };
+    var key = keyMap[group];
+    if (!key) return 'none';
+    var hit = rs.presets.filter(function (p) {
+      return p.kind === 'single' && p.subs.length === 1 && p.subs[0].key === key;
+    })[0];
+    return hit ? hit.id : 'none';
+  }
+
+  function chainCandidatesForLegacy(totalCarbon, family, structure) {
+    return Object.keys(D.COMPOUNDS).filter(function (id) {
+      if (C.classify(id).mode !== 'chain') return false;
+      if (totalCarbon != null && !isNaN(totalCarbon) && C.carbonCount(D.COMPOUNDS[id]) !== totalCarbon) return false;
+      if (family && C.classify(id).family !== family) return false;
+      if (structure && structure !== 'all') {
+        var unsat = C.hasCCMultipleBond(D.COMPOUNDS[id]);
+        if (structure === 'unsaturated' && !unsat) return false;
+        if (structure === 'saturated' && unsat) return false;
+      }
+      return true;
+    });
+  }
+
   function readQuery() {
     var params = null;
     try { params = new URLSearchParams(location.search); } catch (e) { params = null; }
     if (!params) return;
     var mode = params.get('mode');
-    if (mode === 'chain' && params.get('family') && C.CHAIN_INDEX[params.get('family')]) {
+    if (mode === 'chain') {
       state.mode = 'chain';
-      state.chainFamily = params.get('family');
-      var c = Number(params.get('c'));
-      if (c) state.chainCarbon = c;
-      var st = params.get('structure');
-      if (st === 'saturated' || st === 'unsaturated' || st === 'all') state.chainStructure = st;
-      else ensureFamilyStructure(state.chainFamily);
-      var f = params.get('focus');
-      if (f && D.COMPOUNDS[f]) state.focus = f;
+      var focusParam = params.get('focus');
+      if (focusParam && D.COMPOUNDS[focusParam] && C.routeFor(focusParam)) {
+        applyRoute(C.routeFor(focusParam));
+        state.focus = focusParam;
+        if (params.get('c') != null) {
+          state.notice = 'URLのfocusを優先し、物質「' + compoundName(focusParam) + '」の正確な経路へ移行しました。';
+        }
+        return;
+      }
+      var shapeParam = params.get('shape');
+      var cpartialRaw = params.get('cpartial');
+      var cpartial = cpartialRaw == null ? null : Number(cpartialRaw);
+      if (shapeParam) {
+        var descriptor = C.chainDescriptorById(shapeParam);
+        if (descriptor) {
+          state.chainPartialC = descriptor.partialC;
+          state.chainShape = descriptor.id;
+          var famParam = params.get('family');
+          if (famParam && C.chainDescriptorFamilyValid(descriptor.id, famParam)) {
+            state.chainFamily = famParam;
+          } else if (famParam) {
+            state.chainFamily = '';
+            state.notice = 'URLの化合物分類「' + familyName(famParam) + '」はこの骨格に該当しないため、分類の選択を解除しました。';
+          } else {
+            state.chainFamily = '';
+          }
+          return;
+        }
+        state.notice = 'URLの骨格の形「' + shapeParam + '」は収録されていません。骨格の形を選び直してください。';
+        state.chainPartialC = (cpartialRaw != null && C.chainPartialOptions().indexOf(cpartial) !== -1)
+          ? cpartial : C.INITIAL_CHAIN_PARTIAL;
+        state.chainShape = '';
+        state.chainFamily = '';
+        return;
+      }
+      if (cpartialRaw != null && C.chainPartialOptions().indexOf(cpartial) !== -1) {
+        state.chainPartialC = cpartial;
+        state.chainShape = '';
+        state.chainFamily = '';
+        if (!state.notice) state.notice = '骨格の形を選んでください。';
+        return;
+      }
+      // 旧URL（?mode=chain&c=<総炭素数>&family=...&structure=...）の移行。
+      var legacyC = params.get('c');
+      var legacyCarbon = legacyC == null ? null : Number(legacyC);
+      var legacyFamily = params.get('family');
+      var legacyStructure = params.get('structure');
+      if (legacyC != null || legacyFamily || legacyStructure) {
+        var matches = chainCandidatesForLegacy(legacyCarbon, legacyFamily, legacyStructure);
+        if (matches.length === 1) {
+          applyRoute(C.routeFor(matches[0]));
+          state.focus = matches[0];
+          state.notice = '旧URL（総炭素数 C' + legacyCarbon + '）を、新しい炭化水素部分の条件へ移行しました。';
+          return;
+        }
+        state.chainPartialC = C.INITIAL_CHAIN_PARTIAL;
+        state.chainShape = '';
+        state.chainFamily = '';
+        state.notice = matches.length > 1
+          ? '旧URLの総炭素数条件には ' + matches.length + ' 件が該当するため、骨格の形を選んでください。先頭の物質へは自動で移動しません。'
+          : '旧URLの条件に該当する鎖式化合物がありません。骨格の形から選び直してください。';
+        return;
+      }
+      state.chainPartialC = C.INITIAL_CHAIN_PARTIAL;
+      state.chainShape = C.INITIAL_CHAIN_SHAPE;
+      state.chainFamily = 'alkane';
       return;
     }
     if (mode === 'ring' && params.get('system') && C.RING_SYSTEM_MAP[params.get('system')]) {
       state.mode = 'ring';
       state.ringSystem = params.get('system');
-      var g = params.get('group');
-      if (g) state.ringGroup = g;
+      var presetParam = params.get('preset') || params.get('group');
+      state.ringPreset = legacyPresetForGroup(state.ringSystem, presetParam);
       var rf = params.get('focus');
-      if (rf && D.COMPOUNDS[rf]) state.focus = rf;
+      if (rf && D.COMPOUNDS[rf] && C.routeFor(rf)) {
+        state.focus = rf;
+        var froute = C.routeFor(rf);
+        if (!presetParam && froute.mode === 'ring' && froute.system === state.ringSystem && froute.preset) {
+          state.ringPreset = froute.preset;
+        }
+      }
       return;
     }
     if (mode === 'other' && params.get('category')) {
       state.mode = 'other';
       state.otherCategory = params.get('category');
-      var fam = params.get('family');
-      if (fam) state.otherFamily = fam;
+      var fam2 = params.get('family');
+      if (fam2) state.otherFamily = fam2;
       var of = params.get('focus');
       if (of && D.COMPOUNDS[of]) state.focus = of;
       return;
@@ -1062,24 +1336,61 @@
       if (ringSystem) {
         state.mode = 'ring';
         state.ringSystem = ringSystem.id;
-        var available = availableRingGroups(ringSystem);
-        state.ringGroup = oldGroup && available.indexOf(oldGroup) !== -1 ? oldGroup :
-          (available.length ? available[0] : 'none');
-        if (oldFocus && D.COMPOUNDS[oldFocus]) state.focus = oldFocus;
+        state.ringPreset = legacyPresetForGroup(ringSystem.id, oldGroup);
+        if (oldFocus && D.COMPOUNDS[oldFocus] && C.routeFor(oldFocus)) state.focus = oldFocus;
         state.notice = '旧URLの骨格「' + s + '」を、固定骨格＋置換基の条件へ移行しました。';
         return;
       }
       var legacy = D.legacySkeletonRoute ? D.legacySkeletonRoute(s) : null;
       var targetId = (legacy && legacy.id) || oldFocus || null;
-      if (!targetId) {
-        var sk = D.skeletonById(s);
-        if (sk && sk.ids && sk.ids.length) targetId = sk.ids[0];
-      }
       if (targetId && C.routeFor(targetId)) {
         applyRoute(C.routeFor(targetId));
         state.focus = targetId;
         state.notice = '旧URLの骨格「' + s + '」を、新しい探し方の同じ物質の結果へ移行しました。';
         return;
+      }
+      var sk = D.skeletonById(s);
+      if (sk && sk.ids && sk.ids.length) {
+        var routes = sk.ids.map(function (id) { return C.routeFor(id); }).filter(Boolean);
+        var signatures = {};
+        routes.forEach(function (r) {
+          var sig = [r.mode, r.family || '', r.shape || '', r.system || '', r.category || ''].join('|');
+          signatures[sig] = true;
+        });
+        var sigList = Object.keys(signatures);
+        if (sk.ids.length === 1 && routes.length === 1) {
+          applyRoute(routes[0]);
+          state.focus = sk.ids[0];
+          state.notice = '旧URLの骨格「' + s + '」を、新しい探し方の同じ物質の結果へ移行しました。';
+          return;
+        }
+        if (sigList.length === 1 && routes.length === sk.ids.length) {
+          // 複数物質でも経路が同じなら、物質を1つに決めずに条件だけ移行する。
+          applyRoute({
+            mode: routes[0].mode,
+            family: routes[0].family,
+            partialC: routes[0].partialC,
+            shape: routes[0].shape,
+            system: routes[0].system,
+            preset: routes[0].preset,
+            category: routes[0].category
+          });
+          state.focus = '';
+          state.notice = '旧URLの骨格「' + s + '」を、同じ条件の結果へ移行しました。';
+          return;
+        }
+        var chainRoutes = routes.filter(function (r) { return r.mode === 'chain'; });
+        if (chainRoutes.length === routes.length) {
+          var partial = chainRoutes[0].partialC;
+          var samePartial = chainRoutes.every(function (r) { return r.partialC === partial; });
+          state.mode = 'chain';
+          state.chainPartialC = samePartial ? partial : C.INITIAL_CHAIN_PARTIAL;
+          state.chainShape = '';
+          state.chainFamily = '';
+          state.notice = '旧URLの骨格「' + s + '」には ' + sk.ids.length +
+            ' 件が含まれるため、骨格の形を選んでください。先頭の物質へは自動で移動しません。';
+          return;
+        }
       }
       state.notice = 'URLの骨格ID「' + s + '」は収録されていません。初期表示に戻しました。';
       return;
@@ -1103,24 +1414,33 @@
       url.searchParams.delete('group');
       url.searchParams.set('mode', state.mode);
       if (state.mode === 'chain') {
-        url.searchParams.set('family', state.chainFamily);
-        url.searchParams.set('c', String(state.chainCarbon));
-        url.searchParams.set('structure', state.chainStructure);
+        if (state.chainFamily) url.searchParams.set('family', state.chainFamily);
+        else url.searchParams.delete('family');
+        url.searchParams.set('cpartial', String(state.chainPartialC));
+        if (state.chainShape) url.searchParams.set('shape', state.chainShape);
+        else url.searchParams.delete('shape');
+        url.searchParams.delete('c');
+        url.searchParams.delete('structure');
         url.searchParams.delete('system');
+        url.searchParams.delete('preset');
         url.searchParams.delete('category');
       } else if (state.mode === 'ring') {
         url.searchParams.set('system', state.ringSystem);
-        url.searchParams.set('group', state.ringGroup);
+        url.searchParams.set('preset', state.ringPreset);
         url.searchParams.delete('family');
         url.searchParams.delete('c');
+        url.searchParams.delete('cpartial');
+        url.searchParams.delete('shape');
         url.searchParams.delete('category');
         url.searchParams.delete('structure');
       } else {
         url.searchParams.set('category', state.otherCategory);
         url.searchParams.set('family', state.otherFamily);
         url.searchParams.delete('system');
-        url.searchParams.delete('group');
+        url.searchParams.delete('preset');
         url.searchParams.delete('c');
+        url.searchParams.delete('cpartial');
+        url.searchParams.delete('shape');
         url.searchParams.delete('structure');
       }
       if (state.focus) url.searchParams.set('focus', state.focus);
@@ -1137,17 +1457,17 @@
     if (!btn) return;
     selectChainFamily(btn.getAttribute('data-chain-family'));
   });
-  if (els.chainStructureList) {
-    els.chainStructureList.addEventListener('click', function (e) {
-      var btn = e.target.closest('[data-chain-structure]');
+  if (els.chainShapeList) {
+    els.chainShapeList.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-chain-shape]');
       if (!btn) return;
-      selectChainStructure(btn.getAttribute('data-chain-structure'));
+      selectChainShape(btn.getAttribute('data-chain-shape'));
     });
   }
   els.carbonList.addEventListener('click', function (e) {
-    var btn = e.target.closest('[data-carbon]');
+    var btn = e.target.closest('[data-chain-partial]');
     if (!btn) return;
-    selectCarbon(btn.getAttribute('data-carbon'));
+    selectChainPartial(btn.getAttribute('data-chain-partial'));
   });
   els.ringList.addEventListener('click', function (e) {
     var btn = e.target.closest('[data-ring-system]');
@@ -1155,9 +1475,9 @@
     selectRingSystem(btn.getAttribute('data-ring-system'));
   });
   els.ringGroupList.addEventListener('click', function (e) {
-    var btn = e.target.closest('[data-ring-group]');
+    var btn = e.target.closest('[data-ring-preset]');
     if (!btn) return;
-    selectRingGroup(btn.getAttribute('data-ring-group'));
+    selectRingPreset(btn.getAttribute('data-ring-preset'));
   });
   els.otherCategoryList.addEventListener('click', function (e) {
     var btn = e.target.closest('[data-other-category]');
@@ -1173,16 +1493,101 @@
     btn.addEventListener('click', function () { selectMode(btn.getAttribute('data-mode')); });
   });
 
+  /* ------------------------------------------------------------------
+   * 図の拡大ダイアログ（Escape・フォーカス復帰・スクロール復元）
+   * ------------------------------------------------------------------ */
+  var figDialog = document.getElementById('fig-dialog');
+  var figDialogTitle = document.getElementById('fig-dialog-title');
+  var figDialogBody = document.getElementById('fig-dialog-body');
+  var figDialogClose = document.getElementById('fig-dialog-close');
+  var lastFigTrigger = null;
+  var lastScrollY = 0;
+
+  function focusResultsFallback() {
+    var target = document.getElementById('results') || els.results;
+    if (target && target.focus) {
+      try { target.focus(); } catch (e) {}
+    }
+  }
+
+  function restoreFigureDialog() {
+    document.body.classList.remove('oc-dialog-open');
+    if (figDialogBody) figDialogBody.innerHTML = '';
+    if (lastFigTrigger && lastFigTrigger.focus && document.contains(lastFigTrigger)) {
+      try { lastFigTrigger.focus(); } catch (e) { focusResultsFallback(); }
+    } else {
+      focusResultsFallback();
+    }
+    try { window.scrollTo(0, lastScrollY); } catch (e) {}
+    lastFigTrigger = null;
+  }
+
+  function openFigureDialog(fig) {
+    if (!figDialog || !figDialogBody) return;
+    var svg = fig.querySelector('svg');
+    if (!svg) return;
+    // 実際にfocus可能な明示「拡大」ボタンを復帰先にする。
+    var zoomBtn = fig.querySelector('.oc-fig__zoom-btn');
+    if (zoomBtn && zoomBtn.focus) lastFigTrigger = zoomBtn;
+    else if (fig.tabIndex >= 0 && fig.focus) lastFigTrigger = fig;
+    else lastFigTrigger = null;
+    lastScrollY = window.scrollY || window.pageYOffset || 0;
+    var caption = fig.querySelector('.oc-fig__caption');
+    if (figDialogTitle) figDialogTitle.textContent = caption ? caption.textContent : '構造式';
+    figDialogBody.innerHTML = svg.outerHTML;
+    document.body.classList.add('oc-dialog-open');
+    if (typeof figDialog.showModal === 'function') {
+      try { figDialog.showModal(); } catch (e) { figDialog.setAttribute('open', ''); }
+    } else {
+      figDialog.setAttribute('open', '');
+    }
+    if (figDialogClose) figDialogClose.focus();
+  }
+
+  function closeFigureDialog() {
+    if (!figDialog) return;
+    if (typeof figDialog.close === 'function' && figDialog.open) figDialog.close();
+    else { figDialog.removeAttribute('open'); restoreFigureDialog(); }
+  }
+
+  if (figDialog) {
+    figDialog.addEventListener('close', restoreFigureDialog);
+    figDialog.addEventListener('cancel', function (e) {
+      e.preventDefault();
+      closeFigureDialog();
+    });
+    figDialog.addEventListener('click', function (e) {
+      if (e.target === figDialog) closeFigureDialog();
+    });
+    if (figDialogClose) figDialogClose.addEventListener('click', closeFigureDialog);
+  }
+
+  els.results.addEventListener('click', function (e) {
+    var fig = e.target.closest('.oc-fig--zoom');
+    if (!fig) return;
+    openFigureDialog(fig);
+  });
+  els.results.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    var fig = e.target.closest('.oc-fig--zoom');
+    if (!fig) return;
+    e.preventDefault();
+    openFigureDialog(fig);
+  });
+
   buildChainFamilyList();
-  buildChainStructureList();
   buildOtherCategoryList();
   buildRingList();
   readQuery();
-  // 読み込んだURLの条件が現在のfamilyにない場合は補正する
-  if (C.carbonOptions(state.chainFamily).indexOf(state.chainCarbon) === -1) {
-    var opts = C.carbonOptions(state.chainFamily);
-    if (opts.length) state.chainCarbon = opts[0];
+  if (C.chainPartialOptions().indexOf(state.chainPartialC) === -1) {
+    state.chainPartialC = C.INITIAL_CHAIN_PARTIAL;
+    state.chainShape = C.INITIAL_CHAIN_SHAPE;
   }
+  if (!state.chainShape || !C.chainDescriptorById(state.chainShape)) {
+    state.chainShape = '';
+    state.chainFamily = '';
+  }
+  reconcileChainFamily();
   if (state.mode === 'other' && !C.otherFamilies(state.otherCategory).some(function (g) { return g.id === state.otherFamily; })) {
     var groups = C.otherFamilies(state.otherCategory);
     if (groups.length) state.otherFamily = groups[0].id;

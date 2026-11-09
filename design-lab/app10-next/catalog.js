@@ -12,14 +12,15 @@
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
-    module.exports = factory(require('./data.js'), require('./draw.js'));
+    module.exports = factory(require('./data.js'), require('./draw.js'), require('./chain-descriptor.js'));
   } else {
-    root.OCCatalog = factory(root.OCData, root.OCDraw);
+    root.OCCatalog = factory(root.OCData, root.OCDraw, root.OCChainDescriptor);
   }
-})(typeof globalThis !== 'undefined' ? globalThis : this, function (D, R) {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (D, R, X) {
   'use strict';
 
   if (!D || !R) throw new Error('OCCatalog: OCData と OCDraw が必要です');
+  if (!X) throw new Error('OCCatalog: OCChainDescriptor が必要です');
 
   var CHAIN_CATEGORIES = ['alkane', 'unsat', 'alcohol', 'ether', 'aldehyde', 'ketone', 'carboxylic', 'ester', 'aromatic-amine'];
   var RING_CATEGORIES = ['aromatic', 'phenol', 'aromatic-other', 'cyclic'];
@@ -27,26 +28,39 @@
   var METALS = ['Na', 'K', 'Ag', 'Cu', 'Ca', 'Pb', 'Mg', 'Zn', 'Fe', 'Al', 'Ba', 'Li', 'Sn'];
 
   var CHAIN_FAMILIES = [
-    { id: 'amine', label: 'アミン', note: 'Nに結合する炭化水素基の数で第一級〜第三級に分ける。' },
-    { id: 'ether', label: 'エーテル', note: 'R–O–R′。総炭素数を2つのRに分けて数える。C–C結合を保つ表記ではない。' },
-    { id: 'alcohol', label: 'アルコール（一価）', note: 'R–OH。O–Hの結合線は省略してOHとまとめて表す。一価アルコール。' },
-    { id: 'polyol', label: '多価アルコール', note: '1分子に2個以上のOHをもつ。飽和/不飽和はC=C・C≡Cの有無で別に判定する。' },
-    { id: 'carboxylic', label: 'カルボン酸', note: '–COOH。COOHの炭素も総炭素数に含める。' },
-    { id: 'ester', label: 'エステル', note: '–COO–。カルボン酸とアルコールの脱水縮合でできる構造。' },
-    { id: 'aldehyde', label: 'アルデヒド', note: '–CHO。末端のカルボニル基。' },
-    { id: 'ketone', label: 'ケトン', note: 'C=Oが炭素鎖の途中にある。' },
-    { id: 'nitrile', label: 'ニトリル', note: '–C≡N。CNの炭素も総炭素数に含める。' },
-    { id: 'halogen', label: 'ハロゲン化物', note: 'Cl・Br・Iを炭素に結合した化合物。' },
+    { id: 'alkane', label: 'アルカン', note: '単結合だけの鎖式炭化水素。' },
     { id: 'alkene', label: 'アルケン', note: 'C=Cを1本以上もつ鎖式炭化水素。' },
     { id: 'alkyne', label: 'アルキン', note: 'C≡Cを1本以上もつ鎖式炭化水素。' },
-    { id: 'alkane', label: 'アルカン', note: '単結合だけの鎖式炭化水素。' },
-    { id: 'nitro', label: 'ニトロ化合物', note: '–NO₂を炭素に結合した化合物。' },
+    { id: 'halogen', label: 'ハロゲン化物', note: 'Cl・Br・Iを炭素に結合した化合物。' },
+    { id: 'alcohol', label: 'アルコール（一価）', note: 'R–OH。O–Hの結合線は省略してOHとまとめて表す。一価アルコール。' },
+    { id: 'polyol', label: '多価アルコール', note: '1分子に2個以上のOHをもつ。飽和/不飽和はC=C・C≡Cの有無で別に判定する。' },
+    { id: 'ether', label: 'エーテル', note: 'R–O–R′。総炭素数を2つのRに分けて数える。C–C結合を保つ表記ではない。' },
+    { id: 'aldehyde', label: 'アルデヒド', note: '–CHO。末端のカルボニル基。' },
+    { id: 'ketone', label: 'ケトン', note: 'C=Oが炭素鎖の途中にある。' },
+    { id: 'carboxylic', label: 'カルボン酸', note: '–COOH。COOHの炭素も総炭素数に含める。' },
     { id: 'anhydride', label: 'カルボン酸無水物', note: '2分子のカルボン酸から水がとれた構造。' },
+    { id: 'ester', label: 'エステル', note: '–COO–。カルボン酸とアルコールの脱水縮合でできる構造。' },
+    { id: 'amine', label: 'アミン', note: 'Nに結合する炭化水素基の数で第一級〜第三級に分ける。' },
+    { id: 'nitrile', label: 'ニトリル', note: '–C≡N。CNの炭素も総炭素数に含める。' },
+    { id: 'nitro', label: 'ニトロ化合物', note: '–NO₂を炭素に結合した化合物。' },
     { id: 'amino-alcohol', label: 'アミノアルコール（多官能）', note: 'アミノ基とヒドロキシ基を併せもつ。モノアミン R–NH₂ の一般式とは別に扱う。' }
   ];
 
   var CHAIN_FAMILY_LABEL = {};
   CHAIN_FAMILIES.forEach(function (f) { CHAIN_FAMILY_LABEL[f.id] = f.label; });
+
+  // ②の選択ボタンの表示だけを分類ごとに差し替える。分類名（結果の見出し）は
+  // CHAIN_FAMILY_LABEL のまま保持し、アルデヒドだけは官能基の形（−CHO）を
+  // 主表示にして、構造から意味が分かるようにする。他の分類は従来表記のまま。
+  var CHAIN_FAMILY_PICK = {
+    aldehyde: { main: '−CHO', sub: 'アルデヒド基', note: '末端のカルボニル基。R−C(=O)−H。' }
+  };
+
+  function chainFamilyPick(family) {
+    var pick = CHAIN_FAMILY_PICK[family];
+    if (pick) return { main: pick.main, sub: pick.sub, note: pick.note };
+    return { main: CHAIN_FAMILY_LABEL[family] || family, sub: '', note: '' };
+  }
 
   var AMINE_DEGREE = {
     methylamine: 1, ethylamine: 1, propylamine: 1, isopropylamine: 1,
@@ -238,14 +252,135 @@
     'p-hydroxybenzoic-acid': true, 'm-hydroxybenzoic-acid': true, ibuprofen: true
   };
 
-  // 登録済みの多置換ベンゼン（custom/condensed構造で subs 配列をもたないもの）。
-  // 一置換生成の結果に混ぜないための明示リスト。
-  var BENZENE_MULTI_IDS = {
-    'p-divinylbenzene': true, guaiacol: true, 'sulfanilic-acid': true,
-    '2-nitrobenzaldehyde': true, acetaminophen: true, sulfanilamide: true,
-    '2,4,6-tribromophenol': true, 'p-hydroxybenzoic-acid': true,
-    'm-hydroxybenzoic-acid': true, ibuprofen: true
+  // ベンゼン環の置換基表示metadata。ring-sub構造の subs と custom構造の
+  // data.js RING_SUBS を同じ形（key/label/count/positions）にそろえる。
+  var RING_SUB_META = {
+    OH: { label: 'OH', name: 'ヒドロキシ基', formula: '−O−H', attach: 'O', note: '環のHをOHで置き換える。フェノール類。' },
+    CH3: { label: 'CH₃', name: 'メチル基', formula: '−CH₃', attach: 'C', note: '環のHをCH₃で置き換える。炭素が1つ増える。' },
+    C2H5: { label: 'C₂H₅', name: 'エチル基', formula: '−CH₂−CH₃', attach: 'C', note: '環のHをエチル基で置き換える。' },
+    'CH(CH3)2': { label: 'CH(CH₃)₂', name: 'イソプロピル基', formula: '−CH(CH₃)₂', attach: 'C', note: '環のHをイソプロピル基で置き換える。' },
+    'CH=CH2': { label: 'CH=CH₂', name: 'ビニル基', formula: '−CH=CH₂', attach: 'C', note: '環のHをビニル基で置き換える。C=Cをもつ。' },
+    Cl: { label: 'Cl', name: '塩素', formula: '−Cl', attach: 'Cl', note: '環のHを塩素原子で置き換える。' },
+    Br: { label: 'Br', name: '臭素', formula: '−Br', attach: 'Br', note: '環のHを臭素原子で置き換える。' },
+    I: { label: 'I', name: 'ヨウ素', formula: '−I', attach: 'I', note: '環のHをヨウ素原子で置き換える。' },
+    COOH: { label: 'COOH', name: 'カルボキシ基', formula: '−C(=O)−O−H', attach: 'C', note: '環のHをカルボキシ基で置き換える。安息香酸誘導体。' },
+    CHO: { label: 'CHO', name: 'ホルミル基', formula: '−C(=O)−H', attach: 'C', note: '環のHをホルミル基で置き換える。ベンズアルデヒド誘導体。' },
+    NH2: { label: 'NH₂', name: 'アミノ基', formula: '−NH₂', attach: 'N', note: '環のHをアミノ基で置き換える。アニリン誘導体。' },
+    NO2: { label: 'NO₂', name: 'ニトロ基', formula: '−NO₂', attach: 'N', note: '環のHをニトロ基で置き換える。' },
+    CN: { label: 'CN', name: 'シアノ基', formula: '−C≡N', attach: 'C', note: '環のHをシアノ基で置き換える。ベンゾニトリル。' },
+    OCH3: { label: 'OCH₃', name: 'メトキシ基', formula: '−O−CH₃', attach: 'O', note: '環のHをメトキシ基で置き換える。アニソール誘導体。' },
+    OCOCH3: { label: 'OCOCH₃', name: 'アセトキシ基', formula: '−O−C(=O)−CH₃', attach: 'O', note: '環のHをアセトキシ基で置き換える。エステル結合をもつ。' },
+    COOCH3: { label: 'COOCH₃', name: 'メトキシカルボニル基', formula: '−C(=O)−O−CH₃', attach: 'C', note: '環のHをエステル基で置き換える。' },
+    NHCOCH3: { label: 'NHCOCH₃', name: 'アセトアミド基', formula: '−NH−C(=O)−CH₃', attach: 'N', note: '環のHをアセトアミド基で置き換える。' },
+    SO3H: { label: 'SO₃H', name: 'スルホ基', formula: '−SO₃H', attach: 'S', note: '環のHをスルホ基で置き換える。' },
+    SO2NH2: { label: 'SO₂NH₂', name: 'スルホンアミド基', formula: '−SO₂NH₂', attach: 'S', note: '環のHをスルホンアミド基で置き換える。' },
+    'N(CH3)2': { label: 'N(CH₃)₂', name: 'ジメチルアミノ基', formula: '−N(CH₃)₂', attach: 'N', note: '環のHをジメチルアミノ基で置き換える。' },
+    CH2OH: { label: 'CH₂OH', name: 'ヒドロキシメチル基', formula: '−CH₂−OH', attach: 'C', note: '環のHをヒドロキシメチル基で置き換える。' },
+    COCl: { label: 'COCl', name: 'クロロカルボニル基', formula: '−C(=O)−Cl', attach: 'C', note: '環のHをクロロカルボニル基で置き換える。酸塩化物。' },
+    SH: { label: 'SH', name: 'チオール基', formula: '−S−H', attach: 'S', note: '環のHをSHで置き換える。' }
   };
+
+  var GROUP_SUB_KEY = { oh: 'OH', cooh: 'COOH', nh2: 'NH2', cho: 'CHO', no2: 'NO2', ch3: 'CH3', cl: 'Cl', br: 'Br', i: 'I', cn: 'CN' };
+
+  var RING_SKELETON_COMPOUND = {
+    benzene: 'benzene', naphthalene: 'naphthalene', cyclopropane: 'cyclopropane',
+    cyclobutane: 'cyclobutane', cyclopentane: 'cyclopentane', cyclohexane: 'cyclohexane',
+    cyclohexene: 'cyclohexene', anthracene: 'anthracene'
+  };
+
+  function normalizeRingLabel(label) {
+    return String(label == null ? '' : label)
+      .replace(/[₀-₉]/g, function (ch) { return String('₀₁₂₃₄₅₆₇₈₉'.indexOf(ch)); })
+      .replace(/⁺/g, '+').replace(/⁻/g, '-')
+      .replace(/[—–−\s]/g, '');
+  }
+
+  function canonicalRingKey(label) {
+    var s = normalizeRingLabel(label);
+    if (s === 'CH2CH3' || s === 'C2H5') return 'C2H5';
+    if (s === 'CH(CH3)2') return 'CH(CH3)2';
+    if (s === 'NH3+Cl-') return 'NH3+Cl-';
+    if (s === 'N2+Cl-') return 'N2+Cl-';
+    return s;
+  }
+
+  function ringSubMeta(key) {
+    return RING_SUB_META[key] || { label: key, name: key, formula: '−' + key, attach: '?', note: '登録済みの置換基。' };
+  }
+
+  function ringSubTotal(subs) {
+    return (subs || []).reduce(function (n, s) { return n + (s.count || 1); }, 0);
+  }
+
+  function isAdvancedRingKey(key) {
+    if (!key) return true;
+    if (/[+\-]/.test(key)) return true;
+    if (/Na|Ag|Cu|Pb|Ca|Mg|Zn|Fe|Al|Ba|Li|Sn/.test(key)) return true;
+    if (key === 'isobutyl' || key === 'CH(CH3)COOH') return true;
+    return false;
+  }
+
+  function ringSubsFor(id) {
+    var c = D.COMPOUNDS[id];
+    if (!c || !c.structure) return null;
+    var s = c.structure;
+    var out = null;
+    if (D.RING_SUBS && D.RING_SUBS[id]) {
+      out = D.RING_SUBS[id].map(function (item) {
+        var key = canonicalRingKey(item.key || item.label);
+        return { key: key, label: item.label || ringSubMeta(key).label, count: item.count || 1, positions: (item.positions || []).slice() };
+      });
+    } else if (s.type === 'ring-sub' && s.subs && s.subs.length) {
+      out = groupRingSubs(s.subs.map(function (x) { return { label: x.label, at: x.at }; }));
+    } else if (s.type === 'sub' && (s.skeleton === 'benzene' || s.skeleton === 'naphthalene')) {
+      var key = GROUP_SUB_KEY[s.group];
+      if (key) out = [{ key: key, label: ringSubMeta(key).label, count: 1, positions: [(s.at || 0) + 1] }];
+    } else if (s.type === 'multi' && (s.skeleton === 'benzene' || s.skeleton === 'naphthalene')) {
+      out = groupRingSubs((s.groups || []).map(function (x) { return { label: GROUP_SUB_KEY[x.group] || x.group, at: x.at }; }));
+    }
+    if (!out || !out.length) return null;
+    out.advanced = out.some(function (x) { return isAdvancedRingKey(x.key); });
+    return out;
+  }
+
+  function groupRingSubs(list) {
+    var map = {};
+    var order = [];
+    list.forEach(function (item) {
+      var key = canonicalRingKey(item.label);
+      if (!map[key]) {
+        map[key] = { key: key, label: ringSubMeta(key).label, count: 0, positions: [] };
+        order.push(key);
+      }
+      map[key].count += item.count || 1;
+      map[key].positions.push((item.at == null ? 0 : item.at) + 1);
+    });
+    return order.map(function (key) { return map[key]; });
+  }
+
+  function ringPresetKey(subs) {
+    return subs.slice().sort(function (a, b) { return a.key < b.key ? -1 : (a.key > b.key ? 1 : 0); })
+      .map(function (s) { return s.key + 'x' + s.count; }).join('+');
+  }
+
+  function ringPresetLabel(subs) {
+    if (subs.length === 1) return ringSubMeta(subs[0].key).label + (subs[0].count > 1 ? '×' + subs[0].count : '');
+    return subs.map(function (s) { return ringSubMeta(s.key).label + (s.count > 1 ? '×' + s.count : ''); }).join(' + ');
+  }
+
+  function ringPresetKind(subs) {
+    if (subs.length === 1) return subs[0].count > 1 ? 'same' : 'single';
+    return 'combo';
+  }
+
+  function ringPositionText(id) {
+    var subs = ringSubsFor(id);
+    if (!subs) return '';
+    return subs.map(function (s) {
+      return ringSubMeta(s.key).label + '（' + (s.positions || []).map(function (p) { return p + '位'; }).join(', ') + '）';
+    }).join(' / ');
+  }
+
 
   function ringSystemFor(id) {
     var c = D.COMPOUNDS[id];
@@ -300,7 +435,7 @@
         rs.groups.push(gid);
         list.forEach(function (entry) {
           if (RING_ROUTES[entry.id]) return;
-          RING_ROUTES[entry.id] = { mode: 'ring', system: rs.id, group: gid, focus: entry.id };
+          RING_ROUTES[entry.id] = { mode: 'ring', system: rs.id, preset: 'none', group: 'none', focus: entry.id };
           rs.generated.push(entry.id);
         });
       });
@@ -308,6 +443,8 @@
     rs.registeredSingle = [];
     rs.registeredMulti = [];
     rs.registeredOther = [];
+    rs.presets = [];
+    rs.tray = [];
   });
 
   var ringMembers = {};
@@ -317,23 +454,79 @@
     if (isMetalFormula(c.formula)) return;
     var isRing = RING_CATEGORIES.indexOf(c.category) !== -1 || hasRing(c.structure);
     if (!isRing) return;
-    var system = ringSystemFor(id);
+    var system = RING_ROUTES[id] ? RING_ROUTES[id].system : ringSystemFor(id);
     if (!RING_SYSTEM_MAP[system]) system = 'complex-ring';
     if (!ringMembers[system]) ringMembers[system] = [];
     ringMembers[system].push(id);
-    if (RING_ROUTES[id]) return;
-    var s = c.structure;
-    var subs = (s && s.subs) ? s.subs.length : ((s && s.groups) ? s.groups.length : 1);
-    if (BENZENE_MULTI_IDS[id]) subs = 2;
-    var entry = { mode: 'ring', system: system, group: null, focus: id };
-    RING_ROUTES[id] = entry;
-    if (system === 'benzene' || system === 'naphthalene') {
-      if (subs >= 2) RING_SYSTEM_MAP[system].registeredMulti.push(id);
-      else RING_SYSTEM_MAP[system].registeredSingle.push(id);
-    } else {
-      RING_SYSTEM_MAP[system].registeredOther.push(id);
-    }
   });
+
+  function buildRingPresets(rs, members) {
+    var noneId = RING_SKELETON_COMPOUND[rs.id] || null;
+    var presets = [{ id: 'none', kind: 'none', label: '追加なし', subs: [], ids: noneId && D.COMPOUNDS[noneId] ? [noneId] : [] }];
+    var buckets = { single: [], same: [], combo: [] };
+    var byKey = {};
+    var tray = [];
+    members.forEach(function (id) {
+      if (id === noneId) return;
+      var subs = ringSubsFor(id);
+      if (!subs || subs.advanced) { tray.push(id); return; }
+      var key = ringPresetKey(subs);
+      if (!byKey[key]) {
+        byKey[key] = {
+          id: 'p-' + key.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+          kind: ringPresetKind(subs), label: ringPresetLabel(subs), subs: subs, ids: []
+        };
+        buckets[byKey[key].kind].push(byKey[key]);
+      }
+      byKey[key].ids.push(id);
+    });
+    var singleRank = ['OH', 'CH3', 'Cl', 'Br', 'I', 'COOH', 'NH2', 'CHO', 'NO2', 'CN', 'C2H5', 'CH(CH3)2', 'CH=CH2', 'SO3H', 'NHCOCH3', 'CH2OH', 'OCH3', 'OCOCH3', 'N(CH3)2'];
+    function rank(subs) {
+      var i = singleRank.indexOf(subs[0].key);
+      return i === -1 ? 99 : i;
+    }
+    buckets.single.sort(function (a, b) { return rank(a.subs) - rank(b.subs) || (a.label < b.label ? -1 : 1); });
+    buckets.same.sort(function (a, b) { return a.subs[0].count - b.subs[0].count || rank(a.subs) - rank(b.subs); });
+    buckets.combo.sort(function (a, b) {
+      return ringSubTotal(a.subs) - ringSubTotal(b.subs) || a.subs.length - b.subs.length || (a.label < b.label ? -1 : 1);
+    });
+    presets = presets.concat(buckets.single, buckets.same, buckets.combo);
+    if (tray.length) {
+      presets.push({ id: 'tray', kind: 'tray', label: 'その他の登録済み化合物', subs: [], ids: tray });
+    }
+    // 同じslugになった場合は接尾辞を付けて一意にする。
+    var used = {};
+    presets.forEach(function (p) {
+      var base = p.id;
+      var n = 2;
+      while (used[p.id]) p.id = base + '_' + (n++);
+      used[p.id] = true;
+    });
+    rs.tray = tray.slice();
+    return presets;
+  }
+
+  RING_SYSTEMS.forEach(function (rs) {
+    var members = ringMembers[rs.id] || [];
+    members.forEach(function (id) {
+      if (RING_ROUTES[id]) return;
+      var subs = ringSubsFor(id);
+      var total = subs ? ringSubTotal(subs) : 1;
+      if (rs.id === 'benzene' || rs.id === 'naphthalene') {
+        if (total >= 2) rs.registeredMulti.push(id);
+        else rs.registeredSingle.push(id);
+      } else {
+        rs.registeredOther.push(id);
+      }
+    });
+    rs.presets = buildRingPresets(rs, members);
+    rs.presets.forEach(function (preset) {
+      preset.ids.forEach(function (id) {
+        RING_ROUTES[id] = { mode: 'ring', system: rs.id, preset: preset.id, group: preset.id, focus: id };
+      });
+    });
+  });
+
 
   /* ------------------------------------------------------------------
    * その他: category / family
@@ -494,6 +687,129 @@
 
   Object.keys(D.COMPOUNDS).forEach(classify);
 
+  /* ------------------------------------------------------------------
+   * 鎖式: 炭化水素部分デスクリプタ（新方式）
+   * ------------------------------------------------------------------
+   * 既存の総炭素数インデックス（CHAIN_INDEX）は旧URL・互換用に残し、
+   * 新しい①は「官能基に結合する炭化水素部分」で絞り込む。
+   */
+  var CHAIN_IDS = Object.keys(CLASSIFICATION).filter(function (id) {
+    return CLASSIFICATION[id].mode === 'chain';
+  });
+  var CHAIN_DESC = X.build(D, CHAIN_IDS, {
+    familyOf: function (id) { return CLASSIFICATION[id].family; }
+  });
+  var CHAIN_DESCRIPTOR_BY_COMPOUND = CHAIN_DESC.byCompound;
+  var CHAIN_DESCRIPTOR_BY_ID = CHAIN_DESC.byId;
+  var CHAIN_DESCRIPTOR_LIST = CHAIN_DESC.list;
+
+  function chainDescriptorFor(id) {
+    return CHAIN_DESCRIPTOR_BY_COMPOUND[id] || null;
+  }
+
+  function chainDescriptorById(id) {
+    return CHAIN_DESCRIPTOR_BY_ID[id] || null;
+  }
+
+  function chainPartialOptions() {
+    var set = {};
+    CHAIN_DESCRIPTOR_LIST.forEach(function (d) { set[d.partialC] = true; });
+    return Object.keys(set).map(Number).sort(function (a, b) { return a - b; });
+  }
+
+  function chainShapeOptions(partialC) {
+    return CHAIN_DESCRIPTOR_LIST.filter(function (d) { return d.partialC === partialC; });
+  }
+
+  function chainDescriptorCompounds(shape) {
+    var d = CHAIN_DESCRIPTOR_BY_ID[shape];
+    return d ? d.compoundIds.slice() : [];
+  }
+
+  function chainFamiliesForDescriptor(shape) {
+    var d = CHAIN_DESCRIPTOR_BY_ID[shape];
+    if (!d) return [];
+    var counts = {};
+    d.compoundIds.forEach(function (id) {
+      var r = CLASSIFICATION[id];
+      if (!r) return;
+      counts[r.family] = (counts[r.family] || 0) + 1;
+    });
+    return CHAIN_FAMILIES.filter(function (f) { return counts[f.id] > 0; }).map(function (f) {
+      return { id: f.id, label: f.label, note: f.note, count: counts[f.id] };
+    });
+  }
+
+  function chainIdsForDescriptor(shape, family) {
+    var d = CHAIN_DESCRIPTOR_BY_ID[shape];
+    if (!d) return [];
+    var ids = d.compoundIds.filter(function (id) {
+      return !family || (CLASSIFICATION[id] && CLASSIFICATION[id].family === family);
+    });
+    return ids.slice().sort(function (a, b) {
+      var ra = chainRoleOrder(chainRoleFor(a));
+      var rb = chainRoleOrder(chainRoleFor(b));
+      if (ra !== rb) return ra - rb;
+      var ca = carbonCount(D.COMPOUNDS[a]);
+      var cb = carbonCount(D.COMPOUNDS[b]);
+      if (ca !== cb) return ca - cb;
+      return a < b ? -1 : (a > b ? 1 : 0);
+    });
+  }
+
+  function chainDescriptorFamilyValid(shape, family) {
+    return chainIdsForDescriptor(shape, family).length > 0;
+  }
+
+  function chainRoleFor(id) {
+    var d = CHAIN_DESCRIPTOR_BY_COMPOUND[id];
+    return d ? d.role : null;
+  }
+
+  function chainRoleLabel(role) {
+    return X.roleLabel(role);
+  }
+
+  var ROLE_ORDER = {
+    'amine-1': 1, 'amine-2': 2, 'amine-3': 3,
+    monocarboxy: 1, dicarboxy: 2, 'hydroxy-acid': 3, 'hydroxy-polycarboxy': 4,
+    'keto-acid': 5, 'acid-chloride': 6,
+    monohalogen: 1, multihalogen: 2,
+    monoester: 1, triester: 2
+  };
+  function chainRoleOrder(role) {
+    return ROLE_ORDER[role] || 10;
+  }
+
+  function chainDescriptorRoles(shape, family) {
+    var ids = chainIdsForDescriptor(shape, family);
+    var map = {};
+    var order = [];
+    ids.forEach(function (id) {
+      var role = chainRoleFor(id) || 'other';
+      if (!map[role]) { map[role] = 0; order.push(role); }
+      map[role]++;
+    });
+    order.sort(function (a, b) { return chainRoleOrder(a) - chainRoleOrder(b) || (a < b ? -1 : 1); });
+    return order.map(function (role) {
+      return { role: role, label: chainRoleLabel(role), count: map[role] };
+    });
+  }
+
+  function chainDescriptorPreview(shape) {
+    var d = CHAIN_DESCRIPTOR_BY_ID[shape];
+    return d ? X.previewTiles(d) : [];
+  }
+
+  function chainDescriptorLabel(shape) {
+    var d = CHAIN_DESCRIPTOR_BY_ID[shape];
+    return d ? d.label : '';
+  }
+
+  function chainDescriptorForPreview(shape) {
+    return CHAIN_DESCRIPTOR_BY_ID[shape] || null;
+  }
+
   function classifyAll() { return CLASSIFICATION; }
 
   function chainIndex() {
@@ -514,6 +830,29 @@
   function carbonOptions(family) {
     var table = CHAIN_INDEX[family] || {};
     return Object.keys(table).map(Number).sort(function (a, b) { return a - b; });
+  }
+
+  // 総炭素数の選択肢は、分類（②）に依存させない。
+  // すべての鎖式familyの炭素数の和集合を返す。
+  function allCarbonOptions() {
+    var set = {};
+    Object.keys(CHAIN_INDEX).forEach(function (family) {
+      Object.keys(CHAIN_INDEX[family]).forEach(function (c) { set[c] = true; });
+    });
+    return Object.keys(set).map(Number).sort(function (a, b) { return a - b; });
+  }
+
+  // 現在の総炭素数＋構造条件で1件以上ある分類だけを返す。
+  // 0件の分類は「非表示」とし、disabledでも別分類の自動選択もしない。
+  function chainFamiliesFor(carbon, condition) {
+    return CHAIN_FAMILIES.filter(function (f) {
+      return chainIdsFor(f.id, carbon, condition).length > 0;
+    });
+  }
+
+  function chainFamilyValid(family, carbon, condition) {
+    return CHAIN_FAMILIES.some(function (f) { return f.id === family; }) &&
+      chainIdsFor(family, carbon, condition).length > 0;
   }
 
   function chainIds(family, carbon) {
@@ -538,7 +877,19 @@
       var c = D.COMPOUNDS[id];
       var structure = hasCCMultipleBond(c) ? 'unsaturated' :
         (r.family === 'amino-alcohol' ? 'all' : 'saturated');
-      return { mode: 'chain', family: r.family, carbon: r.carbon, degree: r.degree, structure: structure, focus: id };
+      var d = CHAIN_DESCRIPTOR_BY_COMPOUND[id];
+      return {
+        mode: 'chain',
+        family: r.family,
+        partialC: d ? d.partialC : null,
+        shape: d ? d.descriptorId : null,
+        descriptor: d ? d.descriptorId : null,
+        totalCarbon: r.carbon,
+        carbon: r.carbon,
+        degree: r.degree,
+        structure: structure,
+        focus: id
+      };
     }
     if (r.mode === 'ring') return { mode: 'ring', system: r.system, group: r.group || null, focus: id };
     return { mode: 'other', category: r.category, family: r.family, focus: id };
@@ -586,6 +937,9 @@
       var route = routeFor(id);
       if (!route) missing.push({ id: id, reason: 'routeなし' });
       if (r.mode === 'chain' && (!r.family || !r.carbon)) missing.push({ id: id, reason: 'chainのfamily/carbonなし' });
+      if (r.mode === 'chain' && (!CHAIN_DESCRIPTOR_BY_COMPOUND[id] || !CHAIN_DESCRIPTOR_BY_COMPOUND[id].descriptorKey)) {
+        missing.push({ id: id, reason: 'chainの炭化水素部分デスクリプタなし' });
+      }
       if (r.mode === 'ring' && !r.system) missing.push({ id: id, reason: 'ring systemなし' });
       if (r.mode === 'other' && (!r.family || !r.category || r.category === 'other')) missing.push({ id: id, reason: 'other family/categoryなし' });
     });
@@ -595,6 +949,7 @@
   return {
     CHAIN_FAMILIES: CHAIN_FAMILIES,
     CHAIN_FAMILY_LABEL: CHAIN_FAMILY_LABEL,
+    chainFamilyPick: chainFamilyPick,
     CHAIN_INDEX: CHAIN_INDEX,
     AMINE_DEGREE: AMINE_DEGREE,
     RING_SYSTEMS: RING_SYSTEMS,
@@ -609,9 +964,35 @@
     classifyAll: classifyAll,
     routeFor: routeFor,
     carbonCount: carbonCount,
+    CHAIN_DESCRIPTOR_BY_COMPOUND: CHAIN_DESCRIPTOR_BY_COMPOUND,
+    CHAIN_DESCRIPTOR_BY_ID: CHAIN_DESCRIPTOR_BY_ID,
+    CHAIN_DESCRIPTOR_LIST: CHAIN_DESCRIPTOR_LIST,
+    CHAIN_DESCRIPTOR_WARNINGS: CHAIN_DESC.warnings,
+    chainDescriptorFor: chainDescriptorFor,
+    chainDescriptorById: chainDescriptorById,
+    chainPartialOptions: chainPartialOptions,
+    chainShapeOptions: chainShapeOptions,
+    chainDescriptorCompounds: chainDescriptorCompounds,
+    chainFamiliesForDescriptor: chainFamiliesForDescriptor,
+    chainIdsForDescriptor: chainIdsForDescriptor,
+    chainDescriptorFamilyValid: chainDescriptorFamilyValid,
+    chainRoleFor: chainRoleFor,
+    chainRoleLabel: chainRoleLabel,
+    chainDescriptorRoles: chainDescriptorRoles,
+    chainDescriptorPreview: chainDescriptorPreview,
+    chainDescriptorLabel: chainDescriptorLabel,
+    chainDescriptorForPreview: chainDescriptorForPreview,
+    INITIAL_CHAIN_PARTIAL: 2,
+    INITIAL_CHAIN_SHAPE: 'd-ethane-c2',
     carbonOptions: carbonOptions,
+    allCarbonOptions: allCarbonOptions,
+    chainFamiliesFor: chainFamiliesFor,
+    chainFamilyValid: chainFamilyValid,
     chainIds: chainIds,
     chainIdsFor: chainIdsFor,
+    ringSubsFor: ringSubsFor,
+    ringSubMeta: ringSubMeta,
+    ringPositionText: ringPositionText,
     hasCCMultipleBond: hasCCMultipleBond,
     isMonohydricAlcohol: isMonohydricAlcohol,
     structureCondition: structureCondition,

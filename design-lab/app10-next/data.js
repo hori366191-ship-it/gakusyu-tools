@@ -1795,7 +1795,7 @@
     properties: '無色の液体。', uses: '溶媒、化学原料。', nature: '工業的に合成。',
     hazards: '可燃性・有毒。', subcategory: 'ニトリル', dataStatus: 'class'
   });
-  cond('benzonitrile', 'ベンゾニトリル（シアノベンゼン）', 'C7H5N', 'aromatic-other', ['C₆H₅—C≡N'], {
+  sub('benzonitrile', 'ベンゾニトリル（シアノベンゼン）', 'C7H5N', 'aromatic-other', 'benzene', 0, 'cn', {
     properties: '無色の液体。アーモンド様のにおい。', uses: '医薬・染料原料、溶媒。', nature: '工業的に合成。',
     hazards: '有毒。', subcategory: 'ニトリル', dataStatus: 'class'
   });
@@ -2161,7 +2161,7 @@
     properties: '白色の固体。水に溶ける。', uses: '抗酸化剤・医薬品・化粧品原料。',
     nature: '生体内の抗酸化物質。', hazards: '', notes: 'グルタミン酸・システイン・グリシンからなるトリペプチド。', dataStatus: 'class'
   });
-  cond('aspartame', 'アスパルテーム', 'C14H18N2O5', 'amino', ['HOOC—CH(NH₂)—CH₂—CO—NH—CH(CH₂C₆H₅)—COOCH₃'], {
+  cond('aspartame', 'アスパルテーム', 'C14H18N2O5', 'amino', ['HOOC—CH₂—CH(NH₂)—C(=O)—NH—CH(CH₂C₆H₅)—C(=O)—OCH₃'], {
     properties: '白色の結晶。強い甘味。', uses: '人工甘味料。',
     nature: '工業的に合成。', hazards: 'フェニルケトン尿症の人は摂取に注意。', notes: 'アスパラギン酸とフェニルアラニンのジペプチドメチルエステル。', dataStatus: 'class'
   });
@@ -3220,7 +3220,7 @@
   });
 
   /* ---- シクロヘキサンの一置換（六置換のBHCとは別反応） ---- */
-  cond('chlorocyclohexane', 'クロロシクロヘキサン', 'C6H11Cl', 'cyclic', ['C₆H₁₁Cl'], {
+  sub('chlorocyclohexane', 'クロロシクロヘキサン', 'C6H11Cl', 'cyclic', 'cyclohexane', 0, 'cl', {
     properties: '無色の液体。',
     uses: '有機合成の中間体、溶媒。',
     nature: 'シクロヘキサンの塩素置換で得られる。',
@@ -5024,6 +5024,26 @@
     { title: '索引監査の限界', detail: 'Try IT 7節・化学のグルメ全60記事の431 URLを取得し、65件の要判断事項を化合物・family・材料/混合物・無機対象外へ対応づけました。画像1399枚の全目視/OCRと動画の視聴/文字起こしは未完了で、外部抽出の未分類候補625語は別監査で継続中です。教材の完全網羅を保証しません。' }
   ];
 
+  // ベンゼン環の置換基metadata（custom構造の明示定義）。
+  // ring-sub構造は structure.subs を正とし、この表は custom 構造だけを補う。
+  // count/positions は置換基の種類・数・位置（環のlocant 1〜6）を明示する。
+  var RING_SUBS = {
+    'p-divinylbenzene': [{ key: 'CH=CH2', label: 'CH=CH₂', count: 2, positions: [1, 4] }],
+    guaiacol: [{ key: 'OH', label: 'OH', count: 1, positions: [1] }, { key: 'OCH3', label: 'OCH₃', count: 1, positions: [2] }],
+    'sulfanilic-acid': [{ key: 'SO3H', label: 'SO₃H', count: 1, positions: [1] }, { key: 'NH2', label: 'NH₂', count: 1, positions: [4] }],
+    '2-nitrobenzaldehyde': [{ key: 'CHO', label: 'CHO', count: 1, positions: [1] }, { key: 'NO2', label: 'NO₂', count: 1, positions: [2] }],
+    acetaminophen: [{ key: 'OH', label: 'OH', count: 1, positions: [1] }, { key: 'NHCOCH3', label: 'NHCOCH₃', count: 1, positions: [4] }],
+    sulfanilamide: [{ key: 'SO2NH2', label: 'SO₂NH₂', count: 1, positions: [1] }, { key: 'NH2', label: 'NH₂', count: 1, positions: [4] }],
+    'p-hydroxybenzoic-acid': [{ key: 'COOH', label: 'COOH', count: 1, positions: [1] }, { key: 'OH', label: 'OH', count: 1, positions: [4] }],
+    'm-hydroxybenzoic-acid': [{ key: 'COOH', label: 'COOH', count: 1, positions: [1] }, { key: 'OH', label: 'OH', count: 1, positions: [3] }],
+    'n,n-dimethylaniline': [{ key: 'N(CH3)2', label: 'N(CH₃)₂', count: 1, positions: [1] }],
+    '2,4,6-tribromophenol': [{ key: 'OH', label: 'OH', count: 1, positions: [1] }, { key: 'Br', label: 'Br', count: 3, positions: [2, 4, 6] }],
+    ibuprofen: [{ key: 'CH(CH3)COOH', label: 'CH(CH₃)COOH', count: 1, positions: [1] }, { key: 'isobutyl', label: 'CH₂CH(CH₃)₂', count: 1, positions: [4] }],
+    '1-naphthol': [{ key: 'OH', label: 'OH', count: 1, positions: [1] }],
+    '2-naphthol': [{ key: 'OH', label: 'OH', count: 1, positions: [2] }],
+    benzonitrile: [{ key: 'CN', label: 'CN', count: 1, positions: [1] }]
+  };
+
   return {
     CATEGORIES: CATEGORIES,
     GROUPS: GROUPS,
@@ -5039,6 +5059,7 @@
     ALIASES: ALIASES,
     MATERIALS: MATERIALS,
     FAMILIES: FAMILIES,
+    RING_SUBS: RING_SUBS,
     normalizeName: normalizeName,
     aliasTarget: aliasTarget,
     aliasesFor: aliasesFor,

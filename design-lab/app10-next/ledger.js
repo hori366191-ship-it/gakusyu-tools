@@ -57,11 +57,11 @@
     var q = ['mode=' + encodeURIComponent(route.mode)];
     if (route.mode === 'chain') {
       q.push('family=' + encodeURIComponent(route.family));
-      q.push('c=' + encodeURIComponent(route.carbon));
-      if (route.structure) q.push('structure=' + encodeURIComponent(route.structure));
+      q.push('cpartial=' + encodeURIComponent(route.partialC));
+      if (route.shape) q.push('shape=' + encodeURIComponent(route.shape));
     } else if (route.mode === 'ring') {
       q.push('system=' + encodeURIComponent(route.system));
-      if (route.group) q.push('group=' + encodeURIComponent(route.group));
+      if (route.preset) q.push('preset=' + encodeURIComponent(route.preset));
     } else {
       q.push('category=' + encodeURIComponent(route.category || 'other'));
       if (route.family) q.push('family=' + encodeURIComponent(route.family));
@@ -73,7 +73,7 @@
   function routeLabel(id) {
     var route = C && C.routeFor ? C.routeFor(id) : null;
     if (!route) return '個別登録';
-    if (route.mode === 'chain') return '鎖式・' + (C.CHAIN_FAMILY_LABEL[route.family] || route.family) + '・C' + route.carbon;
+    if (route.mode === 'chain') return '鎖式・' + (C.CHAIN_FAMILY_LABEL[route.family] || route.family) + '・炭化水素部分C' + route.partialC + '（' + (C.chainDescriptorLabel(route.shape) || '—') + '）';
     if (route.mode === 'ring') return '環式・' + (C.RING_SYSTEM_MAP[route.system] ? C.RING_SYSTEM_MAP[route.system].label : route.system);
     var g = C.OTHER_GROUP_MAP[route.family];
     return 'その他・' + (g ? g.label : route.category);
@@ -125,6 +125,8 @@
     { b: okCount, s: '分子式・登録データ整合' },
     { b: atomCount, s: '原子レベルの構造検証（配位錯体を除く）' }
   ];
+  var figAudit = R.figureAudit ? R.figureAudit(D.COMPOUNDS) : null;
+  if (figAudit) stats.push({ b: figAudit.dual, s: '構造式＋簡略構造式の二重表示' });
   document.getElementById('ledger-stats').innerHTML = stats.map(function (x) {
     return '<div class="oc-stat"><b>' + esc(x.b) + '</b><span>' + esc(x.s) + '</span></div>';
   }).join('');
@@ -133,6 +135,8 @@
     '「分子式・登録データ整合」は、グラフ構造では原子数・結合価・分子式、環＋置換・投影式・簡略式・トリグリセリド・重合体・模式図では分子式・一般式と登録データの整合を確認した件数です。' +
     '原子レベルの構造検証は ' + atomCount + ' 件、非グラフは ' + nonGraphCount + ' 件で、非グラフは分子式・一般式と登録データの整合、模式図・可変組成は表示式のみで判定しています（原子レベルの検証対象外）。' +
     '配位結合を含む ' + coordinationCount + ' 件は、金属—配位原子の結合を原子価の数え方から除外し、原子レベルの検証対象外として分子式・組成のみ確認しています。' +
+    (figAudit ? ' 図の表示は ' + figAudit.dual + ' 件を「構造式＋簡略構造式」の二重表示、' + figAudit.multi + ' 件を複数投影式、' +
+      figAudit.single + ' 件を理由つきの簡略表示としています（原子数閾値 ' + R.GRAPH_ATOM_LIMIT + '、投影式・重合体・模式図・油脂は理由を明示）。' : '') +
     (invalidCount ? ' 検証に失敗したデータが ' + invalidCount + ' 件あります（範囲外ではなくデータ不備として扱います）。' : ' すべての登録データが検証に合格しています。');
 
   // ---- 19分野の収録状況 ----
