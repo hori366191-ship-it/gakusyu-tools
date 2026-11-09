@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>有機化合物の探し方 — 操作モック</title>
+<meta name="description" content="鎖式（総炭素数＋化合物分類）と芳香族（固定骨格の H を置換基で置換）の探し方の違いを確かめる、design-lab の操作モックです。">
+<style>
+  :root{
+    --paper:#f2efe7;
+    --surface:#fffdf8;
+    --surface-2:#faf7f0;
+    --ink:#22261f;
+    --ink-soft:#3f453c;
+    --muted:#6f7469;
+    --line:#d8d2c4;
+    --line-strong:#b7b09f;
+    --accent:#2e5d50;
+    --accent-dark:#23483f;
+    --accent-soft:#e5eee9;
+    --warm:#a75b37;
+    --warm-soft:#f6e9df;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(34,38,31,.04),0 14px 30px -24px rgba(34,38,31,.45);
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.7;overflow-wrap:break-word}
+  button{font:inherit;color:inherit}
+  sub{font-size:.72em;line-height:0}
+  code{font-family:var(--mono);font-size:.95em;background:rgba(0,0,0,.05);padding:1px 4px;border-radius:3px}
+  .skip{position:absolute;left:-9999px;top:0;z-index:100;background:var(--ink);color:#fff;padding:8px 12px}
+  .skip:focus{left:12px;top:12px}
+  .mock-bar{background:#fff3e2;border-bottom:1px solid #e5cfb0;color:#71462a;font-size:12px;line-height:1.6;padding:9px 20px;text-align:center}
+  .mock-badge{display:inline-block;background:var(--warm);color:#fff;font:700 10px/1 var(--mono);letter-spacing:.12em;padding:4px 6px;border-radius:4px;margin-right:6px;vertical-align:1px}
+  .masthead{padding:34px 20px 8px}
+  .masthead__in,.wrap{max-width:1120px;margin:0 auto}
+  .eyebrow{margin:0 0 10px;font:700 11px/1.4 var(--mono);letter-spacing:.12em;color:var(--accent);text-transform:uppercase}
+  h1{margin:0;font-size:clamp(26px,4.4vw,40px);line-height:1.25;letter-spacing:-.02em;font-weight:800}
+  .mark{background:linear-gradient(transparent 64%,#e9cda9 64%)}
+  .lede{max-width:760px;margin:14px 0 0;color:var(--ink-soft);font-size:14.5px;line-height:1.8}
+  .wrap{padding:18px 20px 56px}
+  .mode-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+  .mode-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 15px;cursor:pointer;box-shadow:var(--shadow);transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+  .mode-btn:hover{border-color:var(--line-strong);transform:translateY(-1px)}
+  .mode-btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .mode-btn__kicker{font:700 10.5px/1.4 var(--mono);letter-spacing:.12em;opacity:.75}
+  .mode-btn__title{font-weight:800;font-size:15.5px;line-height:1.35}
+  .mode-btn__desc{font-size:11.5px;line-height:1.5;opacity:.72}
+  .mode-note{margin:10px 2px 16px;font-size:12.5px;color:var(--muted)}
+  .top-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+  .panel{display:flex;flex-direction:column;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .panel__head{display:flex;align-items:flex-start;gap:10px;padding:15px 17px 12px;border-bottom:1px dashed var(--line)}
+  .panel__num{flex:0 0 auto;display:inline-grid;place-items:center;min-width:28px;height:28px;padding:0 6px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);font:700 10px/1 var(--mono)}
+  .panel__head h2{margin:0;font-size:16px;line-height:1.35}
+  .panel__head p{margin:3px 0 0;color:var(--muted);font-size:11px;line-height:1.4}
+  .panel__body{padding:15px 17px 17px;display:flex;flex-direction:column;gap:12px;flex:1}
+  .control-label{margin:0;font:700 12px/1.5 var(--mono);letter-spacing:.06em;color:var(--ink-soft)}
+  .carbon-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .carbon-btn{display:flex;align-items:baseline;justify-content:space-between;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;transition:background-color .18s ease,border-color .18s ease,color .18s ease}
+  .carbon-btn:hover{border-color:var(--line-strong);background:#fff}
+  .carbon-btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .carbon-btn__main{font:700 21px/1 var(--mono)}
+  .carbon-btn__sub{font-size:10.5px;opacity:.65}
+  .selection-strip{margin:0;padding:9px 11px;border-radius:9px;background:var(--accent-soft);color:#264a40;font-size:12px;line-height:1.55}
+  .common-note{margin:0;padding:9px 11px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 9px 9px 0;background:#fff;color:var(--ink-soft);font-size:11.5px;line-height:1.65}
+  .common-note b{font:700 10px/1.4 var(--mono);letter-spacing:.06em;color:var(--accent);margin-right:4px}
+  .mini-rule{margin-top:auto;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:11px 13px}
+  .mini-rule__title{margin:0 0 5px;font:700 11px/1.4 var(--mono);letter-spacing:.06em;color:var(--accent)}
+  .mini-rule ul{margin:0;padding-left:1.1em;font-size:12px;line-height:1.65;color:var(--ink-soft)}
+  .mini-rule li+li{margin-top:2px}
+  .panel-foot{margin:0;font-size:11px;color:var(--muted);line-height:1.6}
+  .seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .seg-btn{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:8px 6px;font-size:12.5px;font-weight:700;cursor:pointer;transition:background-color .18s ease,border-color .18s ease,color .18s ease}
+  .seg-btn:hover{border-color:var(--line-strong);background:#fff}
+  .seg-btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .preview{display:flex;flex-direction:column;gap:11px;flex:1}
+  .preview-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .preview-head h3{margin:0;font-size:14px;line-height:1.4}
+  .preview-head p{margin:2px 0 0;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .preview-head__badge{flex:0 0 auto;font:700 10px/1.4 var(--mono);border:1px solid var(--line-strong);border-radius:999px;padding:2px 7px;color:var(--muted)}
+  .preview-lead{margin:0;font-size:11.5px;color:var(--muted);line-height:1.6}
+  .gen-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px}
+  .gen-card{min-width:0;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:10px 11px}
+  .gen-card.is-empty{border-style:dashed;background:#f7f4ec}
+  .gen-card--wide{background:var(--surface-2)}
+  .gen-card__head{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:22px}
+  .gen-card__name{font-size:11.5px;font-weight:800;line-height:1.4}
+  .gen-card__badge{flex:0 0 auto;padding:2px 6px;border-radius:999px;background:var(--accent-soft);color:#285246;font:700 9.5px/1.5 var(--mono);white-space:nowrap}
+  .gen-card__badge.is-muted{background:var(--warm-soft);color:#8b5134}
+  .gen-card__meta{margin-top:7px;font:700 10.5px/1.5 var(--mono);color:var(--muted)}
+  .gen-card__note{margin:5px 0 0;font-size:11px;line-height:1.6;color:var(--muted)}
+  .formula{font-family:var(--mono);overflow-x:auto;max-width:100%;white-space:nowrap;scrollbar-width:thin}
+  .formula--lg{font-size:14px;font-weight:700;line-height:1.5;margin-top:10px;color:var(--ink)}
+  .formula--result{font-size:clamp(15px,1.7vw,18px);font-weight:700;line-height:1.5;letter-spacing:.01em}
+  .preview-foot{margin:0;font-size:11px;line-height:1.6;color:var(--muted)}
+  .note-box{border-left:3px solid var(--warm);background:var(--warm-soft);border-radius:0 9px 9px 0;padding:9px 11px;font-size:11.5px;line-height:1.65;color:#5f3d29}
+  .note-box p{margin:0}
+  .note-box p+p{margin-top:6px}
+  .split-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .split-chip{font:700 10.5px/1.5 var(--mono);padding:3px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:#fff}
+  .split-chip.is-current{background:var(--accent);border-color:var(--accent);color:#fff}
+  .hint{margin:0;font-size:12px;color:var(--muted);line-height:1.65}
+  .fixed-skeleton{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+  .fixed-skeleton__ring{flex:0 0 118px;color:var(--accent)}
+  .fixed-skeleton__ring svg{display:block;width:100%;height:auto}
+  .fixed-skeleton h3{margin:3px 0 0;font-size:15px}
+  .fixed-skeleton p{margin:2px 0 0;font-size:11px;color:var(--muted)}
+  .badge-fixed{display:inline-block;font:700 9.5px/1.4 var(--mono);letter-spacing:.08em;color:#fff;background:var(--accent);border-radius:4px;padding:2px 6px}
+  .ring-svg{display:block;width:100%;height:auto}
+  .aroma-preview{display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr);gap:14px;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .aroma-preview__ring{color:var(--accent)}
+  .aroma-preview__label{margin:0;font-size:11.5px;font-weight:800;color:var(--accent-dark)}
+  .aroma-preview__text .formula--lg{margin-top:6px}
+  .results{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);min-width:0}
+  .results__head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 20px 15px;border-bottom:1px solid var(--line)}
+  .results__kicker{margin:0 0 4px;font:700 10px/1.4 var(--mono);letter-spacing:.14em;color:var(--accent)}
+  .results__head h2{margin:0;font-size:19px;line-height:1.35}
+  .results__sub{margin:5px 0 0;font-size:12px;color:var(--muted);line-height:1.6}
+  .results__meta{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:7px;max-width:46%}
+  .count-pill{display:inline-block;background:var(--accent);color:#fff;border-radius:999px;padding:5px 13px;font:700 14px/1.3 var(--mono);white-space:nowrap}
+  .results__selection{margin:0;font-size:11px;color:var(--muted);line-height:1.55;text-align:right}
+  .results__body{padding:8px 20px 20px}
+  .result-group{padding:14px 0;border-bottom:1px dashed var(--line)}
+  .result-group:last-child{border-bottom:0}
+  .result-group__head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px}
+  .result-group__head h3{margin:0;font-size:13px;line-height:1.4}
+  .result-group__head span{font:700 10.5px/1.4 var(--mono);color:var(--muted);white-space:nowrap}
+  .substance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:9px}
+  .substance{min-width:0;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:11px 12px;transition:border-color .18s ease,background-color .18s ease}
+  .substance:hover{border-color:var(--line-strong);background:#fff}
+  .substance__head{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 8px}
+  .substance__head h4{margin:0;font-size:13px;line-height:1.4}
+  .substance__en{font:400 9.5px/1.4 var(--mono);color:var(--muted);letter-spacing:.02em}
+  .substance .formula--result{margin-top:7px}
+  .substance__meta{margin-top:5px;font:400 10.5px/1.5 var(--mono);color:var(--muted)}
+  .substance--aromatic{display:grid;grid-template-columns:minmax(0,1fr) 108px;gap:12px;align-items:center;background:#fff}
+  .substance__ring{color:var(--accent)}
+  .empty-note{margin:0;padding:11px 12px;border:1px dashed var(--line-strong);border-radius:10px;background:#f7f4ec;color:var(--muted);font-size:12px;line-height:1.6}
+  .contrast-note{margin-top:4px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--accent-soft);color:#274a40;font-size:12px;line-height:1.65}
+  .contrast-note p{margin:0}
+  .foot{margin-top:20px;padding:0 2px;color:var(--muted);font-size:11px;line-height:1.7}
+  .foot p{margin:4px 0}
+  button:focus-visible,a:focus-visible{outline:2px solid var(--warm);outline-offset:2px}
+  @media (max-width:860px){
+    .top-grid{grid-template-columns:1fr}
+    .gen-list{grid-template-columns:1fr}
+    .aroma-preview{grid-template-columns:140px minmax(0,1fr)}
+  }
+  @media (max-width:560px){
+    body{font-size:14px}
+    .masthead{padding-top:24px}
+    .wrap{padding-left:14px;padding-right:14px}
+    .mock-bar{padding-left:14px;padding-right:14px;text-align:left}
+    .mode-btn{padding:11px 12px}
+    .mode-btn__title{font-size:14px}
+    .panel__head{padding:13px 14px 11px}
+    .panel__body{padding:14px 14px 15px}
+    .results__head{flex-direction:column;gap:10px;padding:15px 15px 13px}
+    .results__meta{align-items:flex-start;max-width:none}
+    .results__selection{text-align:left}
+    .results__body{padding:4px 15px 16px}
+    .aroma-preview{grid-template-columns:1fr;gap:8px}
+    .aroma-preview__ring{max-width:180px}
+    .substance--aromatic{grid-template-columns:minmax(0,1fr) 82px}
+    .fixed-skeleton__ring{flex-basis:100px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{transition:none!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#results">結果へスキップ</a>
+
+<div class="mock-bar">
+  <span class="mock-badge">MOCK</span>
+  この画面は操作モックです。本番データ・本番アプリ（site/app10）・外部索引とは接続していません。
+</div>
+
+<header class="masthead">
+  <div class="masthead__in">
+    <p class="eyebrow">design-lab / app10-concept</p>
+    <h1>有機化合物の<span class="mark">探し方</span>を比べる</h1>
+    <p class="lede">鎖式は「総炭素数＋化合物分類」、芳香族は「固定した骨格の H を置換基で置換」。同じ有機化合物でも、探し方によって条件の置き方が変わります。</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="mode-switch" role="group" aria-label="探し方のモード">
+    <button type="button" class="mode-btn" data-mode="chain" aria-pressed="true">
+      <span class="mode-btn__kicker">鎖式</span>
+      <span class="mode-btn__title">炭素数から探す</span>
+      <span class="mode-btn__desc">総炭素数 ＋ 化合物分類</span>
+    </button>
+    <button type="button" class="mode-btn" data-mode="aroma" aria-pressed="false">
+      <span class="mode-btn__kicker">芳香族</span>
+      <span class="mode-btn__title">骨格から探す</span>
+      <span class="mode-btn__desc">固定した環の H を置換</span>
+    </button>
+  </div>
+  <p class="mode-note" id="mode-note"></p>
+
+  <section class="top-grid" id="chain-panels" aria-label="鎖式の条件">
+    <article class="panel">
+      <div class="panel__head">
+        <span class="panel__num">01</span>
+        <div><h2>総炭素数を選ぶ</h2><p>鎖式 / 条件</p></div>
+      </div>
+      <div class="panel__body">
+        <p class="control-label" id="carbon-label">総炭素数</p>
+        <div class="carbon-row" role="group" aria-labelledby="carbon-label">
+          <button type="button" class="carbon-btn" data-carbon="2" aria-pressed="true">
+            <span class="carbon-btn__main">C2</span>
+            <span class="carbon-btn__sub">2個</span>
+          </button>
+          <button type="button" class="carbon-btn" data-carbon="3" aria-pressed="false">
+            <span class="carbon-btn__main">C3</span>
+            <span class="carbon-btn__sub">3個</span>
+          </button>
+        </div>
+        <p class="selection-strip" id="chain-selection"></p>
+        <p class="common-note"><b>全鎖式共通:</b> 総炭素数を条件にし、エタンなどの固定骨格は指定しません。炭素の配分を比べる見方であり、合成反応ではありません。</p>
+        <div class="mini-rule">
+          <p class="mini-rule__title">数え方の約束</p>
+          <ul>
+            <li><b>R</b> は炭化水素基（ここではアルキル基）。</li>
+            <li><b>総炭素数</b>は、すべての R の炭素数の合計。</li>
+            <li>構造式では C–H・O–H の結合線を省略し、H は CH<sub>3</sub> のようにまとめて表す。</li>
+          </ul>
+        </div>
+        <p class="panel-foot">条件を変えると、右の一般構造と下の結果が自動で更新されます。</p>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel__head">
+        <span class="panel__num">02</span>
+        <div><h2>分類と一般構造</h2><p>鎖式 / 見方</p></div>
+      </div>
+      <div class="panel__body">
+        <p class="control-label" id="family-label">化合物分類</p>
+        <div class="seg" role="group" aria-labelledby="family-label">
+          <button type="button" class="seg-btn" data-family="amine" aria-pressed="true">アミン</button>
+          <button type="button" class="seg-btn" data-family="ether" aria-pressed="false">エーテル</button>
+          <button type="button" class="seg-btn" data-family="alcohol" aria-pressed="false">アルコール</button>
+        </div>
+        <div class="preview" id="chain-preview"></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="top-grid" id="aroma-panels" aria-label="芳香族の条件" hidden>
+    <article class="panel">
+      <div class="panel__head">
+        <span class="panel__num">01</span>
+        <div><h2>骨格を選ぶ</h2><p>芳香族 / 固定</p></div>
+      </div>
+      <div class="panel__body">
+        <div class="fixed-skeleton">
+          <div class="fixed-skeleton__ring" id="aroma-skeleton-ring"></div>
+          <div>
+            <span class="badge-fixed">固定</span>
+            <h3>ベンゼン環</h3>
+            <p>環の炭素数6をそのまま保持</p>
+          </div>
+        </div>
+        <p class="hint">このモードでは骨格を選び替えません。右で置換基だけを選びます。</p>
+        <div class="mini-rule">
+          <p class="mini-rule__title">見方</p>
+          <ul>
+            <li>鎖式のように「総炭素数」から探さない。</li>
+            <li>ベンゼン環を固定し、環の H を置換基で置き換える。</li>
+            <li>置換基が変わっても、環の炭素数6は変わらない。</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel__head">
+        <span class="panel__num">02</span>
+        <div><h2>置換基を選ぶ</h2><p>芳香族 / 条件</p></div>
+      </div>
+      <div class="panel__body">
+        <p class="control-label" id="substituent-label">置換基</p>
+        <div class="seg" role="group" aria-labelledby="substituent-label">
+          <button type="button" class="seg-btn" data-substituent="none" aria-pressed="true">なし</button>
+          <button type="button" class="seg-btn" data-substituent="OH" aria-pressed="false">−OH</button>
+          <button type="button" class="seg-btn" data-substituent="CH3" aria-pressed="false">−CH₃</button>
+        </div>
+        <div class="preview" id="aroma-preview"></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="results" id="results" aria-labelledby="results-title" aria-live="polite">
+    <div class="results__head">
+      <div>
+        <p class="results__kicker">03 / RESULT</p>
+        <h2 id="results-title">該当する化合物</h2>
+        <p class="results__sub" id="result-sub"></p>
+      </div>
+      <div class="results__meta">
+        <span class="count-pill" id="result-count">0 件</span>
+        <p class="results__selection" id="result-selection"></p>
+      </div>
+    </div>
+    <div class="results__body" id="results-body"></div>
+  </section>
+
+  <footer class="foot">
+    <p>この操作モックは <code>design-lab/app10-concept/</code> の単体HTMLです。外部API・ビルド・本番データに依存しません。</p>
+    <p>収録している例: 鎖式は C2/C3 のアミン・エーテル・アルコール、芳香族はベンゼン環の3つの置換基。画面と操作の検討用で、化学的な網羅性はありません。</p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var CHAIN = {
+    2: {
+      amine: [
+        { name: 'エチルアミン', en: 'ethylamine', degree: 1, formula: 'C<sub>2</sub>H<sub>7</sub>N', structure: 'CH<sub>3</sub>–CH<sub>2</sub>–NH<sub>2</sub>' },
+        { name: 'ジメチルアミン', en: 'dimethylamine', degree: 2, formula: 'C<sub>2</sub>H<sub>7</sub>N', structure: 'CH<sub>3</sub>–NH–CH<sub>3</sub>' }
+      ],
+      ether: [
+        { name: 'ジメチルエーテル', en: 'dimethyl ether', formula: 'C<sub>2</sub>H<sub>6</sub>O', structure: 'CH<sub>3</sub>–O–CH<sub>3</sub>' }
+      ],
+      alcohol: [
+        { name: 'エタノール', en: 'ethanol', formula: 'C<sub>2</sub>H<sub>6</sub>O', structure: 'CH<sub>3</sub>–CH<sub>2</sub>–OH' }
+      ]
+    },
+    3: {
+      amine: [
+        { name: 'プロパン-1-アミン', en: 'propan-1-amine', degree: 1, formula: 'C<sub>3</sub>H<sub>9</sub>N', structure: 'CH<sub>3</sub>–CH<sub>2</sub>–CH<sub>2</sub>–NH<sub>2</sub>' },
+        { name: 'プロパン-2-アミン', en: 'propan-2-amine', degree: 1, formula: 'C<sub>3</sub>H<sub>9</sub>N', structure: 'CH<sub>3</sub>–CH(NH<sub>2</sub>)–CH<sub>3</sub>' },
+        { name: 'エチルメチルアミン', en: 'ethylmethylamine', degree: 2, formula: 'C<sub>3</sub>H<sub>9</sub>N', structure: 'CH<sub>3</sub>–CH<sub>2</sub>–NH–CH<sub>3</sub>' },
+        { name: 'トリメチルアミン', en: 'trimethylamine', degree: 3, formula: 'C<sub>3</sub>H<sub>9</sub>N', structure: 'N(CH<sub>3</sub>)<sub>3</sub>' }
+      ],
+      ether: [
+        { name: 'メトキシエタン', en: 'methoxyethane', formula: 'C<sub>3</sub>H<sub>8</sub>O', structure: 'CH<sub>3</sub>–O–CH<sub>2</sub>–CH<sub>3</sub>' }
+      ],
+      alcohol: [
+        { name: 'プロパン-1-オール', en: 'propan-1-ol', formula: 'C<sub>3</sub>H<sub>8</sub>O', structure: 'CH<sub>3</sub>–CH<sub>2</sub>–CH<sub>2</sub>–OH' },
+        { name: 'プロパン-2-オール', en: 'propan-2-ol', formula: 'C<sub>3</sub>H<sub>8</sub>O', structure: 'CH<sub>3</sub>–CH(OH)–CH<sub>3</sub>' }
+      ]
+    }
+  };
+
+  var AROMA = {
+    none: {
+      name: 'ベンゼン', en: 'benzene',
+      label: '置換基なし',
+      resultGroup: 'ベンゼン環（置換基なし）',
+      carbonNote: '環の炭素数6（総炭素数6）',
+      replacement: '環の H はそのまま（置換基なし）',
+      structure: 'C<sub>6</sub>H<sub>6</sub>', svgLabel: 'H'
+    },
+    OH: {
+      name: 'フェノール', en: 'phenol',
+      label: 'ヒドロキシ基 −OH',
+      resultGroup: 'ベンゼン環の H を −OH で置換',
+      carbonNote: '環の炭素数6（総炭素数6）',
+      replacement: '環の H を −OH で置換',
+      structure: 'C<sub>6</sub>H<sub>5</sub>–OH', svgLabel: 'OH'
+    },
+    CH3: {
+      name: 'トルエン', en: 'toluene',
+      label: 'メチル基 −CH₃',
+      resultGroup: 'ベンゼン環の H を −CH₃ で置換',
+      carbonNote: '環の炭素数6＋メチル基1（総炭素数7）',
+      replacement: '環の H を −CH₃ で置換',
+      structure: 'C<sub>6</sub>H<sub>5</sub>–CH<sub>3</sub>', svgLabel: 'CH₃'
+    }
+  };
+
+  var FAMILY_LABEL = { amine: 'アミン', ether: 'エーテル', alcohol: 'アルコール' };
+  var DEGREE_LABEL = { 1: '第一級アミン', 2: '第二級アミン', 3: '第三級アミン' };
+  var state = { mode: 'chain', carbon: 2, family: 'amine', substituent: 'none' };
+
+  var els = {
+    modeNote: document.getElementById('mode-note'),
+    chainPanels: document.getElementById('chain-panels'),
+    aromaPanels: document.getElementById('aroma-panels'),
+    chainPreview: document.getElementById('chain-preview'),
+    aromaPreview: document.getElementById('aroma-preview'),
+    chainSelection: document.getElementById('chain-selection'),
+    aromaSkeletonRing: document.getElementById('aroma-skeleton-ring'),
+    resultSub: document.getElementById('result-sub'),
+    resultCount: document.getElementById('result-count'),
+    resultSelection: document.getElementById('result-selection'),
+    resultsBody: document.getElementById('results-body')
+  };
+
+  function ringSvg(label, decorative) {
+    var labels = {
+      H: 'ベンゼン環（ケクレ式）',
+      OH: 'ベンゼン環に結合したヒドロキシ基',
+      'CH₃': 'ベンゼン環に結合したメチル基'
+    };
+    var a11y = decorative
+      ? 'aria-hidden="true"'
+      : 'role="img" aria-label="' + (labels[label] || 'ベンゼン環') + '"';
+    return '<svg class="ring-svg" viewBox="0 0 230 150" ' + a11y + '>' +
+      '<polygon points="110,36 148,58 148,102 110,124 72,102 72,58" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>' +
+      '<path d="M107 41 L145 63 M144 97 L106 119 M77 99 L77 55" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' +
+      '<line x1="148" y1="58" x2="184" y2="36" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<text x="191" y="41" fill="currentColor" font-size="15" font-family="Consolas, monospace" font-weight="700">' + label + '</text>' +
+      '</svg>';
+  }
+
+  function renderChainPreview() {
+    var c = state.carbon;
+    var family = state.family;
+    var items = CHAIN[c][family];
+    var html = '';
+
+    if (family === 'amine') {
+      var counts = [1, 2, 3].map(function (degree) {
+        return items.filter(function (item) { return item.degree === degree; }).length;
+      });
+      var cards = [
+        { degree: 1, formula: 'R–NH<sub>2</sub>', meta: 'R の炭素: ' + c, note: 'N に R が1つ' },
+        { degree: 2, formula: 'R–NH–R′', meta: 'R の炭素: ' + (c - 1) + ' + 1', note: 'N に R が2つ。左右を入れ替えても同じ' },
+        {
+          degree: 3,
+          formula: 'R–N(R′)–R″',
+          meta: c >= 3 ? 'R の炭素: ' + (c - 2) + ' + 1 + 1' : 'R を3つに分ける',
+          note: c >= 3 ? 'N に R が3つ' : '一般形は表示。炭素数3以上で表示'
+        }
+      ];
+
+      html += '<div class="preview-head"><div><h3>アミン</h3><p>N に結合する R の数で級が決まる</p></div><span class="preview-head__badge">C' + c + '</span></div>';
+      html += '<p class="preview-lead">一般構造は常に3つ表示します。下の件数が、いまの条件での該当数です。</p>';
+      html += '<div class="gen-list">';
+      cards.forEach(function (card) {
+        var count = counts[card.degree - 1];
+        var empty = count === 0;
+        html += '<article class="gen-card' + (empty ? ' is-empty' : '') + '">' +
+          '<div class="gen-card__head">' +
+            '<span class="gen-card__name">' + DEGREE_LABEL[card.degree] + '</span>' +
+            '<span class="gen-card__badge' + (empty ? ' is-muted' : '') + '">' + (empty ? '炭素数3以上' : count + ' 件') + '</span>' +
+          '</div>' +
+          '<div class="formula formula--lg">' + card.formula + '</div>' +
+          '<div class="gen-card__meta">' + card.meta + '</div>' +
+          '<p class="gen-card__note">' + card.note + '</p>' +
+        '</article>';
+      });
+      html += '</div>';
+      html += c === 2
+        ? '<p class="preview-foot">第三級アミンは N に3つの炭素が必要です。一般形は上に表示し、炭素数3以上で結果に出ます。</p>'
+        : '<p class="preview-foot">総炭素数3の第三級アミンは、3つの R がすべてメチル基（1+1+1）の1通りです。</p>';
+    } else if (family === 'ether') {
+      html += '<div class="preview-head"><div><h3>エーテル</h3><p>炭素を2つの R に分けて数える</p></div><span class="preview-head__badge">C' + c + '</span></div>';
+      html += '<div class="gen-card gen-card--wide">' +
+        '<div class="formula formula--lg">R–O–R′</div>' +
+        '<div class="split-row">' +
+          '<span class="split-chip' + (c === 2 ? ' is-current' : '') + '">C2: 1 + 1</span>' +
+          '<span class="split-chip' + (c === 3 ? ' is-current' : '') + '">C3: 2 + 1</span>' +
+        '</div>' +
+        '<p class="gen-card__note">総炭素数は R と R′ の合計。R と R′ を入れ替えても同じ化合物です。</p>' +
+      '</div>';
+      html += '<div class="note-box">' +
+        '<p><b>C–C 結合を保つ表記ではありません。</b> R–O–R′ は、エタンなどの C–C 結合を残したまま O を差し込む、という骨格の見方ではありません。炭素を2つの R に分けて数え、実際の合成手順を示すものでもありません。</p>' +
+        '<p>この条件では <b>' + (c === 2 ? '1 + 1' : '2 + 1') + '</b> の分け方だけが該当します' + (c === 3 ? '（1+2 は左右を入れ替えた同じ化合物）' : '') + '。</p>' +
+      '</div>';
+    } else {
+      html += '<div class="preview-head"><div><h3>アルコール</h3><p>アルキル基 R に OH が結合する（R–OH）</p></div><span class="preview-head__badge">C' + c + '</span></div>';
+      html += '<div class="gen-card gen-card--wide">' +
+        '<div class="formula formula--lg">R–OH</div>' +
+        '<div class="gen-card__meta">R の炭素: ' + c + '</div>' +
+        '<p class="gen-card__note">' + (c === 3 ? 'C3 では OH が結合する炭素の位置で 2 通り（プロパン-1-オール / プロパン-2-オール）。' : 'C2 はエタノールの1通り。') + '</p>' +
+      '</div>';
+      html += '<div class="note-box"><p>O–H の結合線を省略し、OH とまとめて表します。</p></div>';
+    }
+
+    els.chainPreview.innerHTML = html;
+  }
+
+  function renderAromaPreview() {
+    var item = AROMA[state.substituent];
+    var replaceNote = state.substituent === 'none'
+      ? 'ベンゼン環はそのまま。環の H は置き換えません。'
+      : 'ベンゼン環はそのまま。環の H を置換基で置き換えます。';
+    els.aromaPreview.innerHTML =
+      '<div class="preview-head"><div><h3>置換基とプレビュー</h3><p>ベンゼン環は固定</p></div><span class="preview-head__badge">環の炭素数6</span></div>' +
+      '<div class="aroma-preview">' +
+        '<div class="aroma-preview__ring">' + ringSvg(item.svgLabel, false) + '</div>' +
+        '<div class="aroma-preview__text">' +
+          '<p class="aroma-preview__label">' + item.label + '</p>' +
+          '<div class="formula formula--lg">' + item.structure + '</div>' +
+          '<div class="gen-card__meta">' + item.carbonNote + '</div>' +
+          '<p class="gen-card__note">' + replaceNote + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="note-box"><p>鎖式モードのように「総炭素数」から探すのではなく、<b>固定したベンゼン環</b>の H を置換基で置き換えます。</p><p>環の炭素数は6です。トルエンは環の炭素数6にメチル基1が加わり、総炭素数7になりますが、探し方は「固定した環と置換基」のままです。</p></div>';
+  }
+
+  function substanceCard(item) {
+    return '<article class="substance">' +
+      '<div class="substance__head"><h4>' + item.name + '</h4><span class="substance__en">' + item.en + '</span></div>' +
+      '<div class="formula formula--result">' + item.structure + '</div>' +
+      '<div class="substance__meta">' + item.formula + '</div>' +
+    '</article>';
+  }
+
+  function renderResultGroup(title, items, emptyNote) {
+    var content = items.length
+      ? '<div class="substance-grid">' + items.map(substanceCard).join('') + '</div>'
+      : '<p class="empty-note">' + (emptyNote || '該当する化合物はありません。') + '</p>';
+    return '<section class="result-group">' +
+      '<div class="result-group__head"><h3>' + title + '</h3><span>' + items.length + ' 件</span></div>' +
+      content +
+    '</section>';
+  }
+
+  function renderChainResults() {
+    var c = state.carbon;
+    var family = state.family;
+    var items = CHAIN[c][family];
+    var familyLabel = FAMILY_LABEL[family];
+
+    els.resultCount.textContent = items.length + ' 件';
+    els.resultSelection.textContent = '選択中: 鎖式 ／ 総炭素数 C' + c + ' ／ ' + familyLabel;
+
+    if (family === 'amine') {
+      els.resultSub.textContent = '総炭素数 ' + c + ' のアミン。級ごとにまとめて表示しています。異性体を1つずつ選ぶ必要はありません。';
+      els.resultsBody.innerHTML = [1, 2, 3].map(function (degree) {
+        var groupItems = items.filter(function (item) { return item.degree === degree; });
+        var emptyNote = degree === 3 && groupItems.length === 0
+          ? 'この条件では0件。第三級アミンは炭素数3以上で表示されます。'
+          : '';
+        return renderResultGroup(DEGREE_LABEL[degree], groupItems, emptyNote);
+      }).join('');
+    } else if (family === 'ether') {
+      els.resultSub.textContent = '総炭素数 ' + c + ' のエーテル。R–O–R′ の炭素の分け方で整理しています。';
+      els.resultsBody.innerHTML = renderResultGroup(familyLabel, items, '');
+    } else {
+      els.resultSub.textContent = '総炭素数 ' + c + ' のアルコール。';
+      els.resultsBody.innerHTML = renderResultGroup(familyLabel, items, '');
+    }
+  }
+
+  function renderAromaResults() {
+    var item = AROMA[state.substituent];
+    els.resultCount.textContent = '1 件';
+    els.resultSelection.textContent = '選択中: 芳香族 ／ ベンゼン環（固定） ／ ' + item.label;
+    els.resultSub.textContent = state.substituent === 'none'
+      ? '固定したベンゼン環をそのまま表示した結果です。'
+      : '固定したベンゼン環の H を、選んだ置換基で置き換えた結果です。';
+    els.resultsBody.innerHTML =
+      '<section class="result-group">' +
+        '<div class="result-group__head"><h3>' + item.resultGroup + '</h3><span>1 件</span></div>' +
+        '<article class="substance substance--aromatic">' +
+          '<div class="substance__main">' +
+            '<div class="substance__head"><h4>' + item.name + '</h4><span class="substance__en">' + item.en + '</span></div>' +
+            '<div class="formula formula--result">' + item.structure + '</div>' +
+            '<div class="substance__meta">' + item.carbonNote + ' ／ ' + item.replacement + '</div>' +
+          '</div>' +
+          '<div class="substance__ring" aria-hidden="true">' + ringSvg(item.svgLabel, true) + '</div>' +
+        '</article>' +
+      '</section>' +
+      '<div class="contrast-note"><p><b>鎖式との違い:</b> 鎖式は「総炭素数＋分類」で探しました。芳香族はベンゼン環（環の炭素数6）を固定し、環の H を置換基で置き換えます。置換基が変わっても環の炭素数6はそのままです。</p></div>';
+  }
+
+  function renderResults() {
+    if (state.mode === 'chain') {
+      renderChainResults();
+    } else {
+      renderAromaResults();
+    }
+  }
+
+  function syncMode() {
+    document.querySelectorAll('[data-mode]').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', String(btn.dataset.mode === state.mode));
+    });
+    els.chainPanels.hidden = state.mode !== 'chain';
+    els.aromaPanels.hidden = state.mode !== 'aroma';
+    els.modeNote.textContent = state.mode === 'chain'
+      ? 'いまは鎖式。総炭素数と化合物分類から、当てはまる構造をまとめて表示します。'
+      : 'いまは芳香族。ベンゼン環を固定し、環の H を置換基で置き換えて表示します。';
+    renderResults();
+  }
+
+  function syncChainControls() {
+    document.querySelectorAll('[data-carbon]').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', String(Number(btn.dataset.carbon) === state.carbon));
+    });
+    document.querySelectorAll('[data-family]').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', String(btn.dataset.family === state.family));
+    });
+    els.chainSelection.textContent = '選択中: 総炭素数 C' + state.carbon + ' ／ ' + FAMILY_LABEL[state.family];
+    renderChainPreview();
+  }
+
+  function syncAromaControls() {
+    document.querySelectorAll('[data-substituent]').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', String(btn.dataset.substituent === state.substituent));
+    });
+    renderAromaPreview();
+  }
+
+  function init() {
+    els.aromaSkeletonRing.innerHTML = ringSvg('H', true);
+
+    document.querySelectorAll('[data-mode]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.mode = btn.dataset.mode;
+        syncMode();
+      });
+    });
+
+    document.querySelectorAll('[data-carbon]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.carbon = Number(btn.dataset.carbon);
+        syncChainControls();
+        renderResults();
+      });
+    });
+
+    document.querySelectorAll('[data-family]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.family = btn.dataset.family;
+        syncChainControls();
+        renderResults();
+      });
+    });
+
+    document.querySelectorAll('[data-substituent]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.substituent = btn.dataset.substituent;
+        syncAromaControls();
+        renderResults();
+      });
+    });
+
+    syncChainControls();
+    syncAromaControls();
+    syncMode();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

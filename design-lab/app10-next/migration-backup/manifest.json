@@ -1,0 +1,44 @@
+{
+  "createdAt": "2026-11-09T09:56:45.226Z",
+  "head": "35120ea",
+  "headSubject": "Consolidate organic compound routes and audit duplicate entries",
+  "note": "Uncommitted app10 work preserved before restoring site/app10/data.js to HEAD and moving untracked index files. Files are stored as .txt so they are never executed.",
+  "files": [
+    {
+      "source": "site/app10/data.js",
+      "backup": "data.js.txt",
+      "bytes": 359451,
+      "sha256": "804427836c140c9edbe7c9cfb06b6326b0f9f4ddc26f0613107b3c66ade39fe1"
+    },
+    {
+      "source": "site/app10/index-manifest.js",
+      "backup": "index-manifest.js.txt",
+      "bytes": 201541,
+      "sha256": "babe9be1e340d857c7cb5b062409c54ee60667d96e81d26589809f7effbff762"
+    },
+    {
+      "source": "site/app10/index-audit.js",
+      "backup": "index-audit.js.txt",
+      "bytes": 66452,
+      "sha256": "cb2d578116cdf8f9d65fb48e3f9a4e689a92b343d70f3838bc99c65d9f08c9d6"
+    },
+    {
+      "source": "design-lab/app10-concept/index.html",
+      "backup": "app10-concept-index.html.txt",
+      "bytes": 38106,
+      "sha256": "19c3d0531ea2ad15f89fabd2bd987ba60bc7cd1a73293012f6859b5df93a433e"
+    },
+    {
+      "source": "design-lab/app10-concept/README.md",
+      "backup": "app10-concept-README.md.txt",
+      "bytes": 1895,
+      "sha256": "28014beb79caeb2acaac5c641973a62bd1c67ab47677ed8bd124e12a60c795e5"
+    },
+    {
+      "source": "git diff site/app10/data.js",
+      "backup": "data-46.patch.txt",
+      "bytes": 81004,
+      "sha256": "1f64ea46803b65beb25042d6e2b7dd47e938636a831afcc840a266e859e450fe"
+    }
+  ]
+}
