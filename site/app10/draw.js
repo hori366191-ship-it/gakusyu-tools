@@ -936,28 +936,28 @@
   function verificationForSpec(spec, formulaStatus) {
     if (!spec) return { level: 'unknown', short: '未確認', label: '構造データ未確認' };
     if (formulaStatus === 'variable') {
-      return { level: 'composition', short: '一般式（目視確認）', label: '一般式（R依存）の基準単位整合（描画は目視確認）' };
+      return { level: 'composition', short: '一般式', label: '一般式（R依存）の基準単位と登録データの整合' };
     }
     if (isGraphSpec(spec)) {
       return { level: 'atom', short: '原子レベル', label: '原子数・結合価・分子式' };
     }
     if (spec.type === 'ring-sub') {
-      return { level: 'composition', short: '分子式整合（目視確認）', label: '環＋置換ラベルの分子式整合（描画は目視確認）' };
+      return { level: 'composition', short: '分子式整合', label: '環＋置換ラベルの分子式整合（描画の見た目は自動検証の対象外）' };
     }
     if (spec.type === 'projection') {
-      return { level: 'composition', short: '投影式（目視確認）', label: '投影式の分子式・立体情報整合（描画は目視確認）' };
+      return { level: 'composition', short: '投影式', label: '投影式の分子式・立体情報整合（描画の見た目は自動検証の対象外）' };
     }
     if (spec.type === 'condensed') {
-      return { level: 'composition', short: '簡略式（目視確認）', label: '簡略式の分子式整合（描画は目視確認）' };
+      return { level: 'composition', short: '簡略式', label: '簡略式の分子式整合（描画の見た目は自動検証の対象外）' };
     }
     if (spec.type === 'triglyceride') {
-      return { level: 'composition', short: '構造式（目視確認）', label: 'トリグリセリドの分子式整合（描画は目視確認）' };
+      return { level: 'composition', short: '構造式', label: 'トリグリセリドの分子式整合（描画の見た目は自動検証の対象外）' };
     }
     if (spec.type === 'polymer') {
-      return { level: 'composition', short: '重合体（目視確認）', label: '繰り返し単位の一般式整合（描画は目視確認）' };
+      return { level: 'composition', short: '重合体', label: '繰り返し単位の一般式整合（描画の見た目は自動検証の対象外）' };
     }
     if (spec.type === 'schematic') {
-      return { level: 'composition', short: '模式図（目視確認）', label: '模式図の分子式整合（描画は目視確認）' };
+      return { level: 'composition', short: '模式図', label: '模式図の分子式整合（描画の見た目は自動検証の対象外）' };
     }
     return { level: 'unknown', short: '未確認', label: '構造データ未確認' };
   }

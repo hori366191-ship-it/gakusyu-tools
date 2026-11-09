@@ -8,6 +8,12 @@
   var R = window.OCDraw;
   if (!D || !R) return;
 
+  function prefersReducedMotion() {
+    try {
+      return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    } catch (e) { return false; }
+  }
+
   var validation = R.validateAll(D.COMPOUNDS);
 
   function esc(s) {
@@ -84,7 +90,7 @@
   }).join('');
   document.getElementById('ledger-verification-note').textContent =
     '「分子式・登録データ整合」は、グラフ構造では原子数・結合価・分子式、環＋置換・投影式・簡略式・トリグリセリド・重合体・模式図では分子式・一般式と登録データの整合を確認した件数です。' +
-    '原子レベルの構造検証は ' + atomCount + ' 件、非グラフは ' + otherCount + ' 件で、非グラフは描画を目視確認しています。';
+    '原子レベルの構造検証は ' + atomCount + ' 件、非グラフは ' + otherCount + ' 件で、非グラフは分子式・一般式と登録データの整合で判定しています。';
 
   // ---- 19分野の収録状況 ----
   var catCounts = {};
@@ -165,7 +171,7 @@
         var target = document.getElementById(targetId);
         if (target) {
           target.style.background = 'var(--oc-accent-bg)';
-          setTimeout(function () { target.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 60);
+          setTimeout(function () { target.scrollIntoView({ block: 'center', behavior: prefersReducedMotion() ? 'auto' : 'smooth' }); }, 60);
         }
       } catch (e) {}
     }
@@ -222,8 +228,8 @@
     srcHtml += '<li><b>' + esc(s.label) + '</b> — ' + esc(s.note) +
       (s.url ? ' <a href="' + esc(s.url) + '" target="_blank" rel="noopener">リンク</a>' : '') + '</li>';
   });
-  srcHtml += '<li><b>検証方法</b> — グラフ構造では、構造データから炭素・水素・酸素などの原子数を計算して登録分子式と照合し、各原子の結合次数と水素数の合計が原子価（C=4, N=3, O=2, Cl=1）に一致するか確認します。環＋置換・投影式・簡略式・トリグリセリド・重合体・模式図では、手入力した組成と登録した分子式・一般式の整合を確認します。このため「分子式・登録データ整合」は描画の完全な自動検証を意味せず、描画は目視確認を併用しています。一致しないデータはアプリに表示しません。</li>';
+  srcHtml += '<li><b>検証方法</b> — グラフ構造では、構造データから炭素・水素・酸素などの原子数を計算して登録分子式と照合し、各原子の結合次数と水素数の合計が原子価（C=4, N=3, O=2, Cl=1）に一致するか確認します。環＋置換・投影式・簡略式・トリグリセリド・重合体・模式図では、手入力した組成と登録した分子式・一般式の整合を確認します。このため「分子式・登録データ整合」は描画の完全な自動検証を意味しません。描画の見た目は自動検証の対象外です。一致しないデータはアプリに表示しません。</li>';
   srcHtml += '<li><b>描画方法</b> — 水素の明示、ベンゼン環のケクレ式、グルコースのフィッシャー／ハース投影式を正確に再現するため、外部の構造描画ライブラリに依存せず、登録データから自作SVGを生成しています。ベンゼン環は内部ではケクレ式の交互二重結合として結合次数を保持し、芳香族性フラグも合わせて持っています。</li>';
-  srcHtml += '<li><b>グルコース投影式</b> — 鎖状D-グルコースのフィッシャー投影式、α/β-D-グルコピラノースのハース投影式について、C1〜C5のOHの向きをデータ（stereo）として保持し、描画と一致することを確認しています。</li>';
+  srcHtml += '<li><b>グルコース投影式</b> — 鎖状D-グルコースのフィッシャー投影式、α/β-D-グルコピラノースのハース投影式について、C1〜C5のOHの向きをデータ（stereo）として保持し、SVGの立体情報と一致することを自動テストで確認しています。</li>';
   document.getElementById('ledger-sources').innerHTML = srcHtml;
 })();

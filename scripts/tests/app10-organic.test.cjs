@@ -249,17 +249,17 @@ test('[data] タンパク質はR依存の一般式として検証する', () => 
   const v = R.validate(c);
   assert.equal(v.ok, true);
   assert.equal(v.formulaStatus, 'variable');
-  assert.equal(v.verification.short, '一般式（目視確認）');
+  assert.equal(v.verification.short, '一般式');
 });
 
 test('[data] 検証方法を原子レベルと登録データ整合で区別する', () => {
   assert.equal(R.validate(D.COMPOUNDS.methane).verification.level, 'atom');
   assert.equal(R.validate(D.COMPOUNDS.methane).verification.short, '原子レベル');
   assert.equal(R.validate(D.COMPOUNDS.styrene).verification.level, 'composition');
-  assert.equal(R.validate(D.COMPOUNDS.styrene).verification.short, '分子式整合（目視確認）');
-  assert.equal(R.validate(D.COMPOUNDS.glucose).verification.short, '投影式（目視確認）');
-  assert.equal(R.validate(D.COMPOUNDS.tristearin).verification.short, '構造式（目視確認）');
-  assert.equal(R.validate(D.COMPOUNDS.polyethylene).verification.short, '重合体（目視確認）');
+  assert.equal(R.validate(D.COMPOUNDS.styrene).verification.short, '分子式整合');
+  assert.equal(R.validate(D.COMPOUNDS.glucose).verification.short, '投影式');
+  assert.equal(R.validate(D.COMPOUNDS.tristearin).verification.short, '構造式');
+  assert.equal(R.validate(D.COMPOUNDS.polyethylene).verification.short, '重合体');
 });
 
 test('[draw] 小分子は水素を明示する', () => {
@@ -383,8 +383,10 @@ test('[static] 本体・台帳・ポータル・クレジット・テーマの�
   assert.match(html, /id="results"/);
   assert.match(html, /aria-live="polite"/);
   assert.match(html, /href="\.\/ledger\.html"/);
+  assert.match(html, /href="\.\.\/credits\.html"/);
   assert.match(html, /登録データの整合/);
-  assert.match(html, /目視確認/);
+  assert.equal(/目視確認/.test(html), false);
+  assert.equal(/href="\.\.\/"/.test(html), false);
   assert.equal(/INTERACTIVE MOCK|UIモック|モックです/.test(html), false);
 
   const ledger = read('app10/ledger.html');
@@ -393,9 +395,13 @@ test('[static] 本体・台帳・ポータル・クレジット・テーマの�
   assert.match(ledger, /\.\/ledger\.js/);
   assert.match(ledger, /id="ledger-rows"/);
   assert.match(ledger, /検証方法/);
+  assert.equal(/href="\.\.\/"/.test(ledger), false);
+  assert.match(ledger, /href="\.\/"/);
+  assert.match(ledger, /href="\.\.\/credits\.html"/);
   const ledgerJs = read('app10/ledger.js');
   assert.match(ledgerJs, /分子式・登録データ整合/);
-  assert.match(ledgerJs, /目視確認/);
+  assert.equal(/目視確認/.test(ledgerJs), false);
+  assert.match(ledgerJs, /自動検証の対象外/);
 
   const portal = read('index.html');
   assert.match(portal, /href="\.\/app10\/"/);
@@ -433,4 +439,73 @@ test('[static] アプリは個別化合物で官能基を無効化する', () =>
   assert.match(js, /新しい官能基の追加はできません/);
   assert.match(js, /unsupportedReason/);
   assert.match(js, /aria-pressed/);
+});
+
+test('[data] 検証ラベルは自動検証の範囲だけを示す', () => {
+  const seen = new Set();
+  for (const id of Object.keys(D.COMPOUNDS)) {
+    const v = R.validate(D.COMPOUNDS[id]).verification;
+    assert.ok(v && v.short && v.label, id + ' の検証ラベルがありません');
+    assert.equal(/目視確認/.test(v.short + ' ' + v.label), false, id + ' の検証ラベル');
+    seen.add(v.short);
+  }
+  for (const short of ['原子レベル', '分子式整合', '投影式', '簡略式', '構造式', '重合体', '模式図', '一般式']) {
+    assert.ok(seen.has(short), short + ' の検証ラベルが使われていません');
+  }
+});
+
+test('[static] 表示用ソースに「目視確認」の表記が残らない', () => {
+  for (const rel of ['app10/app.js', 'app10/draw.js', 'app10/index.html', 'app10/ledger.html', 'app10/ledger.js', 'app10/app.css']) {
+    assert.equal(/目視確認/.test(read(rel)), false, rel + ' に目視確認が残っています');
+  }
+});
+
+test('[static] 骨格分類detailsはopen属性が常に最大1で、初期選択の分類を維持する', () => {
+  const js = read('app10/app.js');
+  assert.match(js, /<div class="oc-group__body">/);
+  assert.match(js, /function bindSkeletonGroups\(\)/);
+  assert.match(js, /querySelectorAll\('details\.oc-group'\)/);
+  assert.match(js, /function reconcileDetails\(\)/);
+  assert.match(js, /activeDetails === desiredDetails/);
+  assert.match(js, /detailsPhase === 'closing'/);
+  assert.match(js, /desiredDetails = desiredDetails === details \? null : details/);
+  assert.match(js, /summary\.addEventListener\('click'/);
+  assert.match(js, /e\.preventDefault\(\)/);
+  // 閉じ切ってから次を開く逐次方式（open=true の代入は1か所だけ）
+  assert.equal((js.match(/details\.open = true/g) || []).length, 1);
+  assert.match(js, /details\.open = open;[\s\S]{0,240}reconcileDetails\(\);/);
+  // 閉じた状態から開くときは高さ0を起点にアニメーションする
+  assert.match(js, /var current = 0;/);
+  assert.match(js, /else if \(details\.open\) \{/);
+  // 初期選択の分類は open 属性付きで生成し、それ以外は閉じる
+  assert.match(js, /section\.name === currentSection/);
+  assert.match(js, /\(open \? 'open' : ''\)/);
+  assert.match(js, /activeDetails = els\.skeletonList\.querySelector\('details\.oc-group\[open\]'\)/);
+});
+
+test('[static] 高さアニメーションはprefers-reduced-motionとWAAPI非対応で無効化できる', () => {
+  const js = read('app10/app.js');
+  assert.match(js, /prefers-reduced-motion: reduce/);
+  assert.match(js, /typeof Element\.prototype\.animate === 'function'/);
+  assert.match(js, /function canAnimate\(\)/);
+  assert.match(js, /el\.style\.height = ''/);
+  assert.match(js, /\.style\.overflow = ''/);
+  assert.match(js, /anim\.onfinish/);
+  assert.match(js, /anim\.oncancel/);
+  assert.match(js, /animateHeight\(els\.results, renderResults\)/);
+  assert.match(js, /animateHeight\(els\.skeletonPreview, renderSkeletonPreview\)/);
+  assert.match(js, /animateHeight\(els\.groupPreview, renderGroupPreview\)/);
+  const css = read('app10/app.css');
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(css, /animation: none !important/);
+  assert.match(css, /transition: none !important/);
+});
+
+test('[static] 台帳の全セルはnowrapせず、4列目・7列目の幅を確保する', () => {
+  const css = read('app10/app.css');
+  assert.equal(/\.oc-table td[^{]*\{[^}]*white-space:\s*nowrap/.test(css), false);
+  assert.match(css, /\.oc-table th:nth-child\(4\) \{ width: 128px; \}/);
+  assert.match(css, /\.oc-table th:nth-child\(7\) \{ width: 104px; \}/);
+  assert.match(css, /\.oc-table \{ width: 100%; border-collapse: collapse; min-width: 1170px;/);
+  assert.match(css, /\.oc-table td \{ overflow-wrap: anywhere; \}/);
 });

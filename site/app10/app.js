@@ -87,6 +87,184 @@
     } catch (e) {}
   }
 
+  /* ------------------------------------------------------------------
+   * 高さアニメーション（prefers-reduced-motion / WAAPI未対応時は即時反映）
+   * ------------------------------------------------------------------ */
+  var MOTION_MS = 190;
+  var motionQuery = null;
+  try {
+    motionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  } catch (e) { motionQuery = null; }
+
+  function canAnimate() {
+    return typeof Element !== 'undefined' && Element.prototype &&
+      typeof Element.prototype.animate === 'function' &&
+      !(motionQuery && motionQuery.matches);
+  }
+
+  var heightAnim = new WeakMap();
+
+  function resetHeight(el) {
+    if (!el) return;
+    el.style.height = '';
+    el.style.overflow = '';
+  }
+
+  function animateHeight(el, render) {
+    if (!el) { render(); return; }
+    var running = heightAnim.get(el);
+    var before;
+    if (running) {
+      try {
+        before = parseFloat(window.getComputedStyle(el).height);
+      } catch (e) { before = NaN; }
+      heightAnim.delete(el);
+      try { running.cancel(); } catch (e) {}
+      if (!isFinite(before)) before = el.getBoundingClientRect().height;
+    } else {
+      before = el.getBoundingClientRect().height;
+    }
+    resetHeight(el);
+    render();
+    if (!canAnimate()) { resetHeight(el); return; }
+    var after = el.getBoundingClientRect().height;
+    if (Math.abs(after - before) < 0.5) { resetHeight(el); return; }
+    el.style.overflow = 'hidden';
+    el.style.height = before + 'px';
+    var anim = el.animate(
+      [{ height: before + 'px' }, { height: after + 'px' }],
+      { duration: MOTION_MS, easing: 'cubic-bezier(.4, 0, .2, 1)' }
+    );
+    heightAnim.set(el, anim);
+    anim.onfinish = function () {
+      if (heightAnim.get(el) !== anim) return;
+      heightAnim.delete(el);
+      resetHeight(el);
+    };
+    anim.oncancel = function () {
+      if (heightAnim.get(el) !== anim) return;
+      heightAnim.delete(el);
+      resetHeight(el);
+    };
+  }
+
+  /* ------------------------------------------------------------------
+   * 骨格分類の details（open属性は常に最大1・高さアニメーション）
+   * 閉じ切ってから次を開く逐次方式。連打は最後の意図を優先する。
+   * ------------------------------------------------------------------ */
+  var detailsAnim = new WeakMap();
+  var activeDetails = null;
+  var desiredDetails = null;
+  var detailsPhase = 'idle';
+
+  function groupBody(details) {
+    return details.querySelector('.oc-group__body');
+  }
+
+  function resetGroupBody(details) {
+    var body = groupBody(details);
+    if (!body) return;
+    body.style.height = '';
+    body.style.overflow = '';
+  }
+
+  function cancelDetailsAnim(details) {
+    var anim = detailsAnim.get(details);
+    if (anim) {
+      detailsAnim.delete(details);
+      try { anim.cancel(); } catch (e) {}
+    }
+    resetGroupBody(details);
+  }
+
+  function finishDetailsAnim(details, open) {
+    details.open = open;
+    if (open) {
+      activeDetails = details;
+    } else if (activeDetails === details) {
+      activeDetails = null;
+    }
+    detailsPhase = 'idle';
+    resetGroupBody(details);
+    reconcileDetails();
+  }
+
+  function runDetailsAnim(details, open) {
+    var body = groupBody(details);
+    if (!body || !canAnimate()) {
+      cancelDetailsAnim(details);
+      finishDetailsAnim(details, open);
+      return;
+    }
+    var running = detailsAnim.get(details);
+    var current = 0;
+    if (running) {
+      try {
+        current = parseFloat(window.getComputedStyle(body).height);
+      } catch (e) { current = NaN; }
+      if (!isFinite(current)) current = body.getBoundingClientRect().height;
+      detailsAnim.delete(details);
+      try { running.cancel(); } catch (e) {}
+    } else if (details.open) {
+      current = body.getBoundingClientRect().height;
+    }
+    resetGroupBody(details);
+    if (open) {
+      details.open = true;
+      activeDetails = details;
+    } else if (!details.open) {
+      finishDetailsAnim(details, false);
+      return;
+    }
+    var target = open ? body.getBoundingClientRect().height : 0;
+    if (Math.abs(target - current) < 1) {
+      finishDetailsAnim(details, open);
+      return;
+    }
+    detailsPhase = open ? 'opening' : 'closing';
+    body.style.overflow = 'hidden';
+    body.style.height = current + 'px';
+    var anim = body.animate(
+      [{ height: current + 'px' }, { height: target + 'px' }],
+      { duration: MOTION_MS, easing: 'cubic-bezier(.4, 0, .2, 1)' }
+    );
+    detailsAnim.set(details, anim);
+    anim.onfinish = function () {
+      if (detailsAnim.get(details) !== anim) return;
+      detailsAnim.delete(details);
+      finishDetailsAnim(details, open);
+    };
+  }
+
+  function reconcileDetails() {
+    if (activeDetails) {
+      if (activeDetails === desiredDetails) {
+        if (detailsPhase === 'closing') runDetailsAnim(activeDetails, true);
+        return;
+      }
+      if (detailsPhase === 'closing') return;
+      runDetailsAnim(activeDetails, false);
+      return;
+    }
+    if (desiredDetails) runDetailsAnim(desiredDetails, true);
+  }
+
+  function bindSkeletonGroups() {
+    var groups = els.skeletonList.querySelectorAll('details.oc-group');
+    Array.prototype.forEach.call(groups, function (details) {
+      var summary = details.querySelector('summary');
+      if (!summary) return;
+      // Enter/Space は summary の click として届くため、開閉をここで一元管理する
+      summary.addEventListener('click', function (e) {
+        if (e.defaultPrevented) return;
+        if (e.button != null && e.button !== 0) return;
+        e.preventDefault();
+        desiredDetails = desiredDetails === details ? null : details;
+        reconcileDetails();
+      });
+    });
+  }
+
   function buildSkeletonList() {
     var bySection = [];
     var map = {};
@@ -102,15 +280,20 @@
     bySection.forEach(function (section, idx) {
       var open = section.name === currentSection || (idx === 0 && !currentSection);
       html += '<details class="oc-group" ' + (open ? 'open' : '') + '><summary>' +
-        esc(section.name) + ' <span class="oc-tag">' + section.items.length + '</span></summary>';
+        esc(section.name) + ' <span class="oc-tag">' + section.items.length + '</span></summary>' +
+        '<div class="oc-group__body">';
       section.items.forEach(function (s) {
         html += '<button type="button" class="oc-pick" data-skeleton="' + esc(s.id) + '" aria-pressed="false">' +
           '<span class="oc-pick__label">' + esc(s.label) + '</span>' +
           '<span class="oc-tag">' + esc(s.tag) + '</span></button>';
       });
-      html += '</details>';
+      html += '</div></details>';
     });
     els.skeletonList.innerHTML = html;
+    activeDetails = els.skeletonList.querySelector('details.oc-group[open]');
+    desiredDetails = activeDetails;
+    detailsPhase = 'idle';
+    bindSkeletonGroups();
   }
 
   function buildGroupList() {
@@ -291,8 +474,8 @@
       });
       html += '</div></div>';
     });
-    els.results.innerHTML = html + '<p class="oc-results__note">※ グラフ構造は原子数・結合価・分子式を検証し、環＋置換・投影式・簡略式・トリグリセリド・重合体・模式図は分子式・一般式と登録データの整合を確認しています。' +
-      '描画は目視確認を行っています。</p>';
+    els.results.innerHTML = html + '<p class="oc-results__note">※ グラフ構造は原子数・結合価・分子式を自動照合し、環＋置換・投影式・簡略式・トリグリセリド・重合体・模式図は分子式・一般式と登録データの整合を確認しています。' +
+      '描画の見た目は自動検証の対象外です。</p>';
   }
 
   function renderDataStatus() {
@@ -306,7 +489,7 @@
       else otherCount++;
     });
     els.dataStatus.textContent = '収録 ' + total + ' 化合物／分子式・登録データ整合 ' + ok +
-      ' 件（原子レベル ' + atomCount + '・非グラフ ' + otherCount + '。非グラフは描画を目視確認）';
+      ' 件（原子レベル ' + atomCount + '・非グラフ ' + otherCount + '。非グラフは分子式・登録データの整合で判定）';
   }
 
   function scrollActiveSkeleton() {
@@ -319,13 +502,22 @@
     }
   }
 
+  var firstRender = true;
+
   function update() {
     var sk = selectedSkeleton();
     if (sk.locked) state.group = 'none';
     syncLists();
-    renderSkeletonPreview();
-    renderGroupPreview();
-    renderResults();
+    if (firstRender) {
+      firstRender = false;
+      renderSkeletonPreview();
+      renderGroupPreview();
+      renderResults();
+    } else {
+      animateHeight(els.skeletonPreview, renderSkeletonPreview);
+      animateHeight(els.groupPreview, renderGroupPreview);
+      animateHeight(els.results, renderResults);
+    }
     scrollActiveSkeleton();
     writeQuery();
   }
