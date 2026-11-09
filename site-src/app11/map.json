@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "note": "反応経路マップ試験版の配置・分類の設定。分類は本ツール独自に設計した。座標は生成時に site-src/app11/layout.json へ固定して保存する。",
+  "regions": [
+    {
+      "id": "hydrocarbon",
+      "name": "炭化水素",
+      "note": "炭素と水素だけの骨格をもつ化合物。ハロゲン置換体もここに置く。",
+      "x": 0,
+      "y": 0,
+      "cols": 10
+    },
+    {
+      "id": "aromatic",
+      "name": "芳香族炭化水素",
+      "note": "ベンゼン環をもち、官能基をまだもたない炭化水素。",
+      "x": 1600,
+      "y": 0,
+      "cols": 6
+    },
+    {
+      "id": "alcohol-ether",
+      "name": "アルコール・エーテル",
+      "note": "−OH をもつ化合物と、C−O−C 結合をもつ化合物。",
+      "x": 1600,
+      "y": 200,
+      "cols": 8
+    },
+    {
+      "id": "carbonyl",
+      "name": "アルデヒド・ケトン・カルボン酸",
+      "note": "C=O をもつ化合物と、その酸化で生じる −COOH の化合物。",
+      "x": 0,
+      "y": 560,
+      "cols": 9
+    },
+    {
+      "id": "ester-lipid",
+      "name": "エステル・油脂・セッケン",
+      "note": "−COO− 結合をもつ化合物と、その加水分解で生じる塩。",
+      "x": 1600,
+      "y": 480,
+      "cols": 8
+    },
+    {
+      "id": "phenol-aromatic",
+      "name": "フェノール類・芳香族化合物",
+      "note": "ベンゼン環に −OH やその他の官能基をもつ化合物。",
+      "x": 1600,
+      "y": 1110,
+      "cols": 9
+    },
+    {
+      "id": "nitrogen",
+      "name": "窒素化合物",
+      "note": "アミン・ニトリル・ニトロ化合物。",
+      "x": 0,
+      "y": 1000,
+      "cols": 7
+    },
+    {
+      "id": "sugar",
+      "name": "糖類",
+      "note": "単糖・二糖・多糖とその誘導体。",
+      "x": 1600,
+      "y": 820,
+      "cols": 6
+    },
+    {
+      "id": "amino",
+      "name": "アミノ酸・タンパク質",
+      "note": "アミノ酸と、その重合体・酵素。",
+      "x": 0,
+      "y": 1290,
+      "cols": 10
+    },
+    {
+      "id": "polymer",
+      "name": "高分子・材料",
+      "note": "天然高分子・合成高分子と、その単量体・原料。",
+      "x": 1600,
+      "y": 1500,
+      "cols": 10
+    }
+  ],
+  "categoryRegions": {
+    "alkane": "hydrocarbon",
+    "unsat": "hydrocarbon",
+    "cyclic": "hydrocarbon",
+    "aromatic": "aromatic",
+    "alcohol": "alcohol-ether",
+    "ether": "alcohol-ether",
+    "aldehyde": "carbonyl",
+    "ketone": "carbonyl",
+    "carboxylic": "carbonyl",
+    "ester": "ester-lipid",
+    "lipid": "ester-lipid",
+    "soap": "ester-lipid",
+    "phenol": "phenol-aromatic",
+    "aromatic-other": "phenol-aromatic",
+    "aromatic-amine": "nitrogen",
+    "sugar": "sugar",
+    "amino": "amino",
+    "natural-polymer": "polymer",
+    "synthetic-polymer": "polymer"
+  },
+  "regionOverrides": {
+    "nitromethane": "nitrogen"
+  },
+  "outOfScopeCompounds": [],
+  "outOfScopeRegions": [],
+  "hubs": [
+    "methane",
+    "ethene",
+    "ethyne",
+    "benzene",
+    "toluene",
+    "ethanol",
+    "methanol",
+    "ethanal",
+    "acetic-acid",
+    "ethyl-acetate",
+    "tristearin",
+    "phenol",
+    "aniline",
+    "salicylic-acid",
+    "glucose",
+    "sucrose",
+    "starch",
+    "cellulose",
+    "glycine",
+    "protein",
+    "polyethylene",
+    "pvc",
+    "pet",
+    "nylon66",
+    "sodium-stearate",
+    "styrene",
+    "vinyl-chloride",
+    "acrylic-acid"
+  ]
+}

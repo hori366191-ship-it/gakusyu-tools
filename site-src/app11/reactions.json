@@ -1,0 +1,3399 @@
+{
+  "version": 1,
+  "note": "反応の共通説明（種別）と個別情報。反応は反応種別ごとの一般則を1か所にまとめ、個別の基質・生成物・条件だけを各反応に持たせる。独立資料での確認が済むまでは state を unverified とし、画面では未確認として表示する。実施を促す試薬量・濃度・具体的な操作手順・装置手順は書かない。",
+  "defaultState": "held",
+  "types": {
+    "radical-substitution": {
+      "label": "ラジカル置換",
+      "summary": "光や熱で結合が切れて生じたラジカルを経由し、炭素上の水素が別の原子や基で置き換わる。置き換わる水素は1種類とは限らないため、生成物が複数生じうる。",
+      "schematic": "C–H ＋ X–X → C–X ＋ H–X"
+    },
+    "substitution": {
+      "label": "置換",
+      "summary": "炭素についた基が、別の基でそのまま置き換わる。炭素骨格は変化しない。",
+      "schematic": "R–Y ＋ Z → R–Z ＋ Y"
+    },
+    "addition": {
+      "label": "付加",
+      "summary": "二重結合や三重結合の一部が開き、そこへ別の原子・基が結合する。不飽和結合の数が減る。",
+      "schematic": "C=C ＋ A–B → C–C(A)(B)"
+    },
+    "hydrogenation": {
+      "label": "水素付加",
+      "summary": "不飽和結合に水素が付加し、単結合になる。同じ物質でも不飽和結合が減ると融点が上がり、液体が固体に近づく。",
+      "schematic": "C=C ＋ H–H → C–C(H)(H)"
+    },
+    "hydration": {
+      "label": "水和",
+      "summary": "水が付加して −OH が生じる。アルケンからアルコールをつくる経路の代表例。",
+      "schematic": "C=C ＋ H–OH → C–C(H)(OH)"
+    },
+    "elimination": {
+      "label": "脱離",
+      "summary": "隣り合う炭素から原子や基が取れて、二重結合・三重結合が新しくできる。脱水と脱ハロゲン化水素をまとめて扱う。",
+      "schematic": "C–C(H)(OH) → C=C ＋ H–OH"
+    },
+    "oxidation": {
+      "label": "酸化",
+      "summary": "酸素が入る、または水素が取れる。アルコール → アルデヒド → カルボン酸のように段階を経て進むことがある。",
+      "schematic": "R–CH₂OH → R–CHO → R–COOH"
+    },
+    "reduction": {
+      "label": "還元",
+      "summary": "水素が入る、または酸素が取れる。カルボニル基がアルコールに、ニトロ基がアミノ基になる例がある。",
+      "schematic": "C=O ＋ H–H → C–OH"
+    },
+    "esterification": {
+      "label": "エステル化",
+      "summary": "カルボン酸とアルコールから水が取れて −COO− 結合ができる。縮合の一種で、生成物はエステルと水。",
+      "schematic": "R–COOH ＋ R′–OH ⇄ R–COO–R′ ＋ H₂O"
+    },
+    "hydrolysis": {
+      "label": "加水分解",
+      "summary": "水が反応して結合が切れる。エステル・アミド・糖のグリコシド結合・ペプチド結合で起こる。",
+      "schematic": "R–COO–R′ ＋ H₂O → R–COOH ＋ R′–OH"
+    },
+    "saponification": {
+      "label": "けん化",
+      "summary": "油脂（エステル）をアルカリで加水分解し、脂肪酸の塩とグリセリンが生じる。生成した塩がセッケンとして働く。",
+      "schematic": "油脂 ＋ 3NaOH → 3 脂肪酸ナトリウム ＋ グリセリン"
+    },
+    "neutralization": {
+      "label": "中和",
+      "summary": "酸と塩基が反応して塩ができる。弱酸の塩に強酸を加えると、弱酸が遊離する場合がある。",
+      "schematic": "R–COOH ＋ NaOH → R–COONa ＋ H₂O"
+    },
+    "nitration": {
+      "label": "ニトロ化",
+      "summary": "ベンゼン環の水素がニトロ基（−NO₂）で置き換わる。置換の位置は環についている他の基の影響を受ける。",
+      "schematic": "Ar–H ＋ HNO₃ → Ar–NO₂ ＋ H₂O"
+    },
+    "sulfonation": {
+      "label": "スルホン化",
+      "summary": "ベンゼン環の水素がスルホ基（−SO₃H）で置き換わる。スルホ基は水に溶けやすい性質を与える。",
+      "schematic": "Ar–H ＋ H₂SO₄ → Ar–SO₃H ＋ H₂O"
+    },
+    "aromatic-substitution": {
+      "label": "芳香族置換",
+      "summary": "ベンゼン環の水素が別の原子・基で置き換わる。環の共役（芳香族性）は保たれる。",
+      "schematic": "Ar–H ＋ E–X → Ar–E ＋ H–X"
+    },
+    "diazotization": {
+      "label": "ジアゾ化",
+      "summary": "第一級芳香族アミンのアミノ基がジアゾニウム塩（−N₂⁺）に変わる。生じたジアゾニウム塩は反応性が高く、低温で扱う。",
+      "schematic": "Ar–NH₂ ＋ NaNO₂ ＋ 2HCl → Ar–N₂⁺Cl⁻ ＋ 2H₂O ＋ NaCl"
+    },
+    "coupling": {
+      "label": "カップリング",
+      "summary": "ジアゾニウム塩が芳香族化合物と結合し、アゾ基（−N=N−）を介して2つの環がつながる。色素の合成に使われる。",
+      "schematic": "Ar–N₂⁺ ＋ Ar′–H → Ar–N=N–Ar′ ＋ H⁺"
+    },
+    "condensation": {
+      "label": "縮合",
+      "summary": "2分子以上から水などの小さな分子が取れて、新しい結合ができる。エステル化やアミド化もこの仲間。",
+      "schematic": "A–H ＋ B–OH → A–B ＋ H₂O"
+    },
+    "peptide-bond": {
+      "label": "ペプチド結合",
+      "summary": "アミノ酸のカルボキシ基と別のアミノ酸のアミノ基から水が取れて −CO–NH− 結合ができる。縮合の一種。",
+      "schematic": "H₂N–R–COOH ＋ H₂N–R′–COOH → H₂N–R–CO–NH–R′–COOH ＋ H₂O"
+    },
+    "acetylation": {
+      "label": "アセチル化",
+      "summary": "−OH や −NH₂ の水素がアセチル基（−COCH₃）で置き換わる。エステル化・アミド化の一種。",
+      "schematic": "R–OH ＋ (CH₃CO)₂O → R–OCOCH₃ ＋ CH₃COOH"
+    },
+    "metal-reaction": {
+      "label": "金属との反応",
+      "summary": "アルコールやフェノールの −OH の水素が金属で置き換わり、水素が発生する。",
+      "schematic": "2R–OH ＋ 2Na → 2R–ONa ＋ H₂"
+    },
+    "carboxylation": {
+      "label": "カルボキシ化",
+      "summary": "フェノールの塩に二酸化炭素を作用させ、環にカルボキシ基を導入する。酸を加えると遊離のヒドロキシ酸になる。",
+      "schematic": "Ar–ONa ＋ CO₂ → Ar(COONa)–OH"
+    },
+    "addition-polymerization": {
+      "label": "付加重合",
+      "summary": "二重結合が開いて単量体どうしが次々につながる。主鎖には単量体の骨格がそのまま並ぶ。",
+      "schematic": "n C=C → –(C–C)ₙ–"
+    },
+    "condensation-polymerization": {
+      "label": "縮重合",
+      "summary": "2種類以上の単量体から水などの小さな分子が取れながら高分子になる。主鎖には結合の変化が残る。",
+      "schematic": "n A–B ＋ n C–D → –(A–D)ₙ– ＋ 小分子"
+    },
+    "copolymerization": {
+      "label": "共重合",
+      "summary": "2種類以上の単量体が同じ高分子鎖に取り込まれる。単独の重合体とは異なる性質を示す。",
+      "schematic": "n A ＋ m B → –(A)ₙ(B)ₘ–"
+    },
+    "ring-opening-polymerization": {
+      "label": "開環重合",
+      "summary": "環状の単量体の環が開き、そのままつながって高分子になる。",
+      "schematic": "n 環状単量体 → –(開いた単位)ₙ–"
+    },
+    "polymerization": {
+      "label": "重合",
+      "summary": "単量体が繰り返し結合して高分子になる。付加重合・縮重合・開環重合などの総称として使う。",
+      "schematic": "n 単量体 → –(繰り返し単位)ₙ–"
+    },
+    "fermentation": {
+      "label": "発酵",
+      "summary": "酵素のはたらきで糖が分解され、アルコールや二酸化炭素などが生じる。生体由来の触媒を使う反応。",
+      "schematic": "C₆H₁₂O₆ → 2C₂H₅OH ＋ 2CO₂"
+    },
+    "isomerization": {
+      "label": "異性化",
+      "summary": "原子の数と種類は変えずに、原子の配置が変わる。シス-トランスの変換が代表例。",
+      "schematic": "シス体 ⇄ トランス体"
+    },
+    "decomposition": {
+      "label": "分解",
+      "summary": "1つの化合物が2つ以上の物質に分かれる。加熱や触媒によって結合が切れる。",
+      "schematic": "A–B → A ＋ B"
+    },
+    "precipitation": {
+      "label": "沈殿生成",
+      "summary": "特定の構造が金属イオンなどと結合して、溶けにくい化合物として析出する。構造の確認に使われる。",
+      "schematic": "R–C≡C–H ＋ Ag⁺ → R–C≡C–Ag↓ ＋ H⁺"
+    }
+  },
+  "reactions": [
+    {
+      "id": "methane-chlorination",
+      "type": "radical-substitution",
+      "substrates": [
+        "methane"
+      ],
+      "products": [
+        "chloromethane"
+      ],
+      "conditions": "塩素と混合して紫外線を当てる",
+      "note": "塩素化は一置換で止まらず、ジ・トリ・テトラ塩化物の混合物になる。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "10.2",
+          "title": "Preparing Alkyl Halides from Alkanes: Radical Halogenation",
+          "url": "https://openstax.org/books/organic-chemistry/pages/10-2-preparing-alkyl-halides-from-alkanes-radical-halogenation",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "chloromethane-chlorination",
+      "type": "radical-substitution",
+      "substrates": [
+        "chloromethane"
+      ],
+      "products": [
+        "dichloromethane"
+      ],
+      "conditions": "塩素と光を当てる",
+      "note": "逐次置換の例。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "ethane-chlorination",
+      "type": "radical-substitution",
+      "substrates": [
+        "ethane"
+      ],
+      "products": [
+        "chloroethane"
+      ],
+      "conditions": "塩素と光を当てる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "propane-chlorination",
+      "type": "radical-substitution",
+      "substrates": [
+        "propane"
+      ],
+      "products": [
+        "1-chloropropane"
+      ],
+      "conditions": "塩素と光を当てる",
+      "note": "2位が置き換わった 2-クロロプロパン も同時に生じる。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "ethene-bromine-addition",
+      "type": "addition",
+      "substrates": [
+        "ethene"
+      ],
+      "products": [
+        "1,2-dibromoethane"
+      ],
+      "conditions": "臭素を付加させる",
+      "note": "水が共存する条件ではハロヒドリン生成など別の経路が起こるため、この付加反応とは区別する。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "8.2",
+          "title": "Halogenation of Alkenes: Addition of X2",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-2-halogenation-of-alkenes-addition-of-x2",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "ethene-hydrogen-bromide",
+      "type": "addition",
+      "substrates": [
+        "ethene"
+      ],
+      "products": [
+        "bromoethane"
+      ],
+      "conditions": "臭化水素を付加させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "7.7",
+          "title": "Electrophilic Addition Reactions of Alkenes",
+          "url": "https://openstax.org/books/organic-chemistry/pages/7-7-electrophilic-addition-reactions-of-alkenes",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "ethene-hydrogenation",
+      "type": "hydrogenation",
+      "substrates": [
+        "ethene"
+      ],
+      "products": [
+        "ethane"
+      ],
+      "conditions": "パラジウムや白金の触媒で水素を付加させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "8.6",
+          "title": "Reduction of Alkenes: Hydrogenation",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-6-reduction-of-alkenes-hydrogenation",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "ethene-hydration",
+      "type": "hydration",
+      "substrates": [
+        "ethene"
+      ],
+      "products": [
+        "ethanol"
+      ],
+      "conditions": "強酸触媒で水を付加させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "7.7",
+          "title": "Electrophilic Addition Reactions of Alkenes",
+          "url": "https://openstax.org/books/organic-chemistry/pages/7-7-electrophilic-addition-reactions-of-alkenes",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "propene-hydrogenation",
+      "type": "hydrogenation",
+      "substrates": [
+        "propene"
+      ],
+      "products": [
+        "propane"
+      ],
+      "conditions": "パラジウムや白金の触媒で水素を付加させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "8.6",
+          "title": "Reduction of Alkenes: Hydrogenation",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-6-reduction-of-alkenes-hydrogenation",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "propene-hydration",
+      "type": "hydration",
+      "substrates": [
+        "propene"
+      ],
+      "products": [
+        "propan-2-ol"
+      ],
+      "conditions": "強酸触媒で水を付加させる",
+      "note": "水素が多い炭素にH、置換の多い炭素にOHがつく（マルコフニコフ則）。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "7.7",
+          "title": "Electrophilic Addition Reactions of Alkenes",
+          "url": "https://openstax.org/books/organic-chemistry/pages/7-7-electrophilic-addition-reactions-of-alkenes",
+          "date": "2026-11-10"
+        },
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "7.8",
+          "title": "Orientation of Electrophilic Additions: Markovnikov's Rule",
+          "url": "https://openstax.org/books/organic-chemistry/pages/7-8-orientation-of-electrophilic-additions-markovnikovs-rule",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "ethyne-partial-hydrogenation",
+      "type": "hydrogenation",
+      "substrates": [
+        "ethyne"
+      ],
+      "products": [
+        "ethene"
+      ],
+      "conditions": "触媒で水素を1段階だけ付加させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "ethyne-full-hydrogenation",
+      "type": "hydrogenation",
+      "substrates": [
+        "ethyne"
+      ],
+      "products": [
+        "ethane"
+      ],
+      "conditions": "十分な量の水素と触媒",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "ethyne-hydrogen-bromide",
+      "type": "addition",
+      "substrates": [
+        "ethyne"
+      ],
+      "products": [
+        "bromoethene"
+      ],
+      "conditions": "臭化水素を1段階付加させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "ethyne-silver-acetylide",
+      "type": "precipitation",
+      "substrates": [
+        "ethyne"
+      ],
+      "products": [
+        "silver-acetylide"
+      ],
+      "conditions": "硝酸銀を加えたアンモニア水溶液に通す",
+      "note": "末端に ≡C–H をもつアルキンだけが反応し、白い沈殿ができる。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "ethyne-copper-acetylide",
+      "type": "precipitation",
+      "substrates": [
+        "ethyne"
+      ],
+      "products": [
+        "copper-i-acetylide"
+      ],
+      "conditions": "塩化銅(I)を加えたアンモニア水溶液に通す",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "ethanol-dehydration-ethene",
+      "type": "elimination",
+      "substrates": [
+        "ethanol"
+      ],
+      "products": [
+        "ethene"
+      ],
+      "conditions": "濃硫酸を加えて約170℃に加熱する",
+      "note": "同じ脱水でも温度が低い側ではエーテルが生じる。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "ethanol-dehydration-ether",
+      "type": "condensation",
+      "substrates": [
+        "ethanol"
+      ],
+      "products": [
+        "diethyl-ether"
+      ],
+      "conditions": "硫酸触媒で脱水縮合させる",
+      "note": "一次アルコールに限られる。二次・第三級アルコールでは脱水してアルケンが生じる。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "18.2",
+          "title": "Preparing Ethers",
+          "url": "https://openstax.org/books/organic-chemistry/pages/18-2-preparing-ethers",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "methanol-dehydration-ether",
+      "type": "condensation",
+      "substrates": [
+        "methanol"
+      ],
+      "products": [
+        "dimethyl-ether"
+      ],
+      "conditions": "酸触媒で脱水する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "propan-2-ol-dehydration",
+      "type": "elimination",
+      "substrates": [
+        "propan-2-ol"
+      ],
+      "products": [
+        "propene"
+      ],
+      "conditions": "濃硫酸で脱水する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "cyclohexane-chlorination",
+      "type": "radical-substitution",
+      "substrates": [
+        "cyclohexane"
+      ],
+      "products": [
+        "chlorocyclohexane"
+      ],
+      "conditions": "塩素と光を当てる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "chlorocyclohexane-elimination",
+      "type": "elimination",
+      "substrates": [
+        "chlorocyclohexane"
+      ],
+      "products": [
+        "cyclohexene"
+      ],
+      "conditions": "水酸化カリウムのアルコール溶液で加熱する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "benzene-chlorine-addition",
+      "type": "addition",
+      "substrates": [
+        "benzene"
+      ],
+      "products": [
+        "hexachlorocyclohexane"
+      ],
+      "conditions": "光を当てながら塩素を付加させる",
+      "note": "光の下では環の共役が保たれず、付加体が生じる。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "methanol-oxidation-formaldehyde",
+      "type": "oxidation",
+      "substrates": [
+        "methanol"
+      ],
+      "products": [
+        "formaldehyde"
+      ],
+      "conditions": "Dess–Martin 試薬で酸化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.7",
+          "title": "Oxidation of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "formaldehyde-oxidation-formic",
+      "type": "oxidation",
+      "substrates": [
+        "formaldehyde"
+      ],
+      "products": [
+        "formic-acid"
+      ],
+      "conditions": "塩基性過マンガン酸カリウムまたは熱い硝酸で酸化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "19.3",
+          "title": "Oxidation of Aldehydes and Ketones",
+          "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "ethanol-oxidation-ethanal",
+      "type": "oxidation",
+      "substrates": [
+        "ethanol"
+      ],
+      "products": [
+        "ethanal"
+      ],
+      "conditions": "Dess–Martin 試薬で酸化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.7",
+          "title": "Oxidation of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "ethanal-oxidation-acetic",
+      "type": "oxidation",
+      "substrates": [
+        "ethanal"
+      ],
+      "products": [
+        "acetic-acid"
+      ],
+      "conditions": "塩基性過マンガン酸カリウムまたは熱い硝酸で酸化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "19.3",
+          "title": "Oxidation of Aldehydes and Ketones",
+          "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "ethanol-oxidation-acetic",
+      "type": "oxidation",
+      "substrates": [
+        "ethanol"
+      ],
+      "products": [
+        "acetic-acid"
+      ],
+      "conditions": "塩基性水溶液中で過マンガン酸カリウムと加熱し、酸性にしてカルボン酸を得る",
+      "note": "アルデヒドを経るが、さらに酸化されてカルボン酸になる。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.7",
+          "title": "Oxidation of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "propan-1-ol-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "propan-1-ol"
+      ],
+      "products": [
+        "propanal"
+      ],
+      "conditions": "Dess–Martin 試薬で酸化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.7",
+          "title": "Oxidation of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "propan-2-ol-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "propan-2-ol"
+      ],
+      "products": [
+        "acetone"
+      ],
+      "conditions": "Dess–Martin 試薬で酸化する",
+      "note": "第二級アルコールはケトンになる。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.7",
+          "title": "Oxidation of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "butan-1-ol-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "butan-1-ol"
+      ],
+      "products": [
+        "butanal"
+      ],
+      "conditions": "Dess–Martin 試薬で酸化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.7",
+          "title": "Oxidation of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "propanal-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "propanal"
+      ],
+      "products": [
+        "propionic-acid"
+      ],
+      "conditions": "塩基性過マンガン酸カリウムまたは熱い硝酸で酸化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "19.3",
+          "title": "Oxidation of Aldehydes and Ketones",
+          "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "benzyl-alcohol-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "benzyl-alcohol"
+      ],
+      "products": [
+        "benzaldehyde"
+      ],
+      "conditions": "Dess–Martin 試薬で酸化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.7",
+          "title": "Oxidation of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "benzaldehyde-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "benzaldehyde"
+      ],
+      "products": [
+        "benzoic-acid"
+      ],
+      "conditions": "塩基性過マンガン酸カリウムまたは熱い硝酸で酸化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "19.3",
+          "title": "Oxidation of Aldehydes and Ketones",
+          "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "ethanal-reduction",
+      "type": "reduction",
+      "substrates": [
+        "ethanal"
+      ],
+      "products": [
+        "ethanol"
+      ],
+      "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.4",
+          "title": "Alcohols from Carbonyl Compounds: Reduction",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-4-alcohols-from-carbonyl-compounds-reduction",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "acetone-reduction",
+      "type": "reduction",
+      "substrates": [
+        "acetone"
+      ],
+      "products": [
+        "propan-2-ol"
+      ],
+      "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.4",
+          "title": "Alcohols from Carbonyl Compounds: Reduction",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-4-alcohols-from-carbonyl-compounds-reduction",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "propanal-reduction",
+      "type": "reduction",
+      "substrates": [
+        "propanal"
+      ],
+      "products": [
+        "propan-1-ol"
+      ],
+      "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.4",
+          "title": "Alcohols from Carbonyl Compounds: Reduction",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-4-alcohols-from-carbonyl-compounds-reduction",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "butanal-reduction",
+      "type": "reduction",
+      "substrates": [
+        "butanal"
+      ],
+      "products": [
+        "butan-1-ol"
+      ],
+      "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.4",
+          "title": "Alcohols from Carbonyl Compounds: Reduction",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-4-alcohols-from-carbonyl-compounds-reduction",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "ethanol-bromination",
+      "type": "substitution",
+      "substrates": [
+        "ethanol"
+      ],
+      "products": [
+        "bromoethane"
+      ],
+      "conditions": "臭化水素と加熱する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "propan-2-ol-bromination",
+      "type": "substitution",
+      "substrates": [
+        "propan-2-ol"
+      ],
+      "products": [
+        "2-bromopropane"
+      ],
+      "conditions": "臭化水素と加熱する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "ethanol-sodium",
+      "type": "metal-reaction",
+      "substrates": [
+        "ethanol"
+      ],
+      "products": [
+        "sodium-ethoxide"
+      ],
+      "conditions": "金属ナトリウムを加える",
+      "note": "水素が発生する。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "methanol-sodium",
+      "type": "metal-reaction",
+      "substrates": [
+        "methanol"
+      ],
+      "products": [
+        "sodium-methoxide"
+      ],
+      "conditions": "金属ナトリウムを加える",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "acetic-acid-ethanol-esterification",
+      "type": "esterification",
+      "substrates": [
+        "acetic-acid",
+        "ethanol"
+      ],
+      "products": [
+        "ethyl-acetate"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "note": "水が取れてエステルができる。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "acetic-acid-methanol-esterification",
+      "type": "esterification",
+      "substrates": [
+        "acetic-acid",
+        "methanol"
+      ],
+      "products": [
+        "methyl-acetate"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "acetic-acid-butanol-esterification",
+      "type": "esterification",
+      "substrates": [
+        "acetic-acid",
+        "butan-1-ol"
+      ],
+      "products": [
+        "butyl-acetate"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "acetic-acid-isoamyl-esterification",
+      "type": "esterification",
+      "substrates": [
+        "acetic-acid",
+        "3-methylbutan-1-ol"
+      ],
+      "products": [
+        "isoamyl-acetate"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "note": "果実のような香りのするエステル。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "acetic-acid-glycerol-esterification",
+      "type": "esterification",
+      "substrates": [
+        "acetic-acid",
+        "glycerol"
+      ],
+      "products": [
+        "triacetin"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "formic-acid-methanol-esterification",
+      "type": "esterification",
+      "substrates": [
+        "formic-acid",
+        "methanol"
+      ],
+      "products": [
+        "methyl-formate"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "formic-acid-ethanol-esterification",
+      "type": "esterification",
+      "substrates": [
+        "formic-acid",
+        "ethanol"
+      ],
+      "products": [
+        "ethyl-formate"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "propionic-acid-methanol-esterification",
+      "type": "esterification",
+      "substrates": [
+        "propionic-acid",
+        "methanol"
+      ],
+      "products": [
+        "methyl-propionate"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "propionic-acid-ethanol-esterification",
+      "type": "esterification",
+      "substrates": [
+        "propionic-acid",
+        "ethanol"
+      ],
+      "products": [
+        "ethyl-propionate"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "butanoic-acid-ethanol-esterification",
+      "type": "esterification",
+      "substrates": [
+        "butanoic-acid",
+        "ethanol"
+      ],
+      "products": [
+        "ethyl-butyrate"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "oxalic-acid-methanol-esterification",
+      "type": "esterification",
+      "substrates": [
+        "oxalic-acid",
+        "methanol"
+      ],
+      "products": [
+        "dimethyl-oxalate"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "oxalic-acid-phenol-esterification",
+      "type": "esterification",
+      "substrates": [
+        "oxalic-acid",
+        "phenol"
+      ],
+      "products": [
+        "diphenyl-oxalate"
+      ],
+      "conditions": "酸触媒で加熱する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "acetic-acid-anhydride",
+      "type": "condensation",
+      "substrates": [
+        "acetic-acid"
+      ],
+      "products": [
+        "acetic-anhydride"
+      ],
+      "conditions": "脱水剤を用いて2分子から水を取る",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "salicylic-acid-methyl-esterification",
+      "type": "esterification",
+      "substrates": [
+        "salicylic-acid",
+        "methanol"
+      ],
+      "products": [
+        "methyl-salicylate"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "salicylic-acid-acetylation",
+      "type": "acetylation",
+      "substrates": [
+        "salicylic-acid",
+        "acetic-anhydride"
+      ],
+      "products": [
+        "aspirin"
+      ],
+      "conditions": "無水酢酸でアセチル化する",
+      "note": "−OH がアセチル化されたエステル。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "21.5",
+          "title": "Chemistry of Acid Anhydrides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-5-chemistry-of-acid-anhydrides",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "aspirin-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "aspirin"
+      ],
+      "products": [
+        "salicylic-acid",
+        "acetic-acid"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "21.6",
+          "title": "Chemistry of Esters",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "methyl-salicylate-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "methyl-salicylate"
+      ],
+      "products": [
+        "salicylic-acid",
+        "methanol"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "21.6",
+          "title": "Chemistry of Esters",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "ethyl-acetate-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "ethyl-acetate"
+      ],
+      "products": [
+        "acetic-acid",
+        "ethanol"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "21.6",
+          "title": "Chemistry of Esters",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "acetic-acid-neutralization",
+      "type": "neutralization",
+      "substrates": [
+        "acetic-acid"
+      ],
+      "reagents": [
+        "水酸化ナトリウム"
+      ],
+      "products": [
+        "sodium-acetate"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で中和する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "acetic-acid-sodium-carbonate",
+      "type": "neutralization",
+      "substrates": [
+        "acetic-acid"
+      ],
+      "products": [
+        "sodium-acetate"
+      ],
+      "conditions": "炭酸水素ナトリウムを加える",
+      "note": "二酸化炭素が発生する。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "sodium-acetate-decarboxylation",
+      "type": "decomposition",
+      "substrates": [
+        "sodium-acetate"
+      ],
+      "products": [
+        "methane"
+      ],
+      "conditions": "ソーダ石灰とともに加熱する",
+      "note": "カルボン酸の塩を加熱すると、炭素鎖が1つ短いアルカンが生じる。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "benzoic-acid-neutralization",
+      "type": "neutralization",
+      "substrates": [
+        "benzoic-acid"
+      ],
+      "reagents": [
+        "水酸化ナトリウム"
+      ],
+      "products": [
+        "sodium-benzoate"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で中和する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "glycerol-stearic-esterification",
+      "type": "esterification",
+      "substrates": [
+        "glycerol",
+        "stearic-acid"
+      ],
+      "products": [
+        "tristearin"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "glycerol-palmitic-esterification",
+      "type": "esterification",
+      "substrates": [
+        "glycerol",
+        "palmitic-acid"
+      ],
+      "products": [
+        "tripalmitin"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "glycerol-oleic-esterification",
+      "type": "esterification",
+      "substrates": [
+        "glycerol",
+        "oleic-acid"
+      ],
+      "products": [
+        "triolein"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "glycerol-linoleic-esterification",
+      "type": "esterification",
+      "substrates": [
+        "glycerol",
+        "linoleic-acid"
+      ],
+      "products": [
+        "trilinolein"
+      ],
+      "conditions": "強酸触媒を用いる（Fischer エステル化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "tristearin-saponification",
+      "type": "saponification",
+      "substrates": [
+        "tristearin"
+      ],
+      "reagents": [
+        "水酸化ナトリウム"
+      ],
+      "products": [
+        "sodium-stearate",
+        "glycerol"
+      ],
+      "conditions": "水酸化ナトリウム水溶液と加熱する（けん化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "27.2",
+          "title": "Soap",
+          "url": "https://openstax.org/books/organic-chemistry/pages/27-2-soap",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "tripalmitin-saponification",
+      "type": "saponification",
+      "substrates": [
+        "tripalmitin"
+      ],
+      "reagents": [
+        "水酸化ナトリウム"
+      ],
+      "products": [
+        "sodium-palmitate",
+        "glycerol"
+      ],
+      "conditions": "水酸化ナトリウム水溶液と加熱する（けん化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "27.2",
+          "title": "Soap",
+          "url": "https://openstax.org/books/organic-chemistry/pages/27-2-soap",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "triolein-saponification",
+      "type": "saponification",
+      "substrates": [
+        "triolein"
+      ],
+      "reagents": [
+        "水酸化ナトリウム"
+      ],
+      "products": [
+        "sodium-oleate",
+        "glycerol"
+      ],
+      "conditions": "水酸化ナトリウム水溶液と加熱する（けん化）",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "27.2",
+          "title": "Soap",
+          "url": "https://openstax.org/books/organic-chemistry/pages/27-2-soap",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "tristearin-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "tristearin"
+      ],
+      "products": [
+        "stearic-acid",
+        "glycerol"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "21.6",
+          "title": "Chemistry of Esters",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "triolein-hydrogenation",
+      "type": "hydrogenation",
+      "substrates": [
+        "triolein"
+      ],
+      "products": [
+        "tristearin"
+      ],
+      "conditions": "パラジウムなどの触媒で水素を付加させる",
+      "note": "液体の油脂が固体に近づく。部分的な水素化ではシス-トランス異性化も起こる。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "8.6",
+          "title": "Reduction of Alkenes: Hydrogenation",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-6-reduction-of-alkenes-hydrogenation",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "oleic-acid-elaidic",
+      "type": "isomerization",
+      "substrates": [
+        "oleic-acid"
+      ],
+      "products": [
+        "elaidic-acid"
+      ],
+      "conditions": "シス-トランスの異性化を起こす条件に置く",
+      "note": "シス体とトランス体で分子の形が変わる。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "maleic-acid-fumaric",
+      "type": "isomerization",
+      "substrates": [
+        "maleic-acid"
+      ],
+      "products": [
+        "fumaric-acid"
+      ],
+      "conditions": "加熱または酸触媒で異性化する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "maleic-acid-anhydride",
+      "type": "condensation",
+      "substrates": [
+        "maleic-acid"
+      ],
+      "products": [
+        "maleic-anhydride"
+      ],
+      "conditions": "加熱して分子内で水を取る",
+      "note": "シス体は分子内脱水しやすい。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "phthalic-acid-anhydride",
+      "type": "condensation",
+      "substrates": [
+        "phthalic-acid"
+      ],
+      "products": [
+        "phthalic-anhydride"
+      ],
+      "conditions": "加熱して分子内で水を取る",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "stearic-acid-neutralization",
+      "type": "neutralization",
+      "substrates": [
+        "stearic-acid"
+      ],
+      "reagents": [
+        "水酸化ナトリウム"
+      ],
+      "products": [
+        "sodium-stearate"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で中和する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "lauric-acid-neutralization",
+      "type": "neutralization",
+      "substrates": [
+        "lauric-acid"
+      ],
+      "reagents": [
+        "水酸化ナトリウム"
+      ],
+      "products": [
+        "sodium-laurate"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で中和する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "oleic-acid-neutralization",
+      "type": "neutralization",
+      "substrates": [
+        "oleic-acid"
+      ],
+      "reagents": [
+        "水酸化ナトリウム"
+      ],
+      "products": [
+        "sodium-oleate"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で中和する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "benzene-nitration",
+      "type": "nitration",
+      "substrates": [
+        "benzene"
+      ],
+      "products": [
+        "nitrobenzene"
+      ],
+      "conditions": "濃硝酸と濃硫酸の混合物でニトロ化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "16.2",
+          "title": "Other Aromatic Substitutions",
+          "url": "https://openstax.org/books/organic-chemistry/pages/16-2-other-aromatic-substitutions",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "benzene-sulfonation",
+      "type": "sulfonation",
+      "substrates": [
+        "benzene"
+      ],
+      "products": [
+        "benzenesulfonic-acid"
+      ],
+      "conditions": "発煙硫酸でスルホン化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "16.2",
+          "title": "Other Aromatic Substitutions",
+          "url": "https://openstax.org/books/organic-chemistry/pages/16-2-other-aromatic-substitutions",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "benzene-chlorination",
+      "type": "aromatic-substitution",
+      "substrates": [
+        "benzene"
+      ],
+      "products": [
+        "chlorobenzene"
+      ],
+      "conditions": "塩化鉄(III)触媒のもとで塩素と反応させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "16.2",
+          "title": "Other Aromatic Substitutions",
+          "url": "https://openstax.org/books/organic-chemistry/pages/16-2-other-aromatic-substitutions",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "nitrobenzene-reduction",
+      "type": "reduction",
+      "substrates": [
+        "nitrobenzene"
+      ],
+      "products": [
+        "aniline"
+      ],
+      "conditions": "スズや鉄などの還元剤で還元する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "16.2",
+          "title": "Other Aromatic Substitutions",
+          "url": "https://openstax.org/books/organic-chemistry/pages/16-2-other-aromatic-substitutions",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "aniline-hydrochloride",
+      "type": "neutralization",
+      "substrates": [
+        "aniline"
+      ],
+      "reagents": [
+        "塩酸"
+      ],
+      "products": [
+        "aniline-hydrochloride"
+      ],
+      "conditions": "塩酸を加える",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "phenol-bromination",
+      "type": "aromatic-substitution",
+      "substrates": [
+        "phenol"
+      ],
+      "products": [
+        "2,4,6-tribromophenol"
+      ],
+      "conditions": "臭素水を加える",
+      "note": "フェノールはベンゼンより置換が起こりやすく、複数の位置が置き換わる。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "phenol-nitration",
+      "type": "nitration",
+      "substrates": [
+        "phenol"
+      ],
+      "products": [
+        "picric-acid"
+      ],
+      "conditions": "濃硝酸と濃硫酸で加熱する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "toluene-nitration",
+      "type": "nitration",
+      "substrates": [
+        "toluene"
+      ],
+      "products": [
+        "o-nitrotoluene"
+      ],
+      "conditions": "濃硝酸と濃硫酸で加熱する",
+      "note": "置換の位置はメチル基の影響を受ける。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "toluene-trinitration",
+      "type": "nitration",
+      "substrates": [
+        "toluene"
+      ],
+      "products": [
+        "tnt"
+      ],
+      "conditions": "強い条件でニトロ化を繰り返す",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "phenol-phthalein",
+      "type": "condensation",
+      "substrates": [
+        "phenol",
+        "phthalic-anhydride"
+      ],
+      "products": [
+        "phenolphthalein"
+      ],
+      "conditions": "濃硫酸を加えて加熱する",
+      "note": "酸性では無色、塩基性では赤紫色になる。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "phenol-acetone-bisphenol",
+      "type": "condensation",
+      "substrates": [
+        "phenol",
+        "acetone"
+      ],
+      "products": [
+        "bisphenol-a"
+      ],
+      "conditions": "酸触媒で縮合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "aniline-diazotization",
+      "type": "diazotization",
+      "substrates": [
+        "aniline"
+      ],
+      "products": [
+        "benzenediazonium-chloride"
+      ],
+      "conditions": "亜硝酸（亜硝酸ナトリウムと酸）を作用させてジアゾニウム塩にする",
+      "note": "生じたジアゾニウム塩は不安定で、温度が上がると分解する。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "24.8",
+          "title": "Reactions of Arylamines",
+          "url": "https://openstax.org/books/organic-chemistry/pages/24-8-reactions-of-arylamines",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "diazonium-phenol-coupling",
+      "type": "coupling",
+      "substrates": [
+        "benzenediazonium-chloride",
+        "phenol"
+      ],
+      "products": [
+        "p-hydroxyazobenzene"
+      ],
+      "conditions": "フェノールとカップリングさせる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "24.8",
+          "title": "Reactions of Arylamines",
+          "url": "https://openstax.org/books/organic-chemistry/pages/24-8-reactions-of-arylamines",
+          "date": "2026-11-10"
+        }
+      ],
+      "note": "アゾ基を介して2つの環がつながる。"
+    },
+    {
+      "id": "aniline-sulfonation",
+      "type": "sulfonation",
+      "substrates": [
+        "aniline"
+      ],
+      "products": [
+        "sulfanilic-acid"
+      ],
+      "conditions": "濃硫酸と加熱する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "sulfanilic-acid-methyl-orange",
+      "type": "coupling",
+      "substrates": [
+        "sulfanilic-acid",
+        "n,n-dimethylaniline"
+      ],
+      "products": [
+        "methyl-orange"
+      ],
+      "conditions": "ジアゾ化したのちカップリングさせる",
+      "note": "アゾ色素の例。pH によって色が変わる。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "aniline-acetic-anhydride",
+      "type": "acetylation",
+      "substrates": [
+        "aniline",
+        "acetic-anhydride"
+      ],
+      "products": [
+        "acetanilide"
+      ],
+      "conditions": "無水酢酸でアセチル化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "24.8",
+          "title": "Reactions of Arylamines",
+          "url": "https://openstax.org/books/organic-chemistry/pages/24-8-reactions-of-arylamines",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "cumene-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "cumene"
+      ],
+      "products": [
+        "cumene-hydroperoxide"
+      ],
+      "conditions": "高温で空気（酸素）により酸化する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.9",
+          "title": "Phenols and Their Uses",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-9-phenols-and-their-uses",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "cumene-hydroperoxide-decomposition",
+      "type": "decomposition",
+      "substrates": [
+        "cumene-hydroperoxide"
+      ],
+      "products": [
+        "phenol",
+        "acetone"
+      ],
+      "conditions": "酸で分解する",
+      "note": "フェノールとアセトンを同時に得る。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.9",
+          "title": "Phenols and Their Uses",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-9-phenols-and-their-uses",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "phenol-acid-neutralization",
+      "type": "neutralization",
+      "substrates": [
+        "phenol"
+      ],
+      "reagents": [
+        "水酸化ナトリウム"
+      ],
+      "products": [
+        "sodium-phenoxide"
+      ],
+      "conditions": "水酸化ナトリウム水溶液に溶かす",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.2",
+          "title": "Properties of Alcohols and Phenols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-2-properties-of-alcohols-and-phenols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "sodium-phenoxide-carboxylation",
+      "type": "carboxylation",
+      "substrates": [
+        "sodium-phenoxide"
+      ],
+      "products": [
+        "sodium-salicylate"
+      ],
+      "conditions": "二酸化炭素を加えて加熱する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "sodium-salicylate-acidification",
+      "type": "neutralization",
+      "substrates": [
+        "sodium-salicylate"
+      ],
+      "products": [
+        "salicylic-acid"
+      ],
+      "conditions": "硫酸などの強酸を加える",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "sucrose-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "sucrose"
+      ],
+      "products": [
+        "glucose",
+        "fructose"
+      ],
+      "conditions": "酸または酵素（インベルターゼ）で加水分解する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "25.8",
+          "title": "Disaccharides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/25-8-disaccharides",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "maltose-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "maltose"
+      ],
+      "products": [
+        "glucose"
+      ],
+      "conditions": "酸または酵素で加水分解する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "lactose-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "lactose"
+      ],
+      "products": [
+        "glucose",
+        "galactose"
+      ],
+      "conditions": "酸または酵素で加水分解する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "cellobiose-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "cellobiose"
+      ],
+      "products": [
+        "glucose"
+      ],
+      "conditions": "酵素で加水分解する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "starch-hydrolysis-maltose",
+      "type": "hydrolysis",
+      "substrates": [
+        "starch"
+      ],
+      "products": [
+        "maltose"
+      ],
+      "conditions": "酵素で加水分解する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "25.8",
+          "title": "Disaccharides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/25-8-disaccharides",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "starch-hydrolysis-glucose",
+      "type": "hydrolysis",
+      "substrates": [
+        "starch"
+      ],
+      "products": [
+        "glucose"
+      ],
+      "conditions": "酵素（α-グリコシダーゼ）で加水分解する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "25.9",
+          "title": "Polysaccharides and Their Synthesis",
+          "url": "https://openstax.org/books/organic-chemistry/pages/25-9-polysaccharides-and-their-synthesis",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "dextrin-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "dextrin"
+      ],
+      "products": [
+        "glucose"
+      ],
+      "conditions": "酸または酵素で加水分解する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "cellulose-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "cellulose"
+      ],
+      "products": [
+        "glucose"
+      ],
+      "conditions": "酸またはセルラーゼで加水分解する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "glycogen-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "glycogen"
+      ],
+      "products": [
+        "glucose"
+      ],
+      "conditions": "酵素で加水分解する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "glucose-reduction",
+      "type": "reduction",
+      "substrates": [
+        "glucose"
+      ],
+      "products": [
+        "sorbitol"
+      ],
+      "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "25.6",
+          "title": "Reactions of Monosaccharides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/25-6-reactions-of-monosaccharides",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "glucose-fermentation",
+      "type": "fermentation",
+      "substrates": [
+        "glucose"
+      ],
+      "products": [
+        "ethanol"
+      ],
+      "conditions": "チマーゼのはたらきで発酵させる",
+      "productNote": "二酸化炭素も生じる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "cellulose-acetylation",
+      "type": "esterification",
+      "substrates": [
+        "cellulose",
+        "acetic-anhydride"
+      ],
+      "products": [
+        "cellulose-acetate"
+      ],
+      "conditions": "硫酸などの触媒でエステル化する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "cellulose-nitration",
+      "type": "esterification",
+      "substrates": [
+        "cellulose"
+      ],
+      "products": [
+        "cellulose-nitrate"
+      ],
+      "conditions": "硝酸と硫酸の混合物でエステル化する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "glycine-alanine-peptide",
+      "type": "peptide-bond",
+      "substrates": [
+        "glycine",
+        "alanine"
+      ],
+      "products": [
+        "glycylalanine"
+      ],
+      "conditions": "保護基と縮合剤（DCC/EDC）を用いて結合させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "26.4",
+          "title": "Peptides and Proteins",
+          "url": "https://openstax.org/books/organic-chemistry/pages/26-4-peptides-and-proteins",
+          "date": "2026-11-10"
+        },
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "26.7",
+          "title": "Peptide Synthesis",
+          "url": "https://openstax.org/books/organic-chemistry/pages/26-7-peptide-synthesis",
+          "date": "2026-11-10"
+        }
+      ],
+      "note": "ペプチド結合（アミド結合）の形成。"
+    },
+    {
+      "id": "glycine-glycine-peptide",
+      "type": "peptide-bond",
+      "substrates": [
+        "glycine"
+      ],
+      "products": [
+        "glycylglycine"
+      ],
+      "conditions": "保護基と縮合剤（DCC/EDC）を用いて結合させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "26.4",
+          "title": "Peptides and Proteins",
+          "url": "https://openstax.org/books/organic-chemistry/pages/26-4-peptides-and-proteins",
+          "date": "2026-11-10"
+        },
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "26.7",
+          "title": "Peptide Synthesis",
+          "url": "https://openstax.org/books/organic-chemistry/pages/26-7-peptide-synthesis",
+          "date": "2026-11-10"
+        }
+      ],
+      "note": "ペプチド結合（アミド結合）の形成。"
+    },
+    {
+      "id": "alanine-glycine-peptide",
+      "type": "peptide-bond",
+      "substrates": [
+        "alanine",
+        "glycine"
+      ],
+      "products": [
+        "alanylglycine"
+      ],
+      "conditions": "保護基と縮合剤（DCC/EDC）を用いて結合させる",
+      "note": "ペプチド結合（アミド結合）の形成。結合の向きで別のペプチドになる。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "26.4",
+          "title": "Peptides and Proteins",
+          "url": "https://openstax.org/books/organic-chemistry/pages/26-4-peptides-and-proteins",
+          "date": "2026-11-10"
+        },
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "26.7",
+          "title": "Peptide Synthesis",
+          "url": "https://openstax.org/books/organic-chemistry/pages/26-7-peptide-synthesis",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "cysteine-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "cysteine"
+      ],
+      "products": [
+        "cystine"
+      ],
+      "conditions": "穏やかに酸化する",
+      "note": "ジスルフィド結合（−S–S−）ができる。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "26.4",
+          "title": "Peptides and Proteins",
+          "url": "https://openstax.org/books/organic-chemistry/pages/26-4-peptides-and-proteins",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "protein-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "protein"
+      ],
+      "products": [],
+      "productNote": "アミノ酸の混合物（種類と割合はタンパク質によって異なる）",
+      "conditions": "酸・塩基または酵素で加水分解する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "26.5",
+          "title": "Amino Acid Analysis of Peptides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/26-5-amino-acid-analysis-of-peptides",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "glycylalanine-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "glycylalanine"
+      ],
+      "products": [
+        "glycine",
+        "alanine"
+      ],
+      "conditions": "酸・塩基または酵素で加水分解する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "26.5",
+          "title": "Amino Acid Analysis of Peptides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/26-5-amino-acid-analysis-of-peptides",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "glycylglycine-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "glycylglycine"
+      ],
+      "products": [
+        "glycine"
+      ],
+      "conditions": "酸・塩基または酵素で加水分解する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "26.5",
+          "title": "Amino Acid Analysis of Peptides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/26-5-amino-acid-analysis-of-peptides",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "alanylglycine-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "alanylglycine"
+      ],
+      "products": [
+        "alanine",
+        "glycine"
+      ],
+      "conditions": "酸・塩基または酵素で加水分解する",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "26.5",
+          "title": "Amino Acid Analysis of Peptides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/26-5-amino-acid-analysis-of-peptides",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "aspartame-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "aspartame"
+      ],
+      "products": [
+        "aspartic-acid",
+        "phenylalanine"
+      ],
+      "conditions": "酸・塩基または酵素で加水分解する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "ethene-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "ethene"
+      ],
+      "products": [
+        "polyethylene"
+      ],
+      "conditions": "ラジカル開始剤（過酸化ベンゾイルなど）を用いて重合させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "8.10",
+          "title": "Radical Additions to Alkenes: Chain-Growth Polymers",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "propene-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "propene"
+      ],
+      "products": [
+        "polypropylene"
+      ],
+      "conditions": "開始剤を用いて重合させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "8.10",
+          "title": "Radical Additions to Alkenes: Chain-Growth Polymers",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "styrene-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "styrene"
+      ],
+      "products": [
+        "polystyrene"
+      ],
+      "conditions": "ラジカル開始剤、またはアニオン重合（ブチルリチウム）で重合させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "8.10",
+          "title": "Radical Additions to Alkenes: Chain-Growth Polymers",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
+          "date": "2026-11-10"
+        },
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "31.1",
+          "title": "Chain-Growth Polymers",
+          "url": "https://openstax.org/books/organic-chemistry/pages/31-1-chain-growth-polymers",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "vinyl-chloride-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "vinyl-chloride"
+      ],
+      "products": [
+        "pvc"
+      ],
+      "conditions": "開始剤を用いて重合させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "8.10",
+          "title": "Radical Additions to Alkenes: Chain-Growth Polymers",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "vinylidene-chloride-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "vinylidene-chloride"
+      ],
+      "products": [
+        "pvdc"
+      ],
+      "conditions": "触媒のもとで重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "tetrafluoroethylene-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "tetrafluoroethylene"
+      ],
+      "products": [
+        "ptfe"
+      ],
+      "conditions": "触媒のもとで重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "vinyl-acetate-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "vinyl-acetate"
+      ],
+      "products": [
+        "pvac"
+      ],
+      "conditions": "触媒のもとで重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "mma-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "methyl-methacrylate"
+      ],
+      "products": [
+        "pmma"
+      ],
+      "conditions": "触媒のもとで重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "acrylonitrile-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "acrylonitrile"
+      ],
+      "products": [
+        "pan"
+      ],
+      "conditions": "触媒のもとで重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "butadiene-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "butadiene"
+      ],
+      "products": [
+        "br"
+      ],
+      "conditions": "触媒のもとで重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "isoprene-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "isoprene"
+      ],
+      "products": [
+        "natural-rubber"
+      ],
+      "conditions": "植物体内で生合成される",
+      "note": "天然ゴムは isoprene が繰り返しつながった高分子。",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "chloroprene-polymerization",
+      "type": "addition-polymerization",
+      "substrates": [
+        "chloroprene"
+      ],
+      "products": [
+        "chloroprene-rubber"
+      ],
+      "conditions": "触媒のもとで重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "styrene-butadiene-copolymerization",
+      "type": "copolymerization",
+      "substrates": [
+        "styrene",
+        "butadiene"
+      ],
+      "products": [
+        "sbr"
+      ],
+      "conditions": "共重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "nbr-copolymerization",
+      "type": "copolymerization",
+      "substrates": [
+        "acrylonitrile",
+        "butadiene"
+      ],
+      "products": [
+        "nbr"
+      ],
+      "conditions": "共重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "abs-copolymerization",
+      "type": "copolymerization",
+      "substrates": [
+        "acrylonitrile",
+        "butadiene",
+        "styrene"
+      ],
+      "products": [
+        "abs"
+      ],
+      "conditions": "共重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "iir-copolymerization",
+      "type": "copolymerization",
+      "substrates": [
+        "isobutene",
+        "isoprene"
+      ],
+      "products": [
+        "iir"
+      ],
+      "conditions": "共重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "pvac-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "pvac"
+      ],
+      "products": [
+        "pva"
+      ],
+      "conditions": "アルカリでけん化する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "pva-formalization",
+      "type": "condensation",
+      "substrates": [
+        "pva"
+      ],
+      "products": [
+        "vinylon"
+      ],
+      "conditions": "ホルムアルデヒドと反応させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "caprolactam-ring-opening",
+      "type": "ring-opening-polymerization",
+      "substrates": [
+        "caprolactam"
+      ],
+      "products": [
+        "nylon6"
+      ],
+      "conditions": "少量の水を加えて加熱し、開環重合させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "31.4",
+          "title": "Step-Growth Polymers",
+          "url": "https://openstax.org/books/organic-chemistry/pages/31-4-step-growth-polymers",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "nylon66-condensation",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "adipic-acid",
+        "hexamethylenediamine"
+      ],
+      "products": [
+        "nylon66"
+      ],
+      "conditions": "脱水縮合させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "31.4",
+          "title": "Step-Growth Polymers",
+          "url": "https://openstax.org/books/organic-chemistry/pages/31-4-step-growth-polymers",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "pet-condensation",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "terephthalic-acid",
+        "ethylene-glycol"
+      ],
+      "products": [
+        "pet"
+      ],
+      "conditions": "脱水縮合させる",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "31.4",
+          "title": "Step-Growth Polymers",
+          "url": "https://openstax.org/books/organic-chemistry/pages/31-4-step-growth-polymers",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "pla-polymerization",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "lactic-acid"
+      ],
+      "products": [
+        "pla"
+      ],
+      "conditions": "脱水縮合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "nylon6-from-aminoacid",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "6-aminohexanoic-acid"
+      ],
+      "products": [
+        "nylon6"
+      ],
+      "conditions": "脱水縮合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "epoxy-resin-condensation",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "bisphenol-a",
+        "epichlorohydrin"
+      ],
+      "products": [
+        "epoxy-resin"
+      ],
+      "conditions": "塩基の存在下で縮合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "polycarbonate-condensation",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "phosgene",
+        "bisphenol-a"
+      ],
+      "products": [
+        "polycarbonate"
+      ],
+      "conditions": "縮合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "urea-resin-condensation",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "urea",
+        "formaldehyde"
+      ],
+      "products": [
+        "urea-resin"
+      ],
+      "conditions": "縮合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "melamine-resin-condensation",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "melamine",
+        "formaldehyde"
+      ],
+      "products": [
+        "melamine-resin"
+      ],
+      "conditions": "縮合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "phenol-resin-condensation",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "phenol",
+        "formaldehyde"
+      ],
+      "products": [
+        "phenol-resin"
+      ],
+      "conditions": "酸または塩基触媒で縮合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "unsaturated-polyester-condensation",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "ethylene-glycol",
+        "maleic-anhydride"
+      ],
+      "products": [
+        "unsaturated-polyester"
+      ],
+      "conditions": "脱水縮合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "sodium-polyacrylate-polymerization",
+      "type": "polymerization",
+      "substrates": [
+        "acrylic-acid"
+      ],
+      "products": [
+        "sodium-polyacrylate"
+      ],
+      "conditions": "重合させたのち中和する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "aramid-condensation",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "terephthaloyl-chloride",
+        "p-phenylenediamine"
+      ],
+      "products": [
+        "aramid"
+      ],
+      "conditions": "縮合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "silicone-condensation",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "dimethyldichlorosilane"
+      ],
+      "products": [
+        "silicone"
+      ],
+      "conditions": "加水分解を伴って縮合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "polyaniline-oxidation",
+      "type": "polymerization",
+      "substrates": [
+        "aniline"
+      ],
+      "products": [
+        "polyaniline"
+      ],
+      "conditions": "酸化剤で重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "polyacetylene-polymerization",
+      "type": "polymerization",
+      "substrates": [
+        "ethyne"
+      ],
+      "products": [
+        "polyacetylene"
+      ],
+      "conditions": "触媒のもとで重合させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "vinyl-acetate-from-ethene",
+      "type": "addition",
+      "substrates": [
+        "ethene",
+        "acetic-acid"
+      ],
+      "products": [
+        "vinyl-acetate"
+      ],
+      "conditions": "触媒のもとで付加させる",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "ethylbenzene-dehydrogenation",
+      "type": "elimination",
+      "substrates": [
+        "ethylbenzene"
+      ],
+      "products": [
+        "styrene"
+      ],
+      "conditions": "触媒とともに加熱して脱水素する",
+      "state": "held",
+      "verification": [],
+      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+    },
+    {
+      "id": "isobutene-hydrogen-chloride",
+      "type": "addition",
+      "substrates": [
+        "isobutene"
+      ],
+      "products": [
+        "2-chloro-2-methylpropane"
+      ],
+      "conditions": "塩化水素を付加させる",
+      "note": "マルコフニコフ則に従い、置換の多い炭素にClがつく。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "7.7",
+          "title": "Electrophilic Addition Reactions of Alkenes",
+          "url": "https://openstax.org/books/organic-chemistry/pages/7-7-electrophilic-addition-reactions-of-alkenes",
+          "date": "2026-11-10"
+        },
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "7.8",
+          "title": "Orientation of Electrophilic Additions: Markovnikov's Rule",
+          "url": "https://openstax.org/books/organic-chemistry/pages/7-8-orientation-of-electrophilic-additions-markovnikovs-rule",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "propyne-hydration",
+      "type": "hydration",
+      "substrates": [
+        "propyne"
+      ],
+      "products": [
+        "acetone"
+      ],
+      "conditions": "硫酸水銀(II)触媒と硫酸酸性水で水和させる",
+      "note": "末端アルキンはメチルケトンになる。エノールを経てケト-エノール互変異性する。アセチレンは個別例を確認していないため収録しない。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "9.4",
+          "title": "Hydration of Alkynes",
+          "url": "https://openstax.org/books/organic-chemistry/pages/9-4-hydration-of-alkynes",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "2-methylpropan-2-ol-hydrogen-chloride",
+      "type": "substitution",
+      "substrates": [
+        "2-methylpropan-2-ol"
+      ],
+      "products": [
+        "2-chloro-2-methylpropane"
+      ],
+      "conditions": "塩酸と0℃で反応させる",
+      "note": "第三級アルコールはSN1でハロゲン化される。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "2-methylpropan-2-ol-dehydration",
+      "type": "elimination",
+      "substrates": [
+        "2-methylpropan-2-ol"
+      ],
+      "products": [
+        "isobutene"
+      ],
+      "conditions": "温めた硫酸水溶液で脱水させる",
+      "note": "第三級アルコールは酸触媒で脱水されやすい。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.6",
+          "title": "Reactions of Alcohols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "p-xylene-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "p-xylene"
+      ],
+      "products": [
+        "terephthalic-acid"
+      ],
+      "conditions": "空気とコバルト(III)触媒で酸化する",
+      "note": "ベンジル位のC–Hが必要。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "16.8",
+          "title": "Oxidation of Aromatic Compounds",
+          "url": "https://openstax.org/books/organic-chemistry/pages/16-8-oxidation-of-aromatic-compounds",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "chlorobenzene-dow-phenol",
+      "type": "substitution",
+      "substrates": [
+        "chlorobenzene"
+      ],
+      "products": [
+        "sodium-phenoxide"
+      ],
+      "conditions": "水酸化ナトリウムと高温・高圧で反応させる",
+      "note": "ダウ法。生じたフェノキシドを酸で処理するとフェノールになる。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.9",
+          "title": "Phenols and Their Uses",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-9-phenols-and-their-uses",
+          "date": "2026-11-10"
+        },
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.2",
+          "title": "Properties of Alcohols and Phenols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-2-properties-of-alcohols-and-phenols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "sodium-phenoxide-acidification",
+      "type": "neutralization",
+      "substrates": [
+        "sodium-phenoxide"
+      ],
+      "products": [
+        "phenol"
+      ],
+      "conditions": "強酸を加える",
+      "note": "",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.2",
+          "title": "Properties of Alcohols and Phenols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-2-properties-of-alcohols-and-phenols",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "ethyl-propionate-saponification",
+      "type": "saponification",
+      "substrates": [
+        "ethyl-propionate"
+      ],
+      "products": [
+        "propionic-acid",
+        "ethanol"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
+      "note": "塩基で加水分解するとカルボン酸塩とアルコールになり、酸を加えるとカルボン酸が遊離する。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "21.6",
+          "title": "Chemistry of Esters",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+          "date": "2026-11-10"
+        }
+      ]
+    },
+    {
+      "id": "fructose-base-isomerization",
+      "type": "isomerization",
+      "substrates": [
+        "fructose"
+      ],
+      "products": [
+        "glucose",
+        "mannose"
+      ],
+      "conditions": "塩基性水溶液で異性化させる",
+      "note": "ケト-エノール互変異性を経てアルドースの混合物になる。",
+      "state": "confirmed",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "25.6",
+          "title": "Reactions of Monosaccharides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/25-6-reactions-of-monosaccharides",
+          "date": "2026-11-10"
+        }
+      ]
+    }
+  ],
+  "verifiedAt": "2026-11-10",
+  "source": {
+    "book": "OpenStax Organic Chemistry (McMurry)",
+    "note": "各節の本文で確認した反応だけを confirmed とし、節番号・確認日を verification に記録する。URL は内部記録用で、公開データには含めない。",
+    "sections": {
+      "7.7": {
+        "title": "Electrophilic Addition Reactions of Alkenes",
+        "url": "https://openstax.org/books/organic-chemistry/pages/7-7-electrophilic-addition-reactions-of-alkenes"
+      },
+      "8.2": {
+        "title": "Halogenation of Alkenes: Addition of X2",
+        "url": "https://openstax.org/books/organic-chemistry/pages/8-2-halogenation-of-alkenes-addition-of-x2"
+      },
+      "8.6": {
+        "title": "Reduction of Alkenes: Hydrogenation",
+        "url": "https://openstax.org/books/organic-chemistry/pages/8-6-reduction-of-alkenes-hydrogenation"
+      },
+      "8.10": {
+        "title": "Radical Additions to Alkenes: Chain-Growth Polymers",
+        "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers"
+      },
+      "9.4": {
+        "title": "Hydration of Alkynes",
+        "url": "https://openstax.org/books/organic-chemistry/pages/9-4-hydration-of-alkynes"
+      },
+      "10.2": {
+        "title": "Preparing Alkyl Halides from Alkanes: Radical Halogenation",
+        "url": "https://openstax.org/books/organic-chemistry/pages/10-2-preparing-alkyl-halides-from-alkanes-radical-halogenation"
+      },
+      "16.2": {
+        "title": "Other Aromatic Substitutions",
+        "url": "https://openstax.org/books/organic-chemistry/pages/16-2-other-aromatic-substitutions"
+      },
+      "16.8": {
+        "title": "Oxidation of Aromatic Compounds",
+        "url": "https://openstax.org/books/organic-chemistry/pages/16-8-oxidation-of-aromatic-compounds"
+      },
+      "17.2": {
+        "title": "Properties of Alcohols and Phenols",
+        "url": "https://openstax.org/books/organic-chemistry/pages/17-2-properties-of-alcohols-and-phenols"
+      },
+      "17.4": {
+        "title": "Alcohols from Carbonyl Compounds: Reduction",
+        "url": "https://openstax.org/books/organic-chemistry/pages/17-4-alcohols-from-carbonyl-compounds-reduction"
+      },
+      "17.6": {
+        "title": "Reactions of Alcohols",
+        "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols"
+      },
+      "17.7": {
+        "title": "Oxidation of Alcohols",
+        "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols"
+      },
+      "17.9": {
+        "title": "Phenols and Their Uses",
+        "url": "https://openstax.org/books/organic-chemistry/pages/17-9-phenols-and-their-uses"
+      },
+      "18.2": {
+        "title": "Preparing Ethers",
+        "url": "https://openstax.org/books/organic-chemistry/pages/18-2-preparing-ethers"
+      },
+      "19.3": {
+        "title": "Oxidation of Aldehydes and Ketones",
+        "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones"
+      },
+      "21.5": {
+        "title": "Chemistry of Acid Anhydrides",
+        "url": "https://openstax.org/books/organic-chemistry/pages/21-5-chemistry-of-acid-anhydrides"
+      },
+      "21.6": {
+        "title": "Chemistry of Esters",
+        "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters"
+      },
+      "24.8": {
+        "title": "Reactions of Arylamines",
+        "url": "https://openstax.org/books/organic-chemistry/pages/24-8-reactions-of-arylamines"
+      },
+      "25.6": {
+        "title": "Reactions of Monosaccharides",
+        "url": "https://openstax.org/books/organic-chemistry/pages/25-6-reactions-of-monosaccharides"
+      },
+      "25.8": {
+        "title": "Disaccharides",
+        "url": "https://openstax.org/books/organic-chemistry/pages/25-8-disaccharides"
+      },
+      "25.9": {
+        "title": "Polysaccharides and Their Synthesis",
+        "url": "https://openstax.org/books/organic-chemistry/pages/25-9-polysaccharides-and-their-synthesis"
+      },
+      "26.4": {
+        "title": "Peptides and Proteins",
+        "url": "https://openstax.org/books/organic-chemistry/pages/26-4-peptides-and-proteins"
+      },
+      "26.5": {
+        "title": "Amino Acid Analysis of Peptides",
+        "url": "https://openstax.org/books/organic-chemistry/pages/26-5-amino-acid-analysis-of-peptides"
+      },
+      "26.7": {
+        "title": "Peptide Synthesis",
+        "url": "https://openstax.org/books/organic-chemistry/pages/26-7-peptide-synthesis"
+      },
+      "27.2": {
+        "title": "Soap",
+        "url": "https://openstax.org/books/organic-chemistry/pages/27-2-soap"
+      },
+      "31.1": {
+        "title": "Chain-Growth Polymers",
+        "url": "https://openstax.org/books/organic-chemistry/pages/31-1-chain-growth-polymers"
+      },
+      "31.4": {
+        "title": "Step-Growth Polymers",
+        "url": "https://openstax.org/books/organic-chemistry/pages/31-4-step-growth-polymers"
+      },
+      "7.8": {
+        "title": "Orientation of Electrophilic Additions: Markovnikov's Rule",
+        "url": "https://openstax.org/books/organic-chemistry/pages/7-8-orientation-of-electrophilic-additions-markovnikovs-rule"
+      }
+    }
+  }
+}

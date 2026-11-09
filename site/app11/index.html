@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>有機反応マップ（試験版）</title>
+<meta name="description" content="高校有機化学の物質と反応を1枚の地図でたどる学習ツール（試験版）。物質名で検索し、反応の共通説明と個別情報を同じページで読めます。">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script src="../themes/theme.js"></script>
+<link rel="stylesheet" href="../themes/pop.css">
+<link rel="stylesheet" href="../themes/forest.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=M+PLUS+1+Code:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body class="rp-app">
+<a class="rp-skip" href="#rp-list">物質一覧へスキップ</a>
+
+<header class="rp-header">
+  <div class="rp-header__in">
+    <div class="rp-brand">
+      <div class="rp-brandmark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round">
+          <circle cx="13" cy="17" r="5"/>
+          <circle cx="32" cy="32" r="5"/>
+          <circle cx="51" cy="17" r="5"/>
+          <circle cx="13" cy="47" r="5"/>
+          <circle cx="51" cy="47" r="5"/>
+          <path d="M17 20 L28 29 M36 29 L47 20 M17 44 L28 35 M36 35 L47 44" opacity=".9"/>
+        </svg>
+      </div>
+      <div>
+        <h1>有機反応マップ <span class="rp-pill">試験版</span></h1>
+        <p>高校有機化学の物質と反応を、1枚の地図でたどる。</p>
+      </div>
+    </div>
+    <div class="rp-header__links">
+      <a class="rp-header__link" href="../app10/">有機化学ビルダー</a>
+      <a class="rp-header__link" href="../app10/ledger.html">収録台帳</a>
+      <a class="rp-header__link" href="../credits.html">クレジット</a>
+    </div>
+  </div>
+</header>
+
+<main class="rp-wrap">
+  <div class="rp-notice" id="rp-data-notice">
+    <p><strong>試験版です。</strong><span id="rp-data-summary">収録データを確認中…</span></p>
+    <p class="rp-notice__sub" id="rp-data-note"></p>
+  </div>
+
+  <section class="rp-map-panel" aria-label="反応経路マップ">
+    <div class="rp-toolbar">
+      <div class="rp-toolbar__row">
+        <div class="rp-zoom" role="group" aria-label="地図の拡大と縮小">
+          <button type="button" class="rp-btn" id="rp-zoom-out" aria-label="縮小する">−</button>
+          <button type="button" class="rp-btn" id="rp-zoom-in" aria-label="拡大する">＋</button>
+          <button type="button" class="rp-btn rp-btn--wide" id="rp-reset">全体表示</button>
+        </div>
+        <div class="rp-search">
+          <label class="rp-search__label" for="rp-search">物質名・示性式で検索</label>
+          <input class="rp-search__input" id="rp-search" type="search" autocomplete="off" spellcheck="false" placeholder="例: エタノール / C2H6O">
+        </div>
+        <p class="rp-position" id="rp-position" role="status" aria-live="polite">現在位置: 全体表示</p>
+      </div>
+      <div class="rp-chips" id="rp-chips" role="group" aria-label="分野へ移動"></div>
+    </div>
+
+    <div class="rp-map" id="rp-map" data-level="0">
+      <svg class="rp-svg" id="rp-svg" role="group" aria-label="有機反応経路マップ。Tab で物質や反応に移動し、Enter で詳細を開きます。">
+        <g class="rp-viewport" id="rp-viewport"></g>
+      </svg>
+      <div class="rp-overlay" id="rp-overlay" aria-hidden="true"></div>
+      <p class="rp-hint" id="rp-hint">ドラッグで移動、ピンチまたは Ctrl＋ホイールで拡大。キー: 矢印で移動、＋ / − で拡大縮小、0 で全体表示。</p>
+    </div>
+  </section>
+
+  <section class="rp-list" id="rp-list" aria-labelledby="rp-list-title" tabindex="-1">
+    <div class="rp-list__head">
+      <h2 id="rp-list-title">物質と反応の一覧</h2>
+      <p class="rp-list__status" id="rp-list-status" role="status" aria-live="polite"></p>
+    </div>
+    <div id="rp-list-results" class="rp-list__results" hidden></div>
+    <div id="rp-list-all" class="rp-list__all"></div>
+  </section>
+
+  <section class="rp-info" aria-label="状態区分と注意">
+    <div class="rp-info__block">
+      <h2>状態の区別</h2>
+      <dl class="rp-states" id="rp-states"></dl>
+      <p>判断できないものは「未確認」に置き、「不可能」「生成しない」とは表示しません。物質だけを収録した孤立ノードも、未確認として表示します。</p>
+    </div>
+    <div class="rp-info__block">
+      <h2>データと検証</h2>
+      <p>物質名・示性式・分類・ID とビルダーの focus 経路は、有機化学ビルダーの公開データからオフラインで抽出しました。地図が実行時にビルダーの実装を読み込むことはありません。</p>
+      <p>反応は独自データとして持ち、独立した資料の本文で確認できたものだけを「確認済」として表示します。確認できなかった反応は公開データに含めません。</p>
+      <p id="rp-scope-note"></p>
+      <p id="rp-data-note-long"></p>
+      <p>学習に必要な触媒・温度などの条件は記載しますが、試薬量・濃度・具体的な操作手順・装置の使い方は扱いません。</p>
+    </div>
+    <div class="rp-info__block">
+      <h2>図の読み方</h2>
+      <ul class="rp-legend" aria-label="地図の凡例">
+        <li><span class="rp-legend__key rp-legend__key--node"></span>物質（四角）</li>
+        <li><span class="rp-legend__key rp-legend__key--hub"></span>主要物質</li>
+        <li><span class="rp-legend__key rp-legend__key--same"></span>同じ分野の反応</li>
+        <li><span class="rp-legend__key rp-legend__key--cross"></span>分野をまたぐ反応</li>
+        <li><span class="rp-legend__key rp-legend__key--pending"></span>確認済みの経路がない物質（破線の枠）</li>
+      </ul>
+      <p>四角は物質、小さな丸は反応です。反応の丸から出る線をたどると、どの物質からどの物質へ進むかが分かります。分野をまたぐ反応は破線の弧で描きます。</p>
+      <p>模式図は原子団・結合の変化を示す図で、電子の動きを示す機構図とは区別しています。この地図に機構図は収録していません。</p>
+    </div>
+  </section>
+
+  <footer class="rp-footer">
+    <p><a href="../app10/">有機化学ビルダー</a> ・ <a href="../app10/ledger.html">収録台帳</a> ・ <a href="../credits.html">クレジット</a></p>
+    <p id="rp-data-status">収録データを確認中…</p>
+    <p>このアプリは物質と反応のつながりを学ぶための教材であり、実際の合成・実験の手順を示すものではありません。危険性の判断には最新の安全データシートや専門家の助言を確認してください。</p>
+  </footer>
+</main>
+
+<div class="rp-card" id="rp-card" role="dialog" aria-modal="false" aria-labelledby="rp-card-title" hidden>
+  <div class="rp-card__bar">
+    <p class="rp-card__eyebrow" id="rp-card-eyebrow"></p>
+    <button type="button" class="rp-card__close" id="rp-card-close">閉じる</button>
+  </div>
+  <div class="rp-card__body" id="rp-card-body">
+    <div id="rp-card-detail"></div>
+  </div>
+</div>
+
+<noscript>
+  <p style="padding:20px;text-align:center">このアプリはJavaScriptを有効にすると利用できます。</p>
+</noscript>
+
+<script src="./data.js"></script>
+<script src="./map-core.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

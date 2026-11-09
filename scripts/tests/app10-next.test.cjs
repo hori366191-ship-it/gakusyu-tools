@@ -50,6 +50,7 @@ function readNext(name) {
 function normalizeToProduction(html) {
   return html
     .split('../../site/themes/').join('../themes/')
+    .split('../../site/app11/').join('../app11/')
     .split('../../site/credits.html').join('../credits.html');
 }
 

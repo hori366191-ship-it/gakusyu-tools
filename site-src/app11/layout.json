@@ -1,0 +1,1757 @@
+{
+  "version": 1,
+  "cellW": 152,
+  "cellH": 54,
+  "regions": {
+    "alcohol-ether": {
+      "cols": 8,
+      "next": 27
+    },
+    "amino": {
+      "cols": 10,
+      "next": 66
+    },
+    "aromatic": {
+      "cols": 6,
+      "next": 12
+    },
+    "carbonyl": {
+      "cols": 9,
+      "next": 48
+    },
+    "ester-lipid": {
+      "cols": 8,
+      "next": 36
+    },
+    "hydrocarbon": {
+      "cols": 10,
+      "next": 71
+    },
+    "nitrogen": {
+      "cols": 7,
+      "next": 25
+    },
+    "phenol-aromatic": {
+      "cols": 9,
+      "next": 54
+    },
+    "polymer": {
+      "cols": 10,
+      "next": 65
+    },
+    "sugar": {
+      "cols": 6,
+      "next": 23
+    }
+  },
+  "positions": {
+    "1,1,2,2-tetrabromoethane": {
+      "r": "hydrocarbon",
+      "i": 0
+    },
+    "1,2-dibromoethane": {
+      "r": "hydrocarbon",
+      "i": 1
+    },
+    "1,2-dibromoethene": {
+      "r": "hydrocarbon",
+      "i": 37
+    },
+    "1,3-dibromopropane": {
+      "r": "hydrocarbon",
+      "i": 2
+    },
+    "1-bromopropane": {
+      "r": "hydrocarbon",
+      "i": 3
+    },
+    "1-chloro-2-methylpropane": {
+      "r": "hydrocarbon",
+      "i": 4
+    },
+    "1-chlorobutane": {
+      "r": "hydrocarbon",
+      "i": 5
+    },
+    "1-chloropropane": {
+      "r": "hydrocarbon",
+      "i": 6
+    },
+    "1-chloropropene": {
+      "r": "hydrocarbon",
+      "i": 38
+    },
+    "1-methoxypropane": {
+      "r": "alcohol-ether",
+      "i": 22
+    },
+    "1-naphthol": {
+      "r": "phenol-aromatic",
+      "i": 0
+    },
+    "2,2-dimethylbutane": {
+      "r": "hydrocarbon",
+      "i": 7
+    },
+    "2,2-dimethylpropan-1-ol": {
+      "r": "alcohol-ether",
+      "i": 0
+    },
+    "2,2-dimethylpropanal": {
+      "r": "carbonyl",
+      "i": 0
+    },
+    "2,2-dimethylpropanoic-acid": {
+      "r": "carbonyl",
+      "i": 12
+    },
+    "2,3-dimethylbutane": {
+      "r": "hydrocarbon",
+      "i": 8
+    },
+    "2,4,6-tribromophenol": {
+      "r": "phenol-aromatic",
+      "i": 1
+    },
+    "2-bromopropane": {
+      "r": "hydrocarbon",
+      "i": 9
+    },
+    "2-chloro-2-methylpropane": {
+      "r": "hydrocarbon",
+      "i": 10
+    },
+    "2-chlorobutane": {
+      "r": "hydrocarbon",
+      "i": 11
+    },
+    "2-chloropropane": {
+      "r": "hydrocarbon",
+      "i": 12
+    },
+    "2-chloropropene": {
+      "r": "hydrocarbon",
+      "i": 39
+    },
+    "2-methoxypropane": {
+      "r": "alcohol-ether",
+      "i": 23
+    },
+    "2-methylbutan-1-ol": {
+      "r": "alcohol-ether",
+      "i": 1
+    },
+    "2-methylbutan-2-ol": {
+      "r": "alcohol-ether",
+      "i": 2
+    },
+    "2-methylbutanal": {
+      "r": "carbonyl",
+      "i": 1
+    },
+    "2-methylbutanoic-acid": {
+      "r": "carbonyl",
+      "i": 13
+    },
+    "2-methylpentane": {
+      "r": "hydrocarbon",
+      "i": 13
+    },
+    "2-methylpropan-1-amine": {
+      "r": "nitrogen",
+      "i": 1
+    },
+    "2-methylpropan-1-ol": {
+      "r": "alcohol-ether",
+      "i": 3
+    },
+    "2-methylpropan-2-amine": {
+      "r": "nitrogen",
+      "i": 2
+    },
+    "2-methylpropan-2-ol": {
+      "r": "alcohol-ether",
+      "i": 4
+    },
+    "2-methylpropanal": {
+      "r": "carbonyl",
+      "i": 2
+    },
+    "2-methylpropanoic-acid": {
+      "r": "carbonyl",
+      "i": 14
+    },
+    "2-naphthol": {
+      "r": "phenol-aromatic",
+      "i": 2
+    },
+    "2-nitrobenzaldehyde": {
+      "r": "phenol-aromatic",
+      "i": 17
+    },
+    "3-chloropropene": {
+      "r": "hydrocarbon",
+      "i": 40
+    },
+    "3-methylbutan-1-ol": {
+      "r": "alcohol-ether",
+      "i": 5
+    },
+    "3-methylbutan-2-ol": {
+      "r": "alcohol-ether",
+      "i": 6
+    },
+    "3-methylbutanal": {
+      "r": "carbonyl",
+      "i": 3
+    },
+    "3-methylbutanoic-acid": {
+      "r": "carbonyl",
+      "i": 15
+    },
+    "3-methylpentane": {
+      "r": "hydrocarbon",
+      "i": 14
+    },
+    "6-aminohexanoic-acid": {
+      "r": "amino",
+      "i": 0
+    },
+    "abs": {
+      "r": "polymer",
+      "i": 13
+    },
+    "acetaminophen": {
+      "r": "phenol-aromatic",
+      "i": 18
+    },
+    "acetanilide": {
+      "r": "phenol-aromatic",
+      "i": 19
+    },
+    "acetic-acid": {
+      "r": "carbonyl",
+      "i": 16
+    },
+    "acetic-anhydride": {
+      "r": "carbonyl",
+      "i": 17
+    },
+    "acetone": {
+      "r": "carbonyl",
+      "i": 9
+    },
+    "acetonitrile": {
+      "r": "nitrogen",
+      "i": 3
+    },
+    "acrolein": {
+      "r": "hydrocarbon",
+      "i": 41
+    },
+    "acrylic-acid": {
+      "r": "carbonyl",
+      "i": 18
+    },
+    "acrylonitrile": {
+      "r": "polymer",
+      "i": 14
+    },
+    "adenine": {
+      "r": "polymer",
+      "i": 0
+    },
+    "adenosine": {
+      "r": "polymer",
+      "i": 1
+    },
+    "adipic-acid": {
+      "r": "carbonyl",
+      "i": 19
+    },
+    "adipoyl-chloride": {
+      "r": "carbonyl",
+      "i": 20
+    },
+    "adp": {
+      "r": "polymer",
+      "i": 2
+    },
+    "alanine": {
+      "r": "amino",
+      "i": 1
+    },
+    "alanylglycine": {
+      "r": "amino",
+      "i": 2
+    },
+    "albumin": {
+      "r": "amino",
+      "i": 3
+    },
+    "alginic-acid": {
+      "r": "polymer",
+      "i": 3
+    },
+    "alizarin": {
+      "r": "phenol-aromatic",
+      "i": 20
+    },
+    "alkyd-resin": {
+      "r": "polymer",
+      "i": 15
+    },
+    "allyl-alcohol": {
+      "r": "hydrocarbon",
+      "i": 42
+    },
+    "amylase": {
+      "r": "amino",
+      "i": 4
+    },
+    "amylopectin": {
+      "r": "sugar",
+      "i": 0
+    },
+    "aniline": {
+      "r": "nitrogen",
+      "i": 4
+    },
+    "aniline-hydrochloride": {
+      "r": "nitrogen",
+      "i": 5
+    },
+    "anion-exchange-resin": {
+      "r": "polymer",
+      "i": 16
+    },
+    "anisole": {
+      "r": "phenol-aromatic",
+      "i": 21
+    },
+    "anthracene": {
+      "r": "aromatic",
+      "i": 0
+    },
+    "arachidonic-acid": {
+      "r": "ester-lipid",
+      "i": 15
+    },
+    "aramid": {
+      "r": "polymer",
+      "i": 17
+    },
+    "arginine": {
+      "r": "amino",
+      "i": 5
+    },
+    "asparagine": {
+      "r": "amino",
+      "i": 6
+    },
+    "aspartame": {
+      "r": "amino",
+      "i": 7
+    },
+    "aspartic-acid": {
+      "r": "amino",
+      "i": 8
+    },
+    "aspirin": {
+      "r": "phenol-aromatic",
+      "i": 22
+    },
+    "atp": {
+      "r": "polymer",
+      "i": 4
+    },
+    "atpase": {
+      "r": "amino",
+      "i": 9
+    },
+    "benzaldehyde": {
+      "r": "phenol-aromatic",
+      "i": 23
+    },
+    "benzene": {
+      "r": "aromatic",
+      "i": 1
+    },
+    "benzenediazonium-chloride": {
+      "r": "phenol-aromatic",
+      "i": 24
+    },
+    "benzenesulfonic-acid": {
+      "r": "phenol-aromatic",
+      "i": 25
+    },
+    "benzoic-acid": {
+      "r": "carbonyl",
+      "i": 21
+    },
+    "benzonitrile": {
+      "r": "phenol-aromatic",
+      "i": 26
+    },
+    "benzyl-alcohol": {
+      "r": "phenol-aromatic",
+      "i": 27
+    },
+    "bisphenol-a": {
+      "r": "phenol-aromatic",
+      "i": 28
+    },
+    "br": {
+      "r": "polymer",
+      "i": 18
+    },
+    "bromoethane": {
+      "r": "hydrocarbon",
+      "i": 15
+    },
+    "bromoethene": {
+      "r": "hydrocarbon",
+      "i": 43
+    },
+    "but-1-ene": {
+      "r": "hydrocarbon",
+      "i": 44
+    },
+    "but-1-yne": {
+      "r": "hydrocarbon",
+      "i": 45
+    },
+    "but-2-ene": {
+      "r": "hydrocarbon",
+      "i": 46
+    },
+    "but-2-yne": {
+      "r": "hydrocarbon",
+      "i": 47
+    },
+    "but-3-enoic-acid": {
+      "r": "hydrocarbon",
+      "i": 48
+    },
+    "butadiene": {
+      "r": "polymer",
+      "i": 19
+    },
+    "butan-1-amine": {
+      "r": "nitrogen",
+      "i": 6
+    },
+    "butan-1-ol": {
+      "r": "alcohol-ether",
+      "i": 7
+    },
+    "butan-2-amine": {
+      "r": "nitrogen",
+      "i": 7
+    },
+    "butan-2-ol": {
+      "r": "alcohol-ether",
+      "i": 8
+    },
+    "butanal": {
+      "r": "carbonyl",
+      "i": 4
+    },
+    "butane": {
+      "r": "hydrocarbon",
+      "i": 16
+    },
+    "butanenitrile": {
+      "r": "nitrogen",
+      "i": 8
+    },
+    "butanoic-acid": {
+      "r": "carbonyl",
+      "i": 22
+    },
+    "butanone": {
+      "r": "carbonyl",
+      "i": 10
+    },
+    "butyl-acetate": {
+      "r": "ester-lipid",
+      "i": 0
+    },
+    "calcium-acetate": {
+      "r": "carbonyl",
+      "i": 23
+    },
+    "caprolactam": {
+      "r": "polymer",
+      "i": 20
+    },
+    "carbon-tetrachloride": {
+      "r": "hydrocarbon",
+      "i": 17
+    },
+    "carminic-acid": {
+      "r": "phenol-aromatic",
+      "i": 29
+    },
+    "carthamin": {
+      "r": "phenol-aromatic",
+      "i": 30
+    },
+    "casein": {
+      "r": "amino",
+      "i": 10
+    },
+    "catalase": {
+      "r": "amino",
+      "i": 11
+    },
+    "catechol": {
+      "r": "phenol-aromatic",
+      "i": 3
+    },
+    "cation-exchange-resin": {
+      "r": "polymer",
+      "i": 21
+    },
+    "cellobiase": {
+      "r": "amino",
+      "i": 12
+    },
+    "cellobiose": {
+      "r": "sugar",
+      "i": 1
+    },
+    "cellulase": {
+      "r": "amino",
+      "i": 13
+    },
+    "cellulose": {
+      "r": "sugar",
+      "i": 2
+    },
+    "cellulose-acetate": {
+      "r": "sugar",
+      "i": 3
+    },
+    "cellulose-nitrate": {
+      "r": "sugar",
+      "i": 4
+    },
+    "chitin": {
+      "r": "sugar",
+      "i": 5
+    },
+    "chlorobenzene": {
+      "r": "phenol-aromatic",
+      "i": 31
+    },
+    "chlorocyclohexane": {
+      "r": "hydrocarbon",
+      "i": 64
+    },
+    "chloroethane": {
+      "r": "hydrocarbon",
+      "i": 18
+    },
+    "chloroform": {
+      "r": "hydrocarbon",
+      "i": 19
+    },
+    "chloromethane": {
+      "r": "hydrocarbon",
+      "i": 20
+    },
+    "chloroprene": {
+      "r": "polymer",
+      "i": 22
+    },
+    "chloroprene-rubber": {
+      "r": "polymer",
+      "i": 23
+    },
+    "choline": {
+      "r": "amino",
+      "i": 14
+    },
+    "citric-acid": {
+      "r": "carbonyl",
+      "i": 24
+    },
+    "collagen": {
+      "r": "amino",
+      "i": 15
+    },
+    "copper-i-acetylide": {
+      "r": "hydrocarbon",
+      "i": 49
+    },
+    "crotonic-acid": {
+      "r": "hydrocarbon",
+      "i": 50
+    },
+    "cumene": {
+      "r": "aromatic",
+      "i": 2
+    },
+    "cumene-hydroperoxide": {
+      "r": "phenol-aromatic",
+      "i": 32
+    },
+    "cyclobutane": {
+      "r": "hydrocarbon",
+      "i": 65
+    },
+    "cyclohexane": {
+      "r": "hydrocarbon",
+      "i": 66
+    },
+    "cyclohexene": {
+      "r": "hydrocarbon",
+      "i": 67
+    },
+    "cyclopentane": {
+      "r": "hydrocarbon",
+      "i": 68
+    },
+    "cyclopropane": {
+      "r": "hydrocarbon",
+      "i": 69
+    },
+    "cysteine": {
+      "r": "amino",
+      "i": 16
+    },
+    "cystine": {
+      "r": "amino",
+      "i": 17
+    },
+    "cytosine": {
+      "r": "polymer",
+      "i": 5
+    },
+    "decane": {
+      "r": "hydrocarbon",
+      "i": 21
+    },
+    "deoxyribose": {
+      "r": "sugar",
+      "i": 6
+    },
+    "dextrin": {
+      "r": "sugar",
+      "i": 7
+    },
+    "dibromoindigo": {
+      "r": "phenol-aromatic",
+      "i": 33
+    },
+    "dichloromethane": {
+      "r": "hydrocarbon",
+      "i": 22
+    },
+    "diethyl-ether": {
+      "r": "alcohol-ether",
+      "i": 24
+    },
+    "diethylamine": {
+      "r": "nitrogen",
+      "i": 9
+    },
+    "diethylenetriamine": {
+      "r": "nitrogen",
+      "i": 10
+    },
+    "dimethyl-ether": {
+      "r": "alcohol-ether",
+      "i": 25
+    },
+    "dimethyl-oxalate": {
+      "r": "ester-lipid",
+      "i": 1
+    },
+    "dimethylamine": {
+      "r": "nitrogen",
+      "i": 11
+    },
+    "dimethyldichlorosilane": {
+      "r": "polymer",
+      "i": 24
+    },
+    "diphenyl-oxalate": {
+      "r": "ester-lipid",
+      "i": 2
+    },
+    "disodium-salicylate": {
+      "r": "phenol-aromatic",
+      "i": 4
+    },
+    "dna": {
+      "r": "polymer",
+      "i": 6
+    },
+    "docosahexaenoic-acid": {
+      "r": "ester-lipid",
+      "i": 16
+    },
+    "eicosane": {
+      "r": "hydrocarbon",
+      "i": 23
+    },
+    "eicosapentaenoic-acid": {
+      "r": "ester-lipid",
+      "i": 17
+    },
+    "elaidic-acid": {
+      "r": "ester-lipid",
+      "i": 18
+    },
+    "epichlorohydrin": {
+      "r": "polymer",
+      "i": 25
+    },
+    "epoxy-resin": {
+      "r": "polymer",
+      "i": 26
+    },
+    "erepsin": {
+      "r": "amino",
+      "i": 18
+    },
+    "ethanal": {
+      "r": "carbonyl",
+      "i": 5
+    },
+    "ethane": {
+      "r": "hydrocarbon",
+      "i": 24
+    },
+    "ethanol": {
+      "r": "alcohol-ether",
+      "i": 9
+    },
+    "ethanolamine": {
+      "r": "alcohol-ether",
+      "i": 10
+    },
+    "ethene": {
+      "r": "hydrocarbon",
+      "i": 51
+    },
+    "ethenol": {
+      "r": "hydrocarbon",
+      "i": 52
+    },
+    "ethyl-acetate": {
+      "r": "ester-lipid",
+      "i": 3
+    },
+    "ethyl-butyrate": {
+      "r": "ester-lipid",
+      "i": 4
+    },
+    "ethyl-formate": {
+      "r": "ester-lipid",
+      "i": 5
+    },
+    "ethyl-propionate": {
+      "r": "ester-lipid",
+      "i": 6
+    },
+    "ethylamine": {
+      "r": "nitrogen",
+      "i": 12
+    },
+    "ethylbenzene": {
+      "r": "aromatic",
+      "i": 3
+    },
+    "ethylene-glycol": {
+      "r": "alcohol-ether",
+      "i": 11
+    },
+    "ethylmethylamine": {
+      "r": "nitrogen",
+      "i": 13
+    },
+    "ethyne": {
+      "r": "hydrocarbon",
+      "i": 53
+    },
+    "fibroin": {
+      "r": "amino",
+      "i": 19
+    },
+    "formaldehyde": {
+      "r": "carbonyl",
+      "i": 6
+    },
+    "formic-acid": {
+      "r": "carbonyl",
+      "i": 25
+    },
+    "fructose": {
+      "r": "sugar",
+      "i": 8
+    },
+    "fumaric-acid": {
+      "r": "carbonyl",
+      "i": 26
+    },
+    "galactose": {
+      "r": "sugar",
+      "i": 9
+    },
+    "gelatin": {
+      "r": "amino",
+      "i": 20
+    },
+    "gliadin": {
+      "r": "amino",
+      "i": 21
+    },
+    "globin": {
+      "r": "amino",
+      "i": 22
+    },
+    "globulin": {
+      "r": "amino",
+      "i": 23
+    },
+    "glucose": {
+      "r": "sugar",
+      "i": 10
+    },
+    "glutamic-acid": {
+      "r": "amino",
+      "i": 24
+    },
+    "glutamine": {
+      "r": "amino",
+      "i": 25
+    },
+    "glutaric-acid": {
+      "r": "carbonyl",
+      "i": 27
+    },
+    "glutathione": {
+      "r": "amino",
+      "i": 26
+    },
+    "glutelin": {
+      "r": "amino",
+      "i": 27
+    },
+    "glutenin": {
+      "r": "amino",
+      "i": 28
+    },
+    "glycerol": {
+      "r": "alcohol-ether",
+      "i": 12
+    },
+    "glycine": {
+      "r": "amino",
+      "i": 29
+    },
+    "glycogen": {
+      "r": "sugar",
+      "i": 11
+    },
+    "glycylalanine": {
+      "r": "amino",
+      "i": 30
+    },
+    "glycylglycine": {
+      "r": "amino",
+      "i": 31
+    },
+    "guaiacol": {
+      "r": "phenol-aromatic",
+      "i": 5
+    },
+    "guanine": {
+      "r": "polymer",
+      "i": 7
+    },
+    "helicase": {
+      "r": "amino",
+      "i": 32
+    },
+    "heme": {
+      "r": "amino",
+      "i": 33
+    },
+    "hemocyanin": {
+      "r": "amino",
+      "i": 34
+    },
+    "hemoglobin": {
+      "r": "amino",
+      "i": 35
+    },
+    "heptane": {
+      "r": "hydrocarbon",
+      "i": 25
+    },
+    "hexachlorocyclohexane": {
+      "r": "hydrocarbon",
+      "i": 70
+    },
+    "hexamethylenediamine": {
+      "r": "polymer",
+      "i": 27
+    },
+    "hexane": {
+      "r": "hydrocarbon",
+      "i": 26
+    },
+    "histidine": {
+      "r": "amino",
+      "i": 36
+    },
+    "histone": {
+      "r": "amino",
+      "i": 37
+    },
+    "hordein": {
+      "r": "amino",
+      "i": 38
+    },
+    "hydroquinone": {
+      "r": "phenol-aromatic",
+      "i": 6
+    },
+    "ibuprofen": {
+      "r": "carbonyl",
+      "i": 28
+    },
+    "iir": {
+      "r": "polymer",
+      "i": 28
+    },
+    "indigo": {
+      "r": "phenol-aromatic",
+      "i": 34
+    },
+    "inositol": {
+      "r": "sugar",
+      "i": 12
+    },
+    "insulin": {
+      "r": "amino",
+      "i": 39
+    },
+    "iodoethane": {
+      "r": "hydrocarbon",
+      "i": 27
+    },
+    "iodoform": {
+      "r": "hydrocarbon",
+      "i": 28
+    },
+    "isoamyl-acetate": {
+      "r": "ester-lipid",
+      "i": 7
+    },
+    "isobutane": {
+      "r": "hydrocarbon",
+      "i": 29
+    },
+    "isobutene": {
+      "r": "hydrocarbon",
+      "i": 54
+    },
+    "isoleucine": {
+      "r": "amino",
+      "i": 40
+    },
+    "isomaltose": {
+      "r": "sugar",
+      "i": 13
+    },
+    "isopentane": {
+      "r": "hydrocarbon",
+      "i": 30
+    },
+    "isophthalic-acid": {
+      "r": "phenol-aromatic",
+      "i": 35
+    },
+    "isoprene": {
+      "r": "polymer",
+      "i": 29
+    },
+    "isopropylamine": {
+      "r": "nitrogen",
+      "i": 14
+    },
+    "keratin": {
+      "r": "amino",
+      "i": 41
+    },
+    "lactase": {
+      "r": "amino",
+      "i": 42
+    },
+    "lactic-acid": {
+      "r": "carbonyl",
+      "i": 29
+    },
+    "lactose": {
+      "r": "sugar",
+      "i": 14
+    },
+    "las": {
+      "r": "ester-lipid",
+      "i": 30
+    },
+    "lauric-acid": {
+      "r": "ester-lipid",
+      "i": 19
+    },
+    "lead-ii-acetate": {
+      "r": "carbonyl",
+      "i": 30
+    },
+    "leucine": {
+      "r": "amino",
+      "i": 43
+    },
+    "linoleic-acid": {
+      "r": "ester-lipid",
+      "i": 20
+    },
+    "linolenic-acid": {
+      "r": "ester-lipid",
+      "i": 21
+    },
+    "lipase": {
+      "r": "amino",
+      "i": 44
+    },
+    "lysine": {
+      "r": "amino",
+      "i": 45
+    },
+    "m-cresol": {
+      "r": "phenol-aromatic",
+      "i": 7
+    },
+    "m-hydroxybenzoic-acid": {
+      "r": "carbonyl",
+      "i": 31
+    },
+    "m-nitrotoluene": {
+      "r": "phenol-aromatic",
+      "i": 36
+    },
+    "m-xylene": {
+      "r": "aromatic",
+      "i": 4
+    },
+    "maleic-acid": {
+      "r": "carbonyl",
+      "i": 32
+    },
+    "maleic-anhydride": {
+      "r": "carbonyl",
+      "i": 33
+    },
+    "malic-acid": {
+      "r": "carbonyl",
+      "i": 34
+    },
+    "malonic-acid": {
+      "r": "carbonyl",
+      "i": 35
+    },
+    "maltase": {
+      "r": "amino",
+      "i": 46
+    },
+    "maltose": {
+      "r": "sugar",
+      "i": 15
+    },
+    "mannose": {
+      "r": "sugar",
+      "i": 16
+    },
+    "melamine": {
+      "r": "polymer",
+      "i": 30
+    },
+    "melamine-resin": {
+      "r": "polymer",
+      "i": 31
+    },
+    "methacrylic-acid": {
+      "r": "carbonyl",
+      "i": 36
+    },
+    "methane": {
+      "r": "hydrocarbon",
+      "i": 31
+    },
+    "methanol": {
+      "r": "alcohol-ether",
+      "i": 13
+    },
+    "methionine": {
+      "r": "amino",
+      "i": 47
+    },
+    "methoxyethane": {
+      "r": "alcohol-ether",
+      "i": 26
+    },
+    "methyl-acetate": {
+      "r": "ester-lipid",
+      "i": 8
+    },
+    "methyl-formate": {
+      "r": "ester-lipid",
+      "i": 9
+    },
+    "methyl-methacrylate": {
+      "r": "polymer",
+      "i": 32
+    },
+    "methyl-orange": {
+      "r": "phenol-aromatic",
+      "i": 37
+    },
+    "methyl-propionate": {
+      "r": "ester-lipid",
+      "i": 10
+    },
+    "methyl-salicylate": {
+      "r": "ester-lipid",
+      "i": 11
+    },
+    "methylamine": {
+      "r": "nitrogen",
+      "i": 15
+    },
+    "mucin": {
+      "r": "amino",
+      "i": 48
+    },
+    "myristic-acid": {
+      "r": "ester-lipid",
+      "i": 22
+    },
+    "n,n-dimethylaniline": {
+      "r": "nitrogen",
+      "i": 16
+    },
+    "n,n-dimethylethanamine": {
+      "r": "nitrogen",
+      "i": 17
+    },
+    "n-methylpropan-1-amine": {
+      "r": "nitrogen",
+      "i": 18
+    },
+    "n-methylpropan-2-amine": {
+      "r": "nitrogen",
+      "i": 19
+    },
+    "naphthalene": {
+      "r": "aromatic",
+      "i": 5
+    },
+    "natural-rubber": {
+      "r": "polymer",
+      "i": 8
+    },
+    "nbr": {
+      "r": "polymer",
+      "i": 33
+    },
+    "neopentane": {
+      "r": "hydrocarbon",
+      "i": 32
+    },
+    "ninhydrin": {
+      "r": "phenol-aromatic",
+      "i": 38
+    },
+    "nitrobenzene": {
+      "r": "phenol-aromatic",
+      "i": 39
+    },
+    "nitromethane": {
+      "r": "nitrogen",
+      "i": 0
+    },
+    "nonane": {
+      "r": "hydrocarbon",
+      "i": 33
+    },
+    "nylon6": {
+      "r": "polymer",
+      "i": 34
+    },
+    "nylon66": {
+      "r": "polymer",
+      "i": 35
+    },
+    "o-cresol": {
+      "r": "phenol-aromatic",
+      "i": 8
+    },
+    "o-nitrophenol": {
+      "r": "phenol-aromatic",
+      "i": 9
+    },
+    "o-nitrotoluene": {
+      "r": "phenol-aromatic",
+      "i": 40
+    },
+    "o-xylene": {
+      "r": "aromatic",
+      "i": 6
+    },
+    "octane": {
+      "r": "hydrocarbon",
+      "i": 34
+    },
+    "oleic-acid": {
+      "r": "ester-lipid",
+      "i": 23
+    },
+    "oryzenin": {
+      "r": "amino",
+      "i": 49
+    },
+    "oxalic-acid": {
+      "r": "carbonyl",
+      "i": 37
+    },
+    "p-cresol": {
+      "r": "phenol-aromatic",
+      "i": 10
+    },
+    "p-dichlorobenzene": {
+      "r": "aromatic",
+      "i": 7
+    },
+    "p-divinylbenzene": {
+      "r": "aromatic",
+      "i": 8
+    },
+    "p-hydroxyazobenzene": {
+      "r": "phenol-aromatic",
+      "i": 41
+    },
+    "p-hydroxybenzoic-acid": {
+      "r": "carbonyl",
+      "i": 38
+    },
+    "p-nitrophenol": {
+      "r": "phenol-aromatic",
+      "i": 11
+    },
+    "p-nitrotoluene": {
+      "r": "phenol-aromatic",
+      "i": 42
+    },
+    "p-phenylenediamine": {
+      "r": "nitrogen",
+      "i": 20
+    },
+    "p-xylene": {
+      "r": "aromatic",
+      "i": 9
+    },
+    "palmitic-acid": {
+      "r": "ester-lipid",
+      "i": 24
+    },
+    "pan": {
+      "r": "polymer",
+      "i": 36
+    },
+    "pent-1-ene": {
+      "r": "hydrocarbon",
+      "i": 55
+    },
+    "pent-1-yne": {
+      "r": "hydrocarbon",
+      "i": 56
+    },
+    "pent-2-ene": {
+      "r": "hydrocarbon",
+      "i": 57
+    },
+    "pent-2-yne": {
+      "r": "hydrocarbon",
+      "i": 58
+    },
+    "pentan-1-ol": {
+      "r": "alcohol-ether",
+      "i": 14
+    },
+    "pentan-2-ol": {
+      "r": "alcohol-ether",
+      "i": 15
+    },
+    "pentan-3-ol": {
+      "r": "alcohol-ether",
+      "i": 16
+    },
+    "pentan-3-one": {
+      "r": "carbonyl",
+      "i": 11
+    },
+    "pentanal": {
+      "r": "carbonyl",
+      "i": 7
+    },
+    "pentane": {
+      "r": "hydrocarbon",
+      "i": 35
+    },
+    "pentanoic-acid": {
+      "r": "carbonyl",
+      "i": 39
+    },
+    "pepsin": {
+      "r": "amino",
+      "i": 50
+    },
+    "pet": {
+      "r": "polymer",
+      "i": 37
+    },
+    "phenol": {
+      "r": "phenol-aromatic",
+      "i": 12
+    },
+    "phenol-resin": {
+      "r": "polymer",
+      "i": 38
+    },
+    "phenolphthalein": {
+      "r": "phenol-aromatic",
+      "i": 43
+    },
+    "phenoxide-ion": {
+      "r": "phenol-aromatic",
+      "i": 13
+    },
+    "phenyl-acetate": {
+      "r": "ester-lipid",
+      "i": 12
+    },
+    "phenylalanine": {
+      "r": "amino",
+      "i": 51
+    },
+    "phosgene": {
+      "r": "polymer",
+      "i": 39
+    },
+    "phthalic-acid": {
+      "r": "phenol-aromatic",
+      "i": 44
+    },
+    "phthalic-anhydride": {
+      "r": "carbonyl",
+      "i": 40
+    },
+    "picric-acid": {
+      "r": "phenol-aromatic",
+      "i": 14
+    },
+    "pla": {
+      "r": "polymer",
+      "i": 40
+    },
+    "pmma": {
+      "r": "polymer",
+      "i": 41
+    },
+    "polyacetylene": {
+      "r": "polymer",
+      "i": 42
+    },
+    "polyaniline": {
+      "r": "polymer",
+      "i": 43
+    },
+    "polycarbonate": {
+      "r": "polymer",
+      "i": 44
+    },
+    "polyethylene": {
+      "r": "polymer",
+      "i": 45
+    },
+    "polypropylene": {
+      "r": "polymer",
+      "i": 46
+    },
+    "polystyrene": {
+      "r": "polymer",
+      "i": 47
+    },
+    "polyurethane": {
+      "r": "polymer",
+      "i": 48
+    },
+    "proline": {
+      "r": "amino",
+      "i": 52
+    },
+    "prop-1-en-1-ol": {
+      "r": "hydrocarbon",
+      "i": 59
+    },
+    "prop-1-en-2-ol": {
+      "r": "hydrocarbon",
+      "i": 60
+    },
+    "propan-1-ol": {
+      "r": "alcohol-ether",
+      "i": 17
+    },
+    "propan-2-ol": {
+      "r": "alcohol-ether",
+      "i": 18
+    },
+    "propanal": {
+      "r": "carbonyl",
+      "i": 8
+    },
+    "propane": {
+      "r": "hydrocarbon",
+      "i": 36
+    },
+    "propanenitrile": {
+      "r": "nitrogen",
+      "i": 21
+    },
+    "propene": {
+      "r": "hydrocarbon",
+      "i": 61
+    },
+    "propionic-acid": {
+      "r": "carbonyl",
+      "i": 41
+    },
+    "propyl-formate": {
+      "r": "ester-lipid",
+      "i": 13
+    },
+    "propylamine": {
+      "r": "nitrogen",
+      "i": 22
+    },
+    "propylene-glycol": {
+      "r": "alcohol-ether",
+      "i": 19
+    },
+    "propyne": {
+      "r": "hydrocarbon",
+      "i": 62
+    },
+    "protamine": {
+      "r": "amino",
+      "i": 53
+    },
+    "protease": {
+      "r": "amino",
+      "i": 54
+    },
+    "protein": {
+      "r": "amino",
+      "i": 55
+    },
+    "ptfe": {
+      "r": "polymer",
+      "i": 49
+    },
+    "pva": {
+      "r": "polymer",
+      "i": 50
+    },
+    "pvac": {
+      "r": "polymer",
+      "i": 51
+    },
+    "pvc": {
+      "r": "polymer",
+      "i": 52
+    },
+    "pvdc": {
+      "r": "polymer",
+      "i": 53
+    },
+    "pyruvic-acid": {
+      "r": "carbonyl",
+      "i": 42
+    },
+    "quercetin": {
+      "r": "phenol-aromatic",
+      "i": 45
+    },
+    "resorcinol": {
+      "r": "phenol-aromatic",
+      "i": 15
+    },
+    "ribose": {
+      "r": "sugar",
+      "i": 17
+    },
+    "rna": {
+      "r": "polymer",
+      "i": 9
+    },
+    "salicin": {
+      "r": "sugar",
+      "i": 18
+    },
+    "salicylic-acid": {
+      "r": "phenol-aromatic",
+      "i": 46
+    },
+    "salmine": {
+      "r": "amino",
+      "i": 56
+    },
+    "sbr": {
+      "r": "polymer",
+      "i": 54
+    },
+    "sds": {
+      "r": "ester-lipid",
+      "i": 31
+    },
+    "serine": {
+      "r": "amino",
+      "i": 57
+    },
+    "shikonin": {
+      "r": "phenol-aromatic",
+      "i": 47
+    },
+    "silicone": {
+      "r": "polymer",
+      "i": 55
+    },
+    "silver-acetylide": {
+      "r": "hydrocarbon",
+      "i": 63
+    },
+    "sodium-acetate": {
+      "r": "carbonyl",
+      "i": 43
+    },
+    "sodium-alginate": {
+      "r": "polymer",
+      "i": 10
+    },
+    "sodium-benzenesulfonate": {
+      "r": "phenol-aromatic",
+      "i": 48
+    },
+    "sodium-benzoate": {
+      "r": "carbonyl",
+      "i": 44
+    },
+    "sodium-ethoxide": {
+      "r": "alcohol-ether",
+      "i": 20
+    },
+    "sodium-laurate": {
+      "r": "ester-lipid",
+      "i": 32
+    },
+    "sodium-methoxide": {
+      "r": "alcohol-ether",
+      "i": 21
+    },
+    "sodium-oleate": {
+      "r": "ester-lipid",
+      "i": 33
+    },
+    "sodium-palmitate": {
+      "r": "ester-lipid",
+      "i": 34
+    },
+    "sodium-phenoxide": {
+      "r": "phenol-aromatic",
+      "i": 16
+    },
+    "sodium-polyacrylate": {
+      "r": "polymer",
+      "i": 56
+    },
+    "sodium-salicylate": {
+      "r": "phenol-aromatic",
+      "i": 49
+    },
+    "sodium-stearate": {
+      "r": "ester-lipid",
+      "i": 35
+    },
+    "sorbitol": {
+      "r": "sugar",
+      "i": 19
+    },
+    "starch": {
+      "r": "sugar",
+      "i": 20
+    },
+    "stearic-acid": {
+      "r": "ester-lipid",
+      "i": 25
+    },
+    "styrene": {
+      "r": "aromatic",
+      "i": 10
+    },
+    "succinic-acid": {
+      "r": "carbonyl",
+      "i": 45
+    },
+    "sucrase": {
+      "r": "amino",
+      "i": 58
+    },
+    "sucrose": {
+      "r": "sugar",
+      "i": 21
+    },
+    "sulfanilamide": {
+      "r": "phenol-aromatic",
+      "i": 50
+    },
+    "sulfanilic-acid": {
+      "r": "phenol-aromatic",
+      "i": 51
+    },
+    "tartaric-acid": {
+      "r": "carbonyl",
+      "i": 46
+    },
+    "terephthalic-acid": {
+      "r": "phenol-aromatic",
+      "i": 52
+    },
+    "terephthaloyl-chloride": {
+      "r": "carbonyl",
+      "i": 47
+    },
+    "tetrafluoroethylene": {
+      "r": "polymer",
+      "i": 57
+    },
+    "threonine": {
+      "r": "amino",
+      "i": 59
+    },
+    "thymine": {
+      "r": "polymer",
+      "i": 11
+    },
+    "tnt": {
+      "r": "phenol-aromatic",
+      "i": 53
+    },
+    "toluene": {
+      "r": "aromatic",
+      "i": 11
+    },
+    "trehalose": {
+      "r": "sugar",
+      "i": 22
+    },
+    "triacetin": {
+      "r": "ester-lipid",
+      "i": 14
+    },
+    "triethylamine": {
+      "r": "nitrogen",
+      "i": 23
+    },
+    "trilinolein": {
+      "r": "ester-lipid",
+      "i": 26
+    },
+    "trimethylamine": {
+      "r": "nitrogen",
+      "i": 24
+    },
+    "triolein": {
+      "r": "ester-lipid",
+      "i": 27
+    },
+    "tripalmitin": {
+      "r": "ester-lipid",
+      "i": 28
+    },
+    "tristearin": {
+      "r": "ester-lipid",
+      "i": 29
+    },
+    "trypsin": {
+      "r": "amino",
+      "i": 60
+    },
+    "tryptophan": {
+      "r": "amino",
+      "i": 61
+    },
+    "tyrosine": {
+      "r": "amino",
+      "i": 62
+    },
+    "unsaturated-polyester": {
+      "r": "polymer",
+      "i": 58
+    },
+    "uracil": {
+      "r": "polymer",
+      "i": 12
+    },
+    "urea": {
+      "r": "polymer",
+      "i": 59
+    },
+    "urea-resin": {
+      "r": "polymer",
+      "i": 60
+    },
+    "urease": {
+      "r": "amino",
+      "i": 63
+    },
+    "valine": {
+      "r": "amino",
+      "i": 64
+    },
+    "vinyl-acetate": {
+      "r": "polymer",
+      "i": 61
+    },
+    "vinyl-chloride": {
+      "r": "polymer",
+      "i": 62
+    },
+    "vinylidene-chloride": {
+      "r": "polymer",
+      "i": 63
+    },
+    "vinylon": {
+      "r": "polymer",
+      "i": 64
+    },
+    "zymase": {
+      "r": "amino",
+      "i": 65
+    }
+  }
+}
