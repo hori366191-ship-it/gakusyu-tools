@@ -682,3 +682,40 @@ a { color: var(--oc-accent); }
     transition: none !important;
   }
 }
+
+/* ------------------------------------------------------------------
+ * 外部公開資料との照合（9列・折り返し優先）
+ * ------------------------------------------------------------------ */
+.oc-ext-table {
+  width: 100%;
+  min-width: 1120px;
+  table-layout: fixed;
+}
+.oc-ext-table th:nth-child(1) { width: 150px; }
+.oc-ext-table th:nth-child(2) { width: 92px; }
+.oc-ext-table th:nth-child(3) { width: 150px; }
+.oc-ext-table th:nth-child(4) { width: 138px; }
+.oc-ext-table th:nth-child(5) { width: 138px; }
+.oc-ext-table th:nth-child(6) { width: 88px; }
+.oc-ext-table th:nth-child(7) { width: 230px; }
+.oc-ext-table th:nth-child(8) { width: 66px; }
+.oc-ext-table th:nth-child(9) { width: 138px; }
+.oc-ext-table td {
+  overflow-wrap: anywhere;
+  word-break: normal;
+  vertical-align: top;
+}
+.oc-ext-table tr.oc-ext-missing td {
+  background: rgba(221, 51, 51, 0.09);
+}
+.oc-ext-level {
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.oc-ext-level--標準 { opacity: .82; }
+.oc-ext-level--発展 { font-weight: 700; }
+.oc-ext-level--探究 { font-style: italic; }

@@ -21,6 +21,7 @@ const APP = path.join(SITE, 'app10');
 
 const D = require(path.join(APP, 'data.js'));
 const R = require(path.join(APP, 'draw.js'));
+const E = require(path.join(APP, 'external-coverage.js'));
 
 function read(relPath) {
   return fs.readFileSync(path.join(SITE, relPath), 'utf8');
@@ -548,13 +549,14 @@ function emptyCombos() {
 test('[coverage] チェックリストの全項目が登録され、全化合物がいずれかに含まれる', () => {
   const covered = coverageIds();
   const ids = Object.keys(D.COMPOUNDS);
+  const externalIds = new Set(E.ROWS.filter((r) => r.kind === 'compound' || r.kind === 'alias').map((r) => r.ref));
   assert.ok(ids.length >= 260, '収録化合物が少なすぎます: ' + ids.length);
   for (const id of covered) {
     assert.ok(D.COMPOUNDS[id], 'カバレッジ項目が未登録: ' + id);
     assert.equal(R.validate(D.COMPOUNDS[id]).ok, true, 'カバレッジ項目の検証に失敗: ' + id);
   }
-  const notCovered = ids.filter((id) => !covered.has(id));
-  assert.deepEqual(notCovered, [], 'カバレッジに含まれない化合物: ' + notCovered.join(', '));
+  const notCovered = ids.filter((id) => !covered.has(id) && !externalIds.has(id));
+  assert.deepEqual(notCovered, [], '標準カバレッジにも外部照合台帳にも含まれない化合物: ' + notCovered.join(', '));
   assert.equal(D.COVERAGE.length, 19, 'カバレッジ区分の数');
   for (const group of D.COVERAGE) {
     assert.ok(D.SOURCES[group.source], 'カバレッジの出典が不正: ' + group.source);
@@ -824,23 +826,153 @@ test('[coverage] 独立requiredリストと延べ/ユニーク件数', () => {
   assert.ok(D.REQUIRED_CURRICULUM.length >= 250, 'requiredリストが少なすぎます');
   assert.equal(new Set(D.REQUIRED_CURRICULUM).size, D.REQUIRED_CURRICULUM.length, 'requiredリストに重複');
   const covered = coverageIds();
+  const externalIds = new Set(E.ROWS.filter((r) => r.kind === 'compound' || r.kind === 'alias').map((r) => r.ref));
   for (const id of D.REQUIRED_CURRICULUM) {
     assert.ok(D.COMPOUNDS[id], 'requiredが未登録: ' + id);
     assert.ok(covered.has(id), 'requiredがカバレッジにない: ' + id);
   }
   for (const id of Object.keys(D.COMPOUNDS)) {
-    assert.ok(D.REQUIRED_CURRICULUM.includes(id), '固定requiredリストにない化合物: ' + id);
+    assert.ok(D.REQUIRED_CURRICULUM.includes(id) || externalIds.has(id), '固定requiredリストにも外部照合台帳にもない化合物: ' + id);
   }
   const mustHave = ['vinylon', 'nbr', 'iir', 'unsaturated-polyester', 'alkyd-resin', 'polyacetylene', 'polyaniline', 'epichlorohydrin', 'p-phenylenediamine', 'dimethyldichlorosilane'];
   for (const id of mustHave) assert.ok(D.REQUIRED_CURRICULUM.includes(id), '必須物質がrequiredにない: ' + id);
 
   const total = D.COVERAGE.reduce((n, g) => n + g.items.length, 0);
   assert.equal(D.COVERAGE_STATS.totalItems, total);
-  assert.equal(D.COVERAGE_STATS.uniqueItems, Object.keys(D.COMPOUNDS).length);
+  assert.equal(D.COVERAGE_STATS.uniqueItems, covered.size);
   assert.equal(D.COVERAGE_STATS.duplicateItems, total - D.COVERAGE_STATS.uniqueItems);
   assert.deepEqual(D.COVERAGE_STATS.missing, []);
-  assert.deepEqual(D.COVERAGE_STATS.uncovered, []);
+  assert.equal(D.COVERAGE_STATS.uncovered.length, Object.keys(D.COMPOUNDS).length - covered.size);
+  for (const id of D.COVERAGE_STATS.uncovered) assert.ok(externalIds.has(id), '外部照合台帳にない未カバレッジ化合物: ' + id);
   assert.ok(D.COVERAGE_STATS.duplicateItems > 0, '延べとユニークの区別がない');
+});
+
+test('[external] 外部資料の期待名称を独立リストで照合し、未対応0件', () => {
+  const expected = {
+    s1: ['セロビオース', 'β-グルコース'],
+    s2: ['エタノール', '酢酸', '酢酸エチル', '1-ペンタノール', '酢酸ナトリウム', 'ヨードホルム'],
+    s3: ['メタン', 'エタン', 'プロパン', 'ブタン', 'ペンタン', 'ヘキサン', 'ヘプタン', 'オクタン', 'ノナン', 'デカン', '酢酸Na', 'クロロメタン', 'ジクロロメタン', 'トリクロロメタン', 'テトラクロロメタン'],
+    s4: ['メタン', 'エタン', 'プロパン', 'ブタン', 'ペンタン', 'ヘキサン', 'ヘプタン', 'オクタン', 'ノナン', 'デカン', 'エイコサン', 'クロロメタン', 'ジクロロメタン', 'トリクロロメタン', 'テトラクロロメタン'],
+    s5: ['酢酸', '無水酢酸'],
+    s6: ['塩化ベンゼンジアゾニウム', 'ナトリウムフェノキシド', 'p-ヒドロキシアゾベンゼン'],
+    s7: ['DNA', 'RNA', 'リボース', 'デオキシリボース', 'アデニン', 'グアニン', 'シトシン', 'チミン', 'ウラシル'],
+    s8: ['セルロース', 'セロビオース', 'グルコース', 'セルラーゼ', 'セロビアーゼ'],
+    s9: ['ニンヒドリン', 'アミノ酸'],
+    s10: ['セルロース', 'レーヨン', 'セロファン', 'クプラ', 'シュヴァイツァー試薬'],
+    s11: ['ビスコースレーヨン', 'ビスコース', 'セルロース', '二硫化炭素'],
+    s12: ['スチレン', 'p-ジビニルベンゼン', '陽イオン交換樹脂'],
+    s13: ['陰イオン交換樹脂'],
+    s14: ['インスリン', 'ヘモグロビン', 'ヘム', 'アルブミン', 'グロブリン', 'グルテリン', 'ケラチン', 'コラーゲン', 'フィブロイン', 'ムチン', 'カゼイン', 'ニンヒドリン'],
+    s15: ['アルブミン', 'グロブリン', 'ケラチン', 'コラーゲン', 'フィブロイン', 'グルテリン', 'アミラーゼ', 'カゼイン', 'ヘモグロビン'],
+    s16: ['アルブミン', 'グロブリン', 'ケラチン', 'コラーゲン', 'フィブロイン', 'グルテリン', 'アミラーゼ', 'カゼイン', 'ヘモグロビン', 'ゼラチン', 'ペプシン', 'ヒストン', 'プロタミン', 'グルテニン', 'オリゼニン', 'グリアジン', 'ホルデイン', 'グロビン', 'サルミン', 'ヘモシアニン'],
+    s17: ['グルコース', 'ガラクトース', 'フルクトース', 'マルトース', 'セロビオース', 'ラクトース', 'スクロース', 'トレハロース', '無水マレイン酸', '無水フタル酸'],
+    s18: ['ベンゼンスルホン酸ナトリウム', '無水酢酸', 'ナトリウムフェノキシド', 'p-ヒドロキシアゾベンゼン'],
+    s19: ['メチルオレンジ', '2-ナフトール', 'レゾルシノール', 'グアイアコール', 'N,N-ジメチルアニリン', 'スルファニル酸', 'ポリアニリン', 'アニリンブラック', 'インジゴ', 'アリザリン', 'シコニン', 'カルミン酸', 'ジブロモインジゴ', 'カルタミン', '2-ニトロベンズアルデヒド', 'ケルセチン'],
+    s20: ['アルギン酸', 'アルギン酸ナトリウム', 'アジピン酸ジクロリド', '6-アミノヘキサン酸'],
+    s21: ['アスピリン', 'サリチル酸メチル', 'アセトアミノフェン', 'イブプロフェン', 'スルファニルアミド', 'p-ヒドロキシ安息香酸', 'm-ヒドロキシ安息香酸', '2,4,6-トリブロモフェノール']
+  };
+  const missing = [];
+  for (const [sid, names] of Object.entries(expected)) {
+    assert.ok(E.SOURCES[sid], '資料IDがありません: ' + sid);
+    for (const name of names) {
+      const key = D.normalizeName(name);
+      const rows = E.ROWS.filter((r) => r.source === sid && D.normalizeName(r.name) === key);
+      if (!rows.length) { missing.push(sid + ':' + name); continue; }
+      for (const row of rows) {
+        const res = E.resolveRow(row, D);
+        if (!res.ok) missing.push(sid + ':' + name + ' (' + res.reason + ')');
+      }
+    }
+  }
+  assert.deepEqual(missing, [], '外部資料の期待名称が未対応: ' + missing.join(', '));
+  assert.equal(E.ROWS.length, Object.values(expected).reduce((n, a) => n + a.length, 0));
+  assert.deepEqual(E.audit(D).missing, []);
+});
+
+test('[external] 台帳は9列・URL・title・section・取得日・domainをもつ', () => {
+  assert.equal(E.ROWS.length >= 150, true);
+  for (const [sid, s] of Object.entries(E.SOURCES)) {
+    assert.match(s.url, /^https:\/\//, sid + ' のURL');
+    assert.ok(D.SOURCES[sid], sid + ' が data.js の SOURCES にない');
+    assert.equal(D.SOURCES[sid].url, s.url, sid + ' のURLが data.js と不一致');
+    assert.ok(s.title && s.title.length > 4, sid + ' のtitle');
+    assert.ok(s.section && s.section.length > 2, sid + ' のsection');
+    assert.equal(s.retrieved, E.RETRIEVED, sid + ' の取得日');
+    const host = new URL(s.url).hostname;
+    assert.equal(host, s.domain, sid + ' のdomain');
+    assert.ok(['標準', '発展', '探究'].includes(s.level), sid + ' のラベル');
+  }
+  const keys = ['name', 'kind', 'ref', 'source', 'section', 'date', 'evidence', 'level', 'note'];
+  for (const row of E.ROWS) {
+    assert.deepEqual(Object.keys(row), keys, row.name + ' の列');
+    assert.ok(E.KINDS.includes(row.kind), row.name + ' の種別');
+    assert.ok(row.evidence && row.evidence.length >= 8, row.name + ' の根拠');
+    assert.equal(row.date, E.RETRIEVED, row.name + ' の取得日');
+    assert.ok(['標準', '発展', '探究'].includes(row.level), row.name + ' のラベル');
+  }
+  const seen = new Set();
+  for (const row of E.ROWS) {
+    const key = row.source + '|' + D.normalizeName(row.name);
+    assert.equal(seen.has(key), false, '同一資料内で名称が重複: ' + key);
+    seen.add(key);
+  }
+  const ledger = read('app10/ledger.html');
+  assert.match(ledger, /id="ledger-external-rows"/);
+  assert.match(ledger, /\.\/external-coverage\.js/);
+  assert.match(ledger, /取得日/);
+  const extSec = ledger.slice(ledger.indexOf('外部公開資料との照合'), ledger.indexOf('化合物一覧'));
+  assert.equal((extSec.match(/<th /g) || []).length, 9, '外部照合表は9列');
+  const js = read('app10/ledger.js');
+  assert.match(js, /E\.audit\(D\)/);
+  assert.match(js, /未対応/);
+  const css = read('app10/app.css');
+  assert.match(css, /\.oc-ext-table \{/);
+  assert.match(css, /\.oc-ext-table td \{/);
+  assert.equal(/\.oc-ext-table td[^{]*\{[^}]*white-space:\s*nowrap/.test(css), false);
+});
+
+test('[external] 材料・混合物・無機の扱いを水増ししない', () => {
+  assert.equal(D.COMPOUNDS.rayon, undefined, 'レーヨンを化合物として重複収録しない');
+  assert.equal(D.COMPOUNDS.cellophane, undefined, 'セロファンを化合物として重複収録しない');
+  assert.equal(D.COMPOUNDS.cupra, undefined, 'キュプラを化合物として重複収録しない');
+  assert.equal(D.materialByTerm('レーヨン').of, 'cellulose');
+  assert.equal(D.materialByTerm('ビスコースレーヨン').of, 'cellulose');
+  assert.equal(D.materialByTerm('セロファン').of, 'cellulose');
+  assert.equal(D.materialByTerm('クプラ').of, 'cellulose');
+  assert.equal(D.materialByTerm('ビスコース').kind, 'mixture');
+  assert.equal(D.materialByTerm('アニリンブラック').of, 'polyaniline');
+  assert.ok(D.searchTermsFor('cellulose').includes('レーヨン'));
+  assert.ok(D.searchTermsFor('cellulose').includes('セロファン'));
+  assert.ok(D.searchTermsFor('cellulose').includes('クプラ'));
+  const inorganic = E.ROWS.filter((r) => r.kind === 'inorganic');
+  assert.equal(inorganic.length, 2);
+  for (const row of inorganic) {
+    assert.equal(row.ref, null);
+    assert.match(row.note, /無機/);
+  }
+});
+
+test('[alias] 既存別名の正規化漏れと対応先の欠落がない', () => {
+  const seen = new Map();
+  for (const a of D.ALIASES) {
+    assert.ok(D.COMPOUNDS[a.target], a.term + ' の対応先が未収録: ' + a.target);
+    const key = D.normalizeName(a.term);
+    assert.ok(key.length > 0, a.term + ' の正規化結果が空');
+    if (seen.has(key)) assert.equal(seen.get(key), a.target, '別名の対応先が衝突: ' + a.term);
+    seen.set(key, a.target);
+  }
+  assert.equal(D.aliasTarget('１−ペンタノール'), 'pentan-1-ol');
+  assert.equal(D.aliasTarget(' 塩化メチレン '), 'dichloromethane');
+  assert.equal(D.aliasTarget('ＣＨＬＯＲＯＦＯＲＭ'), null);
+  assert.equal(D.aliasTarget('クロロホルム'), 'chloroform');
+  assert.equal(D.aliasTarget('四塩化炭素'), 'carbon-tetrachloride');
+  assert.equal(D.aliasTarget('p-フェニルアゾフェノール'), 'p-hydroxyazobenzene');
+  assert.equal(D.aliasTarget('酢酸Na'), 'sodium-acetate');
+  for (const id of Object.keys(D.COMPOUNDS)) {
+    for (const term of D.searchTermsFor(id)) {
+      assert.ok(term && D.normalizeName(term).length > 0, id + ' の検索語');
+    }
+  }
 });
 
 test('[data] 反応・前駆体は個別情報で、カテゴリ一律コピーをしない', () => {
@@ -1017,6 +1149,53 @@ test('[draw] ビニロンはアセタール環と残存OHの模式図', () => {
   assert.match(svg, /アセタール環/);
   assert.match(svg, /OH/);
   assert.match(svg, />O<\/text>/);
+});
+
+test('[data] 外部照合で追加した糖・タンパク質・染料の構造データ', () => {
+  assert.equal(D.COMPOUNDS.cellobiose.structure.type, 'schematic');
+  assert.match(R.renderStructure(D.COMPOUNDS.cellobiose.structure, 'cellobiose'), /data-glycosidic="β-1,4"/);
+  assert.match(R.renderStructure(D.COMPOUNDS.cellobiose.structure, 'cellobiose'), /還元性あり/);
+  assert.equal(D.COMPOUNDS.trehalose.structure.kind, 'trehalose');
+  assert.match(R.renderStructure(D.COMPOUNDS.trehalose.structure, 'trehalose'), /data-glycosidic="α,α-1,1"/);
+  assert.match(R.renderStructure(D.COMPOUNDS.trehalose.structure, 'trehalose'), /非還元性/);
+  assert.equal(D.COMPOUNDS.cellobiose.formula, 'C12H22O11');
+  assert.equal(D.COMPOUNDS.trehalose.formula, 'C12H22O11');
+
+  assert.equal(D.COMPOUNDS.albumin.formulaVariable, true);
+  assert.match(D.COMPOUNDS.albumin.formulaDisplay, /組成/);
+  assert.match(R.renderStructure(D.COMPOUNDS.albumin.structure, 'albumin'), /data-protein="1"/);
+  assert.match(R.renderStructure(D.COMPOUNDS.albumin.structure, 'albumin'), /組成不定/);
+  const proteins = Object.values(D.COMPOUNDS).filter((c) => c.structure && c.structure.type === 'schematic' && /^protein-/.test(c.structure.kind));
+  assert.ok(proteins.length >= 20, 'タンパク質・酵素の収録数: ' + proteins.length);
+  for (const c of proteins) {
+    assert.equal(c.formulaVariable, true, c.id + ' は可変組成');
+    assert.ok(c.formulaDisplay, c.id + ' の表示式');
+  }
+
+  assert.equal(D.COMPOUNDS.heme.structure.type, 'custom');
+  assert.equal(D.COMPOUNDS.heme.formula, 'C34H32FeN4O4');
+  assert.equal(D.COMPOUNDS.heme.pubchem, 4973);
+  assert.ok(D.COMPOUNDS.heme.structure.atoms.some((a) => a.skipValence), '金属配位の原子価除外');
+  assert.equal(R.validate(D.COMPOUNDS.heme).ok, true);
+
+  for (const id of ['indigo', 'alizarin', 'shikonin', 'carminic-acid', 'dibromoindigo', 'carthamin', 'quercetin']) {
+    assert.equal(D.COMPOUNDS[id].structure.type, 'custom', id + ' は構造グラフ');
+    assert.equal(R.validate(D.COMPOUNDS[id]).ok, true, id + ' の検証');
+  }
+  assert.equal(D.COMPOUNDS['malonic-acid'].formula, 'C3H4O4');
+  assert.equal(D.COMPOUNDS['maleic-anhydride'].formula, 'C4H2O3');
+  assert.equal(D.COMPOUNDS['phthalic-anhydride'].formula, 'C8H4O3');
+});
+
+test('[static] 外部照合の出典がクレジットに記載される', () => {
+  const credits = read('credits.html');
+  assert.match(credits, /external-coverage\.js/);
+  assert.match(credits, /実教出版/);
+  assert.match(credits, /啓林館/);
+  assert.match(credits, /Try IT/);
+  assert.match(credits, /日本化学会/);
+  assert.match(credits, /jstage\.jst\.go\.jp/);
+  assert.match(credits, /標準的に暗記する範囲であることを意味しません/);
 });
 
 test('[static] 台帳の全セルはnowrapせず、4列目・7列目の幅を確保する', () => {

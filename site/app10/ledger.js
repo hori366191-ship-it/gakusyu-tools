@@ -6,6 +6,7 @@
 
   var D = window.OCData;
   var R = window.OCDraw;
+  var E = window.OCExternal;
   if (!D || !R) return;
 
   function prefersReducedMotion() {
@@ -131,8 +132,71 @@
     });
     coverageEl.innerHTML = '<p class="oc-ledger__note"><b>' + checked + ' / ' + totalItems + '</b> 項目が登録・検証済みです。' +
       '（延べ ' + D.COVERAGE_STATS.totalItems + ' 項目、ユニーク ' + D.COVERAGE_STATS.uniqueItems + ' 件、重複 ' + D.COVERAGE_STATS.duplicateItems + ' 件）' +
-      '<br>固定requiredリスト: ' + D.REQUIRED_CURRICULUM.length + ' 件（未登録 ' + D.COVERAGE_STATS.missing.length + ' 件、カバレッジ外 ' + D.COVERAGE_STATS.uncovered.length + ' 件）' +
+      '<br>固定requiredリスト: ' + D.REQUIRED_CURRICULUM.length + ' 件（未登録 ' + D.COVERAGE_STATS.missing.length + ' 件、カバレッジ外 ' + D.COVERAGE_STATS.uncovered.length + ' 件。カバレッジ外は外部照合台帳で追加した発展・探究項目を含みます）' +
       '<br>' + esc(D.COVERAGE_META.note) + '<br>' + esc(D.COVERAGE_META.scope) + '<br>' + esc(D.COVERAGE_META.exclusions) + '</p>' + covHtml;
+  }
+
+  // ---- 外部公開資料との照合 ----
+  if (E && document.getElementById('ledger-external-rows')) {
+    var extAudit = E.audit(D);
+    var kindLabel = function (k) {
+      return { compound: '化合物', alias: '別名', material: '材料', mixture: '混合物', inorganic: '無機（対象外）', class: '総称' }[k] || k;
+    };
+    var refLabel = function (row) {
+      if (row.kind === 'compound' || row.kind === 'alias') {
+        return '<a href="#c-' + esc(row.ref) + '">' + esc(row.ref) + '</a>';
+      }
+      if (row.kind === 'material') {
+        var m = D.materialByTerm(row.name);
+        return m && m.of ? esc(m.of) + ' の材料' : '材料索引';
+      }
+      if (row.kind === 'mixture') return '混合物（単一化合物でない）';
+      if (row.kind === 'inorganic') return '対象外（無機）';
+      if (row.kind === 'class') {
+        var cat = D.categoryById(row.ref);
+        return (cat ? esc(cat.name) : esc(row.ref)) + '（総称）';
+      }
+      return '—';
+    };
+    var extStats = [
+      { b: extAudit.sources, s: '資料' },
+      { b: extAudit.uniqueNames, s: '抽出名称（重複除く）' },
+      { b: extAudit.rows, s: '照合行' },
+      { b: extAudit.missing.length, s: '未対応' }
+    ];
+    document.getElementById('ledger-external-stats').innerHTML = extStats.map(function (x) {
+      return '<div class="oc-stat"><b>' + esc(x.b) + '</b><span>' + esc(x.s) + '</span></div>';
+    }).join('');
+    var kindBits = E.KINDS.map(function (k) {
+      return kindLabel(k) + ' ' + (extAudit.byKind[k] || 0);
+    }).join(' / ');
+    var levelBits = E.LEVELS.map(function (l) {
+      return l + ' ' + (extAudit.byLevel[l] || 0);
+    }).join(' / ');
+    document.getElementById('ledger-external-note').textContent =
+      '照合結果: ' + (extAudit.missing.length === 0 ? '未対応 0 件（すべて収録ID・別名・材料索引・対象外のいずれかに対応）' :
+        '未対応 ' + extAudit.missing.length + ' 件（下の表で赤く表示）') +
+      '。種別内訳: ' + kindBits + '。資料側ラベル: ' + levelBits +
+      '。外部説明は転載せず、短い根拠は本アプリ用に要約したものです。';
+    var extRows = E.ROWS.map(function (row, idx) {
+      var src = E.SOURCES[row.source];
+      var res = E.resolveRow(row, D);
+      var missing = !res.ok;
+      var srcCell = src ? '<a href="' + esc(src.url) + '" target="_blank" rel="noopener" title="' +
+        esc(src.title) + '">' + esc(row.source) + '</a> <span class="oc-micro">' + esc(src.domain) + '</span>' : esc(row.source);
+      return '<tr' + (missing ? ' class="oc-ext-missing"' : '') + ' data-ext-index="' + idx + '">' +
+        '<td><b>' + esc(row.name) + '</b></td>' +
+        '<td>' + esc(kindLabel(row.kind)) + '</td>' +
+        '<td class="oc-id">' + refLabel(row) + '</td>' +
+        '<td>' + srcCell + '</td>' +
+        '<td>' + esc(row.section) + '</td>' +
+        '<td><span class="oc-id">' + esc(row.date) + '</span></td>' +
+        '<td>' + esc(row.evidence) + (missing ? '<br><span class="oc-ng">' + esc(res.reason) + '</span>' : '') + '</td>' +
+        '<td><span class="oc-ext-level oc-ext-level--' + esc(row.level) + '">' + esc(row.level) + '</span></td>' +
+        '<td>' + esc(row.note || '') + '</td>' +
+        '</tr>';
+    }).join('');
+    document.getElementById('ledger-external-rows').innerHTML = extRows;
   }
 
   // ---- 分類フィルタ ----
@@ -175,7 +239,7 @@
       var c = D.COMPOUNDS[id];
       var v = validation[id];
       if (cat && c.category !== cat) return;
-      var hay = (c.name + ' ' + id + ' ' + c.formula + ' ' + (c.formulaDisplay || R.formatFormula(c.formula)) + ' ' + (D.categoryById(c.category) || {}).name + ' ' + (c.subcategory || '')).toLowerCase();
+      var hay = (c.name + ' ' + id + ' ' + c.formula + ' ' + (c.formulaDisplay || R.formatFormula(c.formula)) + ' ' + (D.categoryById(c.category) || {}).name + ' ' + (c.subcategory || '') + ' ' + (D.searchTermsFor ? D.searchTermsFor(id).join(' ') : '')).toLowerCase();
       if (q && hay.indexOf(q) === -1) return;
       shown++;
       var catName = D.categoryById(c.category) ? D.categoryById(c.category).name : c.category;

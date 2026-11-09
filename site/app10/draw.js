@@ -846,23 +846,56 @@
       content += textEl(210, 172, isDna ? 'デオキシリボース—リン酸鎖／塩基 A-T, G-C' : 'リボース—リン酸鎖／塩基 A-U, G-C', 'oc-schematic-note', 13);
       return svgOpen(0, 0, 420, 195, label, 'data-kind="schematic" data-sugar="' + esc(kind) + '"') + content + '</svg>';
     }
-    if (kind === 'sucrose' || kind === 'maltose' || kind === 'lactose') {
+    if (kind === 'sucrose' || kind === 'maltose' || kind === 'lactose' || kind === 'cellobiose' || kind === 'trehalose') {
+      var dis = {
+        sucrose: { left: 'α-D-グルコース', right: 'β-D-フルクトフラノース', link: 'α-1,2', furanose: true, anomer: true, reducing: 'no' },
+        maltose: { left: 'α-D-グルコース', right: 'D-グルコース', link: 'α-1,4', anomer: false, reducing: 'yes' },
+        lactose: { left: 'β-D-ガラクトース', right: 'D-グルコース', link: 'β-1,4', anomer: false, reducing: 'yes' },
+        cellobiose: { left: 'β-D-グルコース', right: 'β-D-グルコース', link: 'β-1,4', anomer: true, reducing: 'yes' },
+        trehalose: { left: 'α-D-グルコース', right: 'α-D-グルコース', link: 'α,α-1,1', anomer: true, reducing: 'no' }
+      }[kind];
       var isSucrose = kind === 'sucrose';
-      var leftLabel = isSucrose ? 'α-D-グルコース' : (kind === 'maltose' ? 'α-D-グルコース' : 'β-D-ガラクトース');
-      var rightLabel = isSucrose ? 'β-D-フルクトフラノース' : 'D-グルコース';
-      var link = isSucrose ? 'α-1,2' : (kind === 'maltose' ? 'α-1,4' : 'β-1,4');
       var content = schematicSugarRing(100, 101, 65, 1) +
-        (isSucrose ? schematicFuranoseRing() : schematicSugarRing(320, 101, 65, 5)) +
-        '<text x="100" y="18" text-anchor="middle" class="oc-schematic-text" font-size="13">' + esc(leftLabel) + '</text>' +
-        '<text x="320" y="18" text-anchor="middle" class="oc-schematic-text" font-size="13">' + esc(rightLabel) + '</text>' +
+        (dis.furanose ? schematicFuranoseRing() : schematicSugarRing(320, 101, 65, 5)) +
+        '<text x="100" y="18" text-anchor="middle" class="oc-schematic-text" font-size="13">' + esc(dis.left) + '</text>' +
+        '<text x="320" y="18" text-anchor="middle" class="oc-schematic-text" font-size="13">' + esc(dis.right) + '</text>' +
         lineEl(165, 101, 200, 101, 'oc-bond', 2.6) +
         lineEl(220, 101, 255, 101, 'oc-bond', 2.6) +
         textEl(210, 101, 'O', 'oc-atom', 21) +
-        (isSucrose ? textEl(180, 82, 'α', 'oc-schematic-note', 14) + textEl(240, 82, 'β', 'oc-schematic-note', 14) : '') +
-        textEl(210, 132, link, 'oc-schematic-note', 14);
+        (dis.anomer ? textEl(180, 82, kind === 'trehalose' ? 'α' : (kind === 'cellobiose' ? 'β' : 'α'), 'oc-schematic-note', 14) +
+          textEl(240, 82, kind === 'trehalose' ? 'α' : (kind === 'cellobiose' ? 'β' : 'β'), 'oc-schematic-note', 14) : '') +
+        textEl(210, 132, dis.link, 'oc-schematic-note', 14) +
+        textEl(210, 152, dis.reducing === 'yes' ? '還元性あり' : '非還元性', 'oc-schematic-note', 12);
       return svgOpen(0, 0, 420, 180, label, 'data-kind="schematic" data-sugar="' + esc(kind) +
-        '" data-ring-count="2" data-glycosidic="' + esc(link) + '"' +
-        (isSucrose ? ' data-fructose-ring="furanose" data-anomer-glucose="alpha" data-anomer-fructose="beta"' : '')) + content + '</svg>';
+        '" data-ring-count="2" data-glycosidic="' + esc(dis.link) + '" data-reducing="' + esc(dis.reducing) + '"' +
+        (dis.furanose ? ' data-fructose-ring="furanose" data-anomer-glucose="alpha" data-anomer-fructose="beta"' :
+          (kind === 'cellobiose' ? ' data-anomer="beta"' : (kind === 'trehalose' ? ' data-anomer="alpha,alpha"' : '')))) + content + '</svg>';
+    }
+    if (kind.indexOf('protein') === 0) {
+      // タンパク質・酵素はアミノ酸配列と重合度で組成が変わるため、
+      // 主鎖と側鎖Rの模式図だけを示し、固定の分子式は主張しない。
+      var plabel = spec.unitLabel || 'アミノ酸単位 —NH—CH(R)—CO—';
+      var pcontent = '';
+      pcontent += lineEl(70, 100, 120, 70, 'oc-bond', 2.4);
+      pcontent += lineEl(120, 70, 170, 100, 'oc-bond', 2.4);
+      pcontent += lineEl(170, 100, 220, 70, 'oc-bond', 2.4);
+      pcontent += lineEl(220, 70, 270, 100, 'oc-bond', 2.4);
+      pcontent += lineEl(270, 100, 320, 70, 'oc-bond', 2.4);
+      pcontent += textEl(95, 78, 'NH', 'oc-atom', 15);
+      pcontent += textEl(145, 92, 'CO', 'oc-atom', 15);
+      pcontent += textEl(195, 78, 'NH', 'oc-atom', 15);
+      pcontent += textEl(245, 92, 'CO', 'oc-atom', 15);
+      pcontent += textEl(120, 52, 'R', 'oc-atom', 15);
+      pcontent += textEl(220, 52, 'R', 'oc-atom', 15);
+      pcontent += textEl(195, 132, plabel, 'oc-schematic-note', 13);
+      pcontent += textEl(195, 154, '側鎖R・配列・重合度に依存（組成不定）', 'oc-schematic-note', 12);
+      pcontent += lineEl(50, 50, 34, 50, 'oc-bracket', 2.4);
+      pcontent += lineEl(34, 50, 34, 140, 'oc-bracket', 2.4);
+      pcontent += lineEl(34, 140, 50, 140, 'oc-bracket', 2.4);
+      pcontent += lineEl(340, 50, 356, 50, 'oc-bracket', 2.4);
+      pcontent += lineEl(356, 50, 356, 140, 'oc-bracket', 2.4);
+      pcontent += lineEl(356, 140, 340, 140, 'oc-bracket', 2.4);
+      return svgOpen(0, 0, 390, 175, label, 'data-kind="schematic" data-protein="1"') + pcontent + '</svg>';
     }
     // 多糖類: 糖環がグリコシド酸素で連なる模式図
     var unitLabel = spec.unitLabel || 'グルコース単位';
@@ -1151,6 +1184,8 @@
   function checkValence(g) {
     var errors = [];
     g.atoms.forEach(function (a, i) {
+      // 金属配位結合など、通常の原子価の数え方が当てはまらない原子は明示的に除外する。
+      if (a.skipValence) return;
       var allowed = VALENCES[a.el];
       if (!allowed) return;
       var sum = 0;

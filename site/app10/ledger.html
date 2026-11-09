@@ -59,6 +59,32 @@
   </section>
 
   <section class="oc-ledger__section">
+    <h2>外部公開資料との照合</h2>
+    <p>この表は、教科書・入試の標準範囲を確認する上の「カバレッジ・チェックリスト」とは別の根拠です。外部の公開資料に掲載された名称から出発し、収録ID・既存の別名・材料索引・無機化合物の対象外のいずれかに対応するかを確認します。公開資料に掲載されていることは、標準的に暗記する範囲であることを意味しません。各行の「標準／発展／探究」は資料側の位置づけです。</p>
+    <div id="ledger-external-stats" class="oc-stats"></div>
+    <p class="oc-ledger__note" id="ledger-external-note"></p>
+    <div class="oc-table-wrap">
+      <table class="oc-table oc-ext-table">
+        <caption class="oc-sr-only">外部公開資料の抽出名称と収録対応の一覧</caption>
+        <thead>
+          <tr>
+            <th scope="col">抽出名称</th>
+            <th scope="col">種別</th>
+            <th scope="col">対応ID・別名</th>
+            <th scope="col">資料</th>
+            <th scope="col">節</th>
+            <th scope="col">取得日</th>
+            <th scope="col">短い根拠</th>
+            <th scope="col">ラベル</th>
+            <th scope="col">備考</th>
+          </tr>
+        </thead>
+        <tbody id="ledger-external-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="oc-ledger__section">
     <h2>化合物一覧</h2>
     <p>名称・分子式・収録方式・検証方法・説明データの登録状況・出典を確認できます。行のIDはアプリのカードから直接リンクされます。説明データの「詳細あり」は性質・用途・由来を個別に記載、「分類相当」は分類レベルの情報、「最小限」は構造と基本情報のみであることを示します。</p>
     <div class="oc-filter">
@@ -117,6 +143,7 @@
 
 <script src="./data.js"></script>
 <script src="./draw.js"></script>
+<script src="./external-coverage.js"></script>
 <script src="./ledger.js"></script>
 </body>
 </html>
