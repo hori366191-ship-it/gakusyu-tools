@@ -55,6 +55,28 @@
     });
   }
 
+  function rawEntriesFor(skeletonId, groupId) {
+    var table = D.COMBOS[skeletonId];
+    if (!table || !table[groupId]) return [];
+    return table[groupId].slice();
+  }
+
+  function invalidEntryErrors(entries) {
+    var out = [];
+    var seen = {};
+    (entries || []).forEach(function (entry) {
+      if (valid[entry.id] || seen[entry.id]) return;
+      seen[entry.id] = true;
+      var v = validation[entry.id] || {};
+      out.push({
+        id: entry.id,
+        name: (D.COMPOUNDS[entry.id] || {}).name || entry.id,
+        errors: (v.errors || ['検証結果がありません']).join(' / ')
+      });
+    });
+    return out;
+  }
+
   function selectedSkeleton() {
     return D.skeletonById(state.skeleton) || D.SKELETONS[0];
   }
@@ -392,14 +414,11 @@
     var v = validation[c.id] || {};
     var verificationShort = v.verification ? v.verification.short : '未確認';
     var formulaText = c.formulaDisplay || R.formatFormula(c.formula);
-    var formulaLabel = c.formulaVariable ? '一般式' : '分子式';
+    var formulaLabel = c.formulaVariable ? '組成・一般式' : '分子式';
     var badges = [];
     badges.push('<span class="oc-badge">' + esc(individual ? '個別登録' : (skeletonOnly ? '骨格のみ' : '組合せ生成')) + '</span>');
     if (c.figures && c.figures.length > 1) badges.push('<span class="oc-badge">' + c.figures.length + '形態</span>');
     var note = c.notes || '';
-    if (c.dataStatus === 'minimal') {
-      note = (note ? note + ' ' : '') + '個別の用途・由来などの詳細は情報未登録です。';
-    }
     var pubchem = '';
     if (c.pubchem) {
       pubchem = '<a href="https://pubchem.ncbi.nlm.nih.gov/compound/' + encodeURIComponent(c.pubchem) +
@@ -418,6 +437,8 @@
         fact('性質', c.properties) +
         fact('主な用途', c.uses) +
         fact('自然界・由来', c.nature) +
+        (c.precursors ? fact('主な前駆体・生成', c.precursors) : '') +
+        (c.reactions ? fact('主な反応', c.reactions) : '') +
         (c.hazards ? fact('危険性', c.hazards, { warn: true }) : '') +
       '</div>' +
       (note ? '<p class="oc-card__note">' + esc(note) + '</p>' : '') +
@@ -430,6 +451,8 @@
     var sk = selectedSkeleton();
     var g = selectedGroup();
     var entries = entriesFor(sk.id, g.id);
+    var raw = rawEntriesFor(sk.id, g.id);
+    var invalid = invalidEntryErrors(raw);
     var individual = !!sk.locked;
     var desc;
     if (individual) desc = '個別登録された化合物の説明';
@@ -439,12 +462,29 @@
     els.resultCount.textContent = entries.length ? entries.length + ' 種類' : '0 種類';
 
     if (!entries.length) {
-      var reason = g.id === 'none'
-        ? 'この骨格の化合物は分子式・登録データ整合の確認に通りませんでした。'
-        : D.unsupportedReason(sk.id, g.id);
-      els.results.innerHTML = '<div class="oc-empty"><strong>この組み合わせは未収録です</strong>' +
-        '<p>' + esc(reason) + '</p>' +
-        '<p style="margin-top:8px">収録範囲と未対応事項は <a href="./ledger.html">収録台帳</a> で確認できます。</p></div>';
+      if (raw.length) {
+        // 登録はあるが検証に失敗した場合は、範囲外にせずデータ不備として止める。
+        els.results.innerHTML = '<div class="oc-empty oc-empty--error"><strong>登録データの検証に失敗しました</strong>' +
+          '<p>この組み合わせには登録済み化合物がありますが、分子式・結合価・登録データの整合が確認できないため表示を停止しています。範囲外の組み合わせとして扱いません。</p>' +
+          invalid.map(function (x) {
+            return '<p class="oc-data-error"><b>' + esc(x.name) + '</b>（' + esc(x.id) + '）: ' + esc(x.errors) + '</p>';
+          }).join('') +
+          '<p style="margin-top:8px">収録台帳の検証列も確認してください。</p></div>';
+        return;
+      }
+      var ue = D.unsupportedEntry ? D.unsupportedEntry(sk.id, g.id) : null;
+      if (ue) {
+        var typeLabel = ue.type === 'out-of-scope' ? '高校化学の範囲外' : '化学的に成立しない';
+        els.results.innerHTML = '<div class="oc-empty"><strong>この組み合わせは未対応です</strong>' +
+          '<p class="oc-reason-type">区分: ' + esc(typeLabel) + '</p>' +
+          '<p>' + esc(ue.reason) + '</p>' +
+          (ue.examples && ue.examples.length ? '<p class="oc-reason-examples">具体例: ' + esc(ue.examples.join('、')) + '</p>' : '') +
+          '<p style="margin-top:8px">収録範囲と未対応事項は <a href="./ledger.html">収録台帳</a> で確認できます。</p></div>';
+        return;
+      }
+      // 理由データ自体がない場合も、範囲外にせずデータ不備として表示する。
+      els.results.innerHTML = '<div class="oc-empty oc-empty--error"><strong>未対応理由のデータがありません</strong>' +
+        '<p>この組み合わせの理由データが未登録です。範囲外・不成立のいずれにも分類していません。収録台帳のデータ整備が必要です。</p></div>';
       return;
     }
 
@@ -474,8 +514,12 @@
       });
       html += '</div></div>';
     });
-    els.results.innerHTML = html + '<p class="oc-results__note">※ グラフ構造は原子数・結合価・分子式を自動照合し、環＋置換・投影式・簡略式・トリグリセリド・重合体・模式図は分子式・一般式と登録データの整合を確認しています。' +
-      '描画の見た目は自動検証の対象外です。</p>';
+    els.results.innerHTML = html +
+      (invalid.length ? '<div class="oc-empty oc-empty--error"><strong>一部の登録データを表示できません</strong>' +
+        invalid.map(function (x) {
+          return '<p class="oc-data-error"><b>' + esc(x.name) + '</b>（' + esc(x.id) + '）: ' + esc(x.errors) + '</p>';
+        }).join('') + '</div>' : '') +
+      '<p class="oc-results__note">※ グラフ構造は原子数・結合価・分子式を自動照合し、環＋置換・投影式・簡略式・トリグリセリド・重合体は分子式・一般式と登録データの整合を確認しています。模式図・可変組成は表示式のみで、原子レベルの検証対象外です。描画の見た目は自動検証の対象外です。</p>';
   }
 
   function renderDataStatus() {
@@ -489,7 +533,8 @@
       else otherCount++;
     });
     els.dataStatus.textContent = '収録 ' + total + ' 化合物／分子式・登録データ整合 ' + ok +
-      ' 件（原子レベル ' + atomCount + '・非グラフ ' + otherCount + '。非グラフは分子式・登録データの整合で判定）';
+      ' 件（原子レベル ' + atomCount + '・非グラフ ' + otherCount + '。非グラフは分子式・登録データの整合で判定）' +
+      '／カバレッジ ' + ((D.COVERAGE || []).length) + '区分';
   }
 
   function scrollActiveSkeleton() {

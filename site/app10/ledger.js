@@ -88,9 +88,11 @@
   document.getElementById('ledger-stats').innerHTML = stats.map(function (x) {
     return '<div class="oc-stat"><b>' + esc(x.b) + '</b><span>' + esc(x.s) + '</span></div>';
   }).join('');
+  var invalidCount = ids.filter(function (id) { return !validation[id].ok; }).length;
   document.getElementById('ledger-verification-note').textContent =
     '「分子式・登録データ整合」は、グラフ構造では原子数・結合価・分子式、環＋置換・投影式・簡略式・トリグリセリド・重合体・模式図では分子式・一般式と登録データの整合を確認した件数です。' +
-    '原子レベルの構造検証は ' + atomCount + ' 件、非グラフは ' + otherCount + ' 件で、非グラフは分子式・一般式と登録データの整合で判定しています。';
+    '原子レベルの構造検証は ' + atomCount + ' 件、非グラフは ' + otherCount + ' 件で、非グラフは分子式・一般式と登録データの整合、模式図・可変組成は表示式のみで判定しています（原子レベルの検証対象外）。' +
+    (invalidCount ? ' 検証に失敗したデータが ' + invalidCount + ' 件あります（範囲外ではなくデータ不備として扱います）。' : ' すべての登録データが検証に合格しています。');
 
   // ---- 19分野の収録状況 ----
   var catCounts = {};
@@ -104,6 +106,34 @@
       '<span class="oc-coverage__count">' + n + ' 件</span>' +
       '<span>' + esc(cat.note) + '</span></div>';
   }).join('');
+
+  // ---- カバレッジ・チェックリスト ----
+  var coverageEl = document.getElementById('ledger-coverage-checklist');
+  if (coverageEl && D.COVERAGE) {
+    var checked = 0, totalItems = 0;
+    var covHtml = '';
+    D.COVERAGE.forEach(function (group) {
+      var rows = group.items.map(function (id) {
+        totalItems++;
+        var c = D.COMPOUNDS[id];
+        var v = c ? validation[id] : null;
+        var status = !c ? '<span class="oc-ng">未登録</span>' :
+          (v && v.ok ? '<span class="oc-ok">✓ 登録・検証済み</span>' : '<span class="oc-ng">✗ 検証失敗</span>');
+        if (c && v && v.ok) checked++;
+        return '<li><span class="oc-id">' + esc(id) + '</span> ' +
+          (c ? esc(c.name) : '—') + ' ' + status + '</li>';
+      }).join('');
+      covHtml += '<details class="oc-group" style="margin-bottom:8px">' +
+        '<summary>' + esc(group.label) + ' <span class="oc-tag">' + group.items.length + '件</span>' +
+        (D.SOURCES[group.source] ? ' <span class="oc-micro">出典: ' + esc(D.SOURCES[group.source].label) + '</span>' : '') +
+        '</summary>' +
+        '<ul class="oc-notes" style="margin-top:6px">' + rows + '</ul></details>';
+    });
+    coverageEl.innerHTML = '<p class="oc-ledger__note"><b>' + checked + ' / ' + totalItems + '</b> 項目が登録・検証済みです。' +
+      '（延べ ' + D.COVERAGE_STATS.totalItems + ' 項目、ユニーク ' + D.COVERAGE_STATS.uniqueItems + ' 件、重複 ' + D.COVERAGE_STATS.duplicateItems + ' 件）' +
+      '<br>固定requiredリスト: ' + D.REQUIRED_CURRICULUM.length + ' 件（未登録 ' + D.COVERAGE_STATS.missing.length + ' 件、カバレッジ外 ' + D.COVERAGE_STATS.uncovered.length + ' 件）' +
+      '<br>' + esc(D.COVERAGE_META.note) + '<br>' + esc(D.COVERAGE_META.scope) + '<br>' + esc(D.COVERAGE_META.exclusions) + '</p>' + covHtml;
+  }
 
   // ---- 分類フィルタ ----
   var catSelect = document.getElementById('ledger-category');
@@ -189,11 +219,14 @@
       if (g.id === 'none') return;
       var list = (D.COMBOS[sk.id] || {})[g.id] || [];
       if (!list.length) {
+        var entry = D.unsupportedEntry ? D.unsupportedEntry(sk.id, g.id) : null;
         unsupported.push({
           section: sk.section,
           label: sk.label,
           group: g.label,
-          reason: D.unsupportedReason(sk.id, g.id)
+          type: entry ? entry.type : 'data-error',
+          reason: entry ? entry.reason : '理由データ未登録（データ不備）',
+          examples: entry ? entry.examples : []
         });
       }
     });
@@ -210,7 +243,11 @@
       '<summary>' + esc(section) + ' <span class="oc-tag">' + list.length + '件</span></summary>' +
       '<ul class="oc-notes" style="margin-top:6px">';
     list.forEach(function (u) {
-      uhtml += '<li><b>' + esc(u.label) + ' ＋ ' + esc(u.group) + '</b> — ' + esc(u.reason) + '</li>';
+      var typeLabel = u.type === 'out-of-scope' ? '高校化学の範囲外' :
+        (u.type === 'chemically-invalid' ? '化学的に成立しない' : 'データ不備');
+      uhtml += '<li><b>' + esc(u.label) + ' ＋ ' + esc(u.group) + '</b> — <span class="oc-reason-type">' +
+        esc(typeLabel) + '</span> ' + esc(u.reason) +
+        (u.examples && u.examples.length ? ' <span class="oc-micro">例: ' + esc(u.examples.join('、')) + '</span>' : '') + '</li>';
     });
     uhtml += '</ul></details>';
   });

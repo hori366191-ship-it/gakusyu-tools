@@ -442,6 +442,11 @@ a { color: var(--oc-accent); }
 .oc-empty strong { display: block; color: var(--oc-ink); font-size: 15px; margin-bottom: 6px; }
 .oc-empty p { margin: 0 auto; max-width: 540px; font-size: 12.5px; }
 .oc-empty a { font-weight: 700; }
+.oc-empty--error { border-color: #c0392b; background: #fff6f4; }
+.oc-empty--error strong { color: #8e2418; }
+.oc-data-error { font-family: var(--oc-mono, monospace); font-size: 11px; color: #8e2418; overflow-wrap: anywhere; }
+.oc-reason-type { display: inline-block; font-weight: 700; font-size: 11.5px; color: var(--oc-ink); }
+.oc-reason-examples { font-size: 11.5px; }
 .oc-results__note { margin: 11px 2px 0; font-size: 11px; color: var(--oc-muted); }
 
 /* ---------- info ---------- */

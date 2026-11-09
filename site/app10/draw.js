@@ -14,7 +14,11 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  var VALENCE = { C: 4, N: 3, O: 2, Cl: 1, Na: 1, S: 2, P: 3 };
+  // 原子価は複数の値を許容する（S は 2/4/6、P は 3/5）。ハロゲンも同じ表で扱う。
+  var VALENCES = {
+    C: [4], N: [3], O: [2], F: [1], Cl: [1], Br: [1], I: [1],
+    Na: [1], S: [2, 4, 6], P: [3, 5], Si: [4], B: [3]
+  };
   var SUB_DIGIT = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
   var TAU = Math.PI * 2;
 
@@ -190,6 +194,39 @@
       ],
       bonds: [bond(0, 1, 1), bond(0, 2, 1), bond(0, 3, 1), bond(0, 4, 1)],
       mode: 'condensed', width: 360, height: 280
+    };
+    s.hexane = chainGraph(6, { h: [3, 2, 2, 2, 2, 3], mode: 'condensed', width: 460, height: 250 });
+    s['2-methylpentane'] = {
+      atoms: [
+        atom('C', 40, 142, 3), atom('C', 110, 98, 1), atom('C', 180, 142, 2),
+        atom('C', 250, 98, 2), atom('C', 320, 142, 3), atom('C', 110, 30, 3)
+      ],
+      bonds: [bond(0, 1, 1), bond(1, 2, 1), bond(2, 3, 1), bond(3, 4, 1), bond(1, 5, 1)],
+      mode: 'condensed', width: 420, height: 260
+    };
+    s['3-methylpentane'] = {
+      atoms: [
+        atom('C', 40, 142, 3), atom('C', 110, 98, 2), atom('C', 180, 142, 1),
+        atom('C', 250, 98, 2), atom('C', 320, 142, 3), atom('C', 180, 214, 3)
+      ],
+      bonds: [bond(0, 1, 1), bond(1, 2, 1), bond(2, 3, 1), bond(3, 4, 1), bond(2, 5, 1)],
+      mode: 'condensed', width: 420, height: 280
+    };
+    s['2,2-dimethylbutane'] = {
+      atoms: [
+        atom('C', 60, 120, 3), atom('C', 140, 120, 0), atom('C', 220, 120, 2),
+        atom('C', 300, 120, 3), atom('C', 140, 42, 3), atom('C', 140, 198, 3)
+      ],
+      bonds: [bond(0, 1, 1), bond(1, 2, 1), bond(2, 3, 1), bond(1, 4, 1), bond(1, 5, 1)],
+      mode: 'condensed', width: 400, height: 280
+    };
+    s['2,3-dimethylbutane'] = {
+      atoms: [
+        atom('C', 50, 120, 3), atom('C', 120, 80, 1), atom('C', 200, 80, 1),
+        atom('C', 270, 120, 3), atom('C', 120, 168, 3), atom('C', 200, 168, 3)
+      ],
+      bonds: [bond(0, 1, 1), bond(1, 2, 1), bond(2, 3, 1), bond(1, 4, 1), bond(2, 5, 1)],
+      mode: 'condensed', width: 400, height: 280
     };
 
     s.ethene = {
@@ -684,6 +721,9 @@
     var x = 92;
     var ys = [58, 128, 198];
     var labels = ['CH₂', 'CH', 'CH₂'];
+    var chains = spec.chains && spec.chains.length === 3
+      ? spec.chains
+      : ['C₁₇H₃₅', 'C₁₇H₃₅', 'C₁₇H₃₅'];
     var out = '';
     // グリセリン骨格のC-C結合（3つの炭素を縦に明示）
     out += lineEl(x, ys[0] + 13, x, ys[1] - 13, 'oc-bond oc-bond--backbone', 2.8);
@@ -692,7 +732,7 @@
       out += textEl(x, ys[i], labels[i], 'oc-condensed', 19);
       out += lineEl(x + 13, ys[i], x + 42, ys[i], 'oc-bond', 2.6);
       out += '<text x="' + (x + 48) + '" y="' + ys[i] + '" text-anchor="start" dominant-baseline="middle" class="oc-condensed" font-size="17" data-chain="fatty-acid">' +
-        esc('O—CO—C₁₇H₃₅') + '</text>';
+        esc('O—CO—' + chains[i]) + '</text>';
     }
     out += textEl(W / 2, 242, 'グリセリン骨格と3本の脂肪酸鎖（簡略）', 'oc-projection-note', 12);
     return svgOpen(0, 0, W, H, label, 'data-kind="triglyceride"') + out + '</svg>';
@@ -716,83 +756,272 @@
     return svgOpen(0, 0, width, height, label, 'data-kind="polymer"') + content + '</svg>';
   }
 
+  function renderVinylon(spec, label) {
+    var W = 480, H = 220;
+    var out = '';
+    // 部分ホルマール化PVAの模式図（アセタール環と残存OH）
+    out += lineEl(50, 130, 130, 130, 'oc-bond', 2.6);
+    out += lineEl(250, 130, 300, 155, 'oc-bond', 2.6);
+    out += lineEl(300, 155, 360, 130, 'oc-bond', 2.6);
+    out += lineEl(360, 130, 410, 130, 'oc-bond', 2.6);
+    // 6員アセタール環: C1-C2-C3-O-CH2-O
+    out += lineEl(130, 130, 190, 95, 'oc-bond', 2.6);
+    out += lineEl(190, 95, 250, 130, 'oc-bond', 2.6);
+    out += lineEl(250, 130, 250, 65, 'oc-bond', 2.6);
+    out += lineEl(250, 65, 190, 30, 'oc-bond', 2.6);
+    out += lineEl(190, 30, 130, 65, 'oc-bond', 2.6);
+    out += lineEl(130, 65, 130, 130, 'oc-bond', 2.6);
+    out += textEl(130, 130, 'CH', 'oc-condensed', 17);
+    out += textEl(190, 95, 'CH₂', 'oc-condensed', 17);
+    out += textEl(250, 130, 'CH', 'oc-condensed', 17);
+    out += textEl(250, 65, 'O', 'oc-atom', 19);
+    out += textEl(190, 30, 'CH₂', 'oc-condensed', 17);
+    out += textEl(130, 65, 'O', 'oc-atom', 19);
+    out += textEl(300, 155, 'CH₂', 'oc-condensed', 17);
+    out += textEl(360, 130, 'CH', 'oc-condensed', 17);
+    // 残存OH（右側の閉括弧と接触しないよう環の内側上方へ配置）
+    out += lineEl(360, 130, 382, 105, 'oc-bond', 2.2);
+    out += textEl(392, 92, 'OH', 'oc-atom', 18);
+    out += textEl(50, 130, '—', 'oc-condensed', 18);
+    // 括弧と重合度
+    out += lineEl(40, 70, 28, 70, 'oc-bracket', 2.4);
+    out += lineEl(28, 70, 28, 170, 'oc-bracket', 2.4);
+    out += lineEl(28, 170, 40, 170, 'oc-bracket', 2.4);
+    out += lineEl(420, 70, 432, 70, 'oc-bracket', 2.4);
+    out += lineEl(432, 70, 432, 170, 'oc-bracket', 2.4);
+    out += lineEl(432, 170, 420, 170, 'oc-bracket', 2.4);
+    out += textEl(444, 166, 'n', 'oc-atom', 16);
+    out += textEl(W / 2, 205, '部分ホルマール化PVA（アセタール環＋残存OH）', 'oc-projection-note', 12);
+    return svgOpen(0, 0, W, H, label, 'data-kind="schematic" data-sugar="vinylon"') + out + '</svg>';
+  }
+
+  function schematicSugarRing(cx, cy, r, oIndex) {
+    var pts = ringCoords(6, cx, cy, r, 0);
+    var out = '';
+    for (var i = 0; i < 6; i++) {
+      var a = pts[i], b = pts[(i + 1) % 6];
+      out += lineEl(a.x, a.y, b.x, b.y, 'oc-bond oc-schematic-ring', 2.2);
+    }
+    out += textEl(pts[oIndex].x, pts[oIndex].y, 'O', 'oc-atom', 18);
+    return out;
+  }
+
+  function schematicFuranoseRing() {
+    var C2 = { x: 255, y: 101 };
+    var O = { x: 300, y: 60 };
+    var C5 = { x: 345, y: 101 };
+    var C4 = { x: 320, y: 160 };
+    var C3 = { x: 270, y: 150 };
+    var out = '';
+    out += lineEl(C2.x, C2.y, O.x, O.y, 'oc-bond oc-schematic-ring', 2.2);
+    out += lineEl(O.x, O.y, C5.x, C5.y, 'oc-bond oc-schematic-ring', 2.2);
+    out += lineEl(C5.x, C5.y, C4.x, C4.y, 'oc-bond oc-schematic-ring', 2.2);
+    out += lineEl(C4.x, C4.y, C3.x, C3.y, 'oc-bond oc-schematic-ring', 2.2);
+    out += lineEl(C3.x, C3.y, C2.x, C2.y, 'oc-bond oc-schematic-ring', 2.2);
+    out += textEl(O.x, O.y, 'O', 'oc-atom', 18);
+    return out;
+  }
+
   function renderSchematic(spec, label) {
     var kind = spec.kind;
+    if (kind === 'vinylon') return renderVinylon(spec, label);
+    if (kind === 'dna' || kind === 'rna') {
+      var isDna = kind === 'dna';
+      var bases = isDna ? ['A', 'T', 'G', 'C'] : ['A', 'U', 'G', 'C'];
+      var complement = isDna ? { A: 'T', T: 'A', G: 'C', C: 'G' } : { A: 'U', U: 'A', G: 'C', C: 'G' };
+      var content = '';
+      // 2本の糖—リン酸鎖（模式）と塩基対
+      content += lineEl(55, 72, 365, 72, 'oc-bond oc-bond--backbone', 3.2);
+      content += lineEl(55, 128, 365, 128, 'oc-bond oc-bond--backbone', 3.2);
+      content += textEl(35, 72, '5′', 'oc-schematic-note', 13);
+      content += textEl(382, 72, '3′', 'oc-schematic-note', 13);
+      content += textEl(35, 128, '3′', 'oc-schematic-note', 13);
+      content += textEl(382, 128, '5′', 'oc-schematic-note', 13);
+      for (var i = 0; i < 4; i++) {
+        var x = 110 + i * 60;
+        content += lineEl(x, 78, x, 122, 'oc-bond oc-bond--h', 2.0);
+        content += textEl(x, 62, bases[i], 'oc-atom', 17);
+        content += textEl(x, 142, complement[bases[i]], 'oc-atom', 17);
+      }
+      content += textEl(210, 172, isDna ? 'デオキシリボース—リン酸鎖／塩基 A-T, G-C' : 'リボース—リン酸鎖／塩基 A-U, G-C', 'oc-schematic-note', 13);
+      return svgOpen(0, 0, 420, 195, label, 'data-kind="schematic" data-sugar="' + esc(kind) + '"') + content + '</svg>';
+    }
     if (kind === 'sucrose' || kind === 'maltose' || kind === 'lactose') {
-      var leftLabel = kind === 'sucrose' ? 'α-D-グルコース' : (kind === 'maltose' ? 'α-D-グルコース' : 'β-D-ガラクトース');
-      var rightLabel = kind === 'sucrose' ? 'β-D-フルクトース' : 'D-グルコース';
-      var link = kind === 'sucrose' ? 'α-1,2' : (kind === 'maltose' ? 'α-1,4' : 'β-1,4');
-      var content = '<rect x="35" y="65" width="130" height="72" rx="12" class="oc-schematic-box"/>' +
-        '<text x="100" y="101" text-anchor="middle" dominant-baseline="middle" class="oc-schematic-text" font-size="16">' + esc(leftLabel) + '</text>' +
-        '<rect x="255" y="65" width="130" height="72" rx="12" class="oc-schematic-box"/>' +
-        '<text x="320" y="101" text-anchor="middle" dominant-baseline="middle" class="oc-schematic-text" font-size="16">' + esc(rightLabel) + '</text>' +
+      var isSucrose = kind === 'sucrose';
+      var leftLabel = isSucrose ? 'α-D-グルコース' : (kind === 'maltose' ? 'α-D-グルコース' : 'β-D-ガラクトース');
+      var rightLabel = isSucrose ? 'β-D-フルクトフラノース' : 'D-グルコース';
+      var link = isSucrose ? 'α-1,2' : (kind === 'maltose' ? 'α-1,4' : 'β-1,4');
+      var content = schematicSugarRing(100, 101, 65, 1) +
+        (isSucrose ? schematicFuranoseRing() : schematicSugarRing(320, 101, 65, 5)) +
+        '<text x="100" y="18" text-anchor="middle" class="oc-schematic-text" font-size="13">' + esc(leftLabel) + '</text>' +
+        '<text x="320" y="18" text-anchor="middle" class="oc-schematic-text" font-size="13">' + esc(rightLabel) + '</text>' +
         lineEl(165, 101, 200, 101, 'oc-bond', 2.6) +
         lineEl(220, 101, 255, 101, 'oc-bond', 2.6) +
         textEl(210, 101, 'O', 'oc-atom', 21) +
+        (isSucrose ? textEl(180, 82, 'α', 'oc-schematic-note', 14) + textEl(240, 82, 'β', 'oc-schematic-note', 14) : '') +
         textEl(210, 132, link, 'oc-schematic-note', 14);
-      return svgOpen(0, 0, 420, 180, label, 'data-kind="schematic" data-sugar="' + esc(kind) + '"') + content + '</svg>';
+      return svgOpen(0, 0, 420, 180, label, 'data-kind="schematic" data-sugar="' + esc(kind) +
+        '" data-ring-count="2" data-glycosidic="' + esc(link) + '"' +
+        (isSucrose ? ' data-fructose-ring="furanose" data-anomer-glucose="alpha" data-anomer-fructose="beta"' : '')) + content + '</svg>';
     }
-    // 多糖類: 繰り返し単位の模式図
+    // 多糖類: 糖環がグリコシド酸素で連なる模式図
     var unitLabel = spec.unitLabel || 'グルコース単位';
     var linkLabel = spec.linkLabel || '';
-    var content2 = lineEl(60, 50, 42, 50, 'oc-bracket', 2.4) +
-      lineEl(42, 50, 42, 125, 'oc-bracket', 2.4) +
-      lineEl(42, 125, 60, 125, 'oc-bracket', 2.4) +
-      '<rect x="80" y="55" width="190" height="66" rx="12" class="oc-schematic-box"/>' +
-      '<text x="175" y="88" text-anchor="middle" dominant-baseline="middle" class="oc-schematic-text" font-size="16">' + esc(unitLabel) + '</text>' +
-      lineEl(270, 88, 300, 88, 'oc-bond', 2.6) +
-      lineEl(300, 50, 320, 50, 'oc-bracket', 2.4) +
-      lineEl(320, 50, 320, 125, 'oc-bracket', 2.4) +
-      lineEl(320, 125, 300, 125, 'oc-bracket', 2.4) +
-      '<text x="336" y="122" text-anchor="middle" class="oc-atom" font-size="16">n</text>' +
-      (linkLabel ? textEl(210, 158, linkLabel, 'oc-schematic-note', 14) : '');
-    return svgOpen(0, 0, 380, 185, label, 'data-kind="schematic" data-sugar="' + esc(kind) + '"') + content2 + '</svg>';
+    var content2 = schematicSugarRing(80, 100, 38, 1) +
+      schematicSugarRing(190, 100, 38, 1) +
+      schematicSugarRing(300, 100, 38, 1) +
+      lineEl(118, 100, 130, 100, 'oc-bond', 2.4) +
+      textEl(135, 100, 'O', 'oc-atom', 18) +
+      lineEl(140, 100, 152, 100, 'oc-bond', 2.4) +
+      lineEl(228, 100, 240, 100, 'oc-bond', 2.4) +
+      textEl(245, 100, 'O', 'oc-atom', 18) +
+      lineEl(250, 100, 262, 100, 'oc-bond', 2.4) +
+      '<text x="190" y="18" text-anchor="middle" class="oc-schematic-text" font-size="13">' + esc(unitLabel) + '</text>' +
+      lineEl(60, 50, 42, 50, 'oc-bracket', 2.4) +
+      lineEl(42, 50, 42, 150, 'oc-bracket', 2.4) +
+      lineEl(42, 150, 60, 150, 'oc-bracket', 2.4) +
+      lineEl(320, 50, 338, 50, 'oc-bracket', 2.4) +
+      lineEl(338, 50, 338, 150, 'oc-bracket', 2.4) +
+      lineEl(338, 150, 320, 150, 'oc-bracket', 2.4) +
+      '<text x="352" y="146" text-anchor="middle" class="oc-atom" font-size="16">n</text>' +
+      (linkLabel ? textEl(190, 168, linkLabel, 'oc-schematic-note', 13) : '');
+    return svgOpen(0, 0, 380, 185, label, 'data-kind="schematic" data-sugar="' + esc(kind) +
+      '" data-ring-count="3" data-glycosidic="' + esc(linkLabel) + '"') + content2 + '</svg>';
   }
 
   /* ------------------------------------------------------------------
    * グルコース・フルクトースの投影式
    * ------------------------------------------------------------------ */
 
+  var FISCHER_STEREO = {
+    glucose: { c2: 'right', c3: 'left', c4: 'right', c5: 'right' },
+    galactose: { c2: 'right', c3: 'left', c4: 'left', c5: 'right' },
+    mannose: { c2: 'left', c3: 'left', c4: 'right', c5: 'right' },
+    ribose: { c2: 'right', c3: 'right', c4: 'right' },
+    deoxyribose: { c2: 'none', c3: 'right', c4: 'right' },
+    fructose: { c3: 'left', c4: 'right', c5: 'right' }
+  };
+
+  function fischerStereo(spec) {
+    var sugar = spec.sugar || 'glucose';
+    var base = FISCHER_STEREO[sugar] || FISCHER_STEREO.glucose;
+    var out = {};
+    Object.keys(base).forEach(function (k) { out[k] = base[k]; });
+    Object.keys(spec.stereo || {}).forEach(function (k) { out[k] = spec.stereo[k]; });
+    return out;
+  }
+
   function renderFischer(spec, label) {
     var sugar = spec.sugar || 'glucose';
-    var W = 380, H = 360;
+    var ketose = !!spec.ketose || sugar === 'fructose';
+    var carbons = spec.carbons || (sugar === 'ribose' || sugar === 'deoxyribose' ? 5 : 6);
+    var stereo = fischerStereo(spec);
+    var W = 380;
+    var top = 52;
+    var gap = 46;
+    var ys = [];
+    for (var i = 0; i < carbons; i++) ys.push(top + i * gap);
+    var H = ys[carbons - 1] + 78;
     var cxs = 190;
-    var ys = [52, 98, 144, 190, 236, 282];
     var out = '';
     // 縦の炭素鎖
-    out += lineEl(cxs, ys[0] + 12, cxs, ys[5] - 12, 'oc-bond', 2.4);
-    // C1
-    out += textEl(cxs, ys[0] - 8, sugar === 'glucose' ? 'CHO' : 'CH₂OH', 'oc-atom', 21);
-    // C2
-    if (sugar === 'glucose') {
-      out += lineEl(125, ys[1], 255, ys[1], 'oc-bond', 2.2);
-      out += textEl(275, ys[1], 'OH', 'oc-atom', 20);
-      out += textEl(105, ys[1], 'H', 'oc-h', 19);
-    } else {
-      // フルクトースのC2は主鎖上の炭素。C=OのOは主鎖の外側に別描画する。
+    out += lineEl(cxs, ys[0] + 12, cxs, ys[carbons - 1] - 12, 'oc-bond', 2.4);
+    // C1（アルドースは CHO、ケトースは CH₂OH）
+    out += textEl(cxs, ys[0] - 8, ketose ? 'CH₂OH' : 'CHO', 'oc-atom', 21);
+    // C2（ケトースは C=O）
+    if (ketose) {
       var c2 = { x: cxs, y: ys[1] };
       var o2 = { x: cxs + 55, y: ys[1] };
       out += textEl(c2.x, c2.y, 'C', 'oc-atom', 21, 'data-carbonyl="C2"');
       out += drawBondLine(c2, o2, 2, 12, 4, 'oc-bond');
       out += textEl(o2.x + 8, o2.y, 'O', 'oc-atom', 20, 'data-el="O"');
     }
-    // C3-C5
-    var pattern = [{ oh: 'left', h: 'right' }, { oh: 'right', h: 'left' }, { oh: 'right', h: 'left' }];
-    // グルコース・フルクトースとも C3 OH左, C4 OH右, C5 OH右
-    for (var i = 0; i < 3; i++) {
-      var y = ys[i + 2];
+    var stereoAttrs = '';
+    var start = ketose ? 2 : 1;
+    for (var j = start; j < carbons - 1; j++) {
+      var y = ys[j];
+      var key = 'c' + (j + 1);
+      var dir = stereo[key] || (j === 1 ? 'right' : (j % 2 === 0 ? 'right' : 'left'));
       out += lineEl(125, y, 255, y, 'oc-bond', 2.2);
-      var ohRight = pattern[i].oh === 'right';
-      out += textEl(ohRight ? 275 : 105, y, 'OH', 'oc-atom', 20);
-      out += textEl(ohRight ? 105 : 275, y, 'H', 'oc-h', 19);
+      stereoAttrs += ' data-oh-' + key + '="' + esc(dir) + '"';
+      if (dir === 'none') {
+        out += textEl(105, y, 'H', 'oc-h', 19);
+        out += textEl(275, y, 'H', 'oc-h', 19);
+      } else {
+        var ohRight = dir === 'right';
+        out += textEl(ohRight ? 275 : 105, y, 'OH', 'oc-atom', 20);
+        out += textEl(ohRight ? 105 : 275, y, 'H', 'oc-h', 19);
+      }
     }
-    // C6
-    out += textEl(cxs, ys[5] + 14, 'CH₂OH', 'oc-atom', 21);
-    out += textEl(cxs, 335, 'フィッシャー投影式', 'oc-projection-note', 13);
-    return svgOpen(0, 0, W, H, label, 'data-kind="fischer" data-sugar="' + esc(sugar) + '"') + out + '</svg>';
+    // 末端の CH₂OH
+    out += textEl(cxs, ys[carbons - 1] + 14, 'CH₂OH', 'oc-atom', 21);
+    out += textEl(cxs, H - 25, 'フィッシャー投影式', 'oc-projection-note', 13);
+    return svgOpen(0, 0, W, H, label, 'data-kind="fischer" data-sugar="' + esc(sugar) +
+      '" data-carbons="' + carbons + '"' + stereoAttrs) + out + '</svg>';
+  }
+
+  function renderFuranose(spec, label) {
+    var anomer = spec.anomer || 'alpha';
+    var stereo = spec.stereo || {};
+    var W = 470, H = 330;
+    var O = { x: 250, y: 78 };
+    var C2 = { x: 330, y: 112 };
+    var C3 = { x: 300, y: 188 };
+    var C4 = { x: 200, y: 193 };
+    var C5 = { x: 150, y: 118 };
+    var out = '';
+    out += lineEl(O.x, O.y, C2.x, C2.y, 'oc-bond', 2.3);
+    out += lineEl(C2.x, C2.y, C3.x, C3.y, 'oc-bond', 2.3);
+    out += lineEl(C3.x, C3.y, C4.x, C4.y, 'oc-bond oc-bond--front', 4.4);
+    out += lineEl(C4.x, C4.y, C5.x, C5.y, 'oc-bond oc-bond--front', 4.4);
+    out += lineEl(C5.x, C5.y, O.x, O.y, 'oc-bond', 2.3);
+    out += textEl(O.x, O.y, 'O', 'oc-atom', 21, 'data-ring-atom="O"');
+    out += textEl(C2.x + 12, C2.y - 14, '2', 'oc-ring-num', 12);
+    out += textEl(C3.x + 14, C3.y - 8, '3', 'oc-ring-num', 12);
+    out += textEl(C4.x - 18, C4.y - 8, '4', 'oc-ring-num', 12);
+    out += textEl(C5.x - 16, C5.y - 12, '5', 'oc-ring-num', 12);
+
+    function sub(x, y, dx, dy, text, cls) {
+      var tx = x + dx, ty = y + dy;
+      var len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var ax = x + dx / len * 14, ay = y + dy / len * 14;
+      var bx = tx - dx / len * 10, by = ty - dy / len * 10;
+      return lineEl(ax, ay, bx, by, 'oc-bond', 2.0) + textEl(tx, ty, text, cls || 'oc-atom', 18);
+    }
+
+    // C1（C2に結合する CH₂OH）と C6（C5に結合する CH₂OH）
+    var c1Up = (stereo.c1ch2oh || (anomer === 'alpha' ? 'up' : 'down')) === 'up';
+    if (c1Up) {
+      out += lineEl(C2.x, C2.y, 388, 66, 'oc-bond', 2.0);
+      out += textEl(408, 56, 'CH₂OH', 'oc-atom', 17);
+    } else {
+      out += lineEl(C2.x, C2.y, 388, 160, 'oc-bond', 2.0);
+      out += textEl(408, 174, 'CH₂OH', 'oc-atom', 17);
+    }
+    out += lineEl(C5.x, C5.y, 104, 64, 'oc-bond', 2.0);
+    out += textEl(78, 52, 'CH₂OH', 'oc-atom', 17);
+    out += sub(C5.x, C5.y, 12, 42, 'H', 'oc-h');
+
+    // C2 アノマーOH: αは下、βは上。C2はアノマー炭素でHはもたない。
+    var c2Down = (stereo.c2 || (anomer === 'alpha' ? 'down' : 'up')) === 'down';
+    out += sub(C2.x, C2.y, 42, c2Down ? 40 : -40, 'OH', 'oc-atom oc-anomer');
+    // C3 OH上 / H下（D-フルクトフラノース）
+    var c3Up = (stereo.c3 || 'up') === 'up';
+    out += sub(C3.x, C3.y, 0, c3Up ? -44 : 44, 'OH', 'oc-atom');
+    out += sub(C3.x, C3.y, 16, c3Up ? 38 : -38, 'H', 'oc-h');
+    // C4 OH下 / H上
+    var c4Down = (stereo.c4 || 'down') === 'down';
+    out += sub(C4.x, C4.y, 0, c4Down ? 44 : -44, 'OH', 'oc-atom');
+    out += sub(C4.x, C4.y, -16, c4Down ? -38 : 38, 'H', 'oc-h');
+    out += textEl(W / 2, 292, 'フルクトフラノース（ハース投影式）', 'oc-projection-note', 13);
+    return svgOpen(0, 0, W, H, label, 'data-kind="haworth" data-ring="furanose" data-anomer="' + esc(anomer) +
+      '" data-c1ch2oh="' + (c1Up ? 'up' : 'down') + '" data-c2oh="' + (c2Down ? 'down' : 'up') +
+      '" data-c3oh="' + (c3Up ? 'up' : 'down') +
+      '" data-c4oh="' + (c4Down ? 'down' : 'up') + '" data-c5ch2oh="up"') + out + '</svg>';
   }
 
   function renderHaworth(spec, label) {
+    if (spec.ring === 'furanose') return renderFuranose(spec, label);
     var anomer = spec.anomer || 'alpha';
     var stereo = spec.stereo || {};
     var W = 470, H = 320;
@@ -889,16 +1118,20 @@
   }
 
   function formulaFromComposition(comp) {
+    if (!comp) return null;
     var counts = {};
-    Object.keys(comp || {}).forEach(function (el) { counts[el] = comp[el]; });
+    Object.keys(comp).forEach(function (el) { counts[el] = comp[el]; });
     return formulaFromCounts(counts);
   }
 
   function formulaOfStructure(spec) {
     if (!spec) return null;
     if (isGraphSpec(spec)) return formulaOfGraph(buildStructure(spec));
-    if (spec.type === 'ring-sub' || spec.type === 'condensed' || spec.type === 'projection' || spec.type === 'schematic' || spec.type === 'triglyceride') {
+    if (spec.type === 'ring-sub' || spec.type === 'condensed' || spec.type === 'projection' || spec.type === 'triglyceride') {
       return formulaFromComposition(spec.composition);
+    }
+    if (spec.type === 'schematic') {
+      return spec.composition ? formulaFromComposition(spec.composition) : null;
     }
     if (spec.type === 'polymer') return spec.formulaReference || spec.unitFormula || null;
     return null;
@@ -918,16 +1151,18 @@
   function checkValence(g) {
     var errors = [];
     g.atoms.forEach(function (a, i) {
-      if (!VALENCE[a.el]) return;
-      var valence = VALENCE[a.el];
-      if (a.charge === '+') valence += 1;
-      if (a.charge === '-') valence -= 1;
+      var allowed = VALENCES[a.el];
+      if (!allowed) return;
       var sum = 0;
       g.bonds.forEach(function (b) {
         if (b.a === i || b.b === i) sum += b.order;
       });
-      if (sum + (a.h || 0) !== valence) {
-        errors.push('原子' + i + '(' + a.el + ')の結合価が不正: ' + (sum + (a.h || 0)) + ' != ' + valence);
+      var total = sum + (a.h || 0);
+      var charge = a.charge === '+' ? 1 : (a.charge === '-' ? -1 : 0);
+      var ok = allowed.some(function (v) { return total === v + charge; });
+      if (!ok) {
+        errors.push('原子' + i + '(' + a.el + ')の結合価が不正: ' + total +
+          '（許容: ' + allowed.map(function (v) { return v + charge; }).join('/') + '）');
       }
     });
     return { ok: errors.length === 0, errors: errors };
@@ -936,7 +1171,13 @@
   function verificationForSpec(spec, formulaStatus) {
     if (!spec) return { level: 'unknown', short: '未確認', label: '構造データ未確認' };
     if (formulaStatus === 'variable') {
-      return { level: 'composition', short: '一般式', label: '一般式（R依存）の基準単位と登録データの整合' };
+      if (spec.type === 'schematic') {
+        return { level: 'none', short: '模式図（可変組成）', label: '模式図・可変組成（原子レベルの検証対象外。表示式のみ）' };
+      }
+      if (spec.type === 'polymer' && !(spec.formulaReference || spec.unitFormula)) {
+        return { level: 'none', short: '可変組成（原子検証対象外）', label: '可変組成（原子レベルの検証対象外。表示式のみ）' };
+      }
+      return { level: 'composition', short: '一般式', label: '一般式の基準単位と登録データの整合' };
     }
     if (isGraphSpec(spec)) {
       return { level: 'atom', short: '原子レベル', label: '原子数・結合価・分子式' };
@@ -986,10 +1227,12 @@
       if (!computed) computed = f;
       if (variableFormula) {
         var reference = compound.formulaReference || (s.type === 'polymer' ? (s.formulaReference || s.unitFormula) : null);
-        if (!reference) {
-          errors.push('図' + (idx + 1) + ': 一般式の基準単位が未登録');
-        } else if (f !== reference) {
-          errors.push('図' + (idx + 1) + 'の一般式の基準単位が不一致: ' + f + ' != ' + reference);
+        if (reference) {
+          if (f !== reference) {
+            errors.push('図' + (idx + 1) + 'の一般式の基準単位が不一致: ' + f + ' != ' + reference);
+          }
+        } else if (!compound.formulaDisplay) {
+          errors.push('図' + (idx + 1) + ': 可変組成の表示式が未登録');
         }
       } else if (!formulaMatches(f, compound.formula)) {
         errors.push('図' + (idx + 1) + 'の分子式が不一致: ' + f + ' != ' + compound.formula);
