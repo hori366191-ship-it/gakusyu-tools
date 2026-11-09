@@ -56,8 +56,12 @@
       "413件の存在と新方式コピー版の検索/画面到達性は別。UI動作検証は本監査対象外。",
       "全1399画像の完全OCR・完全原寸目視は未実施。TryITの全画像内名称、動画だけの名称は未確定。",
       "625候補のラベル完了を教材全名称の抽出完了と混同しない。",
-      "image-human-read の quote は画像内の出現、構造同定・化学補足は note/identity に分離している。"
-    ]
+      "image-human-read は source ID と note/identity で示し、教材出典ページURL・画像直リンク・sha256・本文抜粋は配信しない。"
+    ],
+    "sourcePolicy": {
+      "distributed": false,
+      "note": "教材出典ページのURL・本文抜粋・画像直リンクは配信しない。source ID・provenance・独自noteのみを保持する。"
+    }
   },
   "TRUE_MISSING": [
     {
@@ -67,9 +71,7 @@
       "status": "added",
       "source": "idx-kimika",
       "provenance": "image-human-read",
-      "imageProvenance": "image-human-read",
-      "url": "https://kimika.net/y2phospholipids.html",
-      "image": "https://kimika.net/wp-content/uploads/2019/04/y2phospholipids4.png"
+      "imageProvenance": "image-human-read"
     },
     {
       "term": "イノシトール",
@@ -78,9 +80,7 @@
       "status": "added",
       "source": "idx-kimika",
       "provenance": "image-human-read",
-      "imageProvenance": "image-human-read",
-      "url": "https://kimika.net/y2phospholipids.html",
-      "image": "https://kimika.net/wp-content/uploads/2019/04/y2phospholipids6.png"
+      "imageProvenance": "image-human-read"
     },
     {
       "term": "コリン",
@@ -89,9 +89,7 @@
       "status": "added",
       "source": "idx-kimika",
       "provenance": "image-human-read",
-      "imageProvenance": "image-human-read",
-      "url": "https://kimika.net/y2phospholipids.html",
-      "image": "https://kimika.net/wp-content/uploads/2019/04/y2phospholipids3.png"
+      "imageProvenance": "image-human-read"
     },
     {
       "term": "酢酸フェニル",
@@ -100,9 +98,7 @@
       "status": "added",
       "source": "idx-kimika",
       "provenance": "image-human-read",
-      "imageProvenance": "image-human-read",
-      "url": "https://kimika.net/fenol.html",
-      "image": "https://kimika.net/wp-content/uploads/2019/10/y1fenol11.png"
+      "imageProvenance": "image-human-read"
     },
     {
       "term": "サリチル酸二ナトリウム",
@@ -111,9 +107,7 @@
       "status": "added",
       "source": "idx-kimika",
       "provenance": "image-human-read",
-      "imageProvenance": "image-human-read",
-      "url": "https://kimika.net/houkokarubon.html",
-      "image": "https://kimika.net/wp-content/uploads/2019/10/y1houkoukarubon9.png"
+      "imageProvenance": "image-human-read"
     }
   ],
   "MANDATORY": [
@@ -129,8 +123,7 @@
         "cellulose"
       ],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosemelt.html"
+      "provenance": "body-text"
     },
     {
       "term": "イソメラーゼ",
@@ -142,8 +135,7 @@
       "explanation": "異性化酵素。シス-トランス異性化の説明へ接続。種/配列未指定を単一固定構造へ捏造しない。",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "イノシトール",
@@ -155,8 +147,7 @@
       "explanation": "C6H12O6、六価環状アルコール。画像に置換の上下は示されるが、myo等の立体異性体名を出典が命名したとはしない。",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text+image-human-read",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text+image-human-read"
     },
     {
       "term": "エタノールアミン",
@@ -168,8 +159,7 @@
       "explanation": "HOCH2CH2NH2。ホスファチジルエタノールアミンの語の部分一致ではなく、画像中の独立反応物。",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text+image-human-read",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text+image-human-read"
     },
     {
       "term": "ジアセチルセルロース",
@@ -183,8 +173,7 @@
         "cellulose-acetate"
       ],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosecompound.html"
+      "provenance": "body-text"
     },
     {
       "term": "ジニトロセルロース",
@@ -198,8 +187,7 @@
         "cellulose-nitrate"
       ],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosecompound.html"
+      "provenance": "body-text"
     },
     {
       "term": "セルロースキサントゲン酸ナトリウム",
@@ -213,8 +201,7 @@
         "cellulose"
       ],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosemelt.html"
+      "provenance": "body-text"
     },
     {
       "term": "デカルボキシラーゼ",
@@ -226,8 +213,7 @@
       "explanation": "RCOOHからCO2を脱離させる酵素群。種/配列未指定を単一固定構造へ捏造しない。",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "デヒドロゲナーゼ",
@@ -239,8 +225,7 @@
       "explanation": "基質からHを奪う酸化還元酵素群。種/配列未指定を単一固定構造へ捏造しない。",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "トランスフェラーゼ",
@@ -252,8 +237,7 @@
       "explanation": "基の転移を触媒。代表としてホスホリラーゼを対応させる。種/配列未指定を単一固定構造へ捏造しない。",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "トリアセチルセルロース",
@@ -267,8 +251,7 @@
         "cellulose-acetate"
       ],
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10160/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "トリニトロセルロース",
@@ -282,8 +265,7 @@
         "cellulose-nitrate"
       ],
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10160/"
+      "provenance": "body-text"
     },
     {
       "term": "ノボラック",
@@ -297,8 +279,7 @@
         "phenol-resin"
       ],
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ヒドロラーゼ",
@@ -310,8 +291,7 @@
       "explanation": "加水分解酵素群。アミラーゼ・リパーゼ・プロテアーゼ等の具体リンクを持たせる。種/配列未指定を単一固定構造へ捏造しない。",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヘキシン",
@@ -323,8 +303,7 @@
       "explanation": "C6アルキン級名。位置未指定をhex-1-yneと断定しない",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヘキセン",
@@ -336,8 +315,7 @@
       "explanation": "C6アルケン級名。位置未指定をhex-1-eneと断定しない。シクロヘキセンの部分一致は独立出現根拠にしない",
       "relatedIds": [],
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9860/"
+      "provenance": "body-text"
     },
     {
       "term": "ペンチン",
@@ -351,8 +329,7 @@
         "pent-1-yne"
       ],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "ペンテン",
@@ -366,8 +343,7 @@
         "pent-1-ene"
       ],
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9860/"
+      "provenance": "body-text"
     },
     {
       "term": "ホスファチジル イノシトール",
@@ -379,8 +355,7 @@
       "explanation": "頭部イノシトール、脂肪酸R可変。単体イノシトールとは別",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホスファチジル エタノールアミン",
@@ -392,8 +367,7 @@
       "explanation": "頭部エタノールアミン。脂肪酸R可変。単体エタノールアミンとは別",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホスファチジル セリン",
@@ -405,8 +379,7 @@
       "explanation": "頭部セリン、脂肪酸R可変。セリン単体に丸めない",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホスファチジルコリン",
@@ -418,8 +391,7 @@
       "explanation": "グリセリン骨格＋脂肪酸2本＋リン酸＋コリン。脂肪酸R可変。レシチンへの相互参照",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホスホリラーゼ",
@@ -431,8 +403,7 @@
       "explanation": "原文「リン酸化する 過リン酸分解する」。リン酸を使う分解を含む群。原文の語を科学的保証とはしない。種/配列未指定を単一固定構造へ捏造しない。",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "リアーゼ",
@@ -444,8 +415,7 @@
       "explanation": "脱離酵素。脱炭酸酵素への具体リンク。種/配列未指定を単一固定構造へ捏造しない。",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "リガーゼ",
@@ -457,8 +427,7 @@
       "explanation": "合成酵素。DNAリガーゼ（DNA鎖の連結）への具体リンク。種/配列未指定を単一固定構造へ捏造しない。",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "リグニン",
@@ -472,8 +441,7 @@
         "cellulose"
       ],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2rayon.html"
+      "provenance": "body-text"
     },
     {
       "term": "レシチン",
@@ -485,8 +453,7 @@
       "explanation": "本教材はホスファチジルコリンの同名。工業的レシチン混合物全てとの同一視は避ける",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "レゾール",
@@ -500,8 +467,7 @@
         "phenol-resin"
       ],
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "コリン",
@@ -512,8 +478,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text+image-human-read",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text+image-human-read"
     },
     {
       "term": "酢酸フェニル",
@@ -524,8 +489,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text+image-human-read",
-      "url": "https://kimika.net/fenol.html"
+      "provenance": "body-text+image-human-read"
     },
     {
       "term": "サリチル酸二ナトリウム",
@@ -536,8 +500,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text+image-human-read",
-      "url": "https://kimika.net/houkokarubon.html"
+      "provenance": "body-text+image-human-read"
     },
     {
       "term": "DNAリガーゼ",
@@ -548,8 +511,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "シス-トランス異性化酵素",
@@ -560,8 +522,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホスファチジン酸",
@@ -572,8 +533,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text+image-human-read",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text+image-human-read"
     },
     {
       "term": "リン脂質",
@@ -584,8 +544,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "酸化還元酵素",
@@ -596,8 +555,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "転移酵素",
@@ -608,8 +566,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "加水分解酵素",
@@ -620,8 +577,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "脱離酵素",
@@ -632,8 +588,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "脱炭酸酵素",
@@ -644,8 +599,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "異性化酵素",
@@ -656,8 +610,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "合成酵素",
@@ -668,8 +621,7 @@
       "explanation": "",
       "relatedIds": [],
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     }
   ],
   "ENTRIES": [
@@ -682,10 +634,9 @@
       "mappingType": "compound",
       "target": "1,1,2,2-tetrabromoethane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9883/"
+      "provenance": "body-text"
     },
     {
       "term": "1,2-ジブロモエタン",
@@ -698,8 +649,7 @@
       "representatives": [],
       "note": "以前の未登録判定を現413件で再照合し、追加46内の同一物質を確認。重複追加不要。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9868/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ATP",
@@ -710,10 +660,9 @@
       "mappingType": "compound",
       "target": "atp",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "ATPアーゼ",
@@ -726,8 +675,7 @@
       "representatives": [],
       "note": "ATPのリン酸結合を加水分解。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "p-ジクロロベンゼン",
@@ -738,10 +686,9 @@
       "mappingType": "compound",
       "target": "p-dichlorobenzene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10000/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "アクリル繊維",
@@ -756,8 +703,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/"
+      "provenance": "body-text"
     },
     {
       "term": "アクリル酸",
@@ -768,10 +714,9 @@
       "mappingType": "compound",
       "target": "acrylic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/karu-esu.html"
+      "provenance": "body-text"
     },
     {
       "term": "アクリロニトリル",
@@ -782,10 +727,9 @@
       "mappingType": "compound",
       "target": "acrylonitrile",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/"
+      "provenance": "body-text"
     },
     {
       "term": "アジピン酸",
@@ -796,10 +740,9 @@
       "mappingType": "compound",
       "target": "adipic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "アスタリスク",
@@ -812,8 +755,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9953/"
+      "provenance": "body-text"
     },
     {
       "term": "アスパラギン酸",
@@ -824,10 +766,9 @@
       "mappingType": "compound",
       "target": "aspartic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10171/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "アスピリン",
@@ -838,10 +779,9 @@
       "mappingType": "compound",
       "target": "aspirin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/houkokarubon.html"
+      "provenance": "body-text"
     },
     {
       "term": "アセタール",
@@ -856,8 +796,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "アセチリド",
@@ -873,8 +812,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "アセチル",
@@ -887,8 +825,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10160/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "アセチルサリチル酸",
@@ -899,10 +836,9 @@
       "mappingType": "compound",
       "target": "aspirin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10050/"
+      "provenance": "body-text"
     },
     {
       "term": "アセチルセルロース",
@@ -913,10 +849,9 @@
       "mappingType": "compound",
       "target": "cellulose-acetate",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosecompound.html"
+      "provenance": "body-text"
     },
     {
       "term": "アセチレン",
@@ -927,10 +862,9 @@
       "mappingType": "compound",
       "target": "ethyne",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/"
+      "provenance": "body-text"
     },
     {
       "term": "アセテート繊維",
@@ -945,8 +879,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosecompound.html"
+      "provenance": "body-text"
     },
     {
       "term": "アセトアニリド",
@@ -957,10 +890,9 @@
       "mappingType": "compound",
       "target": "acetanilide",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10069/"
+      "provenance": "body-text"
     },
     {
       "term": "アセトアミノフェン",
@@ -971,10 +903,9 @@
       "mappingType": "compound",
       "target": "acetaminophen",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "アセトアルデヒド",
@@ -985,10 +916,9 @@
       "mappingType": "compound",
       "target": "ethanal",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "アセトン",
@@ -999,10 +929,9 @@
       "mappingType": "compound",
       "target": "acetone",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9798/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "アゾ",
@@ -1015,8 +944,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10077/"
+      "provenance": "body-text"
     },
     {
       "term": "アデニン",
@@ -1027,10 +955,9 @@
       "mappingType": "compound",
       "target": "adenine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/"
+      "provenance": "body-text"
     },
     {
       "term": "アニリン",
@@ -1041,10 +968,9 @@
       "mappingType": "compound",
       "target": "aniline",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10057/"
+      "provenance": "body-text"
     },
     {
       "term": "アニリンブラック",
@@ -1057,8 +983,7 @@
       "representatives": [],
       "note": "アニリン酸化に由来する黒色高分子染料材料。anilineは前駆体で同一物ではない",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10069/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "アニリン塩",
@@ -1071,8 +996,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10088/"
+      "provenance": "body-text"
     },
     {
       "term": "アマニ油",
@@ -1085,8 +1009,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fats.html"
+      "provenance": "body-text"
     },
     {
       "term": "アミド",
@@ -1101,8 +1024,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "アミノ",
@@ -1115,8 +1037,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "アミノ樹脂",
@@ -1132,8 +1053,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2bakelite.html"
+      "provenance": "body-text"
     },
     {
       "term": "アミノ酸",
@@ -1149,8 +1069,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "アミラーゼ",
@@ -1163,8 +1082,7 @@
       "representatives": [],
       "note": "デンプン→マルトース等。段階分解を区別。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10152/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "アミロペクチン",
@@ -1175,10 +1093,9 @@
       "mappingType": "compound",
       "target": "amylopectin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10168/"
+      "provenance": "body-text"
     },
     {
       "term": "アミロース",
@@ -1189,10 +1106,9 @@
       "mappingType": "compound",
       "target": "starch",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10148/"
+      "provenance": "body-text"
     },
     {
       "term": "アミン",
@@ -1209,8 +1125,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10057/"
+      "provenance": "body-text"
     },
     {
       "term": "アメリカ",
@@ -1223,8 +1138,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2condensation.html"
+      "provenance": "body-text"
     },
     {
       "term": "アラキドン酸",
@@ -1235,10 +1149,9 @@
       "mappingType": "compound",
       "target": "arachidonic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fattyacid.html"
+      "provenance": "body-text"
     },
     {
       "term": "アラニン",
@@ -1249,10 +1162,9 @@
       "mappingType": "compound",
       "target": "alanine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10206/"
+      "provenance": "body-text"
     },
     {
       "term": "アラミド繊維",
@@ -1263,10 +1175,9 @@
       "mappingType": "compound",
       "target": "aramid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10245/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "アリ",
@@ -1279,8 +1190,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "アルカリ",
@@ -1293,8 +1203,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9813/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "アルカリセルロース",
@@ -1307,8 +1216,7 @@
       "representatives": [],
       "note": "NaOH処理中間状態。再生セルロースと同一物としての別名にしない",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosemelt.html"
+      "provenance": "body-text"
     },
     {
       "term": "アルカン",
@@ -1324,8 +1232,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10117/"
+      "provenance": "body-text"
     },
     {
       "term": "アルキド樹脂",
@@ -1336,10 +1243,9 @@
       "mappingType": "compound",
       "target": "alkyd-resin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10261/"
+      "provenance": "body-text"
     },
     {
       "term": "アルキル",
@@ -1352,8 +1258,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "アルキルナトリウム",
@@ -1366,8 +1271,7 @@
       "representatives": [],
       "note": "原文は硫酸アルキルナトリウム。RNa（有機ナトリウム化合物）の出現ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2soap.html"
+      "provenance": "body-text"
     },
     {
       "term": "アルキルベンゼン",
@@ -1383,8 +1287,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9980/"
+      "provenance": "body-text"
     },
     {
       "term": "アルキルベンゼンスルホン酸",
@@ -1399,8 +1302,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9980/"
+      "provenance": "body-text"
     },
     {
       "term": "アルキル硫酸",
@@ -1413,8 +1315,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9980/"
+      "provenance": "body-text"
     },
     {
       "term": "アルキン",
@@ -1427,8 +1328,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9794/"
+      "provenance": "body-text"
     },
     {
       "term": "アルケン",
@@ -1441,8 +1341,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10117/"
+      "provenance": "body-text"
     },
     {
       "term": "アルコキシドイオン",
@@ -1458,8 +1357,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/fenol.html"
+      "provenance": "body-text"
     },
     {
       "term": "アルコール",
@@ -1474,8 +1372,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "アルデヒド",
@@ -1488,8 +1385,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/"
+      "provenance": "body-text"
     },
     {
       "term": "アルドース",
@@ -1505,8 +1401,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/t3tantou.html"
+      "provenance": "body-text"
     },
     {
       "term": "アルファベット",
@@ -1519,8 +1414,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/"
+      "provenance": "body-text"
     },
     {
       "term": "アルブミン",
@@ -1531,10 +1425,9 @@
       "mappingType": "compound",
       "target": "albumin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2tanpakubunrui.html"
+      "provenance": "body-text"
     },
     {
       "term": "アルミ",
@@ -1547,8 +1440,7 @@
       "representatives": [],
       "note": "アルミ缶という無機材料例。純Al単体の有機カード要求ではない",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9790/"
+      "provenance": "body-text"
     },
     {
       "term": "アレンジ",
@@ -1561,8 +1453,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10152/"
+      "provenance": "body-text"
     },
     {
       "term": "アン",
@@ -1575,8 +1466,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "アントラセン",
@@ -1587,10 +1477,9 @@
       "mappingType": "compound",
       "target": "anthracene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-9992/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "アンモニア",
@@ -1603,8 +1492,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "アンモニアレーヨン",
@@ -1617,8 +1505,7 @@
       "representatives": [],
       "note": "引用中の完全名「銅アンモニアレーヨン」として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/"
+      "provenance": "body-text"
     },
     {
       "term": "アンモニウム",
@@ -1631,8 +1518,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "アーゼ",
@@ -1645,8 +1531,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "イオン",
@@ -1659,8 +1544,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "イス",
@@ -1673,8 +1557,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/t3tantou.html"
+      "provenance": "body-text"
     },
     {
       "term": "イソフタル酸",
@@ -1685,10 +1568,9 @@
       "mappingType": "compound",
       "target": "isophthalic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10042/"
+      "provenance": "body-text"
     },
     {
       "term": "イソプレン",
@@ -1699,10 +1581,9 @@
       "mappingType": "compound",
       "target": "isoprene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10271/"
+      "provenance": "body-text"
     },
     {
       "term": "イソプロピル",
@@ -1715,8 +1596,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "イソマルトース",
@@ -1727,10 +1607,9 @@
       "mappingType": "compound",
       "target": "isomaltose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/t3tantou.html"
+      "provenance": "body-text"
     },
     {
       "term": "イソメラーゼ",
@@ -1743,8 +1622,7 @@
       "representatives": [],
       "note": "異性化酵素。シス-トランス異性化の説明へ接続。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "イソロイシン",
@@ -1755,10 +1633,9 @@
       "mappingType": "compound",
       "target": "isoleucine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2aminosan.html"
+      "provenance": "body-text"
     },
     {
       "term": "イノシトール",
@@ -1771,8 +1648,7 @@
       "representatives": [],
       "note": "C6H12O6、六価環状アルコール。画像に置換の上下は示されるが、myo等の立体異性体名を出典が命名したとはしない。",
       "source": "idx-kimika",
-      "provenance": "image-human-read",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "image-human-read"
     },
     {
       "term": "イメージ",
@@ -1785,8 +1661,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "イラストレーター",
@@ -1799,8 +1674,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "イン",
@@ -1813,8 +1687,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "インク",
@@ -1827,8 +1700,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fats.html"
+      "provenance": "body-text"
     },
     {
       "term": "インベルターゼ",
@@ -1841,8 +1713,7 @@
       "representatives": [],
       "note": "スクラーゼの別名。スクロース加水分解。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "ウィンドブレーカー",
@@ -1855,8 +1726,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2condensation.html"
+      "provenance": "body-text"
     },
     {
       "term": "ウイルス",
@@ -1869,8 +1739,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2dna.html"
+      "provenance": "body-text"
     },
     {
       "term": "ウラシル",
@@ -1881,10 +1750,9 @@
       "mappingType": "compound",
       "target": "uracil",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/"
+      "provenance": "body-text"
     },
     {
       "term": "ウレアーゼ",
@@ -1897,8 +1765,7 @@
       "representatives": [],
       "note": "尿素→アンモニア＋二酸化炭素。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "エアバッグ",
@@ -1911,8 +1778,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10241/"
+      "provenance": "body-text"
     },
     {
       "term": "エイコサペンタエン酸",
@@ -1923,10 +1789,9 @@
       "mappingType": "compound",
       "target": "eicosapentaenoic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fattyacid.html"
+      "provenance": "body-text"
     },
     {
       "term": "エステル",
@@ -1941,8 +1806,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "エタノール",
@@ -1953,10 +1817,9 @@
       "mappingType": "compound",
       "target": "ethanol",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9961/"
+      "provenance": "body-text"
     },
     {
       "term": "エタノールアミン",
@@ -1969,8 +1832,7 @@
       "representatives": [],
       "note": "HOCH2CH2NH2。ホスファチジルエタノールアミンの語の部分一致ではなく、画像中の独立反応物。",
       "source": "idx-kimika",
-      "provenance": "image-human-read",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "image-human-read"
     },
     {
       "term": "エタン",
@@ -1981,10 +1843,9 @@
       "mappingType": "compound",
       "target": "ethane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9794/"
+      "provenance": "body-text"
     },
     {
       "term": "エタンジオール",
@@ -1997,8 +1858,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9899/"
+      "provenance": "body-text"
     },
     {
       "term": "エチル",
@@ -2011,8 +1871,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9961/"
+      "provenance": "body-text"
     },
     {
       "term": "エチルベンゼン",
@@ -2023,10 +1882,9 @@
       "mappingType": "compound",
       "target": "ethylbenzene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/arukirubenzen.html"
+      "provenance": "body-text"
     },
     {
       "term": "エチルメチルエーテル",
@@ -2037,10 +1895,9 @@
       "mappingType": "compound",
       "target": "methoxyethane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-ete.html"
+      "provenance": "body-text"
     },
     {
       "term": "エチルメチルケトン",
@@ -2051,10 +1908,9 @@
       "mappingType": "compound",
       "target": "butanone",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-keto.html"
+      "provenance": "body-text"
     },
     {
       "term": "エチレン",
@@ -2065,10 +1921,9 @@
       "mappingType": "compound",
       "target": "ethene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "エチレングリコール",
@@ -2079,10 +1934,9 @@
       "mappingType": "compound",
       "target": "ethylene-glycol",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "エチン",
@@ -2093,10 +1947,9 @@
       "mappingType": "compound",
       "target": "ethyne",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "エテン",
@@ -2107,10 +1960,9 @@
       "mappingType": "compound",
       "target": "ethene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9860/"
+      "provenance": "body-text"
     },
     {
       "term": "エネルギー",
@@ -2123,8 +1975,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10008/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "エノール",
@@ -2137,8 +1988,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "エボナイト",
@@ -2151,8 +2001,7 @@
       "representatives": [],
       "note": "多量の硫黄で加硫した硬質ゴム。天然ゴムそのものの別名ではない",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10271/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "エレプシン",
@@ -2165,8 +2014,7 @@
       "representatives": [],
       "note": "ペプチド→アミノ酸。腸液の酵素群で単一配列ではない。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "エン",
@@ -2179,8 +2027,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukan.html"
+      "provenance": "body-text"
     },
     {
       "term": "エンタルピー",
@@ -2193,8 +2040,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukan.html"
+      "provenance": "body-text"
     },
     {
       "term": "エーテル",
@@ -2209,8 +2055,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9806/"
+      "provenance": "body-text"
     },
     {
       "term": "オキソニウムイオン",
@@ -2223,8 +2068,7 @@
       "representatives": [],
       "note": "当該原文はH3O+（ヒドロニウム/オキソニウム）。一般の有機オキソニウム全体の名称出現とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1aruken.html"
+      "provenance": "body-text"
     },
     {
       "term": "オクタン",
@@ -2235,10 +2079,9 @@
       "mappingType": "compound",
       "target": "octane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukan.html"
+      "provenance": "body-text"
     },
     {
       "term": "オゾン",
@@ -2251,8 +2094,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1aruken.html"
+      "provenance": "body-text"
     },
     {
       "term": "オリゴ",
@@ -2265,8 +2107,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/toubunrui.html"
+      "provenance": "body-text"
     },
     {
       "term": "オリジナル",
@@ -2279,8 +2120,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "オリーブオイル",
@@ -2293,8 +2133,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9968/"
+      "provenance": "body-text"
     },
     {
       "term": "オリーブ油",
@@ -2307,8 +2146,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fats.html"
+      "provenance": "body-text"
     },
     {
       "term": "オル",
@@ -2321,8 +2159,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10008/"
+      "provenance": "body-text"
     },
     {
       "term": "オルト",
@@ -2335,8 +2172,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10008/"
+      "provenance": "body-text"
     },
     {
       "term": "オルトニトロフェノール",
@@ -2349,8 +2185,7 @@
       "representatives": [],
       "note": "以前の未登録判定を現413件で再照合し、追加46内の同一物質を確認。重複追加不要。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/fenol.html"
+      "provenance": "body-text"
     },
     {
       "term": "オレイン酸",
@@ -2361,10 +2196,9 @@
       "mappingType": "compound",
       "target": "oleic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "オンラインストア",
@@ -2377,8 +2211,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "オール",
@@ -2391,8 +2224,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-ete.html"
+      "provenance": "body-text"
     },
     {
       "term": "カウント",
@@ -2405,8 +2237,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9825/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "カタラーゼ",
@@ -2419,8 +2250,7 @@
       "representatives": [],
       "note": "2H2O2→2H2O＋O2。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "カッコ",
@@ -2433,8 +2263,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10101/"
+      "provenance": "body-text"
     },
     {
       "term": "カップ",
@@ -2447,8 +2276,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10253/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "カップリング",
@@ -2461,8 +2289,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10077/"
+      "provenance": "body-text"
     },
     {
       "term": "カップル",
@@ -2475,8 +2302,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10077/"
+      "provenance": "body-text"
     },
     {
       "term": "カツ",
@@ -2489,8 +2315,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1yukibunrui.html"
+      "provenance": "body-text"
     },
     {
       "term": "カプロラクタム",
@@ -2501,10 +2326,9 @@
       "mappingType": "compound",
       "target": "caprolactam",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "カラム",
@@ -2517,8 +2341,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2exchange.html"
+      "provenance": "body-text"
     },
     {
       "term": "カリウム",
@@ -2531,8 +2354,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10152/"
+      "provenance": "body-text"
     },
     {
       "term": "カルシウム",
@@ -2545,8 +2367,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9813/"
+      "provenance": "body-text"
     },
     {
       "term": "カルボキシ",
@@ -2559,8 +2380,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/"
+      "provenance": "body-text"
     },
     {
       "term": "カルボキシル",
@@ -2573,8 +2393,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9798/"
+      "provenance": "body-text"
     },
     {
       "term": "カルボニル",
@@ -2587,8 +2406,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9798/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "カルボン酸",
@@ -2603,8 +2421,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "カローザス",
@@ -2617,8 +2434,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2condensation.html"
+      "provenance": "body-text"
     },
     {
       "term": "カーテン",
@@ -2631,8 +2447,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2addition.html"
+      "provenance": "body-text"
     },
     {
       "term": "カード",
@@ -2645,8 +2460,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1solid.html"
+      "provenance": "body-text"
     },
     {
       "term": "カーバイド",
@@ -2659,8 +2473,7 @@
       "representatives": [],
       "note": "炭化カルシウムの別名、CaC2。アセチレン製法の試薬",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9879/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "カーボンファイバー",
@@ -2673,8 +2486,7 @@
       "representatives": [],
       "note": "炭素繊維材料。PANは原料例であり同一分子ではない",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2addition.html"
+      "provenance": "body-text"
     },
     {
       "term": "ガス",
@@ -2687,8 +2499,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9849/"
+      "provenance": "body-text"
     },
     {
       "term": "ガソリン",
@@ -2701,8 +2512,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1yuki.html"
+      "provenance": "body-text"
     },
     {
       "term": "ガラクトース",
@@ -2713,10 +2523,9 @@
       "mappingType": "compound",
       "target": "galactose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ガラス",
@@ -2729,8 +2538,7 @@
       "representatives": [],
       "note": "一般材料の用途例。無機ガラス/有機ガラスは文脈で区別",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2addition.html"
+      "provenance": "body-text"
     },
     {
       "term": "キサクロリド",
@@ -2743,8 +2551,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/benzen.html"
+      "provenance": "body-text"
     },
     {
       "term": "キサン",
@@ -2757,8 +2564,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "キサントプロテイン",
@@ -2771,8 +2577,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "キシレン",
@@ -2789,8 +2594,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10012/"
+      "provenance": "body-text"
     },
     {
       "term": "キミ",
@@ -2803,8 +2607,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1solid.html"
+      "provenance": "body-text"
     },
     {
       "term": "キャップ",
@@ -2817,8 +2620,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10245/"
+      "provenance": "body-text"
     },
     {
       "term": "キャンプ",
@@ -2831,8 +2633,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9972/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "キュプラ",
@@ -2845,8 +2646,7 @@
       "representatives": [],
       "note": "銅アンモニア法の再生セルロース繊維",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/"
+      "provenance": "body-text"
     },
     {
       "term": "キリ油",
@@ -2859,8 +2659,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fats.html"
+      "provenance": "body-text"
     },
     {
       "term": "キーワード",
@@ -2873,8 +2672,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "ギリシア",
@@ -2887,8 +2685,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/"
+      "provenance": "body-text"
     },
     {
       "term": "ギリシャ",
@@ -2901,8 +2698,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10121/"
+      "provenance": "body-text"
     },
     {
       "term": "ギ酸",
@@ -2913,10 +2709,9 @@
       "mappingType": "compound",
       "target": "formic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/"
+      "provenance": "body-text"
     },
     {
       "term": "クメン",
@@ -2927,10 +2722,9 @@
       "mappingType": "compound",
       "target": "cumene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10027/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "クメンヒドロペルオキシド",
@@ -2941,10 +2735,9 @@
       "mappingType": "compound",
       "target": "cumene-hydroperoxide",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10027/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "クリック",
@@ -2957,8 +2750,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10237/question-2/"
+      "provenance": "body-text"
     },
     {
       "term": "クレゾール",
@@ -2975,8 +2767,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10015/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "クロム酸",
@@ -2989,8 +2780,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "クロロ",
@@ -3003,8 +2793,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10057/"
+      "provenance": "body-text"
     },
     {
       "term": "クロロプレン",
@@ -3015,10 +2804,9 @@
       "mappingType": "compound",
       "target": "chloroprene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10275/"
+      "provenance": "body-text"
     },
     {
       "term": "クロロプレンゴム",
@@ -3029,10 +2817,9 @@
       "mappingType": "compound",
       "target": "chloroprene-rubber",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10275/"
+      "provenance": "body-text"
     },
     {
       "term": "クロロベンゼン",
@@ -3043,10 +2830,9 @@
       "mappingType": "compound",
       "target": "chlorobenzene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10057/"
+      "provenance": "body-text"
     },
     {
       "term": "クロロホルム",
@@ -3057,10 +2843,9 @@
       "mappingType": "compound",
       "target": "chloroform",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukan.html"
+      "provenance": "body-text"
     },
     {
       "term": "クロロメタン",
@@ -3071,10 +2856,9 @@
       "mappingType": "compound",
       "target": "chloromethane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9849/"
+      "provenance": "body-text"
     },
     {
       "term": "クーロン",
@@ -3087,8 +2871,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2sosei.html"
+      "provenance": "body-text"
     },
     {
       "term": "グアニン",
@@ -3099,10 +2882,9 @@
       "mappingType": "compound",
       "target": "guanine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/"
+      "provenance": "body-text"
     },
     {
       "term": "グラフ",
@@ -3115,8 +2897,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10109/"
+      "provenance": "body-text"
     },
     {
       "term": "グリコシド",
@@ -3129,8 +2910,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10148/"
+      "provenance": "body-text"
     },
     {
       "term": "グリコーゲン",
@@ -3141,10 +2921,9 @@
       "mappingType": "compound",
       "target": "glycogen",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10137/"
+      "provenance": "body-text"
     },
     {
       "term": "グリシン",
@@ -3155,10 +2934,9 @@
       "mappingType": "compound",
       "target": "glycine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10206/"
+      "provenance": "body-text"
     },
     {
       "term": "グリセリン",
@@ -3169,10 +2947,9 @@
       "mappingType": "compound",
       "target": "glycerol",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10261/"
+      "provenance": "body-text"
     },
     {
       "term": "グリプタル樹脂",
@@ -3183,10 +2960,9 @@
       "mappingType": "compound",
       "target": "alkyd-resin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "グルコース",
@@ -3197,10 +2973,9 @@
       "mappingType": "compound",
       "target": "glucose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "グルタミンサン",
@@ -3213,8 +2988,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10179/"
+      "provenance": "body-text"
     },
     {
       "term": "グルタミン酸",
@@ -3225,10 +2999,9 @@
       "mappingType": "compound",
       "target": "glutamic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10175/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "グルテリン",
@@ -3239,10 +3012,9 @@
       "mappingType": "compound",
       "target": "glutelin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "グルメ",
@@ -3255,8 +3027,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "グループ",
@@ -3269,8 +3040,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10097/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ケト",
@@ -3283,8 +3053,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "ケトエノール",
@@ -3297,8 +3066,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "ケトン",
@@ -3313,8 +3081,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "ケトース",
@@ -3329,8 +3096,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "ケラチン",
@@ -3341,10 +3107,9 @@
       "mappingType": "compound",
       "target": "keratin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "コック",
@@ -3357,8 +3122,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2separation.html"
+      "provenance": "body-text"
     },
     {
       "term": "コップ",
@@ -3371,8 +3135,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10261/"
+      "provenance": "body-text"
     },
     {
       "term": "コツ",
@@ -3385,8 +3148,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "コドン",
@@ -3399,8 +3161,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2dogma.html"
+      "provenance": "body-text"
     },
     {
       "term": "コバルト",
@@ -3413,8 +3174,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9813/"
+      "provenance": "body-text"
     },
     {
       "term": "コピー",
@@ -3427,8 +3187,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2dogma.html"
+      "provenance": "body-text"
     },
     {
       "term": "コラーゲン",
@@ -3439,10 +3198,9 @@
       "mappingType": "compound",
       "target": "collagen",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "コロイド",
@@ -3455,8 +3213,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10210/"
+      "provenance": "body-text"
     },
     {
       "term": "コロジオン",
@@ -3469,8 +3226,7 @@
       "representatives": [],
       "note": "低硝化度ニトロセルロースのエーテル/アルコール溶液",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosecompound.html"
+      "provenance": "body-text"
     },
     {
       "term": "ゴム",
@@ -3487,8 +3243,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10097/"
+      "provenance": "body-text"
     },
     {
       "term": "ゴムノキ",
@@ -3501,8 +3256,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2addition.html"
+      "provenance": "body-text"
     },
     {
       "term": "ゴール",
@@ -3515,8 +3269,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10027/"
+      "provenance": "body-text"
     },
     {
       "term": "サイズ",
@@ -3529,8 +3282,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2kobunshi.html"
+      "provenance": "body-text"
     },
     {
       "term": "サイド",
@@ -3543,8 +3295,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-ete.html"
+      "provenance": "body-text"
     },
     {
       "term": "サブユニット",
@@ -3557,8 +3308,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2tanpakukozo.html"
+      "provenance": "body-text"
     },
     {
       "term": "サリチル酸",
@@ -3569,10 +3319,9 @@
       "mappingType": "compound",
       "target": "salicylic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10191/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "サリチル酸ナトリウム",
@@ -3583,10 +3332,9 @@
       "mappingType": "compound",
       "target": "sodium-salicylate",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10046/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "サロメチール",
@@ -3599,8 +3347,7 @@
       "representatives": [],
       "note": "商品/製剤名。サリチル酸メチルは成分候補であって、商品全体を単一物質の同名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/houkokarubon.html"
+      "provenance": "body-text"
     },
     {
       "term": "ザイツェフ",
@@ -3613,8 +3360,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-ete.html"
+      "provenance": "body-text"
     },
     {
       "term": "シアン",
@@ -3627,8 +3373,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "シクロ",
@@ -3641,8 +3386,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9794/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "シクロアルカン",
@@ -3657,8 +3401,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9794/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "シクロアルキン",
@@ -3671,8 +3414,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1yukibunrui.html"
+      "provenance": "body-text"
     },
     {
       "term": "シクロアルケン",
@@ -3687,8 +3429,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9794/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "シクロブタン",
@@ -3699,10 +3440,9 @@
       "mappingType": "compound",
       "target": "cyclobutane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9853/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "シクロプロパン",
@@ -3713,10 +3453,9 @@
       "mappingType": "compound",
       "target": "cyclopropane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9853/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "シクロヘキサン",
@@ -3727,10 +3466,9 @@
       "mappingType": "compound",
       "target": "cyclohexane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9794/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "シクロヘキセン",
@@ -3741,10 +3479,9 @@
       "mappingType": "compound",
       "target": "cyclohexene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9794/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "シクロペンタン",
@@ -3755,10 +3492,9 @@
       "mappingType": "compound",
       "target": "cyclopentane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9853/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "シグマ",
@@ -3771,8 +3507,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1solid.html"
+      "provenance": "body-text"
     },
     {
       "term": "シス",
@@ -3785,8 +3520,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "システイン",
@@ -3797,10 +3531,9 @@
       "mappingType": "compound",
       "target": "cysteine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "シストランス",
@@ -3813,8 +3546,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-ete.html"
+      "provenance": "body-text"
     },
     {
       "term": "シスー",
@@ -3827,8 +3559,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1iseitainbunrui.html"
+      "provenance": "body-text"
     },
     {
       "term": "シトシン",
@@ -3839,10 +3570,9 @@
       "mappingType": "compound",
       "target": "cytosine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/"
+      "provenance": "body-text"
     },
     {
       "term": "シュウ酸",
@@ -3853,10 +3583,9 @@
       "mappingType": "compound",
       "target": "oxalic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "シュバイツァー試薬",
@@ -3869,8 +3598,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosemelt.html"
+      "provenance": "body-text"
     },
     {
       "term": "シュワイツァー試薬",
@@ -3883,8 +3611,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/"
+      "provenance": "body-text"
     },
     {
       "term": "ショ",
@@ -3897,8 +3624,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10144/"
+      "provenance": "body-text"
     },
     {
       "term": "シワ",
@@ -3911,8 +3637,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2condensation.html"
+      "provenance": "body-text"
     },
     {
       "term": "シンプル",
@@ -3925,8 +3650,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10097/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "シート",
@@ -3939,8 +3663,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10206/"
+      "provenance": "body-text"
     },
     {
       "term": "ジアセチルセルロース",
@@ -3953,8 +3676,7 @@
       "representatives": [],
       "note": "平均置換度約2、アセテート繊維。一般アセテートの可変式だけでは用途と状態の違いを説明しない",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosecompound.html"
+      "provenance": "body-text"
     },
     {
       "term": "ジアゾ",
@@ -3967,8 +3689,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10073/"
+      "provenance": "body-text"
     },
     {
       "term": "ジアゾカップリング",
@@ -3981,8 +3702,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "ジアゾニウム塩",
@@ -3997,8 +3717,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10073/"
+      "provenance": "body-text"
     },
     {
       "term": "ジエチルエーテル",
@@ -4009,10 +3728,9 @@
       "mappingType": "compound",
       "target": "diethyl-ether",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9798/"
+      "provenance": "body-text"
     },
     {
       "term": "ジエチルケトン",
@@ -4023,10 +3741,9 @@
       "mappingType": "compound",
       "target": "pentan-3-one",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-keto.html"
+      "provenance": "body-text"
     },
     {
       "term": "ジエン",
@@ -4041,8 +3758,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10275/"
+      "provenance": "body-text"
     },
     {
       "term": "ジカルボン酸",
@@ -4058,8 +3774,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ジクロリド",
@@ -4072,8 +3787,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10245/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ジクロロ",
@@ -4086,8 +3800,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9849/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ジクロロベンゼン",
@@ -4100,8 +3813,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10000/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ジクロロメタン",
@@ -4112,10 +3824,9 @@
       "mappingType": "compound",
       "target": "dichloromethane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9849/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ジグザグ",
@@ -4128,8 +3839,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10206/"
+      "provenance": "body-text"
     },
     {
       "term": "ジスルフィド",
@@ -4142,8 +3852,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10206/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ジニトロセルロース",
@@ -4156,8 +3865,7 @@
       "representatives": [],
       "note": "硝酸エステル化度約2。コロジオン/セルロイドとの関連",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosecompound.html"
+      "provenance": "body-text"
     },
     {
       "term": "ジビニルベンゼン",
@@ -4170,8 +3878,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/"
+      "provenance": "body-text"
     },
     {
       "term": "ジブロモ",
@@ -4184,8 +3891,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9868/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ジブロモエタン",
@@ -4198,8 +3904,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9868/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ジブロモエチレン",
@@ -4212,8 +3917,7 @@
       "representatives": [],
       "note": "以前の未登録判定を現413件で再照合し、追加46内の同一物質を確認。重複追加不要。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9883/"
+      "provenance": "body-text"
     },
     {
       "term": "ジペプチド",
@@ -4228,8 +3932,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10198/"
+      "provenance": "body-text"
     },
     {
       "term": "ジメチル",
@@ -4242,8 +3945,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9825/"
+      "provenance": "body-text"
     },
     {
       "term": "ジメチルエーテル",
@@ -4254,10 +3956,9 @@
       "mappingType": "compound",
       "target": "dimethyl-ether",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9825/"
+      "provenance": "body-text"
     },
     {
       "term": "ジメチルケトン",
@@ -4268,10 +3969,9 @@
       "mappingType": "compound",
       "target": "acetone",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-keto.html"
+      "provenance": "body-text"
     },
     {
       "term": "ジメチルプロパン",
@@ -4284,8 +3984,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9857/question-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ジャガイモ",
@@ -4298,8 +3997,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10152/"
+      "provenance": "body-text"
     },
     {
       "term": "スカスカ",
@@ -4312,8 +4010,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10109/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "スクラーゼ",
@@ -4326,8 +4023,7 @@
       "representatives": [],
       "note": "スクロース→グルコース＋フルクトース（転化糖）。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10144/"
+      "provenance": "body-text"
     },
     {
       "term": "スクロース",
@@ -4338,10 +4034,9 @@
       "mappingType": "compound",
       "target": "sucrose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10148/"
+      "provenance": "body-text"
     },
     {
       "term": "スズ",
@@ -4354,8 +4049,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10065/"
+      "provenance": "body-text"
     },
     {
       "term": "スタート",
@@ -4368,8 +4062,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10152/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "スチレン",
@@ -4380,10 +4073,9 @@
       "mappingType": "compound",
       "target": "styrene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/"
+      "provenance": "body-text"
     },
     {
       "term": "スチロール",
@@ -4396,8 +4088,7 @@
       "representatives": [],
       "note": "引用中の完全名「発泡スチロール」として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10253/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ステアリン酸",
@@ -4408,10 +4099,9 @@
       "mappingType": "compound",
       "target": "stearic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ステーキ",
@@ -4424,8 +4114,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "スムーズ",
@@ -4438,8 +4127,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "スルホ",
@@ -4452,8 +4140,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10023/"
+      "provenance": "body-text"
     },
     {
       "term": "スルホン",
@@ -4466,8 +4153,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10023/"
+      "provenance": "body-text"
     },
     {
       "term": "スルホン酸",
@@ -4482,8 +4168,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10023/"
+      "provenance": "body-text"
     },
     {
       "term": "スレオニン",
@@ -4494,10 +4179,9 @@
       "mappingType": "compound",
       "target": "threonine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2aminosan.html"
+      "provenance": "body-text"
     },
     {
       "term": "セッケン",
@@ -4512,8 +4196,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9972/"
+      "provenance": "body-text"
     },
     {
       "term": "セッティング",
@@ -4526,8 +4209,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1gensobunseki.html"
+      "provenance": "body-text"
     },
     {
       "term": "セット",
@@ -4540,8 +4222,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10140/"
+      "provenance": "body-text"
     },
     {
       "term": "セリン",
@@ -4552,10 +4233,9 @@
       "mappingType": "compound",
       "target": "serine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "セルラーゼ",
@@ -4568,8 +4248,7 @@
       "representatives": [],
       "note": "セルロース→セロビオース。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10156/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "セルロイド",
@@ -4582,8 +4261,7 @@
       "representatives": [],
       "note": "ニトロセルロースに樟脳などを加えた材料",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosecompound.html"
+      "provenance": "body-text"
     },
     {
       "term": "セルロース",
@@ -4594,10 +4272,9 @@
       "mappingType": "compound",
       "target": "cellulose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10148/"
+      "provenance": "body-text"
     },
     {
       "term": "セルロースキサントゲン酸",
@@ -4610,8 +4287,7 @@
       "representatives": [],
       "note": "引用中の完全名「セルロースキサントゲン酸ナトリウム」として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosemelt.html"
+      "provenance": "body-text"
     },
     {
       "term": "セルロースキサントゲン酸ナトリウム",
@@ -4624,8 +4300,7 @@
       "representatives": [],
       "note": "CS2付加で生じるキサントゲン酸Na誘導体→ビスコース→酸処理で再生セルロース",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosemelt.html"
+      "provenance": "body-text"
     },
     {
       "term": "セロハン",
@@ -4638,8 +4313,7 @@
       "representatives": [],
       "note": "再生セルロースの膜",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/"
+      "provenance": "body-text"
     },
     {
       "term": "セロハンテープ",
@@ -4652,8 +4326,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/"
+      "provenance": "body-text"
     },
     {
       "term": "セロビアーゼ",
@@ -4666,8 +4339,7 @@
       "representatives": [],
       "note": "セロビオース→グルコース。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10156/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "セロビオース",
@@ -4678,10 +4350,9 @@
       "mappingType": "compound",
       "target": "cellobiose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10156/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "セントラルドグマ",
@@ -4694,8 +4365,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2dogma.html"
+      "provenance": "body-text"
     },
     {
       "term": "セーター",
@@ -4708,8 +4378,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/"
+      "provenance": "body-text"
     },
     {
       "term": "ゼリー",
@@ -4722,8 +4391,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosemelt.html"
+      "provenance": "body-text"
     },
     {
       "term": "ソケット",
@@ -4736,8 +4404,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2bakelite.html"
+      "provenance": "body-text"
     },
     {
       "term": "ソーダ",
@@ -4750,8 +4417,7 @@
       "representatives": [],
       "note": "ソーダ石灰の部分語。CO2吸収の無機混合試薬",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9817/"
+      "provenance": "body-text"
     },
     {
       "term": "タイヤ",
@@ -4764,8 +4430,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10097/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "タンパク",
@@ -4778,8 +4443,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "ダウ",
@@ -4792,8 +4456,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/fenol.html"
+      "provenance": "body-text"
     },
     {
       "term": "ダメ",
@@ -4806,8 +4469,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1iseitainbunrui.html"
+      "provenance": "body-text"
     },
     {
       "term": "ダルマ",
@@ -4820,8 +4482,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10027/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "チェック",
@@ -4834,8 +4495,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9810/"
+      "provenance": "body-text"
     },
     {
       "term": "チマーゼ",
@@ -4848,8 +4508,7 @@
       "representatives": [],
       "note": "グルコース→エタノール＋CO2。発酵酵素群。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10133/"
+      "provenance": "body-text"
     },
     {
       "term": "チミン",
@@ -4860,10 +4519,9 @@
       "mappingType": "compound",
       "target": "thymine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10229/"
+      "provenance": "body-text"
     },
     {
       "term": "チャレンジ",
@@ -4876,8 +4534,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10088/"
+      "provenance": "body-text"
     },
     {
       "term": "チョッキ",
@@ -4890,8 +4547,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2condensation.html"
+      "provenance": "body-text"
     },
     {
       "term": "チロシン",
@@ -4902,10 +4558,9 @@
       "mappingType": "compound",
       "target": "tyrosine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "ツバキ油",
@@ -4918,8 +4573,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fats.html"
+      "provenance": "body-text"
     },
     {
       "term": "テスト",
@@ -4932,8 +4586,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10168/"
+      "provenance": "body-text"
     },
     {
       "term": "テトラ",
@@ -4946,8 +4599,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9849/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "テトラクロロメタン",
@@ -4958,10 +4610,9 @@
       "mappingType": "compound",
       "target": "carbon-tetrachloride",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9849/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "テトラフルオロエチレン",
@@ -4972,10 +4623,9 @@
       "mappingType": "compound",
       "target": "tetrafluoroethylene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2addition.html"
+      "provenance": "body-text"
     },
     {
       "term": "テトラブロモエタン",
@@ -4988,8 +4638,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9883/"
+      "provenance": "body-text"
     },
     {
       "term": "テフロン",
@@ -5000,10 +4649,9 @@
       "mappingType": "compound",
       "target": "ptfe",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1aruken.html"
+      "provenance": "body-text"
     },
     {
       "term": "テル",
@@ -5016,8 +4664,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/"
+      "provenance": "body-text"
     },
     {
       "term": "テレフタル酸",
@@ -5028,10 +4675,9 @@
       "mappingType": "compound",
       "target": "terephthalic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "テレフタル酸ジクロリド",
@@ -5042,10 +4688,9 @@
       "mappingType": "compound",
       "target": "terephthaloyl-chloride",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10245/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "テント",
@@ -5058,8 +4703,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "テーマ",
@@ -5072,8 +4716,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "デオキシ",
@@ -5086,8 +4729,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10229/"
+      "provenance": "body-text"
     },
     {
       "term": "デオキシリボ",
@@ -5100,8 +4742,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10229/"
+      "provenance": "body-text"
     },
     {
       "term": "デオキシリボース",
@@ -5112,10 +4753,9 @@
       "mappingType": "compound",
       "target": "deoxyribose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "デカルボキシラーゼ",
@@ -5128,8 +4768,7 @@
       "representatives": [],
       "note": "RCOOHからCO2を脱離させる酵素群。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "デカン",
@@ -5140,10 +4779,9 @@
       "mappingType": "compound",
       "target": "decane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukan.html"
+      "provenance": "body-text"
     },
     {
       "term": "デキストリン",
@@ -5154,10 +4792,9 @@
       "mappingType": "compound",
       "target": "dextrin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10137/"
+      "provenance": "body-text"
     },
     {
       "term": "デヒドロゲナーゼ",
@@ -5170,8 +4807,7 @@
       "representatives": [],
       "note": "基質からHを奪う酸化還元酵素群。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "デンプン",
@@ -5182,10 +4818,9 @@
       "mappingType": "compound",
       "target": "starch",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10148/"
+      "provenance": "body-text"
     },
     {
       "term": "データ",
@@ -5198,8 +4833,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9821/"
+      "provenance": "body-text"
     },
     {
       "term": "トラ",
@@ -5212,8 +4846,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9806/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "トランス",
@@ -5226,8 +4859,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9806/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "トランスフェラーゼ",
@@ -5240,8 +4872,7 @@
       "representatives": [],
       "note": "基の転移を触媒。代表としてホスホリラーゼを対応させる。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "トランスー",
@@ -5254,8 +4885,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1iseitainbunrui.html"
+      "provenance": "body-text"
     },
     {
       "term": "トリ",
@@ -5268,8 +4898,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10160/"
+      "provenance": "body-text"
     },
     {
       "term": "トリアセチルセルロース",
@@ -5282,8 +4911,7 @@
       "representatives": [],
       "note": "置換度3、写真フィルム。ジアセテートとの加水分解関係を表示",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10160/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "トリクロロメタン",
@@ -5294,10 +4922,9 @@
       "mappingType": "compound",
       "target": "chloroform",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9849/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "トリグリセリド",
@@ -5315,8 +4942,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fats.html"
+      "provenance": "body-text"
     },
     {
       "term": "トリニトロ",
@@ -5329,8 +4955,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10160/"
+      "provenance": "body-text"
     },
     {
       "term": "トリニトロセルロース",
@@ -5343,8 +4968,7 @@
       "representatives": [],
       "note": "硝酸エステル化度3、綿火薬との関連。ニトロ基の直接置換ではない",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10160/"
+      "provenance": "body-text"
     },
     {
       "term": "トリニトロトルエン",
@@ -5357,8 +4981,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10008/"
+      "provenance": "body-text"
     },
     {
       "term": "トリニトロフェノール",
@@ -5371,8 +4994,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10031/"
+      "provenance": "body-text"
     },
     {
       "term": "トリブロモフェノール",
@@ -5385,8 +5007,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10031/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "トリプシン",
@@ -5399,8 +5020,7 @@
       "representatives": [],
       "note": "タンパク質→ペプチド、すい液。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10225/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "トリプトファン",
@@ -5411,10 +5031,9 @@
       "mappingType": "compound",
       "target": "tryptophan",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2aminosan.html"
+      "provenance": "body-text"
     },
     {
       "term": "トリペプチド",
@@ -5429,8 +5048,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10198/"
+      "provenance": "body-text"
     },
     {
       "term": "トリメチルアンモニウム",
@@ -5443,8 +5061,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "トルエン",
@@ -5455,10 +5072,9 @@
       "mappingType": "compound",
       "target": "toluene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10088/"
+      "provenance": "body-text"
     },
     {
       "term": "トレオニン",
@@ -5469,10 +5085,9 @@
       "mappingType": "compound",
       "target": "threonine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2aminosan.html"
+      "provenance": "body-text"
     },
     {
       "term": "トレハロース",
@@ -5483,10 +5098,9 @@
       "mappingType": "compound",
       "target": "trehalose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/t3tantou.html"
+      "provenance": "body-text"
     },
     {
       "term": "トン",
@@ -5499,8 +5113,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9798/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ドコサヘキサエン酸",
@@ -5511,10 +5124,9 @@
       "mappingType": "compound",
       "target": "docosahexaenoic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fattyacid.html"
+      "provenance": "body-text"
     },
     {
       "term": "ドリル",
@@ -5527,8 +5139,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "ドリルシリーズ",
@@ -5541,8 +5152,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "ナイロン",
@@ -5558,8 +5168,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "ナトリウム",
@@ -5572,8 +5181,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "ナトリウムアルコキシド",
@@ -5589,8 +5197,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9903/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ナトリウムイオン",
@@ -5603,8 +5210,7 @@
       "representatives": [],
       "note": "Na+、無機イオン。樹脂の交換相手",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/"
+      "provenance": "body-text"
     },
     {
       "term": "ナトリウムエトキシド",
@@ -5615,10 +5221,9 @@
       "mappingType": "compound",
       "target": "sodium-ethoxide",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9903/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ナトリウムフェノキシド",
@@ -5629,10 +5234,9 @@
       "mappingType": "compound",
       "target": "sodium-phenoxide",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10088/"
+      "provenance": "body-text"
     },
     {
       "term": "ナトリウムメトキシド",
@@ -5643,10 +5247,9 @@
       "mappingType": "compound",
       "target": "sodium-methoxide",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10023/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ナトリウム塩",
@@ -5659,8 +5262,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9972/"
+      "provenance": "body-text"
     },
     {
       "term": "ナフタレン",
@@ -5671,10 +5273,9 @@
       "mappingType": "compound",
       "target": "naphthalene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-9992/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ナフトール",
@@ -5690,8 +5291,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10035/question-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ニクロム酸",
@@ -5704,8 +5304,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10069/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ニッケル",
@@ -5718,8 +5317,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9887/"
+      "provenance": "body-text"
     },
     {
       "term": "ニトロ",
@@ -5732,8 +5330,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "ニトロセルロース",
@@ -5744,10 +5341,9 @@
       "mappingType": "compound",
       "target": "cellulose-nitrate",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosecompound.html"
+      "provenance": "body-text"
     },
     {
       "term": "ニトロトルエン",
@@ -5764,8 +5360,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10008/"
+      "provenance": "body-text"
     },
     {
       "term": "ニトロフェノール",
@@ -5781,8 +5376,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/fenol.html"
+      "provenance": "body-text"
     },
     {
       "term": "ニトロベンゼン",
@@ -5793,10 +5387,9 @@
       "mappingType": "compound",
       "target": "nitrobenzene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10057/"
+      "provenance": "body-text"
     },
     {
       "term": "ニンヒドリン",
@@ -5807,10 +5400,9 @@
       "mappingType": "compound",
       "target": "ninhydrin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10191/"
+      "provenance": "body-text"
     },
     {
       "term": "ニンヒドリン試薬",
@@ -5823,8 +5415,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2tanpakucheck.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヌクレオチド",
@@ -5839,8 +5430,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/"
+      "provenance": "body-text"
     },
     {
       "term": "ノナン",
@@ -5851,10 +5441,9 @@
       "mappingType": "compound",
       "target": "nonane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukan.html"
+      "provenance": "body-text"
     },
     {
       "term": "ノボラック",
@@ -5867,8 +5456,7 @@
       "representatives": [],
       "note": "酸触媒で得る低重合度中間体。硬化剤と加熱で樹脂へ",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ノート",
@@ -5881,8 +5469,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "ハロゲン",
@@ -5895,8 +5482,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10000/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "バナジウム",
@@ -5909,8 +5495,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/benzen.html"
+      "provenance": "body-text"
     },
     {
       "term": "バラ",
@@ -5923,8 +5508,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10109/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "バラツキ",
@@ -5937,8 +5521,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2kobunshi.html"
+      "provenance": "body-text"
     },
     {
       "term": "バリン",
@@ -5949,10 +5532,9 @@
       "mappingType": "compound",
       "target": "valine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2aminosan.html"
+      "provenance": "body-text"
     },
     {
       "term": "バーナー",
@@ -5965,8 +5547,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1gensocheck.html"
+      "provenance": "body-text"
     },
     {
       "term": "パイ",
@@ -5979,8 +5560,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9872/"
+      "provenance": "body-text"
     },
     {
       "term": "パイプ",
@@ -5993,8 +5573,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9872/"
+      "provenance": "body-text"
     },
     {
       "term": "パターン",
@@ -6007,8 +5586,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9961/"
+      "provenance": "body-text"
     },
     {
       "term": "パラ",
@@ -6021,8 +5599,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10245/"
+      "provenance": "body-text"
     },
     {
       "term": "パラジウム",
@@ -6035,8 +5612,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-keto.html"
+      "provenance": "body-text"
     },
     {
       "term": "パラニトロフェノール",
@@ -6049,8 +5625,7 @@
       "representatives": [],
       "note": "以前の未登録判定を現413件で再照合し、追加46内の同一物質を確認。重複追加不要。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/fenol.html"
+      "provenance": "body-text"
     },
     {
       "term": "パルプ",
@@ -6063,8 +5638,7 @@
       "representatives": [],
       "note": "木材等から取り出した繊維材料。純セルロース分子ではない",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2rayon.html"
+      "provenance": "body-text"
     },
     {
       "term": "パルミチン酸",
@@ -6075,10 +5649,9 @@
       "mappingType": "compound",
       "target": "palmitic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "パーツ",
@@ -6091,8 +5664,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10229/"
+      "provenance": "body-text"
     },
     {
       "term": "ヒスチジン",
@@ -6103,10 +5675,9 @@
       "mappingType": "compound",
       "target": "histidine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2aminosan.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヒト",
@@ -6119,8 +5690,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10237/"
+      "provenance": "body-text"
     },
     {
       "term": "ヒドロキシ",
@@ -6133,8 +5703,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "ヒドロキシアゾベンゼン",
@@ -6147,8 +5716,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10077/"
+      "provenance": "body-text"
     },
     {
       "term": "ヒドロキシケトン",
@@ -6163,8 +5731,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/t3tantou.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヒドロキシメチル",
@@ -6177,8 +5744,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2bakelite.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヒドロキシル",
@@ -6191,8 +5757,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1yukibunrui.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヒドロキシ酸",
@@ -6208,8 +5773,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/karu-esu.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヒドロラーゼ",
@@ -6222,8 +5786,7 @@
       "representatives": [],
       "note": "加水分解酵素群。アミラーゼ・リパーゼ・プロテアーゼ等の具体リンクを持たせる。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヒント",
@@ -6236,8 +5799,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10137/"
+      "provenance": "body-text"
     },
     {
       "term": "ビウレット",
@@ -6250,8 +5812,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ビスコース",
@@ -6264,8 +5825,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ビスコースレーヨン",
@@ -6278,8 +5838,7 @@
       "representatives": [],
       "note": "ビスコース法による再生セルロース繊維",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ビニリデン",
@@ -6292,8 +5851,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1aruken.html"
+      "provenance": "body-text"
     },
     {
       "term": "ビニル",
@@ -6306,8 +5864,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "ビニルアルコール",
@@ -6318,10 +5875,9 @@
       "mappingType": "compound",
       "target": "ethenol",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9887/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ビニロン",
@@ -6332,10 +5888,9 @@
       "mappingType": "compound",
       "target": "vinylon",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ビニール",
@@ -6348,8 +5903,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10253/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ビーカー",
@@ -6362,8 +5916,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/"
+      "provenance": "body-text"
     },
     {
       "term": "ビーズ",
@@ -6376,8 +5929,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2exchange.html"
+      "provenance": "body-text"
     },
     {
       "term": "ビール",
@@ -6390,8 +5942,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10133/"
+      "provenance": "body-text"
     },
     {
       "term": "ピクリン酸",
@@ -6402,10 +5953,9 @@
       "mappingType": "compound",
       "target": "picric-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10031/"
+      "provenance": "body-text"
     },
     {
       "term": "ピーク",
@@ -6418,8 +5968,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10187/"
+      "provenance": "body-text"
     },
     {
       "term": "ファンデルワールス",
@@ -6432,8 +5981,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-ete.html"
+      "provenance": "body-text"
     },
     {
       "term": "フィブロイン",
@@ -6444,10 +5992,9 @@
       "mappingType": "compound",
       "target": "fibroin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2tanpakukozo.html"
+      "provenance": "body-text"
     },
     {
       "term": "フィルム",
@@ -6460,8 +6007,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosecompound.html"
+      "provenance": "body-text"
     },
     {
       "term": "フェニルアゾフェノール",
@@ -6474,8 +6020,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10077/"
+      "provenance": "body-text"
     },
     {
       "term": "フェニルアラニン",
@@ -6486,10 +6031,9 @@
       "mappingType": "compound",
       "target": "phenylalanine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10206/"
+      "provenance": "body-text"
     },
     {
       "term": "フェニレンジアミン",
@@ -6502,8 +6046,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10245/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "フェニレンテレフタルアミド",
@@ -6516,8 +6059,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10245/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "フェノキシドイオン",
@@ -6530,10 +6072,14 @@
       "representatives": [
         "sodium-phenoxide"
       ],
-      "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
+      "currentMapping": {
+        "mappingType": "compound",
+        "target": "phenoxide-ion",
+        "note": "OCR二pass統合と原画像の目視で独立イオンとして確認し、化合物IDを追加した。独立625語監査時点のclass-or-family分類は履歴として保持し、遡って書き換えない。"
+      },
+      "note": "独立625語監査の時点ではclass-or-family（一意の分子でない）として分類した。その後のOCR監査で独立イオンとして確認し、現在は化合物 phenoxide-ion に対応する。過去の分類値は履歴として保持する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10023/"
+      "provenance": "body-text"
     },
     {
       "term": "フェノール",
@@ -6544,10 +6090,9 @@
       "mappingType": "compound",
       "target": "phenol",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10023/"
+      "provenance": "body-text"
     },
     {
       "term": "フェノール樹脂",
@@ -6558,10 +6103,9 @@
       "mappingType": "compound",
       "target": "phenol-resin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10105/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "フェーリング",
@@ -6574,8 +6118,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10168/"
+      "provenance": "body-text"
     },
     {
       "term": "フタル酸",
@@ -6586,10 +6129,9 @@
       "mappingType": "compound",
       "target": "phthalic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10261/"
+      "provenance": "body-text"
     },
     {
       "term": "フマル酸",
@@ -6600,10 +6142,9 @@
       "mappingType": "compound",
       "target": "fumaric-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/"
+      "provenance": "body-text"
     },
     {
       "term": "フライパン",
@@ -6616,8 +6157,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "フリー",
@@ -6630,8 +6170,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2tanpakukozo.html"
+      "provenance": "body-text"
     },
     {
       "term": "フルクトース",
@@ -6642,10 +6181,9 @@
       "mappingType": "compound",
       "target": "fructose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "フロバイスヒトリジメ",
@@ -6658,8 +6196,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2aminosan.html"
+      "provenance": "body-text"
     },
     {
       "term": "フワッ",
@@ -6672,8 +6209,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1amido.html"
+      "provenance": "body-text"
     },
     {
       "term": "フワフワ",
@@ -6686,8 +6222,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1solid.html"
+      "provenance": "body-text"
     },
     {
       "term": "ブタジエン",
@@ -6698,10 +6233,9 @@
       "mappingType": "compound",
       "target": "butadiene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10275/"
+      "provenance": "body-text"
     },
     {
       "term": "ブタジエンゴム",
@@ -6712,10 +6246,9 @@
       "mappingType": "compound",
       "target": "br",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10275/"
+      "provenance": "body-text"
     },
     {
       "term": "ブタノール",
@@ -6731,8 +6264,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9922/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "ブタン",
@@ -6743,10 +6275,9 @@
       "mappingType": "compound",
       "target": "butane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/"
+      "provenance": "body-text"
     },
     {
       "term": "ブチン",
@@ -6762,8 +6293,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "ブテン",
@@ -6779,8 +6309,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9860/"
+      "provenance": "body-text"
     },
     {
       "term": "ブドウ",
@@ -6793,8 +6322,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/t3tantou.html"
+      "provenance": "body-text"
     },
     {
       "term": "ブラシ",
@@ -6807,8 +6335,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10241/"
+      "provenance": "body-text"
     },
     {
       "term": "ブロモ",
@@ -6821,8 +6348,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9868/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ブロモエタン",
@@ -6833,10 +6359,9 @@
       "mappingType": "compound",
       "target": "bromoethane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9876/question-2/"
+      "provenance": "body-text"
     },
     {
       "term": "プラス",
@@ -6849,8 +6374,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9949/"
+      "provenance": "body-text"
     },
     {
       "term": "プラスチック",
@@ -6865,8 +6389,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10113/"
+      "provenance": "body-text"
     },
     {
       "term": "プリント",
@@ -6879,8 +6402,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2bakelite.html"
+      "provenance": "body-text"
     },
     {
       "term": "プロ",
@@ -6893,8 +6415,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10221/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "プロテアーゼ",
@@ -6907,8 +6428,7 @@
       "representatives": [],
       "note": "タンパク質のペプチド結合を加水分解する酵素群。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10221/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "プロパノール",
@@ -6924,8 +6444,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9798/"
+      "provenance": "body-text"
     },
     {
       "term": "プロパン",
@@ -6936,10 +6455,9 @@
       "mappingType": "compound",
       "target": "propane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9833/"
+      "provenance": "body-text"
     },
     {
       "term": "プロパントリオール",
@@ -6952,8 +6470,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9899/"
+      "provenance": "body-text"
     },
     {
       "term": "プロピオンアルデヒド",
@@ -6964,10 +6481,9 @@
       "mappingType": "compound",
       "target": "propanal",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-keto.html"
+      "provenance": "body-text"
     },
     {
       "term": "プロピオン酸",
@@ -6978,10 +6494,9 @@
       "mappingType": "compound",
       "target": "propionic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/karu-esu.html"
+      "provenance": "body-text"
     },
     {
       "term": "プロピル",
@@ -6994,8 +6509,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "プロピレン",
@@ -7006,10 +6520,9 @@
       "mappingType": "compound",
       "target": "propene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10253/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "プロピン",
@@ -7020,10 +6533,9 @@
       "mappingType": "compound",
       "target": "propyne",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "プロペン",
@@ -7034,10 +6546,9 @@
       "mappingType": "compound",
       "target": "propene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10253/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ヘキサ",
@@ -7050,8 +6561,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "ヘキサクロロシクロヘキサン",
@@ -7062,10 +6572,9 @@
       "mappingType": "compound",
       "target": "hexachlorocyclohexane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10008/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ヘキサメチレンジアミン",
@@ -7076,10 +6585,9 @@
       "mappingType": "compound",
       "target": "hexamethylenediamine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "ヘキサン",
@@ -7090,10 +6598,9 @@
       "mappingType": "compound",
       "target": "hexane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10121/"
+      "provenance": "body-text"
     },
     {
       "term": "ヘキシン",
@@ -7106,8 +6613,7 @@
       "representatives": [],
       "note": "C6アルキン級名。位置未指定をhex-1-yneと断定しない",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヘキスト",
@@ -7120,8 +6626,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-keto.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヘキセン",
@@ -7134,8 +6639,7 @@
       "representatives": [],
       "note": "C6アルケン級名。位置未指定をhex-1-eneと断定しない。シクロヘキセンの部分一致は独立出現根拠にしない",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9860/"
+      "provenance": "body-text"
     },
     {
       "term": "ヘキソース",
@@ -7151,8 +6655,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10121/"
+      "provenance": "body-text"
     },
     {
       "term": "ヘプタン",
@@ -7163,10 +6666,9 @@
       "mappingType": "compound",
       "target": "heptane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukan.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヘミアセタール",
@@ -7181,8 +6683,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/t3tantou.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヘモグロビン",
@@ -7193,10 +6694,9 @@
       "mappingType": "compound",
       "target": "hemoglobin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2tanpakukozo.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヘリカーゼ",
@@ -7209,8 +6709,7 @@
       "representatives": [],
       "note": "DNAの二重鎖をほどく。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2spiral.html"
+      "provenance": "body-text"
     },
     {
       "term": "ヘリックス",
@@ -7223,8 +6722,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10206/"
+      "provenance": "body-text"
     },
     {
       "term": "ベスト",
@@ -7237,8 +6735,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9810/"
+      "provenance": "body-text"
     },
     {
       "term": "ベンジルアルコール",
@@ -7249,10 +6746,9 @@
       "mappingType": "compound",
       "target": "benzyl-alcohol",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10019/"
+      "provenance": "body-text"
     },
     {
       "term": "ベンズアルデヒド",
@@ -7263,10 +6759,9 @@
       "mappingType": "compound",
       "target": "benzaldehyde",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10038/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ベンゼン",
@@ -7277,10 +6772,9 @@
       "mappingType": "compound",
       "target": "benzene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "ベンゼンジアゾニウム",
@@ -7293,8 +6787,7 @@
       "representatives": [],
       "note": "原文の位置番号/完全修飾名を保持して既存候補へ照合。切り出し語だけを無条件別名にしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10073/"
+      "provenance": "body-text"
     },
     {
       "term": "ベンゼンスルホン酸",
@@ -7305,10 +6798,9 @@
       "mappingType": "compound",
       "target": "benzenesulfonic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10057/"
+      "provenance": "body-text"
     },
     {
       "term": "ベンゼンヘキサクロリド",
@@ -7321,8 +6813,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/benzen.html"
+      "provenance": "body-text"
     },
     {
       "term": "ベークライト",
@@ -7333,10 +6824,9 @@
       "mappingType": "compound",
       "target": "phenol-resin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2bakelite.html"
+      "provenance": "body-text"
     },
     {
       "term": "ベース",
@@ -7349,8 +6839,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10031/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "ペア",
@@ -7363,8 +6852,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10105/"
+      "provenance": "body-text"
     },
     {
       "term": "ペイント",
@@ -7377,8 +6865,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fats.html"
+      "provenance": "body-text"
     },
     {
       "term": "ペットボトル",
@@ -7391,8 +6878,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10097/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ペプシン",
@@ -7405,8 +6891,7 @@
       "representatives": [],
       "note": "タンパク質→ペプチド、胃液、酸性側の最適pH。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10225/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ペプチド",
@@ -7422,8 +6907,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "ペンタ",
@@ -7436,8 +6920,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10121/"
+      "provenance": "body-text"
     },
     {
       "term": "ペンタン",
@@ -7448,10 +6931,9 @@
       "mappingType": "compound",
       "target": "pentane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10121/"
+      "provenance": "body-text"
     },
     {
       "term": "ペンチン",
@@ -7464,8 +6946,7 @@
       "representatives": [],
       "note": "級名。pent-1-yne/pent-2-yneは代表で全異性体ではない",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "ペンテン",
@@ -7478,8 +6959,7 @@
       "representatives": [],
       "note": "級名。pent-1-ene/pent-2-eneは代表で全異性体ではない",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9860/"
+      "provenance": "body-text"
     },
     {
       "term": "ペントース",
@@ -7494,8 +6974,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/"
+      "provenance": "body-text"
     },
     {
       "term": "ページ",
@@ -7508,8 +6987,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホスファチジル",
@@ -7522,8 +7000,7 @@
       "representatives": [],
       "note": "本文はリン脂質複合名称の部分。画像で単体名を別途確認できたもののみ真の欠落へ昇格。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホスファチジル イノシトール",
@@ -7536,8 +7013,7 @@
       "representatives": [],
       "note": "頭部イノシトール、脂肪酸R可変。単体イノシトールとは別",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホスファチジル エタノールアミン",
@@ -7550,8 +7026,7 @@
       "representatives": [],
       "note": "頭部エタノールアミン。脂肪酸R可変。単体エタノールアミンとは別",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホスファチジル セリン",
@@ -7564,8 +7039,7 @@
       "representatives": [],
       "note": "頭部セリン、脂肪酸R可変。セリン単体に丸めない",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホスファチジルコリン",
@@ -7578,8 +7052,7 @@
       "representatives": [],
       "note": "グリセリン骨格＋脂肪酸2本＋リン酸＋コリン。脂肪酸R可変。レシチンへの相互参照",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホスホリラーゼ",
@@ -7592,8 +7065,7 @@
       "representatives": [],
       "note": "原文「リン酸化する 過リン酸分解する」。リン酸を使う分解を含む群。原文の語を科学的保証とはしない。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホルマリン",
@@ -7606,8 +7078,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-keto.html"
+      "provenance": "body-text"
     },
     {
       "term": "ホルムアルデヒド",
@@ -7618,10 +7089,9 @@
       "mappingType": "compound",
       "target": "formaldehyde",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10105/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ホース",
@@ -7634,8 +7104,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2addition.html"
+      "provenance": "body-text"
     },
     {
       "term": "ボイル油",
@@ -7648,8 +7117,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fats.html"
+      "provenance": "body-text"
     },
     {
       "term": "ボタン",
@@ -7662,8 +7130,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10261/"
+      "provenance": "body-text"
     },
     {
       "term": "ポイント",
@@ -7676,8 +7143,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリ",
@@ -7690,8 +7156,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリアクリロニトリル",
@@ -7702,10 +7167,9 @@
       "mappingType": "compound",
       "target": "pan",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリアミド",
@@ -7722,8 +7186,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリイソプレン",
@@ -7734,10 +7197,9 @@
       "mappingType": "compound",
       "target": "natural-rubber",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10271/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリエステル",
@@ -7752,8 +7214,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリエチレン",
@@ -7764,10 +7225,9 @@
       "mappingType": "compound",
       "target": "polyethylene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリエチレンテレフタラート",
@@ -7778,10 +7238,9 @@
       "mappingType": "compound",
       "target": "pet",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリクロロプレン",
@@ -7792,10 +7251,9 @@
       "mappingType": "compound",
       "target": "chloroprene-rubber",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2addition.html"
+      "provenance": "body-text"
     },
     {
       "term": "ポリスチレン",
@@ -7806,10 +7264,9 @@
       "mappingType": "compound",
       "target": "polystyrene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10113/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリビニルアルコール",
@@ -7820,10 +7277,9 @@
       "mappingType": "compound",
       "target": "pva",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリブタジエン",
@@ -7834,10 +7290,9 @@
       "mappingType": "compound",
       "target": "br",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2addition.html"
+      "provenance": "body-text"
     },
     {
       "term": "ポリプロピレン",
@@ -7848,10 +7303,9 @@
       "mappingType": "compound",
       "target": "polypropylene",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10253/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリペプチド",
@@ -7862,10 +7316,9 @@
       "mappingType": "compound",
       "target": "protein",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリマー",
@@ -7878,8 +7331,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10101/"
+      "provenance": "body-text"
     },
     {
       "term": "ポリメタクリル酸",
@@ -7892,8 +7344,7 @@
       "representatives": [],
       "note": "引用中の完全名「ポリメタクリル酸メチル」として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2addition.html"
+      "provenance": "body-text"
     },
     {
       "term": "ポリ塩",
@@ -7906,8 +7357,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "マイナス",
@@ -7920,8 +7370,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9949/"
+      "provenance": "body-text"
     },
     {
       "term": "マスター",
@@ -7934,8 +7383,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9845/"
+      "provenance": "body-text"
     },
     {
       "term": "マッチ",
@@ -7948,8 +7396,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9976/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "マルコフニコフ",
@@ -7962,8 +7409,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1aruken.html"
+      "provenance": "body-text"
     },
     {
       "term": "マルターゼ",
@@ -7976,8 +7422,7 @@
       "representatives": [],
       "note": "マルトース→グルコース。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10140/"
+      "provenance": "body-text"
     },
     {
       "term": "マルトース",
@@ -7988,10 +7433,9 @@
       "mappingType": "compound",
       "target": "maltose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10148/"
+      "provenance": "body-text"
     },
     {
       "term": "マレイン酸",
@@ -8002,10 +7446,9 @@
       "mappingType": "compound",
       "target": "maleic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/"
+      "provenance": "body-text"
     },
     {
       "term": "マンガン",
@@ -8018,8 +7461,7 @@
       "representatives": [],
       "note": "二酸化マンガンの部分語、H2O2分解触媒。Mn単体の出現とはしない",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10221/"
+      "provenance": "body-text"
     },
     {
       "term": "マンガン酸",
@@ -8032,8 +7474,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-ete.html"
+      "provenance": "body-text"
     },
     {
       "term": "マーガリン",
@@ -8046,8 +7487,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9968/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ミカエリス",
@@ -8060,8 +7500,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2michaelis.html"
+      "provenance": "body-text"
     },
     {
       "term": "ミセル",
@@ -8074,8 +7513,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9976/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ミセルコロイド",
@@ -8088,8 +7526,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2soap.html"
+      "provenance": "body-text"
     },
     {
       "term": "ミリスチン酸",
@@ -8100,10 +7537,9 @@
       "mappingType": "compound",
       "target": "myristic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fattyacid.html"
+      "provenance": "body-text"
     },
     {
       "term": "メタ",
@@ -8116,8 +7552,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9810/"
+      "provenance": "body-text"
     },
     {
       "term": "メタクリル酸",
@@ -8128,10 +7563,9 @@
       "mappingType": "compound",
       "target": "methacrylic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2addition.html"
+      "provenance": "body-text"
     },
     {
       "term": "メタノール",
@@ -8142,10 +7576,9 @@
       "mappingType": "compound",
       "target": "methanol",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9961/"
+      "provenance": "body-text"
     },
     {
       "term": "メタン",
@@ -8156,10 +7589,9 @@
       "mappingType": "compound",
       "target": "methane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9810/"
+      "provenance": "body-text"
     },
     {
       "term": "メタンガス",
@@ -8170,10 +7602,9 @@
       "mappingType": "compound",
       "target": "methane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9810/"
+      "provenance": "body-text"
     },
     {
       "term": "メチオニン",
@@ -8184,10 +7615,9 @@
       "mappingType": "compound",
       "target": "methionine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "メチル",
@@ -8200,8 +7630,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10175/"
+      "provenance": "body-text"
     },
     {
       "term": "メチルアセチレン",
@@ -8212,10 +7641,9 @@
       "mappingType": "compound",
       "target": "propyne",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "メチルオレンジ",
@@ -8226,10 +7654,9 @@
       "mappingType": "compound",
       "target": "methyl-orange",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10077/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "メチルブタン",
@@ -8242,8 +7669,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "メチルプロパン",
@@ -8256,8 +7682,7 @@
       "representatives": [],
       "note": "引用中の完全名として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9845/"
+      "provenance": "body-text"
     },
     {
       "term": "メチルペンタン",
@@ -8270,8 +7695,7 @@
       "representatives": [],
       "note": "引用中の完全名「3-メチルペンタン」として照合。位置/構成語を切り落とした文字列を無条件の別名にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9845/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "メチレン",
@@ -8284,8 +7708,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukan.html"
+      "provenance": "body-text"
     },
     {
       "term": "メディア",
@@ -8298,8 +7721,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/anirin.html"
+      "provenance": "body-text"
     },
     {
       "term": "メラミン",
@@ -8310,10 +7732,9 @@
       "mappingType": "compound",
       "target": "melamine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "メラミン樹脂",
@@ -8324,10 +7745,9 @@
       "mappingType": "compound",
       "target": "melamine-resin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "メリット",
@@ -8340,8 +7760,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9802/"
+      "provenance": "body-text"
     },
     {
       "term": "メンテン",
@@ -8354,8 +7773,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2michaelis.html"
+      "provenance": "body-text"
     },
     {
       "term": "モノ",
@@ -8368,8 +7786,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10101/"
+      "provenance": "body-text"
     },
     {
       "term": "モノカルボン酸",
@@ -8384,8 +7801,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "モノクロロメタン",
@@ -8396,10 +7812,9 @@
       "mappingType": "compound",
       "target": "chloromethane",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9849/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "モノマー",
@@ -8412,8 +7827,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10101/"
+      "provenance": "body-text"
     },
     {
       "term": "モル",
@@ -8426,8 +7840,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10279/"
+      "provenance": "body-text"
     },
     {
       "term": "ユリア樹脂",
@@ -8438,10 +7851,9 @@
       "mappingType": "compound",
       "target": "urea-resin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10261/"
+      "provenance": "body-text"
     },
     {
       "term": "ヨウ",
@@ -8454,8 +7866,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10156/"
+      "provenance": "body-text"
     },
     {
       "term": "ヨードホルム",
@@ -8466,10 +7877,9 @@
       "mappingType": "compound",
       "target": "iodoform",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9930/"
+      "provenance": "body-text"
     },
     {
       "term": "ラウリン酸",
@@ -8480,10 +7890,9 @@
       "mappingType": "compound",
       "target": "lauric-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fattyacid.html"
+      "provenance": "body-text"
     },
     {
       "term": "ラクターゼ",
@@ -8496,8 +7905,7 @@
       "representatives": [],
       "note": "ラクトース→グルコース＋ガラクトース。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "ラクトース",
@@ -8508,10 +7916,9 @@
       "mappingType": "compound",
       "target": "lactose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10152/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "ラップ",
@@ -8524,8 +7931,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2addition.html"
+      "provenance": "body-text"
     },
     {
       "term": "ラテックス",
@@ -8538,8 +7944,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10271/"
+      "provenance": "body-text"
     },
     {
       "term": "ラバー",
@@ -8552,8 +7957,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10275/"
+      "provenance": "body-text"
     },
     {
       "term": "リアーゼ",
@@ -8566,8 +7970,7 @@
       "representatives": [],
       "note": "脱離酵素。脱炭酸酵素への具体リンク。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "リガーゼ",
@@ -8580,8 +7983,7 @@
       "representatives": [],
       "note": "合成酵素。DNAリガーゼ（DNA鎖の連結）への具体リンク。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2koso.html"
+      "provenance": "body-text"
     },
     {
       "term": "リグニン",
@@ -8594,8 +7996,7 @@
       "representatives": [],
       "note": "木材の天然芳香族高分子群。セルロースと別物。celluloseは関連先にすぎず同一ID代替不可",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2rayon.html"
+      "provenance": "body-text"
     },
     {
       "term": "リシン",
@@ -8606,10 +8007,9 @@
       "mappingType": "compound",
       "target": "lysine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10171/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "リックス",
@@ -8622,8 +8022,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10206/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "リトマス",
@@ -8636,8 +8035,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9813/"
+      "provenance": "body-text"
     },
     {
       "term": "リノレン酸",
@@ -8648,10 +8046,9 @@
       "mappingType": "compound",
       "target": "linolenic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "リノール酸",
@@ -8662,10 +8059,9 @@
       "mappingType": "compound",
       "target": "linoleic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "リパーゼ",
@@ -8678,8 +8074,7 @@
       "representatives": [],
       "note": "油脂→高級脂肪酸＋グリセリン。種/配列未指定を単一固定構造へ捏造しない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fats.html"
+      "provenance": "body-text"
     },
     {
       "term": "リボ",
@@ -8692,8 +8087,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/"
+      "provenance": "body-text"
     },
     {
       "term": "リボソーム",
@@ -8706,8 +8100,7 @@
       "representatives": [],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2dogma.html"
+      "provenance": "body-text"
     },
     {
       "term": "リボース",
@@ -8718,10 +8111,9 @@
       "mappingType": "compound",
       "target": "ribose",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/"
+      "provenance": "body-text"
     },
     {
       "term": "リン",
@@ -8734,8 +8126,7 @@
       "representatives": [],
       "note": "この引用はリン酸/核酸の語断片。リン単体の新有機物ではない",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/"
+      "provenance": "body-text"
     },
     {
       "term": "リンク",
@@ -8748,8 +8139,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9798/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "リンゴ酸",
@@ -8760,10 +8150,9 @@
       "mappingType": "compound",
       "target": "malic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/karu-esu.html"
+      "provenance": "body-text"
     },
     {
       "term": "リン酸",
@@ -8776,8 +8165,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/"
+      "provenance": "body-text"
     },
     {
       "term": "ルシャトリエ",
@@ -8790,8 +8178,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/karu-esu.html"
+      "provenance": "body-text"
     },
     {
       "term": "ルート",
@@ -8804,8 +8191,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ルール",
@@ -8818,8 +8204,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/"
+      "provenance": "body-text"
     },
     {
       "term": "レシチン",
@@ -8832,8 +8217,7 @@
       "representatives": [],
       "note": "本教材はホスファチジルコリンの同名。工業的レシチン混合物全てとの同一視は避ける",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2phospholipids.html"
+      "provenance": "body-text"
     },
     {
       "term": "レゾール",
@@ -8846,8 +8230,7 @@
       "representatives": [],
       "note": "塩基触媒で得る中間体。加熱によって硬化。ノボラックと区別",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "レベル",
@@ -8860,8 +8243,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1aruken.html"
+      "provenance": "body-text"
     },
     {
       "term": "レモン",
@@ -8874,8 +8256,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2tanpakuhensei.html"
+      "provenance": "body-text"
     },
     {
       "term": "レン",
@@ -8888,8 +8269,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "レーヨン",
@@ -8902,8 +8282,7 @@
       "representatives": [],
       "note": "再生セルロース繊維",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/"
+      "provenance": "body-text"
     },
     {
       "term": "ロイシン",
@@ -8914,10 +8293,9 @@
       "mappingType": "compound",
       "target": "leucine",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2aminosan.html"
+      "provenance": "body-text"
     },
     {
       "term": "ローソク",
@@ -8930,8 +8308,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2fats.html"
+      "provenance": "body-text"
     },
     {
       "term": "ロープ",
@@ -8944,8 +8321,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ワイン",
@@ -8958,8 +8334,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10133/"
+      "provenance": "body-text"
     },
     {
       "term": "ワッカー",
@@ -8972,8 +8347,7 @@
       "representatives": [],
       "note": "引用における反応名/法則/構造/集合状態/記号。具体的化合物名とは区別する。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-keto.html"
+      "provenance": "body-text"
     },
     {
       "term": "ワトソン",
@@ -8986,8 +8360,7 @@
       "representatives": [],
       "note": "引用を確認。日常語・人名・地名・道具・製品用途・販促/著者情報であり、独立した化学物質名称ではない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10237/question-2/"
+      "provenance": "body-text"
     },
     {
       "term": "ーハロゲン",
@@ -9000,8 +8373,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1unsaturation.html"
+      "provenance": "body-text"
     },
     {
       "term": "ーブテン",
@@ -9014,8 +8386,7 @@
       "representatives": [],
       "note": "根拠の語は命名接辞・官能基・結合・長い名称の断片。独立した物質名とはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1iseitainbunrui.html"
+      "provenance": "body-text"
     },
     {
       "term": "乳酸",
@@ -9026,10 +8397,9 @@
       "mappingType": "compound",
       "target": "lactic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9806/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "二糖類",
@@ -9046,8 +8416,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "単糖類",
@@ -9063,8 +8432,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "合成洗剤",
@@ -9080,8 +8448,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9976/"
+      "provenance": "body-text"
     },
     {
       "term": "塩化ビニル",
@@ -9092,10 +8459,9 @@
       "mappingType": "compound",
       "target": "vinyl-chloride",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/"
+      "provenance": "body-text"
     },
     {
       "term": "多糖類",
@@ -9111,8 +8477,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "天然ゴム",
@@ -9123,10 +8488,9 @@
       "mappingType": "compound",
       "target": "natural-rubber",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10097/"
+      "provenance": "body-text"
     },
     {
       "term": "安息香酸",
@@ -9137,10 +8501,9 @@
       "mappingType": "compound",
       "target": "benzoic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10057/"
+      "provenance": "body-text"
     },
     {
       "term": "安息香酸ナトリウム",
@@ -9151,10 +8514,9 @@
       "mappingType": "compound",
       "target": "sodium-benzoate",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10092/"
+      "provenance": "body-text"
     },
     {
       "term": "尿素",
@@ -9165,10 +8527,9 @@
       "mappingType": "compound",
       "target": "urea",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "尿素樹脂",
@@ -9179,10 +8540,9 @@
       "mappingType": "compound",
       "target": "urea-resin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "核酸",
@@ -9198,8 +8558,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/"
+      "provenance": "body-text"
     },
     {
       "term": "油脂",
@@ -9215,8 +8574,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/"
+      "provenance": "body-text"
     },
     {
       "term": "炭化カルシウム",
@@ -9229,8 +8587,7 @@
       "representatives": [],
       "note": "引用の無機物/触媒/混合試薬。参照名称は残すが、新たな有機単一物質カードの欠落とはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9879/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "無水フタル酸",
@@ -9241,10 +8598,9 @@
       "mappingType": "compound",
       "target": "phthalic-anhydride",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10261/"
+      "provenance": "body-text"
     },
     {
       "term": "無水マレイン酸",
@@ -9255,10 +8611,9 @@
       "mappingType": "compound",
       "target": "maleic-anhydride",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9945/practice-3/"
+      "provenance": "body-text"
     },
     {
       "term": "無水酢酸",
@@ -9269,10 +8624,9 @@
       "mappingType": "compound",
       "target": "acetic-anhydride",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10160/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "界面活性剤",
@@ -9289,8 +8643,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9976/"
+      "provenance": "body-text"
     },
     {
       "term": "発泡スチロール",
@@ -9303,8 +8656,7 @@
       "representatives": [],
       "note": "ポリスチレンの発泡材料。スチレン単量体とは別",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10253/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "硬化油",
@@ -9317,8 +8669,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9968/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "糖類",
@@ -9335,8 +8686,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/"
+      "provenance": "body-text"
     },
     {
       "term": "綿火薬",
@@ -9349,8 +8699,7 @@
       "representatives": [],
       "note": "高硝酸エステル化セルロース材料",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y2cellulosecompound.html"
+      "provenance": "body-text"
     },
     {
       "term": "脂肪",
@@ -9365,8 +8714,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/"
+      "provenance": "body-text"
     },
     {
       "term": "脂肪油",
@@ -9381,8 +8729,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9968/"
+      "provenance": "body-text"
     },
     {
       "term": "転化糖",
@@ -9395,8 +8742,7 @@
       "representatives": [],
       "note": "引用で扱う油・飲料・溶液・混合物。構成/製法/用途の名称索引を設け、固定分子の同一性は主張しない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10144/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "酒石酸",
@@ -9407,10 +8753,9 @@
       "mappingType": "compound",
       "target": "tartaric-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9926/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "酢酸",
@@ -9421,10 +8766,9 @@
       "mappingType": "compound",
       "target": "acetic-acid",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "酢酸エチル",
@@ -9435,10 +8779,9 @@
       "mappingType": "compound",
       "target": "ethyl-acetate",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/karu-esu.html"
+      "provenance": "body-text"
     },
     {
       "term": "酢酸カルシウム",
@@ -9449,10 +8792,9 @@
       "mappingType": "compound",
       "target": "calcium-acetate",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/aru-keto.html"
+      "provenance": "body-text"
     },
     {
       "term": "酢酸ナトリウム",
@@ -9463,10 +8805,9 @@
       "mappingType": "compound",
       "target": "sodium-acetate",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9841/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "酢酸ビニル",
@@ -9477,10 +8818,9 @@
       "mappingType": "compound",
       "target": "vinyl-acetate",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "酢酸メチル",
@@ -9491,10 +8831,9 @@
       "mappingType": "compound",
       "target": "methyl-acetate",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9798/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "酢酸鉛",
@@ -9507,8 +8846,7 @@
       "representatives": [],
       "note": "以前の未登録判定を現413件で再照合し、追加46内の同一物質を確認。重複追加不要。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/"
+      "provenance": "body-text"
     },
     {
       "term": "酵素",
@@ -9525,8 +8863,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10133/"
+      "provenance": "body-text"
     },
     {
       "term": "銀アセチリド",
@@ -9537,10 +8874,9 @@
       "mappingType": "compound",
       "target": "silver-acetylide",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "銅(Ⅰ)アセチリド",
@@ -9551,10 +8887,9 @@
       "mappingType": "compound",
       "target": "copper-i-acetylide",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-kimika",
-      "provenance": "body-text",
-      "url": "https://kimika.net/y1arukin.html"
+      "provenance": "body-text"
     },
     {
       "term": "陰イオン交換樹脂",
@@ -9565,10 +8900,9 @@
       "mappingType": "compound",
       "target": "anion-exchange-resin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/point-2/"
+      "provenance": "body-text"
     },
     {
       "term": "陽イオン交換樹脂",
@@ -9579,10 +8913,9 @@
       "mappingType": "compound",
       "target": "cation-exchange-resin",
       "representatives": [],
-      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。",
+      "note": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/"
+      "provenance": "body-text"
     },
     {
       "term": "高級脂肪酸",
@@ -9598,8 +8931,7 @@
       ],
       "note": "同族体/化合物群/高分子群。代表物質へのリンクは全構成員の収録証明でも同名の単一構造でもない。引用の定義を用語説明に保持。",
       "source": "idx-tryit",
-      "provenance": "body-text",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/"
+      "provenance": "body-text"
     }
   ],
   "CROSSWALK": [
@@ -9613,13 +8945,13 @@
       "term": "p-ジクロロベンゼン",
       "label": "source-alias",
       "target": "p-dichlorobenzene",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "ATP",
       "label": "source-alias",
       "target": "atp",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "ATPアーゼ",
@@ -9631,13 +8963,13 @@
       "term": "銀アセチリド",
       "label": "source-alias",
       "target": "silver-acetylide",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "銅(Ⅰ)アセチリド",
       "label": "source-alias",
       "target": "copper-i-acetylide",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "ジブロモエチレン",
@@ -9649,61 +8981,61 @@
       "term": "1,1,2,2-テトラブロモエタン",
       "label": "source-alias",
       "target": "1,1,2,2-tetrabromoethane",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "ヘキサクロロシクロヘキサン",
       "label": "source-alias",
       "target": "hexachlorocyclohexane",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "クメンヒドロペルオキシド",
       "label": "source-alias",
       "target": "cumene-hydroperoxide",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "ナトリウムメトキシド",
       "label": "source-alias",
       "target": "sodium-methoxide",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "ナトリウムエトキシド",
       "label": "source-alias",
       "target": "sodium-ethoxide",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "安息香酸ナトリウム",
       "label": "source-alias",
       "target": "sodium-benzoate",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "サリチル酸ナトリウム",
       "label": "source-alias",
       "target": "sodium-salicylate",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "テレフタル酸ジクロリド",
       "label": "source-alias",
       "target": "terephthaloyl-chloride",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "アントラセン",
       "label": "source-alias",
       "target": "anthracene",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "シクロヘキセン",
       "label": "source-alias",
       "target": "cyclohexene",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "ペンテン",
@@ -9733,7 +9065,7 @@
       "term": "ジエチルケトン",
       "label": "source-alias",
       "target": "pentan-3-one",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "オルトニトロフェノール",
@@ -9751,43 +9083,43 @@
       "term": "リンゴ酸",
       "label": "source-alias",
       "target": "malic-acid",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "イソマルトース",
       "label": "source-alias",
       "target": "isomaltose",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "ラウリン酸",
       "label": "source-alias",
       "target": "lauric-acid",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "ミリスチン酸",
       "label": "source-alias",
       "target": "myristic-acid",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "アラキドン酸",
       "label": "source-alias",
       "target": "arachidonic-acid",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "エイコサペンタエン酸",
       "label": "source-alias",
       "target": "eicosapentaenoic-acid",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "ドコサヘキサエン酸",
       "label": "source-alias",
       "target": "docosahexaenoic-acid",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "ホスファチジルコリン",
@@ -9859,7 +9191,7 @@
       "term": "グリプタル樹脂",
       "label": "source-alias",
       "target": "alkyd-resin",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "チマーゼ",
@@ -9973,7 +9305,7 @@
       "term": "酢酸カルシウム",
       "label": "source-alias",
       "target": "calcium-acetate",
-      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかは引用で確認し、ID存在を外部網羅性の根拠にはしない。"
+      "reason": "外部本文の名称を現413件のIDへ照合。本文に独立出現したかはローカル監査記録で確認し、ID存在を外部網羅性の根拠にはしない。"
     },
     {
       "term": "炭化カルシウム",

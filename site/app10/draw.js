@@ -480,7 +480,8 @@
     if (a.label) return a.label;
     if (a.el === 'C') {
       if (mode !== 'condensed') return 'C';
-      if (a.h >= 3) return 'CH₃';
+      if (a.h >= 4) return 'CH₄';
+      if (a.h === 3) return 'CH₃';
       if (a.h === 2) return 'CH₂';
       if (a.h === 1) return 'CH';
       return 'C';
@@ -488,6 +489,20 @@
     if (a.el === 'Cl') return 'Cl';
     if (a.el === 'Na') return 'Na';
     return a.el;
+  }
+
+  // skeletal表示では連結炭素のCラベルを省略するが、結合を持たない孤立炭素は
+  // 何も描かれず空図になるため、CH₄などの明示ラベルを残す。
+  function bondDegreeOf(g, index) {
+    var n = 0;
+    g.bonds.forEach(function (b) {
+      if (b.a === index || b.b === index) n++;
+    });
+    return n;
+  }
+
+  function isSkeletalCarbonOmitted(g, a, index) {
+    return !!(g.skeletal && a.el === 'C' && !a.charge && !a.label && bondDegreeOf(g, index) > 0);
   }
 
   function chargeLabel(charge) {
@@ -554,7 +569,8 @@
   }
 
   function svgOpen(x, y, w, h, label, extra) {
-    return '<svg class="oc-svg" viewBox="' + x.toFixed(1) + ' ' + y.toFixed(1) + ' ' + w.toFixed(1) + ' ' + h.toFixed(1) + '" role="img" aria-label="' +
+    var pad = 12;
+    return '<svg class="oc-svg" viewBox="' + (x - pad).toFixed(1) + ' ' + (y - pad).toFixed(1) + ' ' + (w + pad * 2).toFixed(1) + ' ' + (h + pad * 2).toFixed(1) + '" role="img" data-font-base="20" data-font-min="10" aria-label="' +
       esc(label || '分子構造式') + '" preserveAspectRatio="xMidYMid meet" ' + (extra || '') + '>';
   }
 
@@ -611,11 +627,64 @@
     return { x: from.x + dx / len * radius, y: from.y + dy / len * radius };
   }
 
+  // SVGのviewBoxを、原子・結合・H・電荷・文字幅・多重結合のずれを含む
+  // 実内容の範囲に合わせる。g.width/height の固定値で無駄な空白を作らない。
+  function graphBounds(g, hPoints) {
+    var mode = g.mode || 'condensed';
+    var skeletal = !!g.skeletal;
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    function include(x, y) {
+      if (!isFinite(x) || !isFinite(y)) return;
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+    }
+    function atomHalf(a, i) {
+      if (isSkeletalCarbonOmitted(g, a, i)) return 0;
+      var fs = (skeletal || mode !== 'condensed') ? 23 : 19;
+      var lab = labelFor(a, mode);
+      return Math.max(atomRadius(a, mode), estimateWidth(lab, fs) / 2 + 2, fs * 0.58);
+    }
+    g.atoms.forEach(function (a, i) {
+      var half = atomHalf(a, i);
+      include(a.x - half, a.y - half);
+      include(a.x + half, a.y + half);
+      if (a.charge) {
+        var cl = chargeLabel(a.charge);
+        include(a.x + 10 + estimateWidth(cl, 13), a.y - 16);
+        include(a.x + 10, a.y - 8);
+      }
+    });
+    (hPoints || []).forEach(function (list) {
+      list.forEach(function (p) {
+        include(p.x - 12, p.y - 12);
+        include(p.x + 12, p.y + 12);
+      });
+    });
+    g.bonds.forEach(function (b) {
+      var a = g.atoms[b.a], c = g.atoms[b.b];
+      if (!a || !c) return;
+      var off = b.order === 3 ? 7 : (b.order === 2 ? 5 : 1.5);
+      include(Math.min(a.x, c.x) - off, Math.min(a.y, c.y) - off);
+      include(Math.max(a.x, c.x) + off, Math.max(a.y, c.y) + off);
+    });
+    if (!isFinite(minX)) return { minX: 0, minY: 0, maxX: 1, maxY: 1 };
+    return { minX: minX, minY: minY, maxX: maxX, maxY: maxY };
+  }
+
+  function graphContentBounds(g) {
+    var mode = g.mode || 'condensed';
+    var hPoints = g.atoms.map(function (a, i) {
+      if (mode === 'condensed' && a.el === 'C') return [];
+      return hDirections(g, i);
+    });
+    return graphBounds(g, hPoints);
+  }
+
   function renderGraph(g, label) {
     var mode = g.mode || 'condensed';
     var skeletal = !!g.skeletal;
-    function radiusOf(a) {
-      if (skeletal && a.el === 'C' && !a.charge && !a.label) return 0;
+    function radiusOf(a, i) {
+      if (isSkeletalCarbonOmitted(g, a, i)) return 0;
       if (skeletal && a.el !== 'C') return Math.max(atomRadius(a, mode), 17);
       return atomRadius(a, mode);
     }
@@ -623,36 +692,22 @@
       if (mode === 'condensed' && a.el === 'C') return [];
       return hDirections(g, i);
     });
-
-    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    g.atoms.forEach(function (a) {
-      minX = Math.min(minX, a.x - 30); maxX = Math.max(maxX, a.x + 30);
-      minY = Math.min(minY, a.y - 30); maxY = Math.max(maxY, a.y + 30);
-    });
-    hPoints.forEach(function (list) {
-      list.forEach(function (p) {
-        minX = Math.min(minX, p.x - 16); maxX = Math.max(maxX, p.x + 16);
-        minY = Math.min(minY, p.y - 16); maxY = Math.max(maxY, p.y + 16);
-      });
-    });
-    var pad = 14;
-    var contentMinX = minX - pad, contentMaxX = maxX + pad;
-    var contentMinY = minY - pad, contentMaxY = maxY + pad;
-    var vbW = Math.max(g.width || 360, contentMaxX - contentMinX);
-    var vbH = Math.max(g.height || 230, contentMaxY - contentMinY);
-    var vbX = (contentMinX + contentMaxX) / 2 - vbW / 2;
-    var vbY = (contentMinY + contentMaxY) / 2 - vbH / 2;
+    var bounds = graphBounds(g, hPoints);
+    var vbX = bounds.minX;
+    var vbY = bounds.minY;
+    var vbW = Math.max(1, bounds.maxX - bounds.minX);
+    var vbH = Math.max(1, bounds.maxY - bounds.minY);
 
     var bonds = '';
     var graphCenter = centroidOf(g);
     g.bonds.forEach(function (b) {
       var a = g.atoms[b.a], c = g.atoms[b.b];
       if (b.ring) {
-        var aa = trimPoint(a, c, radiusOf(a));
-        var cc = trimPoint(c, a, radiusOf(c));
+        var aa = trimPoint(a, c, radiusOf(a, b.a));
+        var cc = trimPoint(c, a, radiusOf(c, b.b));
         bonds += drawRingBond(aa, cc, b.order, b.ringCenter || graphCenter);
       } else {
-        bonds += drawBondLine(a, c, b.order, radiusOf(a), radiusOf(c), null, b.coordinate);
+        bonds += drawBondLine(a, c, b.order, radiusOf(a, b.a), radiusOf(c, b.b), null, b.coordinate);
       }
     });
 
@@ -661,8 +716,8 @@
       hPoints[i].forEach(function (p) {
         var dx = p.x - a.x, dy = p.y - a.y;
         var len = Math.sqrt(dx * dx + dy * dy) || 1;
-        var ax = a.x + dx / len * (radiusOf(a) - 1);
-        var ay = a.y + dy / len * (radiusOf(a) - 1);
+        var ax = a.x + dx / len * (radiusOf(a, i) - 1);
+        var ay = a.y + dy / len * (radiusOf(a, i) - 1);
         var bx = p.x - dx / len * 8;
         var by = p.y - dy / len * 8;
         hBonds += lineEl(ax, ay, bx, by, 'oc-bond oc-bond--h', 2.1);
@@ -671,8 +726,8 @@
     });
 
     var atoms = '';
-    g.atoms.forEach(function (a) {
-      if (skeletal && a.el === 'C' && !a.charge && !a.label) return;
+    g.atoms.forEach(function (a, i) {
+      if (isSkeletalCarbonOmitted(g, a, i)) return;
       var lab = labelFor(a, mode);
       var fs = (skeletal || mode !== 'condensed') ? 23 : 19;
       atoms += textEl(a.x, a.y, lab, 'oc-atom', fs, 'data-el="' + esc(a.el) + '"');
@@ -688,10 +743,152 @@
   }
 
   /* ------------------------------------------------------------------
+   * ②の一般構造（C=O を実際の二重結合線で示す小型図）
+   * ------------------------------------------------------------------ */
+  function functionalGraph(kind, opts) {
+    opts = opts || {};
+    var g = { atoms: [], bonds: [], mode: 'condensed' };
+    function add(el, x, y, h, label, charge) {
+      g.atoms.push({ el: el, x: x, y: y, h: h || 0, label: label || '', charge: charge || '' });
+      return g.atoms.length - 1;
+    }
+    function link(a, b, order) { g.bonds.push({ a: a, b: b, order: order || 1 }); }
+    if (kind === 'methane') {
+      add('C', 100, 100, 4);
+      return g;
+    }
+    if (kind === 'alkane') {
+      var c1 = add('C', 80, 100, 3), c2 = add('C', 150, 100, 3);
+      link(c1, c2);
+      return g;
+    }
+    if (kind === 'alkene') {
+      var e1 = add('C', 80, 100, 2), e2 = add('C', 150, 100, 2);
+      link(e1, e2, 2);
+      return g;
+    }
+    if (kind === 'alkyne') {
+      var y1 = add('C', 80, 100, 1), y2 = add('C', 150, 100, 1);
+      link(y1, y2, 3);
+      return g;
+    }
+    if (kind === 'alcohol') {
+      var ar = add('C', 60, 100, 0, 'R'), ao = add('O', 140, 100, 1);
+      link(ar, ao);
+      return g;
+    }
+    if (kind === 'ether') {
+      var er = add('C', 50, 100, 0, 'R'), eo = add('O', 125, 100, 0), er2 = add('C', 200, 100, 0, 'R′');
+      link(er, eo); link(eo, er2);
+      return g;
+    }
+    if (kind === 'aldehyde') {
+      var dr = add('C', 55, 100, 0, 'R'), dc = add('C', 125, 100, 0);
+      var dox = add('O', 125, 45, 0), dh = add('H', 195, 100, 0);
+      link(dr, dc); link(dc, dox, 2); link(dc, dh);
+      return g;
+    }
+    if (kind === 'ketone') {
+      var kr = add('C', 55, 100, 0, 'R'), kc = add('C', 125, 100, 0);
+      var kox = add('O', 125, 45, 0), kr2 = add('C', 195, 100, 0, 'R′');
+      link(kr, kc); link(kc, kox, 2); link(kc, kr2);
+      return g;
+    }
+    if (kind === 'carboxyl') {
+      var cr = add('C', 50, 100, 0, 'R'), cc = add('C', 120, 100, 0);
+      var cox = add('O', 120, 45, 0), coh = add('O', 190, 100, 1);
+      link(cr, cc); link(cc, cox, 2); link(cc, coh);
+      return g;
+    }
+    if (kind === 'ester') {
+      var sr = add('C', 45, 100, 0, 'R'), sc = add('C', 115, 100, 0);
+      var sox = add('O', 115, 45, 0), so = add('O', 185, 100, 0), sr2 = add('C', 255, 100, 0, 'R′');
+      link(sr, sc); link(sc, sox, 2); link(sc, so); link(so, sr2);
+      return g;
+    }
+    if (kind === 'anhydride') {
+      var anr = add('C', 30, 100, 0, 'R'), anc = add('C', 100, 100, 0);
+      var anox = add('O', 100, 45, 0), ano = add('O', 165, 100, 0), anc2 = add('C', 230, 100, 0);
+      var anox2 = add('O', 230, 45, 0), anr2 = add('C', 300, 100, 0, 'R′');
+      link(anr, anc); link(anc, anox, 2); link(anc, ano); link(ano, anc2);
+      link(anc2, anox2, 2); link(anc2, anr2);
+      return g;
+    }
+    if (kind === 'nitrile') {
+      var nr = add('C', 55, 100, 0, 'R'), nc = add('C', 125, 100, 0), nn = add('N', 195, 100, 0);
+      link(nr, nc); link(nc, nn, 3);
+      return g;
+    }
+    if (kind === 'amine1') {
+      var m1 = add('C', 55, 100, 0, 'R'), n1 = add('N', 130, 100, 2);
+      link(m1, n1);
+      return g;
+    }
+    if (kind === 'amine2') {
+      var m2 = add('C', 45, 100, 0, 'R'), n2 = add('N', 120, 100, 1), m2b = add('C', 195, 100, 0, 'R′');
+      link(m2, n2); link(n2, m2b);
+      return g;
+    }
+    if (kind === 'amine3') {
+      var m3 = add('C', 35, 100, 0, 'R'), n3 = add('N', 110, 100, 0), m3b = add('C', 185, 100, 0, 'R′'), m3c = add('C', 110, 170, 0, 'R″');
+      link(m3, n3); link(n3, m3b); link(n3, m3c);
+      return g;
+    }
+    if (kind === 'nitro') {
+      var xr = add('C', 50, 100, 0, 'R'), xn = add('N', 125, 100, 0, '', '+');
+      var xo1 = add('O', 125, 40, 0), xo2 = add('O', 200, 100, 0, '', '-');
+      link(xr, xn); link(xn, xo1, 2); link(xn, xo2);
+      return g;
+    }
+    if (kind === 'halogen') {
+      var hr = add('C', 55, 100, 0, 'R'), hx = add('C', 130, 100, 0, 'X');
+      link(hr, hx);
+      return g;
+    }
+    if (kind === 'polyol') {
+      var pr = add('C', 40, 100, 0, 'R'), pc = add('C', 110, 100, 1);
+      var po1 = add('O', 180, 70, 1), po2 = add('O', 180, 130, 1);
+      link(pr, pc); link(pc, po1); link(pc, po2);
+      return g;
+    }
+    if (kind === 'aminoAlcohol') {
+      var ao1 = add('O', 35, 100, 1), ac1 = add('C', 100, 100, 2), ac2 = add('C', 165, 100, 2), an1 = add('N', 235, 100, 2);
+      link(ao1, ac1); link(ac1, ac2); link(ac2, an1);
+      return g;
+    }
+    return null;
+  }
+
+  var FUNCTIONAL_FIGURE_KIND = {
+    alkane: 'alkane', alkene: 'alkene', alkyne: 'alkyne', halogen: 'halogen',
+    alcohol: 'alcohol', polyol: 'polyol', ether: 'ether', aldehyde: 'aldehyde',
+    ketone: 'ketone', carboxylic: 'carboxyl', anhydride: 'anhydride', ester: 'ester',
+    nitrile: 'nitrile', nitro: 'nitro', 'amino-alcohol': 'aminoAlcohol'
+  };
+
+  function renderFunctionalFigure(family, opts) {
+    opts = opts || {};
+    var kind = FUNCTIONAL_FIGURE_KIND[family];
+    if (family === 'alkane' && opts.partialC === 1) kind = 'methane';
+    if (!kind) return '';
+    var g = functionalGraph(kind);
+    if (!g) return '';
+    return renderGraph(g, opts.label || '一般構造');
+  }
+
+  function svgGeometry(svg) {
+    var m = String(svg || '').match(/viewBox="([^"]+)"/);
+    if (!m) return null;
+    var v = m[1].trim().split(/\s+/).map(Number);
+    if (v.length !== 4 || v.some(function (n) { return !isFinite(n); })) return null;
+    return { x: v[0], y: v[1], width: v[2], height: v[3], aspect: v[2] / v[3] };
+  }
+
+  /* ------------------------------------------------------------------
    * ベンゼン環＋置換基ラベル（個別化合物用）
    * ------------------------------------------------------------------ */
 
-  function renderRingSub(spec, label) {
+  function renderRingSub(spec, label, simple) {
     var pts = ringCoords(6, 210, 135, 62, 0);
     var center = { x: 210, y: 135 };
     var orders = [2, 1, 2, 1, 2, 1];
@@ -701,6 +898,12 @@
     var subs = {};
     (spec.subs || []).forEach(function (s) { subs[s.at] = s.label; });
     var labels = '';
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    function include(x, y) {
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+    }
+    pts.forEach(function (p) { include(p.x - 8, p.y - 8); include(p.x + 8, p.y + 8); });
     for (var j = 0; j < 6; j++) {
       var angle = j * Math.PI / 3;
       var ux = Math.cos(angle), uy = Math.sin(angle);
@@ -714,34 +917,1308 @@
         labels += '<text x="' + tx.toFixed(1) + '" y="' + ty.toFixed(1) +
           '" text-anchor="' + anchor + '" dominant-baseline="middle" class="oc-atom" font-size="18" data-sub="' +
           esc(subs[j]) + '">' + esc(subs[j]) + '</text>';
-      } else {
+        var tw = estimateWidth(subs[j], 18);
+        var left = anchor === 'start' ? tx : (anchor === 'end' ? tx - tw : tx - tw / 2);
+        include(left - 2, ty - 12);
+        include(left + tw + 2, ty + 12);
+      } else if (!simple) {
         var hx2 = pts[j].x + ux * 42, hy2 = pts[j].y + uy * 42;
         labels += lineEl(x1, y1, hx2, hy2, 'oc-bond oc-bond--h', 2.1);
         labels += textEl(hx2 + ux * 8, hy2 + uy * 8, 'H', 'oc-h', 17, 'data-el="H"');
+        include(hx2 + ux * 8 - 10, hy2 + uy * 8 - 10);
+        include(hx2 + ux * 8 + 10, hy2 + uy * 8 + 10);
       }
     }
-    var width = 460;
-    return svgOpen(0, 0, width, 280, label, 'data-kind="ring-sub"') +
+    return svgOpen(minX, minY, Math.max(1, maxX - minX), Math.max(1, maxY - minY), label, 'data-kind="ring-sub"' + (simple ? ' data-simple="1"' : '')) +
       '<g class="oc-bond-layer">' + bonds + '</g>' +
       '<g class="oc-atom-layer">' + labels + '</g></svg>';
   }
 
   /* ------------------------------------------------------------------
-   * 簡略構造式・重合体・模式図
+   * 簡略式から構造式を作る（明示された結合記号だけを使う）
    * ------------------------------------------------------------------ */
 
-  function renderCondensed(spec, label) {
+  var CONDENSED_SUB = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9' };
+  var CONDENSED_TOKENS = [
+    'H2N', 'HOOC', 'OOH', 'HO', 'COOCH3', 'OCOCH3', 'NHCOCH3', 'SO2NH2', 'SO3H', 'CH2OH', 'CHOH',
+    'COOH', 'CH3', 'CH2', 'CH', 'NH2', 'NO2', 'CHO', 'COO', 'CO', 'CN', 'OH', 'NH', 'N',
+    'O', 'C', 'H', 'Cl', 'Br', 'I', 'F', 'S', 'Si', 'Na', 'Pb', 'Ca', 'Ag', 'Cu', 'K'
+  ].sort(function (a, b) { return b.length - a.length; });
+
+  function normalizeCondensedText(line) {
+    return String(line == null ? '' : line)
+      .replace(/[₀-₉]/g, function (ch) { return CONDENSED_SUB[ch]; })
+      .replace(/\s+/g, '');
+  }
+
+  function condensedTokenize(s, i) {
+    var generic = /^C(\d+)H(\d+)/.exec(s.slice(i));
+    if (generic) return { t: generic[0], len: generic[0].length };
+    for (var k = 0; k < CONDENSED_TOKENS.length; k++) {
+      var t = CONDENSED_TOKENS[k];
+      if (s.slice(i, i + t.length) === t) return { t: t, len: t.length };
+    }
+    return null;
+  }
+
+  function condensedAtom(el, h, charge) { return { el: el, h: h || 0, charge: charge || '' }; }
+
+  function condensedFragment(t) {
+    function one(el, h, charge) { return { atoms: [condensedAtom(el, h, charge)], bonds: [], entry: 0, exit: 0 }; }
+    if (t === 'CH3') return one('C', 3);
+    if (t === 'CH2') return one('C', 2);
+    if (t === 'CH') return one('C', 1);
+    if (t === 'C') return one('C', 0);
+    if (t === 'NH2' || t === 'H2N') return one('N', 2);
+    if (t === 'NH') return one('N', 1);
+    if (t === 'N') return one('N', 0);
+    if (t === 'OH' || t === 'HO') return one('O', 1);
+    if (t === 'O') return one('O', 0);
+    if (t === 'H') return one('H', 0);
+    if (t === 'Cl') return one('Cl', 0);
+    if (t === 'Br') return one('Br', 0);
+    if (t === 'I') return one('I', 0);
+    if (t === 'F') return one('F', 0);
+    if (t === 'S') return one('S', 0);
+    if (t === 'Si') return one('Si', 0);
+    if (t === 'Na') return one('Na', 0);
+    if (t === 'Pb') return one('Pb', 0);
+    if (t === 'Ca') return one('Ca', 0);
+    if (t === 'Ag') return one('Ag', 0);
+    if (t === 'Cu') return one('Cu', 0);
+    if (t === 'K') return one('K', 0);
+    if (t === 'NO2') {
+      return { atoms: [condensedAtom('N', 0, '+'), condensedAtom('O', 0), condensedAtom('O', 0, '-')], bonds: [{ a: 0, b: 1, order: 2 }, { a: 0, b: 2, order: 1 }], entry: 0, exit: 0 };
+    }
+    if (t === 'CHO') {
+      return { atoms: [condensedAtom('C', 1), condensedAtom('O', 0)], bonds: [{ a: 0, b: 1, order: 2 }], entry: 0, exit: 0 };
+    }
+    if (t === 'COOH' || t === 'HOOC') {
+      return { atoms: [condensedAtom('C', 0), condensedAtom('O', 0), condensedAtom('O', 1)], bonds: [{ a: 0, b: 1, order: 2 }, { a: 0, b: 2, order: 1 }], entry: 0, exit: 0 };
+    }
+    if (t === 'COO') {
+      return { atoms: [condensedAtom('C', 0), condensedAtom('O', 0), condensedAtom('O', 0)], bonds: [{ a: 0, b: 1, order: 2 }, { a: 0, b: 2, order: 1 }], entry: 0, exit: 2 };
+    }
+    if (t === 'CO') {
+      return { atoms: [condensedAtom('C', 0), condensedAtom('O', 0)], bonds: [{ a: 0, b: 1, order: 2 }], entry: 0, exit: 0 };
+    }
+    if (t === 'CN') {
+      return { atoms: [condensedAtom('C', 0), condensedAtom('N', 0)], bonds: [{ a: 0, b: 1, order: 3 }], entry: 0, exit: 1 };
+    }
+    if (t === 'CHOH') {
+      return {
+        atoms: [condensedAtom('C', 1), condensedAtom('O', 1)],
+        bonds: [{ a: 0, b: 1, order: 1 }], entry: 0, exit: 0
+      };
+    }
+    if (t === 'CH2OH') {
+      return { atoms: [condensedAtom('C', 2), condensedAtom('O', 1)], bonds: [{ a: 0, b: 1, order: 1 }], entry: 0, exit: 1 };
+    }
+    if (t === 'OCH3') {
+      return { atoms: [condensedAtom('O', 0), condensedAtom('C', 3)], bonds: [{ a: 0, b: 1, order: 1 }], entry: 0, exit: 1 };
+    }
+    if (t === 'OCOCH3') {
+      return {
+        atoms: [condensedAtom('O', 0), condensedAtom('C', 0), condensedAtom('O', 0), condensedAtom('C', 3)],
+        bonds: [{ a: 0, b: 1, order: 1 }, { a: 1, b: 2, order: 2 }, { a: 1, b: 3, order: 1 }], entry: 0, exit: 3
+      };
+    }
+    if (t === 'COOCH3') {
+      return {
+        atoms: [condensedAtom('C', 0), condensedAtom('O', 0), condensedAtom('O', 0), condensedAtom('C', 3)],
+        bonds: [{ a: 0, b: 1, order: 2 }, { a: 0, b: 2, order: 1 }, { a: 2, b: 3, order: 1 }], entry: 0, exit: 3
+      };
+    }
+    if (t === 'NHCOCH3') {
+      return {
+        atoms: [condensedAtom('N', 1), condensedAtom('C', 0), condensedAtom('O', 0), condensedAtom('C', 3)],
+        bonds: [{ a: 0, b: 1, order: 1 }, { a: 1, b: 2, order: 2 }, { a: 1, b: 3, order: 1 }], entry: 0, exit: 3
+      };
+    }
+    if (t === 'SO3H') {
+      return {
+        atoms: [condensedAtom('S', 0), condensedAtom('O', 0), condensedAtom('O', 0), condensedAtom('O', 1)],
+        bonds: [{ a: 0, b: 1, order: 2 }, { a: 0, b: 2, order: 2 }, { a: 0, b: 3, order: 1 }], entry: 0, exit: 3
+      };
+    }
+    if (t === 'SO2NH2') {
+      return {
+        atoms: [condensedAtom('S', 0), condensedAtom('O', 0), condensedAtom('O', 0), condensedAtom('N', 2)],
+        bonds: [{ a: 0, b: 1, order: 2 }, { a: 0, b: 2, order: 2 }, { a: 0, b: 3, order: 1 }], entry: 0, exit: 3
+      };
+    }
+    if (t === 'OOH') {
+      return { atoms: [condensedAtom('O', 0), condensedAtom('O', 0), condensedAtom('H', 1)], bonds: [{ a: 0, b: 1, order: 1 }, { a: 1, b: 2, order: 1 }], entry: 0, exit: 2 };
+    }
+    var m = /^C(\d+)H(\d+)$/.exec(t);
+    if (m) {
+      var n = Number(m[1]);
+      var h = Number(m[2]);
+      if (h !== 2 * n + 1) throw new Error('環・複合表記は簡略式のまま表示します');
+      var atoms = [];
+      for (var i = 0; i < n; i++) atoms.push(condensedAtom('C', i === 0 ? 2 : (i === n - 1 ? 3 : 2)));
+      var bonds = [];
+      for (var j = 0; j < n - 1; j++) bonds.push({ a: j, b: j + 1, order: 1 });
+      return { atoms: atoms, bonds: bonds, entry: 0, exit: n - 1 };
+    }
+    throw new Error('未対応の簡略式記号: ' + t);
+  }
+
+  function appendCondensedFragment(target, frag, attachAtom, order) {
+    var base = target.atoms.length;
+    frag.atoms.forEach(function (a) { target.atoms.push(condensedAtom(a.el, a.h, a.charge)); });
+    frag.bonds.forEach(function (b) { target.bonds.push({ a: b.a + base, b: b.b + base, order: b.order }); });
+    if (attachAtom != null) target.bonds.push({ a: attachAtom, b: base + frag.entry, order: order || 1 });
+    return { base: base, entry: base + frag.entry, exit: base + frag.exit };
+  }
+
+  function parseCondensedFragment(s, state, stopParen) {
+    var target = { atoms: [], bonds: [] };
+    var prevEntry = null;
+    var prevExit = null;
+    var firstEntry = null;
+    var pendingBranches = [];
+    var lastMain = null;
+    var bondOrder = 1;
+    var justBond = false;
+    var entryOrder = 1;
+    while (state.i < s.length) {
+      var ch = s[state.i];
+      if (ch === ')') {
+        state.i++;
+        if (stopParen) break;
+        continue;
+      }
+      if (ch === '(') {
+        state.i++;
+        var inner = parseCondensedFragment(s, state, true);
+        var num = '';
+        while (/[0-9]/.test(s[state.i] || '')) num += s[state.i++];
+        var times = num ? Number(num) : 1;
+        if (!inner.atoms.length) continue;
+        var innerEntryAtom = inner.atoms[inner.entry];
+        // 括弧内が CH2 1個だけのときだけ主鎖の繰り返し。
+        // CH3 は分岐、C2H5 などの多原子基も分岐として扱う。
+        var simpleCH2 = inner.atoms.length === 1 && innerEntryAtom && innerEntryAtom.el === 'C' && innerEntryAtom.h === 2;
+        var asChain = justBond || (prevEntry != null && simpleCH2);
+        if (asChain) {
+          for (var k = 0; k < times; k++) {
+            var link = (prevExit != null) ? prevExit : lastMain;
+            var addedChain = appendCondensedFragment(target, inner, link, justBond ? bondOrder : 1);
+            prevExit = addedChain.exit;
+            prevEntry = addedChain.entry;
+            lastMain = addedChain.entry;
+            if (firstEntry == null) firstEntry = addedChain.entry;
+          }
+        } else if (prevEntry != null) {
+          for (var k2 = 0; k2 < times; k2++) appendCondensedFragment(target, inner, prevEntry, inner.entryOrder || 1);
+        } else {
+          for (var k3 = 0; k3 < times; k3++) pendingBranches.push(inner);
+        }
+        bondOrder = 1;
+        justBond = false;
+        continue;
+      }
+      if (ch === '—' || ch === '–' || ch === '-' || ch === '−' || ch === '=' || ch === '≡') {
+        bondOrder = ch === '=' ? 2 : (ch === '≡' ? 3 : 1);
+        justBond = true;
+        state.i++;
+        continue;
+      }
+      var tok = condensedTokenize(s, state.i);
+      if (!tok) { state.i++; continue; }
+      var frag = condensedFragment(tok.t);
+      state.i += tok.len;
+      var linkOrder = bondOrder;
+      var hadPrev = prevExit != null;
+      var added = appendCondensedFragment(target, frag, hadPrev ? prevExit : null, linkOrder);
+      if (firstEntry == null) {
+        firstEntry = added.entry;
+        entryOrder = hadPrev ? 1 : linkOrder;
+      }
+      while (pendingBranches.length) appendCondensedFragment(target, pendingBranches.shift(), added.entry, 1);
+      var suffix = '';
+      while (/[0-9]/.test(s[state.i] || '')) suffix += s[state.i++];
+      var count = suffix ? Number(suffix) : 1;
+      for (var r = 1; r < count; r++) appendCondensedFragment(target, frag, hadPrev ? lastMain : added.entry, 1);
+      if (s[state.i] === '⁺' || s[state.i] === '+') {
+        target.atoms[added.entry].charge = '+';
+        state.i++;
+      } else if (s[state.i] === '⁻' || s[state.i] === '-') {
+        target.atoms[added.entry].charge = '-';
+        state.i++;
+      }
+      // 末端の一価基は主鎖を進めない（CCl2 の Cl、CHBr2 の Br 等）。
+      var terminalBranch = hadPrev && ['Cl', 'Br', 'I', 'F', 'H', 'OH', 'NH2', 'NO2', 'OOH', 'SH'].indexOf(tok.t) !== -1;
+      if (terminalBranch) {
+        prevExit = lastMain;
+      } else {
+        prevEntry = added.entry;
+        prevExit = added.exit;
+        lastMain = added.entry;
+      }
+      bondOrder = 1;
+      justBond = false;
+    }
+    target.entry = firstEntry == null ? 0 : firstEntry;
+    target.exit = prevExit == null ? target.entry : prevExit;
+    target.entryOrder = entryOrder;
+    return target;
+  }
+
+  function layoutCondensedGraph(g) {
+    var n = g.atoms.length;
+    var adj = g.atoms.map(function () { return []; });
+    g.bonds.forEach(function (b) { adj[b.a].push(b.b); adj[b.b].push(b.a); });
+    var placed = new Array(n);
+    if (!n) return g;
+    placed[0] = true;
+    g.atoms[0].x = 200;
+    g.atoms[0].y = 150;
+    var queue = [0];
+    while (queue.length) {
+      var parent = queue.shift();
+      var angles = [];
+      g.bonds.forEach(function (b) {
+        var other = b.a === parent ? b.b : (b.b === parent ? b.a : null);
+        if (other != null && placed[other]) {
+          angles.push(Math.atan2(g.atoms[other].y - g.atoms[parent].y, g.atoms[other].x - g.atoms[parent].x));
+        }
+      });
+      adj[parent].forEach(function (child) {
+        if (placed[child]) return;
+        var best = null;
+        var bestScore = -Infinity;
+        for (var deg = 0; deg < 360; deg += 5) {
+          var rad = deg * Math.PI / 180;
+          var clear = Math.PI;
+          angles.forEach(function (a) {
+            clear = Math.min(clear, Math.abs(Math.atan2(Math.sin(rad - a), Math.cos(rad - a))));
+          });
+          var px = g.atoms[parent].x + 70 * Math.cos(rad);
+          var py = g.atoms[parent].y + 70 * Math.sin(rad);
+          var collision = 0;
+          for (var j = 0; j < n; j++) {
+            if (!placed[j]) continue;
+            var d = Math.sqrt((px - g.atoms[j].x) * (px - g.atoms[j].x) + (py - g.atoms[j].y) * (py - g.atoms[j].y));
+            if (d < 48) collision += 200;
+            else if (d < 62) collision += 30;
+          }
+          var score = clear * 100 - collision;
+          if (score > bestScore) { bestScore = score; best = { x: px, y: py, angle: rad }; }
+        }
+        g.atoms[child].x = best.x;
+        g.atoms[child].y = best.y;
+        placed[child] = true;
+        angles.push(best.angle);
+        queue.push(child);
+      });
+    }
+    return g;
+  }
+
+  function templateGraph(atoms, bonds, width, height) {
+    return { atoms: atoms, bonds: bonds, mode: 'expanded', width: width || 460, height: height || 340 };
+  }
+
+  function templateAtom(el, x, y, h, charge, ion) {
+    var a = { el: el, x: x, y: y, h: h || 0, charge: charge || '' };
+    if (ion) a.ion = true;
+    return a;
+  }
+
+  function ringTemplate(n, cx, cy, r, start, elements, hs, orders) {
+    var pts = ringCoords(n, cx, cy, r, start);
+    var atoms = pts.map(function (p, i) {
+      return templateAtom(elements[i], p.x, p.y, hs[i], '', false);
+    });
+    var center = { x: cx, y: cy };
+    var bonds = [];
+    for (var i = 0; i < n; i++) {
+      var b = bond(i, (i + 1) % n, orders && orders[i] ? orders[i] : 1);
+      b.ring = true;
+      b.ringCenter = center;
+      bonds.push(b);
+    }
+    return { atoms: atoms, bonds: bonds, width: 480, height: 360 };
+  }
+
+  function addCarboxylate(g, fromAtom, ux, uy) {
+    var a = g.atoms[fromAtom];
+    var c = { x: a.x + 72 * ux, y: a.y + 72 * uy };
+    var px = -uy, py = ux;
+    var ci = g.atoms.length;
+    g.atoms.push(templateAtom('C', c.x, c.y, 0));
+    g.bonds.push(bond(fromAtom, ci, 1));
+    g.atoms.push(templateAtom('O', c.x + 44 * px, c.y + 44 * py, 0));
+    g.bonds.push(bond(ci, ci + 1, 2));
+    g.atoms.push(templateAtom('O', c.x - 44 * px, c.y - 44 * py, 1));
+    g.bonds.push(bond(ci, ci + 2, 1));
+    return ci;
+  }
+
+  function addSodium(g, x, y) {
+    g.atoms.push(templateAtom('Na', x, y, 0, '+', true));
+  }
+
+  function saturatedChainCarboxylate(n, startX, startY) {
+    var g = { atoms: [], bonds: [], mode: 'expanded', width: 640, height: 360 };
+    var x = startX, y = startY;
+    for (var i = 0; i < n; i++) {
+      g.atoms.push(templateAtom('C', x, y, i === 0 ? 3 : 2));
+      if (i > 0) g.bonds.push(bond(i - 1, i, 1));
+      x += 56;
+      y += (i % 2 === 0 ? -28 : 28);
+    }
+    // carboxyl carbon: last CH2 -> C(=O)-O-
+    var ci = g.atoms.length;
+    g.atoms.push(templateAtom('C', x, y, 0));
+    g.bonds.push(bond(n - 1, ci, 1));
+    g.atoms.push(templateAtom('O', x, y - 62, 0));
+    g.bonds.push(bond(ci, ci + 1, 2));
+    g.atoms.push(templateAtom('O', x + 62, y, 0, '-'));
+    g.bonds.push(bond(ci, ci + 2, 1));
+    addSodium(g, x + 150, y + 60);
+    g.width = x + 260;
+    return g;
+  }
+
+  function acetateFragment(g, ox, oy, flip) {
+    var dir = flip ? -1 : 1;
+    var c0 = g.atoms.length;
+    g.atoms.push(templateAtom('C', ox, oy, 3));
+    g.atoms.push(templateAtom('C', ox + 72 * dir, oy, 0));
+    g.bonds.push(bond(c0, c0 + 1, 1));
+    g.atoms.push(templateAtom('O', ox + 72 * dir, oy - 58, 0));
+    g.bonds.push(bond(c0 + 1, c0 + 2, 2));
+    g.atoms.push(templateAtom('O', ox + 72 * dir + 58 * dir, oy, 0, '-'));
+    g.bonds.push(bond(c0 + 1, c0 + 3, 1));
+  }
+
+  function benzeneTemplate() {
+    var g = buildStructure({ type: 'skeleton', skeleton: 'benzene' });
+    g.width = 560;
+    g.height = 360;
+    return { atoms: g.atoms, bonds: g.bonds, mode: 'expanded', width: 560, height: 360 };
+  }
+
+  function addAtomVia(g, parent, el, h, distance, charge) {
+    var d = chooseDirection(g, parent, distance);
+    var idx = g.atoms.length;
+    g.atoms.push(templateAtom(el, d.x, d.y, h, charge));
+    g.bonds.push(bond(parent, idx, 1));
+    return idx;
+  }
+
+  function phenylTemplate(cx, cy, r) {
+    var g = ringTemplate(6, cx, cy, r, 0, ['C', 'C', 'C', 'C', 'C', 'C'], [0, 1, 1, 1, 1, 1], [1, 2, 1, 2, 1, 2]);
+    g.width = 620;
+    g.height = 420;
+    return g;
+  }
+
+  function addAminoAcidChain(g, fromAtom, ester) {
+    var ch2 = addAtomVia(g, fromAtom, 'C', 2, 72);
+    var ch = addAtomVia(g, ch2, 'C', 1, 72);
+    addAtomVia(g, ch, 'N', 2, 64);
+    var c = addAtomVia(g, ch, 'C', 0, 72);
+    var o1 = addAtomVia(g, c, 'O', 0, 56);
+    g.bonds[g.bonds.length - 1].order = 2;
+    if (ester) {
+      var o2 = addAtomVia(g, c, 'O', 0, 56);
+      var ch3 = addAtomVia(g, o2, 'C', 3, 56);
+      return ch3;
+    }
+    addAtomVia(g, c, 'O', 1, 56);
+    return c;
+  }
+
+  function addHydroxyPhenyl(g, at, cx, cy) {
+    var a = g.atoms[at];
+    a.h = 0;
+    var ux = (a.x - cx) / Math.max(1, Math.hypot(a.x - cx, a.y - cy));
+    var uy = (a.y - cy) / Math.max(1, Math.hypot(a.x - cx, a.y - cy));
+    var oi = g.atoms.length;
+    g.atoms.push(templateAtom('O', a.x + ux * 70, a.y + uy * 70, 1));
+    g.bonds.push(bond(at, oi, 1));
+  }
+
+  // 高校基礎アミノ酸のうち、芳香環を含むものを明示templateで描く。
+  function addHydroxyPhenyl(g, at, cx, cy) {
+    var a = g.atoms[at];
+    a.h = 0;
+    var ux = (a.x - cx) / Math.max(1, Math.hypot(a.x - cx, a.y - cy));
+    var uy = (a.y - cy) / Math.max(1, Math.hypot(a.x - cx, a.y - cy));
+    var oi = g.atoms.length;
+    g.atoms.push(templateAtom('O', a.x + ux * 70, a.y + uy * 70, 1));
+    g.bonds.push(bond(at, oi, 1));
+  }
+
+  function mergeTemplate(g, tpl, dx, dy) {
+    var base = g.atoms.length;
+    tpl.atoms.forEach(function (a) {
+      g.atoms.push(templateAtom(a.el, a.x + dx, a.y + dy, a.h, a.charge, a.ion));
+    });
+    tpl.bonds.forEach(function (b) {
+      g.bonds.push(bond(b.a + base, b.b + base, b.order));
+    });
+    return base;
+  }
+
+  // 高校基礎の複合芳香族・ペプチドを明示templateで描く。
+  var CURATED_GRAPHS = {
+    'cumene-hydroperoxide': function () {
+      var g = benzeneTemplate();
+      g.atoms[0].h = 0;
+      var a = g.atoms[0];
+      var ci = addAtomVia(g, 0, 'C', 0, 78);
+      addAtomVia(g, ci, 'C', 3, 60);
+      addAtomVia(g, ci, 'C', 3, 60);
+      var o1 = addAtomVia(g, ci, 'O', 0, 60);
+      var o2 = addAtomVia(g, o1, 'O', 0, 58);
+      addAtomVia(g, o2, 'H', 0, 44);
+      g.width = 650;
+      g.height = 420;
+      return g;
+    },
+    'bisphenol-a': function () {
+      var g = { atoms: [], bonds: [], mode: 'expanded', width: 820, height: 420 };
+      var ringA = ringTemplate(6, 150, 190, 72, 0, ['C', 'C', 'C', 'C', 'C', 'C'], [0, 1, 1, 0, 1, 1], [1, 2, 1, 2, 1, 2]);
+      var baseA = mergeTemplate(g, ringA, 0, 0);
+      var ringB = ringTemplate(6, 650, 190, 72, Math.PI, ['C', 'C', 'C', 'C', 'C', 'C'], [0, 1, 1, 0, 1, 1], [1, 2, 1, 2, 1, 2]);
+      var baseB = mergeTemplate(g, ringB, 0, 0);
+      var central = g.atoms.length;
+      g.atoms.push(templateAtom('C', 400, 190, 0));
+      g.bonds.push(bond(baseA + 0, central, 1));
+      g.bonds.push(bond(baseB + 0, central, 1));
+      addAtomVia(g, central, 'C', 3, 62);
+      addAtomVia(g, central, 'C', 3, 62);
+      var oa = g.atoms.length;
+      g.atoms.push(templateAtom('O', 8, 190, 1));
+      g.bonds.push(bond(baseA + 3, oa, 1));
+      var ob = g.atoms.length;
+      g.atoms.push(templateAtom('O', 792, 190, 1));
+      g.bonds.push(bond(baseB + 3, ob, 1));
+      return g;
+    },
+    aspartame: function () {
+      var g = { atoms: [], bonds: [], mode: 'expanded', width: 960, height: 580 };
+      function A(el, x, y, h) { g.atoms.push(templateAtom(el, x, y, h)); return g.atoms.length - 1; }
+      // Asp: HOOC-CH2-CH(NH2)-C(=O)- (α-carboxylがペプチド結合、側鎖CH2COOHは遊離)
+      var c0 = A('C', 50, 240, 0), o1 = A('O', 50, 170, 0), o2 = A('O', 110, 170, 1);
+      g.bonds.push(bond(c0, o1, 2)); g.bonds.push(bond(c0, o2, 1));
+      var cSide = A('C', 120, 240, 2), ca1 = A('C', 180, 240, 1), n1 = A('N', 180, 170, 2);
+      g.bonds.push(bond(c0, cSide, 1)); g.bonds.push(bond(cSide, ca1, 1)); g.bonds.push(bond(ca1, n1, 1));
+      var c3 = A('C', 245, 240, 0), o3 = A('O', 245, 170, 0), n2 = A('N', 310, 240, 1);
+      g.bonds.push(bond(ca1, c3, 1)); g.bonds.push(bond(c3, o3, 2)); g.bonds.push(bond(c3, n2, 1));
+      // Phe: -NH-CH(CH2Ph)-C(=O)-OCH3
+      var ca2 = A('C', 375, 240, 1), c4 = A('C', 440, 300, 2), c5 = A('C', 440, 240, 0);
+      g.bonds.push(bond(n2, ca2, 1)); g.bonds.push(bond(ca2, c4, 1)); g.bonds.push(bond(ca2, c5, 1));
+      var o4 = A('O', 440, 170, 0), o5 = A('O', 500, 240, 0), c6 = A('C', 565, 240, 3);
+      g.bonds.push(bond(c5, o4, 2)); g.bonds.push(bond(c5, o5, 1)); g.bonds.push(bond(o5, c6, 1));
+      var ring = ringTemplate(6, 440, 430, 76, -Math.PI / 2, ['C', 'C', 'C', 'C', 'C', 'C'], [0, 1, 1, 1, 1, 1], [1, 2, 1, 2, 1, 2]);
+      var base = mergeTemplate(g, ring, 0, 0);
+      g.bonds.push(bond(c4, base + 0, 1));
+      return g;
+    },
+    phenylalanine: function () {
+      var g = phenylTemplate(230, 190, 76);
+      addAminoAcidChain(g, 0, false);
+      return g;
+    },
+    tyrosine: function () {
+      var g = phenylTemplate(230, 190, 76);
+      addHydroxyPhenyl(g, 3, 230, 190);
+      addAminoAcidChain(g, 0, false);
+      return g;
+    },
+    histidine: function () {
+      // imidazole: N0H-C1(=N2)-C3=C4-N0, C1 に側鎖
+      var g = ringTemplate(5, 220, 180, 72, 0, ['N', 'C', 'N', 'C', 'C'], [1, 0, 0, 1, 1], [1, 2, 1, 2, 1]);
+      g.width = 620;
+      g.height = 420;
+      addAminoAcidChain(g, 1, false);
+      return g;
+    },
+    tryptophan: function () {
+      // indole: benzene 0-5 + pyrrole 0-N6-C7=C8-5
+      var g = ringTemplate(6, 240, 180, 76, 0, ['C', 'C', 'C', 'C', 'C', 'C'], [0, 1, 1, 1, 1, 0], [2, 1, 2, 1, 2, 1]);
+      var n6 = g.atoms.length;
+      g.atoms.push(templateAtom('N', 395, 180, 1));
+      var c7 = g.atoms.length;
+      g.atoms.push(templateAtom('C', 370, 110, 1));
+      var c8 = g.atoms.length;
+      g.atoms.push(templateAtom('C', 330, 140, 1));
+      g.bonds.push(bond(0, n6, 1));
+      g.bonds.push(bond(n6, c7, 1));
+      g.bonds.push(bond(c7, c8, 2));
+      g.bonds.push(bond(c8, 5, 1));
+      g.atoms[c7].h = 0;
+      addAminoAcidChain(g, c7, false);
+      g.width = 700;
+      g.height = 480;
+      return g;
+    },
+    sds: function () {
+      var g = { atoms: [], bonds: [], mode: 'expanded', width: 900, height: 300 };
+      var x = 40, y = 160;
+      for (var i = 0; i < 12; i++) {
+        g.atoms.push(templateAtom('C', x, y, i === 0 ? 3 : 2));
+        if (i > 0) g.bonds.push(bond(i - 1, i, 1));
+        x += 52;
+        y += (i % 2 === 0 ? -24 : 24);
+      }
+      var oi = g.atoms.length;
+      g.atoms.push(templateAtom('O', x, y, 0));
+      g.bonds.push(bond(11, oi, 1));
+      var si = g.atoms.length;
+      g.atoms.push(templateAtom('S', x + 60, y, 0));
+      g.bonds.push(bond(oi, si, 1));
+      g.atoms.push(templateAtom('O', x + 60, y - 58, 0));
+      g.bonds.push(bond(si, si + 1, 2));
+      g.atoms.push(templateAtom('O', x + 60, y + 58, 0));
+      g.bonds.push(bond(si, si + 2, 2));
+      g.atoms.push(templateAtom('O', x + 120, y, 0, '-'));
+      g.bonds.push(bond(si, si + 3, 1));
+      addSodium(g, x + 220, y + 60);
+      return g;
+    },
+    'sodium-oleate': function () {
+      var g = saturatedChainCarboxylate(17, 50, 160);
+      // C9=C10 のシス二重結合（カルボキシル基側から8番目）
+      var b = g.bonds.filter(function (x) { return x.a === 7 && x.b === 8; })[0];
+      if (b) b.order = 2;
+      g.atoms[7].h = 1;
+      g.atoms[8].h = 1;
+      g.width = 1200;
+      return g;
+    },
+    proline: function () {
+      var g = ringTemplate(5, 210, 170, 72, -Math.PI / 2, ['N', 'C', 'C', 'C', 'C'], [1, 1, 2, 2, 2]);
+      addCarboxylate(g, 1, 1, 0.15);
+      g.atoms[0].h = 1;
+      g.width = 480;
+      g.height = 360;
+      return g;
+    },
+    caprolactam: function () {
+      var g = ringTemplate(7, 230, 170, 82, -Math.PI / 2, ['N', 'C', 'C', 'C', 'C', 'C', 'C'], [1, 0, 2, 2, 2, 2, 2]);
+      var a = g.atoms[1];
+      var oi = g.atoms.length;
+      g.atoms.push(templateAtom('O', a.x, a.y - 66, 0));
+      g.bonds.push(bond(1, oi, 2));
+      g.width = 420;
+      g.height = 380;
+      return g;
+    },
+    melamine: function () {
+      var g = ringTemplate(6, 220, 160, 76, 0, ['C', 'N', 'C', 'N', 'C', 'N'], [0, 0, 0, 0, 0, 0], [2, 1, 2, 1, 2, 1]);
+      [0, 2, 4].forEach(function (idx) {
+        var a = g.atoms[idx];
+        var ux = (a.x - 220) / 76, uy = (a.y - 160) / 76;
+        var n = g.atoms.length;
+        g.atoms.push(templateAtom('N', a.x + ux * 58, a.y + uy * 58, 2));
+        g.bonds.push(bond(idx, n, 1));
+      });
+      g.width = 480;
+      g.height = 380;
+      return g;
+    },
+    epichlorohydrin: function () {
+      var g = ringTemplate(3, 200, 170, 74, -Math.PI / 2, ['C', 'C', 'O'], [2, 1, 0]);
+      var c1 = g.atoms[1];
+      var c3 = g.atoms.length;
+      g.atoms.push(templateAtom('C', c1.x + 96, c1.y + 30, 2));
+      g.bonds.push(bond(1, c3, 1));
+      g.atoms.push(templateAtom('Cl', c1.x + 160, c1.y + 60, 0));
+      g.bonds.push(bond(c3, c3 + 1, 1));
+      g.width = 460;
+      g.height = 340;
+      return g;
+    },
+    'sodium-methoxide': function () {
+      var g = { atoms: [templateAtom('C', 140, 160, 3), templateAtom('O', 220, 160, 0, '-')], bonds: [bond(0, 1, 1)], mode: 'expanded', width: 460, height: 260 };
+      addSodium(g, 350, 160);
+      return g;
+    },
+    'sodium-ethoxide': function () {
+      var g = { atoms: [templateAtom('C', 90, 160, 3), templateAtom('C', 165, 160, 2), templateAtom('O', 240, 160, 0, '-')], bonds: [bond(0, 1, 1), bond(1, 2, 1)], mode: 'expanded', width: 470, height: 260 };
+      addSodium(g, 370, 160);
+      return g;
+    },
+    'sodium-acetate': function () {
+      var g = { atoms: [], bonds: [], mode: 'expanded', width: 520, height: 300 };
+      acetateFragment(g, 80, 160, false);
+      addSodium(g, 380, 160);
+      return g;
+    },
+    'sodium-benzoate': function () {
+      var g = benzeneTemplate();
+      g.atoms[0].h = 0;
+      var a = g.atoms[0];
+      var ci = g.atoms.length;
+      g.atoms.push(templateAtom('C', a.x + 78, a.y, 0));
+      g.bonds.push(bond(0, ci, 1));
+      g.atoms.push(templateAtom('O', a.x + 78, a.y - 58, 0));
+      g.bonds.push(bond(ci, ci + 1, 2));
+      g.atoms.push(templateAtom('O', a.x + 78, a.y + 58, 0, '-'));
+      g.bonds.push(bond(ci, ci + 2, 1));
+      addSodium(g, a.x + 210, a.y + 80);
+      g.width = 640;
+      return g;
+    },
+    'sodium-phenoxide': function () {
+      var g = benzeneTemplate();
+      g.atoms[0].h = 0;
+      var a = g.atoms[0];
+      g.atoms.push(templateAtom('O', a.x + 72, a.y, 0, '-'));
+      g.bonds.push(bond(0, g.atoms.length - 1, 1));
+      addSodium(g, a.x + 190, a.y + 70);
+      g.width = 600;
+      return g;
+    },
+    'sodium-benzenesulfonate': function () {
+      var g = benzeneTemplate();
+      g.atoms[0].h = 0;
+      var a = g.atoms[0];
+      var si = g.atoms.length;
+      g.atoms.push(templateAtom('S', a.x + 78, a.y, 0));
+      g.bonds.push(bond(0, si, 1));
+      g.atoms.push(templateAtom('O', a.x + 78, a.y - 58, 0));
+      g.bonds.push(bond(si, si + 1, 2));
+      g.atoms.push(templateAtom('O', a.x + 78, a.y + 58, 0));
+      g.bonds.push(bond(si, si + 2, 2));
+      g.atoms.push(templateAtom('O', a.x + 138, a.y, 0, '-'));
+      g.bonds.push(bond(si, si + 3, 1));
+      addSodium(g, a.x + 250, a.y + 70);
+      g.width = 680;
+      return g;
+    },
+    'calcium-acetate': function () {
+      var g = { atoms: [], bonds: [], mode: 'expanded', width: 620, height: 360 };
+      acetateFragment(g, 40, 110, false);
+      acetateFragment(g, 40, 250, false);
+      g.atoms.push(templateAtom('Ca', 420, 180, 0, '2+', true));
+      return g;
+    },
+    'lead-ii-acetate': function () {
+      var g = { atoms: [], bonds: [], mode: 'expanded', width: 620, height: 360 };
+      acetateFragment(g, 40, 110, false);
+      acetateFragment(g, 40, 250, false);
+      g.atoms.push(templateAtom('Pb', 420, 180, 0, '2+', true));
+      return g;
+    },
+    'silver-acetylide': function () {
+      var g = { atoms: [templateAtom('Ag', 90, 160, 0, '+', true), templateAtom('C', 200, 160, 0, '-'), templateAtom('C', 280, 160, 0, '-'), templateAtom('Ag', 390, 160, 0, '+', true)], bonds: [bond(1, 2, 3)], mode: 'expanded', width: 500, height: 260 };
+      return g;
+    },
+    'copper-i-acetylide': function () {
+      var g = { atoms: [templateAtom('Cu', 90, 160, 0, '+', true), templateAtom('C', 200, 160, 0, '-'), templateAtom('C', 280, 160, 0, '-'), templateAtom('Cu', 390, 160, 0, '+', true)], bonds: [bond(1, 2, 3)], mode: 'expanded', width: 500, height: 260 };
+      return g;
+    },
+    'sodium-laurate': function () { return saturatedChainCarboxylate(11, 60, 160); },
+    'sodium-palmitate': function () { return saturatedChainCarboxylate(15, 60, 160); },
+    'sodium-stearate': function () { return saturatedChainCarboxylate(17, 60, 160); }
+  };
+
+  function curatedGraphFor(compound) {
+    var builder = CURATED_GRAPHS[compound.id];
+    if (!builder) return null;
+    try {
+      var g = builder();
+      if (!g || !g.atoms || !g.atoms.length) return null;
+      if (formulaOfGraph(g) !== compound.formula) return null;
+      return g;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  var condensedGraphCache = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+
+
+  function condensedGraphFor(compound) {
+    var spec = compound && compound.structure;
+    if (!spec || spec.type !== 'condensed' || compound.formulaVariable) return { graph: null, reason: '可変組成のため簡略式で表示' };
+    if (condensedGraphCache && condensedGraphCache.has(spec)) return condensedGraphCache.get(spec);
+    var result;
+    var curated = curatedGraphFor(compound);
+    if (curated) {
+      var cv = checkValence(curated);
+      if (cv.ok) {
+        result = { graph: curated, reason: '' };
+        if (condensedGraphCache) condensedGraphCache.set(spec, result);
+        return result;
+      }
+      result = { graph: null, reason: '派生構造の結合価検証に失敗したため簡略式で表示' };
+      if (condensedGraphCache) condensedGraphCache.set(spec, result);
+      return result;
+    }
     var lines = spec.lines || [];
+    var chem = null;
+    for (var i = 0; i < lines.length; i++) {
+      if (!/(シス|トランス)形/.test(lines[i])) { chem = lines[i]; break; }
+    }
+    if (!chem) {
+      result = { graph: null, reason: 'シス/トランス表記を保つため簡略式で表示' };
+    } else if (/Na|Ag|Cu|Pb|Ca|Mg|Zn|Fe|Al|Ba|Li|Sn/.test(compound.formula || '')) {
+      result = { graph: null, reason: '長鎖・複合塩/染料のため簡略式で表示' };
+    } else {
+      try {
+        var text = normalizeCondensedText(chem).replace(/（[^）]*）/g, '').replace(/\([^A-Za-z0-9()]*\)/g, '');
+        var parsed = parseCondensedFragment(text, { i: 0 }, false);
+        var graph = {
+          atoms: parsed.atoms,
+          bonds: parsed.bonds,
+          mode: 'expanded',
+          width: 440,
+          height: 320,
+          _condensed: true
+        };
+        layoutCondensedGraph(graph);
+        if (formulaOfGraph(graph) !== compound.formula) {
+          result = { graph: null, reason: '簡略式の原子数が分子式と一致しないため簡略式で表示' };
+        } else if (graph.atoms.length + graph.atoms.reduce(function (s, a) { return s + (a.h || 0); }, 0) > 40) {
+          result = { graph: null, reason: '原子数が多いため簡略式で表示', graphTooLarge: graph };
+        } else {
+          var gv = checkValence(graph);
+          if (!gv.ok) {
+            result = { graph: null, reason: '派生構造の結合価検証に失敗したため簡略式で表示' };
+          } else {
+            result = { graph: graph, reason: '' };
+          }
+        }
+      } catch (e) {
+        result = { graph: null, reason: e.message || '結合情報を確定できないため簡略式で表示' };
+      }
+    }
+    if (condensedGraphCache) condensedGraphCache.set(spec, result);
+    return result;
+  }
+
+  var GRAPH_ATOM_LIMIT = 40;
+  var FIGURE_EXCEPTION_REASONS = {
+    polymer: '繰り返し単位と一般式で表す重合体のため、簡略表示です。',
+    schematic: '模式図・異性体総称のため、簡略表示です。',
+    projection: '立体配置を保つ投影式のため、構造式は投影式で表示します。',
+    triglyceride: '脂肪酸鎖を簡略化した油脂のため、簡略表示です。',
+    'atom-limit': '原子数が多い複雑な構造のため、水素を省略した骨格図で表示します。',
+    'condensed-only': '簡略式の明示結合から構造式を作れないため、簡略式で表示します。'
+  };
+
+  var GRAPH_CONDENSED_TEXT = {
+    methane: 'CH₄', ethane: 'CH₃CH₃', propane: 'CH₃CH₂CH₃', butane: 'CH₃CH₂CH₂CH₃',
+    isobutane: 'CH₃CH(CH₃)CH₃', ethene: 'CH₂=CH₂', propene: 'CH₃CH=CH₂',
+    ethyne: 'HC≡CH', propyne: 'CH₃C≡CH', methanol: 'CH₃OH', ethanol: 'CH₃CH₂OH',
+    'propan-1-ol': 'CH₃CH₂CH₂OH', 'propan-2-ol': 'CH₃CH(OH)CH₃',
+    'dimethyl-ether': 'CH₃OCH₃', methoxyethane: 'CH₃OCH₂CH₃',
+    formaldehyde: 'HCHO', ethanal: 'CH₃CHO', acetone: 'CH₃COCH₃',
+    'formic-acid': 'HCOOH', 'acetic-acid': 'CH₃COOH', 'methyl-formate': 'HCOOCH₃',
+    'methyl-acetate': 'CH₃COOCH₃', methylamine: 'CH₃NH₂', ethylamine: 'CH₃CH₂NH₂',
+    dimethylamine: 'CH₃NHCH₃', trimethylamine: 'N(CH₃)₃', chloromethane: 'CH₃Cl',
+    chloroethane: 'CH₃CH₂Cl', bromoethane: 'CH₃CH₂Br', acetonitrile: 'CH₃C≡N',
+    benzene: 'C₆H₆', phenol: 'C₆H₅OH', 'phenoxide-ion': 'C₆H₅−O⁻', toluene: 'C₆H₅CH₃',
+    'benzoic-acid': 'C₆H₅COOH', aniline: 'C₆H₅NH₂',
+    benzaldehyde: 'C₆H₅CHO', nitrobenzene: 'C₆H₅NO₂', chlorobenzene: 'C₆H₅Cl',
+    benzonitrile: 'C₆H₅CN',
+    'ethylene-glycol': 'HOCH₂CH₂OH', glycerol: 'HOCH₂CH(OH)CH₂OH',
+    'propylene-glycol': 'CH₃CH(OH)CH₂OH',
+    phenylalanine: 'C₆H₅CH₂CH(NH₂)COOH', tyrosine: 'HOC₆H₄CH₂CH(NH₂)COOH',
+    histidine: 'C₃H₃N₂CH₂CH(NH₂)COOH', tryptophan: 'C₈H₆NCH₂CH(NH₂)COOH',
+    naphthalene: 'C₁₀H₈', cyclopropane: 'C₃H₆', cyclobutane: 'C₄H₈',
+    cyclopentane: 'C₅H₁₀', cyclohexane: 'C₆H₁₂', cyclohexene: 'C₆H₁₀',
+    anthracene: 'C₁₄H₁₀', chlorocyclohexane: 'C₆H₁₁Cl', inositol: 'C₆H₁₂O₆',
+    pentane: 'CH₃CH₂CH₂CH₂CH₃', isopentane: '(CH₃)₂CHCH₂CH₃', neopentane: 'C(CH₃)₄',
+    'but-1-ene': 'CH₂=CHCH₂CH₃', 'but-2-ene': 'CH₃CH=CHCH₃', isobutene: '(CH₃)₂C=CH₂',
+    'but-1-yne': 'HC≡CCH₂CH₃', 'but-2-yne': 'CH₃C≡CCH₃',
+    'butan-1-ol': 'CH₃CH₂CH₂CH₂OH', 'butan-2-ol': 'CH₃CH(OH)CH₂CH₃',
+    '2-methylpropan-1-ol': '(CH₃)₂CHCH₂OH', '2-methylpropan-2-ol': '(CH₃)₃COH',
+    'propionic-acid': 'CH₃CH₂COOH', 'butanoic-acid': 'CH₃CH₂CH₂COOH',
+    '2-methylpropanoic-acid': '(CH₃)₂CHCOOH', 'pentanoic-acid': 'CH₃CH₂CH₂CH₂COOH',
+    '2-methylbutanoic-acid': 'CH₃CH₂CH(CH₃)COOH', '3-methylbutanoic-acid': '(CH₃)₂CHCH₂COOH',
+    '2,2-dimethylpropanoic-acid': '(CH₃)₃CCOOH',
+    propanal: 'CH₃CH₂CHO', butanal: 'CH₃CH₂CH₂CHO', '2-methylpropanal': '(CH₃)₂CHCHO',
+    pentanal: 'CH₃CH₂CH₂CH₂CHO', '2-methylbutanal': 'CH₃CH₂CH(CH₃)CHO',
+    '3-methylbutanal': '(CH₃)₂CHCH₂CHO', '2,2-dimethylpropanal': '(CH₃)₃CCHO',
+    '1-chloropropane': 'CH₃CH₂CH₂Cl', '2-chloropropane': '(CH₃)₂CHCl',
+    '1-chlorobutane': 'CH₃CH₂CH₂CH₂Cl', '2-chlorobutane': 'CH₃CH₂CH(Cl)CH₃',
+    '1-chloro-2-methylpropane': '(CH₃)₂CHCH₂Cl', '2-chloro-2-methylpropane': '(CH₃)₃CCl',
+    'diethyl-ether': 'CH₃CH₂OCH₂CH₃', 'ethyl-acetate': 'CH₃COOCH₂CH₃',
+    butanone: 'CH₃COCH₂CH₃', 'oxalic-acid': 'HOOCCOOH', glycine: 'H₂NCH₂COOH',
+    'dimethyl-oxalate': 'CH₃OOC—COOCH₃', 'diphenyl-oxalate': 'C₆H₅OOC—COOC₆H₅',
+    '1,3-dibromopropane': 'BrCH₂CH₂CH₂Br', diethylenetriamine: 'H₂NCH₂CH₂NHCH₂CH₂NH₂',
+    alanine: 'H₂NCH(CH₃)COOH',
+    'pentan-1-ol': 'CH₃CH₂CH₂CH₂CH₂OH', 'pentan-2-ol': 'CH₃CH₂CH₂CH(OH)CH₃',
+    'pentan-3-ol': 'CH₃CH₂CH(OH)CH₂CH₃',
+    '2-methylbutan-1-ol': 'CH₃CH₂CH(CH₃)CH₂OH', '2-methylbutan-2-ol': 'CH₃CH₂C(CH₃)(OH)CH₃',
+    '3-methylbutan-1-ol': '(CH₃)₂CHCH₂CH₂OH', '3-methylbutan-2-ol': '(CH₃)₂CHCH(OH)CH₃',
+    '2,2-dimethylpropan-1-ol': '(CH₃)₃CCH₂OH',
+    hexane: 'CH₃CH₂CH₂CH₂CH₂CH₃', '2-methylpentane': 'CH₃CH(CH₃)CH₂CH₂CH₃',
+    '3-methylpentane': 'CH₃CH₂CH(CH₃)CH₂CH₃', '2,2-dimethylbutane': '(CH₃)₃CCH₂CH₃',
+    '2,3-dimethylbutane': '(CH₃)₂CHCH(CH₃)₂',
+    dichloromethane: 'CH₂Cl₂', chloroform: 'CHCl₃', 'carbon-tetrachloride': 'CCl₄', iodoform: 'CHI₃',
+    'acetic-anhydride': '(CH₃CO)₂O', 'adipoyl-chloride': 'ClOC(CH₂)₄COCl',
+    '6-aminohexanoic-acid': 'H₂N(CH₂)₅COOH',
+    '1-naphthol': 'C₁₀H₇OH', '2-naphthol': 'C₁₀H₇OH',
+    'p-divinylbenzene': 'C₆H₄(CH=CH₂)₂', guaiacol: 'C₆H₄(OH)(OCH₃)',
+    'n,n-dimethylaniline': 'C₆H₅N(CH₃)₂', 'sulfanilic-acid': 'C₆H₄(SO₃H)(NH₂)',
+    '2-nitrobenzaldehyde': 'C₆H₄(CHO)(NO₂)', acetaminophen: 'C₆H₄(OH)(NHCOCH₃)',
+    sulfanilamide: 'C₆H₄(SO₂NH₂)(NH₂)', 'p-hydroxybenzoic-acid': 'C₆H₄(COOH)(OH)',
+    'm-hydroxybenzoic-acid': 'C₆H₄(COOH)(OH)', '2,4,6-tribromophenol': 'C₆H₂(OH)(Br)₃'
+  };
+
+  function graphAtomCount(g) {
+    return g.atoms.length + g.atoms.reduce(function (s, a) { return s + (a.h || 0); }, 0);
+  }
+
+  function graphRingCountText(g) {
+    var n = g.atoms.length;
+    var adj = g.atoms.map(function () { return []; });
+    g.bonds.forEach(function (b) { adj[b.a].push(b.b); adj[b.b].push(b.a); });
+    var seen = new Array(n);
+    var components = 0;
+    for (var i = 0; i < n; i++) {
+      if (seen[i]) continue;
+      components++;
+      var stack = [i];
+      seen[i] = true;
+      while (stack.length) {
+        var v = stack.pop();
+        adj[v].forEach(function (w) { if (!seen[w]) { seen[w] = true; stack.push(w); } });
+      }
+    }
+    return g.bonds.length - g.atoms.length + components;
+  }
+
+  var IONIC_TEXT = {
+    'sodium-acetate': 'CH₃COO⁻Na⁺',
+    'sodium-methoxide': 'CH₃O⁻Na⁺',
+    'sodium-ethoxide': 'C₂H₅O⁻Na⁺',
+    'sodium-phenoxide': 'C₆H₅O⁻Na⁺',
+    'sodium-benzoate': 'C₆H₅COO⁻Na⁺',
+    'sodium-laurate': 'C₁₁H₂₃COO⁻Na⁺',
+    'sodium-benzenesulfonate': 'C₆H₅SO₃⁻Na⁺',
+    'calcium-acetate': 'Ca²⁺(CH₃COO⁻)₂',
+    'lead-ii-acetate': 'Pb²⁺(CH₃COO⁻)₂',
+    'silver-acetylide': '[C≡C]²⁻·2Ag⁺',
+    'copper-i-acetylide': '[C≡C]²⁻·2Cu⁺'
+  };
+
+  var PROJECTION_TEXT = {
+    glucose: 'CHO[CH(OH)]₄CH₂OH',
+    fructose: 'CH₂OH-C(=O)-[CH(OH)]₃-CH₂OH',
+    galactose: 'CHO[CH(OH)]₄CH₂OH',
+    mannose: 'CHO[CH(OH)]₄CH₂OH',
+    ribose: 'CHO[CH(OH)]₃CH₂OH',
+    deoxyribose: 'CHOCH₂CH(OH)CH(OH)CH₂OH'
+  };
+
+  var SUGAR_CODE = {
+    sucrose: 'Glc(α1→2)Fru',
+    maltose: 'Glc(α1→4)Glc',
+    lactose: 'Gal(β1→4)Glc',
+    cellobiose: 'Glc(β1→4)Glc',
+    trehalose: 'Glc(α1→1)Glc',
+    isomaltose: 'Glc(α1→6)Glc',
+    starch: '(C₆H₁₀O₅)n',
+    cellulose: '(C₆H₁₀O₅)n',
+    glycogen: '(C₆H₁₀O₅)n',
+    amylopectin: '(C₆H₁₀O₅)n',
+    dextrin: '(C₆H₁₀O₅)n',
+    chitin: '(C₈H₁₃NO₅)n'
+  };
+
+  var TEXT_NOTES = {
+    aspartame: '2Dの連結のみを示します。ペプチドの立体配置（L/D）は保証しません。',
+    'cumene-hydroperoxide': '',
+    'bisphenol-a': ''
+  };
+
+  function condensedTextFor(compound) {
+    if (!compound) return { text: '', note: '' };
+    var spec = compound.structure;
+    if (!spec) return { text: '', note: '' };
+    if (IONIC_TEXT[compound.id]) return { text: IONIC_TEXT[compound.id], note: '対イオンはイオンとして表示しています。' };
+    if (spec.type === 'projection' || (compound.figures && compound.figures.length > 1)) {
+      return {
+        text: PROJECTION_TEXT[compound.id] || '',
+        note: '立体配置は図（投影式）が正本です。文字の縮合式は2Dの連結だけを示し、α/β・フィッシャー/ハースの立体を保証しません。'
+      };
+    }
+    if (spec.type === 'condensed') {
+      var lines = (spec.lines || []).slice();
+      return { text: lines.join(' ') || compound.formulaDisplay || '', note: TEXT_NOTES[compound.id] || '' };
+    }
+    if (spec.type === 'ring-sub' && spec.subs && spec.subs.length) {
+      var totalSubs = spec.subs.length;
+      var hCount = Math.max(0, 6 - totalSubs);
+      var ringText = 'C6' + (hCount ? 'H' + hCount : '');
+      spec.subs.forEach(function (s) { ringText += '(' + s.label + ')'; });
+      return { text: ringText, note: '' };
+    }
+    if (spec.type === 'polymer') {
+      var unit = spec.unit || spec.formulaReference || spec.unitFormula || compound.formulaDisplay || '';
+      return { text: '繰返単位: ' + unit, note: '重合度 n は特定しません。' };
+    }
+    if (spec.type === 'triglyceride') {
+      return { text: '', note: 'トリグリセリドの脂肪酸鎖は図を参照してください。' };
+    }
+    if (spec.type === 'schematic' && SUGAR_CODE[compound.id]) {
+      return { text: SUGAR_CODE[compound.id], note: '糖の結合略記・一般式です。立体配置は図を参照してください。' };
+    }
+    if (spec.type === 'schematic') {
+      return { text: '', note: '模式図・異性体総称のため、一意の縮合式はありません。' };
+    }
+    if (GRAPH_CONDENSED_TEXT[compound.id]) {
+      return { text: GRAPH_CONDENSED_TEXT[compound.id], note: '' };
+    }
+    if (isGraphSpec(spec)) {
+      var g = buildStructure(spec);
+      if (graphRingCountText(g) > 0) {
+        return { text: '', note: '環式のため、簡略構造式は図の接続を参照してください。' };
+      }
+      return { text: '', note: '簡略構造式は図の接続を参照してください。' };
+    }
+    return { text: '', note: '簡略構造式は図を参照してください。' };
+  }
+
+
+  function graphAsSpec(g, mode, skeletal) {
+    return {
+      type: 'custom',
+      atoms: g.atoms.map(function (a) { return Object.assign({}, a); }),
+      bonds: g.bonds.map(function (b) { return Object.assign({}, b); }),
+      mode: mode,
+      skeletal: !!skeletal,
+      width: g.width || 440,
+      height: g.height || 320
+    };
+  }
+
+  var RING_SUB_GROUP_KEY = { OH: 'oh', CH3: 'ch3', COOH: 'cooh', NH2: 'nh2', CHO: 'cho', NO2: 'no2', Cl: 'cl', Br: 'br', I: 'i', CN: 'cn' };
+
+  // ring-sub の subs は「環のどの位置にどの置換基があるか」を明示した
+  // 検証済みmetadata。対応する置換基だけ、ベンゼン骨格から原子グラフを組む。
+  function ringSubGraph(spec, compound) {
+    if (!spec || spec.type !== 'ring-sub' || !spec.subs || !spec.subs.length) return null;
+    var g;
+    try { g = buildStructure({ type: 'skeleton', skeleton: 'benzene' }); } catch (e) { return null; }
+    var ringCenter = centroidOf(g);
+    var plan = [];
+    for (var i = 0; i < spec.subs.length; i++) {
+      var sub = spec.subs[i];
+      var raw = normalizeCondensedText(sub.label).replace(/[—–−\s]/g, '');
+      if (/[+\-⁺⁻]/.test(raw) || /Na|Ag|Cu|Pb|Ca|Mg|Zn|Fe|Al|Ba|Li|Sn/.test(raw)) return null;
+      var local;
+      try {
+        var frag = parseCondensedFragment(raw, { i: 0 }, false);
+        if (!frag.atoms.length) return null;
+        local = {
+          atoms: frag.atoms.map(function (a) { return condensedAtom(a.el, a.h, a.charge); }),
+          bonds: frag.bonds.map(function (b) { return { a: b.a, b: b.b, order: b.order }; }),
+          width: 300,
+          height: 300
+        };
+        layoutCondensedGraph(local);
+      } catch (e) {
+        return null;
+      }
+      plan.push({ at: sub.at, local: local, entry: frag.entry });
+    }
+    try {
+      g.width = 520;
+      g.height = 420;
+      plan.forEach(function (item) {
+        var ringAtom = g.atoms[item.at];
+        if (!ringAtom || ringAtom.h < 1) throw new Error('置換位置に水素がありません');
+        var outward = Math.atan2(ringAtom.y - ringCenter.y, ringAtom.x - ringCenter.x);
+        var entry = item.local.atoms[item.entry];
+        var sx = 0, sy = 0, n = 0;
+        item.local.atoms.forEach(function (a, idx) {
+          if (idx === item.entry) return;
+          sx += a.x; sy += a.y; n++;
+        });
+        var dir = n ? Math.atan2(sy / n - entry.y, sx / n - entry.x) : outward;
+        var baseRot = outward - dir;
+        var baseRel = item.local.atoms.map(function (a) {
+          var dx = a.x - entry.x, dy = a.y - entry.y;
+          return {
+            el: a.el,
+            h: a.h,
+            charge: a.charge || '',
+            x: dx * Math.cos(baseRot) - dy * Math.sin(baseRot),
+            y: dx * Math.sin(baseRot) + dy * Math.cos(baseRot)
+          };
+        });
+        function segDist(px, py, ax, ay, bx, by) {
+          var vx = bx - ax, vy = by - ay;
+          var len2 = vx * vx + vy * vy;
+          var t = len2 ? ((px - ax) * vx + (py - ay) * vy) / len2 : 0;
+          t = Math.max(0, Math.min(1, t));
+          var qx = ax + t * vx, qy = ay + t * vy;
+          return Math.sqrt((px - qx) * (px - qx) + (py - qy) * (py - qy));
+        }
+        function candidateClear(rotOffset, distance) {
+          var ca = Math.cos(rotOffset), sa = Math.sin(rotOffset);
+          var rel = baseRel.map(function (a) {
+            return { x: a.x * ca - a.y * sa, y: a.x * sa + a.y * ca };
+          });
+          var ux2 = Math.cos(outward), uy2 = Math.sin(outward);
+          var positions = rel.map(function (a) {
+            return { x: ringAtom.x + distance * ux2 + a.x, y: ringAtom.y + distance * uy2 + a.y };
+          });
+          var i, j;
+          for (i = 0; i < positions.length; i++) {
+            for (j = 0; j < g.atoms.length; j++) {
+              var dx2 = positions[i].x - g.atoms[j].x, dy2 = positions[i].y - g.atoms[j].y;
+              if (Math.sqrt(dx2 * dx2 + dy2 * dy2) < 30) return false;
+            }
+            for (j = 0; j < g.bonds.length; j++) {
+              var b = g.bonds[j];
+              var aa = g.atoms[b.a], bb = g.atoms[b.b];
+              if (segDist(positions[i].x, positions[i].y, aa.x, aa.y, bb.x, bb.y) < 18) return false;
+            }
+          }
+          // 新規結合の線分が、既存原子・新規原子の中心を貫通しないこと。
+          var newBonds = item.local.bonds.map(function (b) { return { a: b.a, b: b.b }; });
+          newBonds.push({ a: -1, b: item.entry });
+          for (j = 0; j < newBonds.length; j++) {
+            var nb = newBonds[j];
+            var p1 = nb.a === -1 ? ringAtom : positions[nb.a];
+            var p2 = positions[nb.b];
+            for (i = 0; i < g.atoms.length; i++) {
+              if (i === item.at) continue;
+              if (segDist(g.atoms[i].x, g.atoms[i].y, p1.x, p1.y, p2.x, p2.y) < 18) return false;
+            }
+            for (i = 0; i < positions.length; i++) {
+              if (i === nb.a || i === nb.b) continue;
+              if (segDist(positions[i].x, positions[i].y, p1.x, p1.y, p2.x, p2.y) < 18) return false;
+            }
+          }
+          return true;
+        }
+        var chosen = null;
+        var offsets = [0, 30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180];
+        for (var oi = 0; oi < offsets.length && !chosen; oi++) {
+          for (var d = 90; d <= 300; d += 10) {
+            if (candidateClear(offsets[oi] * Math.PI / 180, d)) { chosen = { offset: offsets[oi] * Math.PI / 180, distance: d }; break; }
+          }
+        }
+        if (!chosen) throw new Error('置換基を配置できません');
+        var ca2 = Math.cos(chosen.offset), sa2 = Math.sin(chosen.offset);
+        var ux3 = Math.cos(outward), uy3 = Math.sin(outward);
+        var tx = ringAtom.x + chosen.distance * ux3;
+        var ty = ringAtom.y + chosen.distance * uy3;
+        var base = g.atoms.length;
+        baseRel.forEach(function (a) {
+          var rx = a.x * ca2 - a.y * sa2;
+          var ry = a.x * sa2 + a.y * ca2;
+          g.atoms.push({ el: a.el, h: a.h, charge: a.charge, x: tx + rx, y: ty + ry });
+        });
+        item.local.bonds.forEach(function (b) {
+          g.bonds.push({ a: b.a + base, b: b.b + base, order: b.order });
+        });
+        g.bonds.push({ a: item.at, b: base + item.entry, order: 1 });
+        ringAtom.h -= 1;
+      });
+      if (formulaOfGraph(g) !== compound.formula) return null;
+      var rv = checkValence(g);
+      if (!rv.ok) return null;
+    } catch (e) {
+      return null;
+    }
+    return g;
+  }
+
+  // 1化合物について「構造式」と「簡略構造式」の表示計画を返す。
+  // 例外は型・原子数・理由を明示し、全condensedを例外にしない。
+  function figurePlan(compound) {
+    if (!compound || !compound.structure) {
+      return { mode: 'single', single: null, exception: { type: 'missing', reason: '構造データがありません' } };
+    }
+    var spec = compound.structure;
+    if (compound.figures && compound.figures.length > 1) {
+      return { mode: 'multi', figures: compound.figures, exception: { type: 'projection', reason: FIGURE_EXCEPTION_REASONS.projection } };
+    }
+    if (spec.type === 'polymer' || spec.type === 'schematic' || spec.type === 'projection' || spec.type === 'triglyceride') {
+      return { mode: 'single', single: { structure: spec, caption: '構造式', note: FIGURE_EXCEPTION_REASONS[spec.type] }, exception: { type: spec.type, reason: FIGURE_EXCEPTION_REASONS[spec.type] } };
+    }
+    if (spec.type === 'ring-sub') {
+      var ringGraph = ringSubGraph(spec, compound);
+      if (ringGraph) {
+        return {
+          mode: 'dual',
+          full: { structure: graphAsSpec(ringGraph, 'expanded', false), caption: '構造式', note: '' },
+          simple: { structure: graphAsSpec(ringGraph, 'condensed', true), caption: '簡略構造式', note: '' },
+          exception: null
+        };
+      }
+      return {
+        mode: 'dual',
+        full: { structure: spec, caption: '構造式', note: '' },
+        simple: { structure: spec, simple: true, caption: '簡略構造式', note: '' },
+        exception: null
+      };
+    }
+    if (isGraphSpec(spec)) {
+      var g = buildStructure(spec);
+      if (graphAtomCount(g) > GRAPH_ATOM_LIMIT) {
+        return {
+          mode: 'single',
+          single: { structure: graphAsSpec(g, 'condensed', true), caption: '構造式（水素省略）', note: FIGURE_EXCEPTION_REASONS['atom-limit'] },
+          exception: { type: 'atom-limit', reason: FIGURE_EXCEPTION_REASONS['atom-limit'], atomCount: graphAtomCount(g) }
+        };
+      }
+      var condensed = GRAPH_CONDENSED_TEXT[compound.id] || '';
+      return {
+        mode: 'dual',
+        full: { structure: graphAsSpec(g, 'expanded', false), caption: '構造式', note: '' },
+        simple: { structure: graphAsSpec(g, 'condensed', true), caption: '簡略構造式', note: condensed ? '併記: ' + condensed : '' },
+        exception: null
+      };
+    }
+    if (spec.type === 'condensed') {
+      var parsed = condensedGraphFor(compound);
+      if (!parsed.graph) {
+        var condensedType = parsed.graphTooLarge ? 'atom-limit'
+          : (/シス|トランス/.test(parsed.reason) ? 'stereo' : 'complex');
+        var condensedReason = parsed.graphTooLarge ? FIGURE_EXCEPTION_REASONS['atom-limit'] : parsed.reason;
+        return {
+          mode: 'single',
+          single: { structure: spec, caption: '構造式（簡略式）', note: condensedReason },
+          exception: { type: condensedType, reason: condensedReason, atomCount: parsed.graphTooLarge ? graphAtomCount(parsed.graphTooLarge) : null }
+        };
+      }
+      if (graphAtomCount(parsed.graph) > GRAPH_ATOM_LIMIT) {
+        return {
+          mode: 'single',
+          single: { structure: spec, caption: '構造式（簡略式）', note: FIGURE_EXCEPTION_REASONS['atom-limit'] },
+          exception: { type: 'atom-limit', reason: FIGURE_EXCEPTION_REASONS['atom-limit'], atomCount: graphAtomCount(parsed.graph) }
+        };
+      }
+      return {
+        mode: 'dual',
+        full: { structure: graphAsSpec(parsed.graph, 'expanded', false), caption: '構造式', note: '' },
+        simple: { structure: spec, caption: '簡略構造式', note: '' },
+        exception: null
+      };
+    }
+    return {
+      mode: 'single',
+      single: { structure: spec, caption: '構造式', note: '' },
+      exception: { type: 'unknown', reason: '構造式の表示形式を確認できないため簡略表示です。' }
+    };
+  }
+
+  function figureAudit(compounds) {
+    var out = { total: 0, dual: 0, single: 0, multi: 0, exceptions: [], byType: {} };
+    Object.keys(compounds || {}).forEach(function (id) {
+      var plan = figurePlan(compounds[id]);
+      out.total++;
+      if (plan.mode === 'dual') out.dual++;
+      else if (plan.mode === 'multi') out.multi++;
+      else out.single++;
+      if (plan.exception) {
+        out.exceptions.push({ id: id, type: plan.exception.type, reason: plan.exception.reason, atomCount: plan.exception.atomCount || null });
+        out.byType[plan.exception.type] = (out.byType[plan.exception.type] || 0) + 1;
+      }
+    });
+    return out;
+  }
+
+
+  // 長い簡略式は化学的な区切り（結合記号・括弧の終わり・次の炭素単位）で
+  // 折り返す。文字の途中で切って結合の意味を曖昧にしない。
+  function condensedBreakPoints(text) {
+    var points = [];
+    var depth = 0;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (ch === '(' || ch === '（') depth++;
+      else if (ch === ')' || ch === '）') {
+        depth = Math.max(0, depth - 1);
+        if (depth === 0) points.push(i + 1);
+      } else if (depth === 0 && /[=≡—–\-]/.test(ch)) {
+        points.push(i + 1);
+      } else if (depth === 0 && /[CNSOHF]/.test(ch) && i > 0 && /[₀-₉)）]/.test(text[i - 1])) {
+        points.push(i);
+      }
+    }
+    return points;
+  }
+
+  function wrapCondensedText(text, maxChars) {
+    var source = String(text || '');
+    var max = maxChars || 28;
+    if (source.length <= max) return [source];
+    var points = condensedBreakPoints(source);
+    if (!points.length) return [source];
+    points = points.filter(function (p) { return p > 0 && p < source.length; });
+    points.push(source.length);
+    var lines = [];
+    var start = 0;
+    while (start < source.length) {
+      var limit = start + max;
+      var cut = -1;
+      for (var i = 0; i < points.length; i++) {
+        if (points[i] <= start) continue;
+        if (points[i] <= limit) cut = points[i];
+        else break;
+      }
+      if (cut === -1) cut = points.filter(function (p) { return p > start; })[0] || source.length;
+      lines.push(source.slice(start, cut));
+      start = cut;
+    }
+    return lines;
+  }
+
+  // 化学式・簡略式を「化学単位の区切り」で折り返せるようにする。
+  // 文字列そのものは変えない（ゼロ幅スペースを挿入するだけ）。
+  // - 結合記号の直後
+  // - 添字（数字・ₓᵧᵣ）の直後で、次が元素記号か括弧のとき
+  // - 閉じ括弧の直後で、次が元素記号・括弧のとき
+  // これにより CH₃(CH₂)₁₈CH₃ は CH₃ / (CH₂)₁₈ / CH₃ の位置でだけ折れる。
+  function chemBreakable(text) {
+    var s = String(text == null ? '' : text);
+    if (!s) return '';
+    var ZW = '\u200b';
+    var SUB = /[₀-₉0-9ₓᵧᵣ]/;
+    var out = '';
+    for (var i = 0; i < s.length; i++) {
+      var ch = s[i];
+      var next = s[i + 1] || '';
+      out += ch;
+      if (!next) break;
+      if (/[−—=≡＋]/.test(ch)) {
+        out += ZW;
+        continue;
+      }
+      if (SUB.test(ch) && !SUB.test(next) && /[A-Z(（]/.test(next)) {
+        out += ZW;
+        continue;
+      }
+      if (/[)）]/.test(ch) && /[A-Z(（]/.test(next)) out += ZW;
+      else if (ch === '（' && /[(（A-Z]/.test(next)) out += ZW;
+    }
+    return out;
+  }
+
+  function renderCondensed(spec, label) {
+    var sourceLines = spec.lines || [];
+    var lines = [];
+    sourceLines.forEach(function (t) {
+      wrapCondensedText(t, 18).forEach(function (part) { lines.push(part); });
+    });
     var maxLen = 0;
     lines.forEach(function (t) { maxLen = Math.max(maxLen, t.length); });
-    var fs = maxLen > 30 ? 16 : (maxLen > 22 ? 18 : 20);
-    var width = Math.max(360, maxLen * fs * 0.72 + 50);
-    var height = Math.max(120, 52 + lines.length * 36);
+    var fs = lines.length > 3 ? 15 : (lines.length > 2 ? 17 : (maxLen > 26 ? 18 : 20));
+    var width = Math.max(220, maxLen * fs * 0.68 + 36);
+    var height = Math.max(84, 36 + lines.length * 32);
     var content = lines.map(function (t, i) {
-      return '<text x="' + (width / 2).toFixed(1) + '" y="' + (40 + i * 36).toFixed(1) +
+      return '<text x="' + (width / 2).toFixed(1) + '" y="' + (30 + i * 32).toFixed(1) +
         '" text-anchor="middle" dominant-baseline="middle" class="oc-condensed" font-size="' + fs + '">' + esc(t) + '</text>';
     }).join('');
-    return svgOpen(0, 0, width, height, label, 'data-kind="condensed"') + content + '</svg>';
+    return svgOpen(0, 0, width, height, label, 'data-kind="condensed" data-lines="' + lines.length + '"') + content + '</svg>';
   }
 
   function renderTriglyceride(spec, label) {
@@ -850,8 +2327,187 @@
     return out;
   }
 
+  var POLYSACCHARIDE_SCHEMATIC_KINDS = {
+    starch: true, cellulose: true, glycogen: true, amylopectin: true,
+    dextrin: true, chitin: true, 'cellulose-acetate': true, 'cellulose-nitrate': true
+  };
+
   function renderSchematic(spec, label) {
     var kind = spec.kind;
+    if (kind === 'salicin') {
+      // サリチルアルコールのフェノール性Oにβ-D-グルコピラノースが結合した配糖体。
+      // 糖環の5立体中心は描き分けず、identityはmetadata（data-*）で保持する。
+      var sal = '';
+      var agly = ringCoords(6, 350, 150, 60, 0);
+      for (var si = 0; si < 6; si++) {
+        sal += lineEl(agly[si].x, agly[si].y, agly[(si + 1) % 6].x, agly[(si + 1) % 6].y, 'oc-bond oc-schematic-ring', 2.2);
+      }
+      // ベンゼン環のケクレ二重結合（内側へ寄せた短い線）
+      [0, 2, 4].forEach(function (ei) {
+        var a = agly[ei], b = agly[(ei + 1) % 6];
+        var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+        var ix = (350 - mx) * 0.18, iy = (150 - my) * 0.18;
+        sal += lineEl(a.x + (mx - a.x) * 0.18 + ix, a.y + (my - a.y) * 0.18 + iy,
+          b.x + (mx - b.x) * 0.18 + ix, b.y + (my - b.y) * 0.18 + iy, 'oc-bond', 1.9);
+      });
+      sal += textEl(350, 150, '芳香環', 'oc-schematic-note', 11);
+      // アグリコンのCH2OH（遊離）
+      sal += lineEl(agly[4].x, agly[4].y, 320, 60, 'oc-bond', 2.4);
+      sal += textEl(320, 44, 'CH₂OH', 'oc-condensed', 15);
+      // フェノール性O
+      sal += lineEl(agly[3].x, agly[3].y, 240, 150, 'oc-bond', 2.4);
+      sal += textEl(228, 143, 'O', 'oc-atom', 18);
+      sal += textEl(215, 174, 'β', 'oc-anomer', 15);
+      // β-D-グルコピラノース（Oは環のindex5、C1はindex0）
+      var sug = ringCoords(6, 130, 150, 55, 0);
+      sal += schematicSugarRing(130, 150, 55, 5);
+      sal += lineEl(sug[0].x, sug[0].y, 218, 150, 'oc-bond', 2.4);
+      sal += textEl(sug[0].x + 10, sug[0].y + 18, 'C1', 'oc-ring-num', 10);
+      // C2-OH / C3-OH / C4-OH、C5-CH2OH（遊離）
+      sal += lineEl(sug[1].x, sug[1].y, sug[1].x + 14, sug[1].y + 24, 'oc-bond', 2.0);
+      sal += textEl(sug[1].x + 18, sug[1].y + 38, 'OH', 'oc-atom', 13);
+      sal += lineEl(sug[2].x, sug[2].y, sug[2].x - 14, sug[2].y + 24, 'oc-bond', 2.0);
+      sal += textEl(sug[2].x - 18, sug[2].y + 38, 'OH', 'oc-atom', 13);
+      sal += lineEl(sug[3].x, sug[3].y, sug[3].x - 24, sug[3].y, 'oc-bond', 2.0);
+      sal += textEl(sug[3].x - 36, sug[3].y, 'OH', 'oc-atom', 13);
+      sal += lineEl(sug[4].x, sug[4].y, 82, 72, 'oc-bond', 2.2);
+      sal += textEl(72, 56, 'CH₂OH', 'oc-condensed', 14);
+      sal += textEl(130, 20, 'β-D-グルコピラノース', 'oc-schematic-text', 13);
+      sal += textEl(350, 20, 'サリチルアルコール', 'oc-schematic-text', 13);
+      // 注記は構造の下に専用帯を確保し、置換基の結合・ラベルと重ねない。
+      var salNotes = '';
+      salNotes += textEl(235, 266, 'β-D-グルコピラノシド結合（C1—O—フェノール性O）', 'oc-schematic-note', 11);
+      salNotes += textEl(235, 292, '糖の5立体中心は模式図のため省略（metadataでβ-Dを保持）', 'oc-schematic-note', 11);
+      return svgOpen(0, 0, 430, 304, label,
+        'data-kind="schematic" data-sugar="salicin" data-glycosidic="beta-D-glucopyranoside" data-anomer="beta" ' +
+        'data-aglycone="salicyl-alcohol" data-free-hydroxymethyl="2" data-stereocenters="5" data-stereo-drawn="omitted"') +
+        '<g class="oc-schematic-structure">' + sal + '</g>' +
+        '<g class="oc-schematic-annotation">' + salNotes + '</g></svg>';
+    }
+    if (kind === 'nucleoside-adenosine' || kind === 'nucleotide-adp') {
+      // アデニン—リボースを共通の模式で描き、ADPだけ5′位に二リン酸鎖を足す。
+      // ATPの三リン酸・4価陰イオン表示は流用せず、ADPは中性酸形P2・電荷0を明示する。
+      var isAdp = kind === 'nucleotide-adp';
+      var nuc = '';
+      nuc += textEl(80, 96, 'アデニン', 'oc-schematic-text', 15);
+      nuc += textEl(80, 120, '（プリン塩基）', 'oc-schematic-note', 11);
+      nuc += lineEl(142, 108, 200, 108, 'oc-bond', 2.4);
+      nuc += textEl(171, 94, 'N9', 'oc-ring-num', 11);
+      var C1 = { x: 200, y: 108 }, C2 = { x: 226, y: 168 }, C3 = { x: 276, y: 168 };
+      var C4 = { x: 300, y: 108 }, RO = { x: 250, y: 64 };
+      nuc += lineEl(C1.x, C1.y, C2.x, C2.y, 'oc-bond', 2.4);
+      nuc += lineEl(C2.x, C2.y, C3.x, C3.y, 'oc-bond', 2.4);
+      nuc += lineEl(C3.x, C3.y, C4.x, C4.y, 'oc-bond', 2.4);
+      nuc += lineEl(C4.x, C4.y, RO.x, RO.y, 'oc-bond', 2.4);
+      nuc += lineEl(RO.x, RO.y, C1.x, C1.y, 'oc-bond', 2.4);
+      nuc += textEl(RO.x, RO.y, 'O', 'oc-atom', 17);
+      nuc += textEl(C1.x - 4, C1.y + 18, 'C1′', 'oc-ring-num', 10);
+      nuc += textEl(C2.x - 2, C2.y + 18, 'C2′', 'oc-ring-num', 10);
+      nuc += textEl(C3.x + 2, C3.y + 18, 'C3′', 'oc-ring-num', 10);
+      nuc += textEl(C4.x + 8, C4.y + 18, 'C4′', 'oc-ring-num', 10);
+      nuc += lineEl(C2.x, C2.y, C2.x - 14, C2.y + 24, 'oc-bond', 2.0);
+      nuc += textEl(C2.x - 18, C2.y + 38, 'OH', 'oc-atom', 13);
+      nuc += lineEl(C3.x, C3.y, C3.x + 14, C3.y + 24, 'oc-bond', 2.0);
+      nuc += textEl(C3.x + 18, C3.y + 38, 'OH', 'oc-atom', 13);
+      nuc += lineEl(C4.x, C4.y, 338, 78, 'oc-bond', 2.2);
+      nuc += textEl(356, 66, 'CH₂', 'oc-condensed', 14);
+      if (!isAdp) {
+        nuc += textEl(356, 92, 'OH', 'oc-atom', 14);
+        nuc += textEl(275, 225, 'リン酸残基なし（ヌクレオシド）。4立体中心は模式図のため省略。', 'oc-schematic-note', 11);
+        return svgOpen(0, 0, 500, 245, label,
+          'data-kind="schematic" data-nucleotide="adenosine" data-phosphate-count="0" data-sugar="beta-D-ribofuranose" ' +
+          'data-anomer="beta" data-stereocenters="4" data-stereo-drawn="omitted"') + nuc + '</svg>';
+      }
+      nuc += lineEl(348, 78, 382, 78, 'oc-bond', 2.2);
+      nuc += textEl(396, 72, 'O', 'oc-atom', 17);
+      nuc += lineEl(410, 78, 430, 78, 'oc-bond', 2.2);
+      // P1
+      nuc += textEl(446, 78, 'P', 'oc-atom', 18);
+      nuc += lineEl(442, 62, 442, 46, 'oc-bond', 2.0);
+      nuc += lineEl(450, 62, 450, 46, 'oc-bond', 2.0);
+      nuc += textEl(446, 36, 'O', 'oc-atom', 14);
+      nuc += lineEl(446, 94, 446, 110, 'oc-bond', 2.0);
+      nuc += textEl(446, 124, 'OH', 'oc-schematic-note', 12);
+      // O bridge
+      nuc += lineEl(458, 78, 474, 78, 'oc-bond', 2.2);
+      nuc += textEl(486, 72, 'O', 'oc-atom', 17);
+      nuc += lineEl(496, 78, 512, 78, 'oc-bond', 2.2);
+      // P2 terminal
+      nuc += textEl(528, 78, 'P', 'oc-atom', 18);
+      nuc += lineEl(524, 62, 524, 46, 'oc-bond', 2.0);
+      nuc += lineEl(532, 62, 532, 46, 'oc-bond', 2.0);
+      nuc += textEl(528, 36, 'O', 'oc-atom', 14);
+      nuc += lineEl(528, 94, 528, 110, 'oc-bond', 2.0);
+      nuc += textEl(528, 124, 'OH', 'oc-schematic-note', 12);
+      nuc += lineEl(540, 78, 560, 78, 'oc-bond', 2.0);
+      nuc += textEl(574, 72, 'OH', 'oc-schematic-note', 12);
+      // 注記は糖環・OHの下に専用帯を確保し、C2′/C3′やOHと重ねない。
+      var nucNotes = '';
+      nucNotes += textEl(330, 238, 'リボース5′—CH₂—O—P(=O)(OH)—O—P(=O)(OH)₂（中性酸形）', 'oc-schematic-note', 12);
+      nucNotes += textEl(330, 264, 'P2・電荷0を明示。生理的pHのADP³⁻・Mg²⁺錯体とは区別する。', 'oc-schematic-note', 11);
+      nucNotes += textEl(330, 290, '糖の4立体中心は模式図のため省略（metadataでβ-Dを保持）。', 'oc-schematic-note', 11);
+      return svgOpen(0, 0, 600, 302, label,
+        'data-kind="schematic" data-nucleotide="adp" data-phosphate-count="2" data-phosphate-chain="P-O-P" ' +
+        'data-phosphate-charge="0" data-sugar="beta-D-ribofuranose" data-anomer="beta" data-stereocenters="4" data-stereo-drawn="omitted"') +
+        '<g class="oc-schematic-structure">' + nuc + '</g>' +
+        '<g class="oc-schematic-annotation">' + nucNotes + '</g></svg>';
+    }
+    if (kind === 'nucleotide-atp') {
+      // ATPはアデニン—リボース—三リン酸の模式図。糖環の連続図には落とさない。
+      // 三リン酸は P—O—P—O—P で接続し、各PのP=OとO⁻を明示する（ATP⁴⁻）。
+      var atp = '';
+      atp += textEl(78, 62, 'アデニン', 'oc-schematic-text', 14);
+      atp += textEl(78, 84, '（塩基）', 'oc-schematic-note', 11);
+      atp += lineEl(120, 78, 166, 78, 'oc-bond', 2.4);
+      atp += textEl(207, 62, 'リボース', 'oc-schematic-text', 14);
+      atp += textEl(207, 84, '（五炭糖）', 'oc-schematic-note', 11);
+      atp += lineEl(244, 78, 286, 78, 'oc-bond', 2.4);
+      atp += textEl(300, 72, 'O', 'oc-atom', 17);
+      atp += lineEl(314, 78, 338, 78, 'oc-bond', 2.4);
+      // P1
+      atp += textEl(356, 78, 'P', 'oc-atom', 19);
+      atp += lineEl(352, 62, 352, 44, 'oc-bond', 2.2);
+      atp += lineEl(360, 62, 360, 44, 'oc-bond', 2.2);
+      atp += textEl(356, 32, 'O', 'oc-atom', 15);
+      atp += lineEl(356, 94, 356, 112, 'oc-bond', 2.2);
+      atp += textEl(356, 128, 'O⁻', 'oc-schematic-note', 12);
+      // O bridge
+      atp += lineEl(370, 78, 394, 78, 'oc-bond', 2.4);
+      atp += textEl(406, 72, 'O', 'oc-atom', 17);
+      atp += lineEl(420, 78, 444, 78, 'oc-bond', 2.4);
+      // P2
+      atp += textEl(462, 78, 'P', 'oc-atom', 19);
+      atp += lineEl(458, 62, 458, 44, 'oc-bond', 2.2);
+      atp += lineEl(466, 62, 466, 44, 'oc-bond', 2.2);
+      atp += textEl(462, 32, 'O', 'oc-atom', 15);
+      atp += lineEl(462, 94, 462, 112, 'oc-bond', 2.2);
+      atp += textEl(462, 128, 'O⁻', 'oc-schematic-note', 12);
+      // O bridge
+      atp += lineEl(476, 78, 500, 78, 'oc-bond', 2.4);
+      atp += textEl(512, 72, 'O', 'oc-atom', 17);
+      atp += lineEl(526, 78, 550, 78, 'oc-bond', 2.4);
+      // P3 terminal
+      atp += textEl(568, 78, 'P', 'oc-atom', 19);
+      atp += lineEl(564, 62, 564, 44, 'oc-bond', 2.2);
+      atp += lineEl(572, 62, 572, 44, 'oc-bond', 2.2);
+      atp += textEl(568, 32, 'O', 'oc-atom', 15);
+      atp += lineEl(568, 94, 568, 112, 'oc-bond', 2.2);
+      atp += textEl(568, 128, 'O⁻', 'oc-schematic-note', 12);
+      atp += lineEl(580, 78, 604, 78, 'oc-bond', 2.2);
+      atp += textEl(620, 72, 'O⁻', 'oc-schematic-note', 12);
+      atp += textEl(330, 166, '三リン酸鎖（P—O—P—O—P、各PにP=O）', 'oc-schematic-note', 13);
+      atp += textEl(330, 190, '生理的pHでは ATP⁴⁻（O⁻ 4個）として存在し、Mg²⁺と錯体をつくる', 'oc-schematic-note', 12);
+      return svgOpen(0, 0, 680, 220, label, 'data-kind="schematic" data-nucleotide="atp" data-phosphate-chain="P-O-P-O-P" data-phosphate-charge="4-"') + atp + '</svg>';
+    }
+    if (kind === 'cyclohexane-hexachloride') {
+      // C6H6Cl6 は1,2,3,4,5,6-六置換体の立体異性体群。特定異性体の構造を描いたと誤解させない。
+      var hch = '';
+      hch += textEl(210, 54, 'C₆H₆Cl₆', 'oc-schematic-text', 24);
+      hch += textEl(210, 86, 'ベンゼンへの塩素付加で生じる1,2,3,4,5,6-六置換体', 'oc-schematic-note', 13);
+      hch += textEl(210, 110, 'α・β・γ等は立体異性体（γ-異性体＝リンデンを含む）', 'oc-schematic-note', 12);
+      hch += textEl(210, 134, '六置換の位置は共通で、特定の1立体異性体を表す図ではない', 'oc-schematic-note', 12);
+      return svgOpen(0, 0, 420, 160, label, 'data-kind="schematic" data-isomer-class="hch"') + hch + '</svg>';
+    }
     if (kind === 'vinylon') return renderVinylon(spec, label);
     if (kind === 'dna' || kind === 'rna') {
       var isDna = kind === 'dna';
@@ -874,13 +2530,47 @@
       content += textEl(210, 172, isDna ? 'デオキシリボース—リン酸鎖／塩基 A-T, G-C' : 'リボース—リン酸鎖／塩基 A-U, G-C', 'oc-schematic-note', 13);
       return svgOpen(0, 0, 420, 195, label, 'data-kind="schematic" data-sugar="' + esc(kind) + '"') + content + '</svg>';
     }
+    if (kind === 'isomaltose') {
+      // α-1,6: 左をdonor、右をacceptorとして縦にずらす。
+      // donor C5（環頂点）→CH2OH up、donor C1（環頂点）→グリコシドO down
+      // →acceptor C6（環外CH2）→acceptor C5（環頂点）。
+      // 六員環の頂点定義: index0=右, 1=右下, 2=左下, 3=左,
+      // 4=左上, 5=右上。両環ともOはindex5。
+      var donorC = ringCoords(6, 140, 130, 90, 0);
+      var acceptC = ringCoords(6, 385, 346, 90, 0);
+      var donorC1 = donorC[0];       // (230,130)
+      var donorC5 = donorC[4];       // (95,52)
+      var acceptC5 = acceptC[4];     // (340,268)
+      var ch2oh = { x: 95, y: 10 };
+      var glyO = { x: 230, y: 220 };
+      var acceptC6 = { x: 340, y: 220 };
+      var iso = schematicSugarRing(140, 130, 90, 5) + schematicSugarRing(385, 346, 90, 5);
+      // donor C5からCH2OHを上向きに
+      iso += lineEl(donorC5.x, donorC5.y, ch2oh.x, ch2oh.y + 12, 'oc-bond', 2.4);
+      iso += textEl(ch2oh.x, ch2oh.y, 'CH₂OH', 'oc-condensed', 16);
+      // donor C1からグリコシドOを下向きに（α-DのC1置換基down）
+      iso += lineEl(donorC1.x, donorC1.y, glyO.x, glyO.y - 12, 'oc-bond', 2.4);
+      iso += textEl(glyO.x, glyO.y, 'O', 'oc-atom', 19);
+      // Oからacceptorの環外C6へ、C6から環頂点C5へ
+      iso += lineEl(glyO.x + 12, glyO.y, acceptC6.x - 12, acceptC6.y, 'oc-bond', 2.4);
+      iso += textEl(acceptC6.x, acceptC6.y, 'CH₂', 'oc-condensed', 17);
+      iso += lineEl(acceptC6.x, acceptC6.y + 12, acceptC5.x, acceptC5.y, 'oc-bond', 2.4);
+      iso += textEl(donorC5.x - 14, donorC5.y - 10, 'C5', 'oc-ring-num', 12);
+      iso += textEl(donorC1.x + 12, donorC1.y - 10, 'C1', 'oc-ring-num', 12);
+      iso += textEl(glyO.x + 18, glyO.y - 60, 'α', 'oc-anomer', 16);
+      iso += textEl(acceptC5.x + 18, acceptC5.y + 10, 'C5', 'oc-ring-num', 12);
+      iso += textEl(acceptC6.x + 18, acceptC6.y - 10, 'C6', 'oc-ring-num', 12);
+      iso += textEl(280, 455, 'α-1,6（donor C1↓—O—acceptor C6—C5）。受容体の還元末端C1はα/βを特定しない。', 'oc-schematic-note', 12);
+      return svgOpen(0, 0, 560, 470, label, 'data-kind="schematic" data-sugar="isomaltose" data-linkage="alpha-1,6" data-anomer="alpha" data-exocyclic-c6="1" data-glycosidic="α-1,6" data-donor-c1="230,130" data-donor-c5="95,52" data-donor-ch2oh="95,10" data-glycosidic-o="230,220" data-acceptor-c6="340,220" data-acceptor-c5="340,268"') + iso + '</svg>';
+    }
     if (kind === 'sucrose' || kind === 'maltose' || kind === 'lactose' || kind === 'cellobiose' || kind === 'trehalose') {
       var dis = {
         sucrose: { left: 'α-D-グルコース', right: 'β-D-フルクトフラノース', link: 'α-1,2', furanose: true, anomer: true, reducing: 'no' },
         maltose: { left: 'α-D-グルコース', right: 'D-グルコース', link: 'α-1,4', anomer: false, reducing: 'yes' },
         lactose: { left: 'β-D-ガラクトース', right: 'D-グルコース', link: 'β-1,4', anomer: false, reducing: 'yes' },
         cellobiose: { left: 'β-D-グルコース', right: 'β-D-グルコース', link: 'β-1,4', anomer: true, reducing: 'yes' },
-        trehalose: { left: 'α-D-グルコース', right: 'α-D-グルコース', link: 'α,α-1,1', anomer: true, reducing: 'no' }
+        trehalose: { left: 'α-D-グルコース', right: 'α-D-グルコース', link: 'α,α-1,1', anomer: true, reducing: 'no' },
+        isomaltose: { left: 'α-D-グルコース', right: 'D-グルコース', link: 'α-1,6', anomer: false, reducing: 'yes' }
       }[kind];
       var isSucrose = kind === 'sucrose';
       var content = schematicSugarRing(100, 101, 65, 1) +
@@ -925,7 +2615,13 @@
       pcontent += lineEl(356, 140, 340, 140, 'oc-bracket', 2.4);
       return svgOpen(0, 0, 390, 175, label, 'data-kind="schematic" data-protein="1"') + pcontent + '</svg>';
     }
-    // 多糖類: 糖環がグリコシド酸素で連なる模式図
+    // 多糖類: 糖環がグリコシド酸素で連なる模式図。
+    // 未知kindを多糖の3環fallbackへ落とすと別物質の図になるため、
+    // 明示的に多糖kindだけを通し、それ以外は未対応として描画しない。
+    if (!POLYSACCHARIDE_SCHEMATIC_KINDS[kind]) {
+      return svgOpen(0, 0, 380, 120, label, 'data-kind="schematic" data-unsupported-schematic="1"') +
+        textEl(190, 60, 'この模式図は未対応です', 'oc-atom', 15) + '</svg>';
+    }
     var unitLabel = spec.unitLabel || 'グルコース単位';
     var linkLabel = spec.linkLabel || '';
     var content2 = schematicSugarRing(80, 100, 38, 1) +
@@ -1213,7 +2909,7 @@
     var errors = [];
     g.atoms.forEach(function (a, i) {
       // 金属配位結合など、通常の原子価の数え方が当てはまらない原子は明示的に除外する。
-      if (a.skipValence) return;
+      if (a.skipValence || a.ion) return;
       var allowed = VALENCES[a.el];
       if (!allowed) return;
       var sum = 0;
@@ -1342,10 +3038,11 @@
    * 公開レンダリング
    * ------------------------------------------------------------------ */
 
-  function renderStructure(spec, label) {
+  function renderStructure(spec, label, opts) {
+    opts = opts || {};
     try {
       if (isGraphSpec(spec)) return renderGraph(buildStructure(spec), label);
-      if (spec.type === 'ring-sub') return renderRingSub(spec, label);
+      if (spec.type === 'ring-sub') return renderRingSub(spec, label, !!opts.simple);
       if (spec.type === 'condensed') return renderCondensed(spec, label);
       if (spec.type === 'triglyceride') return renderTriglyceride(spec, label);
       if (spec.type === 'polymer') return renderPolymer(spec, label);
@@ -1360,29 +3057,46 @@
     }
   }
 
+  function renderFigure(compound, fig, idx, forcedCaption, forcedNote) {
+    var name = compound.name || '';
+    var figLabel = fig.label ? name + '（' + fig.label + '）' : name;
+    var svg = renderStructure(fig.structure, figLabel + 'の構造式', { simple: fig.simple });
+    var autoNote = '';
+    if (!fig.note && fig.structure) {
+      if (fig.structure.type === 'triglyceride') autoNote = 'グリセリン骨格と脂肪酸鎖を簡略化して表示しています。';
+      else if (fig.structure.type === 'polymer') autoNote = '繰り返し単位と一般式で表示しています。重合度 n は特定しません。';
+      else if (fig.structure.type === 'schematic') autoNote = '模式図です。立体配置の詳細は省略しています。';
+    }
+    var note = forcedNote || fig.note || autoNote;
+    var caption = forcedCaption || fig.caption || fig.label || '';
+    var longCondensed = !!(fig.structure && fig.structure.type === 'condensed' &&
+      (fig.structure.lines || []).some(function (t) { return t.length > 44; }));
+    var figAttrs = 'class="oc-fig oc-fig--zoom' + (fig.structure && fig.structure.skeletal ? ' oc-fig--skeletal' : '') +
+      (longCondensed ? ' oc-fig--long' : '') + '" data-fig="' + idx + '"' +
+      (longCondensed ? ' tabindex="0" aria-label="長い構造式です。カード内では全体を縮小表示し、拡大ボタンで読めます。"' : '');
+    return '<figure ' + figAttrs + '>' +
+      '<div class="oc-fig__canvas">' + svg + '</div>' +
+      '<div class="oc-fig__bar">' +
+      (caption ? '<figcaption class="oc-fig__caption">' + esc(caption) + '</figcaption>' : '<span></span>') +
+      '<button type="button" class="oc-fig__zoom-btn" data-zoom="1" aria-haspopup="dialog">拡大</button>' +
+      '</div>' +
+      (note ? '<p class="oc-fig__note">' + esc(note) + '</p>' : '') +
+      '</figure>';
+  }
+
   function renderCompound(compound, opts) {
     opts = opts || {};
-    var figures = compound.figures && compound.figures.length
-      ? compound.figures
-      : [{ structure: compound.structure, label: '', note: '' }];
-    return figures.map(function (fig, idx) {
-      var name = compound.name || '';
-      var figLabel = fig.label ? name + '（' + fig.label + '）' : name;
-      var svg = renderStructure(fig.structure, figLabel + 'の構造式');
-      var autoNote = '';
-      if (!fig.note && fig.structure) {
-        if (fig.structure.type === 'condensed') autoNote = '簡略構造式（すべての原子・結合を線で示したものではありません）。';
-        else if (fig.structure.type === 'triglyceride') autoNote = 'グリセリン骨格と脂肪酸鎖を簡略化して表示しています。';
-        else if (fig.structure.type === 'polymer') autoNote = '繰り返し単位と一般式で表示しています。重合度 n は特定しません。';
-        else if (fig.structure.type === 'schematic') autoNote = '模式図です。立体配置の詳細は省略しています。';
-        else if (fig.structure.type === 'custom' && fig.structure.skeletal) autoNote = '炭素骨格は頂点で示し、炭素の元素記号を省略しています。ヘテロ原子と電荷は明示しています。';
-      }
-      var note = fig.note || autoNote;
-      return '<figure class="oc-fig' + (fig.structure && fig.structure.skeletal ? ' oc-fig--skeletal' : '') + '" data-fig="' + idx + '">' + svg +
-        (fig.label ? '<figcaption class="oc-fig__caption">' + esc(fig.label) + '</figcaption>' : '') +
-        (note ? '<p class="oc-fig__note">' + esc(note) + '</p>' : '') +
-        '</figure>';
-    }).join('');
+    if (!compound) return '';
+    var plan = figurePlan(compound);
+    if (plan.mode === 'multi') {
+      return plan.figures.map(function (fig, idx) { return renderFigure(compound, fig, idx); }).join('') +
+        (plan.exception && plan.exception.reason ? '<p class="oc-fig__note">' + esc(plan.exception.reason) + '</p>' : '');
+    }
+    if (plan.mode === 'dual') {
+      return renderFigure(compound, plan.full, 0) + renderFigure(compound, plan.simple, 1);
+    }
+    if (plan.single) return renderFigure(compound, plan.single, 0);
+    return '';
   }
 
   function formatFormula(plain) {
@@ -1425,14 +3139,28 @@
     validateAll: validateAll,
     renderStructure: renderStructure,
     renderCompound: renderCompound,
+    figurePlan: figurePlan,
+    figureAudit: figureAudit,
+    condensedTextFor: condensedTextFor,
+    GRAPH_ATOM_LIMIT: GRAPH_ATOM_LIMIT,
+    FIGURE_EXCEPTION_REASONS: FIGURE_EXCEPTION_REASONS,
+    condensedGraphFor: condensedGraphFor,
     formatFormula: formatFormula,
     renderGroupPreview: buildGroupPreview,
-    // テスト用
+    renderFunctionalFigure: renderFunctionalFigure,
+    svgGeometry: svgGeometry,
+    wrapCondensedText: wrapCondensedText,
+    chemBreakable: chemBreakable,
+    // テスト・ブラウザ検証用（SVGのviewBoxと内容bboxの一致確認）
     _internal: {
       chooseDirection: chooseDirection,
       hDirections: hDirections,
       checkValence: checkValence,
-      labelFor: labelFor
+      labelFor: labelFor,
+      graphContentBounds: graphContentBounds,
+      graphBounds: graphBounds,
+      condensedBreakPoints: condensedBreakPoints,
+      functionalGraph: functionalGraph
     }
   };
 });

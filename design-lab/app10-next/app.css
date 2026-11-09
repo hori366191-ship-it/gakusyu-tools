@@ -149,6 +149,8 @@ a { color: var(--oc-accent); }
 }
 
 /* ---------- panels ---------- */
+/* 3モード共通の外枠。モード切替時はこの高さだけを伸縮する。 */
+.oc-stage { min-width: 0; }
 .oc-top {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -326,14 +328,30 @@ a { color: var(--oc-accent); }
   display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px;
   margin-top: 7px; min-width: 0;
 }
+.oc-frag-preview--single { display: block; }
 .oc-frag-tile {
   flex: 1 1 92px; min-width: 0; max-width: 150px;
   display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
   padding: 5px 4px 4px; border: 1px solid var(--oc-line); border-radius: 8px;
   background: var(--oc-panel);
 }
-.oc-frag-tile__fig { width: 100%; min-width: 0; }
+.oc-frag-tile--single { max-width: 100%; width: 100%; }
+.oc-frag-tile__fig { width: 100%; min-width: 0; display: flex; align-items: center; justify-content: center; }
 .oc-frag-tile__fig svg { display: block; width: 100%; height: auto; max-height: 116px; }
+.oc-frag-tile--single .oc-frag-tile__fig svg { max-height: 230px; }
+.oc-frag-tile--explicit .oc-frag-tile__fig svg { max-height: 210px; }
+.oc-frag-formula {
+  display: block;
+  padding: 6px 2px;
+  font-family: var(--oc-font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--oc-ink);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.oc-frag-tile--single .oc-frag-formula { font-size: 24px; }
 .oc-frag-tile__label {
   margin-top: 3px; font-size: 10.5px; font-weight: 800; line-height: 1.35;
   text-align: center; overflow-wrap: anywhere;
@@ -341,6 +359,7 @@ a { color: var(--oc-accent); }
 .oc-frag-tile__label span {
   display: block; color: var(--oc-muted); font-size: 9.5px; font-weight: 600;
 }
+.oc-frag-tile__label .oc-frag-tile__note { color: var(--oc-warn); font-weight: 700; }
 .oc-frag-tile--h .oc-frag-tile__fig {
   display: flex; align-items: center; justify-content: center; min-height: 54px;
 }
@@ -349,12 +368,6 @@ a { color: var(--oc-accent); }
   align-self: center; flex: 0 0 auto; color: var(--oc-muted);
   font-size: 15px; font-weight: 800;
 }
-.oc-attach-mark {
-  fill: none; stroke: var(--oc-accent); stroke-width: 2;
-  stroke-dasharray: 4 3; stroke-linecap: round;
-}
-.oc-left-figure__legend { margin-top: 6px; font-size: 10.5px; color: var(--oc-muted); }
-.oc-attach-legend { color: var(--oc-accent-ink); font-weight: 800; }
 .oc-preview .oc-micro { white-space: normal; max-width: 100%; overflow-wrap: anywhere; text-align: center; }
 .oc-ring-preview__meta .oc-micro { white-space: normal; overflow-wrap: anywhere; }
 .oc-preview__locked-note {
@@ -460,10 +473,13 @@ a { color: var(--oc-accent); }
 .oc-card__formula {
   font-family: var(--oc-font-mono);
   font-size: 12.5px; color: var(--oc-muted);
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 .oc-condensed-text { margin: 0 13px 8px; padding: 7px 9px; border: 1px dashed var(--oc-line); border-radius: 8px; background: var(--oc-panel-2); min-width: 0; }
 .oc-condensed-text strong { display: block; font-size: 10px; color: var(--oc-muted); letter-spacing: .04em; }
-.oc-condensed-text code { display: block; margin-top: 2px; font-family: var(--oc-font-mono); font-size: 12px; line-height: 1.55; color: var(--oc-ink); overflow-wrap: anywhere; word-break: break-word; white-space: normal; }
+.oc-condensed-text code { display: block; margin-top: 2px; font-family: var(--oc-font-mono); font-size: 12px; line-height: 1.55; color: var(--oc-ink); overflow-wrap: anywhere; word-break: normal; white-space: pre-line; }
 .oc-condensed-text span { display: block; margin-top: 2px; font-size: 10px; color: var(--oc-muted); line-height: 1.5; overflow-wrap: anywhere; }
 .oc-card__figs { padding: 0 13px; display: grid; gap: 9px; grid-template-columns: minmax(0, 1fr); min-width: 0; }
 .oc-card__figs--stack { grid-template-columns: minmax(0, 1fr); }
@@ -477,24 +493,17 @@ a { color: var(--oc-accent); }
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   min-width: 0;
 }
-.oc-fig .oc-svg { width: 100%; max-height: 220px; height: auto; }
-/* 長い鎖式（EPA/DHA等）はページ全体を縮小せず、図の枠内だけ横スクロールする。 */
-.oc-fig--scroll {
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: thin;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  /* flexの中央寄せだと負のoverflow側がscrollLeftで到達できない。左寄せにする。 */
-  align-items: flex-start;
-  justify-content: flex-start;
+.oc-fig .oc-svg { width: 100%; max-height: 240px; height: auto; }
+/* 長い簡略式もカード幅に全体を収める。切らずに縮小し、読めない場合は
+   既存の「拡大」ダイアログで確認する（カード内の横スクロールはしない）。 */
+.oc-fig--long {
+  align-items: center;
+  justify-content: center;
 }
-.oc-fig--scroll .oc-svg {
-  flex: 0 0 auto;
-  width: auto;
-  min-width: 720px;
-  max-width: none;
-  max-height: none;
+.oc-fig--long .oc-svg {
+  width: 100%;
+  max-width: 100%;
+  max-height: 300px;
   margin: 0;
 }
 .oc-card__figs--stack .oc-fig .oc-svg { max-height: 340px; }
@@ -809,7 +818,10 @@ a { color: var(--oc-accent); }
   .oc-carbon { padding: 6px 7px; }
   .oc-carbon__main { font-size: 15px; }
   .oc-family-list { grid-template-columns: minmax(0, 1fr); }
-  .oc-preset-row { grid-template-columns: minmax(0, 1fr); }
+  #chain-shape-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #carbon-list { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; }
+  #carbon-list .oc-carbon { min-height: 44px; padding: 4px 1px; justify-content: center; }
+  #carbon-list .oc-carbon__main { font-size: clamp(9px, 2.6vw, 12px); }
   .oc-ring-preview { grid-template-columns: minmax(0, 1fr); }
   .oc-ring-preview__fig { max-width: 190px; }
   .oc-fig .oc-svg { max-height: 170px; }
@@ -864,6 +876,7 @@ a { color: var(--oc-accent); }
 /* ============================================================
    app10-next: 3つの探し方（鎖式 / 芳香族・環式 / その他）
    ============================================================ */
+/* モバイルでも3列を維持する。ラベルは折り返し、押せる高さを確保する。 */
 .oc-modes {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -876,6 +889,8 @@ a { color: var(--oc-accent); }
   align-items: flex-start;
   gap: 2px;
   text-align: left;
+  min-height: 44px;
+  min-width: 0;
   background: var(--oc-panel);
   border: 1px solid var(--oc-line);
   border-radius: 12px;
@@ -886,8 +901,8 @@ a { color: var(--oc-accent); }
 }
 .oc-mode:hover { border-color: var(--oc-accent); transform: translateY(-1px); }
 .oc-mode[aria-pressed="true"] { background: var(--oc-accent); border-color: var(--oc-accent); color: #fff; }
-.oc-mode__main { font-size: 18px; font-weight: 800; line-height: 1.3; overflow-wrap: anywhere; }
-.oc-mode__sub { font-size: 11.5px; line-height: 1.45; opacity: .74; overflow-wrap: anywhere; }
+.oc-mode__main { display: block; min-width: 0; font-size: 18px; font-weight: 800; line-height: 1.3; overflow-wrap: anywhere; word-break: normal; }
+.oc-mode__sub { display: block; min-width: 0; font-size: 11.5px; line-height: 1.45; opacity: .74; overflow-wrap: anywhere; }
 .oc-mode:focus-visible { outline: 2px solid var(--oc-accent); outline-offset: 2px; }
 
 .oc-control-label { margin: 0 0 7px; color: var(--oc-muted); font-family: var(--oc-font-mono); font-size: 11px; font-weight: 700; letter-spacing: .05em; }
@@ -895,23 +910,140 @@ a { color: var(--oc-accent); }
 .oc-selection { margin: 10px 0 0; padding: 8px 11px; border-radius: 8px; background: var(--oc-accent-bg); color: var(--oc-accent-ink); font-size: 12px; font-weight: 700; line-height: 1.55; }
 
 .oc-carbon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 7px; }
-.oc-carbon { display: flex; align-items: baseline; justify-content: space-between; gap: 5px; background: var(--oc-panel-2); border: 1px solid var(--oc-line); border-radius: 9px; padding: 8px 10px; cursor: pointer; color: var(--oc-ink); }
+#carbon-list { grid-template-columns: repeat(auto-fit, minmax(52px, 1fr)); }
+#carbon-list .oc-carbon__main { max-width: 100%; font-size: clamp(9px, 2.6vw, 17px); letter-spacing: -0.02em; }
+.oc-carbon { display: flex; align-items: baseline; justify-content: space-between; gap: 5px; min-width: 0; min-height: 38px; background: var(--oc-panel-2); border: 1px solid var(--oc-line); border-radius: 9px; padding: 8px 10px; cursor: pointer; color: var(--oc-ink); }
 .oc-carbon:hover { border-color: var(--oc-accent); background: var(--oc-panel); }
 .oc-carbon.is-current { background: var(--oc-accent); border-color: var(--oc-accent); color: #fff; }
-.oc-carbon__main { font-family: var(--oc-font-mono); font-size: 17px; font-weight: 700; line-height: 1; }
+.oc-carbon__main { font-family: var(--oc-font-mono); font-size: 17px; font-weight: 700; line-height: 1; white-space: nowrap; }
 .oc-carbon__sub { font-size: 10px; opacity: .65; }
 .oc-carbon:focus-visible { outline: 2px solid var(--oc-accent); outline-offset: 1px; }
+.oc-carbon--none { grid-column: 1 / -1; align-self: start; justify-content: flex-start; min-width: 0; }
+.oc-carbon--none .oc-carbon__main { font-family: inherit; font-size: 12px; line-height: 1.25; white-space: nowrap; overflow-wrap: normal; }
+@media (pointer: coarse) { .oc-carbon { min-height: 44px; } }
 
 .oc-family-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; margin-bottom: 12px; }
+#chain-family-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#chain-shape-list { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+#chain-shape-list .oc-shape { min-width: 0; max-width: 100%; }
+#chain-shape-list .oc-shape__fig,
+#chain-shape-list .oc-shape__name { min-width: 0; max-width: 100%; }
+#chain-shape-list .oc-shape__name { overflow-wrap: anywhere; }
+/* 文字式は化学単位の区切り（ゼロ幅スペース）だけで折り返す。
+   overflow:hidden や省略記号で意味を削らない。 */
+#chain-shape-list .oc-shape__formula { min-width: 0; max-width: 100%; }
+#chain-shape-list .oc-frag-formula {
+  min-width: 0; max-width: 100%;
+  word-break: normal; overflow-wrap: normal;
+}
 .oc-family-list .oc-pick { border: 1px solid var(--oc-line); border-radius: 8px; }
 .oc-family-list .oc-empty-note { grid-column: 1 / -1; }
+
+/* ①の骨格カード: 上段に簡単な構造（大きく）、下段に名前（小さく）。 */
+.oc-shape {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 3px;
+  min-height: 86px;
+  position: relative;
+  padding: 7px 7px 6px;
+}
+.oc-shape__fig {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  min-width: 0;
+  /* 右上の件数バッジと重ならないための余白。モバイルの狭いカードでは
+     バッジを名前行へ移し、この余白を0にする（@media 430px）。 */
+  padding-right: 22px;
+}
+.oc-shape__fig svg { display: block; width: 100%; height: auto; max-height: 82px; }
+.oc-shape__fig .oc-shape__halves { width: 100%; }
+.oc-shape__formula {
+  font-family: var(--oc-font-mono);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--oc-ink);
+  text-align: center;
+  word-break: normal;
+  overflow-wrap: normal;
+  max-width: 100%;
+}
+.oc-shape__formula--h { font-size: 24px; }
+.oc-shape__none { font-size: 11px; font-weight: 800; color: var(--oc-muted); text-align: center; line-height: 1.4; }
+/* 複数fragmentは等分トラック（minmax(0,1fr)）に置く。子SVGはwidth:100%。
+   flexのwidth:autoのままだと狭いカードで幅0に潰れ、片側の構造が消える。 */
+.oc-shape__halves {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+.oc-shape__half { display: flex; align-items: center; justify-content: center; width: 100%; min-width: 0; }
+.oc-shape__half svg { display: block; width: 100%; height: auto; max-height: 78px; }
+.oc-shape__half .oc-frag-formula { min-width: 0; max-width: 100%; overflow-wrap: normal; word-break: normal; }
+.oc-shape__gap { justify-self: center; align-self: stretch; width: 0; border-left: 1px dashed var(--oc-line); }
+.oc-shape__name { display: block; min-width: 0; font-size: 10.5px; font-weight: 800; line-height: 1.35; text-align: center; overflow-wrap: anywhere; }
+.oc-shape .oc-tag { position: absolute; top: 4px; right: 4px; }
+.oc-shape .oc-frag-formula { font-size: 15px; word-break: normal; overflow-wrap: normal; }
+.oc-shape .oc-frag-formula--sm { font-size: 13px; }
+.oc-shape .oc-frag-formula--xs { font-size: 11px; }
+.oc-shape .oc-frag-h { font-size: 20px; }
+
+/* ②の分類カード: 上段に官能基の形、下段に分類名。 */
+.oc-fam, .oc-ring-frag {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 2px;
+  min-height: 64px;
+  position: relative;
+  padding: 7px 8px 6px;
+}
+.oc-fam__fig, .oc-ring-frag__fig {
+  display: block;
+  min-width: 0;
+  padding-right: 22px;
+  font-family: var(--oc-font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--oc-ink);
+  overflow-wrap: anywhere;
+}
+.oc-fam__name, .oc-ring-frag__name {
+  display: block;
+  min-width: 0;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--oc-muted);
+  overflow-wrap: anywhere;
+}
+.oc-fam .oc-tag, .oc-ring-frag .oc-tag { position: absolute; top: 4px; right: 4px; }
 
 .oc-note-box { margin-top: 11px; padding: 9px 11px; border: 1px solid var(--oc-line); border-left: 3px solid var(--oc-warn); border-radius: 0 8px 8px 0; background: var(--oc-warn-bg); color: var(--oc-ink); font-size: 11.5px; line-height: 1.65; }
 .oc-note-box p { margin: 0; }
 .oc-note-box p + p { margin-top: 5px; }
 .oc-note-box b { color: var(--oc-warn); }
 
+.oc-help { margin-top: 10px; border: 1px solid var(--oc-line); border-radius: 8px; background: var(--oc-panel-2); }
+.oc-help summary { padding: 8px 11px; cursor: pointer; font-size: 11.5px; font-weight: 700; color: var(--oc-muted); }
+.oc-help summary:focus-visible { outline: 2px solid var(--oc-accent); outline-offset: 1px; }
+.oc-help__body { padding: 0 11px 9px; }
+.oc-help__body p { margin: 0 0 6px; font-size: 11px; line-height: 1.65; color: var(--oc-ink); }
+.oc-help__body p:last-child { margin-bottom: 0; }
+
 .oc-gen-lead { margin: 0 0 8px; color: var(--oc-muted); font-size: 11.5px; line-height: 1.6; }
+.oc-gen-figure { width: 100%; max-width: 380px; margin: 2px auto 0; padding: 6px 8px; border: 1px solid var(--oc-line); border-radius: 9px; background: var(--oc-panel); }
+.oc-gen-figure svg { display: block; width: 100%; height: auto; max-height: 150px; }
+.oc-gen-figure__note { margin: 4px 0 8px; color: var(--oc-muted); font-size: 10px; line-height: 1.5; text-align: center; }
+.oc-left-figure__none { margin-top: 6px; padding: 18px 10px; border: 1px dashed var(--oc-line); border-radius: 8px; background: var(--oc-panel); color: var(--oc-muted); font-size: 12px; font-weight: 800; text-align: center; }
 .oc-gen-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
 .oc-gen { min-width: 0; background: var(--oc-panel-2); border: 1px solid var(--oc-line); border-radius: 10px; padding: 9px 10px; }
 .oc-gen.is-empty { border-style: dashed; background: #fbf8f4; }
@@ -972,13 +1104,20 @@ body.oc-dialog-open { overflow: hidden; }
 .oc-subgroup__note { margin: -2px 0 9px; color: var(--oc-muted); font-size: 11.5px; line-height: 1.6; }
 .oc-family-card .oc-fact span a { color: var(--oc-accent); font-weight: 700; }
 
-@media (max-width: 900px) {
-  .oc-modes { grid-template-columns: 1fr; }
-}
 @media (max-width: 760px) {
+  .oc-modes { gap: 6px; margin-top: 12px; }
+  .oc-mode { padding: 9px 8px; border-radius: 8px; }
+  .oc-mode__main { font-size: 15px; }
+  .oc-mode__sub { font-size: 10px; }
   .oc-gen-grid { grid-template-columns: 1fr; }
   .oc-ring-preview { grid-template-columns: 1fr; }
   .oc-ring-preview__fig { max-width: 210px; }
+}
+@media (max-width: 430px) {
+  .oc-modes { gap: 5px; }
+  .oc-mode { padding: 8px 6px; }
+  .oc-mode__main { font-size: 13.5px; line-height: 1.35; }
+  .oc-mode__sub { font-size: 9px; line-height: 1.4; }
 }
 @media (prefers-reduced-motion: reduce) {
   .oc-mode { transition: none; }
@@ -1013,7 +1152,7 @@ body.oc-dialog-open { overflow: hidden; }
 .oc-seg__btn[aria-pressed="true"] { background: var(--oc-accent); border-color: var(--oc-accent); color: #fff; }
 .oc-seg__btn:focus-visible { outline: 2px solid var(--oc-accent); outline-offset: 1px; }
 @media (max-width: 430px) { .oc-seg { grid-template-columns: 1fr; } }
-.oc-fig--scroll:focus-visible { outline: 2px solid var(--oc-accent); outline-offset: 2px; }
+.oc-fig--long:focus-visible { outline: 2px solid var(--oc-accent); outline-offset: 2px; }
 
 /* ============================================================
    app10-next: �����`���m���ɏ㏑�����郂�o�C������
@@ -1024,19 +1163,51 @@ body.oc-dialog-open { overflow: hidden; }
   .oc-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .oc-cards--single { grid-template-columns: minmax(0, 1fr); }
   .oc-card__figs { grid-template-columns: minmax(0, 1fr); }
-  .oc-fig__canvas { overflow: auto; max-height: 72vh; -webkit-overflow-scrolling: touch; }
-  .oc-fig__canvas .oc-svg { width: auto; min-width: 400px; max-width: none; max-height: none; }
-  .oc-fig--scroll .oc-fig__canvas { overflow: visible; max-height: none; }
-  .oc-fig--scroll .oc-fig__canvas .oc-svg { min-width: 720px; }
+  .oc-fig__canvas { width: 100%; min-width: 0; overflow: visible; max-height: none; }
+  .oc-fig__canvas .oc-svg { width: 100%; min-width: 0; max-width: 100%; max-height: 240px; }
+  .oc-fig--long .oc-svg { min-width: 0; }
   .oc-family-list { grid-template-columns: minmax(0, 1fr); }
-  .oc-preset-row { grid-template-columns: minmax(0, 1fr); }
+  #chain-shape-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #carbon-list { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; }
+  #carbon-list .oc-carbon { min-height: 44px; padding: 4px 1px; justify-content: center; }
+  #carbon-list .oc-carbon__main { font-size: clamp(9px, 2.6vw, 12px); }
   .oc-ring-preview { grid-template-columns: minmax(0, 1fr); }
   .oc-panel__body { max-height: 64vh; overflow-y: auto; overflow-x: hidden; }
+}
+/* 2列カードが狭くなる幅では、複数fragmentを縦に積む。
+   横並びのまま各トラックを潰すと文字式の化学単位が切れる。 */
+@media (max-width: 620px) {
+  .oc-shape__halves { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+  .oc-shape__gap {
+    justify-self: stretch;
+    align-self: center;
+    width: 100%;
+    height: 0;
+    border-left: 0;
+    border-top: 1px dashed var(--oc-line);
+  }
 }
 @media (max-width: 430px) {
   .oc-top { gap: 6px; }
   .oc-cards { gap: 6px; }
-  .oc-family-list, .oc-preset-row { grid-template-columns: minmax(0, 1fr); }
+  .oc-family-list { grid-template-columns: minmax(0, 1fr); }
   .oc-carbon-grid { grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 5px; }
   .oc-panel__body { max-height: 58vh; }
+  .oc-fig { padding: 5px 5px 6px; border-radius: 7px; }
+  .oc-fig__canvas { padding: 0; }
+  .oc-frag-preview { gap: 4px; }
+  .oc-left-figure { padding: 7px; }
+  .oc-shape { min-height: 78px; padding: 6px 5px 5px; }
+  .oc-shape__fig { min-height: 38px; padding-right: 0; }
+  /* 狭いカードでは件数バッジを絶対配置にせず、名前行の下に置く。
+     figure の幅を22px削らずに済み、文字式・構造図が収まる。 */
+  .oc-shape .oc-tag {
+    position: static;
+    align-self: center;
+    margin-top: 1px;
+    padding: 0 4px;
+    font-size: 9px;
+    line-height: 1.5;
+  }
+  .oc-fam, .oc-ring-frag { min-height: 58px; padding: 6px 7px 5px; }
 }

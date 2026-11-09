@@ -41,7 +41,7 @@
 
 <main class="oc-wrap">
   <div class="oc-notice">
-    高校「化学」の有機化合物を、<strong>登録済みの構造データ</strong>から表示します。同じ有機化合物でも、鎖式は「官能基に結合する炭化水素部分＋化合物分類」、芳香族・環式は「固定した骨格＋置換基」、その他は「family」と、探し方が変わります。未収録の条件は、誤った構造を作らずに理由を表示します。
+    骨格と官能基から化合物を比較します。
   </div>
   <p class="oc-query-notice" id="query-notice" role="status" hidden></p>
 
@@ -51,7 +51,7 @@
       <span class="oc-mode__sub">炭化水素部分から探す</span>
     </button>
     <button type="button" class="oc-mode" data-mode="ring" aria-pressed="false">
-      <strong class="oc-mode__main">芳香族・環式</strong>
+      <strong class="oc-mode__main">芳香族・<wbr>環式</strong>
       <span class="oc-mode__sub">固定した骨格から探す</span>
     </button>
     <button type="button" class="oc-mode" data-mode="other" aria-pressed="false">
@@ -60,40 +60,40 @@
     </button>
   </nav>
 
+  <div class="oc-stage" id="oc-stage">
   <section class="oc-top" id="chain-panels" aria-label="鎖式の条件">
     <article class="oc-panel">
       <div class="oc-panel__head">
         <h2><span class="oc-num">1</span>炭化水素部分を選ぶ</h2>
-        <span class="oc-micro">鎖式 / 骨格</span>
       </div>
       <div class="oc-panel__body">
         <p class="oc-control-label" id="carbon-label">炭化水素部分の炭素数（官能基の炭素を除く）</p>
         <div class="oc-carbon-grid" id="carbon-list" role="group" aria-labelledby="carbon-label"></div>
         <p class="oc-control-label" id="chain-shape-label" style="margin-top:12px">骨格の形（つながり・分かれ方）</p>
         <div class="oc-family-list" id="chain-shape-list" role="group" aria-labelledby="chain-shape-label"></div>
-        <p class="oc-selection" id="chain-selection"></p>
         <div class="oc-left-figure" id="chain-left-figure" aria-live="polite"></div>
-        <div class="oc-note-box">
-          <p><b>数え方:</b> 官能基に結合する炭化水素部分の炭素数です。カルボニル基（C=O）とニトリル基（C≡N）の炭素は官能基側に含め、OHをもつ炭素は炭化水素部分に残します。分子全体の炭素数は結果カードに表示します。</p>
-          <p><b>「ジメチル」ではありません:</b> メチル基が2つある場合は、1つの分子としてつながった「ジメチル」ではなく、「メチル基×2」として図を分けて表示します。</p>
-          <p><b>C0:</b> 炭化水素基がない場合は「炭化水素基なし〈H〉」として、ギ酸・ホルムアルデヒド・シュウ酸に対応します。</p>
-          <p><b>接続点:</b> 親炭化水素の接続点にはHを補い、○で示します。骨格の形が同じでも、二重結合・三重結合の位置異性体は①ではまとめ、結果カードで区別します（例: ブタ-1-エンとブタ-2-エン）。</p>
-          <p><b>合成手順ではありません:</b> 炭化水素部分と官能基の組み合わせを比べる見方であり、実際の合成手順や実験操作を示すものではありません。</p>
-        </div>
-        <p class="oc-panel-foot">①を変えると、右の一般構造と下の結果が自動で更新されます。②から①を書き換えることはありません。</p>
+        <p class="oc-panel-foot">C=O・C≡Nの炭素は官能基側に数えます。</p>
+        <details class="oc-help">
+          <summary>数え方・図について</summary>
+          <div class="oc-help__body">
+            <p><b>炭化水素部分のC数:</b> 官能基に結合する炭化水素部分の炭素数です。カルボニル基（C=O）とニトリル基（C≡N）の炭素は官能基側に含め、OHをもつ炭素は炭化水素部分に残します。分子全体の炭素数は結果カードに表示します。</p>
+            <p><b>複数fragment:</b> メチル基が2つある場合は、1つの分子としてつながった「ジメチル」ではなく、接続点のダッシュ（−）で分けた「メチル基×2」として表示します。独立したfragmentの間に結合線は描きません。</p>
+            <p><b>C0（炭化水素部分なし）:</b> Hが結合する場合（ギ酸・ホルムアルデヒドのR=H）と、官能基どうしが炭素を介さず直接結合する場合（シュウ酸）を別の形として区別します。Hを補った親炭化水素の図に一括して偽装しません。</p>
+            <p><b>アルデヒド:</b> R−C(=O)−H。C=Oの炭素にHが結合しており、O–Hではありません。</p>
+            <p><b>図:</b> 選択カードは簡単な形（文字式または小さな構造図）で並べ、選択後は原子とHを明示した構造式で表示します。長い鎖は繰返し（CH₂の括弧）で圧縮し、各図の「拡大」で確認できます。</p>
+          </div>
+        </details>
       </div>
     </article>
 
     <article class="oc-panel">
       <div class="oc-panel__head">
         <h2><span class="oc-num">2</span>化合物分類を選ぶ</h2>
-        <span class="oc-micro">鎖式 / 官能基</span>
       </div>
       <div class="oc-panel__body">
         <p class="oc-control-label" id="chain-family-label">化合物分類</p>
         <div class="oc-family-list" id="chain-family-list" role="group" aria-labelledby="chain-family-label"></div>
         <div class="oc-preview" id="chain-preview"></div>
-        <p class="oc-panel-foot">②は一般の官能基fragmentと分類だけを表示します。多官能の分類では複数の役割例を出し、一価の一般式だけを当てはめません。</p>
       </div>
     </article>
   </section>
@@ -102,15 +102,12 @@
     <article class="oc-panel">
       <div class="oc-panel__head">
         <h2><span class="oc-num">1</span>固定する骨格を選ぶ</h2>
-        <span class="oc-micro">芳香族・環式 / 固定</span>
       </div>
       <div class="oc-panel__body">
         <nav class="oc-list oc-list--ring" id="ring-list" aria-label="固定する環のリスト"></nav>
-        <p class="oc-selection" id="ring-selection"></p>
         <div class="oc-left-figure" id="ring-left-figure" aria-live="polite"></div>
         <div class="oc-note-box">
-          <p><b>環は固定:</b> 総炭素数から探すのではなく、選んだ環の炭素数をそのまま保持し、環のHを置換基で置き換えます。</p>
-          <p><b>置換基はプリセットで:</b> 「置換基1つ」「同じ置換基を複数」「異なる置換基組み合わせ」から1回選ぶと、同じ置換基構成の位置異性体をまとめて結果に表示します。</p>
+          <p><b>環は固定:</b> 選んだ環の炭素数をそのまま保持し、環のHを置換基で置き換えます。</p>
         </div>
       </div>
     </article>
@@ -118,13 +115,11 @@
     <article class="oc-panel">
       <div class="oc-panel__head">
         <h2><span class="oc-num">2</span>置換基・組み合わせを選ぶ</h2>
-        <span class="oc-micro">芳香族・環式 / 条件</span>
       </div>
       <div class="oc-panel__body">
         <p class="oc-control-label" id="ring-group-label">置換基・組み合わせ</p>
         <div class="oc-family-list" id="ring-group-list" role="group" aria-labelledby="ring-group-label"></div>
         <div class="oc-preview" id="ring-preview"></div>
-        <p class="oc-panel-foot" id="ring-foot"></p>
       </div>
     </article>
   </section>
@@ -133,13 +128,10 @@
     <article class="oc-panel">
       <div class="oc-panel__head">
         <h2><span class="oc-num">1</span>大きな分類を選ぶ</h2>
-        <span class="oc-micro">その他 / category</span>
       </div>
       <div class="oc-panel__body">
         <div class="oc-family-list" id="other-category-list" role="group" aria-label="その他の分類"></div>
-        <p class="oc-selection" id="other-selection"></p>
         <div class="oc-note-box">
-          <p><b>一覧を並べすぎない:</b> 物質を1件ずつ選ぶのではなく、category→familyのまとまりで選び、該当する複数の物質を結果に並べます。</p>
           <p><b>純物質と材料を区別:</b> 酵素・脂質・高分子・再生セルロースなどのfamilyや材料は、単一の固定分子式をもつ純物質カードとは区別します。</p>
         </div>
       </div>
@@ -148,16 +140,15 @@
     <article class="oc-panel">
       <div class="oc-panel__head">
         <h2><span class="oc-num">2</span>familyを選ぶ</h2>
-        <span class="oc-micro">その他 / family</span>
       </div>
       <div class="oc-panel__body">
         <p class="oc-control-label" id="other-family-label">family</p>
         <div class="oc-family-list" id="other-family-list" role="group" aria-labelledby="other-family-label"></div>
         <div class="oc-preview" id="other-preview"></div>
-        <p class="oc-panel-foot" id="other-foot"></p>
       </div>
     </article>
   </section>
+  </div>
 
   <div class="oc-connector" aria-hidden="true">
     <span class="oc-connector__line"></span>
@@ -180,27 +171,27 @@
   <section class="oc-info" aria-label="使い方と収録範囲">
     <section>
       <h2>3つの探し方</h2>
-      <p><strong>鎖式</strong>は、官能基に結合する炭化水素部分の炭素数と骨格（つながり方・分かれ方）を①で選び、化合物分類（アルカン・アルケン・アルキン・ハロゲン化物・アルコール・エーテル・アルデヒド・ケトン・カルボン酸・エステル・アミン・ニトリルなど）を②で選びます。カルボニル基（C=O）とニトリル基（C≡N）の炭素は官能基側に含め、OHをもつ炭素は炭化水素部分に残します。分子全体の炭素数は結果カードに表示します。アミンは級ごとに結果をまとめ、異性体を1つずつ選ぶ必要はありません。</p>
-      <p><strong>芳香族・環式</strong>は、ベンゼン環・ナフタレン環・シクロアルカンなどの固定した骨格を選び、置換基の学習用プリセット（置換基1つ／同じ置換基を複数／異なる置換基組み合わせ）で表示します。同じ置換基構成の位置異性体は、1つのプリセットの結果にまとめて表示します。「追加なし」は骨格単体だけを表示します。</p>
-      <p><strong>その他</strong>は、糖類・アミノ酸・タンパク質・脂質・天然高分子・合成高分子・材料などのcategoryとfamilyから探します。単一の固定分子式をもたないfamily・材料・混合物は、純物質カードに偽装しません。</p>
+      <p><strong>鎖式</strong>は、炭化水素部分の炭素数と骨格、化合物分類を選びます。</p>
+      <p><strong>芳香族・環式</strong>は、固定した骨格と置換基の組み合わせを選びます。</p>
+      <p><strong>その他</strong>は、categoryとfamilyから、糖類・アミノ酸・脂質・高分子・材料などを探します。単一の固定分子式をもたないfamily・材料・混合物は、純物質カードに偽装しません。</p>
     </section>
     <section>
       <h2>収録範囲</h2>
-      <p>高校「化学」の有機化学19分野を対象に、アルカン・アルケン・アルキン、アルコール・エーテル・カルボン酸・エステル・油脂・糖類・アミノ酸・核酸・合成高分子など、登録済みの構造データを収録しています。</p>
-      <p>外部公開資料（Try IT 7節・化学のグルメ全60記事）から名称を確認した発展・探究項目は、収録台帳の「全章索引の監査」で標準範囲とは別に確認できます。431頁の取得記録、65件の要判断事項、独立625語の全分類を保存しています。独立監査で画像原本から5件の物質/イオン/塩状態を追加し、42件のname/state/family mappingを説明・構造へ到達可能にしました。画像1399枚の全OCR・全動画の視聴/文字起こしは未完了であり、教材の完全網羅を主張しません。</p>
+      <p>高校「化学」の有機化学19分野を対象に、登録済みの構造データを収録しています。</p>
+      <p>外部公開資料（Try IT 7節・化学のグルメ全60記事）の索引監査、独立625語の分類、画像OCR二pass監査の記録は収録台帳にあります。画像は1398 uniqueを二pass処理済み（empty 51は原画像を確認）ですが、全画像の化学的な完全読取と動画127件の視聴/文字起こしは未完了で、教材の完全網羅を主張しません。</p>
       <p><a href="./ledger.html">収録台帳</a>で、カバレッジ・チェックリスト・化合物一覧・検証状況・未対応事項・出典・索引監査を確認できます。</p>
     </section>
     <section>
       <h2>注意</h2>
-      <p>このアプリは構造と分類を学ぶための教材です。実際の物質の混合・合成・実験手順を示すものではありません。危険性・毒性の記載は代表的な情報です。実験・使用の判断には、必ず最新の安全データシート（SDS）や専門家の指示を確認してください。</p>
-      <p>構造式は高校化学の教科書で使われる2次元表示に合わせ、ベンゼン環はケクレ式で描画しています。図の見た目は自動検証の対象外です。</p>
+      <p>危険性・毒性の記載は代表的な情報です。実験・使用の判断には、必ず最新の安全データシート（SDS）や専門家の指示を確認してください。</p>
+      <p>構造式は高校化学の教科書で使われる2次元表示に合わせ、ベンゼン環はケクレ式で描画しています。</p>
     </section>
   </section>
 
   <footer class="oc-footer">
     <p><a href="./ledger.html">収録台帳</a> ・ <a href="../../site/credits.html">クレジット</a></p>
     <p id="oc-data-status">収録データを確認中…</p>
-    <p>構造式は登録データからSVGで描画しています。糖類の投影式は教科書標準の配置に基づき、高分子は可変組成を「組成依存」と表示します。</p>
+    <p>このアプリは構造と分類を学ぶための教材であり、実際の物質の混合・合成・実験手順を示すものではありません。図の見た目は自動検証の対象外です。糖類の投影式は教科書標準の配置に基づき、高分子は可変組成を「組成依存」と表示します。</p>
   </footer>
 </main>
 
@@ -221,6 +212,7 @@
 <script src="./draw.js"></script>
 <script src="./chain-descriptor.js"></script>
 <script src="./catalog.js"></script>
+<script src="./motion.js"></script>
 <script src="./app.js"></script>
 </body>
 </html>

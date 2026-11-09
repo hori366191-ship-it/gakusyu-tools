@@ -49,17 +49,39 @@
   var CHAIN_FAMILY_LABEL = {};
   CHAIN_FAMILIES.forEach(function (f) { CHAIN_FAMILY_LABEL[f.id] = f.label; });
 
-  // ②の選択ボタンの表示だけを分類ごとに差し替える。分類名（結果の見出し）は
-  // CHAIN_FAMILY_LABEL のまま保持し、アルデヒドだけは官能基の形（−CHO）を
-  // 主表示にして、構造から意味が分かるようにする。他の分類は従来表記のまま。
+  // ②の選択カードは全16分類で「上段=簡単な官能基の形（大きく）/
+  // 下段=分類名（小さく）」に統一する。選択カードでは C(=O) の括弧表記を
+  // 使わず、CO と縮合して書く（詳しい右preview・結果図は実二重結合線で描く）。
+  // アミンは −NH₂ だけを示すと第二・第三級を排除したと誤認するため「など」を添える。
   var CHAIN_FAMILY_PICK = {
-    aldehyde: { main: '−CHO', sub: 'アルデヒド基', note: '末端のカルボニル基。R−C(=O)−H。' }
+    alkane: { main: 'C−C', sub: 'アルカン', note: '単結合だけの鎖式炭化水素。' },
+    alkene: { main: 'C=C', sub: 'アルケン', note: 'C=Cを1本以上もつ鎖式炭化水素。' },
+    alkyne: { main: 'C≡C', sub: 'アルキン', note: 'C≡Cを1本以上もつ鎖式炭化水素。' },
+    halogen: { main: '−X', sub: 'ハロゲン化物', note: 'Cl・Br・Iを炭素に結合した化合物。' },
+    alcohol: { main: '−OH', sub: 'アルコール', note: '一価アルコール。O–Hの結合線は省略してOHとまとめて表す。' },
+    polyol: { main: '−OH ×2以上', sub: '多価アルコール', note: '1分子に2個以上のOHをもつ多価アルコール。' },
+    ether: { main: '−O−', sub: 'エーテル', note: '炭素を2つのRに分けて数える。C–C結合を保つ表記ではない。' },
+    aldehyde: { main: '−CHO', sub: 'アルデヒド', note: '末端のカルボニル基。R−C(=O)−H。' },
+    ketone: { main: '−CO−', sub: 'ケトン', note: 'C=Oが炭素鎖の途中にある。' },
+    carboxylic: { main: '−COOH', sub: 'カルボン酸', note: 'COOHの炭素は官能基側。炭化水素部分のC数とは別に数える。' },
+    anhydride: { main: '−CO−O−CO−', sub: 'カルボン酸無水物', note: '2分子のカルボン酸から水がとれた構造。' },
+    ester: { main: '−COO−', sub: 'エステル', note: 'カルボン酸とアルコールの脱水縮合でできる構造。' },
+    amine: { main: '−NH₂ など', sub: 'アミン（1〜3級）', note: 'Nに結合する炭化水素基の数で第一級〜第三級に分ける。' },
+    nitrile: { main: '−C≡N', sub: 'ニトリル', note: 'CNの炭素は官能基側。炭化水素部分のC数とは別に数える。' },
+    nitro: { main: '−NO₂', sub: 'ニトロ化合物', note: 'ニトロ基を炭素に結合した化合物。' },
+    'amino-alcohol': { main: '−OH ＋ −NH₂', sub: 'アミノアルコール', note: 'アミノ基とヒドロキシ基を併せもつ多官能化合物。' }
   };
 
-  function chainFamilyPick(family) {
-    var pick = CHAIN_FAMILY_PICK[family];
-    if (pick) return { main: pick.main, sub: pick.sub, note: pick.note };
-    return { main: CHAIN_FAMILY_LABEL[family] || family, sub: '', note: '' };
+  function chainFamilyPick(family, shape) {
+    var pick = CHAIN_FAMILY_PICK[family] || { main: CHAIN_FAMILY_LABEL[family] || family, sub: '', note: '' };
+    if (family === 'alkane' && shape) {
+      var d = chainDescriptorById(shape);
+      // C1のアルカンは C−C を要求しない（メタン CH₄）。
+      if (d && d.partialC === 1) {
+        return { main: 'CH₄', sub: pick.sub, note: '炭素1個のアルカン（メタン）。C−C結合はない。' };
+      }
+    }
+    return { main: pick.main, sub: pick.sub, note: pick.note };
   }
 
   var AMINE_DEGREE = {
@@ -249,13 +271,14 @@
     'p-divinylbenzene': true, guaiacol: true, 'n,n-dimethylaniline': true,
     'sulfanilic-acid': true, '2-nitrobenzaldehyde': true, acetaminophen: true,
     sulfanilamide: true, '2,4,6-tribromophenol': true,
-    'p-hydroxybenzoic-acid': true, 'm-hydroxybenzoic-acid': true, ibuprofen: true
+    'p-hydroxybenzoic-acid': true, 'm-hydroxybenzoic-acid': true, ibuprofen: true,
+    'phenoxide-ion': true
   };
 
   // ベンゼン環の置換基表示metadata。ring-sub構造の subs と custom構造の
   // data.js RING_SUBS を同じ形（key/label/count/positions）にそろえる。
   var RING_SUB_META = {
-    OH: { label: 'OH', name: 'ヒドロキシ基', formula: '−O−H', attach: 'O', note: '環のHをOHで置き換える。フェノール類。' },
+    OH: { label: 'OH', name: 'ヒドロキシ基', formula: '−O−H', simple: '−OH', attach: 'O', note: '環のHをOHで置き換える。フェノール類。' },
     CH3: { label: 'CH₃', name: 'メチル基', formula: '−CH₃', attach: 'C', note: '環のHをCH₃で置き換える。炭素が1つ増える。' },
     C2H5: { label: 'C₂H₅', name: 'エチル基', formula: '−CH₂−CH₃', attach: 'C', note: '環のHをエチル基で置き換える。' },
     'CH(CH3)2': { label: 'CH(CH₃)₂', name: 'イソプロピル基', formula: '−CH(CH₃)₂', attach: 'C', note: '環のHをイソプロピル基で置き換える。' },
@@ -263,21 +286,22 @@
     Cl: { label: 'Cl', name: '塩素', formula: '−Cl', attach: 'Cl', note: '環のHを塩素原子で置き換える。' },
     Br: { label: 'Br', name: '臭素', formula: '−Br', attach: 'Br', note: '環のHを臭素原子で置き換える。' },
     I: { label: 'I', name: 'ヨウ素', formula: '−I', attach: 'I', note: '環のHをヨウ素原子で置き換える。' },
-    COOH: { label: 'COOH', name: 'カルボキシ基', formula: '−C(=O)−O−H', attach: 'C', note: '環のHをカルボキシ基で置き換える。安息香酸誘導体。' },
-    CHO: { label: 'CHO', name: 'ホルミル基', formula: '−C(=O)−H', attach: 'C', note: '環のHをホルミル基で置き換える。ベンズアルデヒド誘導体。' },
+    COOH: { label: 'COOH', name: 'カルボキシ基', formula: '−C(=O)−O−H', simple: '−COOH', attach: 'C', note: '環のHをカルボキシ基で置き換える。安息香酸誘導体。' },
+    CHO: { label: 'CHO', name: 'ホルミル基', formula: '−C(=O)−H', simple: '−CHO', attach: 'C', note: '環のHをホルミル基で置き換える。ベンズアルデヒド誘導体。' },
     NH2: { label: 'NH₂', name: 'アミノ基', formula: '−NH₂', attach: 'N', note: '環のHをアミノ基で置き換える。アニリン誘導体。' },
     NO2: { label: 'NO₂', name: 'ニトロ基', formula: '−NO₂', attach: 'N', note: '環のHをニトロ基で置き換える。' },
-    CN: { label: 'CN', name: 'シアノ基', formula: '−C≡N', attach: 'C', note: '環のHをシアノ基で置き換える。ベンゾニトリル。' },
+    CN: { label: 'CN', name: 'シアノ基', formula: '−C≡N', simple: '−C≡N', attach: 'C', note: '環のHをシアノ基で置き換える。ベンゾニトリル。' },
     OCH3: { label: 'OCH₃', name: 'メトキシ基', formula: '−O−CH₃', attach: 'O', note: '環のHをメトキシ基で置き換える。アニソール誘導体。' },
-    OCOCH3: { label: 'OCOCH₃', name: 'アセトキシ基', formula: '−O−C(=O)−CH₃', attach: 'O', note: '環のHをアセトキシ基で置き換える。エステル結合をもつ。' },
-    COOCH3: { label: 'COOCH₃', name: 'メトキシカルボニル基', formula: '−C(=O)−O−CH₃', attach: 'C', note: '環のHをエステル基で置き換える。' },
-    NHCOCH3: { label: 'NHCOCH₃', name: 'アセトアミド基', formula: '−NH−C(=O)−CH₃', attach: 'N', note: '環のHをアセトアミド基で置き換える。' },
+    OCOCH3: { label: 'OCOCH₃', name: 'アセトキシ基', formula: '−O−C(=O)−CH₃', simple: '−OCOCH₃', attach: 'O', note: '環のHをアセトキシ基で置き換える。エステル結合をもつ。' },
+    COOCH3: { label: 'COOCH₃', name: 'メトキシカルボニル基', formula: '−C(=O)−O−CH₃', simple: '−COOCH₃', attach: 'C', note: '環のHをエステル基で置き換える。' },
+    NHCOCH3: { label: 'NHCOCH₃', name: 'アセトアミド基', formula: '−NH−C(=O)−CH₃', simple: '−NHCOCH₃', attach: 'N', note: '環のHをアセトアミド基で置き換える。' },
     SO3H: { label: 'SO₃H', name: 'スルホ基', formula: '−SO₃H', attach: 'S', note: '環のHをスルホ基で置き換える。' },
     SO2NH2: { label: 'SO₂NH₂', name: 'スルホンアミド基', formula: '−SO₂NH₂', attach: 'S', note: '環のHをスルホンアミド基で置き換える。' },
     'N(CH3)2': { label: 'N(CH₃)₂', name: 'ジメチルアミノ基', formula: '−N(CH₃)₂', attach: 'N', note: '環のHをジメチルアミノ基で置き換える。' },
     CH2OH: { label: 'CH₂OH', name: 'ヒドロキシメチル基', formula: '−CH₂−OH', attach: 'C', note: '環のHをヒドロキシメチル基で置き換える。' },
-    COCl: { label: 'COCl', name: 'クロロカルボニル基', formula: '−C(=O)−Cl', attach: 'C', note: '環のHをクロロカルボニル基で置き換える。酸塩化物。' },
-    SH: { label: 'SH', name: 'チオール基', formula: '−S−H', attach: 'S', note: '環のHをSHで置き換える。' }
+    COCl: { label: 'COCl', name: 'クロロカルボニル基', formula: '−C(=O)−Cl', simple: '−COCl', attach: 'C', note: '環のHをクロロカルボニル基で置き換える。酸塩化物。' },
+    SH: { label: 'SH', name: 'チオール基', formula: '−S−H', attach: 'S', note: '環のHをSHで置き換える。' },
+    'O-': { label: 'O⁻', name: 'フェノキシドO⁻', formula: '−O⁻', simple: '−O⁻', attach: 'O', note: 'フェノールのH⁺が外れた環–O⁻。対イオンは含めず、塩とは区別する。' }
   };
 
   var GROUP_SUB_KEY = { oh: 'OH', cooh: 'COOH', nh2: 'NH2', cho: 'CHO', no2: 'NO2', ch3: 'CH3', cl: 'Cl', br: 'Br', i: 'I', cn: 'CN' };
@@ -314,6 +338,7 @@
 
   function isAdvancedRingKey(key) {
     if (!key) return true;
+    if (key === 'O-') return false; // フェノキシドO⁻は単独の専門presetへ
     if (/[+\-]/.test(key)) return true;
     if (/Na|Ag|Cu|Pb|Ca|Mg|Zn|Fe|Al|Ba|Li|Sn/.test(key)) return true;
     if (key === 'isobutyl' || key === 'CH(CH3)COOH') return true;
@@ -371,6 +396,47 @@
   function ringPresetKind(subs) {
     if (subs.length === 1) return subs[0].count > 1 ? 'same' : 'single';
     return 'combo';
+  }
+
+  // ②の環式カードも「上段=置換基fragment（大きく）/下段=置換基名（小さく）」。
+  // 追加なしはベンゼン環の図を出さず、説明だけにする。
+  function ringPresetCard(preset) {
+    if (!preset || preset.kind === 'none') {
+      return {
+        kind: 'none',
+        main: '追加なし',
+        sub: '骨格単体のみ',
+        types: 0,
+        total: 0,
+        note: '置換基を追加せず、固定した骨格そのものを表示します。'
+      };
+    }
+    if (preset.kind === 'tray') {
+      return {
+        kind: 'tray',
+        main: '登録済み',
+        sub: 'その他の置換体',
+        types: 0,
+        total: preset.ids.length,
+        note: '単純な置換基プリセットに分けない登録済み化合物です。'
+      };
+    }
+    var mains = [];
+    var names = [];
+    preset.subs.forEach(function (s) {
+      var meta = ringSubMeta(s.key);
+      var count = s.count || 1;
+      mains.push((meta.simple || meta.formula) + (count > 1 ? '×' + count : ''));
+      names.push(meta.name + (count > 1 ? '×' + count : ''));
+    });
+    return {
+      kind: 'subs',
+      main: mains.join(' ＋ '),
+      sub: names.join('＋'),
+      types: preset.subs.length,
+      total: ringSubTotal(preset.subs),
+      note: '同じ置換基構成の位置異性体は、1つのカードの結果にまとめて表示します。'
+    };
   }
 
   function ringPositionText(id) {
@@ -480,7 +546,7 @@
       }
       byKey[key].ids.push(id);
     });
-    var singleRank = ['OH', 'CH3', 'Cl', 'Br', 'I', 'COOH', 'NH2', 'CHO', 'NO2', 'CN', 'C2H5', 'CH(CH3)2', 'CH=CH2', 'SO3H', 'NHCOCH3', 'CH2OH', 'OCH3', 'OCOCH3', 'N(CH3)2'];
+    var singleRank = ['O-', 'OH', 'CH3', 'Cl', 'Br', 'I', 'COOH', 'NH2', 'CHO', 'NO2', 'CN', 'C2H5', 'CH(CH3)2', 'CH=CH2', 'SO3H', 'NHCOCH3', 'CH2OH', 'OCH3', 'OCOCH3', 'N(CH3)2'];
     function rank(subs) {
       var i = singleRank.indexOf(subs[0].key);
       return i === -1 ? 99 : i;
@@ -577,6 +643,7 @@
     { id: 'polysaccharide', category: 'sugar', label: '多糖', ids: ['starch', 'cellulose', 'glycogen', 'amylopectin', 'dextrin', 'chitin'] },
     { id: 'sugar-alcohol', category: 'sugar', label: '糖アルコール', ids: ['sorbitol'] },
     { id: 'cyclitol', category: 'sugar', label: '環状多価アルコール（シクリトール）', ids: ['inositol'] },
+    { id: 'glycoside', category: 'sugar', label: '配糖体', ids: ['salicin'] },
     { id: 'cellulose-derivative', category: 'sugar', label: 'セルロース誘導体', ids: ['cellulose-acetate', 'cellulose-nitrate'] },
 
     { id: 'amino-acid', category: 'amino', label: 'アミノ酸', ids: STANDARD_AMINO_ACIDS.concat(['cystine', '6-aminohexanoic-acid']) },
@@ -596,7 +663,7 @@
 
     { id: 'nucleic-acid', category: 'natural-polymer', label: '核酸', ids: ['dna', 'rna'] },
     { id: 'nucleic-base', category: 'natural-polymer', label: '核酸塩基', ids: ['adenine', 'guanine', 'cytosine', 'thymine', 'uracil'] },
-    { id: 'nucleotide', category: 'natural-polymer', label: 'ヌクレオチド', ids: ['atp'] },
+    { id: 'nucleotide', category: 'natural-polymer', label: 'ヌクレオチド・ヌクレオシド', ids: ['atp', 'adenosine', 'adp'] },
     { id: 'natural-rubber', category: 'natural-polymer', label: '天然ゴム', ids: ['natural-rubber'] },
     { id: 'natural-polysaccharide', category: 'natural-polymer', label: '天然多糖・その他', ids: NATURAL_POLYSACCHARIDE_IDS },
 
@@ -771,11 +838,11 @@
   }
 
   var ROLE_ORDER = {
-    'amine-1': 1, 'amine-2': 2, 'amine-3': 3,
+    'amine-1': 1, 'amine-2': 2, 'amine-3': 3, 'amine-1-2': 4,
     monocarboxy: 1, dicarboxy: 2, 'hydroxy-acid': 3, 'hydroxy-polycarboxy': 4,
     'keto-acid': 5, 'acid-chloride': 6,
     monohalogen: 1, multihalogen: 2,
-    monoester: 1, triester: 2
+    monoester: 1, diester: 2, triester: 3
   };
   function chainRoleOrder(role) {
     return ROLE_ORDER[role] || 10;
@@ -798,7 +865,13 @@
 
   function chainDescriptorPreview(shape) {
     var d = CHAIN_DESCRIPTOR_BY_ID[shape];
-    return d ? X.previewTiles(d) : [];
+    return d ? X.shapePreviewTiles(d) : [];
+  }
+
+  // ①の選択カード用。上段の図（文字式/2D構造）と下段の名前を返す。
+  function chainShapeFigure(shape) {
+    var d = CHAIN_DESCRIPTOR_BY_ID[shape];
+    return d ? X.shapeFigure(d) : null;
   }
 
   function chainDescriptorLabel(shape) {
@@ -981,6 +1054,8 @@
     chainDescriptorRoles: chainDescriptorRoles,
     chainDescriptorPreview: chainDescriptorPreview,
     chainDescriptorLabel: chainDescriptorLabel,
+    chainShapeFigure: chainShapeFigure,
+    ringPresetCard: ringPresetCard,
     chainDescriptorForPreview: chainDescriptorForPreview,
     INITIAL_CHAIN_PARTIAL: 2,
     INITIAL_CHAIN_SHAPE: 'd-ethane-c2',

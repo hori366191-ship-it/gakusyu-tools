@@ -60,7 +60,7 @@
 
   <section class="oc-ledger__section">
     <h2>外部公開資料との照合</h2>
-    <p>この表は、教科書・入試の標準範囲を確認する上の「カバレッジ・チェックリスト」とは別の根拠です。外部の公開資料に掲載された名称から出発し、収録ID・既存の別名・材料索引・無機化合物の対象外のいずれかに対応するかを確認します。公開資料に掲載されていることは、標準的に暗記する範囲であることを意味しません。各行の「標準／発展／探究」は資料側の位置づけです。英語名は「対応ID・別名」欄のID（例: adenine、cellobiose）でも確認できます。件数は固定値ではなく、下の表と上の統計の自動集計で確認できます。</p>
+    <p>この表は、教科書・入試の標準範囲を確認する上の「カバレッジ・チェックリスト」とは別の根拠です。外部の公開資料に掲載された名称から出発し、収録ID・既存の別名・材料索引・無機化合物の対象外のいずれかに対応するかを確認します。教材出典ページのURLと本文は配信せず、資料名・source ID・独自に整理した短い根拠のみを示します。公開資料に掲載されていることは、標準的に暗記する範囲であることを意味しません。各行の「標準／発展／探究」は資料側の位置づけです。英語名は「対応ID・別名」欄のID（例: adenine、cellobiose）でも確認できます。件数は固定値ではなく、下の表と上の統計の自動集計で確認できます。</p>
     <div id="ledger-external-stats" class="oc-stats"></div>
     <p class="oc-ledger__note" id="ledger-external-note"></p>
     <div class="oc-table-wrap">
@@ -99,14 +99,14 @@
 
   <section class="oc-ledger__section">
     <h2>全章索引の監査（Try IT 7節・化学のグルメ全60記事）</h2>
-    <p>2026-11-09 に取得した431 URLのURL・title・節・種別・HTTP状態・本文文字数・SHA-256を保存し、65件の要判断事項を化合物・family・材料/混合物・無機対象外へ対応づけました。期待リストは外部抽出の名称を基準にし、現在の収録データから逆算した名称だけを根拠にしていません。画像の全OCR・動画の視聴/文字起こしは未完了であり、教材の完全網羅を主張しません。</p>
+    <p>2026-11-09 に取得した431件のentry ID・title・節・種別・HTTP状態・本文文字数・SHA-256を保存し、65件の要判断事項を化合物・family・材料/混合物・無機対象外へ対応づけました。教材出典ページのURLと本文抜粋は配信せず、source ID・件数・独自の化学的事実のみを示します。期待リストは外部抽出の名称を基準にし、現在の収録データから逆算した名称だけを根拠にしていません。画像1399枚は別sectionのOCR二pass統合まで実施しましたが、化学的な完全読取と全動画の視聴/文字起こしは未完了であり、教材の完全網羅を主張しません。</p>
     <div id="ledger-index-stats" class="oc-stats"></div>
     <p class="oc-ledger__note" id="ledger-index-note"></p>
     <div id="ledger-index-chapters"></div>
     <div class="oc-table-wrap" style="margin-top:12px">
       <table class="oc-table">
         <caption class="oc-sr-only">65件の索引監査</caption>
-        <thead><tr><th scope="col">用語</th><th scope="col">種別</th><th scope="col">対応</th><th scope="col">対応先</th><th scope="col">短い根拠</th><th scope="col">補足</th></tr></thead>
+        <thead><tr><th scope="col">用語</th><th scope="col">種別</th><th scope="col">対応</th><th scope="col">対応先</th><th scope="col">出典（source ID）</th><th scope="col">化学的事実・判定理由</th></tr></thead>
         <tbody id="ledger-audit-rows"></tbody>
       </table>
     </div>
@@ -115,7 +115,7 @@
 
   <section class="oc-ledger__section" id="ledger-independent">
     <h2>独立625語監査とname/state mapping</h2>
-    <p>外部抽出625語を全件分類し、旧未判定209語も解消した独立監査です。真の未収録5物質/イオン/塩状態を追加し、42件のname/state/family mapping要件を、categoryの存在ではなく説明・代表構造・関連IDへ到達するfamilyとして実装しました。原文全文・長い引用は保持せず、短い理由・出典URL・provenanceだけを保存します。</p>
+    <p>外部抽出625語を全件分類し、旧未判定209語も解消した独立監査です。真の未収録5物質/イオン/塩状態を追加し、42件のname/state/family mapping要件を、categoryの存在ではなく説明・代表構造・関連IDへ到達するfamilyとして実装しました。教材出典ページのURL・本文抜粋・画像直リンクは配信せず、source ID・独自の理由・provenanceのみを保存します。</p>
     <div id="ledger-independent-stats" class="oc-stats"></div>
     <p class="oc-ledger__note" id="ledger-independent-note"></p>
     <h3>name/state/family mapping（42件）</h3>
@@ -147,6 +147,40 @@
       </table>
     </div>
     <div id="ledger-independent-limits" class="oc-notes" style="margin-top:10px"></div>
+  </section>
+
+  <section class="oc-ledger__section" id="ledger-ocr-audit">
+    <h2>OCR二pass統合監査（1399件 / 1398画像）</h2>
+    <p>2026-11-09 のOCR二pass統合結果を、raw OCR text全文・原画像URLを転載せずmetadataだけで記録しています。1399件・1398 unique imageを統合し、ok 1347・empty 51・error 0でした。51枚のemptyは原画像を目視し、構造36・模式図8・写真6・注記1に分類しています。全画像の化学的な完全読取を主張しません。</p>
+    <div id="ledger-ocr-stats" class="oc-stats"></div>
+    <p class="oc-ledger__note" id="ledger-ocr-note"></p>
+    <h3>確定不足として反映した項目</h3>
+    <div class="oc-table-wrap">
+      <table class="oc-table">
+        <caption class="oc-sr-only">OCR監査で確定した追加・別名・family検索修正</caption>
+        <thead><tr><th scope="col">種別</th><th scope="col">名称</th><th scope="col">対応先</th><th scope="col">出典（source ID）</th><th scope="col">状態</th></tr></thead>
+        <tbody id="ledger-ocr-confirmed"></tbody>
+      </table>
+    </div>
+    <h3>家族lookupの訂正（新規追加なし）</h3>
+    <div class="oc-table-wrap">
+      <table class="oc-table">
+        <caption class="oc-sr-only">既存familyの検索・表記修正</caption>
+        <thead><tr><th scope="col">用語</th><th scope="col">対応先</th><th scope="col">訂正内容</th></tr></thead>
+        <tbody id="ledger-ocr-family-fixes"></tbody>
+      </table>
+    </div>
+    <div id="ledger-ocr-limits" class="oc-notes" style="margin-top:10px"></div>
+  </section>
+
+  <section class="oc-ledger__section" id="ledger-verification">
+    <h2>収録・検証の詳細</h2>
+    <ul class="oc-notes">
+      <li>グラフ構造は原子数・結合価・分子式を自動照合します。環＋置換・投影式・簡略式・トリグリセリド・重合体は分子式・一般式と登録データの整合を確認します。</li>
+      <li>模式図・可変組成は表示式のみで、原子レベルの検証対象外です。描画の見た目は自動検証の対象外です。</li>
+      <li>データ不備を検出した化合物は、範囲外の組み合わせとして扱わず、カードの表示を停止して理由を表示します。</li>
+      <li>このアプリは構造と分類を学ぶための教材であり、実際の合成手順・実験操作を示すものではありません。危険性・毒性は代表的な情報で、実験・使用の判断には最新のSDSや専門家の指示を確認してください。</li>
+    </ul>
   </section>
 
   <section class="oc-ledger__section">
@@ -209,6 +243,7 @@
 <script src="./index-manifest.js"></script>
 <script src="./index-audit.js"></script>
 <script src="./independent-audit.js"></script>
+<script src="./ocr-audit.js"></script>
 <script src="./ledger.js"></script>
 </body>
 </html>

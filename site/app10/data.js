@@ -5,7 +5,8 @@
  *   自動で構造を生成しないため、未収録の組合せは理由を表示する。
  * - 構造データと学習用データを分離する。
  * - 分子式は構造データから計算して照合する（draw.js の validate）。
- * - PubChem CID は分子式・構造の照合用。出典は SOURCES を参照。
+ * - PubChem CID は分子式・構造の照合用。出典は SOURCES の source ID で示す。
+ * - 教材出典ページのURL・本文抜粋・画像の直リンクは配信しない。
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -91,108 +92,99 @@
     },
     s1: {
       label: '実教出版 Web理科教材「セロビオース」',
-      note: 'セロビオースをβ-グルコース2分子の二糖として扱う。',
-      url: 'https://www.jikkyo.co.jp/web_ni_link/science2/jmol/cellobiose.html'
+      note: 'セロビオースをβ-グルコース2分子の二糖として扱う。'
     },
     s2: {
       label: '啓林館 授業実践記録（化学）「エステルの合成・分解とヨードホルム反応」',
-      note: 'エタノール・酢酸・酢酸エチル・1-ペンタノール・酢酸ナトリウム・ヨードホルムを扱う実験ページ。',
-      url: 'https://www.shinko-keirin.co.jp/keirinkan/tea/kou/jissen/kagaku/201306/index.html'
+      note: 'エタノール・酢酸・酢酸エチル・1-ペンタノール・酢酸ナトリウム・ヨードホルムを扱う実験ページ。'
     },
     s3: {
       label: '化学のグルメ アルカン一問一答',
-      note: 'メタン〜デカンと塩素化メタン4種、酢酸ナトリウムCH₃COONaを扱う。',
-      url: 'https://kimika.net/iy2arukan.html'
+      note: 'メタン〜デカンと塩素化メタン4種、酢酸ナトリウムCH₃COONaを扱う。'
     },
     s4: {
       label: 'FromHimuka 飽和炭化水素',
-      note: 'メタン〜デカン、エイコサン、塩素化メタン4種を扱う。',
-      url: 'https://fromhimuka.com/chemistry/429.html'
+      note: 'メタン〜デカン、エイコサン、塩素化メタン4種を扱う。'
     },
     s5: {
       label: 'Try IT 酸無水物',
-      note: '酢酸と無水酢酸の関係を扱う。',
-      url: 'https://www.try-it.jp/chapters-9788/sections-9894/lessons-9945/point-2/'
+      note: '酢酸と無水酢酸の関係を扱う。'
     },
     s6: {
       label: 'Try IT アゾカップリング',
-      note: '塩化ベンゼンジアゾニウムとナトリウムフェノキシドのカップリングを扱う。',
-      url: 'https://www.try-it.jp/chapters-9788/sections-9987/lessons-10077/'
+      note: '塩化ベンゼンジアゾニウムとナトリウムフェノキシドのカップリングを扱う。'
     },
     s7: {
       label: 'Try IT DNAの構造',
-      note: 'DNA・RNAと塩基A/G/C/T/U、リボース・デオキシリボースを扱う。',
-      url: 'https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/point-2/'
+      note: 'DNA・RNAと塩基A/G/C/T/U、リボース・デオキシリボースを扱う。'
     },
     s8: {
       label: 'Try IT セルロースの性質',
-      note: 'セルロース・セロビオース・グルコース・セルラーゼ・セロビアーゼを扱う。',
-      url: 'https://www.try-it.jp/chapters-10095/sections-10116/lessons-10156/point-2/'
+      note: 'セルロース・セロビオース・グルコース・セルラーゼ・セロビアーゼを扱う。'
     },
     s9: {
       label: 'Try IT ニンヒドリン反応',
-      note: 'ニンヒドリンによるアミノ酸の検出を扱う。',
-      url: 'https://www.try-it.jp/chapters-10095/sections-10116/lessons-10191/'
+      note: 'ニンヒドリンによるアミノ酸の検出を扱う。'
     },
     s10: {
       label: 'Try IT 銅アンモニアレーヨン',
-      note: 'セルロースからレーヨン・セロハン・キュプラ（銅アンモニアレーヨン）への加工とシュワイツァー試薬を扱う。',
-      url: 'https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/'
+      note: 'セルロースからレーヨン・セロハン・キュプラ（銅アンモニアレーヨン）への加工とシュワイツァー試薬を扱う。'
     },
     s11: {
       label: 'Try IT ビスコースレーヨン',
-      note: 'ビスコース法と二硫化炭素を扱う。',
-      url: 'https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/point-2/'
+      note: 'ビスコース法と二硫化炭素を扱う。'
     },
     s12: {
       label: 'Try IT 陽イオン交換樹脂',
-      note: 'スチレンとp-ジビニルベンゼンからなる陽イオン交換樹脂を扱う。',
-      url: 'https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/'
+      note: 'スチレンとp-ジビニルベンゼンからなる陽イオン交換樹脂を扱う。'
     },
     s13: {
       label: 'Try IT 陰イオン交換樹脂',
-      note: '陰イオン交換樹脂の構造と交換反応を扱う。',
-      url: 'https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/point-2/'
+      note: '陰イオン交換樹脂の構造と交換反応を扱う。'
     },
     s14: {
       label: 'examist タンパク質の分類',
-      note: '単純タンパク質・複合タンパク質・誘導タンパク質の分類を扱う。',
-      url: 'https://examist.jp/chemistry/natural-polymer/protein/'
+      note: '単純タンパク質・複合タンパク質・誘導タンパク質の分類を扱う。'
     },
     s15: {
       label: 'yorikuwa タンパク質',
-      note: 'アルブミン・グロブリン・ケラチン・コラーゲン・フィブロイン・グルテリン・アミラーゼ・カゼイン・ヘモグロビンを扱う。',
-      url: 'https://ch.yorikuwa.com/c6417/'
+      note: 'アルブミン・グロブリン・ケラチン・コラーゲン・フィブロイン・グルテリン・アミラーゼ・カゼイン・ヘモグロビンを扱う。'
     },
     s16: {
       label: '高校化学ラボ タンパク質',
-      note: 'タンパク質の分類と代表例を扱う。',
-      url: 'https://kagakulab.com/protein/'
+      note: 'タンパク質の分類と代表例を扱う。'
     },
     s17: {
       label: '大学化学 構造決定',
-      note: '糖類・酸無水物の構造決定を扱う。',
-      url: 'https://daigaku-kagaku.com/2024/06/06/what-you-need-to-know-to-make-structural-decisions/'
+      note: '糖類・酸無水物の構造決定を扱う。'
     },
     s18: {
       label: '日本化学会「高校化学における芳香族化合物の合成実験」',
-      note: '化学と教育 68巻6号 pp.258-261。',
-      url: 'https://www.jstage.jst.go.jp/article/kakyoshi/68/6/68_258/_pdf'
+      note: '化学と教育 68巻6号 pp.258-261。'
     },
     s19: {
       label: '日本化学会「高校化学における染料と染色」',
-      note: '化学と教育 68巻10号 pp.416-419。',
-      url: 'https://www.jstage.jst.go.jp/article/kakyoshi/68/10/68_416/_pdf'
+      note: '化学と教育 68巻10号 pp.416-419。'
     },
     s20: {
       label: '日本化学会「高分子らしさを体感する実験」',
-      note: '化学と教育 68巻9号 pp.376-379。',
-      url: 'https://students.csj.jp/wp-content/uploads/2021/09/ky68-376-newkoza.pdf'
+      note: '化学と教育 68巻9号 pp.376-379。'
     },
     s21: {
       label: '日本大学理工学部 学術講演会予稿集「解熱鎮痛剤として利用される芳香族化合物の性質を知る事後探求型実験」',
-      note: '令和5年度 日本大学理工学部 学術講演会予稿集 A-3。',
-      url: 'https://www.cst.nihon-u.ac.jp/research/gakujutu/67/pdf/A-3.pdf'
+      note: '令和5年度 日本大学理工学部 学術講演会予稿集 A-3。'
+    },
+    s22: {
+      label: 'Try IT「フェノール類の酸としての性質」',
+      note: 'フェノールの脱プロトン化とフェノキシドイオンの名称・構造を確認。画像内の名称と化学同定の補足は sourceEvidence で分離する。'
+    },
+    'idx-tryit': {
+      label: 'Try IT 有機化合物・高分子（全章索引）',
+      note: '2026-11-09 に取得した2章7節（索引・lesson・point・practice・question）の名称確認。本文・ページURLは配信せず、source IDと独自noteのみを sourceEvidence に記録する。'
+    },
+    'idx-kimika': {
+      label: '化学のグルメ 有機化学（全60記事）',
+      note: '2026-11-09 に取得した全60記事（メイン57＋サブ3）の名称確認。本文・ページURLは配信せず、source IDと独自noteのみを sourceEvidence に記録する。'
     }
   };
 
@@ -395,6 +387,22 @@
       subs: subs,
       composition: compositionFromRingSub(subs)
     }, e);
+  }
+
+  // 模式図（タンパク質・酵素・核酸など、単一の固定分子式をもたないもの）。
+  // composition を明示した場合だけ分子式の整合を検証する。
+  function schematic(id, name, formula, category, kind, extra) {
+    var e = extra || {};
+    var s = {
+      type: 'schematic',
+      kind: kind,
+      composition: e.composition || compositionFromCondensedText(formula)
+    };
+    if (e.structureExtra) {
+      Object.keys(e.structureExtra).forEach(function (k) { s[k] = e.structureExtra[k]; });
+      delete e.structureExtra;
+    }
+    return comp(id, name, formula, category, s, e);
   }
 
   function poly(id, name, formula, unit, unitFormula, category, extra) {
@@ -1015,6 +1023,63 @@
     hazards: '可燃性。',
     pubchem: 8857, dataStatus: 'full'
   });
+  comp('dimethyl-oxalate', 'シュウ酸ジメチル（ジメチルオキサラート）', 'C4H6O4', 'ester', {
+    type: 'custom',
+    atoms: [
+      { el: 'C', x: 60, y: 115, h: 3 },
+      { el: 'O', x: 130, y: 115, h: 0 },
+      { el: 'C', x: 200, y: 90, h: 0 },
+      { el: 'O', x: 200, y: 30, h: 0 },
+      { el: 'C', x: 270, y: 90, h: 0 },
+      { el: 'O', x: 340, y: 115, h: 0 },
+      { el: 'C', x: 410, y: 90, h: 3 },
+      { el: 'O', x: 270, y: 30, h: 0 }
+    ],
+    bonds: [
+      { a: 0, b: 1, order: 1 }, { a: 1, b: 2, order: 1 }, { a: 2, b: 3, order: 2 },
+      { a: 2, b: 4, order: 1 }, { a: 4, b: 5, order: 1 }, { a: 5, b: 6, order: 1 },
+      { a: 4, b: 7, order: 2 }
+    ],
+    mode: 'condensed', width: 500, height: 230
+  }, {
+    properties: '白色の結晶。',
+    uses: '有機合成の中間体、研究用試薬。',
+    nature: 'シュウ酸とメタノールのジエステル。',
+    hazards: '刺激性。',
+    notes: 'シュウ酸の両端をメチルエステルにしたジエステル。2つのエステル基をもつため、モノメチル体（シュウ酸水素メチル）とは別物質。',
+    precursors: 'シュウ酸とメタノールのエステル化で得られる。',
+    reactions: '加水分解でシュウ酸とメタノール。',
+    sources: ['pubchem'], dataStatus: 'full', pubchem: 11120, formalCharge: 0, charge: 0,
+    sourceEvidence: [{
+      source: 'pubchem', section: 'CID 11120（PubChem 2D構造・分子式）',
+      note: '独立にPubChem APIで取得し、C4H6O4・電荷0・2つのエステル結合を確認した。OCRや教材画像には依存しない。'
+    }]
+  });
+  comp('diphenyl-oxalate', 'シュウ酸ジフェニル（ジフェニルオキサラート）', 'C14H10O4', 'ester', customGraph([
+    ['C', 190, 130, 0], ['C', 159.6, 181.9, 1], ['C', 100.4, 181.9, 1],
+    ['C', 70, 130, 1], ['C', 100.4, 78.1, 1], ['C', 159.6, 78.1, 1],
+    ['O', 250, 130, 0], ['C', 310, 130, 0], ['O', 310, 70, 0],
+    ['C', 370, 130, 0], ['O', 370, 70, 0], ['O', 430, 130, 0],
+    ['C', 490, 130, 0], ['C', 520.4, 181.9, 1], ['C', 579.6, 181.9, 1],
+    ['C', 610, 130, 1], ['C', 579.6, 78.1, 1], ['C', 520.4, 78.1, 1]
+  ], [
+    [0, 1, 2], [1, 2, 1], [2, 3, 2], [3, 4, 1], [4, 5, 2], [5, 0, 1],
+    [0, 6, 1], [6, 7, 1], [7, 8, 2], [7, 9, 1], [9, 10, 2], [9, 11, 1],
+    [11, 12, 1], [12, 13, 2], [13, 14, 1], [14, 15, 2], [15, 16, 1], [16, 17, 2], [17, 12, 1]
+  ], 660, 260), {
+    properties: '白色の結晶。',
+    uses: '有機合成の中間体、研究用試薬。',
+    nature: 'シュウ酸とフェノールのジエステル。',
+    hazards: '刺激性。',
+    notes: 'シュウ酸のフェニルジエステル。2つのベンゼン環がシュウ酸エステル結合を介して結合する。TCPOやCPPOとは別物質。発光用途は本データでは確認していないため記載しない。',
+    precursors: 'シュウ酸とフェノールからエステル化で得られる。',
+    reactions: '加水分解でシュウ酸とフェノール。',
+    sources: ['pubchem'], dataStatus: 'full', pubchem: 18475, formalCharge: 0, charge: 0,
+    sourceEvidence: [{
+      source: 'pubchem', section: 'CID 18475（PubChem 2D構造・分子式）',
+      note: '独立にPubChem APIで取得し、C14H10O4・電荷0・2つのフェニルエステルを確認した。TCPO/CPPOとは別物質として扱う。'
+    }]
+  });
 
   /* ---- アルデヒド・ケトン（個別） ---- */
   comp('formaldehyde', 'ホルムアルデヒド（メタナール）', 'CH2O', 'aldehyde', {
@@ -1300,7 +1365,7 @@
     nature: 'サトウキビ・テンサイから得られる。',
     hazards: '',
     pubchem: 5988, dataStatus: 'full',
-    notes: 'グルコースとフルクトースがα-1,2結合した二糖。図は糖環を六員環で簡略化した模式図で、フルクトースは実際には五員環（フラノース）だが図では六員環で表す。立体配置の詳細は省略。'
+    notes: 'グルコースとフルクトースがα-1,2結合した二糖。グルコースは六員環（ピラノース）、フルクトースは五員環（フラノース）として模式図に描く。図は糖環の水素・立体配置の詳細を省略した模式図であり、フルクトースを六員環で表すものではない。'
   });
   comp('maltose', 'マルトース（麦芽糖）', 'C12H22O11', 'sugar', {
     type: 'schematic',
@@ -1713,9 +1778,32 @@
     properties: '無色の気体。魚臭がある。塩基性。', uses: '化学原料、魚臭の原因物質。', nature: '魚類の腐敗で生成。',
     hazards: '可燃性・刺激性。', subcategory: '脂肪族アミン', dataStatus: 'class'
   });
+  cond('ethylmethylamine', 'エチルメチルアミン（N-メチルエタンアミン）', 'C3H9N', 'aromatic-amine', ['CH₃CH₂—NH—CH₃'], {
+    properties: '無色の気体〜液体。アンモニア様の臭い。塩基性。', uses: '有機合成の中間体。', nature: 'エチル基とメチル基が同じNに結合した第二級アミン。',
+    hazards: '可燃性・刺激性。', notes: '総炭素数3の第二級アミン。Nに結合する炭素はエチル基の1個とメチル基の1個で、合計2個。プロパン-1-アミン・プロパン-2-アミン（第一級）およびトリメチルアミン（第三級）とは級が異なる。', subcategory: '脂肪族アミン', dataStatus: 'class'
+  });
   cond('diethylamine', 'ジエチルアミン', 'C4H11N', 'aromatic-amine', ['(C₂H₅)₂NH'], {
     properties: '無色の液体。塩基性。', uses: '医薬・農薬・ゴム薬品原料。', nature: '工業的に合成。',
     hazards: '可燃性・腐食性。', subcategory: '脂肪族アミン', dataStatus: 'class'
+  });
+  comp('diethylenetriamine', 'ジエチレントリアミン（DETA）', 'C4H13N3', 'aromatic-amine', customGraph([
+    ['N', 40, 100, 2], ['C', 110, 100, 2], ['C', 180, 100, 2], ['N', 250, 100, 1],
+    ['C', 320, 100, 2], ['C', 390, 100, 2], ['N', 460, 100, 2]
+  ], [
+    [0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 1], [4, 5, 1], [5, 6, 1]
+  ], 520, 220), {
+    properties: '無色の液体。塩基性。水に溶けやすい。',
+    uses: '有機合成の中間体、研究用試薬。',
+    nature: '2つのエチレン鎖を3つの窒素で連結した鎖状ポリアミン。',
+    hazards: '腐食性・刺激性。',
+    notes: '第一級アミン2個と第二級アミン1個を併せもつ。末端Nは炭素1個が結合する第一級、中央Nは炭素2個が結合する第二級。エポキシ硬化などの個別用途は本データでは確認していないため断定しない。',
+    precursors: '工業的に合成される。詳細な製造法は本データでは確認していない。',
+    reactions: '酸と中和して塩をつくる。アミンとしての付加・縮合。',
+    sources: ['pubchem'], dataStatus: 'full', pubchem: 8111, formalCharge: 0, charge: 0,
+    sourceEvidence: [{
+      source: 'pubchem', section: 'CID 8111（PubChem 2D構造・分子式）',
+      note: '独立にPubChem APIで取得し、C4H13N3・電荷0・第一級N2個＋第二級N1個の結合を確認した。個別用途は確認していないため記載しない。'
+    }]
   });
   cond('triethylamine', 'トリエチルアミン', 'C6H15N', 'aromatic-amine', ['N(C₂H₅)₃'], {
     properties: '無色の液体。塩基性。', uses: '有機合成の塩基、触媒。', nature: '工業的に合成。',
@@ -1765,7 +1853,7 @@
     properties: '無色の液体。', uses: '溶媒、化学原料。', nature: '工業的に合成。',
     hazards: '可燃性・有毒。', subcategory: 'ニトリル', dataStatus: 'class'
   });
-  cond('benzonitrile', 'ベンゾニトリル（シアノベンゼン）', 'C7H5N', 'aromatic-other', ['C₆H₅—C≡N'], {
+  sub('benzonitrile', 'ベンゾニトリル（シアノベンゼン）', 'C7H5N', 'aromatic-other', 'benzene', 0, 'cn', {
     properties: '無色の液体。アーモンド様のにおい。', uses: '医薬・染料原料、溶媒。', nature: '工業的に合成。',
     hazards: '有毒。', subcategory: 'ニトリル', dataStatus: 'class'
   });
@@ -2131,7 +2219,7 @@
     properties: '白色の固体。水に溶ける。', uses: '抗酸化剤・医薬品・化粧品原料。',
     nature: '生体内の抗酸化物質。', hazards: '', notes: 'グルタミン酸・システイン・グリシンからなるトリペプチド。', dataStatus: 'class'
   });
-  cond('aspartame', 'アスパルテーム', 'C14H18N2O5', 'amino', ['HOOC—CH(NH₂)—CH₂—CO—NH—CH(CH₂C₆H₅)—COOCH₃'], {
+  cond('aspartame', 'アスパルテーム', 'C14H18N2O5', 'amino', ['HOOC—CH₂—CH(NH₂)—C(=O)—NH—CH(CH₂C₆H₅)—C(=O)—OCH₃'], {
     properties: '白色の結晶。強い甘味。', uses: '人工甘味料。',
     nature: '工業的に合成。', hazards: 'フェニルケトン尿症の人は摂取に注意。', notes: 'アスパラギン酸とフェニルアラニンのジペプチドメチルエステル。', dataStatus: 'class'
   });
@@ -2156,6 +2244,38 @@
   cond('sorbitol', 'ソルビトール（グルシトール）', 'C6H14O6', 'sugar', ['HOCH₂—(CHOH)₄—CH₂OH'], {
     properties: '白色の結晶。水に溶けやすい。甘味がある。', uses: '食品甘味料・保湿剤・医薬品。',
     nature: '果実に含まれる。', hazards: '大量摂取で下痢。', notes: 'グルコースの還元で得られる糖アルコール。', dataStatus: 'class'
+  });
+  comp('salicin', 'サリシン（サリチルアルコールβ-D-グルコピラノシド）', 'C13H18O7', 'sugar', {
+    type: 'schematic', kind: 'salicin',
+    composition: { C: 13, H: 18, O: 7 },
+    identity: {
+      cid: 439503,
+      nameEn: 'salicin',
+      synonyms: ['salicoside'],
+      aglycone: 'salicyl alcohol（saligenin, 2-(hydroxymethyl)phenol）',
+      linkage: 'phenolic O–β-D-glucopyranoside'
+    },
+    stereo: {
+      sugar: 'D-glucopyranose',
+      anomer: 'beta',
+      glycosidicBond: 'β',
+      stereocenters: 5,
+      drawn: false,
+      note: 'グルコース環の5個の立体中心は図では描き分けず、β-D-グルコピラノシドのidentityをmetadataで保持する。'
+    }
+  }, {
+    properties: '白色の結晶性固体。水にやや溶けにくい。',
+    uses: 'ヤナギ樹皮由来成分の研究、医薬品関連の研究用試薬。',
+    nature: 'ヤナギの樹皮などに含まれる配糖体。',
+    hazards: '刺激性。',
+    notes: 'サリチルアルコールのフェノール性OHにβ-D-グルコピラノースが結合した配糖体。グルコースC6のCH₂OHとアグリコンのCH₂OHは遊離している。図は糖環とグリコシド結合の模式図で、5個の立体中心を描き分けた構造式ではない。サリチル酸そのものとは別。',
+    precursors: '植物体中でサリチルアルコールの配糖化により生じる。',
+    reactions: '加水分解でD-グルコースとサリチルアルコール。',
+    sources: ['pubchem'], dataStatus: 'class', pubchem: 439503, formalCharge: 0, charge: 0,
+    sourceEvidence: [{
+      source: 'pubchem', section: 'CID 439503（PubChem 2D構造・分子式）',
+      note: '独立にPubChem APIで取得し、C13H18O7・電荷0・β-D-グルコピラノシド結合・遊離CH2OHを確認した。図の立体描画は省略し、metadataと注記で区別する。'
+    }]
   });
   comp('amylopectin', 'アミロペクチン', '(C6H10O5)n', 'sugar', {
     type: 'schematic', kind: 'amylopectin', unitLabel: 'α-グルコース単位',
@@ -2473,6 +2593,24 @@
   cond('decane', 'デカン', 'C10H22', 'alkane', ['CH₃(CH₂)₈CH₃'], { sources: ['s3', 's4'], properties: '無色の液体。水にほとんど溶けない。', uses: '溶媒、燃料、標準物質。', nature: '石油に含まれる。', notes: '', precursors: '石油の分留で得られる。', reactions: '燃焼、ラジカル置換。', dataStatus: 'full' });
   cond('eicosane', 'エイコサン', 'C20H42', 'alkane', ['CH₃(CH₂)₁₈CH₃'], { sources: ['s4'], properties: '白色の固体。水にほとんど溶けない。', uses: '研究用標準物質、相変化材料。', nature: '石油の高沸点留分に含まれる。', notes: '', precursors: '石油の分留、または長鎖アルコールの還元で得られる。', reactions: '燃焼、ラジカル置換。', dataStatus: 'class' });
   cond('sodium-acetate', '酢酸ナトリウム', 'C2H3NaO2', 'carboxylic', ['CH₃COO⁻Na⁺'], { sources: ['s2', 's3'], properties: '白色の固体。水に溶けやすい。', uses: '緩衝液、食品添加物、加熱によるメタン発生の実験。', nature: '酢酸と水酸化ナトリウムの中和で生成する。', notes: '', precursors: '酢酸と水酸化ナトリウム（または炭酸ナトリウム）の中和で製造。', reactions: '中和、ソーダ石灰と加熱すると脱炭酸してメタンを生じる。', dataStatus: 'full', pubchem: 31372 });
+  comp('phenoxide-ion', 'フェノキシドイオン', 'C6H5O', 'phenol', customGraph([["O",230,36,0,"-"],["C",230,103,0],["C",288,136.5,1],["C",172,136.5,1],["C",288,203.5,1],["C",172,203.5,1],["C",230,237,1]], [[0,1,1],[1,2,2],[1,3,1],[2,4,1],[3,5,2],[4,6,2],[5,6,1]], 460, 340), {
+    formulaDisplay: 'C₆H₅O⁻',
+    composition: { C: 6, H: 5, O: 1 },
+    ion: { charge: '-1', cation: null, anion: 'C₆H₅O⁻（フェノキシドイオン）' },
+    sources: ['s22'],
+    properties: 'フェノールからH⁺が外れた有機陰イオン。特定の対イオンを前提にしない。',
+    uses: 'フェノールの脱プロトン化で生じ、求核剤・有機合成の中間体として扱われる。',
+    nature: 'フェノール C₆H₅OH の酸としての解離で生じる C₆H₅O⁻。ナトリウムフェノキシドなどの塩とは区別する。',
+    hazards: '',
+    notes: '画像では「フェノキシドイオン」とベンゼン–O⁻が併記されている。単一の純物質として沸点・融点などを断定しない。',
+    precursors: 'フェノールの脱プロトン化（塩基との反応）で生じる。',
+    reactions: '酸（H⁺）と反応するとフェノール C₆H₅OH に戻る。',
+    dataStatus: 'full',
+    pubchem: null,
+    sourceEvidence: [
+      { source: 's22', section: 'フェノール類の酸としての性質', note: '画像内の名称とベンゼン–O⁻を確認。化学同定の補足はnoteに分離し、未確認のCIDは付けない。' }
+    ]
+  });
   cond('sodium-phenoxide', 'ナトリウムフェノキシド（フェノキシドナトリウム）', 'C6H5NaO', 'phenol', ['C₆H₅O⁻Na⁺'], { sources: ['s6', 's18'], properties: '白色〜淡黄色の固体。水に溶けやすい。', uses: 'サリチル酸合成（コルベ・シュミット反応）の中間体、有機合成試薬。', nature: 'フェノールと水酸化ナトリウムの中和で生成する。', notes: '', precursors: 'フェノールと水酸化ナトリウム水溶液から生成。', reactions: '二酸化炭素と加熱するとサリチル酸ナトリウム、酸でフェノールに戻る。', dataStatus: 'full' });
   cond('sodium-benzenesulfonate', 'ベンゼンスルホン酸ナトリウム', 'C6H5NaO3S', 'aromatic-other', ['C₆H₅SO₃⁻Na⁺'], { sources: ['s18'], properties: '白色の固体。水に溶けやすい。', uses: 'フェノール合成（アルカリ融解）の中間体、界面活性剤の原料。', nature: 'ベンゼンのスルホン化後、中和して得られる。', notes: '', precursors: 'ベンゼンを濃硫酸でスルホン化し、水酸化ナトリウムで中和。', reactions: '水酸化ナトリウムと高温で融解するとフェノールを生じる。', dataStatus: 'full', pubchem: 517327 });
   comp('acetic-anhydride', '無水酢酸', 'C4H6O3', 'carboxylic', customGraph([["O",230,86,0],["O",133,254,0],["O",327,254,0],["C",133,142,0],["C",327,142,0],["C",36,86,3],["C",424,86,3]], [[0,3,1],[0,4,1],[1,3,2],[2,4,2],[3,5,1],[4,6,1]], 460, 340), { sources: ['s5', 's18'], properties: '無色の液体。刺激臭がある。', uses: 'アセチル化剤、アスピリン・酢酸セルロースの合成。', nature: '酢酸2分子の脱水縮合で生成する酸無水物。', hazards: '腐食性・催涙性。', notes: '', precursors: '酢酸の脱水、またはケテンと酢酸の反応で製造。', reactions: '加水分解で酢酸、アルコール・アミンをアセチル化。', dataStatus: 'full', pubchem: 7918, subcategory: '酸無水物' });
@@ -2542,12 +2680,778 @@
   comp('sodium-alginate', 'アルギン酸ナトリウム', '(C6H7NaO6)n', 'natural-polymer', { type: 'polymer', unit: '—C₆H₇NaO₆—', unitFormula: 'C6H7NaO6', formula: '(C6H7NaO6)n' }, { sources: ['s20'], properties: '白色〜淡黄色の粉末。水に溶けやすい。', uses: '増粘剤、食品添加物、医用材料。', nature: 'アルギン酸のナトリウム塩。', notes: '', precursors: 'アルギン酸を水酸化ナトリウムで中和して製造。', reactions: 'カルシウムイオンでゲル化、酸でアルギン酸。', dataStatus: 'class', subcategory: '多糖', formulaVariable: true, formulaDisplay: '組成依存（C6H7NaO6 を繰り返し単位とする重合体）' });
 
   /* ------------------------------------------------------------------
+   * 全章索引（Try IT 7節 + 化学のグルメ全60記事）の確認済み欠落の補完
+   *
+   * 外部本文で名称を確認した物質を、単なる注記ではなく構造・式・性質・用途を
+   * もつレコードとして収録する。教材原文の短い根拠は sourceEvidence に分離し、
+   * 収録判断の補足は notes / supplement に書く（原文の転載ではない）。
+   * 単一の固定分子式をもたない酵素・材料・混合物は schematic / family /
+   * MATERIALS として区別し、純物質カードに偽装しない。
+   * ------------------------------------------------------------------ */
+
+  /* ---- ハロゲン付加・多置換生成物（一置換のCOMBOSとは混ぜない） ---- */
+  comp('1,3-dibromopropane', '1,3-ジブロモプロパン（トリメチレンジブロミド）', 'C3H6Br2', 'alkane', customGraph([
+    ['Br', 40, 110, 0], ['C', 110, 110, 2], ['C', 180, 110, 2], ['C', 250, 110, 2], ['Br', 320, 110, 0]
+  ], [
+    [0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 1]
+  ], 380, 220), {
+    properties: '無色の液体。水に溶けにくい。',
+    uses: '有機合成の中間体。',
+    nature: 'プロパンの両末端の水素を臭素で置換した構造。',
+    hazards: '刺激性・毒性。',
+    notes: 'プロパン1,3位の二置換体。1,2-ジブロモプロパンとは位置異性体。分子内環化の条件は本データでは確認していないため記載しない。',
+    precursors: 'プロパンの臭素化などで得られる。',
+    reactions: '求核置換、脱離。',
+    sources: ['pubchem'], dataStatus: 'full', pubchem: 8001, formalCharge: 0, charge: 0, subcategory: 'ハロゲン化物',
+    sourceEvidence: [{
+      source: 'pubchem', section: 'CID 8001（PubChem 2D構造・分子式）',
+      note: '独立にPubChem APIで取得し、C3H6Br2・電荷0・BrCH2CH2CH2Brの直鎖を確認した。1,2-体とは別物質。環化条件は確認していない。'
+    }]
+  });
+  cond('1,2-dibromoethane', '1,2-ジブロモエタン（二臭化エチレン）', 'C2H4Br2', 'alkane', ['BrCH₂CH₂Br'], {
+    properties: '無色の液体。甘い臭い。水に溶けにくい。',
+    uses: 'かつて農薬・ガソリン添加剤に使われたが、発がん性・毒性のため現在の用途は限定される。',
+    nature: 'エテンと臭素の付加で生成する。',
+    hazards: '発がん性・毒性。換気と保護具に注意。',
+    notes: '臭素の付加生成物。エタンの水素1個をBrで置換したブロモエタン（C2H5Br）とは別構造。実験操作の手順は扱わない。',
+    precursors: 'エテンに臭素を付加して生成。',
+    reactions: '脱離でエテン、求核置換。',
+    sources: ['idx-tryit'], dataStatus: 'full',
+    sourceEvidence: [{ source: 'idx-tryit', section: 'アルケンの付加反応', note: '教材は付加生成物として例示。本データは臭素付加の生成物として区別した。' }]
+  });
+  cond('1,2-dibromoethene', '1,2-ジブロモエテン（1,2-ジブロモエチレン）', 'C2H2Br2', 'unsat', ['BrCH=CHBr'], {
+    properties: '淡黄色の液体〜固体。異性体で物性が異なる。',
+    uses: '有機合成の中間体。',
+    nature: 'アセチレンへの臭素付加（1段階）で生成する。',
+    hazards: '刺激性・毒性。',
+    notes: 'E/Z（シス/トランス）は教材本文で指定されていないため、本項はどちらか一方に断定しない。1,1-ジブロモエテンとは位置異性体。',
+    precursors: 'アセチレンに臭素を1段階付加して生成。',
+    reactions: 'さらに臭素付加で1,1,2,2-テトラブロモエタン。',
+    sources: ['idx-tryit'], dataStatus: 'class', structureExtra: { doubleBonds: [{ at: 1, geometry: 'unspecified' }] },
+    sourceEvidence: [{ source: 'idx-tryit', section: 'アルキンの付加反応', note: '教材はE/Zを指定しない。付加の中間体として収録した。' }]
+  });
+  cond('1,1,2,2-tetrabromoethane', '1,1,2,2-テトラブロモエタン', 'C2H2Br4', 'alkane', ['CHBr₂CHBr₂'], {
+    properties: '無色〜淡黄色の液体。水に溶けにくい。',
+    uses: '有機合成の中間体、かつての溶媒。',
+    nature: 'アセチレンへの2段階臭素付加で生成する。',
+    hazards: '刺激性・毒性。',
+    notes: 'アセチレンへの2段階付加の最終生成物。1,2-ジブロモエテン（1段階）とは臭素の数が異なる。',
+    precursors: 'アセチレンに臭素を2段階付加して生成。',
+    reactions: '脱離反応。',
+    sources: ['idx-tryit'], dataStatus: 'full',
+    sourceEvidence: [{ source: 'idx-tryit', section: 'アルキンの付加反応', note: '2段階付加の最終生成物として収録した。' }]
+  });
+  cond('bromoethene', 'ブロモエテン（臭化ビニル）', 'C2H3Br', 'unsat', ['CH₂=CHBr'], {
+    properties: '無色の気体〜液体。',
+    uses: '高分子の単量体・有機合成原料。',
+    nature: 'エテンの水素1個をBrで置換した構造。',
+    hazards: '可燃性・刺激性。',
+    notes: 'エテンの一置換体（C2H3Br）。1,2-ジブロモエテン（C2H2Br2）は臭素付加で生じる二置換/付加生成物であり、この組合せとは別。',
+    precursors: 'エテンの臭素化、またはジブロモエタンの脱離で製造。',
+    reactions: '付加重合、求核置換。',
+    sources: ['idx-tryit'], dataStatus: 'class',
+    sourceEvidence: [{ source: 'idx-tryit', section: 'アルケンの置換と付加', note: '一置換（C2H3Br）と付加（C2H2Br2）を混同しないためのレコード。' }]
+  });
+  schematic('hexachlorocyclohexane', 'ヘキサクロロシクロヘキサン（BHC）', 'C6H6Cl6', 'cyclic', 'cyclohexane-hexachloride', {
+    properties: '白色〜淡黄色の固体。異性体で物性が異なる。',
+    uses: 'かつて殺虫剤として使われたが、残留性・毒性のため現在は使用が制限される。',
+    nature: 'ベンゼンに塩素を光付加させると生成する。',
+    hazards: '神経毒性・環境残留性。実験操作の手順は扱わない。',
+    notes: 'C6H6Cl6の総称。ベンゼンへの塩素付加では1,2,3,4,5,6の六置換体が生じ、α・β・γ等は立体異性体である。本項は特定異性体を固定せず、代表例としてγ-異性体（リンデン）があることだけを注記する。ベンゼン環を保つクロロベンゼン（C6H5Cl）とは別反応・別構造。',
+    precursors: 'ベンゼンへの塩素付加で生成（光または紫外線）。',
+    reactions: '脱塩化水素、異性体分離。',
+    sources: ['idx-tryit', 'idx-kimika'], dataStatus: 'class',
+    sourceEvidence: [
+      { source: 'idx-tryit', section: 'ベンゼンの付加反応', note: '付加反応の生成物として収録。一置換のクロロベンゼンとは区別した。' },
+      { source: 'idx-kimika', section: 'ベンゼンの反応', note: '用途と現在の使用状況の補足。' }
+    ]
+  });
+
+  /* ---- クメン法・ナトリウム塩・芳香族多置換 ---- */
+  cond('cumene-hydroperoxide', 'クメンヒドロペルオキシド（クミルヒドロペルオキシド）', 'C9H12O2', 'aromatic-other', ['C₆H₅—C(CH₃)₂—OOH'], {
+    properties: '無色〜淡黄色の液体。酸化性が強い。',
+    uses: 'クメン法によるフェノール・アセトン製造の中間体。',
+    nature: 'クメンの酸化で生成する。',
+    hazards: '酸化性・爆発性。濃縮・加熱を避ける。',
+    notes: 'クメン法の中間体。酸分解するとフェノールとアセトンになる。実験操作の手順は扱わない。',
+    precursors: 'クメンを酸化して生成。',
+    reactions: '酸触媒分解でフェノールとアセトン。',
+    sources: ['idx-tryit', 'idx-kimika'], dataStatus: 'class',
+    sourceEvidence: [
+      { source: 'idx-tryit', section: 'クメン法', note: 'フェノール製造の中間体として収録。' },
+      { source: 'idx-kimika', section: 'フェノールの工業的製法', note: '反応経路の補足。' }
+    ]
+  });
+  cond('sodium-methoxide', 'ナトリウムメトキシド（メトキシドナトリウム）', 'CH3NaO', 'alcohol', ['CH₃O⁻Na⁺'], {
+    properties: '白色の固体。水と反応してメタノールと水酸化ナトリウムを生じる。',
+    uses: '有機合成の塩基・求核剤。',
+    nature: 'メタノールと金属ナトリウムの反応で生成する。',
+    hazards: '腐食性・可燃性。水と激しく反応する。',
+    notes: 'メタノールのO—HをNaで置換した塩。メタノールそのものではない。',
+    precursors: 'メタノールと金属ナトリウムの反応で生成。',
+    reactions: '加水分解、求核置換。',
+    sources: ['idx-tryit'], dataStatus: 'full', ion: { cation: 'Na⁺', anion: 'CH₃O⁻' },
+    sourceEvidence: [{ source: 'idx-tryit', section: 'アルコールの性質', note: 'アルコールの塩状態として収録。' }]
+  });
+  cond('sodium-ethoxide', 'ナトリウムエトキシド（エトキシドナトリウム）', 'C2H5NaO', 'alcohol', ['C₂H₅O⁻Na⁺'], {
+    properties: '白色〜淡黄色の固体。水と反応する。',
+    uses: '有機合成の塩基・求核剤。',
+    nature: 'エタノールと金属ナトリウムの反応で生成する。',
+    hazards: '腐食性・可燃性。水と激しく反応する。',
+    notes: 'エタノールのO—HをNaで置換した塩。エタノールそのものではない。',
+    precursors: 'エタノールと金属ナトリウムの反応で生成。',
+    reactions: '加水分解、求核置換。',
+    sources: ['idx-tryit', 'idx-kimika'], dataStatus: 'full', ion: { cation: 'Na⁺', anion: 'C₂H₅O⁻' },
+    sourceEvidence: [
+      { source: 'idx-tryit', section: 'アルコールの反応', note: 'アルコールの塩状態として収録。' },
+      { source: 'idx-kimika', section: 'アルコールの性質', note: '反応の補足。' }
+    ]
+  });
+  cond('sodium-benzoate', '安息香酸ナトリウム', 'C7H5NaO2', 'carboxylic', ['C₆H₅COO⁻Na⁺'], {
+    properties: '白色の結晶。水に溶けやすい。',
+    uses: '食品保存料、有機合成の中間体。',
+    nature: '安息香酸と水酸化ナトリウムの中和で生成する。',
+    hazards: '刺激性。',
+    notes: '安息香酸のナトリウム塩。安息香酸本体とは別レコード。',
+    precursors: '安息香酸と水酸化ナトリウムの中和で製造。',
+    reactions: '酸で安息香酸に戻る、脱炭酸。',
+    sources: ['idx-tryit', 'idx-kimika'], dataStatus: 'full', ion: { cation: 'Na⁺', anion: 'C₆H₅COO⁻' },
+    sourceEvidence: [
+      { source: 'idx-tryit', section: '芳香族化合物の分離', note: '分離操作で生じる塩として収録。' },
+      { source: 'idx-kimika', section: '安息香酸', note: '中和の補足。' }
+    ]
+  });
+  ringSub('sodium-salicylate', 'サリチル酸ナトリウム', 'C7H5NaO3', 'aromatic-other', [
+    { at: 0, label: 'OH' }, { at: 1, label: 'COO⁻Na⁺' }
+  ], {
+    properties: '白色の結晶。水に溶けやすい。',
+    uses: '医薬品・染料の中間体。',
+    nature: 'ナトリウムフェノキシドのカルボキシル化で生成する。',
+    hazards: '刺激性。',
+    notes: 'サリチル酸のナトリウム塩。ナトリウムフェノキシドのコルベ・シュミット反応で生じる。',
+    precursors: 'ナトリウムフェノキシドと二酸化炭素の加熱で生成。',
+    reactions: '酸でサリチル酸に戻る。',
+    sources: ['idx-tryit', 'idx-kimika'], dataStatus: 'full', ion: { cation: 'Na⁺', anion: 'o-HOC₆H₄COO⁻' },
+    sourceEvidence: [
+      { source: 'idx-tryit', section: 'サリチル酸の製法', note: 'コルベ・シュミット反応の中間体として収録。' },
+      { source: 'idx-kimika', section: 'サリチル酸', note: '塩状態の補足。' }
+    ]
+  });
+  ringSub('p-dichlorobenzene', 'p-ジクロロベンゼン（1,4-ジクロロベンゼン）', 'C6H4Cl2', 'aromatic', [
+    { at: 0, label: 'Cl' }, { at: 3, label: 'Cl' }
+  ], {
+    properties: '白色の結晶。特有の臭い。昇華性がある。',
+    uses: '防虫剤・消臭剤。',
+    nature: 'クロロベンゼンの更なる塩素化で生成する。',
+    hazards: '刺激性・環境毒性。',
+    notes: 'パラ位（1,4）の二置換。クロロベンゼン（一置換）とは別構造。',
+    precursors: 'ベンゼンまたはクロロベンゼンの塩素化で製造。',
+    reactions: '求電子置換。',
+    sources: ['idx-tryit'], dataStatus: 'class',
+    sourceEvidence: [{ source: 'idx-tryit', section: '芳香族の置換反応', note: '二置換体として収録。一置換のクロロベンゼンとは区別した。' }]
+  });
+  ringSub('o-nitrophenol', 'o-ニトロフェノール（2-ニトロフェノール）', 'C6H5NO3', 'phenol', [
+    { at: 0, label: 'OH' }, { at: 1, label: 'NO₂' }
+  ], {
+    properties: '淡黄色の結晶。水に溶けにくい。',
+    uses: '有機合成の中間体、pH指示薬の原料。',
+    nature: 'フェノールのニトロ化で生成する。',
+    hazards: '刺激性・毒性。',
+    notes: 'フェノールのオルト位ニトロ化体。分子内水素結合をもつ。ピクリン酸とは置換数が異なる。',
+    precursors: 'フェノールのニトロ化で生成。',
+    reactions: '中和、還元でアミノフェノール。',
+    sources: ['idx-kimika'], dataStatus: 'class',
+    sourceEvidence: [{ source: 'idx-kimika', section: 'フェノールの反応', note: '位置異性体としてo体を収録。' }]
+  });
+  ringSub('p-nitrophenol', 'p-ニトロフェノール（4-ニトロフェノール）', 'C6H5NO3', 'phenol', [
+    { at: 0, label: 'OH' }, { at: 3, label: 'NO₂' }
+  ], {
+    properties: '淡黄色の結晶。水に溶けにくい。',
+    uses: '有機合成の中間体、pH指示薬の原料。',
+    nature: 'フェノールのニトロ化で生成する。',
+    hazards: '刺激性・毒性。',
+    notes: 'フェノールのパラ位ニトロ化体。o-ニトロフェノールとは位置異性体。',
+    precursors: 'フェノールのニトロ化で生成。',
+    reactions: '中和、還元でアミノフェノール。',
+    sources: ['idx-kimika'], dataStatus: 'class',
+    sourceEvidence: [{ source: 'idx-kimika', section: 'フェノールの反応', note: '位置異性体としてp体を収録。' }]
+  });
+  ringSub('terephthaloyl-chloride', 'テレフタル酸ジクロリド', 'C8H4Cl2O2', 'carboxylic', [
+    { at: 0, label: 'COCl' }, { at: 3, label: 'COCl' }
+  ], {
+    properties: '白色の固体。加水分解しやすい。',
+    uses: 'アラミド（芳香族ポリアミド）の単量体。',
+    nature: 'テレフタル酸の二酸塩化物。',
+    hazards: '腐食性・催涙性。',
+    notes: 'p-フェニレンジアミンと縮重合してアラミドになる。アジピン酸ジクロリドとは炭素骨格が異なる。',
+    precursors: 'テレフタル酸と塩化チオニルなどの反応で製造。',
+    reactions: 'アミンと縮合してアミド結合。',
+    sources: ['idx-tryit'], dataStatus: 'full',
+    sourceEvidence: [{ source: 'idx-tryit', section: 'アラミド繊維', note: 'アラミドの単量体として収録。' }]
+  });
+
+  /* ---- 独立監査で画像原本から追加した5物質/イオン/塩状態 ----
+   * sourceEvidence は source ID・節・独自noteのみをもち、本文抜粋・教材URL・
+   * 画像直リンクは保持しない。 */
+  cond('ethanolamine', 'エタノールアミン（2-アミノエタン-1-オール）', 'C2H7NO', 'alcohol', ['HOCH₂CH₂NH₂'], {
+    properties: '無色の粘稠な液体。水・エタノールに溶けやすい。塩基性とアルコール性を併せもつ。',
+    uses: '界面活性剤・医薬品・化粧品の原料、二酸化炭素の吸収剤。',
+    nature: 'リン脂質（ホスファチジルエタノールアミン）の頭部として生体膜に存在する。',
+    hazards: '腐食性・刺激性。',
+    notes: 'アミノ基とヒドロキシ基を併せもつアミノアルコール。モノアミン R–NH₂ の飽和一般式とは異なるため、第一〜第三級アミンの一覧には混ぜない。',
+    precursors: 'エチレンオキシドとアンモニアの反応などで製造。',
+    reactions: 'アミンとしての塩形成、アルコールとしてのエステル化。',
+    sources: ['idx-kimika'], dataStatus: 'full', subcategory: 'アミノアルコール',
+    sourceEvidence: [{
+      source: 'idx-kimika', section: 'リン脂質の合成',
+      note: '画像内の独立反応物としての出現を確認。構造同定は HOCH2CH2NH2。アミノアルコールとして分類する。',
+      evidenceType: 'image-human-read'
+    }]
+  });
+  comp('inositol', 'イノシトール（シクリトール）', 'C6H12O6', 'sugar', {
+    type: 'custom',
+    atoms: [
+      { el: 'C', x: 210, y: 58, h: 1 }, { el: 'C', x: 268, y: 92, h: 1 },
+      { el: 'C', x: 268, y: 160, h: 1 }, { el: 'C', x: 210, y: 194, h: 1 },
+      { el: 'C', x: 152, y: 160, h: 1 }, { el: 'C', x: 152, y: 92, h: 1 },
+      { el: 'O', x: 210, y: 18, h: 1 }, { el: 'O', x: 308, y: 76, h: 1 },
+      { el: 'O', x: 308, y: 176, h: 1 }, { el: 'O', x: 210, y: 234, h: 1 },
+      { el: 'O', x: 112, y: 176, h: 1 }, { el: 'O', x: 112, y: 76, h: 1 }
+    ],
+    bonds: [
+      { a: 0, b: 1, order: 1 }, { a: 1, b: 2, order: 1 }, { a: 2, b: 3, order: 1 },
+      { a: 3, b: 4, order: 1 }, { a: 4, b: 5, order: 1 }, { a: 5, b: 0, order: 1 },
+      { a: 0, b: 6, order: 1 }, { a: 1, b: 7, order: 1 }, { a: 2, b: 8, order: 1 },
+      { a: 3, b: 9, order: 1 }, { a: 4, b: 10, order: 1 }, { a: 5, b: 11, order: 1 }
+    ],
+    mode: 'condensed', width: 420, height: 260
+  }, {
+    properties: '白色の結晶。水に溶けやすい。甘味がある。',
+    uses: '栄養補助食品、リン脂質・細胞膜研究。',
+    nature: '植物・動物の細胞に広く存在する環状多価アルコール。',
+    hazards: '通常の取扱いでは危険性は低い。',
+    notes: '六員環に6個のOHをもつ環状多価アルコール（シクリトール）。C6H12O6。出典画像はmyo等の立体異性体名を命名していないため、特定の立体異性体に断定しない。',
+    precursors: 'グルコースの環化・脱リン酸化などで生合成される。',
+    reactions: 'リン脂質（ホスファチジルイノシトール）の頭部になる。',
+    sources: ['idx-kimika'], dataStatus: 'class', subcategory: 'シクリトール',
+    sourceEvidence: [{
+      source: 'idx-kimika', section: 'リン脂質の合成',
+      note: '画像内の独立反応物としての出現を確認。C6H12O6の環状多価アルコールとして同定し、myo等の立体異性体名は出典が命名していないため断定しない。',
+      evidenceType: 'image-human-read'
+    }]
+  });
+  cond('choline', 'コリン（2-ヒドロキシエチル）トリメチルアンモニウム', 'C5H14NO', 'amino', ['HOCH₂CH₂N⁺(CH₃)₃'], {
+    properties: '吸湿性の強い固体〜粘稠液。水に溶けやすい。常に陽イオンとして存在する。',
+    uses: 'リン脂質（ホスファチジルコリン）の頭部、栄養素、界面活性剤原料。',
+    nature: '生体膜のリン脂質や神経伝達物質アセチルコリンの構成成分。',
+    hazards: '高濃度では刺激性。',
+    notes: '四級アンモニウムの永久陽イオン。中性アミンや第一〜第三級アミンとは別分類。塩化コリン（対イオンCl⁻）とも同一視しない。図では対イオン未指定。',
+    precursors: '生体内でセリンやメチオニンから合成される。',
+    reactions: 'リン脂質の頭部としてエステル結合、アセチル化。',
+    sources: ['idx-kimika'], dataStatus: 'class', subcategory: '四級アンモニウム',
+    formulaDisplay: 'C5H14NO⁺', ion: { cation: 'コリン陽イオン（N⁺(CH₃)₃）', anion: null },
+    sourceEvidence: [{
+      source: 'idx-kimika', section: 'リン脂質の合成',
+      note: '画像内の独立反応物としての出現を確認。四級アンモニウム陽イオンとして同定し、中性アミンや塩化コリンとは区別する。対イオンは図で未指定。',
+      evidenceType: 'image-human-read'
+    }]
+  });
+  ringSub('phenyl-acetate', '酢酸フェニル（フェニルエタノアート）', 'C8H8O2', 'ester', [
+    { at: 0, label: 'OCOCH₃' }
+  ], {
+    properties: '無色の液体。芳香様の臭い。水に溶けにくい。',
+    uses: '香料・有機合成の中間体。',
+    nature: 'フェノールと無水酢酸のエステル化で生成する。',
+    hazards: '可燃性・刺激性。',
+    notes: '芳香族エステル。酢酸ベンジル（ベンジルアルコールのエステル）や安息香酸メチル（安息香酸のメチルエステル）とは異構造。フェノール性OHのアセチル化体。',
+    precursors: 'フェノールと無水酢酸の反応で生成。',
+    reactions: '加水分解でフェノールと酢酸。',
+    sources: ['idx-kimika'], dataStatus: 'full', subcategory: '芳香族エステル',
+    sourceEvidence: [{
+      source: 'idx-kimika', section: 'フェノールの反応',
+      note: '画像内の反応物・生成物としての出現を確認。CH3COOC6H5の芳香族エステルとして同定し、酢酸ベンジル・安息香酸メチルと区別する。',
+      evidenceType: 'image-human-read'
+    }]
+  });
+  ringSub('disodium-salicylate', 'サリチル酸二ナトリウム', 'C7H4Na2O3', 'phenol', [
+    { at: 0, label: 'ONa' }, { at: 1, label: 'COO⁻Na⁺' }
+  ], {
+    properties: '白色の固体。水に溶けやすい。',
+    uses: '医薬品・染料の中間体、サリチル酸の二ナトリウム塩。',
+    nature: 'サリチル酸を2当量の水酸化ナトリウムで中和した塩。',
+    hazards: '刺激性。',
+    notes: 'フェノール性OHとカルボキシ基の両方がNa塩になった状態。一Na塩（sodium-salicylate、フェノール性OHを残す）とは別レコード。',
+    precursors: 'サリチル酸と2当量の水酸化ナトリウムの中和で生成。',
+    reactions: '酸でサリチル酸に戻る。',
+    sources: ['idx-kimika'], dataStatus: 'full', subcategory: '二ナトリウム塩',
+    ion: { cation: 'Na⁺ ×2', anion: 'o-C6H4(O⁻)(COO⁻)' },
+    sourceEvidence: [{
+      source: 'idx-kimika', section: 'サリチル酸の塩',
+      note: '画像内の反応物・生成物としての出現を確認。フェノール性OHとカルボキシ基の双方が脱プロトン化した二ナトリウム塩として同定する。',
+      evidenceType: 'image-human-read'
+    }]
+  });
+
+  /* ---- 環状・縮合芳香族 ---- */
+  comp('anthracene', 'アントラセン', 'C14H10', 'aromatic', {
+    type: 'custom',
+    atoms: [
+      { el: 'C', x: 180, y: 95, h: 0 }, { el: 'C', x: 130, y: 67, h: 1 },
+      { el: 'C', x: 80, y: 95, h: 1 }, { el: 'C', x: 80, y: 165, h: 1 },
+      { el: 'C', x: 130, y: 193, h: 1 }, { el: 'C', x: 180, y: 165, h: 0 },
+      { el: 'C', x: 230, y: 193, h: 1 }, { el: 'C', x: 280, y: 165, h: 0 },
+      { el: 'C', x: 280, y: 95, h: 0 }, { el: 'C', x: 230, y: 67, h: 1 },
+      { el: 'C', x: 330, y: 193, h: 1 }, { el: 'C', x: 380, y: 165, h: 1 },
+      { el: 'C', x: 380, y: 95, h: 1 }, { el: 'C', x: 330, y: 67, h: 1 }
+    ],
+    bonds: [
+      { a: 0, b: 1, order: 2 }, { a: 1, b: 2, order: 1 }, { a: 2, b: 3, order: 2 },
+      { a: 3, b: 4, order: 1 }, { a: 4, b: 5, order: 2 }, { a: 5, b: 0, order: 1 },
+      { a: 0, b: 9, order: 1 }, { a: 9, b: 8, order: 2 }, { a: 8, b: 7, order: 1 },
+      { a: 7, b: 6, order: 2 }, { a: 6, b: 5, order: 1 },
+      { a: 8, b: 13, order: 1 }, { a: 13, b: 12, order: 2 }, { a: 12, b: 11, order: 1 },
+      { a: 11, b: 10, order: 2 }, { a: 10, b: 7, order: 1 }
+    ],
+    mode: 'expanded', width: 460, height: 300
+  }, {
+    properties: '淡黄色の結晶。昇華性がある。',
+    uses: '染料・発光材料・有機半導体の原料。',
+    nature: '石炭タールに含まれる。',
+    hazards: '刺激性。光分解物に注意。',
+    notes: '三環縮合芳香族。ナフタレン（二環）やフェナントレン（屈曲三環）とは異なる。',
+    precursors: '石炭タールから分離、または工業合成。',
+    reactions: '求電子置換、付加、酸化。',
+    sources: ['idx-tryit', 'idx-kimika'], dataStatus: 'full',
+    sourceEvidence: [
+      { source: 'idx-tryit', section: '縮合芳香族', note: '三環縮合芳香族として収録。' },
+      { source: 'idx-kimika', section: '縮合芳香族', note: 'ナフタレンとの区別の補足。' }
+    ]
+  });
+  comp('cyclohexene', 'シクロヘキセン', 'C6H10', 'cyclic', {
+    type: 'custom',
+    atoms: [
+      { el: 'C', x: 200, y: 60, h: 1 }, { el: 'C', x: 254, y: 91, h: 2 },
+      { el: 'C', x: 254, y: 153, h: 2 }, { el: 'C', x: 200, y: 184, h: 2 },
+      { el: 'C', x: 146, y: 153, h: 2 }, { el: 'C', x: 146, y: 91, h: 1 }
+    ],
+    bonds: [
+      { a: 0, b: 1, order: 1 }, { a: 1, b: 2, order: 1 }, { a: 2, b: 3, order: 1 },
+      { a: 3, b: 4, order: 1 }, { a: 4, b: 5, order: 1 }, { a: 5, b: 0, order: 2 }
+    ],
+    mode: 'condensed', width: 400, height: 260
+  }, {
+    properties: '無色の液体。刺激臭。',
+    uses: '有機合成の中間体、溶媒。',
+    nature: 'シクロヘキサンの脱水素、またはベンゼンの部分水素化で得られる。',
+    hazards: '可燃性・刺激性。',
+    notes: '六員環にC=Cを1本もつ環状アルケン。シクロヘキサン（C6H12）とは不飽和度が異なる。',
+    precursors: 'シクロヘキサンの脱水素などで製造。',
+    reactions: '付加、酸化、重合。',
+    sources: ['idx-tryit'], dataStatus: 'full',
+    sourceEvidence: [{ source: 'idx-tryit', section: '環式炭化水素', note: '環状アルケンの代表例として収録。' }]
+  });
+
+  /* ---- ケトン・ヒドロキシ酸・二糖・脂肪酸 ---- */
+  cond('pentan-3-one', 'ペンタン-3-オン（ジエチルケトン）', 'C5H10O', 'ketone', ['CH₃CH₂—CO—CH₂CH₃'], {
+    properties: '無色の液体。アセトン様の臭い。',
+    uses: '溶媒、有機合成の中間体。',
+    nature: '3-ペンタノールの酸化などで得られる。',
+    hazards: '可燃性・刺激性。',
+    notes: 'ケトンのカルボニルが鎖の中央にある。ペンタナール（アルデヒド）とは官能基異性体。',
+    precursors: '3-ペンタノールの酸化、またはカルボン酸塩の乾留で製造。',
+    reactions: '還元、求核付加、縮合。',
+    sources: ['idx-kimika'], dataStatus: 'full',
+    sourceEvidence: [{ source: 'idx-kimika', section: 'ケトンの命名', note: '慣用名ジエチルケトン＝ペンタン-3-オンとして収録。' }]
+  });
+  cond('malic-acid', 'リンゴ酸（2-ヒドロキシブタン二酸）', 'C4H6O5', 'carboxylic', ['HOOC—CH(OH)—CH₂—COOH'], {
+    properties: '白色の結晶。水に溶けやすい。酸味がある。',
+    uses: '食品の酸味料、医薬品・化粧品の原料。',
+    nature: 'リンゴなどの果実に含まれる。',
+    hazards: '刺激性。',
+    notes: 'ヒドロキシジカルボン酸。不斉炭素をもち光学異性体があるが、教材本文では光学形が指定されていないため本項はどちらか一方に断定しない。',
+    precursors: '果実から得る、またはフマル酸の水和などで製造。',
+    reactions: '中和、エステル化、脱水でフマル酸。',
+    sources: ['idx-kimika'], dataStatus: 'class',
+    sourceEvidence: [{ source: 'idx-kimika', section: 'ヒドロキシ酸', note: 'ヒドロキシジカルボン酸として収録。光学形は未指定のまま注記した。' }]
+  });
+  schematic('isomaltose', 'イソマルトース', 'C12H22O11', 'sugar', 'isomaltose', {
+    composition: { C: 12, H: 22, O: 11 },
+    properties: '白色の結晶。水に溶けやすい。還元性がある。',
+    uses: '食品・発酵原料、構造研究用。',
+    nature: 'デンプンのα-1,6結合の加水分解で生じる。',
+    hazards: '',
+    notes: 'グルコース2分子がα(1→6)結合した二糖。マルトースのα(1→4)とは結合位置が異なる。非還元末端側のC1はα配置で下向き、還元末端側のC1はα/βを図で特定しない。図は糖環を簡略化した模式図。',
+    precursors: 'デンプンの加水分解で生成。',
+    reactions: '加水分解でグルコース。',
+    sources: ['idx-kimika'], dataStatus: 'class',
+    sourceEvidence: [{ source: 'idx-kimika', section: '二糖', note: 'α(1→6)二糖として収録。マルトースと区別した。' }]
+  });
+  cond('lauric-acid', 'ラウリン酸（ドデカン酸）', 'C12H24O2', 'lipid', ['CH₃(CH₂)₁₀COOH'], {
+    properties: '白色の固体。水に溶けにくい。',
+    uses: '石けん・化粧品・食品添加物の原料。',
+    nature: 'やし油・パーム核油に多く含まれる。',
+    hazards: '刺激性。',
+    notes: 'C12の飽和脂肪酸。ラウリン酸ナトリウム（塩）とは別レコード。',
+    precursors: '油脂の加水分解で得られる。',
+    reactions: '中和（セッケン）、エステル化。',
+    sources: ['idx-kimika'], dataStatus: 'full', structureExtra: { doubleBonds: [] },
+    sourceEvidence: [{ source: 'idx-kimika', section: '高級脂肪酸', note: '飽和脂肪酸の鎖長として収録。' }]
+  });
+  cond('myristic-acid', 'ミリスチン酸（テトラデカン酸）', 'C14H28O2', 'lipid', ['CH₃(CH₂)₁₂COOH'], {
+    properties: '白色の固体。水に溶けにくい。',
+    uses: '石けん・化粧品の原料。',
+    nature: 'やし油・パーム油に含まれる。',
+    hazards: '刺激性。',
+    notes: 'C14の飽和脂肪酸。',
+    precursors: '油脂の加水分解で得られる。',
+    reactions: '中和（セッケン）、エステル化。',
+    sources: ['idx-kimika'], dataStatus: 'full', structureExtra: { doubleBonds: [] },
+    sourceEvidence: [{ source: 'idx-kimika', section: '高級脂肪酸', note: '飽和脂肪酸の鎖長として収録。' }]
+  });
+  cond('arachidonic-acid', 'アラキドン酸（全シス-5,8,11,14-エイコサテトラエン酸）', 'C20H32O2', 'lipid', ['CH₃(CH₂)₄CH=CHCH₂CH=CHCH₂CH=CHCH₂CH=CH(CH₂)₃COOH'], {
+    properties: '無色〜淡黄色の液体。',
+    uses: '生理活性脂質（プロスタグランジンなど）の前駆体。',
+    nature: '動物のリン脂質に含まれる。',
+    hazards: '',
+    notes: '20:4の高度不飽和脂肪酸。二重結合は全シス-5,8,11,14位。教材の表だけでは位置・幾何を特定しないため、公的な一般構造に基づいて補足した。',
+    precursors: 'リン脂質の加水分解で得られる。',
+    reactions: '酸化、酵素酸化で生理活性物質。',
+    sources: ['idx-kimika'], dataStatus: 'class', structureExtra: { doubleBonds: [
+      { at: 5, geometry: 'cis' }, { at: 8, geometry: 'cis' }, { at: 11, geometry: 'cis' }, { at: 14, geometry: 'cis' }
+    ] },
+    sourceEvidence: [{ source: 'idx-kimika', section: '高級脂肪酸', note: '教材は分子式と不飽和数を示す。二重結合位置・シス配置は一般構造で補足し、その旨を注記した。' }]
+  });
+  cond('eicosapentaenoic-acid', 'エイコサペンタエン酸（EPA、全シス-5,8,11,14,17）', 'C20H30O2', 'lipid', ['CH₃CH₂CH=CHCH₂CH=CHCH₂CH=CHCH₂CH=CHCH₂CH=CHCH₂CH₂CH₂COOH'], {
+    properties: '無色〜淡黄色の液体。',
+    uses: '魚油成分、健康食品・医薬品原料。',
+    nature: '魚油・海産物に含まれる。',
+    hazards: '',
+    notes: '20:5の高度不飽和脂肪酸。二重結合は全シス-5,8,11,14,17位。',
+    precursors: '魚油の加水分解・精製で得られる。',
+    reactions: '酸化、水素添加。',
+    sources: ['idx-kimika'], dataStatus: 'class', structureExtra: { doubleBonds: [
+      { at: 5, geometry: 'cis' }, { at: 8, geometry: 'cis' }, { at: 11, geometry: 'cis' }, { at: 14, geometry: 'cis' }, { at: 17, geometry: 'cis' }
+    ] },
+    sourceEvidence: [{ source: 'idx-kimika', section: '高級脂肪酸', note: '教材は分子式と不飽和数を示す。位置・シス配置は一般構造で補足した。' }]
+  });
+  cond('docosahexaenoic-acid', 'ドコサヘキサエン酸（DHA、全シス-4,7,10,13,16,19）', 'C22H32O2', 'lipid', ['CH₃CH₂CH=CHCH₂CH=CHCH₂CH=CHCH₂CH=CHCH₂CH=CHCH₂CH=CHCH₂CH₂COOH'], {
+    properties: '無色〜淡黄色の液体。',
+    uses: '魚油成分、健康食品・医薬品原料。',
+    nature: '魚油・海産物に含まれる。',
+    hazards: '',
+    notes: '22:6の高度不飽和脂肪酸。二重結合は全シス-4,7,10,13,16,19位。',
+    precursors: '魚油の加水分解・精製で得られる。',
+    reactions: '酸化、水素添加。',
+    sources: ['idx-kimika'], dataStatus: 'class', structureExtra: { doubleBonds: [
+      { at: 4, geometry: 'cis' }, { at: 7, geometry: 'cis' }, { at: 10, geometry: 'cis' },
+      { at: 13, geometry: 'cis' }, { at: 16, geometry: 'cis' }, { at: 19, geometry: 'cis' }
+    ] },
+    sourceEvidence: [{ source: 'idx-kimika', section: '高級脂肪酸', note: '教材は分子式と不飽和数を示す。位置・シス配置は一般構造で補足した。' }]
+  });
+  cond('lead-ii-acetate', '酢酸鉛(II)', 'C4H6O4Pb', 'carboxylic', ['Pb(CH₃COO)₂'], {
+    properties: '白色の結晶。水に溶けやすい。',
+    uses: 'タンパク質の硫黄検出（酢酸鉛紙）、有機合成試薬。',
+    nature: '酢酸と酸化鉛(II)などの反応で得られる。',
+    hazards: '有毒（鉛）。取扱いに注意。',
+    notes: '酢酸の鉛(II)塩。無機試薬ではなく有機酸塩として扱う。硫黄を含むアミノ酸の検出で硫化鉛の黒色沈殿を生じる。',
+    precursors: '酢酸と鉛化合物の反応で製造。',
+    reactions: '硫化水素と反応して硫化鉛の黒色沈殿。',
+    sources: ['idx-tryit', 'idx-kimika'], dataStatus: 'class', ion: { cation: 'Pb²⁺', anion: 'CH₃COO⁻ ×2' },
+    sourceEvidence: [
+      { source: 'idx-tryit', section: 'タンパク質の検出', note: '有機酸塩の検出試薬として収録。' },
+      { source: 'idx-kimika', section: 'タンパク質の検出', note: '反応の補足。' }
+    ]
+  });
+  cond('calcium-acetate', '酢酸カルシウム', 'C4H6CaO4', 'carboxylic', ['Ca(CH₃COO)₂'], {
+    properties: '白色の固体。水に溶けやすい。',
+    uses: 'アセトンの乾留原料、食品添加物、融雪剤。',
+    nature: '酢酸と水酸化カルシウムの中和で生成する。',
+    hazards: '刺激性。',
+    notes: '酢酸のカルシウム塩。乾留でアセトンを生じる。',
+    precursors: '酢酸と水酸化カルシウムの中和で製造。',
+    reactions: '乾留でアセトンと炭酸カルシウム。',
+    sources: ['idx-kimika'], dataStatus: 'full', ion: { cation: 'Ca²⁺', anion: 'CH₃COO⁻ ×2' },
+    sourceEvidence: [{ source: 'idx-kimika', section: 'アセトンの製法', note: '有機酸塩とアセトン製法の関係として収録。' }]
+  });
+
+  /* ---- 核酸ヌクレオチド（ATP） ---- */
+  schematic('atp', 'ATP（アデノシン三リン酸）', 'C10H16N5O13P3', 'natural-polymer', 'nucleotide-atp', {
+    composition: { C: 10, H: 16, N: 5, O: 13, P: 3 },
+    properties: '白色の固体。水に溶けやすい。生理的pHでは4価陰イオン（ATP⁴⁻）として存在し、Mg²⁺と錯体をつくる。',
+    uses: '生体内のエネルギー通貨。リン酸基の加水分解でエネルギーを取り出す。',
+    nature: 'すべての生物の細胞内で合成される。',
+    hazards: '',
+    notes: 'アデニン—リボース—三リン酸からなるヌクレオチド。図はアデノシン部分を模式化し、三リン酸鎖と電荷を明示する。塩基配列・重合度をもたないため核酸高分子とは区別する。',
+    precursors: 'ADPとリン酸からATP合成酵素などで合成。',
+    reactions: 'ATPアーゼによる加水分解でADP＋リン酸。',
+    sources: ['idx-kimika'], dataStatus: 'class', ion: { charge: '-4', cation: 'Mg²⁺（錯体）' },
+    sourceEvidence: [{ source: 'idx-kimika', section: '酵素の分類', note: 'ATPを酵素作用の対象（基質）として収録。リン酸数と電荷を明示した。' }]
+  });
+  comp('adenosine', 'アデノシン', 'C10H13N5O4', 'natural-polymer', {
+    type: 'schematic', kind: 'nucleoside-adenosine',
+    composition: { C: 10, H: 13, N: 5, O: 4 },
+    identity: {
+      cid: 60961,
+      nameEn: 'adenosine',
+      synonyms: ['adenine riboside', 'β-D-adenosine'],
+      base: 'adenine',
+      sugar: 'β-D-ribofuranose',
+      linkage: 'adenine N9–C1′'
+    },
+    stereo: {
+      sugar: 'D-ribofuranose',
+      anomer: 'beta',
+      glycosidicBond: 'β',
+      stereocenters: 4,
+      drawn: false,
+      phosphateCount: 0,
+      note: 'リボース環の4個の立体中心は図では描き分けず、β-D-リボフラノシドのidentityをmetadataで保持する。'
+    }
+  }, {
+    properties: '白色の結晶性固体。水にやや溶けにくい。',
+    uses: '生化学的研究、医薬品関連の研究用試薬。',
+    nature: 'アデニンとβ-D-リボフラノースがN9–C1′で結合したヌクレオシド。',
+    hazards: '',
+    notes: 'アデニン—リボースからなるヌクレオシド。リン酸残基をもたないためAMP・ADP・ATPとは別。図は塩基とリボースの結合模式で、4個の立体中心を描き分けた構造式ではない。デオキシアデノシンとも別。',
+    precursors: 'RNAの分解などで生じる。',
+    reactions: 'リン酸化を受けるとAMP、さらにADP・ATPへ至る経路がある。',
+    sources: ['pubchem'], dataStatus: 'class', pubchem: 60961, formalCharge: 0, charge: 0,
+    sourceEvidence: [{
+      source: 'pubchem', section: 'CID 60961（PubChem 2D構造・分子式）',
+      note: '独立にPubChem APIで取得し、C10H13N5O4・電荷0・リン酸0・アデニンN9β-D-リボフラノシドを確認した。立体配置はmetadataに保持し、図では省略する。'
+    }]
+  });
+  comp('adp', 'ADP（アデノシン二リン酸）', 'C10H15N5O10P2', 'natural-polymer', {
+    type: 'schematic', kind: 'nucleotide-adp',
+    composition: { C: 10, H: 15, N: 5, O: 10, P: 2 },
+    identity: {
+      cid: 6022,
+      nameEn: 'adenosine 5′-diphosphate',
+      synonyms: ['ADP'],
+      base: 'adenine',
+      sugar: 'β-D-ribofuranose',
+      phosphate: "ribose 5′-CH₂O–P(=O)(OH)–O–P(=O)(OH)₂",
+      neutralAcidForm: true
+    },
+    stereo: {
+      sugar: 'D-ribofuranose',
+      anomer: 'beta',
+      glycosidicBond: 'β',
+      stereocenters: 4,
+      drawn: false,
+      phosphateCount: 2,
+      phosphateCharge: 0,
+      note: 'リボース環の4個の立体中心は図では描き分けない。中性酸形のP2・電荷0を明示し、生理的pHのADP³⁻やMg²⁺錯体とは区別する。'
+    }
+  }, {
+    properties: '白色の固体。水に溶けやすい。',
+    uses: '生化学的研究、医薬品関連の研究用試薬。',
+    nature: 'アデノシンの5′位に二リン酸鎖が結合したヌクレオチド。',
+    hazards: '',
+    notes: 'アデノシン5′-二リン酸。図は中性酸形（P–OH）で表し、P2・電荷0を明示する。生体では生理的pHで3価陰イオン（ADP³⁻）として存在し、Mg²⁺錯体は別状態として扱う。糖の4立体中心を描き分けた構造式ではなく、ATPの三リン酸・4価陰イオン表示を流用しない。ATP合成の条件は本データでは確認していないため断定しない。',
+    precursors: 'ATPの加水分解、またはAMPのリン酸化で生じる。',
+    reactions: 'リン酸基の加水分解・リン酸化を受ける。',
+    sources: ['pubchem'], dataStatus: 'class', pubchem: 6022, formalCharge: 0, charge: 0,
+    ion: { charge: '0', note: '中性酸形。生理的pHのADP³⁻・Mg²⁺錯体とは別。' },
+    sourceEvidence: [{
+      source: 'pubchem', section: 'CID 6022（PubChem 2D構造・分子式）',
+      note: '独立にPubChem APIで取得し、C10H15N5O10P2・電荷0・P2・adenosine 5′-diphosphateを確認した。中性酸形として表示し、生理的イオン形とは区別する。'
+    }]
+  });
+
+  /* ---- 金属アセチリド（塩） ---- */
+  cond('silver-acetylide', '銀アセチリド', 'C2Ag2', 'unsat', ['Ag—C≡C—Ag'], {
+    properties: '白色の沈殿。',
+    uses: 'アセチレンの検出・確認に用いられる。',
+    nature: 'アセチレンにアンモニア性硝酸銀水溶液を加えると生成する。',
+    hazards: '乾燥すると爆発性がある。実験操作の手順は扱わない。',
+    notes: '金属アセチリド（塩）。共有結合性の有機単分子とは区別し、Ag⁺とC₂²⁻からなる塩として扱う。',
+    precursors: 'アセチレンとアンモニア性硝酸銀の反応で生成。',
+    reactions: '酸でアセチレンに戻る。',
+    sources: ['idx-kimika'], dataStatus: 'class', ion: { cation: 'Ag⁺ ×2', anion: 'C₂²⁻' },
+    sourceEvidence: [{ source: 'idx-kimika', section: 'アルキンの検出', note: '検出反応の生成物を塩として収録。' }]
+  });
+  cond('copper-i-acetylide', '銅(I)アセチリド', 'C2Cu2', 'unsat', ['Cu—C≡C—Cu'], {
+    properties: '赤色の沈殿。',
+    uses: 'アセチレンの検出・確認に用いられる。',
+    nature: 'アセチレンにアンモニア性塩化銅(I)水溶液を加えると生成する。',
+    hazards: '乾燥すると爆発性がある。実験操作の手順は扱わない。',
+    notes: '金属アセチリド（塩）。Cu⁺とC₂²⁻からなる塩として扱う。',
+    precursors: 'アセチレンとアンモニア性塩化銅(I)の反応で生成。',
+    reactions: '酸でアセチレンに戻る。',
+    sources: ['idx-kimika'], dataStatus: 'class', ion: { cation: 'Cu⁺ ×2', anion: 'C₂²⁻' },
+    sourceEvidence: [{ source: 'idx-kimika', section: 'アルキンの検出', note: '検出反応の生成物を塩として収録。' }]
+  });
+
+  /* ---- アルケン・アルキンのC5級（位置未指定の級名への代表例） ---- */
+  cond('pent-1-ene', 'ペンタ-1-エン', 'C5H10', 'unsat', ['CH₂=CHCH₂CH₂CH₃'], {
+    properties: '無色の可燃性液体。',
+    uses: '有機合成の中間体、重合原料。',
+    nature: '石油化学工業で製造。',
+    hazards: '可燃性。',
+    notes: 'C5アルケンの位置異性体の代表例。級名「ペンテン」は位置・分岐を指定しない総称であり、本物質はその一つ。',
+    precursors: 'ペンタンの接触分解・脱水素で製造。',
+    reactions: '付加、付加重合。',
+    sources: ['idx-tryit', 'idx-kimika'], dataStatus: 'class',
+    sourceEvidence: [
+      { source: 'idx-tryit', section: 'アルケンの命名', note: '級名ペンテンの代表例として収録。' },
+      { source: 'idx-kimika', section: 'アルケン一覧', note: '分子式の補足。' }
+    ]
+  });
+  cond('pent-2-ene', 'ペンタ-2-エン', 'C5H10', 'unsat', ['CH₃CH=CHCH₂CH₃'], {
+    properties: '無色の可燃性液体。シス/トランス異性体がある。',
+    uses: '有機合成の中間体。',
+    nature: '石油化学工業で製造。',
+    hazards: '可燃性。',
+    notes: 'C5アルケンの位置異性体の代表例。二重結合のE/Zは教材本文で指定されないため、本項はどちらか一方に断定しない。',
+    precursors: 'ペンタンの脱水素などで製造。',
+    reactions: '付加、異性化、重合。',
+    sources: ['idx-kimika'], dataStatus: 'class', structureExtra: { doubleBonds: [{ at: 2, geometry: 'unspecified' }] },
+    sourceEvidence: [{ source: 'idx-kimika', section: 'アルケン一覧', note: '位置異性体の代表例として収録。' }]
+  });
+  cond('pent-1-yne', 'ペンタ-1-イン', 'C5H8', 'unsat', ['HC≡CCH₂CH₂CH₃'], {
+    properties: '無色の可燃性液体。',
+    uses: '有機合成の中間体。',
+    nature: '石油化学工業で製造。',
+    hazards: '可燃性。',
+    notes: 'C5アルキンの位置異性体の代表例。級名「ペンチン」は位置・分岐を指定しない総称。',
+    precursors: 'ペンタンの脱水素などで製造。',
+    reactions: '付加、末端アルキンの検出。',
+    sources: ['idx-kimika'], dataStatus: 'class',
+    sourceEvidence: [{ source: 'idx-kimika', section: 'アルキン一覧', note: '級名ペンチンの代表例として収録。' }]
+  });
+  cond('pent-2-yne', 'ペンタ-2-イン', 'C5H8', 'unsat', ['CH₃C≡CCH₂CH₃'], {
+    properties: '無色の可燃性液体。',
+    uses: '有機合成の中間体。',
+    nature: '石油化学工業で製造。',
+    hazards: '可燃性。',
+    notes: 'C5アルキンの位置異性体の代表例。末端アルキンではないため銀・銅アセチリドの検出対象にならない。',
+    precursors: 'ペンタンの脱水素などで製造。',
+    reactions: '付加、異性化。',
+    sources: ['idx-kimika'], dataStatus: 'class',
+    sourceEvidence: [{ source: 'idx-kimika', section: 'アルキン一覧', note: '位置異性体の代表例として収録。' }]
+  });
+
+  /* ---- 酵素・酵素群（可変のタンパク質模式図。単一固定分子式にしない） ---- */
+  function enzyme(id, name, kind, substrate, func, extra) {
+    var e = extra || {};
+    return schematic(id, name, '組成依存', 'amino', kind, {
+      properties: 'タンパク質からなる生体触媒。至適pH・温度をもつ。',
+      uses: '生体内の代謝・消化、工業・研究用途。',
+      nature: '生物が生産する酵素。種・配列は未指定。',
+      hazards: '',
+      notes: '酵素はアミノ酸配列と重合度で分子が変わるため、単一の固定分子式をもたない。図はタンパク質主鎖と側鎖Rの模式図。' + (e.note ? ' ' + e.note : ''),
+      precursors: '生体内でアミノ酸から生合成される。',
+      reactions: func,
+      sources: e.sources || ['idx-kimika'], dataStatus: 'class',
+      subcategory: '酵素', formulaVariable: true,
+      formulaDisplay: '組成依存（アミノ酸配列・重合度に依存）',
+      substrate: substrate, enzymeFunction: func,
+      sourceEvidence: e.sourceEvidence || []
+    });
+  }
+  enzyme('atpase', 'ATPアーゼ（ATP加水分解酵素）', 'protein-atpase', 'ATP', 'ATPのリン酸結合を加水分解してADPとリン酸を生じる。', {
+    note: '種・配列を特定しない酵素の総称。', sources: ['idx-kimika'],
+    sourceEvidence: [{ source: 'idx-kimika', section: '酵素の分類', note: '基質ATPと反応を明示して収録。' }]
+  });
+  enzyme('zymase', 'チマーゼ（アルコール発酵酵素群）', 'protein-zymase', 'グルコース', 'グルコースをエタノールと二酸化炭素に分解する発酵を進める。', {
+    note: '単一酵素ではなく酵素群。', sources: ['idx-tryit', 'idx-kimika'],
+    sourceEvidence: [
+      { source: 'idx-tryit', section: 'アルコール発酵', note: '発酵を進める酵素群として収録。' },
+      { source: 'idx-kimika', section: '酵素の分類', note: '酵素群であることの補足。' }
+    ]
+  });
+  enzyme('maltase', 'マルターゼ（マルトース加水分解酵素）', 'protein-maltase', 'マルトース', 'マルトースのα-1,4結合を加水分解してグルコース2分子を生じる。', {
+    note: 'マルトースの消化酵素。', sources: ['idx-tryit', 'idx-kimika'],
+    sourceEvidence: [
+      { source: 'idx-tryit', section: '二糖の消化', note: '基質と生成物を明示して収録。' },
+      { source: 'idx-kimika', section: '消化酵素', note: '反応の補足。' }
+    ]
+  });
+  enzyme('sucrase', 'スクラーゼ（スクロース加水分解酵素）', 'protein-sucrase', 'スクロース', 'スクロースを加水分解してグルコースとフルクトース（転化糖）を生じる。', {
+    note: 'インベルターゼとも呼ばれる。', sources: ['idx-tryit', 'idx-kimika'],
+    sourceEvidence: [
+      { source: 'idx-tryit', section: '二糖の消化', note: '基質と生成物を明示して収録。' },
+      { source: 'idx-kimika', section: '消化酵素', note: '別名の補足。' }
+    ]
+  });
+  enzyme('trypsin', 'トリプシン（タンパク質分解酵素）', 'protein-trypsin', 'タンパク質・ペプチド', 'タンパク質を加水分解してペプチドを生じる。', {
+    note: 'ペプシンとは別の酵素。', sources: ['idx-tryit', 'idx-kimika'],
+    sourceEvidence: [
+      { source: 'idx-tryit', section: '消化酵素の至適pH', note: 'ペプシンとの区別を明示して収録。' },
+      { source: 'idx-kimika', section: '消化酵素', note: '反応の補足。' }
+    ]
+  });
+  enzyme('protease', 'プロテアーゼ（タンパク質分解酵素の総称）', 'protein-protease', 'タンパク質', 'タンパク質のペプチド結合を加水分解する酵素の総称。', {
+    note: '個別の酵素ではなくクラス。', sources: ['idx-tryit'],
+    sourceEvidence: [{ source: 'idx-tryit', section: '酵素の定義', note: '酵素クラスとして収録。' }]
+  });
+  enzyme('lipase', 'リパーゼ（油脂加水分解酵素）', 'protein-lipase', '油脂（トリグリセリド）', '油脂を加水分解して高級脂肪酸とグリセリンを生じる。', {
+    note: '油脂の消化酵素。', sources: ['idx-kimika'],
+    sourceEvidence: [{ source: 'idx-kimika', section: '油脂の加水分解', note: '基質と生成物を明示して収録。' }]
+  });
+  enzyme('catalase', 'カタラーゼ（過酸化水素分解酵素）', 'protein-catalase', '過酸化水素', '2H₂O₂ → 2H₂O + O₂ を触媒する。', {
+    note: '酸化還元酵素。', sources: ['idx-kimika'],
+    sourceEvidence: [{ source: 'idx-kimika', section: '酵素の分類', note: '反応式を明示して収録。' }]
+  });
+  enzyme('lactase', 'ラクターゼ（ラクトース加水分解酵素）', 'protein-lactase', 'ラクトース', 'ラクトースを加水分解してグルコースとガラクトースを生じる。', {
+    note: '乳糖不耐症に関わる酵素。', sources: ['idx-kimika'],
+    sourceEvidence: [{ source: 'idx-kimika', section: '消化酵素', note: '基質と生成物を明示して収録。' }]
+  });
+  enzyme('erepsin', 'エレプシン（ペプチド分解酵素群）', 'protein-erepsin', 'ペプチド', 'ペプチドをアミノ酸に分解する。', {
+    note: '単一酵素ではなく酵素群。', sources: ['idx-kimika'],
+    sourceEvidence: [{ source: 'idx-kimika', section: '消化酵素', note: '酵素群として収録。' }]
+  });
+  enzyme('urease', 'ウレアーゼ（尿素加水分解酵素）', 'protein-urease', '尿素', '尿素を加水分解してアンモニアと二酸化炭素を生じる。', {
+    note: '尿素の分解酵素。', sources: ['idx-kimika'],
+    sourceEvidence: [{ source: 'idx-kimika', section: '酵素の分類', note: '基質と生成物を明示して収録。' }]
+  });
+  enzyme('helicase', 'ヘリカーゼ（DNA二重鎖をほどく酵素）', 'protein-helicase', 'DNA二重鎖', 'DNAの二重らせんをほどいて複製・転写を可能にする。', {
+    note: '核酸に作用する酵素。', sources: ['idx-kimika'],
+    sourceEvidence: [{ source: 'idx-kimika', section: 'DNAの二重らせん', note: 'DNAに作用する酵素として収録。' }]
+  });
+
+  /* ---- シクロヘキサンの一置換（六置換のBHCとは別反応） ---- */
+  sub('chlorocyclohexane', 'クロロシクロヘキサン', 'C6H11Cl', 'cyclic', 'cyclohexane', 0, 'cl', {
+    properties: '無色の液体。',
+    uses: '有機合成の中間体、溶媒。',
+    nature: 'シクロヘキサンの塩素置換で得られる。',
+    hazards: '可燃性・刺激性。',
+    notes: 'シクロヘキサンの水素1個をClで置換した一置換体（C6H11Cl）。ベンゼンへの塩素付加で生じるヘキサクロロシクロヘキサン（C6H6Cl6）とは反応も置換数も異なる。',
+    precursors: 'シクロヘキサンと塩素の光反応などで製造。',
+    reactions: '脱離でシクロヘキセン、求核置換。',
+    sources: ['idx-tryit'], dataStatus: 'class',
+    sourceEvidence: [{ source: 'idx-tryit', section: '環式炭化水素', note: '一置換体として収録。六置換のBHCとは区別した。' }]
+  });
+
+  /* ------------------------------------------------------------------
    * 別名・材料索引
    * 名称そのものとは別に、資料や教科書で使われる呼称を検索できるようにする。
    * 同じ分子を水増ししないため、材料・混合物は COMPOUNDS に追加しない。
    * ------------------------------------------------------------------ */
   var ALIASES = [
     { term: '1-ペンタノール', target: 'pentan-1-ol' },
+    { term: 'シュウ酸ジメチル', target: 'dimethyl-oxalate' },
+    { term: 'dimethyl oxalate', target: 'dimethyl-oxalate' },
+    { term: 'シュウ酸ジフェニル', target: 'diphenyl-oxalate' },
+    { term: 'diphenyl oxalate', target: 'diphenyl-oxalate' },
+    { term: 'サリシン', target: 'salicin' },
+    { term: 'salicin', target: 'salicin' },
+    { term: 'salicoside', target: 'salicin' },
+    { term: 'サリチルアルコールグルコシド', target: 'salicin' },
+    { term: 'DETA', target: 'diethylenetriamine' },
+    { term: 'ジエチレントリアミン', target: 'diethylenetriamine' },
+    { term: 'diethylenetriamine', target: 'diethylenetriamine' },
+    { term: 'bis(2-aminoethyl)amine', target: 'diethylenetriamine' },
+    { term: 'トリメチレンジブロミド', target: '1,3-dibromopropane' },
+    { term: 'trimethylene dibromide', target: '1,3-dibromopropane' },
+    { term: 'アデノシン', target: 'adenosine' },
+    { term: 'adenosine', target: 'adenosine' },
+    { term: 'アデノシン二リン酸', target: 'adp' },
+    { term: 'adenosine diphosphate', target: 'adp' },
+    { term: 'インベルターゼ', target: 'sucrase' },
+    { term: 'invertase', target: 'sucrase' },
+    { term: 'トレオニン', target: 'threonine' },
     { term: '酢酸Na', target: 'sodium-acetate' },
     { term: '酢酸ナトリウム', target: 'sodium-acetate' },
     { term: '塩化メチレン', target: 'dichloromethane' },
@@ -2716,6 +3620,21 @@
     { term: 'sulfanilamide', target: 'sulfanilamide' },
     { term: 'aspirin', target: 'aspirin' },
     { term: 'methyl salicylate', target: 'methyl-salicylate' },
+    { term: 'エタノールアミン', target: 'ethanolamine' },
+    { term: '2-アミノエタノール', target: 'ethanolamine' },
+    { term: 'aminoethanol', target: 'ethanolamine' },
+    { term: 'イノシトール', target: 'inositol' },
+    { term: 'inositol', target: 'inositol' },
+    { term: 'コリン', target: 'choline' },
+    { term: 'choline', target: 'choline' },
+    { term: '酢酸フェニル', target: 'phenyl-acetate' },
+    { term: 'phenyl acetate', target: 'phenyl-acetate' },
+    { term: 'サリチル酸二ナトリウム', target: 'disodium-salicylate' },
+    { term: 'disodium salicylate', target: 'disodium-salicylate' },
+    { term: 'オルトニトロフェノール', target: 'o-nitrophenol' },
+    { term: 'パラニトロフェノール', target: 'p-nitrophenol' },
+    { term: 'o-nitrophenol', target: 'o-nitrophenol' },
+    { term: 'p-nitrophenol', target: 'p-nitrophenol' },
     { term: 'p-hydroxybenzoic acid', target: 'p-hydroxybenzoic-acid' },
     { term: 'm-hydroxybenzoic acid', target: 'm-hydroxybenzoic-acid' },
     { term: '2,4,6-tribromophenol', target: '2,4,6-tribromophenol' },
@@ -2755,7 +3674,7 @@
     {
       id: 'cupra', name: '銅アンモニアレーヨン（キュプラ）', kind: 'material', of: 'cellulose',
       note: '銅アンモニア溶液に溶かしたセルロースを再生した繊維。分子そのものはセルロース。',
-      synonyms: ['銅アンモニアレーヨン', 'キュプラ', 'クプラ', 'cupra']
+      synonyms: ['銅アンモニアレーヨン', 'キュプラ', 'クプラ']
     },
     {
       id: 'viscose', name: 'ビスコース', kind: 'mixture', of: null,
@@ -2766,8 +3685,446 @@
       id: 'aniline-black', name: 'アニリンブラック', kind: 'material', of: null,
       note: 'アニリンの酸化で生じる黒色物質。ポリアニリン（導電性高分子）と同一の純物質とはみなさない。',
       synonyms: ['アニリン黒']
+    },
+    {
+      id: 'lignin', name: 'リグニン', kind: 'polymer-family', of: null,
+      note: '木材パルプから除去される天然芳香族高分子。セルロースそのものではなく、単一の固定分子式をもたない。',
+      synonyms: ['木材リグニン']
+    },
+    {
+      id: 'cellulose-xanthate', name: 'セルロースキサントゲン酸ナトリウム', kind: 'polymer-derivative', of: 'cellulose',
+      note: 'セルロースのキサントゲン酸エステル塩。置換度は一定でなく、ビスコース溶液とも区別する。',
+      synonyms: ['セルロースキサントゲン酸塩', 'キサントゲン酸セルロースナトリウム']
+    },
+    {
+      id: 'alkali-cellulose', name: 'アルカリセルロース', kind: 'polymer-derivative', of: 'cellulose',
+      note: 'セルロースの濃水酸化ナトリウム処理物。単一構造に固定しない。',
+      synonyms: ['アルカリ処理セルロース']
+    },
+    {
+      id: 'dinitrocellulose', name: 'ジニトロセルロース', kind: 'variant', of: 'cellulose-nitrate',
+      note: 'セルロース繰り返し単位のOH2箇所を硝酸エステル化したもの。セルロースナイトレートの置換度variant。',
+      synonyms: ['セルロースジニトレート']
+    },
+    {
+      id: 'diacetylcellulose', name: 'ジアセチルセルロース', kind: 'variant', of: 'cellulose-acetate',
+      note: 'セルロース繰り返し単位のOH2箇所を酢酸エステル化したもの。セルロースアセテートの置換度variant。',
+      synonyms: ['セルロースジアセテート']
+    },
+    {
+      id: 'novolac', name: 'ノボラック', kind: 'material', of: 'phenol-resin',
+      note: '酸触媒で得るフェノール樹脂前駆体。分子量分布をもち、硬化後の樹脂と同一物扱いしない。',
+      synonyms: ['ノボラック型フェノール樹脂']
+    },
+    {
+      id: 'resol', name: 'レゾール', kind: 'material', of: 'phenol-resin',
+      note: '塩基触媒で得るフェノール樹脂前駆体。加熱で架橋する。ノボラックとは別段階。',
+      synonyms: ['レゾール型フェノール樹脂']
+    },
+    {
+      id: 'glyptal', name: 'グリプタル樹脂', kind: 'material', of: 'alkyd-resin',
+      note: 'フタル酸とグリセリンに由来するアルキド樹脂の一種。一般のアルキド樹脂と同一視しない。',
+      synonyms: ['グリプタル']
+    },
+    {
+      id: 'collodion', name: 'コロジオン', kind: 'material', of: 'cellulose-nitrate',
+      note: 'ジニトロセルロースを溶剤に溶かした膜材料。硝酸セルロースの置換度依存で、単一化合物ではない。',
+      synonyms: ['コロジオン液']
+    },
+    {
+      id: 'ebonite', name: 'エボナイト', kind: 'material', of: 'natural-rubber',
+      note: '天然ゴムに多量の硫黄を加えて長時間加硫した硬質ゴム。加硫状態の材料。',
+      synonyms: ['硬質ゴム']
+    },
+    {
+      id: 'latex', name: 'ラテックス', kind: 'mixture', of: 'natural-rubber',
+      note: 'ゴム樹液の乳液。天然ゴムの純物質名ではない。',
+      synonyms: ['ゴムラテックス']
+    },
+    {
+      id: 'schweizer-reagent', name: 'シュワイツァー試薬', kind: 'reagent-mixture', of: null,
+      note: '銅(II)水酸化物のアンモニア溶液。セルロースを溶かす試薬で、単一化合物ではない。',
+      synonyms: ['シュバイツァー試薬', '銅アンモニア溶液']
+    },
+    {
+      id: 'celluloid', name: 'セルロイド', kind: 'material', of: 'cellulose-nitrate',
+      note: 'ジニトロセルロースに樟脳を混ぜた熱可塑性材料。純物質ではない。',
+      synonyms: ['セルロイド材料']
+    },
+    {
+      id: 'salomethyl', name: 'サロメチール', kind: 'product', of: 'methyl-salicylate',
+      note: 'サリチル酸メチルを配合した外用鎮痛薬の商品名。純物質の別名として扱わない。',
+      synonyms: ['サロメチール外用薬']
+    },
+    {
+      id: 'calcium-carbide', name: '炭化カルシウム', kind: 'inorganic-out-of-scope', of: null,
+      note: 'CaC₂の無機化合物。有機化合物カードにはせず、アセチレン製法の無機原料として索引だけに置く。',
+      synonyms: ['カルシウムカーバイド', 'CaC2']
+    },
+    {
+      id: 'carbon-fiber', name: 'カーボンファイバー', kind: 'material', of: 'pan',
+      note: 'ポリアクリロニトリル等を炭化した炭素繊維。PANそのものではなく、加工状態の材料。',
+      synonyms: ['炭素繊維']
+    },
+    {
+      id: 'glass', name: 'ガラス', kind: 'inorganic-out-of-scope', of: null,
+      note: '主にケイ酸塩からなる無機材料。有機化合物の純物質カードにはしない。',
+      synonyms: ['ケイ酸ガラス']
+    },
+    {
+      id: 'pulp', name: 'パルプ', kind: 'material', of: 'cellulose',
+      note: '木材からリグニン等を除いて得るセルロース主体の繊維材料。セルロース純物質そのものではない。',
+      synonyms: ['木材パルプ']
+    },
+    {
+      id: 'styrofoam', name: '発泡スチロール', kind: 'material', of: 'polystyrene',
+      note: 'ポリスチレンを発泡成形した材料。ポリスチレン純物質とは区別する。',
+      synonyms: ['発泡ポリスチレン']
+    },
+    {
+      id: 'guncotton', name: '綿火薬', kind: 'material', of: 'cellulose-nitrate',
+      note: '高置換度の硝酸セルロース（トリニトロセルロース）を主成分とする火薬。硝酸セルロースそのものと同一視しない。',
+      synonyms: ['ニトロセルロース火薬']
     }
   ];
+
+  /* ------------------------------------------------------------------
+   * 級名・family（単一の固定分子式をもたない区分）
+   * 65件の索引監査（index-audit.js）が familyById / materialById で解決する。
+   * members は代表例で、級名全体を代表1物質と同一視しない。
+   * ------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------
+   * リン脂質familyの一般構造（グリセロール骨格の結合線つき）
+   * sn-1,2位にアシル基（R¹・R²）、sn-3位にリン酸。
+   * PC/PEは頭部N⁺を含む双性イオン形、PAはP–OHの中性形で表示する。
+   * 頭部はP–O–CH₂–CH₂–N…の結合を明示し、長い名称を原子ラベルに載せない。
+   * 固定した脂肪酸鎖を1本に決めないため、R¹・R²は可変ラベルにする。
+   * ------------------------------------------------------------------ */
+  function glycerophospholipidGeneralStructure(head) {
+    var hasHead = head === 'pe' || head === 'pc';
+    var atoms = [
+      { el: 'R', label: 'R¹', x: 30, y: 80, h: 0 },
+      { el: 'C', x: 110, y: 80, h: 0 },
+      { el: 'O', x: 180, y: 80, h: 0 },
+      { el: 'C', x: 250, y: 80, h: 2 },
+      { el: 'O', x: 110, y: 30, h: 0 },
+      { el: 'R', label: 'R²', x: 30, y: 150, h: 0 },
+      { el: 'C', x: 110, y: 150, h: 0 },
+      { el: 'O', x: 180, y: 150, h: 0 },
+      { el: 'C', x: 250, y: 150, h: 1 },
+      { el: 'O', x: 110, y: 200, h: 0 },
+      { el: 'C', x: 250, y: 220, h: 2 },
+      { el: 'O', x: 320, y: 220, h: 0 },
+      { el: 'P', x: 390, y: 220, h: 0 },
+      { el: 'O', x: 390, y: 160, h: 0 },
+      { el: 'O', x: 390, y: 280, h: hasHead ? 0 : 1, charge: hasHead ? '-' : '' },
+      { el: 'O', x: 460, y: 220, h: hasHead ? 0 : 1 }
+    ];
+    var bonds = [
+      { a: 0, b: 1, order: 1 }, { a: 1, b: 2, order: 1 }, { a: 1, b: 4, order: 2 }, { a: 2, b: 3, order: 1 },
+      { a: 5, b: 6, order: 1 }, { a: 6, b: 7, order: 1 }, { a: 6, b: 9, order: 2 }, { a: 7, b: 8, order: 1 },
+      { a: 3, b: 8, order: 1 }, { a: 8, b: 10, order: 1 },
+      { a: 10, b: 11, order: 1 }, { a: 11, b: 12, order: 1 }, { a: 12, b: 13, order: 2 },
+      { a: 12, b: 14, order: 1 }, { a: 12, b: 15, order: 1 }
+    ];
+    var width = 620;
+    if (hasHead) {
+      // リン酸エステルの架橋Oからエタノールアミン/コリンのC–C–Nへ順に結合する。
+      atoms.push({ el: 'C', x: 510, y: 220, h: 2 });
+      atoms.push({ el: 'C', x: 570, y: 220, h: 2 });
+      if (head === 'pe') {
+        atoms.push({ el: 'N', label: 'NH₃⁺', x: 640, y: 220, h: 0, skipValence: true });
+        width = 680;
+      } else {
+        atoms.push({ el: 'N', label: 'N⁺(CH₃)₃', x: 665, y: 220, h: 0, skipValence: true });
+        width = 740;
+      }
+      bonds.push({ a: 15, b: 16, order: 1 }, { a: 16, b: 17, order: 1 }, { a: 17, b: 18, order: 1 });
+    }
+    return { type: 'custom', atoms: atoms, bonds: bonds, mode: 'condensed', width: width, height: 320 };
+  }
+
+  var FAMILIES = [
+    {
+      id: 'pentene-class', name: 'ペンテン類（C5H10 鎖式モノアルケン）', nameEn: 'pentenes',
+      kind: 'homolog-class', category: 'unsat', formula: 'C5H10',
+      formulaNote: '位置・分岐を指定しない級名。C5H10の鎖式モノアルケン全体を指す。',
+      summary: '炭素5個の鎖式モノアルケンの級名。ペンタ-1-エンとペンタ-2-エンは位置異性体。',
+      description: '教材では「ペンテン」のように級名で扱われる。本アプリは級名をfamilyとして登録し、代表例の化合物カードとは区別する。E/Z（シス/トランス）は教材本文で指定されないため、ペンタ-2-エンはどちらか一方に断定しない。',
+      representativeId: 'pent-1-ene', members: ['pent-1-ene', 'pent-2-ene'],
+      sources: ['idx-tryit', 'idx-kimika']
+    },
+    {
+      id: 'hexene-class', name: 'ヘキセン類（C6H12 鎖式モノアルケン）', nameEn: 'hexenes',
+      kind: 'homolog-class', category: 'unsat', formula: 'C6H12',
+      formulaNote: '位置・分岐を指定しない級名。C6H12の鎖式モノアルケン全体を指す。',
+      summary: '炭素6個の鎖式モノアルケンの級名。位置・分岐の異性体を一括して指す。',
+      description: '代表1物質を級名全体と同一視しない。登録済みの代表化合物がないため、一般構造 R—CH=CH₂（R = C₄H₉）と級名の説明を表示する。',
+      representativeId: null, members: [], structure: { type: 'condensed', lines: ['R—CH=CH₂（R = C₄H₉）'] },
+      sources: ['idx-tryit', 'idx-kimika']
+    },
+    {
+      id: 'pentyne-class', name: 'ペンチン類（C5H8 鎖式モノアルキン）', nameEn: 'pentynes',
+      kind: 'homolog-class', category: 'unsat', formula: 'C5H8',
+      formulaNote: '位置・分岐を指定しない級名。C5H8の鎖式モノアルキン全体を指す。',
+      summary: '炭素5個の鎖式モノアルキンの級名。ペンタ-1-インとペンタ-2-インは位置異性体。',
+      description: '末端アルキン（ペンタ-1-イン）は銀・銅アセチリドの検出対象になるが、内部アルキン（ペンタ-2-イン）は対象にならない。級名と代表例を区別する。',
+      representativeId: 'pent-1-yne', members: ['pent-1-yne', 'pent-2-yne'],
+      sources: ['idx-tryit', 'idx-kimika']
+    },
+    {
+      id: 'hexyne-class', name: 'ヘキシン類（C6H10 鎖式モノアルキン）', nameEn: 'hexynes',
+      kind: 'homolog-class', category: 'unsat', formula: 'C6H10',
+      formulaNote: '位置・分岐を指定しない級名。C6H10の鎖式モノアルキン全体を指す。',
+      summary: '炭素6個の鎖式モノアルキンの級名。位置・分岐の異性体を一括して指す。',
+      description: '代表1物質を級名全体と同一視しない。登録済みの代表化合物がないため、一般構造 R—C≡CH（R = C₄H₉）と級名の説明を表示する。',
+      representativeId: null, members: [], structure: { type: 'condensed', lines: ['R—C≡CH（R = C₄H₉）'] },
+      sources: ['idx-tryit', 'idx-kimika']
+    },
+    {
+      id: 'phosphatidylcholine', name: 'ホスファチジルコリン（PC）', nameEn: 'phosphatidylcholine',
+      kind: 'lipid-family', category: 'lipid', formula: null,
+      formulaNote: 'グリセロールのsn-1,2位にアシル基R¹・R²、sn-3位にホスホコリンが結合する。アシル鎖と頭部に依存し、単一の固定分子式をもたない。',
+      summary: 'グリセロリン脂質の一種。レシチンとも呼ばれる。',
+      description: 'グリセロールのsn-1,2位に脂肪酸（アシル基）、sn-3位にホスホコリン（P–O–CH₂–CH₂–N⁺(CH₃)₃）が結合する。R¹・R²は生物種・組織で異なり、ステアリン酸は代表例の一つにすぎない。工業的なレシチンは大豆・卵黄由来のリン脂質混合物を指す場合があり、PC単一の純物質とは限らない。コリン単体やホスファチジン酸そのものではない。',
+      representativeId: null, members: ['glycerol', 'choline'],
+      synonyms: ['レシチン', 'ホスファチジル コリン', 'ホスファチジルコリン', 'ホスファチジルコリン（レシチン）'],
+      provenanceNote: '原資料の一般構造はP–OHやNH₂等の中性形で描かれることがある。本版は教材の表記に合わせ、リン酸O⁻とコリン四級N⁺の双性イオン形（P–O–CH₂–CH₂–N⁺(CH₃)₃）で表示しており、原資料の描画そのものではない。',
+      relatedFamilyIds: ['phospholipid', 'phosphatidic-acid'],
+      structure: glycerophospholipidGeneralStructure('pc'),
+      sources: ['idx-tryit', 'idx-kimika']
+    },
+    {
+      id: 'phosphatidylethanolamine', name: 'ホスファチジルエタノールアミン（PE）', nameEn: 'phosphatidylethanolamine',
+      kind: 'lipid-family', category: 'lipid', formula: null,
+      formulaNote: 'グリセロールのsn-1,2位にアシル基R¹・R²、sn-3位にホスホエタノールアミンが結合する。固定分子式なし。',
+      summary: 'グリセロリン脂質の一種。頭部にエタノールアミンをもつ。',
+      description: 'グリセロールのsn-1,2位に脂肪酸（アシル基）、sn-3位にホスホエタノールアミン（P–O–CH₂–CH₂–NH₃⁺）が結合する。R¹・R²は固定せず、エタノールアミン単体の収録根拠でもない。膜脂質のfamilyとして、代表構造と構成要素を区別して表示する。',
+      representativeId: null, members: ['glycerol', 'ethanolamine'],
+      synonyms: ['ホスファチジル エタノールアミン', 'ホスファチジルエタノールアミン'],
+      provenanceNote: '原資料の一般構造はP–OHやNH₂等の中性形で描かれることがある。本版はリン酸O⁻とエタノールアミンN⁺の双性イオン形（P–O–CH₂–CH₂–NH₃⁺）で表示しており、原資料の描画そのものではない。',
+      relatedFamilyIds: ['phospholipid', 'phosphatidic-acid'],
+      structure: glycerophospholipidGeneralStructure('pe'),
+      sources: ['idx-tryit', 'idx-kimika']
+    },
+    {
+      id: 'phosphatidylserine', name: 'ホスファチジルセリン（PS）', nameEn: 'phosphatidylserine',
+      kind: 'lipid-family', category: 'lipid', formula: null,
+      formulaNote: 'アシル鎖R¹・R²に依存するグリセロリン脂質。固定分子式なし。',
+      summary: 'グリセロリン脂質の一種。頭部にセリンをもつ。',
+      description: 'セリン単体の収録根拠ではない。アミノ酸と脂質のfamilyを混同しない。',
+      representativeId: null, members: ['glycerol', 'serine'],
+      synonyms: ['ホスファチジル セリン', 'ホスファチジルセリン'],
+      relatedFamilyIds: ['phospholipid', 'phosphatidic-acid'],
+      structure: { type: 'condensed', lines: ['R¹COO—CH₂', 'R²COO—CH', 'CH₂—O—P(=O)(O⁻)—O—CH₂CH(N⁺H₃)—COO⁻'] },
+      sources: ['idx-tryit', 'idx-kimika']
+    },
+    {
+      id: 'phosphatidylinositol', name: 'ホスファチジルイノシトール（PI）', nameEn: 'phosphatidylinositol',
+      kind: 'lipid-family', category: 'lipid', formula: null,
+      formulaNote: 'アシル鎖R¹・R²とイノシトール環に依存するグリセロリン脂質。固定分子式なし。',
+      summary: 'グリセロリン脂質の一種。頭部にイノシトールをもつ。',
+      description: 'イノシトール単体の収録根拠ではない。リン脂質familyとして説明と代表構造を表示する。',
+      representativeId: null, members: ['glycerol', 'inositol'],
+      synonyms: ['ホスファチジル イノシトール', 'ホスファチジルイノシトール'],
+      relatedFamilyIds: ['phospholipid', 'phosphatidic-acid'],
+      structure: { type: 'condensed', lines: ['R¹COO—CH₂', 'R²COO—CH', 'CH₂—O—P(=O)(O⁻)—O—イノシトール'] },
+      sources: ['idx-tryit', 'idx-kimika']
+    },
+    {
+      id: 'alkyl-sulfate', name: 'アルキル硫酸（R—OSO₃H）', nameEn: 'alkyl sulfates',
+      kind: 'class', category: 'soap', formula: 'R—OSO₃H',
+      formulaNote: 'Rは炭化水素基。Rの鎖長で界面活性能が変わり、単一の固定分子式をもたない。',
+      summary: '硫酸エステル型の界面活性剤クラス。SDSは代表的なナトリウム塩の一つ。',
+      description: 'SDS（ドデシル硫酸ナトリウム）をクラス全体と同一視しない。石けん（脂肪酸塩）とも別のfamilyとして扱う。',
+      synonyms: ['アルキル硫酸', 'alkyl sulfate'],
+      representativeId: 'sds', members: ['sds'],
+      sources: ['idx-tryit', 'idx-kimika']
+    }
+  ];
+
+  /* ------------------------------------------------------------------
+   * 独立監査（2026-11-09）のname/state/family mapping要件。
+   * categoryの存在ではなく、名称から説明・代表構造・関連IDへ到達できる
+   * 実体としてfamilyを追加する。固定分子式をもたないものは formula=null。
+   * ------------------------------------------------------------------ */
+  var AUDIT_FAMILIES = [
+    {
+      id: 'cellulose-alkali', name: 'アルカリセルロース', nameEn: 'alkali cellulose',
+      kind: 'polymer-state', category: 'natural-polymer', formula: null,
+      formulaNote: 'セルロースを濃NaOH水溶液で処理した中間状態。置換度は一定でない。',
+      summary: 'セルロースの濃NaOH処理で生じる半透明の中間体。',
+      description: 'セルロースそのものでも再生セルロースとも同一視しない。CS₂を加えるとセルロースキサントゲン酸Naを経てビスコースになる。',
+      members: ['cellulose'], relatedMaterialIds: ['alkali-cellulose'], sources: ['idx-kimika']
+    },
+    {
+      id: 'cellulose-xanthate-sodium', name: 'セルロースキサントゲン酸ナトリウム', nameEn: 'sodium cellulose xanthate',
+      kind: 'polymer-state', category: 'natural-polymer', formula: null,
+      formulaNote: 'セルロースのOHにCS₂が付加したキサントゲン酸Na。置換度は一定でない。',
+      summary: 'CS₂付加で生じるキサントゲン酸Na誘導体。ビスコース→酸処理で再生セルロースになる。',
+      description: 'アルカリセルロースにCS₂を加えて生じる。ビスコース溶液そのものではなく、酸処理で再生セルロース（レーヨン等）へ至る段階として区別する。',
+      members: ['cellulose'], relatedMaterialIds: ['cellulose-xanthate', 'viscose'], sources: ['idx-kimika']
+    },
+    {
+      id: 'cellulose-acetate-ds2', name: 'ジアセチルセルロース', nameEn: 'diacetyl cellulose',
+      kind: 'polymer-state', category: 'natural-polymer', formula: null,
+      formulaNote: 'セルロース繰り返し単位のOH2箇所をアセチル化した平均置換度約2の状態。',
+      summary: '平均置換度約2のセルロースアセテート。アセテート繊維などに使う。',
+      description: 'トリアセチルセルロースの部分加水分解でも得る。一般のセルロースアセテートの可変式だけでは、置換度と用途の違いを説明できない。',
+      members: ['cellulose-acetate'], relatedMaterialIds: ['diacetylcellulose'], sources: ['idx-kimika']
+    },
+    {
+      id: 'cellulose-acetate-ds3', name: 'トリアセチルセルロース', nameEn: 'triacetyl cellulose',
+      kind: 'polymer-state', category: 'natural-polymer', formula: null,
+      formulaNote: 'セルロース繰り返し単位のOH3箇所をアセチル化した置換度3の状態。',
+      summary: '置換度3のセルロースアセテート。写真フィルム基材などに使われた。',
+      description: '部分加水分解するとジアセチルセルロースになる。半合成繊維として、セルロースそのものとは区別する。',
+      members: ['cellulose-acetate'], sources: ['idx-tryit', 'idx-kimika']
+    },
+    {
+      id: 'cellulose-nitrate-ds2', name: 'ジニトロセルロース', nameEn: 'dinitro cellulose',
+      kind: 'polymer-state', category: 'natural-polymer', formula: null,
+      formulaNote: 'セルロース繰り返し単位のOH2箇所を硝酸エステル化した平均置換度約2の状態。',
+      summary: '平均置換度約2の硝酸セルロース。コロジオン膜・セルロイドの原料。',
+      description: '硝酸エステル化度約2。コロジオン（溶液・膜）やセルロイド（樟脳添加）は材料であり、ジニトロセルロースそのものと同一視しない。',
+      members: ['cellulose-nitrate'], relatedMaterialIds: ['dinitrocellulose', 'collodion', 'celluloid'], sources: ['idx-kimika']
+    },
+    {
+      id: 'cellulose-nitrate-ds3', name: 'トリニトロセルロース', nameEn: 'trinitro cellulose',
+      kind: 'polymer-state', category: 'natural-polymer', formula: null,
+      formulaNote: 'セルロース繰り返し単位のOH3箇所を硝酸エステル化した置換度3の状態。',
+      summary: '置換度3の硝酸セルロース。綿火薬の原料。',
+      description: '硝酸エステル化度3。ニトロ基の直接置換ではなく、OHの硝酸エステル化である。ジニトロセルロースとは置換度が異なる。',
+      members: ['cellulose-nitrate'], sources: ['idx-kimika']
+    },
+    {
+      id: 'phenol-resin-novolac', name: 'ノボラック', nameEn: 'novolac',
+      kind: 'resin-state', category: 'synthetic-polymer', formula: null,
+      formulaNote: '酸触媒で得る低重合度のフェノール樹脂中間体。硬化剤と加熱で架橋する。',
+      summary: '酸触媒で得るフェノール樹脂前駆体。単独では加熱硬化しない。',
+      description: 'フェノールとホルムアルデヒドを酸触媒で縮合した低重合体。硬化にはヘキサメチレンテトラミン等の硬化剤と加熱が必要。レゾールとは別中間状態。',
+      members: ['phenol-resin'], relatedMaterialIds: ['novolac'], sources: ['idx-kimika']
+    },
+    {
+      id: 'phenol-resin-resol', name: 'レゾール', nameEn: 'resol',
+      kind: 'resin-state', category: 'synthetic-polymer', formula: null,
+      formulaNote: '塩基触媒で得るフェノール樹脂中間体。加熱で自己架橋する。',
+      summary: '塩基触媒で得るフェノール樹脂前駆体。加熱で硬化する。',
+      description: 'フェノールとホルムアルデヒドを塩基触媒で縮合した中間体。加熱により網目状に架橋する。ノボラックとは触媒・硬化挙動が異なる。',
+      members: ['phenol-resin'], relatedMaterialIds: ['resol'], sources: ['idx-kimika']
+    },
+    {
+      id: 'natural-polymer-lignin', name: 'リグニン', nameEn: 'lignin',
+      kind: 'polymer-family', category: 'natural-polymer', formula: null,
+      formulaNote: '木材中の天然芳香族高分子群。単一の固定分子式をもたない。',
+      summary: '木材パルプから除去される天然芳香族高分子群。セルロースとは別物。',
+      description: 'リグニンはセルロースと並ぶ木材成分だが、芳香族性の高分子群であり、セルロースの別名ではない。材料索引の lignin へ到達させる。',
+      members: [], relatedMaterialIds: ['lignin'], sources: ['idx-kimika']
+    },
+    {
+      id: 'phospholipid', name: 'リン脂質', nameEn: 'phospholipids',
+      kind: 'lipid-family', category: 'lipid', formula: null,
+      formulaNote: 'グリセロールのsn-1,2位に脂肪酸2本、sn-3位にリン酸が結合し、さらに頭部アルコールが結合する。Rと頭部に依存し、固定分子式をもたない。',
+      summary: 'グリセロリン脂質の総称。親水頭部と疎水アシル鎖をもつ。',
+      description: 'ホスファチジン酸を基本に、頭部アルコールが異なるホスファチジルコリン/エタノールアミン/セリン/イノシトールへ分かれる。頭部単体の物質（コリン・エタノールアミン・セリン・イノシトール）とは別family。',
+      members: ['glycerol'], relatedFamilyIds: ['phosphatidic-acid', 'phosphatidylcholine', 'phosphatidylethanolamine', 'phosphatidylserine', 'phosphatidylinositol'],
+      structure: { type: 'condensed', lines: ['R¹COO—CH₂', 'R²COO—CH', 'CH₂—O—P(=O)(O⁻)—O—頭部'] },
+      provenanceNote: '原資料の一般構造はP–OHやNH₂等の中性形で描かれることがある。本版の代表構造はリン酸O⁻と頭部の電離形を含む模式的な一般構造で、原資料の描画そのものではない。',
+      sources: ['idx-tryit', 'idx-kimika']
+    },
+    {
+      id: 'phosphatidic-acid', name: 'ホスファチジン酸（PA）', nameEn: 'phosphatidic acid',
+      kind: 'lipid-family', category: 'lipid', formula: null,
+      formulaNote: 'グリセロールのsn-1,2位に脂肪酸2本、sn-3位にリン酸が結合した基本骨格。アシル鎖R¹・R²に依存する。',
+      summary: 'リン脂質の基本骨格。グリセリン＋脂肪酸2本＋リン酸。',
+      description: 'ホスファチジルコリン等の頭部を除いた基本構造。グリセロールのsn-1,2位に脂肪酸（アシル基）、sn-3位にリン酸をもつ。単一の固定分子式ではなく、R¹・R²の脂肪酸鎖に依存し、ステアリン酸は代表例の一つにすぎない。',
+      members: ['glycerol'],
+      synonyms: ['ホスファチジン酸', 'ホスファチジン酸（PA）', 'phosphatidic acid'],
+      provenanceNote: '原資料の一般構造はP–OH等の中性形で描かれることがある。本版はP(=O)(OH)₂の中性形で表示しており、生体内の電離状態を固定して主張するものではない。',
+      relatedFamilyIds: ['phospholipid'],
+      structure: glycerophospholipidGeneralStructure(null),
+      sources: ['idx-tryit', 'idx-kimika']
+    },
+    {
+      id: 'enzyme-dehydrogenase', name: 'デヒドロゲナーゼ', nameEn: 'dehydrogenase',
+      kind: 'enzyme-class', category: 'amino', formula: null,
+      summary: '基質から水素（H）を奪う酸化還元酵素群。',
+      description: '脱水素酵素。基質の酸化に関与し、補酵素が水素を受け取る。種・配列を特定しない総称であり、単一の固定構造をもたない。酸化還元酵素の一種。',
+      members: [], relatedFamilyIds: ['enzyme-oxidoreductase'], sources: ['idx-kimika']
+    },
+    {
+      id: 'enzyme-transferase', name: '転移酵素（トランスフェラーゼ）', nameEn: 'transferase',
+      kind: 'enzyme-class', category: 'amino', formula: null,
+      summary: '基（アミノ基・リン酸基など）を他の分子へ転移する酵素群。',
+      description: '代表としてホスホリラーゼ（リン酸を用いる分解）へリンクする。種・配列を特定しない総称であり、単一の固定構造をもたない。',
+      members: [], relatedFamilyIds: ['enzyme-phosphorylase'], sources: ['idx-kimika']
+    },
+    {
+      id: 'enzyme-phosphorylase', name: 'ホスホリラーゼ', nameEn: 'phosphorylase',
+      kind: 'enzyme-class', category: 'amino', formula: null,
+      summary: 'リン酸を用いて基質を分解する酵素群。',
+      description: '教材の「リン酸化する／過リン酸分解する」という表現は原文の語であり、科学用語としての厳密な定義とは区別する。リン酸を使う分解反応を触媒する群として説明する。',
+      members: [], relatedFamilyIds: ['enzyme-transferase'], sources: ['idx-kimika']
+    },
+    {
+      id: 'enzyme-hydrolase', name: '加水分解酵素（ヒドロラーゼ）', nameEn: 'hydrolase',
+      kind: 'enzyme-class', category: 'amino', formula: null,
+      summary: '水を加えて基質の結合を切る酵素群。',
+      description: '糖・油脂・ペプチドの加水分解を触媒する。アミラーゼ・マルターゼ・ラクターゼ・スクラーゼ・リパーゼ・プロテアーゼ等の具体的な酵素へリンクする。',
+      members: ['amylase', 'maltase', 'lactase', 'sucrase', 'lipase', 'protease', 'trypsin', 'pepsin', 'cellulase', 'cellobiase', 'urease'],
+      sources: ['idx-kimika']
+    },
+    {
+      id: 'enzyme-lyase', name: '脱離酵素（リアーゼ）', nameEn: 'lyase',
+      kind: 'enzyme-class', category: 'amino', formula: null,
+      summary: '基質から基を脱離させる酵素群。',
+      description: '脱炭酸酵素（デカルボキシラーゼ）へリンクする。種・配列を特定しない総称であり、単一の固定構造をもたない。',
+      members: [], relatedFamilyIds: ['enzyme-decarboxylase'], sources: ['idx-kimika']
+    },
+    {
+      id: 'enzyme-decarboxylase', name: '脱炭酸酵素（デカルボキシラーゼ）', nameEn: 'decarboxylase',
+      kind: 'enzyme-class', category: 'amino', formula: null,
+      summary: 'カルボン酸 RCOOH から CO₂ を脱離させる酵素群。',
+      description: '脱離酵素の一種。基質特異性は酵素ごとに異なり、単一の固定構造をもたない。',
+      members: [], relatedFamilyIds: ['enzyme-lyase'], sources: ['idx-kimika']
+    },
+    {
+      id: 'enzyme-isomerase', name: '異性化酵素（イソメラーゼ）', nameEn: 'isomerase',
+      kind: 'enzyme-class', category: 'amino', formula: null,
+      summary: '基質の異性化を触媒する酵素群。',
+      description: 'シス-トランス異性化酵素へリンクする。種・配列を特定しない総称であり、単一の固定構造をもたない。',
+      members: [], relatedFamilyIds: ['enzyme-cis-trans-isomerase'], sources: ['idx-kimika']
+    },
+    {
+      id: 'enzyme-cis-trans-isomerase', name: 'シス-トランス異性化酵素', nameEn: 'cis-trans isomerase',
+      kind: 'enzyme-class', category: 'amino', formula: null,
+      summary: 'シス体とトランス体を相互変換する酵素群。',
+      description: '二重結合の幾何異性を変換する。教材一覧に名称があるが種・配列は未指定で、単一の固定構造をもたない。',
+      members: [], relatedFamilyIds: ['enzyme-isomerase'], sources: ['idx-kimika']
+    },
+    {
+      id: 'enzyme-ligase', name: '合成酵素（リガーゼ）', nameEn: 'ligase',
+      kind: 'enzyme-class', category: 'amino', formula: null,
+      summary: '2つの分子をATP等のエネルギーを使って連結する酵素群。',
+      description: 'DNAリガーゼ（DNA鎖の連結）へリンクする。教材の「DNAの合成を行う」は原文表現であり、DNAポリメラーゼとの区別を説明する。',
+      members: [], relatedFamilyIds: ['enzyme-dna-ligase'], sources: ['idx-kimika']
+    },
+    {
+      id: 'enzyme-dna-ligase', name: 'DNAリガーゼ', nameEn: 'DNA ligase',
+      kind: 'enzyme-class', category: 'amino', formula: null,
+      summary: 'DNA鎖の切れ目を連結する酵素。',
+      description: 'DNAのリン酸ジエステル結合を形成して鎖をつなぐ。教材の「DNAの合成を行う」は連結作用の説明として扱い、DNAポリメラーゼによる鎖伸長とは区別する。',
+      members: [], relatedFamilyIds: ['enzyme-ligase'], sources: ['idx-kimika']
+    },
+    {
+      id: 'enzyme-oxidoreductase', name: '酸化還元酵素', nameEn: 'oxidoreductase',
+      kind: 'enzyme-class', category: 'amino', formula: null,
+      summary: '酸化還元反応を触媒する酵素群。',
+      description: 'カタラーゼ（過酸化水素の分解）とデヒドロゲナーゼ（基質からの脱水素）は作用が異なる。同じ「酸化還元酵素」でも個別酵素を同一視しない。',
+      members: ['catalase'], relatedFamilyIds: ['enzyme-dehydrogenase'], sources: ['idx-kimika']
+    }
+  ];
+  FAMILIES = FAMILIES.concat(AUDIT_FAMILIES);
 
   function normalizeName(text) {
     var s = String(text == null ? '' : text);
@@ -2795,6 +4152,32 @@
     return MATERIALS.filter(function (m) { return m.of === id; });
   }
 
+  function materialById(id) {
+    for (var i = 0; i < MATERIALS.length; i++) {
+      if (MATERIALS[i].id === id) return MATERIALS[i];
+    }
+    return null;
+  }
+
+  function familyById(id) {
+    for (var i = 0; i < FAMILIES.length; i++) {
+      if (FAMILIES[i].id === id) return FAMILIES[i];
+    }
+    return null;
+  }
+
+  function familyByTerm(term) {
+    var key = normalizeName(term);
+    for (var i = 0; i < FAMILIES.length; i++) {
+      var f = FAMILIES[i];
+      var names = [f.name, f.nameEn || ''].concat(f.synonyms || []);
+      for (var j = 0; j < names.length; j++) {
+        if (names[j] && normalizeName(names[j]) === key) return f;
+      }
+    }
+    return null;
+  }
+
   function materialByTerm(term) {
     var key = normalizeName(term);
     for (var i = 0; i < MATERIALS.length; i++) {
@@ -2810,6 +4193,8 @@
   function searchTermsFor(id) {
     var terms = aliasesFor(id);
     materialsFor(id).forEach(function (m) {
+      // 商品名・製剤名は純物質の別名として検索語に混ぜない。
+      if (m.kind === 'product') return;
       terms = terms.concat([m.name], m.synonyms || []);
     });
     var seen = {};
@@ -3885,6 +5270,7 @@
   });
 
   var LEDGER_NOTES = [
+    { title: '出典と本文抜粋の扱い', detail: '教材出典ページのURLと本文抜粋は配信していません（画像・動画も配信しません）。資料名・source ID・出典URLとの照合結果として独自に整理した化学的事実のみを示します。' },
     { title: '組合せ生成の意味（水素置換のみ）', detail: '炭素骨格＋官能基の組合せは、骨格のC−H結合を置換する生成だけを扱います。水の付加（水和、エテン＋H₂O→エタノール）や付加反応の生成物は混在させず、必要に応じて個別化合物として登録しています。アルケンのC−Hを−OHや−Clで置換したエノール・塩化ビニル等は、付加物とは別の物質として収録しています。ブロモエタン・ヨードエタンはエタンの水素置換として表示しますが、HBr・HIの付加でも同じ物質が得られることは別経路であり、この画面では置換経路として扱います。ニトリルはHCNの付加ではなく、骨格の水素を−CNで置換した経路です。' },
     { title: '異性体の表示範囲', detail: '同じ骨格＋官能基から得られる位置・骨格異性体は、高校教材で扱う代表範囲をCOMBOSに列挙し、結果一覧で比較します（例: ブタン＋−OHの4種、プロパン＋−NH₂の2種、ナフタレン＋−OHの2種）。C5以上のアミンやC4以上のハロゲン化物など、異性体を網羅しない組み合わせは、空セルの理由に「代表例のみ」「範囲外」と明示します。官能基異性体（エタノールとジメチルエーテルなど）は同じ結果一覧に混ぜず、個別選択として扱います。' },
     { title: '空の組合せの理由', detail: '空の組合せは「高校化学の範囲外」と「化学的に成立しない」の2分類だけを使います。範囲外には具体例と、教科書で扱う範囲の目安を添えています。登録済み化合物の検証失敗は範囲外にせず、データ不備として表示を止めます。' },
@@ -3903,8 +5289,32 @@
     { title: '収録カバレッジの確認', detail: 'COVERAGE のチェックリストで、アルカン・アルケン・アルキン・環状・芳香族・アルコール・エーテル・アルデヒド・ケトン・カルボン酸・エステル・油脂・セッケン・糖類・アミノ酸・核酸・単量体・合成高分子・天然高分子の各項目を確認します。件数だけでは網羅を主張しません。' },
     { title: '外部公開資料との照合', detail: '実教出版・啓林館・Try IT・大学化学・日本化学会『化学と教育』などの公開資料に掲載された名称を、外部照合台帳（external-coverage.js）に記録しました。資料に掲載されていることは標準的に暗記する範囲であることを意味しないため、各行に標準・発展・探究のラベルを付けています。照合は名称から収録ID・別名・材料索引・無機対象外への対応を確認するもので、外部説明の文章は転載していません。' },
     { title: '別名・材料索引', detail: '「1-ペンタノール」「酢酸Na」「塩化メチレン」「クロロホルム」「四塩化炭素」「p-フェニルアゾフェノール」などの別名を検索できるようにしました。レーヨン・セロファン・キュプラはセルロースの材料名、ビスコースは混合物、アニリンブラックはポリアニリンを主成分とする混合物として扱い、同じ分子を別化合物として水増ししていません。' },
-    { title: '発展・探究で追加した化合物', detail: 'ヘプタン〜デカン・エイコサン、核酸塩基、染料、医薬品、タンパク質・酵素などを追加しました。これらは標準カバレッジとは別の外部照合台帳で管理し、標準項目と混同しません。タンパク質・酵素はアミノ酸配列と重合度で組成が変わるため、固定の分子式を主張せず模式図で表示します。' }
+    { title: '発展・探究で追加した化合物', detail: 'ヘプタン〜デカン・エイコサン、核酸塩基、染料、医薬品、タンパク質・酵素などを追加しました。これらは標準カバレッジとは別の外部照合台帳で管理し、標準項目と混同しません。タンパク質・酵素はアミノ酸配列と重合度で組成が変わるため、固定の分子式を主張せず模式図で表示します。' },
+    { title: '3つの探し方（app10-next）', detail: '鎖式は分子全体の総炭素数（–COOH・–COO–・–C≡N などの官能基炭素を含む）＋化合物分類、芳香族・環式は固定した環＋置換基、その他はcategory→familyで探します。鎖式のアミンは第一級〜第三級の一般構造を常時表示し、該当しない級は条件不足と明記します。' },
+    { title: '一置換生成と多置換体', detail: '芳香族・環式では、固定した環のHを置換基で置き換える一置換生成だけを行います。p-ジクロロベンゼン・キシレン・クレゾール・TNT・ピクリン酸などの多置換体は、一置換生成の結果に混ぜず、別familyとして表示します。' },
+    { title: '索引監査の限界', detail: 'Try IT 7節・化学のグルメ全60記事の431件を取得し、65件の要判断事項を化合物・family・材料/混合物・無機対象外へ対応づけました。画像1399枚の全目視/OCRと動画の視聴/文字起こしは未完了で、外部抽出の未分類候補625語は別監査で継続中です。教材の完全網羅を保証しません。' }
   ];
+
+  // ベンゼン環の置換基metadata（custom構造の明示定義）。
+  // ring-sub構造は structure.subs を正とし、この表は custom 構造だけを補う。
+  // count/positions は置換基の種類・数・位置（環のlocant 1〜6）を明示する。
+  var RING_SUBS = {
+    'p-divinylbenzene': [{ key: 'CH=CH2', label: 'CH=CH₂', count: 2, positions: [1, 4] }],
+    guaiacol: [{ key: 'OH', label: 'OH', count: 1, positions: [1] }, { key: 'OCH3', label: 'OCH₃', count: 1, positions: [2] }],
+    'sulfanilic-acid': [{ key: 'SO3H', label: 'SO₃H', count: 1, positions: [1] }, { key: 'NH2', label: 'NH₂', count: 1, positions: [4] }],
+    '2-nitrobenzaldehyde': [{ key: 'CHO', label: 'CHO', count: 1, positions: [1] }, { key: 'NO2', label: 'NO₂', count: 1, positions: [2] }],
+    acetaminophen: [{ key: 'OH', label: 'OH', count: 1, positions: [1] }, { key: 'NHCOCH3', label: 'NHCOCH₃', count: 1, positions: [4] }],
+    sulfanilamide: [{ key: 'SO2NH2', label: 'SO₂NH₂', count: 1, positions: [1] }, { key: 'NH2', label: 'NH₂', count: 1, positions: [4] }],
+    'p-hydroxybenzoic-acid': [{ key: 'COOH', label: 'COOH', count: 1, positions: [1] }, { key: 'OH', label: 'OH', count: 1, positions: [4] }],
+    'm-hydroxybenzoic-acid': [{ key: 'COOH', label: 'COOH', count: 1, positions: [1] }, { key: 'OH', label: 'OH', count: 1, positions: [3] }],
+    'n,n-dimethylaniline': [{ key: 'N(CH3)2', label: 'N(CH₃)₂', count: 1, positions: [1] }],
+    '2,4,6-tribromophenol': [{ key: 'OH', label: 'OH', count: 1, positions: [1] }, { key: 'Br', label: 'Br', count: 3, positions: [2, 4, 6] }],
+    ibuprofen: [{ key: 'CH(CH3)COOH', label: 'CH(CH₃)COOH', count: 1, positions: [1] }, { key: 'isobutyl', label: 'CH₂CH(CH₃)₂', count: 1, positions: [4] }],
+    '1-naphthol': [{ key: 'OH', label: 'OH', count: 1, positions: [1] }],
+    '2-naphthol': [{ key: 'OH', label: 'OH', count: 1, positions: [2] }],
+    benzonitrile: [{ key: 'CN', label: 'CN', count: 1, positions: [1] }],
+    'phenoxide-ion': [{ key: 'O-', label: 'O⁻', count: 1, positions: [1] }]
+  };
 
   return {
     CATEGORIES: CATEGORIES,
@@ -3920,11 +5330,16 @@
     REQUIRED_CURRICULUM: REQUIRED_CURRICULUM,
     ALIASES: ALIASES,
     MATERIALS: MATERIALS,
+    FAMILIES: FAMILIES,
+    RING_SUBS: RING_SUBS,
     normalizeName: normalizeName,
     aliasTarget: aliasTarget,
     aliasesFor: aliasesFor,
     materialsFor: materialsFor,
+    materialById: materialById,
     materialByTerm: materialByTerm,
+    familyById: familyById,
+    familyByTerm: familyByTerm,
     searchTermsFor: searchTermsFor,
     UNSUPPORTED_REASONS: UNSUPPORTED_REASONS,
     unsupportedReason: unsupportedReason,

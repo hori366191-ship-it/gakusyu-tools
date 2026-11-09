@@ -2,8 +2,8 @@
  * 有機化学ビルダー（app10-next）— 全章索引の取得マニフェスト（監査記録）
  *
  * 生成元: 2026-11-09 の外部教材取得結果（Try IT 2章7節 + 化学のグルメ全60記事）。
- * 431 URL の URL・title・節・種別（type/kind）・HTTP状態・文字数・SHA-256 を保持する。
- * 本文全文は保持しない。名称と短い根拠は index-audit.js を参照。
+ * 431件の entry ID・title・節・種別（type/kind）・HTTP状態・文字数・SHA-256 を保持する。
+ * 教材URL・本文全文は配信しない。名称対応は index-audit.js の source ID と独自判定で示す。
  * 画像1399枚は取得・索引化したが全目視/OCRは未完了、動画は未視聴であり、完了とは主張しない。
  */
 (function (root, factory) {
@@ -14,56 +14,56 @@
   return {
   "RETRIEVED": "2026-11-09",
   "SCOPE": {
-    "tryit": "https://www.try-it.jp/ の有機化合物・高分子の2章7節（索引・lesson・point・practice・question）",
-    "kimika": "https://kimika.net/y.html の有機化学 全60記事（メイン57＋サブ3）",
-    "note": "全431 URLをHTTP取得し、URL・title・節・種別・HTTP状態・本文文字数・元HTMLのSHA-256を記録する。本文全文は再配布せず、監査用の短い根拠のみを別ファイルにもつ。"
+    "tryit": "Try IT の有機化合物・高分子の2章7節（索引・lesson・point・practice・question）",
+    "kimika": "化学のグルメの有機化学 全60記事（メイン57＋サブ3）",
+    "note": "全431件をHTTP取得し、title・節・種別・HTTP状態・本文文字数・元HTMLのSHA-256を記録する。教材URL・本文は配信せず、公開データにはentry ID・件数・独自の化学的事実のみを残す。"
   },
   "CHAPTERS": [
     {
       "name": "有機化合物の特徴と構造",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/",
+      "id": "ch-1",
       "expectedLessons": 11,
       "obtainedLessons": 11,
       "allPages": 32
     },
     {
       "name": "炭化水素",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/",
+      "id": "ch-2",
       "expectedLessons": 16,
       "obtainedLessons": 16,
       "allPages": 46
     },
     {
       "name": "酸素を含む有機化合物",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/",
+      "id": "ch-3",
       "expectedLessons": 24,
       "obtainedLessons": 24,
       "allPages": 69
     },
     {
       "name": "芳香族化合物",
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/",
+      "id": "ch-4",
       "expectedLessons": 28,
       "obtainedLessons": 28,
       "allPages": 80
     },
     {
       "name": "高分子化合物の基礎",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/",
+      "id": "ch-5",
       "expectedLessons": 5,
       "obtainedLessons": 5,
       "allPages": 16
     },
     {
       "name": "天然高分子化合物",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/",
+      "id": "ch-6",
       "expectedLessons": 32,
       "obtainedLessons": 32,
       "allPages": 92
     },
     {
       "name": "合成高分子化合物",
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/",
+      "id": "ch-7",
       "expectedLessons": 11,
       "obtainedLessons": 11,
       "allPages": 32
@@ -99,6 +99,7 @@
     "No chapter/section/lesson/point/practice link was left unfetched within the two chosen Try IT chapters.",
     "Try IT videos were not downloaded or transcribed.",
     "Images are separately downloaded and indexed but not all visually reviewed/OCRed. Therefore no claim of exhaustive image-only chemical-name extraction.",
+    "教材出典ページのURLと本文抜粋は配信しない（entry ID・件数・独自判定のみ）。",
     "Kimika includes three sub-content articles (orientation/Markovnikov/Michaelis) as well as every main index article.",
     "Reverse current-data name matching is only a cross-reference; it is not used as an external completeness criterion.",
     "Raw candidates include teaching words, fragments, and generic classes; unresolved lexical candidates are explicitly preserved rather than silently counted as chemicals.",
@@ -107,7 +108,7 @@
   ],
   "PAGES": [
     {
-      "url": "https://www.try-it.jp/chapters-9788/",
+      "id": "idx-tryit-001",
       "title": "「有機化合物」の勉強法のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "Try IT 化学（章索引）",
       "kind": "index",
@@ -118,7 +119,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/",
+      "id": "idx-tryit-002",
       "title": "「高分子化合物」の勉強法のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "Try IT 化学（章索引）",
       "kind": "index",
@@ -129,7 +130,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/questions/",
+      "id": "idx-tryit-003",
       "title": "「高分子化合物」の問題のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "Try IT 化学（章索引）",
       "kind": "index",
@@ -140,7 +141,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/",
+      "id": "idx-tryit-004",
       "title": "「高分子化合物」の勉強法のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "index",
@@ -151,7 +152,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/",
+      "id": "idx-tryit-005",
       "title": "「天然高分子化合物」の勉強法のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "index",
@@ -162,7 +163,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/",
+      "id": "idx-tryit-006",
       "title": "【高校化学】「フルクトース」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -173,7 +174,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10148/",
+      "id": "idx-tryit-007",
       "title": "【高校化学】「デンプンの構造①」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -184,7 +185,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10156/",
+      "id": "idx-tryit-008",
       "title": "【高校化学】「セルロースの構造」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -195,7 +196,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10168/",
+      "id": "idx-tryit-009",
       "title": "【高校化学】「高分子化合物（テスト３、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -206,7 +207,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/",
+      "id": "idx-tryit-010",
       "title": "【高校化学】「タンパク質の分類」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -217,7 +218,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10206/",
+      "id": "idx-tryit-011",
       "title": "【高校化学】「タンパク質の構造①」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -228,7 +229,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/",
+      "id": "idx-tryit-012",
       "title": "【高校化学】「タンパク質の反応①」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -239,7 +240,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/",
+      "id": "idx-tryit-013",
       "title": "【高校化学】「RNA」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -250,7 +251,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/",
+      "id": "idx-tryit-014",
       "title": "「合成高分子化合物」の勉強法のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "index",
@@ -261,7 +262,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/",
+      "id": "idx-tryit-015",
       "title": "【高校化学】「高分子化合物（テスト７、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "lesson",
@@ -272,7 +273,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/questions/",
+      "id": "idx-tryit-016",
       "title": "「有機化合物」の問題のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "Try IT 化学（章索引）",
       "kind": "index",
@@ -283,7 +284,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/",
+      "id": "idx-tryit-017",
       "title": "「有機化合物の特徴と構造」の勉強法のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "index",
@@ -294,7 +295,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9806/",
+      "id": "idx-tryit-018",
       "title": "【高校化学】「構造異性体」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "lesson",
@@ -305,7 +306,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9810/",
+      "id": "idx-tryit-019",
       "title": "【高校化学】「有機化合物（テスト１、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "lesson",
@@ -316,7 +317,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/",
+      "id": "idx-tryit-020",
       "title": "「炭化水素」の勉強法のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "index",
@@ -327,7 +328,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/",
+      "id": "idx-tryit-021",
       "title": "「酸素を含む有機化合物」の勉強法のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "index",
@@ -338,7 +339,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/",
+      "id": "idx-tryit-022",
       "title": "【高校化学】「カルボン酸の定義」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -349,7 +350,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9949/",
+      "id": "idx-tryit-023",
       "title": "【高校化学】「水素結合」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -360,7 +361,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9961/",
+      "id": "idx-tryit-024",
       "title": "【高校化学】「有機化合物（テスト８、第１問）」(問題編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -371,7 +372,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/",
+      "id": "idx-tryit-025",
       "title": "「芳香族化合物」の勉強法のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "index",
@@ -382,7 +383,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10023/",
+      "id": "idx-tryit-026",
       "title": "【高校化学】「フェノール類の酸としての性質」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -393,7 +394,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10057/",
+      "id": "idx-tryit-027",
       "title": "【高校化学】「芳香族アミンとは」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -404,7 +405,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10088/",
+      "id": "idx-tryit-028",
       "title": "【高校化学】「芳香族化合物の分離①」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -415,7 +416,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10092/",
+      "id": "idx-tryit-029",
       "title": "【高校化学】「有機化合物（テスト１４、第１問）」(問題編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -426,7 +427,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10097/",
+      "id": "idx-tryit-030",
       "title": "【高校化学】「天然高分子化合物」 | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "lesson",
@@ -437,7 +438,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10097/point-2/",
+      "id": "idx-tryit-031",
       "title": "【高校化学】「合成高分子化合物」 | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "point",
@@ -448,7 +449,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10097/practice-3/",
+      "id": "idx-tryit-032",
       "title": "【高校化学】「高分子化合物」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "practice",
@@ -459,7 +460,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10101/",
+      "id": "idx-tryit-033",
       "title": "【高校化学】「単量体と重合体、重合度」 | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "lesson",
@@ -470,7 +471,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10101/point-2/",
+      "id": "idx-tryit-034",
       "title": "【高校化学】「付加重合」 | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "point",
@@ -481,7 +482,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10101/practice-3/",
+      "id": "idx-tryit-035",
       "title": "【高校化学】「付加重合」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "practice",
@@ -492,7 +493,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10105/",
+      "id": "idx-tryit-036",
       "title": "【高校化学】「縮合重合」 | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "lesson",
@@ -503,7 +504,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10105/point-2/",
+      "id": "idx-tryit-037",
       "title": "【高校化学】「様々な重合」 | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "point",
@@ -514,7 +515,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10105/practice-3/",
+      "id": "idx-tryit-038",
       "title": "【高校化学】「様々な重合」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "practice",
@@ -525,7 +526,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10109/",
+      "id": "idx-tryit-039",
       "title": "【高校化学】「平均分子量」 | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "lesson",
@@ -536,7 +537,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10109/point-2/",
+      "id": "idx-tryit-040",
       "title": "【高校化学】「高分子化合物の特徴」 | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "point",
@@ -547,7 +548,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10109/practice-3/",
+      "id": "idx-tryit-041",
       "title": "【高校化学】「高分子化合物の特徴」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "practice",
@@ -558,7 +559,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10113/",
+      "id": "idx-tryit-042",
       "title": "【高校化学】「高分子化合物（テスト１、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "lesson",
@@ -569,7 +570,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/questions/",
+      "id": "idx-tryit-043",
       "title": "「高分子化合物」の問題のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "index",
@@ -580,7 +581,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10117/",
+      "id": "idx-tryit-044",
       "title": "【高校化学】「糖類とは」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -591,7 +592,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10117/point-2/",
+      "id": "idx-tryit-045",
       "title": "【高校化学】「糖類の分類」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -602,7 +603,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10117/practice-3/",
+      "id": "idx-tryit-046",
       "title": "【高校化学】「糖類」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -613,7 +614,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10121/",
+      "id": "idx-tryit-047",
       "title": "【高校化学】「単糖類の種類」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -624,7 +625,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10121/point-2/",
+      "id": "idx-tryit-048",
       "title": "【高校化学】「糖類の分類単糖類の性質」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -635,7 +636,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10121/practice-3/",
+      "id": "idx-tryit-049",
       "title": "【高校化学】「単糖類の種類と性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -646,7 +647,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10125/",
+      "id": "idx-tryit-050",
       "title": "【高校化学】「グルコースの構造」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -657,7 +658,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10125/point-2/",
+      "id": "idx-tryit-051",
       "title": "【高校化学】「グルコースの水溶液中での平衡」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -668,7 +669,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10125/practice-3/",
+      "id": "idx-tryit-052",
       "title": "【高校化学】「グルコースとその性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -679,7 +680,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/point-2/",
+      "id": "idx-tryit-053",
       "title": "【高校化学】「ガラクトース」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -690,7 +691,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10129/practice-3/",
+      "id": "idx-tryit-054",
       "title": "【高校化学】「様々な単糖類」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -701,7 +702,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10133/",
+      "id": "idx-tryit-055",
       "title": "【高校化学】「アルコール発酵」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -712,7 +713,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10133/point-2/",
+      "id": "idx-tryit-056",
       "title": "【高校化学】「アルコール発酵と計算」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -723,7 +724,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10133/practice-3/",
+      "id": "idx-tryit-057",
       "title": "【高校化学】「アルコール発酵と計算」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -734,7 +735,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10137/",
+      "id": "idx-tryit-058",
       "title": "【高校化学】「高分子化合物（テスト２、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -745,7 +746,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10140/",
+      "id": "idx-tryit-059",
       "title": "【高校化学】「マルトース」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -756,7 +757,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10140/point-2/",
+      "id": "idx-tryit-060",
       "title": "【高校化学】「マルトースの性質」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -767,7 +768,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10140/practice-3/",
+      "id": "idx-tryit-061",
       "title": "【高校化学】「マルトースの性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -778,7 +779,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10144/",
+      "id": "idx-tryit-062",
       "title": "【高校化学】「スクロース」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -789,7 +790,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10144/point-2/",
+      "id": "idx-tryit-063",
       "title": "【高校化学】「スクロースの性質」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -800,7 +801,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10144/practice-3/",
+      "id": "idx-tryit-064",
       "title": "【高校化学】「スクロースの性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -811,7 +812,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10148/point-2/",
+      "id": "idx-tryit-065",
       "title": "【高校化学】「デンプンの構造②」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -822,7 +823,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10148/practice-3/",
+      "id": "idx-tryit-066",
       "title": "【高校化学】「デンプンの構造」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -833,7 +834,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10152/",
+      "id": "idx-tryit-067",
       "title": "【高校化学】「デンプンの性質①」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -844,7 +845,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10152/point-2/",
+      "id": "idx-tryit-068",
       "title": "【高校化学】「デンプンの性質②」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -855,7 +856,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10152/practice-3/",
+      "id": "idx-tryit-069",
       "title": "【高校化学】「デンプンの性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -866,7 +867,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10156/point-2/",
+      "id": "idx-tryit-070",
       "title": "【高校化学】「セルロースの性質」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -877,7 +878,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10156/practice-3/",
+      "id": "idx-tryit-071",
       "title": "【高校化学】「セルロースの性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -888,7 +889,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10160/",
+      "id": "idx-tryit-072",
       "title": "【高校化学】「セルロースのニトロ化」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -899,7 +900,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10160/point-2/",
+      "id": "idx-tryit-073",
       "title": "【高校化学】「セルロースのアセチル化」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -910,7 +911,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10160/practice-3/",
+      "id": "idx-tryit-074",
       "title": "【高校化学】「セルロースのニトロ化・アセチル化」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -921,7 +922,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/",
+      "id": "idx-tryit-075",
       "title": "【高校化学】「銅アンモニアレーヨン」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -932,7 +933,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/point-2/",
+      "id": "idx-tryit-076",
       "title": "【高校化学】「ビスコースレーヨン」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -943,7 +944,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/practice-3/",
+      "id": "idx-tryit-077",
       "title": "【高校化学】「再生繊維」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -954,7 +955,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10171/",
+      "id": "idx-tryit-078",
       "title": "【高校化学】「アミノ酸の構造」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -965,7 +966,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10171/point-2/",
+      "id": "idx-tryit-079",
       "title": "【高校化学】「アミノ酸の特徴」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -976,7 +977,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10171/practice-3/",
+      "id": "idx-tryit-080",
       "title": "【高校化学】「アミノ酸の特徴」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -987,7 +988,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10175/",
+      "id": "idx-tryit-081",
       "title": "【高校化学】「グリシンとアラニン」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -998,7 +999,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10175/point-2/",
+      "id": "idx-tryit-082",
       "title": "【高校化学】「様々なアミノ酸」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1009,7 +1010,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10175/practice-3/",
+      "id": "idx-tryit-083",
       "title": "【高校化学】「様々なアミノ酸」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1020,7 +1021,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10179/",
+      "id": "idx-tryit-084",
       "title": "【高校化学】「ベンゼン環を含むアミノ酸」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1031,7 +1032,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10179/point-2/",
+      "id": "idx-tryit-085",
       "title": "【高校化学】「硫黄を含むアミノ酸」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1042,7 +1043,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10179/practice-3/",
+      "id": "idx-tryit-086",
       "title": "【高校化学】「様々なアミノ酸」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1053,7 +1054,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10183/",
+      "id": "idx-tryit-087",
       "title": "【高校化学】「双性イオンとは」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1064,7 +1065,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10183/point-2/",
+      "id": "idx-tryit-088",
       "title": "【高校化学】「アミノ酸の電離平衡」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1075,7 +1076,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10183/practice-3/",
+      "id": "idx-tryit-089",
       "title": "【高校化学】「アミノ酸の電離平衡」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1086,7 +1087,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10187/",
+      "id": "idx-tryit-090",
       "title": "【高校化学】「等電点」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1097,7 +1098,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10187/point-2/",
+      "id": "idx-tryit-091",
       "title": "【高校化学】「アミノ酸のイオンとpHの関係」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1108,7 +1109,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10187/practice-3/",
+      "id": "idx-tryit-092",
       "title": "【高校化学】「アミノ酸のイオンとpHの関係」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1119,7 +1120,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10191/",
+      "id": "idx-tryit-093",
       "title": "【高校化学】「ニンヒドリン反応」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1130,7 +1131,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10191/point-2/",
+      "id": "idx-tryit-094",
       "title": "【高校化学】「アミノ酸のエステル化アセチル化」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1141,7 +1142,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10191/practice-3/",
+      "id": "idx-tryit-095",
       "title": "【高校化学】「アミノ酸のエステル化アセチル化」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1152,7 +1153,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10195/",
+      "id": "idx-tryit-096",
       "title": "【高校化学】「高分子化合物（テスト４、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1163,7 +1164,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10198/",
+      "id": "idx-tryit-097",
       "title": "【高校化学】「アミノ酸の脱水縮合」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1174,7 +1175,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10198/point-2/",
+      "id": "idx-tryit-098",
       "title": "【高校化学】「ジペプチドの構造」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1185,7 +1186,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10198/practice-3/",
+      "id": "idx-tryit-099",
       "title": "【高校化学】「ペプチド」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1196,7 +1197,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/point-2/",
+      "id": "idx-tryit-100",
       "title": "【高校化学】「単純タンパク質の分類」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1207,7 +1208,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10202/practice-3/",
+      "id": "idx-tryit-101",
       "title": "【高校化学】「タンパク質の分類」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1218,7 +1219,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10206/point-2/",
+      "id": "idx-tryit-102",
       "title": "【高校化学】「タンパク質の構造②」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1229,7 +1230,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10206/practice-3/",
+      "id": "idx-tryit-103",
       "title": "【高校化学】「タンパク質の構造」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1240,7 +1241,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10210/",
+      "id": "idx-tryit-104",
       "title": "【高校化学】「タンパク質の性質①」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1251,7 +1252,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10210/point-2/",
+      "id": "idx-tryit-105",
       "title": "【高校化学】「タンパク質の性質②」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1262,7 +1263,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10210/practice-3/",
+      "id": "idx-tryit-106",
       "title": "【高校化学】「タンパク質の性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1273,7 +1274,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/point-2/",
+      "id": "idx-tryit-107",
       "title": "【高校化学】「タンパク質の反応②」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1284,7 +1285,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10214/practice-3/",
+      "id": "idx-tryit-108",
       "title": "【高校化学】「タンパク質の反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1295,7 +1296,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10218/",
+      "id": "idx-tryit-109",
       "title": "【高校化学】「高分子化合物（テスト５、第１問）」(問題編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1306,7 +1307,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10221/",
+      "id": "idx-tryit-110",
       "title": "【高校化学】「酵素とは」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1317,7 +1318,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10221/point-2/",
+      "id": "idx-tryit-111",
       "title": "【高校化学】「酵素の基質特異性」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1328,7 +1329,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10221/practice-3/",
+      "id": "idx-tryit-112",
       "title": "【高校化学】「酵素」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1339,7 +1340,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10225/",
+      "id": "idx-tryit-113",
       "title": "【高校化学】「最適温度」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1350,7 +1351,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10225/point-2/",
+      "id": "idx-tryit-114",
       "title": "【高校化学】「最適ｐH」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1361,7 +1362,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10225/practice-3/",
+      "id": "idx-tryit-115",
       "title": "【高校化学】「酵素の反応条件」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1372,7 +1373,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10229/",
+      "id": "idx-tryit-116",
       "title": "【高校化学】「ヌクレオチド」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1383,7 +1384,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10229/point-2/",
+      "id": "idx-tryit-117",
       "title": "【高校化学】「ヌクレオチドの重合体」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1394,7 +1395,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10229/practice-3/",
+      "id": "idx-tryit-118",
       "title": "【高校化学】「ヌクレオチド」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1405,7 +1406,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/point-2/",
+      "id": "idx-tryit-119",
       "title": "【高校化学】「DNA」 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "point",
@@ -1416,7 +1417,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/practice-3/",
+      "id": "idx-tryit-120",
       "title": "【高校化学】「RNA・DNA」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "practice",
@@ -1427,7 +1428,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10237/",
+      "id": "idx-tryit-121",
       "title": "【高校化学】「高分子化合物（テスト６、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "lesson",
@@ -1438,7 +1439,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/questions/",
+      "id": "idx-tryit-122",
       "title": "「天然高分子化合物」の問題のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "index",
@@ -1449,7 +1450,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10241/",
+      "id": "idx-tryit-123",
       "title": "【高校化学】「ナイロン66」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "lesson",
@@ -1460,7 +1461,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10241/point-2/",
+      "id": "idx-tryit-124",
       "title": "【高校化学】「ナイロン6」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "point",
@@ -1471,7 +1472,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10241/practice-3/",
+      "id": "idx-tryit-125",
       "title": "【高校化学】「合成繊維」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "practice",
@@ -1482,7 +1483,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10245/",
+      "id": "idx-tryit-126",
       "title": "【高校化学】「ポリエチレン系合成繊維」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "lesson",
@@ -1493,7 +1494,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10245/point-2/",
+      "id": "idx-tryit-127",
       "title": "【高校化学】「ポリエチレンテレフタラート」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "point",
@@ -1504,7 +1505,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10245/practice-3/",
+      "id": "idx-tryit-128",
       "title": "【高校化学】「ポリエチレン系合成繊維」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "practice",
@@ -1515,7 +1516,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/",
+      "id": "idx-tryit-129",
       "title": "【高校化学】「アクリロニトリル」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "lesson",
@@ -1526,7 +1527,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/point-2/",
+      "id": "idx-tryit-130",
       "title": "【高校化学】「アクリル繊維」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "point",
@@ -1537,7 +1538,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10249/practice-3/",
+      "id": "idx-tryit-131",
       "title": "【高校化学】「アクリル繊維」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "practice",
@@ -1548,7 +1549,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10253/",
+      "id": "idx-tryit-132",
       "title": "【高校化学】「合成樹脂（プラスチック）」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "lesson",
@@ -1559,7 +1560,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10253/point-2/",
+      "id": "idx-tryit-133",
       "title": "【高校化学】「熱可塑性樹脂」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "point",
@@ -1570,7 +1571,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10253/practice-3/",
+      "id": "idx-tryit-134",
       "title": "【高校化学】「合成樹脂Ⅰ」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "practice",
@@ -1581,7 +1582,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/",
+      "id": "idx-tryit-135",
       "title": "【高校化学】「尿素樹脂とメラミン樹脂」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "lesson",
@@ -1592,7 +1593,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/point-2/",
+      "id": "idx-tryit-136",
       "title": "【高校化学】「グリプタル樹脂            」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "point",
@@ -1603,7 +1604,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10257/practice-3/",
+      "id": "idx-tryit-137",
       "title": "【高校化学】「合成樹脂Ⅱ」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "practice",
@@ -1614,7 +1615,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10261/",
+      "id": "idx-tryit-138",
       "title": "【高校化学】「合成樹脂」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "lesson",
@@ -1625,7 +1626,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10261/practice-2/",
+      "id": "idx-tryit-139",
       "title": "【高校化学】「合成樹脂Ⅲ」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "practice",
@@ -1636,7 +1637,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/",
+      "id": "idx-tryit-140",
       "title": "【高校化学】「陽イオン交換樹脂」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "lesson",
@@ -1647,7 +1648,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/point-2/",
+      "id": "idx-tryit-141",
       "title": "【高校化学】「陰イオン交換樹脂」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "point",
@@ -1658,7 +1659,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/practice-3/",
+      "id": "idx-tryit-142",
       "title": "【高校化学】「イオン交換樹脂」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "practice",
@@ -1669,7 +1670,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10271/",
+      "id": "idx-tryit-143",
       "title": "【高校化学】「イソプレン」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "lesson",
@@ -1680,7 +1681,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10271/point-2/",
+      "id": "idx-tryit-144",
       "title": "【高校化学】「天然ゴムの構造と加硫」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "point",
@@ -1691,7 +1692,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10271/practice-3/",
+      "id": "idx-tryit-145",
       "title": "【高校化学】「天然ゴム」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "practice",
@@ -1702,7 +1703,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10275/",
+      "id": "idx-tryit-146",
       "title": "【高校化学】「付加重合と合成ゴム」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "lesson",
@@ -1713,7 +1714,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10275/point-2/",
+      "id": "idx-tryit-147",
       "title": "【高校化学】「共重合と合成ゴム」 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "point",
@@ -1724,7 +1725,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10275/practice-3/",
+      "id": "idx-tryit-148",
       "title": "【高校化学】「合成ゴム」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "practice",
@@ -1735,7 +1736,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10279/",
+      "id": "idx-tryit-149",
       "title": "【高校化学】「高分子化合物（テスト８、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "lesson",
@@ -1746,7 +1747,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/questions/",
+      "id": "idx-tryit-150",
       "title": "「合成高分子化合物」の問題のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "index",
@@ -1757,7 +1758,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9790/",
+      "id": "idx-tryit-151",
       "title": "【高校化学】「有機化合物と無機化合物」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "lesson",
@@ -1768,7 +1769,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9790/point-2/",
+      "id": "idx-tryit-152",
       "title": "【高校化学】「有機化合物の結合・構造・特徴」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "point",
@@ -1779,7 +1780,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9790/practice-3/",
+      "id": "idx-tryit-153",
       "title": "【高校化学】「有機化合物と無機化合物」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "practice",
@@ -1790,7 +1791,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9794/",
+      "id": "idx-tryit-154",
       "title": "【高校化学】「鎖式炭化水素」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "lesson",
@@ -1801,7 +1802,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9794/point-2/",
+      "id": "idx-tryit-155",
       "title": "【高校化学】「環式炭化水素」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "point",
@@ -1812,7 +1813,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9794/practice-3/",
+      "id": "idx-tryit-156",
       "title": "【高校化学】「炭化水素の分類」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "practice",
@@ -1823,7 +1824,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9798/",
+      "id": "idx-tryit-157",
       "title": "【高校化学】「官能基Ⅰ」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "lesson",
@@ -1834,7 +1835,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9798/point-2/",
+      "id": "idx-tryit-158",
       "title": "【高校化学】「官能基Ⅱ」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "point",
@@ -1845,7 +1846,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9798/practice-3/",
+      "id": "idx-tryit-159",
       "title": "【高校化学】「官能基」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "practice",
@@ -1856,7 +1857,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9802/",
+      "id": "idx-tryit-160",
       "title": "【高校化学】「分子式と示性式」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "lesson",
@@ -1867,7 +1868,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9802/point-2/",
+      "id": "idx-tryit-161",
       "title": "【高校化学】「構造式」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "point",
@@ -1878,7 +1879,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9802/practice-3/",
+      "id": "idx-tryit-162",
       "title": "【高校化学】「有機化合物の表し方」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "practice",
@@ -1889,7 +1890,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9806/point-2/",
+      "id": "idx-tryit-163",
       "title": "【高校化学】「立体異性体」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "point",
@@ -1900,7 +1901,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9806/practice-3/",
+      "id": "idx-tryit-164",
       "title": "【高校化学】「異性体」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "practice",
@@ -1911,7 +1912,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9813/",
+      "id": "idx-tryit-165",
       "title": "【高校化学】「成分元素の確認（C・H・N）」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "lesson",
@@ -1922,7 +1923,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9813/point-2/",
+      "id": "idx-tryit-166",
       "title": "【高校化学】「成分元素の確認（Cl・S）」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "point",
@@ -1933,7 +1934,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9813/practice-3/",
+      "id": "idx-tryit-167",
       "title": "【高校化学】「成分元素の確認方法」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "practice",
@@ -1944,7 +1945,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9817/",
+      "id": "idx-tryit-168",
       "title": "【高校化学】「元素分析の装置」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "lesson",
@@ -1955,7 +1956,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9817/point-2/",
+      "id": "idx-tryit-169",
       "title": "【高校化学】「元素分析と成分元素の質量」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "point",
@@ -1966,7 +1967,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9817/practice-3/",
+      "id": "idx-tryit-170",
       "title": "【高校化学】「元素分析の実験」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "practice",
@@ -1977,7 +1978,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9821/",
+      "id": "idx-tryit-171",
       "title": "【高校化学】「元素分析と組成式」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "lesson",
@@ -1988,7 +1989,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9821/point-2/",
+      "id": "idx-tryit-172",
       "title": "【高校化学】「分子量と分子式」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "point",
@@ -1999,7 +2000,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9821/practice-3/",
+      "id": "idx-tryit-173",
       "title": "【高校化学】「組成式・分子式の決定」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "practice",
@@ -2010,7 +2011,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9825/",
+      "id": "idx-tryit-174",
       "title": "【高校化学】「官能基による決定」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "lesson",
@@ -2021,7 +2022,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9825/point-2/",
+      "id": "idx-tryit-175",
       "title": "【高校化学】「異性体の区別」 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "point",
@@ -2032,7 +2033,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9825/practice-3/",
+      "id": "idx-tryit-176",
       "title": "【高校化学】「構造式の決定」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "practice",
@@ -2043,7 +2044,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9829/",
+      "id": "idx-tryit-177",
       "title": "【高校化学】「有機化合物（テスト２、第１問）」(問題編) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "lesson",
@@ -2054,7 +2055,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/questions/",
+      "id": "idx-tryit-178",
       "title": "「有機化合物の特徴と構造」の問題のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "index",
@@ -2065,7 +2066,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9833/",
+      "id": "idx-tryit-179",
       "title": "【高校化学】「アルカンの定義」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2076,7 +2077,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9833/point-2/",
+      "id": "idx-tryit-180",
       "title": "【高校化学】「アルカンの構造」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2087,7 +2088,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9833/practice-3/",
+      "id": "idx-tryit-181",
       "title": "【高校化学】「アルカン」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2098,7 +2099,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/",
+      "id": "idx-tryit-182",
       "title": "【高校化学】「直鎖状アルカンの名称」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2109,7 +2110,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/point-2/",
+      "id": "idx-tryit-183",
       "title": "【高校化学】「アルキル基」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2120,7 +2121,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9837/practice-3/",
+      "id": "idx-tryit-184",
       "title": "【高校化学】「アルカンの名称とアルキル基」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2131,7 +2132,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9841/",
+      "id": "idx-tryit-185",
       "title": "【高校化学】「アルカンの性質」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2142,7 +2143,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9841/point-2/",
+      "id": "idx-tryit-186",
       "title": "【高校化学】「メタンの製法」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2153,7 +2154,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9841/practice-3/",
+      "id": "idx-tryit-187",
       "title": "【高校化学】「アルカンの性質とメタンの製法」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2164,7 +2165,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9845/",
+      "id": "idx-tryit-188",
       "title": "【高校化学】「アルカンの異性体」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2175,7 +2176,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9845/point-2/",
+      "id": "idx-tryit-189",
       "title": "【高校化学】「アルカンのつくり方」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2186,7 +2187,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9845/practice-3/",
+      "id": "idx-tryit-190",
       "title": "【高校化学】「アルカンの異性体」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2197,7 +2198,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9849/",
+      "id": "idx-tryit-191",
       "title": "【高校化学】「アルカンの置換反応」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2208,7 +2209,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9849/point-2/",
+      "id": "idx-tryit-192",
       "title": "【高校化学】「アルカンの置換反応の流れ」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2219,7 +2220,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9849/practice-3/",
+      "id": "idx-tryit-193",
       "title": "【高校化学】「アルカンの置換反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2230,7 +2231,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9853/",
+      "id": "idx-tryit-194",
       "title": "【高校化学】「シクロアルカンの定義」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2241,7 +2242,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9853/point-2/",
+      "id": "idx-tryit-195",
       "title": "【高校化学】「シクロアルカンの性質」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2252,7 +2253,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9853/practice-3/",
+      "id": "idx-tryit-196",
       "title": "【高校化学】「シクロアルカン」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2263,7 +2264,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9857/",
+      "id": "idx-tryit-197",
       "title": "【高校化学】「有機化合物（テスト３、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2274,7 +2275,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9860/",
+      "id": "idx-tryit-198",
       "title": "【高校化学】「アルケンの定義」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2285,7 +2286,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9860/point-2/",
+      "id": "idx-tryit-199",
       "title": "【高校化学】「アルケンの構造」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2296,7 +2297,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9860/practice-3/",
+      "id": "idx-tryit-200",
       "title": "【高校化学】「アルケン」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2307,7 +2308,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9864/",
+      "id": "idx-tryit-201",
       "title": "【高校化学】「シス・トランス異性体」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2318,7 +2319,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9864/point-2/",
+      "id": "idx-tryit-202",
       "title": "【高校化学】「シス・トランス異性体の判別」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2329,7 +2330,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9864/practice-3/",
+      "id": "idx-tryit-203",
       "title": "【高校化学】「シス・トランス異性体」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2340,7 +2341,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9868/",
+      "id": "idx-tryit-204",
       "title": "【高校化学】「アルケンの製法」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2351,7 +2352,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9868/point-2/",
+      "id": "idx-tryit-205",
       "title": "【高校化学】「アルケンの付加反応」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2362,7 +2363,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9868/practice-3/",
+      "id": "idx-tryit-206",
       "title": "【高校化学】「アルケンの製法と性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2373,7 +2374,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9872/",
+      "id": "idx-tryit-207",
       "title": "【高校化学】「アルケンの付加重合」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2384,7 +2385,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9872/point-2/",
+      "id": "idx-tryit-208",
       "title": "【高校化学】「モノマーとポリマー」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2395,7 +2396,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9872/practice-3/",
+      "id": "idx-tryit-209",
       "title": "【高校化学】「アルケンと付加重合」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2406,7 +2407,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9876/",
+      "id": "idx-tryit-210",
       "title": "【高校化学】「有機化合物（テスト４、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2417,7 +2418,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9879/",
+      "id": "idx-tryit-211",
       "title": "【高校化学】「アルキンの定義」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2428,7 +2429,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9879/point-2/",
+      "id": "idx-tryit-212",
       "title": "【高校化学】「アルキンの製法」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2439,7 +2440,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9879/practice-3/",
+      "id": "idx-tryit-213",
       "title": "【高校化学】「アルキン」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2450,7 +2451,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9883/",
+      "id": "idx-tryit-214",
       "title": "【高校化学】「アルキンの付加反応」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2461,7 +2462,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9883/point-2/",
+      "id": "idx-tryit-215",
       "title": "【高校化学】「アルキンとビニル化合物」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2472,7 +2473,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9883/practice-3/",
+      "id": "idx-tryit-216",
       "title": "【高校化学】「アルキンの付加反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2483,7 +2484,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9887/",
+      "id": "idx-tryit-217",
       "title": "【高校化学】「アセチレンの付加反応」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2494,7 +2495,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9887/point-2/",
+      "id": "idx-tryit-218",
       "title": "【高校化学】「アセチレンへの水付加」 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "point",
@@ -2505,7 +2506,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9887/practice-3/",
+      "id": "idx-tryit-219",
       "title": "【高校化学】「アセチレンの付加反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "practice",
@@ -2516,7 +2517,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9891/",
+      "id": "idx-tryit-220",
       "title": "【高校化学】「有機化合物（テスト５、第１問）」(問題編) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "lesson",
@@ -2527,7 +2528,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/questions/",
+      "id": "idx-tryit-221",
       "title": "「炭化水素」の問題のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "index",
@@ -2538,7 +2539,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9895/",
+      "id": "idx-tryit-222",
       "title": "【高校化学】「アルコールの構造」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2549,7 +2550,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9895/point-2/",
+      "id": "idx-tryit-223",
       "title": "【高校化学】「アルコールの名称」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2560,7 +2561,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9895/practice-3/",
+      "id": "idx-tryit-224",
       "title": "【高校化学】「アルコール」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2571,7 +2572,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9899/",
+      "id": "idx-tryit-225",
       "title": "【高校化学】「アルコールの価数」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2582,7 +2583,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9899/point-2/",
+      "id": "idx-tryit-226",
       "title": "【高校化学】「アルコールの級数」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2593,7 +2594,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9899/practice-3/",
+      "id": "idx-tryit-227",
       "title": "【高校化学】「アルコールの分類」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2604,7 +2605,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9903/",
+      "id": "idx-tryit-228",
       "title": "【高校化学】「アルコールの水溶液」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2615,7 +2616,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9903/point-2/",
+      "id": "idx-tryit-229",
       "title": "【高校化学】「アルコールの反応」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2626,7 +2627,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9903/practice-3/",
+      "id": "idx-tryit-230",
       "title": "【高校化学】「アルコールの性質と反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2637,7 +2638,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9907/",
+      "id": "idx-tryit-231",
       "title": "【高校化学】「第一級アルコールの酸化」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2648,7 +2649,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9907/point-2/",
+      "id": "idx-tryit-232",
       "title": "【高校化学】「第二級、第三級アルコールの酸化」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2659,7 +2660,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9907/practice-3/",
+      "id": "idx-tryit-233",
       "title": "【高校化学】「アルコールの酸化反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2670,7 +2671,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9911/",
+      "id": "idx-tryit-234",
       "title": "【高校化学】「アルコールの分子間脱水」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2681,7 +2682,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9911/point-2/",
+      "id": "idx-tryit-235",
       "title": "【高校化学】「アルコールの分子内脱水」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2692,7 +2693,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9911/practice-3/",
+      "id": "idx-tryit-236",
       "title": "【高校化学】「アルコールの脱水反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2703,7 +2704,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9915/",
+      "id": "idx-tryit-237",
       "title": "【高校化学】「有機化合物（テスト６、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2714,7 +2715,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9918/",
+      "id": "idx-tryit-238",
       "title": "【高校化学】「エーテルの定義」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2725,7 +2726,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9918/point-2/",
+      "id": "idx-tryit-239",
       "title": "【高校化学】「エーテルの性質」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2736,7 +2737,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9918/practice-3/",
+      "id": "idx-tryit-240",
       "title": "【高校化学】「エーテル」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2747,7 +2748,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9922/",
+      "id": "idx-tryit-241",
       "title": "【高校化学】「カルボニル化合物の定義」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2758,7 +2759,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9922/point-2/",
+      "id": "idx-tryit-242",
       "title": "【高校化学】「ケトンの製法」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2769,7 +2770,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9922/practice-3/",
+      "id": "idx-tryit-243",
       "title": "【高校化学】「カルボニル化合物」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2780,7 +2781,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9926/",
+      "id": "idx-tryit-244",
       "title": "【高校化学】「アルデヒドの定義」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2791,7 +2792,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9926/point-2/",
+      "id": "idx-tryit-245",
       "title": "【高校化学】「アルデヒドの性質」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2802,7 +2803,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9926/practice-3/",
+      "id": "idx-tryit-246",
       "title": "【高校化学】「アルデヒド」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2813,7 +2814,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9930/",
+      "id": "idx-tryit-247",
       "title": "【高校化学】「ヨードホルム反応」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2824,7 +2825,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9930/point-2/",
+      "id": "idx-tryit-248",
       "title": "【高校化学】「ヨードホルム反応が陽性となる構造」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2835,7 +2836,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9930/practice-3/",
+      "id": "idx-tryit-249",
       "title": "【高校化学】「ヨードホルム反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2846,7 +2847,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9934/",
+      "id": "idx-tryit-250",
       "title": "【高校化学】「有機化合物（テスト７、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2857,7 +2858,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/point-2/",
+      "id": "idx-tryit-251",
       "title": "【高校化学】「カルボン酸の分類」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2868,7 +2869,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9937/practice-3/",
+      "id": "idx-tryit-252",
       "title": "【高校化学】「カルボン酸の分類」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2879,7 +2880,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9941/",
+      "id": "idx-tryit-253",
       "title": "【高校化学】「酢酸の性質」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2890,7 +2891,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9941/point-2/",
+      "id": "idx-tryit-254",
       "title": "【高校化学】「ギ酸の性質」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2901,7 +2902,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9941/practice-3/",
+      "id": "idx-tryit-255",
       "title": "【高校化学】「酢酸とギ酸」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2912,7 +2913,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9945/",
+      "id": "idx-tryit-256",
       "title": "【高校化学】「マレイン酸とフマル酸」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2923,7 +2924,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9945/point-2/",
+      "id": "idx-tryit-257",
       "title": "【高校化学】「酸無水物」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2934,7 +2935,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9945/practice-3/",
+      "id": "idx-tryit-258",
       "title": "【高校化学】「様々なカルボン酸」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2945,7 +2946,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9949/point-2/",
+      "id": "idx-tryit-259",
       "title": "【高校化学】「カルボン酸と酸性」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2956,7 +2957,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9949/practice-3/",
+      "id": "idx-tryit-260",
       "title": "【高校化学】「カルボン酸の性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -2967,7 +2968,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9953/",
+      "id": "idx-tryit-261",
       "title": "【高校化学】「不斉炭素原子」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -2978,7 +2979,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9953/point-2/",
+      "id": "idx-tryit-262",
       "title": "【高校化学】「鏡像異性体」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -2989,7 +2990,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9953/practice-3/",
+      "id": "idx-tryit-263",
       "title": "【高校化学】「鏡像異性体」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -3000,7 +3001,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9957/",
+      "id": "idx-tryit-264",
       "title": "【高校化学】「エステルの定義」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -3011,7 +3012,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9957/point-2/",
+      "id": "idx-tryit-265",
       "title": "【高校化学】「エステル化と加水分解・けん化」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -3022,7 +3023,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9957/practice-3/",
+      "id": "idx-tryit-266",
       "title": "【高校化学】「エステル」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -3033,7 +3034,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/",
+      "id": "idx-tryit-267",
       "title": "【高校化学】「油脂の定義」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -3044,7 +3045,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/point-2/",
+      "id": "idx-tryit-268",
       "title": "【高校化学】「油脂を構成する脂肪酸」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -3055,7 +3056,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9964/practice-3/",
+      "id": "idx-tryit-269",
       "title": "【高校化学】「油脂」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -3066,7 +3067,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9968/",
+      "id": "idx-tryit-270",
       "title": "【高校化学】「油脂の分類」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -3077,7 +3078,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9968/point-2/",
+      "id": "idx-tryit-271",
       "title": "【高校化学】「脂肪油の分類」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -3088,7 +3089,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9968/practice-3/",
+      "id": "idx-tryit-272",
       "title": "【高校化学】「油脂の分類」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -3099,7 +3100,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9972/",
+      "id": "idx-tryit-273",
       "title": "【高校化学】「セッケンとは」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -3110,7 +3111,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9972/point-2/",
+      "id": "idx-tryit-274",
       "title": "【高校化学】「セッケンの性質」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -3121,7 +3122,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9972/practice-3/",
+      "id": "idx-tryit-275",
       "title": "【高校化学】「セッケンの性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -3132,7 +3133,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9976/",
+      "id": "idx-tryit-276",
       "title": "【高校化学】「界面活性剤」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -3143,7 +3144,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9976/point-2/",
+      "id": "idx-tryit-277",
       "title": "【高校化学】「界面活性剤の性質」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -3154,7 +3155,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9976/practice-3/",
+      "id": "idx-tryit-278",
       "title": "【高校化学】「界面活性剤」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -3165,7 +3166,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9980/",
+      "id": "idx-tryit-279",
       "title": "【高校化学】「合成洗剤」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -3176,7 +3177,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9980/point-2/",
+      "id": "idx-tryit-280",
       "title": "【高校化学】「合成洗剤の性質」 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "point",
@@ -3187,7 +3188,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9980/practice-3/",
+      "id": "idx-tryit-281",
       "title": "【高校化学】「合成洗剤の性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "practice",
@@ -3198,7 +3199,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9984/",
+      "id": "idx-tryit-282",
       "title": "【高校化学】「有機化合物（テスト９、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "lesson",
@@ -3209,7 +3210,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/questions/",
+      "id": "idx-tryit-283",
       "title": "「酸素を含む有機化合物」の問題のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "index",
@@ -3220,7 +3221,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10000/",
+      "id": "idx-tryit-284",
       "title": "【高校化学】「ベンゼンの置換反応」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3231,7 +3232,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10000/point-2/",
+      "id": "idx-tryit-285",
       "title": "【高校化学】「ハロゲン化」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3242,7 +3243,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10000/practice-3/",
+      "id": "idx-tryit-286",
       "title": "【高校化学】「ベンゼンの置換反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3253,7 +3254,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10004/",
+      "id": "idx-tryit-287",
       "title": "【高校化学】「スルホン化」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3264,7 +3265,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10004/point-2/",
+      "id": "idx-tryit-288",
       "title": "【高校化学】「ニトロ化」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3275,7 +3276,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10004/practice-3/",
+      "id": "idx-tryit-289",
       "title": "【高校化学】「ベンゼンの置換反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3286,7 +3287,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10008/",
+      "id": "idx-tryit-290",
       "title": "【高校化学】「ベンゼンの様々な反応」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3297,7 +3298,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10008/point-2/",
+      "id": "idx-tryit-291",
       "title": "【高校化学】「ベンゼンの付加反応」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3308,7 +3309,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10008/practice-3/",
+      "id": "idx-tryit-292",
       "title": "【高校化学】「ベンゼンの様々な反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3319,7 +3320,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10012/",
+      "id": "idx-tryit-293",
       "title": "【高校化学】「有機化合物（テスト１０、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3330,7 +3331,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10015/",
+      "id": "idx-tryit-294",
       "title": "【高校化学】「フェノール類とは」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3341,7 +3342,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10015/point-2/",
+      "id": "idx-tryit-295",
       "title": "【高校化学】「主なフェノール類」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3352,7 +3353,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10015/practice-3/",
+      "id": "idx-tryit-296",
       "title": "【高校化学】「フェノール類」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3363,7 +3364,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10019/",
+      "id": "idx-tryit-297",
       "title": "【高校化学】「アルコールの-OHとフェノール類の-OH」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3374,7 +3375,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10019/point-2/",
+      "id": "idx-tryit-298",
       "title": "【高校化学】「フェノール類の呈色反応」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3385,7 +3386,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10019/practice-3/",
+      "id": "idx-tryit-299",
       "title": "【高校化学】「フェノール類の呈色反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3396,7 +3397,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10023/point-2/",
+      "id": "idx-tryit-300",
       "title": "【高校化学】「フェノール類のナトリウムの反応」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3407,7 +3408,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10023/practice-3/",
+      "id": "idx-tryit-301",
       "title": "【高校化学】「フェノール類の酸としての性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3418,7 +3419,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10027/",
+      "id": "idx-tryit-302",
       "title": "【高校化学】「フェノール類の製法」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3429,7 +3430,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10027/point-2/",
+      "id": "idx-tryit-303",
       "title": "【高校化学】「クメン法」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3440,7 +3441,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10027/practice-3/",
+      "id": "idx-tryit-304",
       "title": "【高校化学】「フェノール類の製法」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3451,7 +3452,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10031/",
+      "id": "idx-tryit-305",
       "title": "【高校化学】「フェノールの置換反応」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3462,7 +3463,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10031/point-2/",
+      "id": "idx-tryit-306",
       "title": "【高校化学】「フェノールと臭素の反応」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3473,7 +3474,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10031/practice-3/",
+      "id": "idx-tryit-307",
       "title": "【高校化学】「フェノールの置換反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3484,7 +3485,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10035/",
+      "id": "idx-tryit-308",
       "title": "【高校化学】「有機化合物（テスト１１、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3495,7 +3496,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10038/",
+      "id": "idx-tryit-309",
       "title": "【高校化学】「芳香族カルボン酸とは」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3506,7 +3507,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10038/point-2/",
+      "id": "idx-tryit-310",
       "title": "【高校化学】「安息香酸」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3517,7 +3518,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10038/practice-3/",
+      "id": "idx-tryit-311",
       "title": "【高校化学】「芳香族カルボン酸」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3528,7 +3529,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10042/",
+      "id": "idx-tryit-312",
       "title": "【高校化学】「フタル酸とテレフタル酸」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3539,7 +3540,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10042/point-2/",
+      "id": "idx-tryit-313",
       "title": "【高校化学】「無水フタル酸」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3550,7 +3551,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10042/practice-3/",
+      "id": "idx-tryit-314",
       "title": "【高校化学】「フタル酸」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3561,7 +3562,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10046/",
+      "id": "idx-tryit-315",
       "title": "【高校化学】「サリチル酸」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3572,7 +3573,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10046/point-2/",
+      "id": "idx-tryit-316",
       "title": "【高校化学】「サリチル酸の製法」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3583,7 +3584,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10046/practice-3/",
+      "id": "idx-tryit-317",
       "title": "【高校化学】「サリチル酸」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3594,7 +3595,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10050/",
+      "id": "idx-tryit-318",
       "title": "【高校化学】「アセチルサリチル酸」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3605,7 +3606,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10050/point-2/",
+      "id": "idx-tryit-319",
       "title": "【高校化学】「サリチル酸メチル」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3616,7 +3617,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10050/practice-3/",
+      "id": "idx-tryit-320",
       "title": "【高校化学】「アセチルサリチル酸」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3627,7 +3628,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10054/",
+      "id": "idx-tryit-321",
       "title": "【高校化学】「有機化合物（テスト１２、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3638,7 +3639,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10057/point-2/",
+      "id": "idx-tryit-322",
       "title": "【高校化学】「アニリン」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3649,7 +3650,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10057/practice-3/",
+      "id": "idx-tryit-323",
       "title": "【高校化学】「アニリン」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3660,7 +3661,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10061/",
+      "id": "idx-tryit-324",
       "title": "【高校化学】「アニリンの塩基としての性質①」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3671,7 +3672,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10061/point-2/",
+      "id": "idx-tryit-325",
       "title": "【高校化学】「アニリンの塩基としての性質②」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3682,7 +3683,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10061/practice-3/",
+      "id": "idx-tryit-326",
       "title": "【高校化学】「アニリンの塩基としての性質」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3693,7 +3694,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10065/",
+      "id": "idx-tryit-327",
       "title": "【高校化学】「アニリンの製法①」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3704,7 +3705,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10065/point-2/",
+      "id": "idx-tryit-328",
       "title": "【高校化学】「アニリンの製法②」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3715,7 +3716,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10065/practice-3/",
+      "id": "idx-tryit-329",
       "title": "【高校化学】「アニリンの製法」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3726,7 +3727,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10069/",
+      "id": "idx-tryit-330",
       "title": "【高校化学】「アニリンと無水酢酸の反応」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3737,7 +3738,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10069/point-2/",
+      "id": "idx-tryit-331",
       "title": "【高校化学】「アニリンブラック」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3748,7 +3749,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10069/practice-3/",
+      "id": "idx-tryit-332",
       "title": "【高校化学】「アニリンと無水酢酸の反応」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3759,7 +3760,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10073/",
+      "id": "idx-tryit-333",
       "title": "【高校化学】「ジアゾ化」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3770,7 +3771,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10073/point-2/",
+      "id": "idx-tryit-334",
       "title": "【高校化学】「塩化ベンゼンジアゾニウムの性質」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3781,7 +3782,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10073/practice-3/",
+      "id": "idx-tryit-335",
       "title": "【高校化学】「ジアゾ化」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3792,7 +3793,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10077/",
+      "id": "idx-tryit-336",
       "title": "【高校化学】「カップリング」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3803,7 +3804,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10077/point-2/",
+      "id": "idx-tryit-337",
       "title": "【高校化学】「アゾ染料」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3814,7 +3815,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10077/practice-3/",
+      "id": "idx-tryit-338",
       "title": "【高校化学】「カップリング」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3825,7 +3826,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10081/",
+      "id": "idx-tryit-339",
       "title": "【高校化学】「有機化合物（テスト１３、第１問）」(問題編1) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3836,7 +3837,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10084/",
+      "id": "idx-tryit-340",
       "title": "【高校化学】「芳香族化合物の分離の基本①」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3847,7 +3848,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10084/point-2/",
+      "id": "idx-tryit-341",
       "title": "【高校化学】「芳香族化合物の分離の基本②」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3858,7 +3859,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10084/practice-3/",
+      "id": "idx-tryit-342",
       "title": "【高校化学】「芳香族化合物の分離の基本」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3869,7 +3870,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10088/point-2/",
+      "id": "idx-tryit-343",
       "title": "【高校化学】「芳香族化合物の分離②」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3880,7 +3881,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10088/practice-3/",
+      "id": "idx-tryit-344",
       "title": "【高校化学】「芳香族化合物の分離」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3891,7 +3892,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-9988/",
+      "id": "idx-tryit-345",
       "title": "【高校化学】「芳香族化合物とは」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3902,7 +3903,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-9988/point-2/",
+      "id": "idx-tryit-346",
       "title": "【高校化学】「ベンゼンの略記法」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3913,7 +3914,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-9988/practice-3/",
+      "id": "idx-tryit-347",
       "title": "【高校化学】「芳香族化合物」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3924,7 +3925,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-9992/",
+      "id": "idx-tryit-348",
       "title": "【高校化学】「ベンゼンの性質」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3935,7 +3936,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-9992/point-2/",
+      "id": "idx-tryit-349",
       "title": "【高校化学】「ベンゼン環をもつ化合物」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3946,7 +3947,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-9992/practice-3/",
+      "id": "idx-tryit-350",
       "title": "【高校化学】「ベンゼンの性質と種類」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3957,7 +3958,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-9996/",
+      "id": "idx-tryit-351",
       "title": "【高校化学】「オルト・メタ・パラ異性体」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "lesson",
@@ -3968,7 +3969,7 @@
       "type": "lesson"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-9996/point-2/",
+      "id": "idx-tryit-352",
       "title": "【高校化学】「キシレンの構造異性体」 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "point",
@@ -3979,7 +3980,7 @@
       "type": "point"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-9996/practice-3/",
+      "id": "idx-tryit-353",
       "title": "【高校化学】「ベンゼン環を含む異性体」(練習編) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "practice",
@@ -3990,7 +3991,7 @@
       "type": "practice"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/questions/",
+      "id": "idx-tryit-354",
       "title": "「芳香族化合物」の問題のわからないを5分で解決 | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "index",
@@ -4001,7 +4002,7 @@
       "type": "index"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10096/lessons-10113/question-2/",
+      "id": "idx-tryit-355",
       "title": "【高校化学】「高分子化合物（テスト１、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "高分子化合物の基礎",
       "kind": "question",
@@ -4012,7 +4013,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10137/question-2/",
+      "id": "idx-tryit-356",
       "title": "【高校化学】「高分子化合物（テスト２、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "question",
@@ -4023,7 +4024,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10168/question-2/",
+      "id": "idx-tryit-357",
       "title": "【高校化学】「高分子化合物（テスト３、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "question",
@@ -4034,7 +4035,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10195/question-2/",
+      "id": "idx-tryit-358",
       "title": "【高校化学】「高分子化合物（テスト４、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "question",
@@ -4045,7 +4046,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10116/lessons-10237/question-2/",
+      "id": "idx-tryit-359",
       "title": "【高校化学】「高分子化合物（テスト６、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "天然高分子化合物",
       "kind": "question",
@@ -4056,7 +4057,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10264/question-2/",
+      "id": "idx-tryit-360",
       "title": "【高校化学】「高分子化合物（テスト７、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "question",
@@ -4067,7 +4068,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-10095/sections-10240/lessons-10279/question-2/",
+      "id": "idx-tryit-361",
       "title": "【高校化学】「高分子化合物（テスト８、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "合成高分子化合物",
       "kind": "question",
@@ -4078,7 +4079,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9789/lessons-9810/question-2/",
+      "id": "idx-tryit-362",
       "title": "【高校化学】「有機化合物（テスト１、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "有機化合物の特徴と構造",
       "kind": "question",
@@ -4089,7 +4090,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9857/question-2/",
+      "id": "idx-tryit-363",
       "title": "【高校化学】「有機化合物（テスト３、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "question",
@@ -4100,7 +4101,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9832/lessons-9876/question-2/",
+      "id": "idx-tryit-364",
       "title": "【高校化学】「有機化合物（テスト４、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "炭化水素",
       "kind": "question",
@@ -4111,7 +4112,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9915/question-2/",
+      "id": "idx-tryit-365",
       "title": "【高校化学】「有機化合物（テスト６、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "question",
@@ -4122,7 +4123,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9934/question-2/",
+      "id": "idx-tryit-366",
       "title": "【高校化学】「有機化合物（テスト７、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "question",
@@ -4133,7 +4134,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9894/lessons-9984/question-2/",
+      "id": "idx-tryit-367",
       "title": "【高校化学】「有機化合物（テスト９、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "酸素を含む有機化合物",
       "kind": "question",
@@ -4144,7 +4145,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10012/question-2/",
+      "id": "idx-tryit-368",
       "title": "【高校化学】「有機化合物（テスト１０、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "question",
@@ -4155,7 +4156,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10035/question-2/",
+      "id": "idx-tryit-369",
       "title": "【高校化学】「有機化合物（テスト１１、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "question",
@@ -4166,7 +4167,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10054/question-2/",
+      "id": "idx-tryit-370",
       "title": "【高校化学】「有機化合物（テスト１２、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "question",
@@ -4177,7 +4178,7 @@
       "type": "question"
     },
     {
-      "url": "https://www.try-it.jp/chapters-9788/sections-9987/lessons-10081/question-2/",
+      "id": "idx-tryit-371",
       "title": "【高校化学】「有機化合物（テスト１３、第２問）」(問題編2) | 映像授業のTry IT (トライイット)",
       "section": "芳香族化合物",
       "kind": "question",
@@ -4188,7 +4189,7 @@
       "type": "question"
     },
     {
-      "url": "https://kimika.net/anirin.html",
+      "id": "idx-kimika-001",
       "title": "芳香族アミン（アニリン）の構造・製法・性質・反応 | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4199,7 +4200,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/aru-ete.html",
+      "id": "idx-kimika-002",
       "title": "アルコール・エーテル（一覧・違い・命名法・製法・反応・性質など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4210,7 +4211,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/aru-keto.html",
+      "id": "idx-kimika-003",
       "title": "アルデヒド・ケトン（一覧・違い・命名法・製法・反応・性質など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4221,7 +4222,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/arukirubenzen.html",
+      "id": "idx-kimika-004",
       "title": "アルキルベンゼン（トルエン・キシレン）の構造・製法・反応 | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4232,7 +4233,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/benzen.html",
+      "id": "idx-kimika-005",
       "title": "ベンゼン（構造・特徴・製法・各種反応など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4243,7 +4244,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/fenol.html",
+      "id": "idx-kimika-006",
       "title": "フェノール類（名称・製法・性質・反応など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4254,7 +4255,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/houkokarubon.html",
+      "id": "idx-kimika-007",
       "title": "芳香族カルボン酸（安息香酸・サリチル酸）の構造・製法・性質・反応 | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4265,7 +4266,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/karu-esu.html",
+      "id": "idx-kimika-008",
       "title": "カルボン酸・エステル（一覧・構造・命名法・製法・反応・性質など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4276,7 +4277,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/t3tantou.html",
+      "id": "idx-kimika-009",
       "title": "単糖類（分類・構造・性質・二糖や多糖との関係性など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4287,7 +4288,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/toubunrui.html",
+      "id": "idx-kimika-010",
       "title": "糖類の分類と基礎知識 | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4298,7 +4299,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1amido.html",
+      "id": "idx-kimika-011",
       "title": "アミド（構造・合成・加水分解・エステルとの違いなど） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4309,7 +4310,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1arukan.html",
+      "id": "idx-kimika-012",
       "title": "アルカン（一般式の作り方・一覧・命名法・製法・性質・置換反応など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4320,7 +4321,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1aruken.html",
+      "id": "idx-kimika-013",
       "title": "アルケン（一般式の作り方・一覧・命名法・製法・付加反応など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4331,7 +4332,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1arukin.html",
+      "id": "idx-kimika-014",
       "title": "アルキン（一般式の作り方・一覧・製法・付加重合・置換反応など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4342,7 +4343,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1gensobunseki.html",
+      "id": "idx-kimika-015",
       "title": "元素分析（装置の原理・計算問題の解法など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4353,7 +4354,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1gensocheck.html",
+      "id": "idx-kimika-016",
       "title": "【有機】成分元素の確認方法まとめ（炭素/水素/窒素/塩素/硫黄） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4364,7 +4365,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1ginfehling.html",
+      "id": "idx-kimika-017",
       "title": "銀鏡反応とフェーリング反応（原理・反応式・沈殿・色変化など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4375,7 +4376,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1iseitainbunrui.html",
+      "id": "idx-kimika-018",
       "title": "異性体（種類・数え方・分類など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4386,7 +4387,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1kouzouhyoki.html",
+      "id": "idx-kimika-019",
       "title": "有機化合物の表記法〜分子式・示性式・構造式〜 | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4397,7 +4398,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1markovnikov.html",
+      "id": "idx-kimika-020",
       "title": "【マルコフニコフ則】反応の原理を大学レベルまで踏み込んで解説 | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4408,7 +4409,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1orientation.html",
+      "id": "idx-kimika-021",
       "title": "置換反応と配向性（オルト・メタ・パラ） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4419,7 +4420,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1solid.html",
+      "id": "idx-kimika-022",
       "title": "【基礎知識】有機化合物の結合と立体構造、回転など | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4430,7 +4431,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1unsaturation.html",
+      "id": "idx-kimika-023",
       "title": "不飽和度（公式、計算解法、窒素を含む場合など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4441,7 +4442,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1yuki.html",
+      "id": "idx-kimika-024",
       "title": "有機化合物とは（定義・特徴・性質など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4452,7 +4453,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y1yukibunrui.html",
+      "id": "idx-kimika-025",
       "title": "【分類】有機化合物の基礎〜鎖式・環式・飽和・不飽和・炭化水素・官能基など〜 | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4463,7 +4464,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2addition.html",
+      "id": "idx-kimika-026",
       "title": "付加重合・共重合（ビニル系・ビニリデン系・テフロン・天然ゴムなど） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4474,7 +4475,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2aminosan.html",
+      "id": "idx-kimika-027",
       "title": "アミノ酸の定義や構造、分類（酸性・塩基性・中性）など | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4485,7 +4486,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2bakelite.html",
+      "id": "idx-kimika-028",
       "title": "熱硬化性樹脂（フェノール樹脂・アミノ樹脂）の合成や反応・用途・付加縮合など | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4496,7 +4497,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2cellulosecompound.html",
+      "id": "idx-kimika-029",
       "title": "ニトロセルロースとアセチルセルロース（合成法/作り方や構造、用途など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4507,7 +4508,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2cellulosemelt.html",
+      "id": "idx-kimika-030",
       "title": "シュバイツァー試薬や二硫化炭素を用いてセルロースを溶かす方法 | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4518,7 +4519,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2condensation.html",
+      "id": "idx-kimika-031",
       "title": "縮合重合・開環重合（ポリエステル・ポリアミド・ナイロンなど） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4529,7 +4530,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2denkieido.html",
+      "id": "idx-kimika-032",
       "title": "電気泳動（原理・中性/酸性/塩基性アミノ酸の移動方向など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4540,7 +4541,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2dna.html",
+      "id": "idx-kimika-033",
       "title": "【核酸】DNA・RNA（構造・違い・構成塩基の種類など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4551,7 +4552,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2dogma.html",
+      "id": "idx-kimika-034",
       "title": "セントラルドグマ（DNA複製・タンパク質合成の流れ） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4562,7 +4563,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2exchange.html",
+      "id": "idx-kimika-035",
       "title": "陽イオン交換樹脂・陰イオン交換樹脂（作り方・原理・反応式など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4573,7 +4574,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2fats.html",
+      "id": "idx-kimika-036",
       "title": "油脂（構造・酸化・加水分解・グリセリンや脂肪酸との関係など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4584,7 +4585,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2fattyacid.html",
+      "id": "idx-kimika-037",
       "title": "高級脂肪酸（炭素数・覚え方・種類・一覧・構造式・分子量など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4595,7 +4596,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2glycerin.html",
+      "id": "idx-kimika-038",
       "title": "グリセリン（構造式・化学式・油脂との関係など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4606,7 +4607,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2kenkaka.html",
+      "id": "idx-kimika-039",
       "title": "けん化価とは（計算問題・ヨウ素価との違いなど） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4617,7 +4618,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2kobunshi.html",
+      "id": "idx-kimika-040",
       "title": "高分子化合物とは（分類・全体的な特徴など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4628,7 +4629,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2koso.html",
+      "id": "idx-kimika-041",
       "title": "酵素（一覧・酵素基質複合体・基質特異性・最適温度・最適pHなど） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4639,7 +4640,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2michaelis.html",
+      "id": "idx-kimika-042",
       "title": "【高校】ミカエリス・メンテン式を攻略！酵素反応速度論/ミカエリス定数の導出など | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4650,7 +4651,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2nito.html",
+      "id": "idx-kimika-043",
       "title": "二糖類（マルトース/スクロースなどの還元性・構造式・結合・覚え方など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4661,7 +4662,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2pepuketsu.html",
+      "id": "idx-kimika-044",
       "title": "ペプチド結合（アミド結合との違いなど） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4672,7 +4673,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2phospholipids.html",
+      "id": "idx-kimika-045",
       "title": "リン脂質（構造・種類・親水基/疎水基の向き・役割など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4683,7 +4684,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2polymerization.html",
+      "id": "idx-kimika-046",
       "title": "重合反応まとめ（付加重合・共重合・縮合重合・開環重合・付加縮合） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4694,7 +4695,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2rayon.html",
+      "id": "idx-kimika-047",
       "title": "ビスコースレーヨンと銅アンモニアレーヨン（合成法/作り方・原理・構造式・具体的な用途など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4705,7 +4706,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2separation.html",
+      "id": "idx-kimika-048",
       "title": "有機化合物（芳香族）の分離法〜仕組みや実験手順などを解説〜 | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4716,7 +4717,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2soap.html",
+      "id": "idx-kimika-049",
       "title": "セッケンと合成洗剤（違い・構造・製法・性質・欠点など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4727,7 +4728,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2sosei.html",
+      "id": "idx-kimika-050",
       "title": "双性イオン（定義や特徴、酸・塩基との反応など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4738,7 +4739,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2spiral.html",
+      "id": "idx-kimika-051",
       "title": "二重らせん構造（塩基の組み合わせ・水素結合の本数・ほどく方法など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4749,7 +4750,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2tanpakubunrui.html",
+      "id": "idx-kimika-052",
       "title": "【タンパク質の分類】単純/複合/球状/繊維状タンパク質の違いなど | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4760,7 +4761,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2tanpakucheck.html",
+      "id": "idx-kimika-053",
       "title": "【アミノ酸/タンパク質】検出反応を総まとめ（ビウレット/キサントプロテイン/ニンヒドリン/硫黄） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4771,7 +4772,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2tanpakuhensei.html",
+      "id": "idx-kimika-054",
       "title": "タンパク質の変性（例・理由・原理など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4782,7 +4783,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2tanpakukozo.html",
+      "id": "idx-kimika-055",
       "title": "タンパク質の一次構造・二次構造（αヘリックス/βシート）・三次構造・四次構造 | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4793,7 +4794,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2tato.html",
+      "id": "idx-kimika-056",
       "title": "【多糖類】デンプン（アミロース・アミロペクチン）/セルロースの構造・還元性・加水分解など | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4804,7 +4805,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2todenten.html",
+      "id": "idx-kimika-057",
       "title": "【アミノ酸】等電点（求め方・pHとの関係・計算問題の解き方など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4815,7 +4816,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2vinylon.html",
+      "id": "idx-kimika-058",
       "title": "ビニロン（構造・用途・合成法など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4826,7 +4827,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2yosodenpun.html",
+      "id": "idx-kimika-059",
       "title": "ヨウ素デンプン反応（原理・色の違い・反応式など） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",
@@ -4837,7 +4838,7 @@
       "type": "article"
     },
     {
-      "url": "https://kimika.net/y2yousoka.html",
+      "id": "idx-kimika-060",
       "title": "ヨウ素価とは（計算問題・けん化価との違いなど） | 化学のグルメ",
       "section": "化学のグルメ 有機化学（全60記事）",
       "kind": "article",

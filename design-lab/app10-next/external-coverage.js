@@ -4,6 +4,7 @@
  * 目的: 「収録データの一覧」ではなく、外部資料に掲載された名称から出発して
  *       収録漏れを検出する。各行は 9 列（名称・種別・対応先・資料・節・取得日・
  *       短い根拠・ラベル・備考）をもち、外部説明の文章は転載しない。
+ *       教材出典ページのURLは配信せず、source ID（s1〜s22）と資料名で示す。
  *
  * 種別:
  *   compound  … COMPOUNDS に収録した化合物
@@ -23,130 +24,109 @@
 
   var SOURCES = {
     s1: {
-      url: 'https://www.jikkyo.co.jp/web_ni_link/science2/jmol/cellobiose.html',
       title: '実教出版 Web理科教材「セロビオース」',
       section: 'セロビオースの構造',
-      domain: 'www.jikkyo.co.jp', retrieved: RETRIEVED, level: '発展'
+retrieved: RETRIEVED, level: '発展'
     },
     s2: {
-      url: 'https://www.shinko-keirin.co.jp/keirinkan/tea/kou/jissen/kagaku/201306/index.html',
       title: '啓林館 授業実践記録（化学）「エステルの合成・分解とヨードホルム反応」',
       section: 'エステルの合成・分解とヨードホルム反応',
-      domain: 'www.shinko-keirin.co.jp', retrieved: RETRIEVED, level: '探究'
+retrieved: RETRIEVED, level: '探究'
     },
     s3: {
-      url: 'https://kimika.net/iy2arukan.html',
       title: '化学のグルメ アルカン一問一答',
       section: 'アルカンと塩素化メタン',
-      domain: 'kimika.net', retrieved: RETRIEVED, level: '標準'
+retrieved: RETRIEVED, level: '標準'
     },
     s4: {
-      url: 'https://fromhimuka.com/chemistry/429.html',
       title: 'FromHimuka 飽和炭化水素',
       section: 'アルカンとハロゲン化物',
-      domain: 'fromhimuka.com', retrieved: RETRIEVED, level: '標準'
+retrieved: RETRIEVED, level: '標準'
     },
     s5: {
-      url: 'https://www.try-it.jp/chapters-9788/sections-9894/lessons-9945/point-2/',
       title: 'Try IT 酸無水物',
       section: '酢酸と無水酢酸',
-      domain: 'www.try-it.jp', retrieved: RETRIEVED, level: '標準'
+retrieved: RETRIEVED, level: '標準'
     },
     s6: {
-      url: 'https://www.try-it.jp/chapters-9788/sections-9987/lessons-10077/',
       title: 'Try IT アゾカップリング',
       section: 'ジアゾニウム塩とフェノールのカップリング',
-      domain: 'www.try-it.jp', retrieved: RETRIEVED, level: '発展'
+retrieved: RETRIEVED, level: '発展'
     },
     s7: {
-      url: 'https://www.try-it.jp/chapters-10095/sections-10116/lessons-10233/point-2/',
       title: 'Try IT DNAの構造',
       section: '核酸と塩基',
-      domain: 'www.try-it.jp', retrieved: RETRIEVED, level: '標準'
+retrieved: RETRIEVED, level: '標準'
     },
     s8: {
-      url: 'https://www.try-it.jp/chapters-10095/sections-10116/lessons-10156/point-2/',
       title: 'Try IT セルロースの性質',
       section: 'セルロースと加水分解',
-      domain: 'www.try-it.jp', retrieved: RETRIEVED, level: '標準'
+retrieved: RETRIEVED, level: '標準'
     },
     s9: {
-      url: 'https://www.try-it.jp/chapters-10095/sections-10116/lessons-10191/',
       title: 'Try IT ニンヒドリン反応',
       section: 'アミノ酸の検出',
-      domain: 'www.try-it.jp', retrieved: RETRIEVED, level: '標準'
+retrieved: RETRIEVED, level: '標準'
     },
     s10: {
-      url: 'https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/',
       title: 'Try IT 銅アンモニアレーヨン',
       section: 'セルロースの加工',
-      domain: 'www.try-it.jp', retrieved: RETRIEVED, level: '発展'
+retrieved: RETRIEVED, level: '発展'
     },
     s11: {
-      url: 'https://www.try-it.jp/chapters-10095/sections-10116/lessons-10164/point-2/',
       title: 'Try IT ビスコースレーヨン',
       section: 'ビスコース法',
-      domain: 'www.try-it.jp', retrieved: RETRIEVED, level: '発展'
+retrieved: RETRIEVED, level: '発展'
     },
     s12: {
-      url: 'https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/',
       title: 'Try IT 陽イオン交換樹脂',
       section: '陽イオン交換樹脂の構造',
-      domain: 'www.try-it.jp', retrieved: RETRIEVED, level: '発展'
+retrieved: RETRIEVED, level: '発展'
     },
     s13: {
-      url: 'https://www.try-it.jp/chapters-10095/sections-10240/lessons-10267/point-2/',
       title: 'Try IT 陰イオン交換樹脂',
       section: '陰イオン交換樹脂の構造',
-      domain: 'www.try-it.jp', retrieved: RETRIEVED, level: '発展'
+retrieved: RETRIEVED, level: '発展'
     },
     s14: {
-      url: 'https://examist.jp/chemistry/natural-polymer/protein/',
       title: 'examist タンパク質の分類',
       section: '単純・複合・誘導タンパク質',
-      domain: 'examist.jp', retrieved: RETRIEVED, level: '発展'
+retrieved: RETRIEVED, level: '発展'
     },
     s15: {
-      url: 'https://ch.yorikuwa.com/c6417/',
       title: 'yorikuwa タンパク質',
       section: 'タンパク質の種類',
-      domain: 'ch.yorikuwa.com', retrieved: RETRIEVED, level: '発展'
+retrieved: RETRIEVED, level: '発展'
     },
     s16: {
-      url: 'https://kagakulab.com/protein/',
       title: '高校化学ラボ タンパク質',
       section: 'タンパク質の分類と代表例',
-      domain: 'kagakulab.com', retrieved: RETRIEVED, level: '発展'
+retrieved: RETRIEVED, level: '発展'
     },
     s17: {
-      url: 'https://daigaku-kagaku.com/2024/06/06/what-you-need-to-know-to-make-structural-decisions/',
       title: '大学化学 構造決定',
       section: '糖類・酸無水物の構造決定',
-      domain: 'daigaku-kagaku.com', retrieved: RETRIEVED, level: '発展'
+retrieved: RETRIEVED, level: '発展'
     },
     s18: {
-      url: 'https://www.jstage.jst.go.jp/article/kakyoshi/68/6/68_258/_pdf',
       title: '日本化学会「高校化学における芳香族化合物の合成実験」',
       section: '化学と教育 68巻6号 pp.258-261',
-      domain: 'www.jstage.jst.go.jp', retrieved: RETRIEVED, level: '探究'
+retrieved: RETRIEVED, level: '探究'
     },
     s19: {
-      url: 'https://www.jstage.jst.go.jp/article/kakyoshi/68/10/68_416/_pdf',
       title: '日本化学会「高校化学における染料と染色」',
       section: '化学と教育 68巻10号 pp.416-419',
-      domain: 'www.jstage.jst.go.jp', retrieved: RETRIEVED, level: '探究'
+retrieved: RETRIEVED, level: '探究'
     },
     s20: {
-      url: 'https://students.csj.jp/wp-content/uploads/2021/09/ky68-376-newkoza.pdf',
       title: '日本化学会「高分子らしさを体感する実験」',
       section: '化学と教育 68巻9号 pp.376-379',
-      domain: 'students.csj.jp', retrieved: RETRIEVED, level: '探究'
+retrieved: RETRIEVED, level: '探究'
     },
     s21: {
-      url: 'https://www.cst.nihon-u.ac.jp/research/gakujutu/67/pdf/A-3.pdf',
       title: '日本大学理工学部 学術講演会予稿集「解熱鎮痛剤として利用される芳香族化合物の性質を知る事後探求型実験」',
       section: '令和5年度 日本大学理工学部 学術講演会予稿集 A-3',
-      domain: 'www.cst.nihon-u.ac.jp', retrieved: RETRIEVED, level: '探究'
+retrieved: RETRIEVED, level: '探究'
     }
   };
 
@@ -177,7 +157,7 @@
     r('酢酸ナトリウム', 'compound', 'sodium-acetate', 's2', 'エステルの合成・分解とヨードホルム反応', 'けん化で酢酸ナトリウムが生じると説明される。', '探究'),
     r('ヨードホルム', 'compound', 'iodoform', 's2', 'エステルの合成・分解とヨードホルム反応', 'ヨードホルム反応の実験で扱われる。', '探究'),
 
-    /* S3 kimika.net */
+    /* S3 化学のグルメ */
     r('メタン', 'alias', 'methane', 's3', 'アルカンと塩素化メタン', 'アルカン一問一答のC1として扱われる。'),
     r('エタン', 'alias', 'ethane', 's3', 'アルカンと塩素化メタン', 'アルカン一問一答のC2として扱われる。'),
     r('プロパン', 'alias', 'propane', 's3', 'アルカンと塩素化メタン', 'アルカン一問一答のC3として扱われる。'),
@@ -411,13 +391,8 @@
     });
     Object.keys(SOURCES).forEach(function (sid) {
       var s = SOURCES[sid];
-      if (!/^https?:\/\//.test(s.url || '')) missing.push({ source: sid, reason: 'URLが不正' });
-      if (!s.title || !s.section || !s.domain || !s.retrieved) missing.push({ source: sid, reason: '資料メタデータ不足' });
+      if (!s.title || !s.section || !s.retrieved) missing.push({ source: sid, reason: '資料メタデータ不足' });
       if (LEVELS.indexOf(s.level) === -1 || bySource[sid] == null) missing.push({ source: sid, reason: '資料のラベルまたは行がない' });
-      try {
-        var host = new URL(s.url).hostname;
-        if (host !== s.domain) missing.push({ source: sid, reason: 'domain不一致: ' + host + ' != ' + s.domain });
-      } catch (e) { missing.push({ source: sid, reason: 'URLを解析できない' }); }
     });
     return {
       rows: ROWS.length,

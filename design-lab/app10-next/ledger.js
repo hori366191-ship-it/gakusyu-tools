@@ -11,6 +11,7 @@
   var M = window.OCIndex;
   var A = window.OCIndexAudit;
   var IA = window.OCIndependentAudit;
+  var OA = window.OCOcrAudit;
   if (!D || !R) return;
 
   function prefersReducedMotion() {
@@ -221,13 +222,12 @@
       '照合結果: ' + (extAudit.missing.length === 0 ? '未対応 0 件（すべて収録ID・別名・材料索引・対象外のいずれかに対応）' :
         '未対応 ' + extAudit.missing.length + ' 件（下の表で赤く表示）') +
       '。種別内訳: ' + kindBits + '。資料側ラベル: ' + levelBits +
-      '。外部説明は転載せず、短い根拠は本アプリ用に要約したものです。';
+      '。外部説明は転載せず、短い根拠は本アプリ用に要約したものです。教材出典ページのURLと本文は配信していません。';
     var extRows = E.ROWS.map(function (row, idx) {
       var src = E.SOURCES[row.source];
       var res = E.resolveRow(row, D);
       var missing = !res.ok;
-      var srcCell = src ? '<a href="' + esc(src.url) + '" target="_blank" rel="noopener" title="' +
-        esc(src.title) + '">' + esc(row.source) + '</a> <span class="oc-micro">' + esc(src.domain) + '</span>' : esc(row.source);
+      var srcCell = src ? '<span class="oc-id">' + esc(row.source) + '</span> ' + esc(src.title) : esc(row.source);
       return '<tr' + (missing ? ' class="oc-ext-missing"' : '') + ' data-ext-index="' + idx + '">' +
         '<td><b>' + esc(row.name) + '</b></td>' +
         '<td>' + esc(kindLabel(row.kind)) + '</td>' +
@@ -250,6 +250,7 @@
       return '<div class="oc-coverage__item" id="f-' + esc(f.id) + '"><b>' + esc(f.name) + '</b>' +
         '<span class="oc-coverage__count">' + esc(f.kind || 'family') + '</span>' +
         '<span>' + esc(f.summary || '') + '</span>' +
+        (f.provenanceNote ? '<span class="oc-micro">表記: ' + esc(f.provenanceNote) + '</span>' : '') +
         (f.formula ? '<span class="oc-micro">' + esc(f.formula) + '</span>' : '<span class="oc-micro">組成依存・固定分子式なし</span>') +
         '</div>';
     }).join('') + '</div>';
@@ -271,7 +272,7 @@
   if (idxStats && M) {
     var auditResult = A ? A.audit(D) : { findings: 0, missing: [] };
     idxStats.innerHTML = [
-      { b: M.COUNTS.total, s: '取得URL' },
+      { b: M.COUNTS.total, s: '取得エントリ' },
       { b: M.CHAPTERS.length, s: '章・節' },
       { b: M.COUNTS.byKind.lesson, s: 'lesson' },
       { b: M.COUNTS.bySource['idx-kimika'], s: '化学のグルメ記事' },
@@ -283,18 +284,18 @@
     var chapters = document.getElementById('ledger-index-chapters');
     if (chapters) {
       chapters.innerHTML = '<div class="oc-table-wrap"><table class="oc-table"><caption class="oc-sr-only">章・節ごとの取得数</caption>' +
-        '<thead><tr><th scope="col">章・節</th><th scope="col">URL</th><th scope="col">期待lesson</th><th scope="col">取得lesson</th><th scope="col">全ページ</th></tr></thead><tbody>' +
+        '<thead><tr><th scope="col">章・節</th><th scope="col">章ID</th><th scope="col">期待lesson</th><th scope="col">取得lesson</th><th scope="col">全ページ</th></tr></thead><tbody>' +
         M.CHAPTERS.map(function (ch) {
-          return '<tr><td><b>' + esc(ch.name) + '</b></td><td><a href="' + esc(ch.url) + '" target="_blank" rel="noopener">' + esc(ch.url) + '</a></td>' +
+          return '<tr><td><b>' + esc(ch.name) + '</b></td><td class="oc-id">' + esc(ch.id) + '</td>' +
             '<td>' + esc(ch.expectedLessons) + '</td><td>' + esc(ch.obtainedLessons) + '</td><td>' + esc(ch.allPages) + '</td></tr>';
         }).join('') + '</tbody></table></div>';
     }
     var idxNote = document.getElementById('ledger-index-note');
     if (idxNote) {
-      idxNote.textContent = '取得日 ' + M.RETRIEVED + '。URL・title・節・種別・HTTP状態・文字数・SHA-256 を保持し、全' +
+      idxNote.textContent = '取得日 ' + M.RETRIEVED + '。entry ID・title・節・種別・HTTP状態・文字数・SHA-256 を保持し、全' +
         M.COUNTS.total + '件がHTTP 200です。要判断事項 ' + auditResult.findings +
         '件は化合物・family・材料/混合物・無機対象外のいずれかへ対応づけ、未解決 ' + auditResult.missing.length + '件です。' +
-        '画像の全OCR・動画の視聴/文字起こしは未完了であり、教材の完全網羅を主張しません。';
+        '教材出典ページのURLと本文抜粋は配信していません。画像の全OCR・動画の視聴/文字起こしは未完了であり、教材の完全網羅を主張しません。';
     }
     var auditRows = document.getElementById('ledger-audit-rows');
     if (auditRows && A) {
@@ -304,10 +305,11 @@
         if (f.resolution === 'compound' && D.COMPOUNDS[f.ref]) ref = '<a href="' + esc(appHref(f.ref)) + '">' + esc(D.COMPOUNDS[f.ref].name) + '</a>';
         else if ((f.resolution === 'material' || f.resolution === 'variant') && D.materialById && D.materialById(f.ref)) ref = '<a href="#m-' + esc(f.ref) + '">' + esc(D.materialById(f.ref).name) + '</a>';
         else if (f.resolution === 'family' && D.familyById && D.familyById(f.ref)) ref = '<a href="#f-' + esc(f.ref) + '">' + esc(D.familyById(f.ref).name) + '</a>';
-        var urls = (f.urls || []).map(function (u) { return '<a href="' + esc(u) + '" target="_blank" rel="noopener">根拠</a>'; }).join(' ');
+        var sources = (f.sources || []).join(' / ');
         return '<tr><td><b>' + esc(f.term) + '</b></td><td>' + esc(f.kind || '') + '</td>' +
           '<td>' + esc(resLabel[f.resolution] || f.resolution) + '</td><td>' + ref + '</td>' +
-          '<td>' + esc(f.quote || '') + ' ' + urls + '</td><td>' + esc(f.supplement || '') + '</td></tr>';
+          '<td><span class="oc-id">' + esc(sources || '—') + '</span> ' + esc(f.sourceCount || 0) + '件</td>' +
+          '<td>' + esc(f.supplement || '') + (f.proposal ? ' ' + esc(f.proposal) : '') + '</td></tr>';
       }).join('');
     }
     var limits = document.getElementById('ledger-manifest-limits');
@@ -339,7 +341,7 @@
         '。未解決 ' + ia.unresolved.length + '件、mapping未解決 ' + ia.mandatoryUnresolved.length +
         '件、画像実証の未収録 ' + ia.trueMissingMissing.length + '件。' +
         '範囲差: ' + esc(IA.META.scopeDiff.candidateList) + ' ' + esc(IA.META.scopeDiff.compounds) +
-        ' 全1399画像のOCR・全動画は未実施であり、625候補の分類完了を教材全名称の抽出完了とは主張しません。';
+        ' 全1399画像のOCR二pass統合は別sectionに記録し、化学的な完全読取・全動画は未完了です。625候補の分類完了を教材全名称の抽出完了とは主張しません。';
     }
     var mand = document.getElementById('ledger-independent-mandatory');
     if (mand) {
@@ -353,16 +355,18 @@
       mand.innerHTML = IA.MANDATORY.map(function (m) {
         return '<tr><td><b>' + esc(m.term) + '</b></td><td>' + esc(m.kind || m.label) + '</td>' +
           '<td>' + targetCell(m.targetType, m.target) + '</td><td>' + esc(m.explanation || '') + '</td>' +
-          '<td>' + (m.url ? '<a href="' + esc(m.url) + '" target="_blank" rel="noopener">根拠</a>' : '—') + '</td>' +
+          '<td><span class="oc-id">' + esc(m.source || '—') + '</span></td>' +
           '<td><span class="oc-id">' + esc(m.provenance || '') + '</span></td></tr>';
       }).join('');
     }
     var indRows = document.getElementById('ledger-independent-rows');
     if (indRows) {
       indRows.innerHTML = IA.ENTRIES.map(function (e) {
+        var cur = e.currentMapping;
         return '<tr><td><b>' + esc(e.term) + '</b></td><td>' + esc(e.label) + '</td>' +
-          '<td>' + esc(e.mappingType) + '</td><td>' + targetCell(e.mappingType, e.target) + '</td>' +
-          '<td>' + esc(e.note || '') + '</td><td>' + (e.url ? '<a href="' + esc(e.url) + '" target="_blank" rel="noopener">根拠</a>' : '—') + '</td>' +
+          '<td>' + esc(e.mappingType + (cur ? ' → ' + cur.mappingType : '')) + '</td>' +
+          '<td>' + targetCell(cur ? cur.mappingType : e.mappingType, cur ? cur.target : e.target) + '</td>' +
+          '<td>' + esc(e.note || '') + '</td><td><span class="oc-id">' + esc(e.source || '—') + '</span></td>' +
           '<td><span class="oc-id">' + esc(e.source) + ' / ' + esc(e.provenance) + '</span></td></tr>';
       }).join('');
     }
@@ -383,6 +387,61 @@
         '件。all1399OcrCompleted=' + esc(IA.IMAGE_REVIEW.all1399OcrCompleted) + '。' + esc(IA.IMAGE_REVIEW.note) + '</li>' +
         '<li>provenance内訳: ' + Object.keys(IA.PROVENANCE).map(function (k) { return esc(k) + ' ' + esc(IA.PROVENANCE[k]); }).join(' / ') +
         '（画像実証5件は TRUE_MISSING に image-human-read として別記）。</li>';
+    }
+  }
+
+  // ---- OCR二pass統合監査 ----
+  if (OA && OA.META) {
+    var ocrStats = document.getElementById('ledger-ocr-stats');
+    if (ocrStats) {
+      var m = OA.META;
+      ocrStats.innerHTML = [
+        { b: m.urls, s: '取得件数' },
+        { b: m.uniqueImages, s: 'unique画像' },
+        { b: m.twoPass.ok, s: 'OCR ok' },
+        { b: m.twoPass.empty, s: 'empty（原画像目視）' },
+        { b: m.twoPass.error, s: 'error' },
+        { b: m.candidates.total, s: '候補分類' },
+        { b: m.alternatePass.uniqueCandidates, s: '未採用pass追加語' },
+        { b: OA.VIDEO.totalVideos, s: '動画（未照合）' }
+      ].map(function (x) {
+        return '<div class="oc-stat"><b>' + esc(x.b) + '</b><span>' + esc(x.s) + '</span></div>';
+      }).join('');
+    }
+    var ocrNote = document.getElementById('ledger-ocr-note');
+    if (ocrNote) {
+      ocrNote.textContent = 'empty内訳: 構造/反応のみ36・模式図/アイコン8・写真6・注記1。化合物名のOCR失敗は0件。' +
+        '候補766（片仮名249・漢字403・式114）を分類し、漢字403は語と文脈による分類のみで全代表原画像の目視は未実施です。' +
+        '現在の化合物は' + OA.META.history.currentCompounds + '件、独立625語監査の履歴値は' + OA.META.history.independentAuditFinalCompounds + '件として区別します。' +
+        '全1399画像の化学的な完全読取は主張しません。';
+    }
+    var confirmed = document.getElementById('ledger-ocr-confirmed');
+    if (confirmed) {
+      confirmed.innerHTML = OA.CONFIRMED_ADDITIONS.map(function (x) {
+        var target = x.type === 'compound'
+          ? '<a href="' + esc(appHref(x.id)) + '">' + esc(D.COMPOUNDS[x.id] ? D.COMPOUNDS[x.id].name : x.id) + '</a>'
+          : (D.COMPOUNDS[x.target] ? '<a href="' + esc(appHref(x.target)) + '">' + esc(D.COMPOUNDS[x.target].name) + '</a>' : esc(x.target));
+        var evidence = '<span class="oc-id">' + esc(x.source || '—') + '</span>';
+        return '<tr><td>' + esc(x.type) + '</td><td><b>' + esc(x.term || x.alias) + '</b></td>' +
+          '<td>' + target + '</td><td>' + evidence + '</td><td>' + esc(x.status) + '</td></tr>';
+      }).join('');
+    }
+    var familyFixes = document.getElementById('ledger-ocr-family-fixes');
+    if (familyFixes) {
+      familyFixes.innerHTML = OA.FAMILY_LOOKUP_CORRECTIONS.map(function (x) {
+        var target = D.familyById(x.target)
+          ? '<a href="#f-' + esc(x.target) + '">' + esc(D.familyById(x.target).name) + '</a>'
+          : esc(x.target);
+        return '<tr><td><b>' + esc(x.term) + '</b></td><td>' + target + '</td><td>' + esc(x.correction) + '</td></tr>';
+      }).join('');
+    }
+    var ocrLimits = document.getElementById('ledger-ocr-limits');
+    if (ocrLimits) {
+      ocrLimits.innerHTML = OA.META.limitations.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') +
+        '<li>動画' + OA.VIDEO.totalVideos + '本は本文未照合。' +
+        '主対象 ' + esc(OA.VIDEO.mainVideoId) + ' の公開文字起こしは通常UIでも0 segment、' +
+        'get_transcript は HTTP ' + OA.VIDEO.httpStatus + ' / ' + esc(OA.VIDEO.error) + '。' +
+        'トークン・Cookie・ヘッダーは記録せず、再取得・迂回は行っていません（' + esc(OA.VIDEO.evidenceFile) + '）。</li>';
     }
   }
 

@@ -1,7 +1,7 @@
 /*
  * 有機化学ビルダー（app10-next）— 鎖式の炭化水素部分デスクリプタ
  *
- * 鎖式154化合物について、検証済みの構造グラフから
+ * 鎖式157化合物について、検証済みの構造グラフから
  *   「官能基に結合する炭化水素部分」の C 数・つながり方・分かれ方
  * を導出する。分子式や名称から炭素骨格を推定しない。
  *
@@ -47,6 +47,13 @@
     'ノナデカン', 'エイコサン'
   ];
 
+  var LINEAR_RADICAL_NAMES = [
+    '', 'メチル基', 'エチル基', 'プロピル基', 'ブチル基', 'ペンチル基', 'ヘキシル基',
+    'ヘプチル基', 'オクチル基', 'ノニル基', 'デシル基', 'ウンデシル基', 'ドデシル基',
+    'トリデシル基', 'テトラデシル基', 'ペンタデシル基', 'ヘキサデシル基',
+    'ヘプタデシル基', 'オクタデシル基', 'ノナデシル基', 'エイコシル基'
+  ];
+
   var ROLE_LABELS = {
     alkane: 'アルカン',
     alkene: 'アルケン',
@@ -66,10 +73,12 @@
     'acid-chloride': '酸塩化物',
     anhydride: 'カルボン酸無水物',
     monoester: '一価エステル',
+    diester: '二価エステル（ジエステル）',
     triester: '三価エステル（トリエステル）',
     'amine-1': '第一級アミン',
     'amine-2': '第二級アミン',
     'amine-3': '第三級アミン',
+    'amine-1-2': '第一級アミン×2・第二級アミン×1',
     nitrile: 'ニトリル',
     nitro: 'ニトロ化合物',
     'amino-alcohol': 'アミノアルコール'
@@ -400,6 +409,7 @@
         id: id,
         token: id,
         parentName: shortCompoundName(c),
+        commonName: commonCompoundName(c),
         kind: 'compound',
         branchCount: info.branchCount
       });
@@ -409,10 +419,18 @@
   }
 
   function shortCompoundName(c) {
+    // 分岐骨格の選択カードは、イソ/ネオの慣用名ではなくIUPAC名を主表示にする
+    // （例: ネオヘキサン → 2,2-ジメチルブタン）。慣用名は commonCompoundName で
+    // 別名として詳細に残す。物質レコードは追加しない。
+    var name = String(c.name || c.id);
+    return name.split('（')[0];
+  }
+
+  function commonCompoundName(c) {
     var name = String(c.name || c.id);
     var m = name.match(/（([^）]+)）/);
-    if (m && /^(イソ|ネオ)[^（）]*$/.test(m[1])) return m[1];
-    return name.split('（')[0];
+    if (!m) return '';
+    return m[1];
   }
 
   function parentForShape(shape, parentIndex) {
@@ -543,9 +561,11 @@
       return 'monocarboxy';
     }
     if (family === 'halogen') return groups.halogen > 1 ? 'multihalogen' : 'monohalogen';
-    if (family === 'ester') return groups.ester >= 3 ? 'triester' : 'monoester';
+    if (family === 'ester') return groups.ester >= 3 ? 'triester' : (groups.ester === 2 ? 'diester' : 'monoester');
     if (family === 'amine') {
       var deg = groups.amineDegrees[3] ? 3 : (groups.amineDegrees[2] ? 2 : 1);
+      // 1分子に第一級と第二級が併存する場合は、多い方の級だけを表示しない。
+      if (groups.amineDegrees[1] && groups.amineDegrees[2] && !groups.amineDegrees[3]) return 'amine-1-2';
       return 'amine-' + deg;
     }
     if (family === 'polyol') return 'polyol';
@@ -630,34 +650,28 @@
       if (fragment.tripleBonds === 1) return 'エチニル基';
       return 'エチル基';
     }
-    return fragment.parentName + '骨格';
-  }
-
-  function isPositionalHydrocarbonLabel(fragment) {
-    if (!fragment || !fragment.parentName) return false;
-    if (!(fragment.doubleBonds || fragment.tripleBonds)) return false;
-    return /[-−]\d+[-−]/.test(fragment.parentName);
+    // 1か所でつながる直鎖は「プロピル基」のようなラジカル名で示す。
+    // 枝分かれ・複数接続は、どの位置でつながるかを特定しない「骨格」とし、
+    // n-プロピル/イソプロピルの片方と誤認させない。
+    if (!fragment.branchCount && fragment.attachmentCount === 1) {
+      return LINEAR_RADICAL_NAMES[fragment.carbonCount] || (fragment.parentName + '基');
+    }
+    return (fragment.commonName || fragment.parentName) + '骨格';
   }
 
   function fragmentOriginLabel(fragment) {
     if (fragment.isHydrogen) return 'H';
-    if (isPositionalHydrocarbonLabel(fragment)) return fragment.parentName;
     return fragment.parentName + '由来';
   }
 
   function buildDescriptorLabel(uniqueFragments) {
-    if (!uniqueFragments.length) return '炭化水素基なし〈H〉';
+    if (!uniqueFragments.length) return '官能基どうしが直接結合';
     if (uniqueFragments.length === 1) {
       var f = uniqueFragments[0];
-      if (f.isHydrogen) return '炭化水素基なし〈H〉';
-      var single = f.carbonCount === 1 ? 'メチル基'
-        : (f.carbonCount === 2 && f.doubleBonds === 1 ? 'エテン'
-          : (f.carbonCount === 2 && f.tripleBonds === 1 ? 'エチン' : f.parentName));
+      if (f.isHydrogen) return 'Hが結合';
       if (f.count > 1) return fragmentCarbonLabel(f) + '×' + f.count;
-      if (f.carbonCount === 1) return 'メチル基（メタン由来）';
-      if (f.carbonCount === 2 && f.doubleBonds === 1) return 'エテン由来';
-      if (f.carbonCount === 2 && f.tripleBonds === 1) return 'エチン由来';
-      if (isPositionalHydrocarbonLabel(f)) return f.parentName;
+      // 単一fragmentは接続位置を特定しない親炭化水素の「○○由来」で統一する。
+      // 位置異性体は同じshapeにまとめ、結果カードで区別する。
       return f.parentName + '由来';
     }
     var ordered = uniqueFragments.slice().sort(function (a, b) {
@@ -676,6 +690,9 @@
   }
 
   function buildDescriptorId(uniqueFragments, partialC) {
+    // 炭化水素部分がなく、官能基どうしが炭素を介さず直接結合する場合
+    // （シュウ酸 HOOC–COOH）は、H断片の「Hが結合」と混同しない。
+    if (!uniqueFragments.length) return 'd-direct-c' + partialC;
     var counts = {};
     var order = [];
     uniqueFragments.forEach(function (f) {
@@ -797,12 +814,16 @@
           parentId: parent.id,
           token: parent.token || parent.id,
           parentName: parent.parentName,
+          commonName: parent.commonName || '',
           component: { atoms: comp, graph: graph, info: info }
         };
       });
 
       var coreHydrogen = hasRHydrogenOnCore(graph, adj, coreIndices);
-      var useH = fragments.length === 0 || coreHydrogen.rHydrogen;
+      // 炭化水素部分がなくても、カルボニルCにR=Hが残る場合だけH断片を足す。
+      // シュウ酸（HOOC–COOH）はR=Hも炭化水素部分もなく、官能基どうしが
+      // 直接結合しているため、H親図に偽装しない。
+      var useH = coreHydrogen.rHydrogen;
       if (useH) {
         fragments.push({
           key: 'H',
@@ -821,6 +842,7 @@
       }
 
       var key = fragments.map(function (f) { return f.key; }).sort().join('*');
+      if (!fragments.length) key = 'direct';
       var descriptor = byKey[key];
       if (!descriptor) {
         descriptor = {
@@ -856,15 +878,18 @@
             branchCount: sample.branchCount,
             doubleBonds: sample.doubleBonds,
             tripleBonds: sample.tripleBonds,
+            attachmentCount: sample.attachmentCount || 0,
             parentId: sample.parentId,
             token: sample.token,
             parentName: sample.parentName,
+            commonName: sample.commonName || '',
             isHydrogen: !!sample.isHydrogen,
             count: 0
           };
           descriptor.uniqueFragments.push(existing);
         }
         existing.count = fragmentKeyCount[fkey];
+        existing.attachmentCount = Math.max(existing.attachmentCount || 0, sample.attachmentCount || 0);
         var best = descriptor.bestFragments[fkey];
         if (!best || (sample.attachmentCount > best.attachmentCount)) {
           descriptor.bestFragments[fkey] = sample;
@@ -911,6 +936,15 @@
       });
       descriptor.id = buildDescriptorId(descriptor.uniqueFragments, descriptor.partialC);
       descriptor.label = buildDescriptorLabel(descriptor.uniqueFragments);
+      descriptor.commonName = '';
+      descriptor.zeroKind = '';
+      if (!descriptor.uniqueFragments.length) {
+        descriptor.zeroKind = 'direct';
+      } else if (descriptor.uniqueFragments.length === 1 && descriptor.uniqueFragments[0].isHydrogen) {
+        descriptor.zeroKind = 'hydrogen';
+      } else if (descriptor.uniqueFragments.length === 1 && (descriptor.uniqueFragments[0].count || 1) === 1) {
+        descriptor.commonName = descriptor.uniqueFragments[0].commonName || '';
+      }
       descriptor.sortKey = sortKeyForDescriptor(descriptor);
       if (byId[descriptor.id]) warnings.push('デスクリプタIDが重複: ' + descriptor.id);
       byId[descriptor.id] = descriptor;
@@ -980,9 +1014,246 @@
     return descriptorList().filter(function (d) { return d.partialC === partialC; });
   }
 
-  function previewTiles(descriptor) {
+  /* ------------------------------------------------------------------
+   * 選択カード用の図（短い直鎖は文字式、長い直鎖は繰返しで圧縮、
+   * 分岐は2D構造図で枝を見せる）
+   * ------------------------------------------------------------------ */
+  var SUB_DIGITS = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
+
+  function subDigits(n) {
+    return String(n).split('').map(function (ch) {
+      return SUB_DIGITS[Number(ch)] || ch;
+    }).join('');
+  }
+
+  function pathInfo(component) {
+    if (!component || !component.atoms || !component.atoms.length) return null;
+    var n = component.atoms.length;
+    var local = {};
+    component.atoms.forEach(function (v, i) { local[v] = i; });
+    var adj = component.atoms.map(function () { return []; });
+    component.info.internal.forEach(function (b) {
+      var a = local[b.a];
+      var c = local[b.b];
+      if (a == null || c == null) return;
+      adj[a].push({ to: c, order: b.order });
+      adj[c].push({ to: a, order: b.order });
+    });
+    var start = -1;
+    for (var i = 0; i < n; i++) {
+      if (adj[i].length > 2) return null;
+      if (adj[i].length <= 1 && start === -1) start = i;
+    }
+    if (start === -1) return null;
+    var order = [start];
+    var bonds = [];
+    var prev = -1;
+    var cur = start;
+    while (order.length < n) {
+      var next = null;
+      for (var j = 0; j < adj[cur].length; j++) {
+        if (adj[cur][j].to !== prev) { next = adj[cur][j]; break; }
+      }
+      if (!next) break;
+      bonds.push(next.order);
+      prev = cur;
+      cur = next.to;
+      order.push(cur);
+    }
+    if (order.length !== n) return null;
+    return { order: order, bonds: bonds, local: local };
+  }
+
+  function carbonToken(h) {
+    if (h === 0) return 'C';
+    if (h === 1) return 'CH';
+    if (h === 2) return 'CH₂';
+    if (h === 3) return 'CH₃';
+    if (h === 4) return 'CH₄';
+    return 'CH' + subDigits(h);
+  }
+
+  function bondSymbol(order) {
+    if (order === 2) return '=';
+    if (order === 3) return '≡';
+    return '−';
+  }
+
+  // opts.useActualH : ラジカル表示（接続点のHを1つ除いた実H数）
+  // opts.dashAt     : 接続点のダッシュを置く位置（0=左端, 最後=右端）
+  // opts.compress   : 5炭素以上の直鎖アルカンを CH₃(CH₂)ₙCH₃ に圧縮
+  function pathFormula(component, opts) {
+    opts = opts || {};
+    var path = pathInfo(component);
+    if (!path) return null;
+    var n = path.order.length;
+    var hs = [];
+    path.order.forEach(function (li) {
+      if (opts.useActualH) {
+        var gid = component.atoms[li];
+        hs.push(component.graph.atoms[gid].h || 0);
+      } else {
+        hs.push(component.info.parentHydrogens[li]);
+      }
+    });
+    var allSingle = path.bonds.every(function (o) { return o === 1; });
+    var isLinearAlkane = allSingle && n >= 5 && path.order.every(function (li, i) {
+      if (i === 0 || i === n - 1) return hs[i] === 3;
+      return hs[i] === 2;
+    });
+    if (opts.compress && isLinearAlkane && opts.dashAt == null) {
+      return 'CH₃(CH₂)' + subDigits(n - 2) + 'CH₃';
+    }
+    var parts = hs.map(carbonToken);
+    var text = '';
+    for (var i = 0; i < parts.length; i++) {
+      if (i > 0) text += bondSymbol(path.bonds[i - 1]);
+      text += parts[i];
+    }
+    if (opts.dashAt === 0) text = '−' + text;
+    else if (opts.dashAt === n - 1) text = text + '−';
+    return text;
+  }
+
+  function graphTileFigure(descriptor, fragment) {
+    var best = descriptor.bestFragments[fragment.key];
+    if (!best || !best.component) return null;
+    var structure = previewStructure({
+      atoms: best.component.atoms,
+      graph: best.component.graph,
+      info: best.component.info
+    });
+    var local = {};
+    best.component.atoms.forEach(function (v, li) { local[v] = li; });
+    var marks = best.component.info.attachmentAtoms.map(function (v) {
+      var li = local[v];
+      return { x: structure.atoms[li].x, y: structure.atoms[li].y };
+    });
+    return { kind: 'graph', structure: structure, marks: marks, attachmentCount: marks.length };
+  }
+
+  function reverseFormulaText(text) {
+    var tokens = [];
+    var seps = [];
+    var cur = '';
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (ch === '−' || ch === '=' || ch === '≡') {
+        seps.push(ch);
+        tokens.push(cur);
+        cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    tokens.push(cur);
+    var out = tokens[tokens.length - 1];
+    for (var j = tokens.length - 2; j >= 0; j--) {
+      out += seps[j] + tokens[j];
+    }
+    return out;
+  }
+
+  function fragmentFigureFor(descriptor, fragment, opts) {
+    opts = opts || {};
+    if (!fragment) return null;
+    if (fragment.isHydrogen) {
+      return { kind: 'hydrogen', text: opts.dashAt === 0 ? '−H' : 'H−' };
+    }
+    var best = descriptor.bestFragments[fragment.key];
+    if (best && best.component) {
+      if (opts.radical) {
+        // 1か所だけ・末端でつながる直鎖は、接続点のダッシュ付き文字式。
+        // 内部でつながる（イソプロピル等）は2D図で○の位置を見せる。
+        if ((best.attachmentCount || 0) === 1 && (best.attachmentAtoms || []).length === 1) {
+          var path = pathInfo(best.component);
+          if (path) {
+            var local = best.component.atoms.indexOf(best.attachmentAtoms[0]);
+            var idx = path.order.indexOf(local);
+            if (idx === 0 || idx === path.order.length - 1) {
+              var text;
+              if (path.order.length === 1) {
+                // メチル基は左右どちらに置いても、中央のすき間へダッシュを向ける。
+                text = opts.side === 'right' ? '−CH₃' : 'CH₃−';
+              } else {
+                text = pathFormula(best.component, { useActualH: true, dashAt: idx });
+                // 左右のfragmentを向かい合わせ、ダッシュを中央のすき間へ向ける。
+                if (opts.side === 'left' && /^[−=≡]/.test(text)) text = reverseFormulaText(text);
+                else if (opts.side === 'right' && /[−=≡]$/.test(text)) text = reverseFormulaText(text);
+              }
+              if (text) return { kind: 'formula', text: text };
+            }
+          }
+        }
+      } else {
+        var t = pathFormula(best.component, { compress: true, dashAt: null });
+        if (t) return { kind: 'formula', text: t };
+      }
+    }
+    return graphTileFigure(descriptor, fragment);
+  }
+
+  function shapeFigure(descriptor) {
+    if (!descriptor) return null;
+    var label = descriptor.label;
+    if (descriptor.zeroKind === 'direct') {
+      return {
+        kind: 'none',
+        label: label,
+        note: '炭化水素部分がなく、2つの官能基が炭素を介さず直接結合しています。'
+      };
+    }
+    if (descriptor.zeroKind === 'hydrogen') {
+      return {
+        kind: 'hydrogen',
+        label: label,
+        text: 'H',
+        note: '官能基に結合するHを炭化水素部分として扱います（R=H）。'
+      };
+    }
+    var single = descriptor.uniqueFragments.length === 1 && (descriptor.uniqueFragments[0].count || 1) === 1;
+    if (single) {
+      var f = descriptor.uniqueFragments[0];
+      return {
+        kind: 'single',
+        label: label,
+        commonName: descriptor.commonName || '',
+        figure: fragmentFigureFor(descriptor, f, { radical: false }),
+        note: descriptor.commonName ? '別名: ' + descriptor.commonName : ''
+      };
+    }
+    var ordered = descriptor.uniqueFragments.slice().sort(function (a, b) {
+      if (a.isHydrogen !== b.isHydrogen) return a.isHydrogen ? -1 : 1;
+      return b.carbonCount - a.carbonCount || (a.parentName < b.parentName ? -1 : 1);
+    });
+    var left = ordered[0];
+    var right = ordered.length > 1 ? ordered[1] : ordered[0];
+    return {
+      kind: 'multi',
+      label: label,
+      halves: [
+        fragmentFigureFor(descriptor, left, { radical: true, dashAt: null, side: 'left' }),
+        fragmentFigureFor(descriptor, right, { radical: true, dashAt: 0, side: 'right' })
+      ],
+      note: 'fragmentを＋でつながず、接続点のダッシュ（−）で分けて表示します。'
+    };
+  }
+
+  function expandedParentStructure(component) {
+    var structure = previewStructure(component);
+    structure.mode = 'expanded';
+    structure.width = 0;
+    structure.height = 0;
+    return structure;
+  }
+
+  function shapePreviewTiles(descriptor) {
     if (!descriptor) return [];
+    if (!descriptor.uniqueFragments.length) return [];
     var tiles = [];
+    var singleParent = descriptor.uniqueFragments.length === 1 &&
+      !descriptor.uniqueFragments[0].isHydrogen &&
+      (descriptor.uniqueFragments[0].count || 1) === 1;
     var ordered = descriptor.uniqueFragments.slice().sort(function (a, b) {
       if (a.isHydrogen !== b.isHydrogen) return a.isHydrogen ? -1 : 1;
       return b.carbonCount - a.carbonCount || (a.parentName < b.parentName ? -1 : 1);
@@ -990,36 +1261,99 @@
     ordered.forEach(function (f) {
       var count = f.count || 1;
       for (var i = 0; i < count; i++) {
-        var best = descriptor.bestFragments[f.key];
-        if (f.isHydrogen || !best || !best.component) {
+        if (f.isHydrogen) {
           tiles.push({
             kind: 'hydrogen',
             label: 'H',
             parentName: 'H',
+            origin: descriptor.zeroKind === 'hydrogen' ? '炭化水素部分はH（R=H）' : '',
+            count: count,
+            marks: [],
+            attachmentCount: 0,
+            contracted: false,
+            figure: { kind: 'hydrogen', text: 'H' }
+          });
+          continue;
+        }
+        var best = descriptor.bestFragments[f.key];
+        var label = singleParent ? f.parentName : fragmentCarbonLabel(f);
+        // 小さい親炭化水素は、原子とHをすべて明示した構造式で示す。
+        // text fallback にしない（compactな選択カードとは別表示）。
+        if (best && best.component && f.carbonCount <= 6) {
+          var structure = expandedParentStructure(best.component);
+          var local = {};
+          best.component.atoms.forEach(function (v, li) { local[v] = li; });
+          var marks = best.component.info.attachmentAtoms.map(function (v) {
+            var li = local[v];
+            return { x: structure.atoms[li].x, y: structure.atoms[li].y };
+          });
+          tiles.push({
+            kind: 'hydrocarbon',
+            label: label,
+            origin: singleParent ? '' : (descriptor.label + ' の一部'),
+            parentName: f.parentName,
+            structure: structure,
+            figure: { kind: 'graph', structure: structure, marks: marks, expanded: true },
+            marks: marks,
+            attachmentCount: marks.length,
+            contracted: false,
             count: count
           });
           continue;
         }
-        var structure = previewStructure({
-          atoms: best.component.atoms,
-          graph: best.component.graph,
-          info: best.component.info
-        });
-        var local = {};
-        best.component.atoms.forEach(function (v, li) { local[v] = li; });
-        var marks = best.component.info.attachmentAtoms.map(function (v) {
-          var li = local[v];
-          return {
-            x: structure.atoms[li].x,
-            y: structure.atoms[li].y
-          };
-        });
+        var figure = fragmentFigureFor(descriptor, f, { radical: !singleParent });
         tiles.push({
           kind: 'hydrocarbon',
-          label: best.attachmentCount ? fragmentCarbonLabel(f) : f.parentName,
+          label: label,
+          origin: singleParent ? '' : (descriptor.label + ' の一部'),
+          parentName: f.parentName,
+          structure: null,
+          figure: figure,
+          marks: [],
+          attachmentCount: 0,
+          contracted: true,
+          note: '長い炭化水素鎖のため、原子とHをすべては描かず、繰返しで圧縮した式で示します。',
+          count: count
+        });
+      }
+    });
+    return tiles;
+  }
+
+  function previewTiles(descriptor) {
+    if (!descriptor) return [];
+    var tiles = [];
+    var singleParent = descriptor.uniqueFragments.length === 1 &&
+      !descriptor.uniqueFragments[0].isHydrogen &&
+      (descriptor.uniqueFragments[0].count || 1) === 1;
+    var ordered = descriptor.uniqueFragments.slice().sort(function (a, b) {
+      if (a.isHydrogen !== b.isHydrogen) return a.isHydrogen ? -1 : 1;
+      return b.carbonCount - a.carbonCount || (a.parentName < b.parentName ? -1 : 1);
+    });
+    ordered.forEach(function (f) {
+      var count = f.count || 1;
+      for (var i = 0; i < count; i++) {
+        var figure = fragmentFigureFor(descriptor, f, { radical: !singleParent, side: 'left' });
+        if (f.isHydrogen || !figure) {
+          tiles.push({
+            kind: 'hydrogen',
+            label: 'H',
+            parentName: 'H',
+            count: count,
+            marks: [],
+            attachmentCount: 0,
+            figure: { kind: 'hydrogen', text: descriptor.zeroKind === 'hydrogen' ? 'H' : (figure ? figure.text : 'H') }
+          });
+          continue;
+        }
+        var marks = figure.kind === 'graph' ? figure.marks : [];
+        tiles.push({
+          kind: 'hydrocarbon',
+          label: singleParent ? f.parentName : fragmentCarbonLabel(f),
           origin: fragmentOriginLabel(f),
           parentName: f.parentName,
-          structure: structure,
+          structure: figure.kind === 'graph' ? figure.structure : null,
+          figure: figure,
           marks: marks,
           attachmentCount: marks.length,
           count: count
@@ -1047,6 +1381,8 @@
     partialOptions: partialOptions,
     descriptorsForPartial: descriptorsForPartial,
     previewTiles: previewTiles,
+    shapePreviewTiles: shapePreviewTiles,
+    shapeFigure: shapeFigure,
     roleLabel: function (role) { return ROLE_LABELS[role] || role; },
     ROLE_LABELS: ROLE_LABELS,
     sameFragmentShape: sameFragmentShape,
@@ -1063,7 +1399,12 @@
       wlHash: wlHash,
       formulaCarbonCount: formulaCarbonCount,
       linearAlkaneGraph: linearAlkaneGraph,
-      shortCompoundName: shortCompoundName
+      shortCompoundName: shortCompoundName,
+      commonCompoundName: commonCompoundName,
+      pathInfo: pathInfo,
+      pathFormula: pathFormula,
+      fragmentFigureFor: fragmentFigureFor,
+      subDigits: subDigits
     }
   };
 });

@@ -1,12 +1,13 @@
 /**
- * 有機化学ビルダー（design-lab/app10-next）の再発防止テスト
+ * 有機化学ビルダー（本番 site/app10・NEXT版）の再発防止テスト
  *
  * 実行: node --test scripts/tests/app10-next.test.cjs
  *
- * 外部API・ブラウザ・CDNには接続しない。data.js / draw.js / catalog.js /
- * index-manifest.js / index-audit.js を Node で読み込み、新版の分類・
- * 総炭素数・級・異性体・索引監査・配線を静的に確認する。実際のクリック操作は
- * test サブエージェントが担当する。
+ * 外部API・ブラウザ・CDNには接続しない。本番 site/app10 の data.js / draw.js /
+ * catalog.js / index-manifest.js / index-audit.js を Node で読み込み、新版の
+ * 分類・総炭素数・級・異性体・索引監査・配線を静的に確認する。docs は
+ * design-lab/app10-next に分離し、本番16ファイルとの一致も確認する。
+ * 実際のクリック操作は test サブエージェントが担当する。
  */
 'use strict';
 
@@ -16,7 +17,16 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const APP = path.join(ROOT, 'design-lab', 'app10-next');
+const APP = path.join(ROOT, 'site', 'app10');
+const NEXT = path.join(ROOT, 'design-lab', 'app10-next');
+
+// 本番として配信する16ファイル（順序はindex.htmlの読込順を含む）
+const PRODUCTION_FILES = [
+  'index.html', 'app.css', 'data.js', 'draw.js', 'chain-descriptor.js',
+  'catalog.js', 'motion.js', 'app.js', 'favicon.svg', 'ledger.html',
+  'ledger.js', 'external-coverage.js', 'index-manifest.js', 'index-audit.js',
+  'independent-audit.js', 'ocr-audit.js'
+];
 
 const D = require(path.join(APP, 'data.js'));
 const R = require(path.join(APP, 'draw.js'));
@@ -26,9 +36,21 @@ const E = require(path.join(APP, 'external-coverage.js'));
 const M = require(path.join(APP, 'index-manifest.js'));
 const A = require(path.join(APP, 'index-audit.js'));
 const IA = require(path.join(APP, 'independent-audit.js'));
+const OA = require(path.join(APP, 'ocr-audit.js'));
 
 function read(name) {
   return fs.readFileSync(path.join(APP, name), 'utf8');
+}
+
+function readNext(name) {
+  return fs.readFileSync(path.join(NEXT, name), 'utf8');
+}
+
+// design-lab の相対パスを本番 site/app10 の相対パスへ正規化する。
+function normalizeToProduction(html) {
+  return html
+    .split('../../site/themes/').join('../themes/')
+    .split('../../site/credits.html').join('../credits.html');
 }
 
 function structureSignature(spec) {
@@ -143,7 +165,7 @@ test('[data] app10-nextの19分野・全化合物の必須項目と出典', () =
   const catIds = new Set(D.CATEGORIES.map((c) => c.id));
   assert.equal(catIds.size, 19);
   const ids = Object.keys(D.COMPOUNDS);
-  assert.ok(ids.length >= 419, '収録化合物が少なすぎます: ' + ids.length);
+  assert.ok(ids.length >= 427, '収録化合物が少なすぎます: ' + ids.length);
   for (const id of ids) {
     const c = D.COMPOUNDS[id];
     assert.equal(c.id, id);
@@ -208,11 +230,13 @@ test('[data] 保全46物質と必須26物質が全レコード到達可能', () 
     assert.ok(c.formula, id + ' の式がない');
     assert.ok(c.properties && c.nature, id + ' の説明がない');
     assert.ok(Array.isArray(c.sources) && c.sources.length > 0, id + ' の出典がない');
-    assert.ok((c.sourceEvidence || []).length > 0, id + ' の引用根拠がない');
+    assert.ok((c.sourceEvidence || []).length > 0, id + ' の出典記録がない');
     for (const ev of c.sourceEvidence) {
-      assert.ok(/^https?:\/\//.test(ev.url), id + ' の根拠URLが不正: ' + ev.url);
-      assert.ok(ev.quote && ev.quote.length >= 8, id + ' の引用が短い');
+      assert.match(ev.source || '', /^(?:s\d+|idx-(?:tryit|kimika)|textbook|mext|pubchem|nist|iupac|csj)$/, id + ' のsource IDが不正: ' + ev.source);
+      assert.equal(ev.url, undefined, id + ' に教材URLが残る');
+      assert.equal(ev.quote, undefined, id + ' に本文抜粋が残る');
       assert.ok(ev.section, id + ' の節がない');
+      assert.ok(ev.note, id + ' の独自補足がない');
     }
     assert.ok(C.routeFor(id), id + ' の検索経路がない');
   }
@@ -420,31 +444,36 @@ test('[draw] 全化合物とfamily代表構造がSVGで描画できる', () => {
   assert.ok(D.COMPOUNDS.sucrose.notes.includes('五員環'), 'スクロースのフラノース説明を修正する');
   for (const id of ['eicosapentaenoic-acid', 'docosahexaenoic-acid']) {
     const fig = R.renderCompound(D.COMPOUNDS[id]);
-    assert.ok(fig.includes('oc-fig--scroll'), id + ' は長い鎖式を局所スクロールにする');
+    assert.ok(fig.includes('oc-fig--long'), id + ' は長い鎖式をカード内に全体フィット＋拡大で読む');
+    assert.ok(!fig.includes('oc-fig--scroll'), id + ' はカード内で横スクロールしない');
   }
 });
 
-test('[data] 46追加分のsourceEvidenceは引用と補足を分離している', () => {
+test('[data] 46追加分のsourceEvidenceはsource IDと独自補足を分離している', () => {
   for (const id of PRESERVED_46) {
     const c = D.COMPOUNDS[id];
     assert.ok((c.sourceEvidence || []).length > 0, id + ' のsourceEvidenceがない');
     for (const ev of c.sourceEvidence) {
-      assert.ok(/^https?:\/\//.test(ev.url), id + ' のURLが不正');
+      assert.match(ev.source || '', /^(?:s\d+|idx-(?:tryit|kimika)|textbook|mext|pubchem|nist|iupac|csj)$/, id + ' のsource IDが不正');
+      assert.equal(ev.url, undefined, id + ' に教材URLが残る');
+      assert.equal(ev.quote, undefined, id + ' に本文抜粋が残る');
       assert.ok(ev.section, id + ' の節がない');
-      assert.ok(ev.quote && ev.quote.length >= 8, id + ' の引用が短い');
       assert.ok(ev.note, id + ' の補足がない');
     }
   }
 });
 
-test('[data] 本番site/app10のデータを独立して保持している', () => {
-  const siteDataPath = path.join(ROOT, 'site', 'app10', 'data.js');
-  delete require.cache[require.resolve(siteDataPath)];
-  const S = require(siteDataPath);
-  assert.equal(Object.keys(S.COMPOUNDS).length, 367, 'site/app10はHEAD検証済みの367化合物');
-  assert.equal(S.FAMILIES, undefined, 'site/app10に新版familyを混ぜない');
-  assert.equal(S.COMPOUNDS.ethylmethylamine, undefined, 'site/app10に新版の追加アミンを混ぜない');
-  assert.equal(Object.keys(D.COMPOUNDS).length, 419);
+test('[data] 旧site/app10の367化合物は不変fixtureに保全し、本番はNEXT版と一致する', () => {
+  const fixturePath = path.join(ROOT, 'scripts', 'tests', 'fixtures', 'app10-baseline-35120ea', 'data.js');
+  delete require.cache[require.resolve(fixturePath)];
+  const S = require(fixturePath);
+  assert.equal(Object.keys(S.COMPOUNDS).length, 367, 'fixtureは35120ea時点の367化合物');
+  assert.equal(S.FAMILIES, undefined, 'fixtureに新版familyを混ぜない');
+  assert.equal(S.COMPOUNDS.ethylmethylamine, undefined, 'fixtureに新版の追加アミンを混ぜない');
+  assert.equal(Object.keys(D.COMPOUNDS).length, 427, '本番はNEXT版の427化合物');
+  assert.equal(D.FAMILIES.length, 31);
+  assert.ok(D.COMPOUNDS.ethylmethylamine, '本番にはNEXT版の追加アミンがある');
+  assert.equal(fs.readFileSync(path.join(APP, 'data.js')).equals(fs.readFileSync(path.join(NEXT, 'data.js'))), true, '本番data.jsはdesign-labとbyte一致');
 });
 
 test('[data] HCH異性体・脂肪酸cis位置・ATPリン酸・金属塩を区別する', () => {
@@ -473,7 +502,7 @@ test('[data] HCH異性体・脂肪酸cis位置・ATPリン酸・金属塩を区�
 });
 
 test('[data] 独立監査の5物質/イオン/塩状態を正しく区別する', () => {
-  assert.equal(Object.keys(D.COMPOUNDS).length, 419);
+  assert.equal(Object.keys(D.COMPOUNDS).length, 427);
   const ea = D.COMPOUNDS.ethanolamine;
   assert.equal(ea.formula, 'C2H7NO');
   assert.equal(C.classify('ethanolamine').family, 'amino-alcohol');
@@ -506,8 +535,459 @@ test('[data] 独立監査の5物質/イオン/塩状態を正しく区別する'
     const ev = (D.COMPOUNDS[id].sourceEvidence || [])[0];
     assert.ok(ev, id + ' のsourceEvidenceがない');
     assert.equal(ev.evidenceType, 'image-human-read');
-    assert.ok(ev.image && /^https?:\/\//.test(ev.image), id + ' の画像URLがない');
-    assert.ok(ev.quote && ev.note && ev.quote !== ev.note, id + ' の原文出現と化学補足が分離されていない');
+    assert.equal(ev.image, undefined, id + ' に画像直リンクが残る');
+    assert.equal(ev.quote, undefined, id + ' に本文抜粋が残る');
+    assert.match(ev.source || '', /^idx-(?:tryit|kimika)$/, id + ' のsource IDがない');
+    assert.ok(ev.note, id + ' の独自補足がない');
+  }
+});
+
+test('[data] 独立PubChem確認7物質のidentity・接続・電荷・立体metadata', () => {
+  const expected = {
+    'dimethyl-oxalate': { cid: 11120, formula: 'C4H6O4', mode: 'chain', family: 'ester' },
+    'diphenyl-oxalate': { cid: 18475, formula: 'C14H10O4', mode: 'ring', system: 'complex-ring' },
+    salicin: { cid: 439503, formula: 'C13H18O7', mode: 'other', family: 'glycoside' },
+    '1,3-dibromopropane': { cid: 8001, formula: 'C3H6Br2', mode: 'chain', family: 'halogen' },
+    diethylenetriamine: { cid: 8111, formula: 'C4H13N3', mode: 'chain', family: 'amine' },
+    adenosine: { cid: 60961, formula: 'C10H13N5O4', mode: 'other', family: 'nucleotide' },
+    adp: { cid: 6022, formula: 'C10H15N5O10P2', mode: 'other', family: 'nucleotide' }
+  };
+  assert.equal(Object.keys(expected).length, 7);
+  for (const [id, want] of Object.entries(expected)) {
+    const c = D.COMPOUNDS[id];
+    assert.ok(c, id + ' のレコードがない');
+    assert.equal(c.formula, want.formula, id + ' の分子式');
+    assert.equal(c.pubchem, want.cid, id + ' のCID');
+    assert.equal(c.formalCharge, 0, id + ' の形式電荷');
+    assert.equal(c.charge, 0, id + ' の電荷');
+    assert.equal(C.classify(id).mode, want.mode, id + ' の経路');
+    if (want.family) assert.equal(C.classify(id).family, want.family, id + ' のfamily');
+    if (want.system) assert.equal(C.classify(id).system, want.system, id + ' の環system');
+    assert.equal(R.validate(c).ok, true, id + ' の分子式・結合価');
+    const ev = (c.sourceEvidence || [])[0];
+    assert.equal(ev.source, 'pubchem', id + ' のsourceはPubChem');
+    assert.match(ev.section || '', new RegExp('CID\\s*' + want.cid), id + ' のCID section');
+    assert.equal(ev.url, undefined, id + ' に教材URLを入れない');
+    assert.equal(ev.quote, undefined, id + ' に本文抜粋を入れない');
+    assert.equal(ev.imageUrl, undefined, id + ' に画像URLを入れない');
+    assert.ok(ev.note && ev.note.length > 10, id + ' の独自note');
+  }
+
+  const dimethyl = D.COMPOUNDS['dimethyl-oxalate'];
+  const dGraph = R.buildStructure(dimethyl.structure);
+  assert.equal(dGraph.atoms.filter((a) => a.el === 'C').length, 4);
+  assert.equal(dGraph.atoms.filter((a) => a.el === 'O').length, 4);
+  assert.equal(dGraph.bonds.filter((b) => b.order === 2 && dGraph.atoms[b.a].el === 'C' && dGraph.atoms[b.b].el === 'O').length, 2, '2つのC=O');
+  const dDesc = C.chainDescriptorFor('dimethyl-oxalate');
+  assert.equal(dDesc.role, 'diester', 'ジエステルを一価エステルと表示しない');
+  assert.notEqual(dDesc.role, 'monoester');
+  assert.equal(dDesc.groups.ester, 2);
+  assert.equal(dDesc.descriptorId, 'd-methanex2-c2');
+  assert.equal(C.chainRoleLabel('diester'), '二価エステル（ジエステル）');
+  assert.equal(C.chainDescriptorFor('dimethyl-oxalate').monoester, undefined);
+
+  const diphenyl = D.COMPOUNDS['diphenyl-oxalate'];
+  assert.equal(C.ringCount(diphenyl.structure), 2, '2つのベンゼン環');
+  const pGraph = R.buildStructure(diphenyl.structure);
+  assert.equal(pGraph.atoms.filter((a) => a.el === 'C').length, 14);
+  assert.equal(pGraph.atoms.filter((a) => a.el === 'O').length, 4);
+  assert.equal(pGraph.bonds.filter((b) => b.order === 2).length, 8, '2つのC=O＋2環のケクレ二重結合');
+  assert.equal(C.classify('diphenyl-oxalate').preset, 'tray', '複合環trayへ入れる');
+  assert.ok(C.RING_SYSTEM_MAP['complex-ring'].tray.includes('diphenyl-oxalate'));
+
+  const dibromo = D.COMPOUNDS['1,3-dibromopropane'];
+  const bGraph = R.buildStructure(dibromo.structure);
+  assert.equal(bGraph.atoms.filter((a) => a.el === 'Br').length, 2);
+  assert.equal(C.chainDescriptorFor('1,3-dibromopropane').role, 'multihalogen');
+  assert.equal(C.chainDescriptorFor('1,3-dibromopropane').descriptorId, 'd-propane-c3');
+  assert.equal(C.chainDescriptorFor('1,3-dibromopropane').groups.halogen, 2);
+
+  const deta = D.COMPOUNDS.diethylenetriamine;
+  const detaGraph = R.buildStructure(deta.structure);
+  assert.equal(detaGraph.atoms.filter((a) => a.el === 'N').length, 3);
+  assert.equal(detaGraph.atoms.filter((a) => a.el === 'C').length, 4);
+  const detaDesc = C.chainDescriptorFor('diethylenetriamine');
+  assert.deepEqual(detaDesc.groups.amineDegrees, { 1: 2, 2: 1, 3: 0 }, '第一級N2個＋第二級N1個');
+  assert.equal(detaDesc.role, 'amine-1-2', '多い方の級だけを表示しない');
+  assert.equal(C.chainRoleLabel('amine-1-2'), '第一級アミン×2・第二級アミン×1');
+  assert.ok(!/^第二級アミン$/.test(C.chainRoleLabel(detaDesc.role)));
+  assert.equal(detaDesc.descriptorId, 'd-ethanex2-c4');
+
+  const salicin = D.COMPOUNDS.salicin;
+  assert.equal(salicin.structure.type, 'schematic');
+  assert.equal(salicin.structure.kind, 'salicin');
+  assert.equal(salicin.structure.identity.linkage, 'phenolic O–β-D-glucopyranoside');
+  assert.ok(salicin.structure.identity.synonyms.includes('salicoside'));
+  assert.ok(salicin.structure.identity.aglycone.includes('saligenin'));
+  assert.equal(salicin.structure.stereo.sugar, 'D-glucopyranose');
+  assert.equal(salicin.structure.stereo.anomer, 'beta');
+  assert.equal(salicin.structure.stereo.stereocenters, 5);
+  assert.equal(salicin.structure.stereo.drawn, false);
+  assert.ok(/CH₂OH/.test(salicin.notes) && /立体中心/.test(salicin.notes), '遊離CH2OHと立体省略の注記');
+  const salicinSvg = R.renderCompound(salicin);
+  assert.ok(salicinSvg.includes('data-sugar="salicin"'));
+  assert.ok(salicinSvg.includes('data-glycosidic="beta-D-glucopyranoside"'));
+  assert.ok(salicinSvg.includes('data-anomer="beta"'));
+  assert.ok(salicinSvg.includes('data-free-hydroxymethyl="2"'));
+  assert.ok(salicinSvg.includes('data-stereo-drawn="omitted"'));
+  assert.ok(!salicinSvg.includes('data-ring-count="3"'), '多糖3環fallbackに落とさない');
+
+  const adenosine = D.COMPOUNDS.adenosine;
+  assert.equal(adenosine.structure.kind, 'nucleoside-adenosine');
+  assert.equal(adenosine.structure.stereo.phosphateCount, 0);
+  assert.equal(adenosine.structure.stereo.stereocenters, 4);
+  assert.ok(adenosine.structure.identity.synonyms.includes('adenine riboside'));
+  const adenoSvg = R.renderCompound(adenosine);
+  assert.ok(adenoSvg.includes('data-nucleotide="adenosine"'));
+  assert.ok(adenoSvg.includes('data-phosphate-count="0"'));
+  assert.equal((adenoSvg.match(/>P</g) || []).length, 0, 'アデノシンはP0');
+  assert.ok(!adenoSvg.includes('data-ring-count="3"'));
+
+  const adp = D.COMPOUNDS.adp;
+  assert.equal(adp.structure.kind, 'nucleotide-adp');
+  assert.equal(adp.ion.charge, '0');
+  assert.equal(adp.structure.stereo.phosphateCount, 2);
+  assert.equal(adp.structure.stereo.phosphateCharge, 0);
+  assert.equal(adp.structure.stereo.stereocenters, 4);
+  assert.ok(adp.structure.identity.synonyms.includes('ADP'));
+  const adpSvg = R.renderCompound(adp);
+  assert.ok(adpSvg.includes('data-nucleotide="adp"'));
+  assert.ok(adpSvg.includes('data-phosphate-count="2"'));
+  assert.ok(adpSvg.includes('data-phosphate-charge="0"'));
+  assert.equal((adpSvg.match(/>P</g) || []).length, 2, 'ADPはP2');
+  assert.ok(!adpSvg.includes('data-ring-count="3"'));
+  assert.equal((adpSvg.match(/O⁻/g) || []).length, 0, '中性酸形にO⁻を4個流用しない');
+  assert.ok(!adpSvg.includes('P—O—P—O—P'), 'ATPの三リン酸鎖を流用しない');
+  assert.ok(adp.notes.includes('ADP³⁻') && adp.notes.includes('Mg²⁺'), '生理的イオン形とMg錯体を区別');
+  assert.ok(adp.structure.identity.phosphate.includes('P(=O)(OH)'));
+  const adpAtomSum = Object.values(adp.structure.composition).reduce((n, v) => n + v, 0);
+  assert.equal(adpAtomSum, 42, 'ADPの全原子数');
+  assert.ok(adpAtomSum > R.GRAPH_ATOM_LIMIT, '40原子上限を超えるため模式図');
+
+  const atpSvg = R.renderCompound(D.COMPOUNDS.atp);
+  assert.equal((atpSvg.match(/>P</g) || []).length, 3, '既存ATPのP3表示を維持');
+  assert.ok(atpSvg.includes('data-phosphate-charge="4-"'), '既存ATPの4-表示を維持');
+
+  for (const id of ['dimethyl-oxalate', 'diphenyl-oxalate', '1,3-dibromopropane', 'diethylenetriamine']) {
+    const plan = R.figurePlan(D.COMPOUNDS[id]);
+    assert.equal(plan.mode, 'dual', id + ' は構造式＋簡略構造式');
+    const html = R.renderCompound(D.COMPOUNDS[id]);
+    assert.ok(html.includes('構造式') && html.includes('簡略構造式'), id + ' の二重表示');
+  }
+  for (const id of ['salicin', 'adenosine', 'adp']) {
+    const plan = R.figurePlan(D.COMPOUNDS[id]);
+    assert.equal(plan.mode, 'single', id + ' は模式図の明示例外');
+    assert.equal(plan.exception.type, 'schematic');
+    assert.ok(plan.exception.reason.length >= 6);
+  }
+
+  assert.equal(C.CHAIN_DESCRIPTOR_LIST.length, 47, '新規shapeを増やさない');
+  assert.ok(['d-methanex2-c2', 'd-propane-c3', 'd-ethanex2-c4'].every((id) => C.CHAIN_DESCRIPTOR_BY_ID[id]));
+  for (const id of Object.keys(D.COMPOUNDS)) assert.ok(C.routeFor(id), id + ' のrouteがない');
+
+  const searches = {
+    'シュウ酸ジメチル': 'dimethyl-oxalate',
+    'diphenyl oxalate': 'diphenyl-oxalate',
+    サリシン: 'salicin',
+    salicoside: 'salicin',
+    DETA: 'diethylenetriamine',
+    'bis(2-aminoethyl)amine': 'diethylenetriamine',
+    'trimethylene dibromide': '1,3-dibromopropane',
+    'アデノシン二リン酸': 'adp'
+  };
+  for (const [term, id] of Object.entries(searches)) {
+    assert.ok(C.search(term).some((row) => row.id === id), term + ' で ' + id + ' を引けない');
+  }
+});
+
+test('[draw] 未知のschematic kindを多糖3環fallbackへ落とさない', () => {
+  const svg = R.renderStructure({ type: 'schematic', kind: 'unknown-example', composition: { C: 1 } }, '未知');
+  assert.ok(svg.includes('data-unsupported-schematic="1"'));
+  assert.ok(!svg.includes('data-ring-count="3"'));
+  assert.ok(svg.includes('未対応'));
+});
+
+/* ------------------------------------------------------------------
+ * 模式図の構造/注記分離と、孤立炭素skeletalの空図防止
+ * ------------------------------------------------------------------ */
+
+function svgGroupBody(svg, className) {
+  const m = svg.match(new RegExp('<g class="' + className + '">([\\s\\S]*?)<\\/g>'));
+  return m ? m[1] : '';
+}
+
+function svgTextBoxes(fragment) {
+  const boxes = [];
+  const re = /<text\b([^>]*)>([\s\S]*?)<\/text>/g;
+  let m;
+  while ((m = re.exec(fragment))) {
+    const attrs = {};
+    for (const part of m[1].matchAll(/([\w-]+)="([^"]*)"/g)) attrs[part[1]] = part[2];
+    const text = m[2];
+    const fs = Number(attrs['font-size'] || 20);
+    const x = Number(attrs.x);
+    const y = Number(attrs.y);
+    let width = 0;
+    for (const ch of text) {
+      if (/[₀-₉]/.test(ch)) width += fs * 0.55;
+      else if (/[A-Za-z0-9]/.test(ch)) width += fs * 0.62;
+      else if (ch === '—' || ch === '–' || ch === '=') width += fs * 0.7;
+      else if (/[′″]/.test(ch)) width += fs * 0.4;
+      else width += fs;
+    }
+    boxes.push({
+      text, fs,
+      left: x - width / 2, right: x + width / 2,
+      top: y - fs * 0.8, bottom: y + fs * 0.8
+    });
+  }
+  return boxes;
+}
+
+function svgLineBoxes(fragment) {
+  const boxes = [];
+  const re = /<line\b([^>]*)\/?>/g;
+  let m;
+  while ((m = re.exec(fragment))) {
+    const attrs = {};
+    for (const part of m[1].matchAll(/([\w-]+)="([^"]*)"/g)) attrs[part[1]] = part[2];
+    const x1 = Number(attrs.x1), y1 = Number(attrs.y1);
+    const x2 = Number(attrs.x2), y2 = Number(attrs.y2);
+    boxes.push({
+      left: Math.min(x1, x2), right: Math.max(x1, x2),
+      top: Math.min(y1, y2), bottom: Math.max(y1, y2)
+    });
+  }
+  return boxes;
+}
+
+test('[draw] 模式図は構造と注記の座標帯を分離し、注記をCSSで隠さない', () => {
+  const css = read('app.css');
+  assert.equal(/\.oc-schematic-annotation\s*\{[^}]*display:\s*none/s.test(css), false, '注記をCSSで隠さない');
+  const expectedNotes = { salicin: 2, adp: 3 };
+  for (const id of Object.keys(expectedNotes)) {
+    const svg = R.renderCompound(D.COMPOUNDS[id]);
+    const structure = svgGroupBody(svg, 'oc-schematic-structure');
+    const annotation = svgGroupBody(svg, 'oc-schematic-annotation');
+    assert.ok(structure, id + ' の構造グループ');
+    assert.ok(annotation, id + ' の注記グループ');
+    const structureBoxes = [...svgTextBoxes(structure), ...svgLineBoxes(structure)];
+    const noteBoxes = svgTextBoxes(annotation);
+    assert.equal(noteBoxes.length, expectedNotes[id], id + ' の注記数');
+    for (const note of noteBoxes) {
+      assert.ok(note.fs >= 11, id + ' の注記文字を極小化しない');
+    }
+    const structureBottom = Math.max(...structureBoxes.map((b) => b.bottom));
+    const noteTop = Math.min(...noteBoxes.map((b) => b.top));
+    const noteBottom = Math.max(...noteBoxes.map((b) => b.bottom));
+    assert.ok(noteTop >= structureBottom + 8, id + ' の注記が構造領域に食い込む');
+    assert.ok(noteTop - structureBottom <= 40, id + ' の注記帯までの余白が過剰');
+    const ordered = [...noteBoxes].sort((a, b) => a.top - b.top);
+    for (let i = 1; i < ordered.length; i++) {
+      assert.ok(ordered[i].top > ordered[i - 1].bottom, id + ' の注記行が重なる');
+    }
+    const vb = R.svgGeometry(svg);
+    const all = [...structureBoxes, ...noteBoxes];
+    assert.ok(vb.x <= Math.min(...all.map((b) => b.left)), id + ' のviewBox左外に内容');
+    assert.ok(vb.y <= Math.min(...all.map((b) => b.top)), id + ' のviewBox上外に内容');
+    assert.ok(vb.x + vb.width >= Math.max(...all.map((b) => b.right)), id + ' のviewBox右外に内容');
+    assert.ok(vb.y + vb.height >= Math.max(...all.map((b) => b.bottom)), id + ' のviewBox下外に内容');
+    assert.ok(noteBottom <= vb.y + vb.height - 8, id + ' の注記がviewBox下端に接する');
+  }
+});
+
+test('[draw] 孤立炭素のskeletalはCH₄を表示し、連結Cの省略は維持する', () => {
+  const plan = R.figurePlan(D.COMPOUNDS.methane);
+  assert.equal(plan.mode, 'dual', 'メタンは構造式＋簡略構造式');
+  const simple = R.renderStructure(plan.simple.structure, 'メタンの簡略構造式');
+  assert.ok(simple.includes('CH₄'), '孤立炭素はCH₄の明示ラベル');
+  assert.equal((simple.match(/data-el="C"/g) || []).length, 1);
+  const boxes = svgTextBoxes(simple);
+  assert.equal(boxes.length, 1, '空図にせずラベル1つを描く');
+  const vb = R.svgGeometry(simple);
+  assert.ok(boxes[0].left >= vb.x && boxes[0].right <= vb.x + vb.width, 'CH₄がviewBox内');
+  assert.ok(boxes[0].top >= vb.y && boxes[0].bottom <= vb.y + vb.height, 'CH₄がviewBox内');
+  const full = R.renderStructure(plan.full.structure, 'メタンの構造式');
+  assert.equal((full.match(/data-el="C"/g) || []).length, 1);
+  assert.equal((full.match(/data-el="H"/g) || []).length, 4, '完全構造式のH4個を維持');
+
+  for (const id of ['ethane', 'propane', 'butane']) {
+    const simple = R.renderStructure(R.figurePlan(D.COMPOUNDS[id]).simple.structure, id + 'の簡略構造式');
+    assert.equal((simple.match(/data-el="C"/g) || []).length, 0, id + ' の連結Cラベル省略を維持');
+    assert.ok((simple.match(/<line /g) || []).length >= 1, id + ' のC–C結合は表示');
+    assert.equal(simple.includes('CH₃'), false, id + ' の連結CにCH₃を復活させない');
+  }
+});
+
+test('[figures] 全化合物の全SVGが空でない', () => {
+  let total = 0;
+  const empty = [];
+  for (const id of Object.keys(D.COMPOUNDS)) {
+    const html = R.renderCompound(D.COMPOUNDS[id]);
+    const svgs = html.match(/<svg[\s\S]*?<\/svg>/g) || [];
+    for (const svg of svgs) {
+      total++;
+      if (!/<(?:line|text|path|circle|rect|polygon|polyline|ellipse)\b/.test(svg)) empty.push(id);
+    }
+  }
+  assert.deepEqual(empty, [], '描画要素のないSVG: ' + empty.join(','));
+  assert.ok(total >= 700, 'SVG総数 ' + total);
+});
+
+test('[data] フェノキシドイオンはNaを含まない独立イオンgraphとring presetを持つ', () => {
+  const p = D.COMPOUNDS['phenoxide-ion'];
+  assert.ok(p, 'フェノキシドイオンのentity');
+  assert.equal(p.name, 'フェノキシドイオン');
+  assert.equal(p.formula, 'C6H5O');
+  assert.equal(p.formulaDisplay, 'C₆H₅O⁻');
+  assert.equal(p.ion.charge, '-1');
+  assert.equal(p.ion.cation, null);
+  assert.ok(p.ion.anion.includes('C₆H₅O⁻'));
+  assert.equal(p.pubchem, null, '未確認CIDを作らない');
+  assert.ok(!/沸点|融点|固体/.test(p.properties), '純物質の沸点・固体などを捏造しない');
+  assert.ok(p.properties && p.uses && p.nature && p.precursors && p.reactions);
+  assert.ok(p.reactions.includes('フェノール'), '酸でフェノールに戻る');
+  assert.ok(p.precursors.includes('脱プロトン化'));
+  const ev = p.sourceEvidence[0];
+  assert.equal(ev.url, undefined, '教材URLは配信しない');
+  assert.equal(ev.imageUrl, undefined, '画像直リンクは配信しない');
+  assert.equal(ev.imageSha256, undefined, '画像sha256は配信しない');
+  assert.equal(ev.quote, undefined, '本文抜粋は配信しない');
+  assert.equal(ev.source, 's22');
+  assert.ok(ev.note, '独自の化学的補足を残す');
+  assert.equal(R.validate(p).ok, true);
+  const g = R.buildStructure(R.figurePlan(p).full.structure);
+  assert.equal(g.atoms.filter((a) => a.el === 'Na').length, 0, 'Naをgraphへ含めない');
+  assert.equal(g.atoms.filter((a) => a.el === 'O' && a.charge === '-' && a.h === 0).length, 1, 'O⁻を明示');
+  assert.equal(g.bonds.filter((b) => g.atoms[b.a].el === 'O' || g.atoms[b.b].el === 'O').length, 1, 'C–O結合は1本');
+  assert.equal(graphRingCount(p.structure), 1);
+  assert.equal(R.formulaOfGraph(g), 'C6H5O');
+  const plan = R.figurePlan(p);
+  assert.equal(plan.mode, 'dual', '構造式＋簡略構造式の二重表示');
+  const text = R.condensedTextFor(p);
+  assert.equal(text.text, 'C₆H₅−O⁻');
+  assert.equal(text.note, '', '対イオン注記を付けない');
+  assert.equal(R.IONIC_TEXT === undefined || !Object.prototype.hasOwnProperty.call(R.IONIC_TEXT || {}, 'phenoxide-ion'), true, 'IONIC_TEXTへ入れない');
+  assert.equal(D.COMPOUNDS['sodium-phenoxide'].formula, 'C6H5NaO', 'ナトリウム塩は別entity');
+  assert.equal(C.classify('phenoxide-ion').mode, 'ring');
+  assert.equal(C.classify('phenoxide-ion').system, 'benzene');
+  const route = C.routeFor('phenoxide-ion');
+  assert.equal(route.preset, 'p-o_x1');
+  assert.equal(route.focus, 'phenoxide-ion');
+  const preset = C.RING_SYSTEM_MAP.benzene.presets.filter((x) => x.id === route.preset)[0];
+  assert.deepEqual(preset.ids, ['phenoxide-ion']);
+  assert.equal(C.ringSubsFor('phenoxide-ion')[0].key, 'O-');
+  assert.equal(C.ringSubsFor('phenoxide-ion')[0].label, 'O⁻');
+  assert.ok(C.search('フェノキシドイオン').some((x) => x.id === 'phenoxide-ion'));
+});
+
+test('[data] 既存別名インベルターゼ/トレオニンとリン脂質familyの完全名検索', () => {
+  assert.equal(D.ALIASES.length, 228);
+  assert.equal(D.aliasTarget('インベルターゼ'), 'sucrase');
+  assert.equal(D.aliasTarget('invertase'), 'sucrase', '英語invertaseも同じsucraseへ');
+  assert.ok(C.search('invertase').some((x) => x.id === 'sucrase' && x.type === 'compound'), '英語名から実到達');
+  assert.deepEqual(C.search('invertase').map((x) => x.id), ['sucrase'], '別名で別物質を増やさない');
+  assert.equal(D.aliasTarget('トレオニン'), 'threonine');
+  assert.equal(D.COMPOUNDS.threonine.name, 'スレオニン', '表示名はスレオニンを維持');
+  const aliasKeys = new Map();
+  for (const a of D.ALIASES) {
+    const key = D.normalizeName(a.term);
+    assert.equal(aliasKeys.has(key), false, '別名の重複: ' + a.term);
+    aliasKeys.set(key, a.target);
+  }
+  assert.equal(D.FAMILIES.length, 31, 'familyの新規追加なし');
+  const pc = D.familyById('phosphatidylcholine');
+  const pe = D.familyById('phosphatidylethanolamine');
+  const pa = D.familyById('phosphatidic-acid');
+  for (const f of [pc, pe, pa]) {
+    assert.equal(f.formula, null, f.id + ' は固定分子式をもたない');
+    assert.ok(!(f.members || []).includes('stearic-acid'), f.id + ' はステアリン酸を唯一の固定鎖にしない');
+    assert.ok(f.description.includes('sn-1,2'), f.id + ' のsn-1,2アシル');
+    assert.ok(f.description.includes('sn-3'), f.id + ' のsn-3リン酸');
+    assert.ok(f.provenanceNote && /P–OH|NH₂/.test(f.provenanceNote), f.id + ' の表記provenance');
+  }
+  assert.ok(pc.synonyms.includes('ホスファチジルコリン（レシチン）'));
+  assert.ok(pa.synonyms.includes('ホスファチジン酸'));
+  assert.equal(D.familyByTerm('ホスファチジルコリン（レシチン）').id, 'phosphatidylcholine');
+  assert.equal(D.familyByTerm('ホスファチジン酸').id, 'phosphatidic-acid');
+  assert.ok(C.search('ホスファチジルコリン（レシチン）').some((x) => x.type === 'family' && x.id === 'phosphatidylcholine'));
+  assert.ok(C.search('ホスファチジン酸').some((x) => x.type === 'family' && x.id === 'phosphatidic-acid'));
+  assert.ok(pc.description.includes('混合物'), '工業的レシチンの混合物注記');
+  assert.equal(pc.formula, null, '固定分子式を主張しない');
+  assert.equal(R.formulaOfStructure(pc.structure).includes('R'), true, '一般構造はR¹/R²を残す');
+  const pcSvg = R.renderStructure(pc.structure, pc.name);
+  assert.ok(pcSvg.includes('<svg') && !pcSvg.includes('NaN'));
+  assert.ok(pcSvg.includes('R¹') && pcSvg.includes('R²'));
+});
+
+test('[draw] PE/PC頭部はP–O–CH₂–CH₂–N…を明示し、長い頭部名を原子ラベルに置かない', () => {
+  function graphOf(id) {
+    return R.buildStructure(D.familyById(id).structure);
+  }
+  function pathElements(g, from, to) {
+    const prev = new Array(g.atoms.length).fill(-1);
+    const queue = [from];
+    const seen = new Set([from]);
+    while (queue.length) {
+      const v = queue.shift();
+      if (v === to) break;
+      for (const b of g.bonds) {
+        const w = b.a === v ? b.b : (b.b === v ? b.a : -1);
+        if (w >= 0 && !seen.has(w)) { seen.add(w); prev[w] = v; queue.push(w); }
+      }
+    }
+    const out = [];
+    let v = to;
+    while (v !== -1) { out.push(v); if (v === from) break; v = prev[v]; }
+    return out.reverse();
+  }
+  function bondOrder(g, a, b) {
+    const hit = g.bonds.find((x) => (x.a === a && x.b === b) || (x.a === b && x.b === a));
+    assert.ok(hit, `結合がない: ${a}-${b}`);
+    return hit.order;
+  }
+  function headPath(id) {
+    const g = graphOf(id);
+    const p = g.atoms.findIndex((a) => a.el === 'P');
+    const n = g.atoms.findIndex((a) => a.el === 'N');
+    assert.ok(p >= 0 && n >= 0, id + ' のP/N原子がない');
+    const idx = pathElements(g, p, n);
+    assert.deepEqual(idx.map((i) => g.atoms[i].el), ['P', 'O', 'C', 'C', 'N'], id + ' の頭部がP–O–C–C–Nでない');
+    for (let i = 0; i < idx.length - 1; i++) assert.equal(bondOrder(g, idx[i], idx[i + 1]), 1, id + ' の頭部結合次数');
+    return { g, n, idx };
+  }
+  const pe = headPath('phosphatidylethanolamine');
+  assert.equal(pe.g.atoms[pe.n].label, 'NH₃⁺', 'PEのNはNH₃⁺として表示');
+  const pc = headPath('phosphatidylcholine');
+  assert.equal(pc.g.atoms[pc.n].label, 'N⁺(CH₃)₃', 'PCのNは四級アンモニウムN⁺(CH₃)₃として表示');
+  for (const [id, head] of [['phosphatidylethanolamine', pe], ['phosphatidylcholine', pc]]) {
+    const g = head.g;
+    assert.equal(g.atoms.some((a) => /エタノールアミン|コリン/.test(a.label || '')), false, id + ' の原子ラベルに頭部の長い名称を残さない');
+    assert.equal(g.atoms[head.n].charge, undefined, id + ' はNラベル内に電荷を表示し、別電荷textを重ねない');
+    assert.equal(g.bonds.some((b) => {
+      const ea = g.atoms[b.a].el;
+      const eb = g.atoms[b.b].el;
+      return (ea === 'O' && eb === 'N') || (ea === 'N' && eb === 'O');
+    }), false, id + ' にO–N直接結合を作らない');
+    assert.equal(g.atoms.some((a) => a.label === 'R¹') && g.atoms.some((a) => a.label === 'R²'), true, id + ' のR¹/R²可変ラベル');
+    const svg = R.renderStructure(D.familyById(id).structure, D.familyById(id).name);
+    assert.ok(svg.includes('<svg') && !svg.includes('NaN'), id + ' のSVG');
+    const texts = [...svg.matchAll(/<text[^>]*>([^<]+)<\/text>/g)].map((m) => m[1]);
+    assert.equal(texts.some((t) => /エタノールアミン|コリン/.test(t)), false, id + ' の表示文字に頭部名を重ねない');
+  }
+  assert.ok(pe.g.atoms.some((a) => a.label === 'NH₃⁺'));
+  assert.ok(pc.g.atoms.some((a) => a.label === 'N⁺(CH₃)₃'));
+  const pa = graphOf('phosphatidic-acid');
+  assert.equal(pa.atoms.some((a) => a.charge), false, 'PAは中性形で不正な形式電荷を作らない');
+  assert.equal(pa.atoms.some((a) => a.el === 'N'), false);
+  const pIndex = pa.atoms.findIndex((a) => a.el === 'P');
+  const pValence = pa.bonds.filter((b) => b.a === pIndex || b.b === pIndex).reduce((sum, b) => sum + b.order, 0);
+  assert.equal(pValence, 5, 'PAのPは5価');
+  assert.ok(pa.atoms.some((a) => a.label === 'R¹') && pa.atoms.some((a) => a.label === 'R²'));
+  for (const id of ['phosphatidylcholine', 'phosphatidylethanolamine', 'phosphatidic-acid']) {
+    const f = D.familyById(id);
+    assert.ok(f.provenanceNote && /P–OH|NH₂/.test(f.provenanceNote), id + ' のprovenance維持');
+    assert.ok(f.description.includes('sn-1,2') && f.description.includes('sn-3'), id + ' の結合位置説明');
   }
 });
 
@@ -557,8 +1037,17 @@ test('[independent] 625語全分類・42 mapping・5実証物質が未解決0', 
     assert.ok(D.COMPOUNDS[x.id], x.id + ' がない');
     assert.ok(C.routeFor(x.id), x.id + ' のrouteがない');
     assert.equal(x.provenance, 'image-human-read');
-    assert.ok(x.identity && x.url && x.image, x.id + ' のprovenance/identityがない');
+    assert.ok(x.identity, x.id + ' のidentityがない');
+    assert.equal(x.url, undefined, x.id + ' に教材URLが残る');
+    assert.equal(x.image, undefined, x.id + ' に画像直リンクが残る');
+    assert.equal(x.source, 'idx-kimika');
   }
+  const phenEntry = IA.ENTRIES.filter((e) => e.term === 'フェノキシドイオン')[0];
+  assert.equal(phenEntry.label, 'class-or-family', '独立監査時点のラベルを改竄しない');
+  assert.equal(phenEntry.mappingType, 'class', '過去監査のmappingTypeを履歴として残す');
+  assert.equal(phenEntry.currentMapping.mappingType, 'compound', '現在の対応を明示');
+  assert.equal(phenEntry.currentMapping.target, 'phenoxide-ion');
+  assert.ok(D.COMPOUNDS[phenEntry.currentMapping.target]);
   assert.equal(IA.PROVENANCE['idx-kimika/image-human-read'], 7);
   assert.equal(IA.IMAGE_REVIEW.all1399OcrCompleted, false);
   assert.ok(IA.META.limits.some((t) => /1399/.test(t)));
@@ -567,6 +1056,89 @@ test('[independent] 625語全分類・42 mapping・5実証物質が未解決0', 
     assert.ok(x.target, 'crosswalk targetなし: ' + x.term);
     assert.ok(D.COMPOUNDS[x.target] || D.materialById(x.target) || D.familyById(x.target), 'crosswalk target未解決: ' + x.term);
   }
+});
+
+test('[ocr] 二pass統合・51 empty・確定不足・動画未確認をmetadataで記録する', () => {
+  assert.equal(OA.META.urls, 1399);
+  assert.equal(OA.META.uniqueImages, 1398);
+  assert.deepEqual(OA.META.twoPass, { ok: 1347, empty: 51, error: 0 });
+  assert.equal(OA.META.ocrRows, 1398);
+  assert.equal(OA.META.pageMapRows, 1399);
+  assert.equal(OA.META.candidates.total, 766);
+  assert.equal(OA.META.candidates.katakana, 249);
+  assert.equal(OA.META.candidates.kanji, 403);
+  assert.equal(OA.META.candidates.formula, 114);
+  const classSum = Object.values(OA.META.candidates.classificationCounts).reduce((a, b) => a + b, 0);
+  assert.equal(classSum, 766, '766候補の分類合計');
+  assert.equal(OA.META.candidates.classificationCounts.confirmed_missing_specific_organic_ion, 1);
+  assert.equal(OA.META.candidates.classificationCounts.confirmed_missing_generic_lipid_family, 3);
+  assert.equal(OA.META.alternatePass.uniqueCandidates, 188);
+  assert.equal(OA.META.alternatePass.occurrences, 280);
+  assert.equal(OA.META.alternatePass.differingLines, 1941);
+  assert.equal(OA.META.emptyImages.total, 51);
+  const emptySum = Object.values(OA.META.emptyImages.byStatus).reduce((a, b) => a + b, 0);
+  assert.equal(emptySum, 51);
+  assert.equal(OA.META.emptyImages.byStatus.structure_or_reaction_only_no_compound_name, 36);
+  assert.equal(OA.META.emptyImages.byStatus.schematic_or_icon_no_compound_name, 8);
+  assert.equal(OA.META.emptyImages.byStatus.photo_or_product_photo, 6);
+  assert.equal(OA.META.emptyImages.byStatus.annotation_only_no_compound_name, 1);
+  assert.equal(OA.META.emptyImages.missedCompoundNames, 0);
+  assert.equal(OA.META.emptyImages.reviewed, true);
+  assert.equal(OA.META.history.independentAuditFinalCompounds, 419, '履歴値は419のまま');
+  assert.equal(OA.META.history.ocrBaselineCompounds, 420, 'OCR監査時点の420を履歴として残す');
+  assert.equal(OA.META.history.currentCompounds, 427);
+  assert.ok(/420/.test(OA.META.history.note) && /427/.test(OA.META.history.note), '420と427を混同しない説明');
+  assert.equal(OA.INDEPENDENT_ADDITIONS.length, 7, 'OCRとは別の独立追加7件');
+  for (const add of OA.INDEPENDENT_ADDITIONS) {
+    const c = D.COMPOUNDS[add.id];
+    assert.ok(c, add.id + ' のレコード');
+    assert.equal(add.cid, c.pubchem, add.id + ' のCID一致');
+    assert.equal(add.formula, c.formula, add.id + ' の分子式一致');
+    assert.equal(add.charge, 0, add.id + ' の電荷0');
+    assert.equal(c.formalCharge, 0);
+    assert.equal(add.source, 'pubchem');
+    assert.ok(D.aliasTarget(add.id) === null || C.search(add.id).some((r) => r.id === add.id), add.id + ' の検索到達');
+  }
+  assert.ok(OA.META.limitations.some((t) => /7物質/.test(t) && /PubChem API/.test(t)), '7物質がOCR由来でない説明');
+  assert.equal(OA.META.claims.allImagesChemicallyFullyRead, false);
+  assert.equal(OA.META.claims.allVideosTranscribed, false);
+  assert.equal(OA.META.imageManifest.rawOcrTextStoredInRepo, false);
+  assert.equal(OA.META.imageManifest.urls, 1399);
+  assert.ok(OA.META.limitations.some((t) => /漢字403/.test(t)));
+  assert.ok(OA.META.limitations.some((t) => /動画127/.test(t)));
+  const phen = OA.CONFIRMED_ADDITIONS.filter((x) => x.type === 'compound')[0];
+  assert.equal(phen.id, 'phenoxide-ion');
+  assert.equal(phen.source, 'idx-tryit');
+  assert.equal(phen.imageSha256, undefined, '画像sha256は配信しない');
+  assert.equal(phen.imageUrl, undefined, '画像直リンクは配信しない');
+  assert.ok(D.COMPOUNDS[phen.id]);
+  const aliases = OA.CONFIRMED_ADDITIONS.filter((x) => x.type === 'alias');
+  assert.equal(aliases.length, 2);
+  assert.equal(D.aliasTarget('インベルターゼ'), 'sucrase');
+  assert.equal(D.aliasTarget('トレオニン'), 'threonine');
+  for (const x of OA.FAMILY_LOOKUP_CORRECTIONS) {
+    assert.ok(D.familyById(x.target), x.term + ' の既存family');
+  }
+  assert.equal(OA.VIDEO.totalVideos, 127);
+  assert.equal(OA.VIDEO.reviewed, false);
+  assert.equal(OA.VIDEO.mainVideoId, 'pIdeL8PT2DM');
+  assert.equal(OA.VIDEO.httpStatus, 400);
+  assert.match(OA.VIDEO.error, /FAILED_PRECONDITION/);
+  assert.equal(OA.VIDEO.segments, 0);
+  assert.equal(OA.VIDEO.tokensRecorded, false);
+  assert.equal(OA.VIDEO.cookiesRecorded, false);
+  assert.equal(OA.VIDEO.headersRecorded, false);
+  assert.equal(OA.VIDEO.bypassAttempted, false);
+  assert.equal(OA.VIDEO.evidenceFile, 'media-audit-evidence-20261109');
+  assert.equal(OA.META.sources.mediaEvidence, 'media-audit-evidence-20261109');
+  assert.equal(OA.META.sources.reviewBundle, 'ocr-review-20261109');
+  const ledgerHtml = read('ledger.html');
+  assert.ok(ledgerHtml.includes('ocr-audit.js'));
+  assert.ok(ledgerHtml.includes('id="ledger-ocr-audit"'));
+  assert.ok(ledgerHtml.includes('id="ledger-verification"'));
+  const ledgerJs = read('ledger.js');
+  assert.ok(ledgerJs.includes('OCOcrAudit'));
+  assert.ok(ledgerJs.includes('ledger-ocr-confirmed'));
 });
 
 test('[data] 46追加分のうち金属アセチリドの式順序が検証済み', () => {
@@ -678,14 +1250,22 @@ test('[index] 431頁マニフェストのURL・title・節・種別・status・h
   assert.equal(M.COUNTS.bySource['idx-kimika'], 60);
   assert.equal(M.CHAPTERS.length, 7);
   assert.equal(M.COUNTS.byKind.lesson, 127);
-  for (const ch of M.CHAPTERS) assert.equal(ch.expectedLessons, ch.obtainedLessons, ch.name + ' のlesson数が不一致');
+  for (const ch of M.CHAPTERS) {
+    assert.equal(ch.expectedLessons, ch.obtainedLessons, ch.name + ' のlesson数が不一致');
+    assert.match(ch.id, /^ch-\d+$/, '章のlogical IDがない');
+    assert.equal(ch.url, undefined, '章の教材URLを配信しない');
+  }
+  const pageIds = new Set();
   for (const p of M.PAGES) {
-    assert.ok(/^https?:\/\//.test(p.url), 'URLが不正: ' + p.url);
-    assert.ok(p.title && p.title.length > 0, p.url + ' のtitleがない');
-    assert.ok(p.section, p.url + ' のsectionがない');
-    assert.ok(p.type, p.url + ' のtypeがない');
-    assert.equal(p.status, 200, p.url + ' のstatusが200でない');
-    assert.match(p.hash, /^[0-9a-f]{64}$/, p.url + ' のhashが不正');
+    assert.match(p.id, /^idx-(?:tryit|kimika)-\d{3}$/, 'entry IDが不正: ' + p.id);
+    assert.equal(pageIds.has(p.id), false, 'entry IDが重複: ' + p.id);
+    pageIds.add(p.id);
+    assert.equal(p.url, undefined, '教材URLを配信しない: ' + p.id);
+    assert.ok(p.title && p.title.length > 0, p.id + ' のtitleがない');
+    assert.ok(p.section, p.id + ' のsectionがない');
+    assert.ok(p.type, p.id + ' のtypeがない');
+    assert.equal(p.status, 200, p.id + ' のstatusが200でない');
+    assert.match(p.hash, /^[0-9a-f]{64}$/, p.id + ' のhashが不正');
   }
   assert.equal(M.IMAGES.count, 1399);
   assert.equal(M.IMAGES.reviewed, false);
@@ -701,9 +1281,12 @@ test('[index] 65件の索引監査が全件解決する', () => {
   assert.deepEqual(result.byResolution, { compound: 40, family: 9, material: 13, variant: 2, inorganic: 1 });
   for (const f of A.FINDINGS) {
     assert.ok(f.term && f.kind && f.resolution, '必須項目がない');
-    assert.ok(Array.isArray(f.urls) && f.urls.length > 0, f.term + ' のURLがない');
-    for (const u of f.urls) assert.ok(/^https?:\/\//.test(u), f.term + ' のURLが不正');
-    assert.ok(f.quote && f.quote.length >= 8, f.term + ' の引用が短い');
+    assert.ok(Array.isArray(f.sources) && f.sources.length > 0, f.term + ' のsource IDがない');
+    for (const s of f.sources) assert.match(s, /^idx-(?:tryit|kimika)$/, f.term + ' のsource IDが不正');
+    assert.equal(typeof f.sourceCount, 'number', f.term + ' のsourceCountがない');
+    assert.ok(f.sourceCount > 0, f.term + ' のsourceCountが0');
+    assert.equal(f.urls, undefined, f.term + ' にURL配列が残る');
+    assert.equal(f.quote, undefined, f.term + ' に本文抜粋が残る');
     assert.ok(f.supplement, f.term + ' のsupplementがない');
     if (f.resolution === 'compound') assert.ok(D.COMPOUNDS[f.ref], f.term + ' の化合物IDがない');
     if (f.resolution === 'material' || f.resolution === 'variant') assert.ok(D.materialById(f.ref), f.term + ' の材料IDがない');
@@ -711,6 +1294,8 @@ test('[index] 65件の索引監査が全件解決する', () => {
     if (f.resolution === 'inorganic') assert.equal(f.ref, null);
   }
   assert.ok(A.LIMITS.some((t) => /画像/.test(t)));
+  assert.equal(A.EXCERPTS.distributed, false, '本文抜粋は配信しない');
+  assert.equal(A.SOURCE_URLS.distributed, false, '教材URLは配信しない');
 });
 
 test('[index] 既存21資料・153原文mappingを維持する', () => {
@@ -789,10 +1374,10 @@ test('[search] 索引監査の全用語を名前検索で引ける', () => {
  * 静的配線
  * ------------------------------------------------------------------ */
 
-test('[chain] 154件すべてが検証済みexact graphからデスクリプタを持つ', () => {
+test('[chain] 157件すべてが検証済みexact graphからデスクリプタを持つ', () => {
   const chainIds = Object.keys(D.COMPOUNDS).filter((id) => C.classify(id).mode === 'chain');
-  assert.equal(chainIds.length, 154);
-  assert.equal(C.CHAIN_DESCRIPTOR_LIST.length, 46, '位置異性体4組を分離した実測デスクリプタ数');
+  assert.equal(chainIds.length, 157);
+  assert.equal(C.CHAIN_DESCRIPTOR_LIST.length, 47, '位置異性体4組＋C0の直結を分離した実測デスクリプタ数');
   assert.deepEqual(C.CHAIN_DESCRIPTOR_WARNINGS, []);
   // 件数だけで受理しない: 全デスクリプタのexact tree canonicalが相異なり、
   // 同じkeyへ別構造が混ざっていないことを確認する。
@@ -801,7 +1386,8 @@ test('[chain] 154件すべてが検証済みexact graphからデスクリプタ�
   assert.equal(new Set(C.CHAIN_DESCRIPTOR_LIST.map((d) => d.id)).size, C.CHAIN_DESCRIPTOR_LIST.length);
   for (const d of C.CHAIN_DESCRIPTOR_LIST) {
     assert.ok(d.key && d.id, 'descriptor key/id');
-    assert.ok(d.uniqueFragments.length > 0, d.id + ' の断片');
+    if (d.id === 'd-direct-c0') assert.equal(d.uniqueFragments.length, 0, '官能基どうしの直結はH断片にしない');
+    else assert.ok(d.uniqueFragments.length > 0, d.id + ' の断片');
     assert.equal(d.compoundIds.length > 0, true, d.id + ' の化合物');
   }
   const sources = { build: 0, condensed: 0, manual: 0 };
@@ -824,35 +1410,35 @@ test('[chain] 154件すべてが検証済みexact graphからデスクリプタ�
     assert.equal(route.shape, d.descriptorId, id + ': routeのshape');
     assert.ok(C.chainDescriptorById(route.shape), id + ': routeのshapeが実在');
   }
-  assert.deepEqual(sources, { build: 80, condensed: 71, manual: 3 });
+  assert.deepEqual(sources, { build: 83, condensed: 71, manual: 3 });
   assert.equal(X.exactGraphFor(D.COMPOUNDS['maleic-acid']).source, 'manual');
   assert.equal(X.exactGraphFor(D.COMPOUNDS['fumaric-acid']).source, 'manual');
   assert.equal(X.exactGraphFor(D.COMPOUNDS.eicosane).source, 'manual');
   const reached = new Set();
   for (const d of C.CHAIN_DESCRIPTOR_LIST) d.compoundIds.forEach((id) => reached.add(id));
-  assert.equal(reached.size, 154, '全154件が①から到達可能');
+  assert.equal(reached.size, 157, '全157件が①から到達可能');
 });
 
-test('[chain] 31件の代表mapping（部分C数・断片数・ラベル）', () => {
+test('[chain] 34件の代表mapping（部分C数・断片数・ラベル）', () => {
   const expected = {
     ethanol: [2, 1, 'エタン由来'],
-    methanol: [1, 1, 'メチル基（メタン由来）'],
-    'acetic-acid': [1, 1, 'メチル基（メタン由来）'],
+    methanol: [1, 1, 'メタン由来'],
+    'acetic-acid': [1, 1, 'メタン由来'],
     'propionic-acid': [2, 1, 'エタン由来'],
     acetone: [2, 2, 'メチル基×2'],
     'methyl-acetate': [2, 2, 'メチル基×2'],
     'methyl-formate': [1, 2, 'H＋メチル基'],
-    acetonitrile: [1, 1, 'メチル基（メタン由来）'],
+    acetonitrile: [1, 1, 'メタン由来'],
     'acetic-anhydride': [2, 2, 'メチル基×2'],
     'dimethyl-ether': [2, 2, 'メチル基×2'],
     dimethylamine: [2, 2, 'メチル基×2'],
     trimethylamine: [3, 3, 'メチル基×3'],
     triacetin: [6, 4, 'プロパン骨格＋メチル基×3'],
-    'pyruvic-acid': [1, 1, 'メチル基（メタン由来）'],
+    'pyruvic-acid': [1, 1, 'メタン由来'],
     'adipoyl-chloride': [4, 1, 'ブタン由来'],
-    'oxalic-acid': [0, 1, '炭化水素基なし〈H〉'],
-    'formic-acid': [0, 1, '炭化水素基なし〈H〉'],
-    formaldehyde: [0, 1, '炭化水素基なし〈H〉'],
+    'oxalic-acid': [0, 0, '官能基どうしが直接結合'],
+    'formic-acid': [0, 1, 'Hが結合'],
+    formaldehyde: [0, 1, 'Hが結合'],
     glycerol: [3, 1, 'プロパン由来'],
     'ethylene-glycol': [2, 1, 'エタン由来'],
     'propylene-glycol': [3, 1, 'プロパン由来'],
@@ -862,12 +1448,15 @@ test('[chain] 31件の代表mapping（部分C数・断片数・ラベル）', ()
     'ethyl-acetate': [3, 2, 'エチル基＋メチル基'],
     'methyl-propionate': [3, 2, 'エチル基＋メチル基'],
     'butan-1-ol': [4, 1, 'ブタン由来'],
-    '2-methylpropan-1-ol': [4, 1, 'イソブタン由来'],
-    'but-1-ene': [4, 1, 'ブタ-1-エン'],
-    isobutene: [4, 1, 'イソブテン由来'],
+    '2-methylpropan-1-ol': [4, 1, '2-メチルプロパン由来'],
+    'but-1-ene': [4, 1, 'ブタ-1-エン由来'],
+    isobutene: [4, 1, '2-メチルプロペン由来'],
+    'dimethyl-oxalate': [2, 2, 'メチル基×2'],
+    '1,3-dibromopropane': [3, 1, 'プロパン由来'],
+    diethylenetriamine: [4, 2, 'エチル基×2'],
     'propan-1-ol': [3, 1, 'プロパン由来']
   };
-  assert.equal(Object.keys(expected).length, 31);
+  assert.equal(Object.keys(expected).length, 34);
   for (const [id, want] of Object.entries(expected)) {
     const d = C.chainDescriptorFor(id);
     assert.equal(d.partialC, want[0], id + ' の部分C数');
@@ -890,7 +1479,7 @@ test('[chain] アルデヒドだけ −CHO を主表示にし、①の炭化水�
   assert.equal(methyl.totalC, 2, 'エタナールは分子全体C2');
   assert.equal(methyl.coreC, 1, 'CHOの炭素は官能基側');
   assert.equal(methyl.descriptorId, 'd-methane-c1', 'CHO内のaldehydic Hは①のHにしない');
-  assert.equal(C.chainDescriptorLabel(methyl.descriptorId), 'メチル基（メタン由来）');
+  assert.equal(C.chainDescriptorLabel(methyl.descriptorId), 'メタン由来');
   assert.equal(methyl.coreHydrogen.rHydrogen, false);
   assert.equal(methyl.coreHydrogen.details[0].type, 'aldehyde');
   assert.equal(methyl.coreHydrogen.details[0].hydrogens, 1, 'CHO固定H1');
@@ -928,13 +1517,29 @@ test('[chain] アルデヒドだけ −CHO を主表示にし、①の炭化水�
     assert.equal(route.partialC, d.partialC, id + ' の旧route partialC');
   }
 
-  // ②は −CHO を主表示、アルデヒド基を補足。結果の分類名は「アルデヒド」を保持。
-  assert.deepEqual(C.chainFamilyPick('aldehyde'), {
+  // ②は −CHO を主表示、分類名「アルデヒド」を下段に。結果の分類名も保持。
+  assert.deepEqual(C.chainFamilyPick('aldehyde', 'd-methane-c1'), {
     main: '−CHO',
-    sub: 'アルデヒド基',
+    sub: 'アルデヒド',
     note: '末端のカルボニル基。R−C(=O)−H。'
   });
   assert.equal(C.CHAIN_FAMILY_LABEL.aldehyde, 'アルデヒド', '結果分類名はアルデヒドのまま');
+  assert.equal(C.chainFamilyPick('ketone', 'd-propane-c3').main, '−CO−');
+  assert.equal(C.chainFamilyPick('carboxylic', 'd-propane-c3').main, '−COOH');
+  assert.equal(C.chainFamilyPick('ester', 'd-ethane-c2').main, '−COO−');
+  assert.equal(C.chainFamilyPick('anhydride', 'd-propane-c3').main, '−CO−O−CO−');
+  assert.equal(C.chainFamilyPick('amine', 'd-ethane-c2').main, '−NH₂ など', '第二・第三級を排除しない');
+  assert.equal(C.chainFamilyPick('alkane', 'd-methane-c1').main, 'CH₄', 'C1アルカンにC−Cを要求しない');
+  for (const family of C.CHAIN_FAMILIES) {
+    const pick = C.chainFamilyPick(family.id, 'd-ethane-c2');
+    assert.ok(pick.main, family.id + ' の上段');
+    assert.ok(pick.sub, family.id + ' の下段');
+    assert.equal(/C\(=O\)/.test(pick.main), false, family.id + ' の選択カードでC(=O)括弧表記を使わない');
+    const sub = family.id === 'amine' ? 'アミン（1〜3級）'
+      : (family.id === 'alcohol' ? 'アルコール'
+        : (family.id === 'amino-alcohol' ? 'アミノアルコール' : C.CHAIN_FAMILY_LABEL[family.id]));
+    assert.equal(pick.sub, sub);
+  }
   assert.deepEqual(C.chainFamiliesForDescriptor('d-methane-c1').map((f) => f.id).sort(),
     ['alcohol', 'aldehyde', 'alkane', 'amine', 'carboxylic', 'halogen', 'nitrile', 'nitro'],
     'methyl選択からアルデヒドとカルボン酸などを②で選べる');
@@ -956,29 +1561,25 @@ test('[chain] アルデヒドだけ −CHO を主表示にし、①の炭化水�
   assert.equal(C.chainDescriptorFor('ethyl-formate').descriptorId, 'd-ethane+h-c2');
   assert.equal(C.chainDescriptorFor('propyl-formate').descriptorId, 'd-h+propane-c3');
 
-  // アルデヒド以外の分類は従来表記のまま（エステルを含む）。
-  for (const f of C.CHAIN_FAMILIES) {
-    if (f.id === 'aldehyde') continue;
-    assert.equal(C.chainFamilyPick(f.id).main, f.label, f.id + ' は従来の分類名');
-    assert.equal(C.chainFamilyPick(f.id).sub, '', f.id + ' に補足を足さない');
-  }
+  // アルデヒド以外も「上段=簡単な形／下段=分類名」に統一（C(=O)は使わない）。
   assert.equal(C.classify('methyl-acetate').family, 'ester', 'エステルfamilyは不変');
   assert.equal(C.chainDescriptorFor('methyl-acetate').descriptorId, 'd-methanex2-c2', 'エステルdescriptorは不変');
   assert.equal(C.chainDescriptorLabel('d-methanex2-c2'), 'メチル基×2');
   assert.equal(C.chainDescriptorFor('methyl-acetate').role, 'monoester');
-  assert.deepEqual(C.chainIdsForDescriptor('d-methanex2-c2', 'ester'), ['methyl-acetate']);
+  assert.deepEqual(C.chainIdsForDescriptor('d-methanex2-c2', 'ester'), ['methyl-acetate', 'dimethyl-oxalate'],
+    '同じshapeのエステルは結果カードで区別する');
   assert.equal(C.chainDescriptorFor('ethyl-acetate').descriptorId, 'd-ethane+methane-c3',
     'エステルのacyl/alkoxyは①で分けない既存挙動');
 
   const js = read('app.js');
   const familyFn = js.slice(js.indexOf('function renderChainFamilyList'), js.indexOf('function genCard'));
-  assert.ok(familyFn.includes('C.chainFamilyPick(f.id)'), '②は分類ごとの表示を使う');
+  assert.ok(familyFn.includes('C.chainFamilyPick(f.id, state.chainShape)'), '②は分類ごとの表示を使う');
   assert.ok(familyFn.includes('pick.main') && familyFn.includes('pick.sub'));
   assert.equal(familyFn.includes('state.chainShape ='), false, '②から①を書き換えない');
   const previewFn = js.slice(js.indexOf('function renderChainPreview'), js.indexOf('function chainCardBadges'));
-  assert.ok(previewFn.includes('R−C(=O)−H'), '右プレビューは R−C(=O)−H で示す');
-  assert.ok(previewFn.includes('O–H ではありません'), 'CHOをO–Hと誤解させない');
+  assert.equal(previewFn.includes('O–H ではありません'), false, 'O–H説明を常時繰り返さない');
   assert.ok(js.includes("aldehyde: ['R−C(=O)−H'"), '一般構造カードも同じ表記');
+  assert.ok(read('index.html').includes('O–Hではありません'), '詳細折畳みにO–H説明を残す');
   const leftFn = js.slice(js.indexOf('function renderChainLeftFigure'), js.indexOf('function renderChainFamilyList'));
   assert.equal(leftFn.includes('CHO'), false, '左①はCHOを描かず骨格だけ');
   const resultFn = js.slice(js.indexOf('function renderChainResults'), js.indexOf('/* ------------------------------------------------------------------\n   * 芳香族・環式'));
@@ -988,10 +1589,10 @@ test('[chain] アルデヒドだけ −CHO を主表示にし、①の炭化水�
 
 test('[chain] −CHO固定Hとギ酸/ギ酸エステルR=Hを独立に分離する', () => {
   const cases = [
-    ['ethanal', 'd-methane-c1', 'メチル基（メタン由来）', 'aldehyde', 1, 0, false],
+    ['ethanal', 'd-methane-c1', 'メタン由来', 'aldehyde', 1, 0, false],
     ['propanal', 'd-ethane-c2', 'エタン由来', 'aldehyde', 1, 0, false],
-    ['formaldehyde', 'd-h-c0', '炭化水素基なし〈H〉', 'aldehyde', 1, 1, true],
-    ['formic-acid', 'd-h-c0', '炭化水素基なし〈H〉', 'carboxyl', 0, 1, true],
+    ['formaldehyde', 'd-h-c0', 'Hが結合', 'aldehyde', 1, 1, true],
+    ['formic-acid', 'd-h-c0', 'Hが結合', 'carboxyl', 0, 1, true],
     ['methyl-formate', 'd-h+methane-c1', 'H＋メチル基', 'ester', 0, 1, true],
     ['ethyl-formate', 'd-ethane+h-c2', 'H＋エチル基', 'ester', 0, 1, true]
   ];
@@ -1048,9 +1649,11 @@ test('[chain] 同じ骨格はまとめ、分岐・不飽和の別骨格は分け
   const c2 = C.chainShapeOptions(2).map((d) => d.label);
   assert.deepEqual(c2.slice(0, 4), ['エタン由来', 'エテン由来', 'エチン由来', 'メチル基×2']);
   const c0 = C.chainShapeOptions(0);
-  assert.equal(c0.length, 1);
-  assert.equal(c0[0].label, '炭化水素基なし〈H〉');
-  assert.deepEqual(c0[0].compoundIds.sort(), ['formaldehyde', 'formic-acid', 'oxalic-acid']);
+  assert.equal(c0.length, 2, 'C0は「Hが結合」と「官能基どうしが直接結合」を分ける');
+  assert.deepEqual(c0.map((d) => d.id), ['d-direct-c0', 'd-h-c0']);
+  assert.deepEqual(c0.map((d) => d.label), ['官能基どうしが直接結合', 'Hが結合']);
+  assert.deepEqual(c0[0].compoundIds.sort(), ['oxalic-acid']);
+  assert.deepEqual(c0[1].compoundIds.sort(), ['formaldehyde', 'formic-acid']);
 });
 
 test('[chain] 4組の位置異性体を別shape・別label・別親図にし、原子順序に依存しない', () => {
@@ -1064,8 +1667,8 @@ test('[chain] 4組の位置異性体を別shape・別label・別親図にし、�
     const da = C.chainDescriptorFor(a);
     const db = C.chainDescriptorFor(b);
     assert.notEqual(da.descriptorId, db.descriptorId, a + '/' + b + ' のshape');
-    assert.equal(C.chainDescriptorLabel(da.descriptorId), la, a + ' のlabel');
-    assert.equal(C.chainDescriptorLabel(db.descriptorId), lb, b + ' のlabel');
+    assert.equal(C.chainDescriptorLabel(da.descriptorId), la + '由来', a + ' のlabel');
+    assert.equal(C.chainDescriptorLabel(db.descriptorId), lb + '由来', b + ' のlabel');
     assert.deepEqual(C.chainIdsForDescriptor(da.descriptorId, 'alkene').concat(C.chainIdsForDescriptor(da.descriptorId, 'alkyne')), [a]);
     assert.deepEqual(C.chainIdsForDescriptor(db.descriptorId, 'alkene').concat(C.chainIdsForDescriptor(db.descriptorId, 'alkyne')), [b]);
     const ta = C.chainDescriptorPreview(da.descriptorId)[0];
@@ -1109,7 +1712,7 @@ test('[chain] 4組の位置異性体を別shape・別label・別親図にし、�
   assert.equal(shape1.skeleton, shape2.skeleton);
 });
 
-test('[chain] 多官能25件のroleとC数をgraphで確認する', () => {
+test('[chain] 多官能28件のroleとC数をgraphで確認する', () => {
   const roles = {
     'ethylene-glycol': 'polyol', glycerol: 'polyol', 'propylene-glycol': 'polyol',
     ethanolamine: 'amino-alcohol',
@@ -1122,9 +1725,12 @@ test('[chain] 多官能25件のroleとC数をgraphで確認する', () => {
     'dichloromethane': 'multihalogen', chloroform: 'multihalogen', 'carbon-tetrachloride': 'multihalogen',
     iodoform: 'multihalogen', '1,2-dibromoethane': 'multihalogen', '1,2-dibromoethene': 'multihalogen',
     '1,1,2,2-tetrabromoethane': 'multihalogen',
-    triacetin: 'triester'
+    '1,3-dibromopropane': 'multihalogen',
+    triacetin: 'triester',
+    'dimethyl-oxalate': 'diester',
+    diethylenetriamine: 'amine-1-2'
   };
-  assert.equal(Object.keys(roles).length, 25);
+  assert.equal(Object.keys(roles).length, 28);
   for (const [id, role] of Object.entries(roles)) {
     assert.equal(C.chainRoleFor(id), role, id + ' のrole');
     assert.equal(C.chainDescriptorFor(id).role, role);
@@ -1138,9 +1744,20 @@ test('[chain] 多官能25件のroleとC数をgraphで確認する', () => {
   assert.equal(C.chainDescriptorFor('dimethylamine').groups.amineDegrees[2], 1);
   assert.equal(C.chainDescriptorFor('trimethylamine').groups.amineDegrees[3], 1);
   assert.equal(C.chainDescriptorFor('glycerol').groups.hydroxyl, 3);
-  const c0Roles = C.chainDescriptorRoles('d-h-c0', 'carboxylic');
-  assert.deepEqual(c0Roles.map((r) => r.role).sort(), ['dicarboxy', 'monocarboxy']);
+  assert.equal(C.chainDescriptorFor('dimethyl-oxalate').groups.ester, 2, 'dimethyl-oxalateはジエステル');
+  assert.equal(C.chainRoleFor('dimethyl-oxalate'), 'diester');
+  assert.notEqual(C.chainRoleFor('dimethyl-oxalate'), 'monoester');
+  assert.equal(C.chainRoleLabel('diester'), '二価エステル（ジエステル）');
+  assert.deepEqual(C.chainDescriptorFor('diethylenetriamine').groups.amineDegrees, { 1: 2, 2: 1, 3: 0 });
+  assert.equal(C.chainRoleFor('diethylenetriamine'), 'amine-1-2');
+  assert.equal(C.chainRoleLabel('amine-1-2'), '第一級アミン×2・第二級アミン×1');
+  const appJs = read('app.js');
+  assert.ok(appJs.includes("diester: ['R–COO"), '②previewにジエステルの一般形');
+  assert.ok(appJs.includes("'amine-1-2': ['H₂N–R–NH–R′–NH₂ など'"), '②previewに混合級アミンの一般形');
+  const c0Roles = C.chainDescriptorRoles('d-direct-c0', 'carboxylic');
+  assert.deepEqual(c0Roles.map((r) => r.role), ['dicarboxy'], 'シュウ酸はC0の直結shape');
   assert.equal(c0Roles.find((r) => r.role === 'dicarboxy').label, '二価カルボン酸（2COOH）');
+  assert.deepEqual(C.chainDescriptorRoles('d-h-c0', 'carboxylic').map((r) => r.role), ['monocarboxy'], 'ギ酸はHが結合');
   const c3Roles = C.chainDescriptorRoles('d-propane-c3', 'carboxylic');
   assert.ok(c3Roles.length > 1, '一価の一般式だけを当てはめない');
   assert.ok(c3Roles.some((r) => r.role === 'monocarboxy'));
@@ -1148,7 +1765,7 @@ test('[chain] 多官能25件のroleとC数をgraphで確認する', () => {
   assert.ok(c3Roles.some((r) => r.role === 'hydroxy-polycarboxy'));
 });
 
-test('[chain] 全154件の①到達と全419件のroute維持・旧API互換', () => {
+test('[chain] 全157件の①到達と全427件のroute維持・旧API互換', () => {
   const chainIds = Object.keys(D.COMPOUNDS).filter((id) => C.classify(id).mode === 'chain');
   const reach = new Set();
   for (const d of C.CHAIN_DESCRIPTOR_LIST) {
@@ -1171,48 +1788,69 @@ test('[chain] 全154件の①到達と全419件のroute維持・旧API互換', (
   assert.equal(C.chainFamilyValid('ether', 1, 'saturated'), false);
   assert.equal(C.structureCondition('acetone'), 'saturated');
   assert.deepEqual(C.auditCoverage().missing, []);
-  assert.equal(C.auditCoverage().modes.chain, 154);
+  assert.equal(C.auditCoverage().modes.chain, 157);
   const ledger = read('ledger.js');
   assert.ok(ledger.includes('cpartial'));
   assert.ok(ledger.includes('route.partialC'));
   assert.ok(ledger.includes('chainDescriptorLabel'));
 });
 
-test('[chain] ①previewは親炭化水素を分離し、②は一般fragmentのみ', () => {
+test('[chain] ①previewは親炭化水素を明示Hの構造式で分離し、②は一般fragmentのみ', () => {
   const methyl2 = C.chainDescriptorPreview('d-methanex2-c2');
   assert.equal(methyl2.length, 2, 'メチル基×2は2枚に分ける');
   assert.deepEqual(methyl2.map((t) => t.label), ['メチル基', 'メチル基']);
   for (const tile of methyl2) {
     assert.equal(tile.kind, 'hydrocarbon');
-    assert.equal(tile.marks.length, 1, '接続点を1つ○で示す');
+    assert.equal(tile.figure.kind, 'graph', '選択後の①は文字式ではなく構造式');
+    assert.equal(tile.marks.length, 1, '接続点metadataを内部に保持する');
     const svg = R.renderStructure(tile.structure, tile.label);
     assert.ok(svg.includes('<svg'));
     assert.ok(!svg.includes('NaN'));
+    assert.equal((svg.match(/data-el="C"/g) || []).length, 1, 'メチル親graphのC');
+    assert.equal((svg.match(/data-el="H"/g) || []).length, 4, 'Hを明示（CH₄の4H）');
   }
   const tri = C.chainDescriptorPreview('d-methanex3+propane-c6');
   assert.equal(tri.length, 4, 'プロパン＋メチル×3を4断片に分離');
   assert.equal(tri[0].label, 'プロパン骨格');
   assert.equal(tri[0].marks.length, 3);
+  assert.equal((R.renderStructure(tri[0].structure, tri[0].label).match(/data-el="H"/g) || []).length, 8, 'プロパンC3H8のH');
   assert.deepEqual(tri.slice(1).map((t) => t.label), ['メチル基', 'メチル基', 'メチル基']);
   const h = C.chainDescriptorPreview('d-h+methane-c1');
   assert.equal(h.length, 2);
   assert.equal(h[0].kind, 'hydrogen');
   assert.equal(h[1].label, 'メチル基');
+  assert.equal(C.chainDescriptorPreview('d-direct-c0').length, 0, 'シュウ酸はH親図を作らない');
   const js = read('app.js');
   const previewFn = js.slice(js.indexOf('function renderChainPreview'), js.indexOf('function chainCardBadges'));
   assert.equal(previewFn.includes('renderStructure'), false, '②に骨格SVGを出さない');
   assert.equal(previewFn.includes('renderCompound'), false, '②に分子図を出さない');
   assert.ok(js.includes('function renderChainLeftFigure'));
-  assert.ok(js.includes('oc-attach-mark'));
+  assert.equal(js.includes('oc-attach-mark'), false, '炭素の点線circleを描画しない');
+  assert.equal(js.includes('markAttachmentSvg'), false, 'attachment markのSVG注入を撤去');
+  assert.equal(js.includes('oc-attach-legend'), false, '○凡例を撤去');
+  assert.ok(js.includes('oc-frag-tile--single'), '選択後の①を大きく表示');
+  assert.ok(js.includes('oc-frag-preview--single'), '①previewの単一骨格を横幅いっぱいに');
+  assert.ok(/\.oc-frag-tile--single\s+\.oc-frag-tile__fig\s+svg\s*\{[^}]*max-height:\s*230px/s.test(read('app.css')), '①previewの図を大きく');
   for (const d of C.CHAIN_DESCRIPTOR_LIST) {
     const tiles = C.chainDescriptorPreview(d.id);
+    if (d.zeroKind === 'direct') {
+      assert.equal(tiles.length, 0, d.id + ' は炭化水素図を作らない');
+      continue;
+    }
     assert.ok(tiles.length > 0, d.id + ' のpreviewがない');
     for (const tile of tiles) {
       if (tile.kind !== 'hydrocarbon') continue;
+      assert.equal(tile.marks.length, tile.attachmentCount, d.id + ' の接続点metadata数');
+      if (tile.contracted) {
+        assert.equal(tile.figure.kind, 'formula', d.id + ' の長鎖は縮約式');
+        assert.ok(tile.note && tile.note.includes('圧縮'), d.id + ' の縮約注記');
+        continue;
+      }
+      assert.equal(tile.figure.kind, 'graph', d.id + ' の小さい親は構造式');
       const svg = R.renderStructure(tile.structure, tile.label);
       assert.ok(svg.includes('<svg'), d.id + ' のpreview SVG');
       assert.ok(!svg.includes('NaN'), d.id + ' のpreviewにNaN');
-      assert.equal(tile.marks.length, tile.attachmentCount, d.id + ' の接続点○数');
+      assert.ok(!svg.includes('undefined'), d.id + ' のpreviewにundefined');
       assert.equal(R._internal.checkValence(tile.structure).ok, true, d.id + ' のpreview結合価');
     }
   }
@@ -1234,6 +1872,160 @@ test('[chain] 2列は全結果を通した同一グリッドで、グループ�
   assert.ok(/\.oc-cards\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s.test(css));
   assert.ok(/@media \(max-width: 760px\)[\s\S]*?\.oc-cards\s*\{[^}]*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s.test(css));
   assert.ok(/@media \(max-width: 430px\)[\s\S]*?\.oc-cards\s*\{[^}]*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s.test(css));
+});
+
+test('[static] ②の分類・置換基カードは320/390でも最低2列、C0だけfull-row', () => {
+  const css = read('app.css');
+  const js = read('app.js');
+  assert.ok(/#chain-family-list\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s.test(css), '鎖式②は2列');
+  assert.ok(/#chain-shape-list\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit,\s*minmax\(120px,\s*1fr\)\)/s.test(css), 'desktopは余裕に応じて多列');
+  assert.ok(/@media \(max-width: 760px\)[\s\S]*?#chain-shape-list\s*\{[^}]*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s.test(css), 'モバイルは2列以上');
+  assert.equal(/@media[^{]*\{[\s\S]*?#chain-shape-list\s*\{[^}]*grid-template-columns:\s*(minmax\(0,\s*1fr\)|1fr)/s.test(css), false, 'モバイルで1列へ戻さない');
+  assert.ok(/#chain-shape-list\s+\.oc-shape\s*\{[^}]*min-width:\s*0[^}]*max-width:\s*100%/s.test(css), 'shapeカードのmin-width0');
+  assert.ok(/#chain-shape-list\s+\.oc-frag-formula\s*\{[^}]*overflow-wrap:\s*normal/s.test(css), 'shape文字は化学単位の区切りで折り返す');
+  assert.equal(/#chain-shape-list\s+\.oc-frag-formula[^{]*\{[^}]*overflow-wrap:\s*anywhere/s.test(css), false, '文字の途中で無条件に切らない');
+  assert.equal(css.includes('ellipsis'), false, '省略記号で意味を欠落させない');
+  assert.ok(js.includes('esc(chemBreakable(text))'), 'compact構造文字を化学単位で折り返す');
+  assert.ok(js.includes('R.chemBreakable'), '折返し処理をdraw.jsと共有する');
+  assert.ok(/\.oc-preset-row\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s.test(css), '環式②preset行は2列');
+  assert.equal(/@media[^{]*\{[\s\S]*?\.oc-preset-row\s*\{[^}]*grid-template-columns:\s*(minmax\(0,\s*1fr\)|1fr)/s.test(css), false, 'preset行をmobileで1列へ落とさない');
+  assert.equal(/\.oc-family-list\s*\{[^}]*grid-template-columns:\s*repeat\(2,/s.test(css), false, 'その他モードのfamily listへ2列を波及させない');
+  assert.ok(/\.oc-carbon--none\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/s.test(css), 'C0だけfull-row');
+  assert.ok(/\.oc-carbon\s*\{[^}]*min-height:\s*38px/s.test(css), 'C1等の通常ボタン高さを維持');
+  assert.ok(/#carbon-list\s*\{[^}]*repeat\(auto-fit,\s*minmax\(52px,\s*1fr\)\)/s.test(css), 'desktopは6列以上可');
+  assert.ok(/@media \(max-width: 760px\)[\s\S]*?#carbon-list\s*\{[^}]*repeat\(6,\s*minmax\(0,\s*1fr\)\)/s.test(css), '320/390でも6列');
+  assert.ok(/@media \(max-width: 760px\)[\s\S]*?#carbon-list\s+\.oc-carbon\s*\{[^}]*min-height:\s*44px[^}]*padding:\s*4px 1px/s.test(css), 'mobileの44pxタップと余白');
+  assert.equal(/@media[^{]*\{[\s\S]*?#carbon-list\s*\{[^}]*grid-template-columns:\s*(minmax\(0,\s*1fr\)|1fr)/s.test(css), false, 'carbon gridを1列へ戻さない');
+  assert.ok(/#carbon-list\s+\.oc-carbon__main\s*\{[^}]*font-size:\s*clamp\(/s.test(css), 'C20まで収まる数値font');
+  assert.equal(css.includes('ellipsis'), false, '文字をellipsisで欠落させない');
+  const options = C.chainPartialOptions();
+  assert.deepEqual(options, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20], '実在optionsだけ');
+  for (const n of [11, 12, 13, 14, 15, 16, 17, 18, 19]) assert.equal(options.includes(n), false, 'C' + n + 'のdummyを作らない');
+  assert.ok(/\.oc-carbon--none\s+\.oc-carbon__main\s*\{[^}]*white-space:\s*nowrap/s.test(css), 'C0ラベルを1本で表示');
+  const html = read('index.html');
+  assert.equal(html.includes('oc-selection'), false, '選択中statusの3重表示を残さない');
+  assert.equal((html.match(/class="oc-micro"/g) || []).length, 0, 'パネル見出しの6 microを残さない');
+  assert.ok(html.includes('数え方・図について'));
+  assert.equal(html.includes('図の読み方'), false, '①の図の読み方UI説明を残さない');
+  assert.equal(html.includes('一覧を並べすぎない'), false, 'その他のUI設計説明を残さない');
+  assert.ok(js.includes('function chemBreakable'), '化学単位の折返し補助');
+  assert.ok(js.includes('chemBreakable(pick.main)') && js.includes('chemBreakable(card.main)'));
+  assert.ok(js.includes('収録・検証の詳細'));
+  const ledger = read('ledger.html');
+  assert.ok(ledger.includes('収録・検証の詳細'));
+});
+
+test('[static] 公開16 assetだけを配信し、ローカル絶対パス・認証パスを含まない', () => {
+  assert.deepEqual(fs.readdirSync(APP).sort(), PRODUCTION_FILES.slice().sort(), '本番は16ファイルのみ');
+  const banned = [
+    { name: 'Windows absolute path', re: /(^|[^A-Za-z0-9])[A-Za-z]:[\\/]/ },
+    { name: 'Users path', re: /\/Users\// },
+    { name: 'AppData path', re: /AppData[\\/]/i },
+    { name: 'local user name', re: /hori3/i },
+    { name: 'clasp auth path', re: /\.clasprc|AUTH_FILE/i }
+  ];
+  for (const file of [...PRODUCTION_FILES, 'README.md']) {
+    const text = file === 'README.md' ? readNext(file) : read(file);
+    for (const b of banned) {
+      assert.equal(b.re.test(text), false, file + ' に' + b.name + 'が残っている');
+    }
+  }
+  assert.equal(fs.existsSync(path.join(APP, 'README.md')), false, '本番にREADMEを配信しない');
+  assert.equal(fs.existsSync(path.join(APP, 'catalog-audit.md')), false, '本番に監査mdを配信しない');
+  assert.equal(fs.existsSync(path.join(APP, 'ocr-audit.json')), false, '本番にOCR raw jsonを配信しない');
+  assert.equal(fs.existsSync(path.join(APP, 'migration-backup')), false, '本番にbackupを配信しない');
+  assert.equal(fs.existsSync(path.join(NEXT, 'migration-backup')), false, 'design-labのtracked treeに旧backupを残さない');
+  const readme = readNext('README.md');
+  assert.equal(/migration-backup\/(?:manifest\.json|README\.md)/.test(readme), false, '不存在のbackupファイルを参照しない');
+  assert.ok(readme.includes('temp/opencode/rights-audit-20261110/migration-backup'), '退避先を明示する');
+  assert.ok(readme.includes('完全消去は主張しません'), 'git履歴に原文が残ることを隠さない');
+});
+
+test('[static] 教材出典URL・本文抜粋・画像直リンクを配信データと画面に残さない', () => {
+  const textbookHosts = [
+    'try-it\\.jp', 'kimika\\.net', 'jikkyo\\.co\\.jp', 'shinko-keirin\\.co\\.jp',
+    'fromhimuka\\.com', 'examist\\.jp', 'yorikuwa\\.com', 'kagakulab\\.com',
+    'daigaku-kagaku\\.com', 'jstage\\.jst\\.go\\.jp', 'students\\.csj\\.jp',
+    'cst\\.nihon-u\\.ac\\.jp', 'cloudfront\\.net'
+  ];
+  const re = new RegExp('(?:' + textbookHosts.join('|') + ')', 'i');
+  for (const file of PRODUCTION_FILES) {
+    assert.equal(re.test(read(file)), false, file + ' に教材出典URL/画像ホストが残る');
+  }
+  const credits = fs.readFileSync(path.join(ROOT, 'site', 'credits.html'), 'utf8');
+  assert.equal(re.test(credits), false, 'credits.html に教材出典URLが残る');
+  assert.ok(credits.includes('教材出典ページのURLと本文は配信せず'), 'creditsに出典の扱いを明記');
+  // 本文抜粋（quote）は全公開データで0件
+  for (const [name, mod] of [['data.js', D], ['index-audit.js', A], ['independent-audit.js', IA], ['ocr-audit.js', OA], ['index-manifest.js', M], ['external-coverage.js', E]]) {
+    assert.equal(JSON.stringify(mod).includes('"quote"'), false, name + ' にquoteフィールドが残る');
+  }
+  for (const c of Object.values(D.COMPOUNDS)) {
+    for (const ev of (c.sourceEvidence || [])) {
+      assert.equal(ev.quote, undefined, c.id + ' の本文抜粋が残る');
+      assert.equal(ev.url, undefined, c.id + ' の教材URLが残る');
+      assert.equal(ev.image, undefined, c.id + ' の画像直リンクが残る');
+      assert.equal(ev.imageUrl, undefined, c.id + ' の画像直リンクが残る');
+      assert.equal(ev.imageSha256, undefined, c.id + ' の画像sha256が残る');
+    }
+  }
+  assert.equal(Object.keys(D.SOURCES).filter((k) => D.SOURCES[k].url).sort().join(','), 'csj,iupac,mext,nist,pubchem', '化学DB・基準のリンクだけを残す');
+  assert.equal(Object.keys(E.SOURCES).some((k) => E.SOURCES[k].url || E.SOURCES[k].domain), false, '外部照合の教材URL/domainを配信しない');
+  assert.equal(M.PAGES.some((p) => p.url), false, 'manifestに教材URLを残さない');
+  assert.equal(IA.ENTRIES.some((e) => e.url), false, 'independent監査に教材URLを残さない');
+  assert.equal(IA.MANDATORY.some((m) => m.url), false, 'mappingに教材URLを残さない');
+  assert.equal(OA.CONFIRMED_ADDITIONS.some((x) => x.sourceUrl || x.imageUrl || x.imageSha256), false, 'OCR監査にURL/shaを残さない');
+  assert.equal(OA.META.sourcePolicy.distributed, false);
+  assert.equal(IA.META.sourcePolicy.distributed, false);
+  assert.ok(D.LEDGER_NOTES.some((n) => /教材出典ページのURLと本文抜粋は配信していません/.test(n.detail)), '台帳に配信ポリシーを明記');
+  assert.ok(read('ledger.html').includes('教材出典ページのURLと本文抜粋は配信せず'), 'ledgerに方針を明記');
+});
+
+test('[static] 教材出典URLに依存する検索・行・テストはlogical IDで代替する', () => {
+  const ids = new Set(M.PAGES.map((p) => p.id));
+  assert.equal(ids.size, 431, '431件のentry IDが一意');
+  assert.equal([...ids].every((id) => /^idx-(?:tryit|kimika)-\d{3}$/.test(id)), true);
+  assert.equal(M.CHAPTERS.length, 7);
+  assert.equal(M.CHAPTERS.every((ch) => /^ch-\d+$/.test(ch.id)), true);
+  for (const f of A.FINDINGS) {
+    assert.ok(f.sources.every((s) => /^idx-(?:tryit|kimika)$/.test(s)), f.term);
+    assert.ok(f.sourceCount >= f.sources.length, f.term);
+  }
+  const ledgerJs = read('ledger.js');
+  assert.equal(ledgerJs.includes('f.quote'), false, '台帳は本文抜粋を描画しない');
+  assert.equal(ledgerJs.includes('ch.url'), false, '章URLを描画しない');
+  assert.equal(ledgerJs.includes('E.SOURCES[row.source].url'), false, '外部資料URLを描画しない');
+  assert.equal(ledgerJs.includes('imageSha256'), false, '画像shaを描画しない');
+  assert.ok(ledgerJs.includes('entry ID') || ledgerJs.includes('source ID'));
+});
+
+test('[static] 本番16ファイルはdesign-labとHTML正規化後・非HTML byteで一致する', () => {
+  assert.equal(fs.existsSync(path.join(NEXT, 'README.md')), true, 'docsはdesign-labに分離');
+  for (const file of PRODUCTION_FILES) {
+    const production = fs.readFileSync(path.join(APP, file));
+    const lab = fs.readFileSync(path.join(NEXT, file));
+    if (file.endsWith('.html')) {
+      assert.equal(production.toString('utf8'), normalizeToProduction(lab.toString('utf8')), file + ' のHTMLが正規化後に一致しない');
+      assert.equal(production.toString('utf8').includes('../../site/'), false, file + ' にdesign-lab用の../../site/が残る');
+    } else {
+      assert.equal(production.equals(lab), true, file + ' がbyte一致しない');
+    }
+  }
+  const index = read('index.html');
+  const scripts = [...index.matchAll(/<script src="\.\/([^"]+)"><\/script>/g)].map((m) => m[1]);
+  assert.deepEqual(scripts, ['data.js', 'draw.js', 'chain-descriptor.js', 'catalog.js', 'motion.js', 'app.js'], 'motionを含む読込順');
+  assert.ok(index.includes('../themes/theme.js') && index.includes('../themes/pop.css') && index.includes('../themes/forest.css'));
+  assert.ok(index.includes('../credits.html'));
+  const ledger = read('ledger.html');
+  assert.ok(ledger.includes('../themes/theme.js') && ledger.includes('../credits.html'));
+  for (const file of ['index.html', 'ledger.html']) {
+    for (const m of read(file).matchAll(/(?:href|src)="([^"]+)"/g)) {
+      const ref = m[1];
+      if (/^(https?:|#|mailto:|data:)/.test(ref)) continue;
+      const clean = ref.split('#')[0].split('?')[0];
+      if (!clean) continue;
+      assert.equal(fs.existsSync(path.resolve(APP, clean)), true, file + ' の相対dependencyがない: ' + ref);
+    }
+  }
 });
 
 test('[chain] 旧totalC URLは一意なら移行し、複数なら明示して選び直す', () => {
@@ -1259,15 +2051,18 @@ test('[static] index.htmlは3モード・テーマ共有・クレジット・fav
   assert.ok(html.includes('data-mode="chain"'));
   assert.ok(html.includes('data-mode="ring"'));
   assert.ok(html.includes('data-mode="other"'));
-  assert.ok(html.includes('../../site/themes/theme.js'));
-  assert.ok(html.includes('../../site/themes/pop.css'));
-  assert.ok(html.includes('../../site/themes/forest.css'));
-  assert.ok(!html.includes('../themes/'), '本流の旧相対パスが残っている');
-  assert.ok(html.includes('../../site/credits.html'));
+  assert.ok(html.includes('../themes/theme.js'));
+  assert.ok(html.includes('../themes/pop.css'));
+  assert.ok(html.includes('../themes/forest.css'));
+  assert.ok(!html.includes('../../site/themes/'), 'design-lab用の相対パスが残っている');
+  assert.ok(html.includes('../credits.html'));
   assert.ok(html.includes('favicon.svg'));
   assert.ok(html.includes('./ledger.html'));
-  assert.ok(html.includes('実合成手順') || html.includes('合成手順'));
-  assert.ok(html.includes('条件不足') || html.includes('役割'));
+  assert.ok(html.includes('合成') && html.includes('手順'), '実合成・実験手順ではない注意をfooterに残す');
+  assert.ok(html.includes('数え方・図について'), '詳細折畳みに数え方・図の説明を残す');
+  assert.ok(html.includes('C=O・C≡Nの炭素は官能基側に数えます'), '常時表示は短い数え方1文');
+  assert.equal(html.includes('oc-selection'), false, '選択中statusの3重表示を残さない');
+  assert.equal(html.includes('oc-attach-legend'), false, '○凡例を残さない');
   assert.ok(html.includes('chain-shape-list'));
   assert.equal(html.includes('chain-structure-list'), false, '旧・構造条件のUIを残さない');
   const js = read('app.js');
@@ -1277,16 +2072,16 @@ test('[static] index.htmlは3モード・テーマ共有・クレジット・fav
   assert.equal(js.includes('data-carbon='), false, '旧・総炭素数の選択を残さない');
   const css = read('app.css');
   assert.ok(css.includes('[hidden] { display: none !important; }'), 'hidden属性をdisplay:gridが上書きしない');
-  assert.ok(css.includes('.oc-fig--scroll'), '長い鎖式の局所スクロール');
-  assert.ok(css.includes('min-width: 720px'), '長い鎖式を6pxまで縮小しない');
-  assert.ok(/\.oc-fig--scroll\s*\{[^}]*align-items:\s*flex-start/s.test(css), 'スクロール領域を左寄せにする');
-  assert.ok(/\.oc-fig--scroll\s+\.oc-svg\s*\{[^}]*flex:\s*0 0 auto/s.test(css), '長鎖SVGを縮小しない');
+  assert.ok(css.includes('.oc-fig--long'), '長い鎖式はカード内フィット＋拡大で読む');
+  assert.equal(/min-width:\s*720px/.test(css), false, 'カード内に強制min-widthを残さない');
+  assert.equal(/min-width:\s*400px/.test(css), false, '全SVGへの400px強制を残さない');
+  assert.ok(/\.oc-fig--long\s+\.oc-svg\s*\{[^}]*width:\s*100%/s.test(css), '長鎖SVGをカード幅に収める');
 });
 
 test('[static] ledger.htmlは索引監査・family/材料索引・テーマ共有をもつ', () => {
   const html = read('ledger.html');
-  assert.ok(html.includes('../../site/themes/theme.js'));
-  assert.ok(html.includes('../../site/credits.html'));
+  assert.ok(html.includes('../themes/theme.js'));
+  assert.ok(html.includes('../credits.html'));
   assert.ok(html.includes('./index.html'));
   assert.ok(html.includes('index-manifest.js'));
   assert.ok(html.includes('index-audit.js'));
@@ -1308,9 +2103,11 @@ test('[static] UIは常時最大1accordion・keyboard・reduced motion・motion 
   assert.ok(js.includes('desiredDetails'));
   assert.ok(js.includes('summary.addEventListener'));
   assert.ok(js.includes("e.preventDefault()"));
-  assert.ok(js.includes('prefers-reduced-motion'));
-  assert.ok(js.includes('Element.prototype.animate'));
   assert.ok(js.includes('resetHeight'));
+  const motion = read('motion.js');
+  assert.ok(motion.includes('prefers-reduced-motion'));
+  assert.ok(/Element[\s\S]{0,60}prototype[\s\S]{0,60}animate/.test(motion), 'WAAPI対応を判定');
+  assert.ok(motion.includes('addEventListener') || motion.includes('addListener'), '設定変更を監視');
   const css = read('app.css');
   assert.ok(css.includes('@media (prefers-reduced-motion: reduce)'));
 });
@@ -1347,8 +2144,8 @@ test('[static] 未対応理由は2分類だけで、データ不備を範囲外�
   assert.equal(D.unsupportedEntry('alkane-c6', 'ch3').type, 'out-of-scope');
 });
 
-test('[static] READMEが機能・収録数・family・制限・ローカルURLを説明する', () => {
-  const md = fs.readFileSync(path.join(APP, 'README.md'), 'utf8');
+test('[static] READMEが機能・収録数・公開昇格・保全・未確認範囲を説明する', () => {
+  const md = readNext('README.md');
   assert.ok(md.includes('app10-next'));
   assert.ok(md.includes('総炭素数'));
   assert.ok(md.includes('固定'));
@@ -1356,6 +2153,12 @@ test('[static] READMEが機能・収録数・family・制限・ローカルURL�
   assert.ok(md.includes('1399'));
   assert.ok(md.includes('625'));
   assert.ok(md.includes('http://localhost:8000/design-lab/app10-next/'));
+  assert.ok(md.includes('site/app10'), '本番昇格先');
+  assert.ok(md.includes('35120ea'), '旧版の保全基準');
+  assert.ok(md.includes('archive/site-app10-35120ea-20261110'), '完全snapshot');
+  assert.ok(md.includes('scripts/tests/fixtures/app10-baseline-35120ea'), '旧テスト fixture');
+  assert.ok(md.includes('動画127') && md.includes('未確認'), '動画127本の未確認');
+  assert.ok(md.includes('完全網羅') && md.includes('主張しません'), '全高校化学の絶対網羅を断定しない');
 });
 
 /* ------------------------------------------------------------------
@@ -1384,7 +2187,8 @@ test('[chain] 分類順・初期値・炭化水素部分Cの選択肢が分類�
   assert.equal(C.chainDescriptorLabel('d-ethene-c2'), 'エテン由来');
   assert.equal(C.chainDescriptorLabel('d-ethyne-c2'), 'エチン由来');
   assert.equal(C.chainDescriptorLabel('d-methanex2-c2'), 'メチル基×2');
-  assert.equal(C.chainDescriptorLabel('d-h-c0'), '炭化水素基なし〈H〉');
+  assert.equal(C.chainDescriptorLabel('d-h-c0'), 'Hが結合');
+  assert.equal(C.chainDescriptorLabel('d-direct-c0'), '官能基どうしが直接結合');
   assert.equal(C.chainDescriptorById(C.INITIAL_CHAIN_SHAPE).partialC, 2);
   assert.equal(C.chainDescriptorFamilyValid('d-ethane-c2', 'alkane'), true);
   assert.equal(C.chainDescriptorFamilyValid('d-ethyne-c2', 'alkane'), false);
@@ -1479,15 +2283,21 @@ test('[ring] 置換基プリセットと位置異性体のまとまり', () => {
   for (const id of C.RING_SYSTEM_MAP.benzene.registeredSingle.concat(C.RING_SYSTEM_MAP.benzene.registeredMulti)) {
     assert.ok(covered.has(id), '登録済み置換体の受け皿がない: ' + id);
   }
-  assert.equal(C.RING_SYSTEM_MAP.benzene.registeredSingle.length, 11);
+  assert.equal(C.RING_SYSTEM_MAP.benzene.registeredSingle.length, 12);
   assert.equal(C.RING_SYSTEM_MAP.benzene.registeredMulti.length, 35);
+  const phenoxidePreset = C.RING_SYSTEM_MAP.benzene.presets.filter((p) => p.ids.includes('phenoxide-ion'))[0];
+  assert.ok(phenoxidePreset, 'フェノキシドイオンの専用preset');
+  assert.equal(phenoxidePreset.kind, 'single');
+  assert.deepEqual(phenoxidePreset.ids, ['phenoxide-ion'], '塩や追加なしへ混ぜない');
+  assert.equal(C.RING_SYSTEM_MAP.benzene.presets[0].ids.includes('phenoxide-ion'), false, '追加なしに混ぜない');
+  assert.equal(C.RING_SYSTEM_MAP.benzene.tray.includes('phenoxide-ion'), false, 'trayに混ぜない');
   const sections = ['single', 'same', 'combo'];
   for (const kind of sections) assert.ok(C.RING_SYSTEM_MAP.benzene.presets.some((p) => p.kind === kind), kind);
   const js = read('app.js');
   for (const label of ['置換基1つ', '同じ置換基を複数', '異なる置換基組み合わせ']) assert.ok(js.includes(label), label);
 });
 
-test('[ring] routeForは全419件でpresetを返し、legacy/focusの行先が有効', () => {
+test('[ring] routeForは全427件でpresetを返し、legacy/focusの行先が有効', () => {
   let ring = 0;
   for (const id of Object.keys(D.COMPOUNDS)) {
     const route = C.routeFor(id);
@@ -1541,7 +2351,7 @@ test('[figures] 構造式と簡略構造式の二重表示・例外理由・原�
     assert.ok(glucose.figures.some((f) => (f.label || '').includes(label)), label);
   }
   const audit = R.figureAudit(D.COMPOUNDS);
-  assert.equal(audit.total, 419);
+  assert.equal(audit.total, 427);
   assert.ok(audit.dual >= 250, '二重表示の件数: ' + audit.dual);
   assert.ok(audit.multi >= 2);
   for (const ex of audit.exceptions) assert.ok(ex.reason && ex.reason.length >= 6, ex.id + ' の例外理由が短い');
@@ -1618,7 +2428,11 @@ test('[static] 2カラム維持・図の縦併記・拡大dialog・3テーマ', 
   assert.ok(css.includes('.oc-fig-dialog'));
   assert.ok(css.includes('body.oc-dialog-open'));
   assert.ok(css.includes('.oc-fig__zoom-btn'), '明示的な拡大ボタン');
-  assert.ok(css.includes('min-width: 400px'), 'モバイルは図の最小可読幅を確保');
+  assert.equal(css.includes('min-width: 400px'), false, 'モバイルでも全SVGへ最小幅を強制しない');
+  assert.equal(/@media \(max-width: 900px\)[\s\S]{0,200}?\.oc-modes\s*\{[^}]*grid-template-columns:\s*1fr/s.test(css), false, 'モードボタンを1列に落とさない');
+  assert.ok(/\.oc-modes\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/s.test(css), 'モードは3列');
+  assert.ok(/@media \(max-width: 430px\)[\s\S]*?\.oc-mode\s*\{[^}]*padding:/s.test(css), '320pxでも3列が収まる余白');
+  assert.ok(/\.oc-mode\s*\{[^}]*min-height:\s*44px/s.test(css), '押しやすい高さ');
   const html = read('index.html');
   assert.ok(html.includes('id="fig-dialog"'));
   assert.ok(html.includes('id="fig-dialog-close"'));
@@ -1641,9 +2455,9 @@ test('[static] 2カラム維持・図の縦併記・拡大dialog・3テーマ', 
   assert.equal(js.includes('data-ring-group'), false);
   for (const file of ['index.html', 'ledger.html']) {
     const text = read(file);
-    assert.ok(text.includes('../../site/themes/theme.js'));
-    assert.ok(text.includes('../../site/themes/pop.css'));
-    assert.ok(text.includes('../../site/themes/forest.css'));
+    assert.ok(text.includes('../themes/theme.js'));
+    assert.ok(text.includes('../themes/pop.css'));
+    assert.ok(text.includes('../themes/forest.css'));
   }
   assert.ok(js.includes('ringSubPreviewHtml'));
   assert.ok(js.includes('置換基を追加しません'));
@@ -1818,4 +2632,553 @@ test('[static] 右②は置換基fragmentのみ・骨格は①側', () => {
   assert.ok(js.includes('function renderRingLeftFigure'));
   assert.ok(js.includes('function renderChainLeftFigure'));
   assert.ok(js.includes('ringSubPreviewHtml'));
+});
+
+/* ------------------------------------------------------------------
+ * 選択カード（compact）と①プレビュー（明示Hの構造式）の分離
+ * ------------------------------------------------------------------ */
+
+function svgCount(svg, re) {
+  return (svg.match(re) || []).length;
+}
+
+test('[chain] 選択カードはcompact・①プレビューは明示Hの構造式で全shape成功', () => {
+  assert.equal(C.CHAIN_DESCRIPTOR_LIST.length, 47);
+  for (const d of C.CHAIN_DESCRIPTOR_LIST) {
+    const card = C.chainShapeFigure(d.id);
+    assert.ok(card, d.id + ' の選択カード図');
+    assert.equal(card.label, d.label, d.id + ' の下段ラベル');
+    assert.ok(['none', 'hydrogen', 'single', 'multi'].includes(card.kind), d.id + ' のカード種別');
+    if (card.kind === 'single' && card.figure.kind === 'graph') {
+      const compactSvg = R.renderStructure(card.figure.structure, card.label);
+      assert.equal(svgCount(compactSvg, /data-el="H"/g), 0, d.id + ' のcompactカードはHを省略');
+    }
+    const tiles = C.chainDescriptorPreview(d.id);
+    if (d.zeroKind === 'direct') {
+      assert.equal(card.kind, 'none');
+      assert.equal(tiles.length, 0, d.id + ' はH親図を作らない');
+      continue;
+    }
+    assert.ok(tiles.length > 0, d.id + ' の①プレビュー');
+    for (const tile of tiles) {
+      assert.ok(tile.label, d.id + ' のプレビュー役割名');
+      assert.notEqual(tile.label, card.label, d.id + ' はcompactカードの名前と役割名を分離');
+      assert.ok(tile.figure, d.id + ' のプレビュー図');
+      if (tile.kind === 'hydrogen') {
+        assert.equal(tile.figure.kind, 'hydrogen');
+        continue;
+      }
+      if (tile.contracted) {
+        assert.equal(tile.figure.kind, 'formula', d.id + ' の長鎖は縮約式');
+        assert.ok(tile.figure.text && tile.figure.text.includes('CH₂'), d.id + ' の繰返し表記');
+        assert.ok(tile.note && /圧縮/.test(tile.note), d.id + ' の縮約注記');
+        continue;
+      }
+      assert.equal(tile.figure.kind, 'graph', d.id + ' の小さい親は構造式');
+      const svg = R.renderStructure(tile.structure, tile.label);
+      assert.ok(svg.includes('<svg'), d.id + ' のSVG');
+      assert.ok(!svg.includes('NaN'), d.id + ' のNaN');
+      assert.ok(!svg.includes('undefined'), d.id + ' のundefined');
+      assert.equal(svgCount(svg, /data-el="C"/g), tile.structure.atoms.filter((a) => a.el === 'C').length, d.id + ' のC数');
+      assert.equal(svgCount(svg, /data-el="H"/g), tile.structure.atoms.reduce((n, a) => n + (a.h || 0), 0), d.id + ' のH数');
+      const vb = R.svgGeometry(svg);
+      assert.ok(vb && vb.width > 0 && vb.height > 0, d.id + ' のviewBox');
+    }
+  }
+  // 複数fragmentはcompactカードでも実分離し、CH₃−CH₃に連結しない。
+  const halves = C.chainShapeFigure('d-methanex2-c2').halves.map((h) => h.text);
+  assert.deepEqual(halves, ['CH₃−', '−CH₃']);
+  assert.equal(halves.join('').includes('CH₃−CH₃'), false);
+  const separate = C.chainDescriptorPreview('d-methanex2-c2');
+  assert.equal(separate.length, 2);
+  assert.notEqual(separate[0].structure, separate[1].structure, '独立fragmentは別graph');
+  const js = read('app.js');
+  assert.ok(js.includes('oc-shape__fig') && js.includes('oc-shape__name'), '上段図・下段名');
+  assert.ok(js.includes('oc-shape__gap'), 'fragment間のすき間');
+});
+
+test('[chain] ethane/methane/propane/neohexane/but-2-yneの①プレビューが正しい構造式', () => {
+  function previewTile(id) {
+    return C.chainDescriptorPreview(C.chainDescriptorFor(id).descriptorId)[0];
+  }
+  const cases = [
+    ['ethane', 2, 6, 7],
+    ['methane', 1, 4, 4],
+    ['propane', 3, 8, 10],
+    ['2,2-dimethylbutane', 6, 14, 19],
+    ['but-2-yne', 4, 6, 11]
+  ];
+  assert.ok(R.renderCompound(D.COMPOUNDS.methane).includes('CH₄'), 'メタンはCH₄（CH₃にしない）');
+  for (const [id, c, h, lines] of cases) {
+    const tile = previewTile(id);
+    assert.equal(tile.figure.kind, 'graph', id + ' は文字fallbackにしない');
+    const svg = R.renderStructure(tile.structure, tile.label);
+    assert.equal(svgCount(svg, /data-el="C"/g), c, id + ' のC数');
+    assert.equal(svgCount(svg, /data-el="H"/g), h, id + ' の明示H数');
+    assert.equal(svgCount(svg, /<line /g), lines, id + ' の結合線数');
+    assert.equal(R._internal.checkValence(tile.structure).ok, true, id + ' の結合価');
+  }
+  const neo = previewTile('2,2-dimethylbutane').structure;
+  const center = neo.atoms.filter((a) => a.h === 0)[0];
+  assert.ok(center, '四級炭素');
+  const degree = (i) => neo.bonds.filter((b) => b.a === i || b.b === i).length;
+  const centerIndex = neo.atoms.indexOf(center);
+  assert.equal(degree(centerIndex), 4, '中心Cは4本のC–C');
+  assert.equal(neo.atoms.filter((a) => a.h === 3).length, 4, 'CH₃×4');
+  assert.equal(neo.atoms.filter((a) => a.h === 2).length, 1, 'CH₂×1');
+  const butyne = previewTile('but-2-yne').structure;
+  const triple = butyne.bonds.filter((b) => b.order === 3)[0];
+  assert.ok(triple, 'C≡C');
+  const carbonDegree = (v) => butyne.bonds.filter((b) => (b.a === v || b.b === v)).length;
+  assert.equal(carbonDegree(triple.a), 2, '三重結合は内部');
+  assert.equal(carbonDegree(triple.b), 2, '三重結合は内部');
+  const butene = previewTile('but-1-ene').structure;
+  const dbl = butene.bonds.filter((b) => b.order === 2)[0];
+  const dblDegree = (v) => butene.bonds.filter((b) => (b.a === v || b.b === v)).length;
+  assert.equal(dblDegree(dbl.a) === 1 || dblDegree(dbl.b) === 1, true, 'ブタ-1-エンは末端C=C');
+  const five = ['hexane', '2-methylpentane', '3-methylpentane', '2,2-dimethylbutane', '2,3-dimethylbutane']
+    .map((id) => C.chainDescriptorFor(id).descriptorId);
+  assert.equal(new Set(five).size, 5, 'C6の5異性体は別shape');
+  assert.equal(new Set(five.map((s) => C.chainDescriptorLabel(s))).size, 5, 'C6の5異性体は別label');
+  const neoCard = C.chainShapeFigure(C.chainDescriptorFor('2,2-dimethylbutane').descriptorId);
+  assert.equal(neoCard.label, '2,2-ジメチルブタン由来');
+  assert.equal(neoCard.commonName, 'ネオヘキサン');
+  assert.ok(C.search('ネオヘキサン').some((r) => r.id === '2,2-dimethylbutane'), '別名で検索できる');
+  assert.equal(Object.keys(D.COMPOUNDS).filter((id) => D.COMPOUNDS[id].name.includes('ネオヘキサン')).length, 1, '物質レコードを重複追加しない');
+});
+
+test('[chain] C0は「Hが結合」と「官能基どうしが直接結合」を分ける', () => {
+  const h = C.chainDescriptorById('d-h-c0');
+  const direct = C.chainDescriptorById('d-direct-c0');
+  assert.equal(h.label, 'Hが結合');
+  assert.deepEqual(h.compoundIds.sort(), ['formaldehyde', 'formic-acid']);
+  assert.equal(direct.label, '官能基どうしが直接結合');
+  assert.deepEqual(direct.compoundIds, ['oxalic-acid']);
+  assert.equal(direct.uniqueFragments.length, 0, 'H断片を作らない');
+  assert.equal(direct.fragments, undefined);
+  assert.equal(C.chainDescriptorFor('oxalic-acid').descriptorId, 'd-direct-c0');
+  assert.equal(C.chainDescriptorFor('formic-acid').descriptorId, 'd-h-c0');
+  assert.equal(C.chainDescriptorFor('formaldehyde').descriptorId, 'd-h-c0');
+  assert.equal(C.chainDescriptorFor('oxalic-acid').coreHydrogen.rHydrogen, false, 'R=Hはない');
+  assert.deepEqual(C.chainDescriptorRoles('d-direct-c0', 'carboxylic').map((r) => r.role), ['dicarboxy']);
+  assert.deepEqual(C.chainDescriptorRoles('d-h-c0', 'carboxylic').map((r) => r.role), ['monocarboxy']);
+  assert.equal(C.chainDescriptorPreview('d-h-c0')[0].kind, 'hydrogen');
+  assert.equal(C.chainDescriptorPreview('d-direct-c0').length, 0);
+  assert.equal(C.routeFor('oxalic-acid').shape, 'd-direct-c0', 'focusは新shapeへ移行');
+  assert.ok(read('app.js').includes('focusParam'), '旧URLはfocus優先');
+  assert.ok(C.chainPartialOptions().includes(0));
+  const js = read('app.js');
+  assert.ok(js.includes('炭化水素部分なし'), 'C0の大項目');
+  assert.ok(js.includes('官能基どうしが直接結合'), '直結の説明');
+  assert.ok(js.includes('Hを補った親炭化水素の図には置き換えません'), 'H親図に偽装しない');
+});
+
+test('[figures] ②の一般構造は実二重結合線で示し、選択カードは括弧表記を使わない', () => {
+  assert.ok(R.renderFunctionalFigure('aldehyde', { partialC: 3 }).includes('<svg'));
+  const lineCount = (family) => svgCount(R.renderFunctionalFigure(family, { partialC: 3 }), /<line /g);
+  assert.equal(lineCount('aldehyde'), 4, 'R–CHO（C=Oは2本）');
+  assert.equal(lineCount('ketone'), 4, 'R–CO–R′（C=Oは2本）');
+  assert.ok(lineCount('anhydride') >= 8, '無水物はC=Oを2つ');
+  assert.ok(lineCount('nitrile') >= 4, 'C≡Nは3本');
+  assert.equal(R.renderFunctionalFigure('amine'), '', 'アミンは1〜3級カードで示す');
+  for (const family of ['aldehyde', 'ketone', 'carboxylic', 'ester', 'anhydride', 'nitrile']) {
+    const svg = R.renderFunctionalFigure(family, { partialC: 3 });
+    assert.ok(!svg.includes('NaN') && !svg.includes('undefined'), family);
+    assert.ok(!/>C\(=O\)</.test(svg), family + ' は文字のC(=O)ではなく結合線');
+  }
+  const js = read('app.js');
+  const previewFn = js.slice(js.indexOf('function renderChainPreview'), js.indexOf('function chainCardBadges'));
+  assert.ok(previewFn.includes('R.renderFunctionalFigure'), '右previewに結合線図');
+  assert.ok(js.includes('C=O・C≡Nは結合線'), '縮合COとの違いを説明');
+});
+
+test('[ring] ②の置換基カードは上段fragment・下段置換基名、noneは骨格図なし', () => {
+  const none = C.ringPresetCard(C.RING_SYSTEM_MAP.benzene.presets.filter((p) => p.kind === 'none')[0]);
+  assert.equal(none.kind, 'none');
+  assert.equal(none.main, '追加なし');
+  assert.equal(none.sub, '骨格単体のみ');
+  assert.equal(none.main.includes('ベンゼン'), false);
+  const phenol = C.ringPresetCard(C.RING_SYSTEM_MAP.benzene.presets.filter((p) => p.id === 'p-ohx1')[0]);
+  assert.equal(phenol.main, '−OH');
+  assert.equal(phenol.sub, 'ヒドロキシ基');
+  const carboxylic = C.ringPresetCard(C.RING_SYSTEM_MAP.benzene.presets.filter((p) => p.id === 'p-coohx1')[0]);
+  assert.equal(carboxylic.main, '−COOH', '環式の選択カードもC(=O)を使わない');
+  const combo = C.ringPresetCard(C.RING_SYSTEM_MAP.benzene.presets.filter((p) => p.kind === 'combo')[0]);
+  assert.ok(combo.main.includes('＋'), '複数置換基を分けて示す');
+  assert.ok(combo.types >= 2);
+  const js = read('app.js');
+  assert.ok(js.includes('oc-ring-frag__fig') && js.includes('oc-ring-frag__name'));
+  assert.ok(js.includes('C.ringPresetCard'));
+});
+
+test('[static] モードボタンは320/390/1280で3列、横はみ出しを防ぐ', () => {
+  const css = read('app.css');
+  assert.ok(/\.oc-modes\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/s.test(css));
+  assert.equal(/@media\s*\(max-width:\s*900px\)[\s\S]{0,300}?\.oc-modes\s*\{[^}]*grid-template-columns:\s*1fr/s.test(css), false, '900pxで1列に落とさない');
+  assert.ok(/@media\s*\(max-width:\s*760px\)[\s\S]*?\.oc-mode\s*\{[^}]*padding:\s*9px 8px/s.test(css), '390pxの余白');
+  assert.ok(/@media\s*\(max-width:\s*430px\)[\s\S]*?\.oc-mode\s*\{[^}]*padding:\s*8px 6px/s.test(css), '320pxの余白');
+  assert.ok(/\.oc-mode__main\s*\{[^}]*font-size:\s*13\.5px/s.test(css), '320pxの主ラベル');
+  assert.ok(/\.oc-mode\s*\{[^}]*min-height:\s*44px/s.test(css), 'タップ領域44px');
+  assert.ok(/\.oc-mode__main\s*\{[^}]*overflow-wrap:\s*anywhere/s.test(css));
+  const html = read('index.html');
+  assert.equal(svgCountText(html, /data-mode="/g), 3, '3モード');
+  assert.ok(html.includes('芳香族・<wbr>環式'), '長いラベルを折り返し可能');
+  assert.ok(html.includes('aria-label="探し方のモード"'));
+});
+
+function svgCountText(text, re) { return (text.match(re) || []).length; }
+
+test('[figures] 全SVGのviewBoxは内容bboxにフィットし、カード内スクロールをしない', () => {
+  const css = read('app.css');
+  assert.equal(css.includes('.oc-fig--scroll'), false, 'カード内横スクロールを残さない');
+  assert.ok(css.includes('.oc-fig--long'), '長い図はフィット＋拡大');
+  assert.equal(/min-width:\s*(400|720)px/.test(css), false, '全SVGへのmin-width強制を残さない');
+  assert.ok(/\.oc-card\s*\{[^}]*min-width:\s*0/s.test(css));
+  assert.ok(/\.oc-fig\s*\{[^}]*min-width:\s*0/s.test(css));
+  assert.ok(/\.oc-fig__canvas\s*\{[^}]*min-width:\s*0/s.test(css));
+  assert.equal(/\.oc-shape__fig\s*\{[^}]*overflow:\s*hidden/s.test(css), false, '選択図をoverflow:hiddenで切らない');
+  for (const d of C.CHAIN_DESCRIPTOR_LIST) {
+    for (const tile of C.chainDescriptorPreview(d.id)) {
+      if (tile.figure && tile.figure.kind === 'graph') {
+        const svg = R.renderStructure(tile.structure, tile.label);
+        const vb = R.svgGeometry(svg);
+        const b = R._internal.graphContentBounds(tile.structure);
+        assert.ok(vb.x <= b.minX - 11 && vb.y <= b.minY - 11,
+          d.id + ' のviewBox左/上に余白');
+        assert.ok(vb.x + vb.width >= b.maxX + 11 && vb.y + vb.height >= b.maxY + 11,
+          d.id + ' のviewBox右/下に余白');
+      }
+    }
+  }
+  for (const id of Object.keys(D.COMPOUNDS)) {
+    const svg = R.renderCompound(D.COMPOUNDS[id]);
+    const first = R.svgGeometry(svg);
+    assert.ok(first && first.width > 0 && first.height > 0, id + ' のviewBox');
+    assert.ok(first.width < 5000 && first.height < 5000, id + ' の過大viewBox');
+  }
+  for (const f of D.FAMILIES) {
+    if (!f.structure) continue;
+    const svg = R.renderStructure(f.structure, f.name);
+    assert.ok(!svg.includes('NaN'), f.id + ' のNaN');
+    assert.ok(!svg.includes('undefined'), f.id + ' のundefined');
+  }
+});
+
+test('[text] 長い簡略式は化学単位の途中で切らず、複数行にする', () => {
+  const line = 'CH₃CH₂CH=CHCH₂CH=CHCH₂CH=CHCH₂CH=CHCH₂CH=CHCH₂CH₂CH₂COOH';
+  const wrapped = R.wrapCondensedText(line, 24);
+  assert.ok(wrapped.length > 2, '複数行');
+  assert.equal(wrapped.join(''), line, '文字を欠落させない');
+  for (const part of wrapped) assert.ok(part.length <= 24, '行長');
+  for (const part of wrapped.slice(0, -1)) {
+    assert.ok(/[=≡]$/.test(part) || part.endsWith(')') || /[₀-₉]$/.test(part), '化学単位の区切りで折る');
+  }
+});
+
+/* ------------------------------------------------------------------
+ * 本番前の最終残件: shape 2列はみ出し / multi SVG / 長い組成式 / 収録範囲表記
+ * ------------------------------------------------------------------ */
+
+test('[layout] shape複数fragmentは等分トラックで子SVGを幅100%にし、0x0へ潰れない', () => {
+  const css = read('app.css');
+  assert.ok(/\.oc-shape__halves\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+10px\s+minmax\(0,\s*1fr\)/s.test(css),
+    '複数fragmentはminmax(0,1fr)の等分トラック');
+  assert.ok(/\.oc-shape__half\s*\{[^}]*width:\s*100%/s.test(css), 'halfはトラック幅いっぱい');
+  assert.ok(/\.oc-shape__half\s+svg\s*\{[^}]*width:\s*100%/s.test(css), '子SVGはwidth100%');
+  assert.equal(/\.oc-shape__half\s+svg\s*\{[^}]*width:\s*auto/s.test(css), false, 'width:autoで0に潰さない');
+  assert.ok(/\.oc-shape__fig\s+\.oc-shape__halves\s*\{[^}]*width:\s*100%/s.test(css));
+  assert.ok(/@media \(max-width: 620px\)[\s\S]*?\.oc-shape__halves\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s.test(css),
+    '狭幅ではfragmentを縦積みにして化学単位を守る');
+  assert.ok(/@media \(max-width: 430px\)[\s\S]*?\.oc-shape__fig\s*\{[^}]*padding-right:\s*0/s.test(css),
+    '狭いカードではバッジ用22px余白を外す');
+  assert.ok(/@media \(max-width: 430px\)[\s\S]*?\.oc-shape \.oc-tag\s*\{[^}]*position:\s*static/s.test(css),
+    '狭いカードでは件数バッジを名前行へ移す');
+  assert.equal(/\.oc-shape__fig\s*\{[^}]*overflow:\s*hidden/s.test(css), false, 'hiddenで切らない');
+});
+
+test('[text] chemBreakableは化学単位の区切りだけで折り、47shapeの文字を欠落させない', () => {
+  assert.deepEqual(R.chemBreakable('CH₃(CH₂)₁₈CH₃').split('\u200b'), ['CH₃', '(CH₂)₁₈', 'CH₃']);
+  assert.deepEqual(R.chemBreakable('CH₃−CH₂−CH₂−').split('\u200b'), ['CH₃−', 'CH₂−', 'CH₂−']);
+  assert.equal(R.chemBreakable('CH₃(CH₂)₁₈CH₃').replace(/\u200b/g, ''), 'CH₃(CH₂)₁₈CH₃');
+  const texts = [];
+  for (const d of C.CHAIN_DESCRIPTOR_LIST) {
+    const card = C.chainShapeFigure(d.id);
+    if (card.kind === 'single' && card.figure && card.figure.kind === 'formula') texts.push(card.figure.text);
+    if (card.kind === 'multi') card.halves.forEach((h) => { if (h && h.kind === 'formula') texts.push(h.text); });
+  }
+  assert.ok(texts.length > 0);
+  for (const t of texts) {
+    const broken = R.chemBreakable(t);
+    assert.equal(broken.replace(/\u200b/g, ''), t, '文字を欠落させない: ' + t);
+    const maxSegment = Math.max(...broken.split('\u200b').map((s) => s.length));
+    assert.ok(maxSegment <= 8, '化学単位の最大長: ' + t + ' (' + maxSegment + ')');
+  }
+  assert.equal(C.CHAIN_DESCRIPTOR_LIST.length, 47, 'shape候補数は維持');
+  assert.equal(new Set(C.CHAIN_DESCRIPTOR_LIST.map((d) => d.id)).size, 47);
+  for (const rs of C.RING_SYSTEMS) {
+    for (const p of rs.presets) {
+      const card = C.ringPresetCard(p);
+      for (const t of [card.main, card.sub]) {
+        assert.equal(R.chemBreakable(t).replace(/\u200b/g, ''), t, '環式カードの文字を欠落させない: ' + t);
+      }
+    }
+  }
+});
+
+test('[layout] 結果カードの分子式・組成表示は折り返し、hiddenで切らない', () => {
+  const css = read('app.css');
+  assert.ok(/\.oc-card__formula\s*\{[^}]*overflow-wrap:\s*break-word/s.test(css), '長い組成表示を折り返す');
+  assert.ok(/\.oc-card__formula\s*\{[^}]*min-width:\s*0/s.test(css));
+  const abs = D.COMPOUNDS.abs;
+  assert.ok(abs && abs.formulaDisplay.length > 30, 'ABSは長い組成表示');
+  const broken = R.chemBreakable(abs.formulaDisplay);
+  assert.equal(broken.replace(/\u200b/g, ''), abs.formulaDisplay);
+  assert.ok(broken.includes('\u200b'), '長い組成表示に化学的な折返し点');
+  assert.ok(/\.oc-card__formula/.test(css));
+});
+
+test('[static] 収録範囲は二pass処理済み1398uniqueと未完の限界を短く正しく書く', () => {
+  const html = read('index.html');
+  assert.ok(html.includes('1398 unique'));
+  assert.ok(/二pass処理済/.test(html));
+  assert.ok(html.includes('empty 51'));
+  assert.ok(html.includes('原画像'));
+  assert.ok(html.includes('動画127'));
+  assert.equal(html.includes('画像1399枚の全OCR'), false, '旧表記を残さない');
+  assert.equal(html.includes('全動画の視聴'), false, '旧表記を残さない');
+  assert.ok(html.includes('625'), '625語監査の履歴は残す');
+  assert.equal(html.includes('625語を収録'), false, '監査語数を収録数と混同しない');
+});
+
+/* ------------------------------------------------------------------
+ * 伸縮アニメーション（fake DOM / fake WAAPI。実タイミングは使わない）
+ * ------------------------------------------------------------------ */
+function motionModule() {
+  return require(path.join(APP, 'motion.js'));
+}
+
+function makeAnimEnv(options) {
+  options = options || {};
+  const env = {
+    animations: [],
+    getComputedStyle(el) {
+      return { height: String(el._computed != null ? el._computed : el._h) + 'px' };
+    },
+    matchMedia() {
+      return { matches: !!options.reduced, addEventListener() {}, addListener() {} };
+    },
+    Element: { prototype: {} }
+  };
+  if (!options.noWaapi) env.Element.prototype.animate = function () { return { cancel() {} }; };
+  return env;
+}
+
+function makeAnimEl(height) {
+  const el = {
+    _h: height,
+    _computed: null,
+    _anim: null,
+    style: {},
+    hidden: false,
+    renders: 0,
+    animateCalls: [],
+    getBoundingClientRect() { return { height: this._h }; },
+    animate(keyframes, options) {
+      this.animateCalls.push({
+        keyframes: keyframes.map((k) => Object.assign({}, k)),
+        options: Object.assign({}, options)
+      });
+      this._computed = parseFloat(keyframes[0].height);
+      const anim = {
+        cancelled: false,
+        cancel() { this.cancelled = true; },
+        finish() { if (this.onfinish) this.onfinish(); }
+      };
+      this._anim = anim;
+      return anim;
+    }
+  };
+  return el;
+}
+
+test('[motion] 3要素を1回ずつ描画し、同じduration/easingで同時に伸縮してstyleを解除する', () => {
+  const Motion = motionModule();
+  const motion = Motion.create(makeAnimEnv());
+  const a = makeAnimEl(100);
+  const b = makeAnimEl(40);
+  const r = makeAnimEl(200);
+  motion.animateMany([
+    { el: a, render() { a.renders++; a._h = 160; } },
+    { el: b, render() { b.renders++; b._h = 40; } },
+    { el: r, render() { r.renders++; r._h = 300; } }
+  ]);
+  assert.equal(a.renders, 1);
+  assert.equal(b.renders, 1);
+  assert.equal(r.renders, 1);
+  assert.equal(a.animateCalls.length, 1);
+  assert.equal(b.animateCalls.length, 0, '高さが変わらない要素はanimateしない');
+  assert.equal(r.animateCalls.length, 1);
+  assert.equal(a.animateCalls[0].options.duration, Motion.MOTION_MS);
+  assert.equal(a.animateCalls[0].options.easing, Motion.EASING);
+  assert.equal(r.animateCalls[0].options.duration, Motion.MOTION_MS);
+  assert.equal(a.animateCalls[0].keyframes[0].height, '100px');
+  assert.equal(a.animateCalls[0].keyframes[1].height, '160px');
+  assert.equal(a.style.height, '100px');
+  assert.equal(a.style.overflow, 'hidden');
+  a._anim.finish();
+  r._anim.finish();
+  assert.equal(a.style.height, '');
+  assert.equal(a.style.overflow, '');
+  assert.equal(r.style.height, '');
+});
+
+test('[motion] 連打は現在の見えている高さから継続し、cancel後もstyleを残さない', () => {
+  const Motion = motionModule();
+  const motion = Motion.create(makeAnimEnv());
+  const el = makeAnimEl(100);
+  motion.animateMany([{ el, render() { el._h = 200; } }]);
+  const first = el._anim;
+  el._computed = 150;
+  el._h = 150;
+  motion.animateMany([{ el, render() { el._h = 260; } }]);
+  assert.equal(first.cancelled, true, '途中のアニメーションをcancel');
+  assert.equal(el.animateCalls.length, 2);
+  assert.equal(el.animateCalls[1].keyframes[0].height, '150px', '見えている高さから継続');
+  motion.restoreAll();
+  assert.equal(el.style.height, '');
+  assert.equal(el.style.overflow, '');
+});
+
+test('[motion] reduced motion / WAAPI未対応では即時反映し、styleを残さない', () => {
+  const Motion = motionModule();
+  for (const env of [makeAnimEnv({ reduced: true }), makeAnimEnv({ noWaapi: true })]) {
+    const motion = Motion.create(env);
+    const el = makeAnimEl(60);
+    let renders = 0;
+    motion.animateMany([{ el, render() { renders++; el._h = 120; } }]);
+    assert.equal(renders, 1, '描画はする');
+    assert.equal(el.animateCalls.length, 0, 'アニメーションしない');
+    assert.equal(el.style.height, '');
+    assert.equal(el.style.overflow, '');
+  }
+});
+
+test('[motion] hidden要素はanimateせず、描画だけ行う', () => {
+  const Motion = motionModule();
+  const motion = Motion.create(makeAnimEnv());
+  const el = makeAnimEl(20);
+  el.hidden = true;
+  let renders = 0;
+  motion.animateMany([{ el, render() { renders++; el._h = 90; } }]);
+  assert.equal(renders, 1);
+  assert.equal(el.animateCalls.length, 0);
+  assert.equal(el.style.height, '');
+});
+
+test('[motion] 初回はanimate:falseで描画のみ、モード切替はstageと結果だけを対象にする', () => {
+  const Motion = motionModule();
+  const motion = Motion.create(makeAnimEnv());
+  const stage = makeAnimEl(300);
+  const left = makeAnimEl(400);
+  const right = makeAnimEl(380);
+  const results = makeAnimEl(500);
+  motion.animateMany([
+    { el: stage, render() { stage._h = 480; } },
+    { el: results, render() { results._h = 600; } }
+  ], { animate: false });
+  assert.equal(stage.animateCalls.length, 0, '初回はアニメーションしない');
+  assert.equal(results.animateCalls.length, 0);
+  motion.animateMany([
+    { el: left, render() { left._h = 460; } },
+    { el: right, render() { right._h = 420; } },
+    { el: results, render() { results._h = 640; } }
+  ]);
+  assert.equal(left.animateCalls.length, 1);
+  assert.equal(right.animateCalls.length, 1);
+  assert.equal(results.animateCalls.length, 1);
+  motion.animateMany([
+    { el: stage, before: 470, render() { stage._h = 520; } },
+    { el: results, render() { results._h = 700; } }
+  ]);
+  assert.equal(stage.animateCalls.length, 1, '切替はstageだけ');
+  assert.equal(stage.animateCalls[0].keyframes[0].height, '470px', '切替前の見えている高さから');
+  assert.equal(results.animateCalls.length, 2);
+  assert.equal(left.animateCalls.length, 1, 'bodyは二重にanimateしない');
+  assert.equal(right.animateCalls.length, 1);
+  assert.equal(left.style.height, '', 'hiddenになるbodyのstyleを解除');
+  assert.equal(right.style.overflow, '');
+});
+
+test('[motion] oc-helpはbody高さで開閉し、閉じ切ってからopen=falseにする', () => {
+  const Motion = motionModule();
+  const motion = Motion.create(makeAnimEnv());
+  const body = makeAnimEl(0);
+  let open = false;
+  const details = {
+    get open() { return open; },
+    set open(v) { open = v; body._h = v ? 120 : 0; },
+    querySelector() { return body; }
+  };
+  const done = [];
+  motion.animateDisclosure(details, body, true, () => done.push('opened'));
+  assert.equal(details.open, true);
+  assert.equal(body.animateCalls.length, 1);
+  assert.equal(body.animateCalls[0].keyframes[0].height, '0px');
+  assert.equal(body.animateCalls[0].keyframes[1].height, '120px');
+  body._anim.finish();
+  assert.deepEqual(done, ['opened']);
+  assert.equal(body.style.height, '');
+  motion.animateDisclosure(details, body, false, () => done.push('closed'));
+  assert.equal(details.open, true, '閉じ切るまではopenのまま');
+  assert.equal(body.animateCalls.length, 2);
+  assert.equal(body.animateCalls[1].keyframes[0].height, '120px');
+  assert.equal(body.animateCalls[1].keyframes[1].height, '0px');
+  body._anim.finish();
+  assert.equal(details.open, false);
+  assert.deepEqual(done, ['opened', 'closed']);
+  assert.equal(body.style.height, '');
+  assert.equal(body.style.overflow, '');
+});
+
+test('[motion] reduced motionではoc-helpも即時開閉する', () => {
+  const Motion = motionModule();
+  const motion = Motion.create(makeAnimEnv({ reduced: true }));
+  const body = makeAnimEl(0);
+  let open = false;
+  const details = {
+    get open() { return open; },
+    set open(v) { open = v; body._h = v ? 90 : 0; },
+    querySelector() { return body; }
+  };
+  motion.animateDisclosure(details, body, true);
+  assert.equal(details.open, true);
+  assert.equal(body.animateCalls.length, 0);
+  assert.equal(body.style.height, '');
+});
+
+test('[static] 更新はstage/body/resultsを1回ずつ描画し、preview単体の二重renderを残さない', () => {
+  const js = read('app.js');
+  assert.equal(js.includes('animateHeight('), false, 'preview単体のheightアニメを残さない');
+  assert.ok(js.includes('function animateMany'));
+  assert.ok(js.includes('firstUpdate'));
+  assert.ok(js.includes('modeChanged'));
+  assert.ok(js.includes('els.stage'));
+  assert.ok(js.includes('bindHelp'));
+  assert.ok(js.includes('motion.animateDisclosure'));
+  const updateFn = js.slice(js.indexOf('function update('), js.indexOf('function renderQueryNotice'));
+  assert.equal((updateFn.match(/renderChainPreview\(/g) || []).length, 1);
+  assert.equal((updateFn.match(/renderRingPreview\(/g) || []).length, 1);
+  assert.equal((updateFn.match(/renderOtherPreview\(/g) || []).length, 1);
+  assert.equal((updateFn.match(/renderModeResults/g) || []).length, 2, '通常時とモード切替で1回ずつ');
+  const resultsFn = js.slice(js.indexOf('function renderModeResults'), js.indexOf('// 左パネルbody'));
+  assert.equal((resultsFn.match(/renderChainResults\(/g) || []).length, 1);
+  assert.equal((resultsFn.match(/renderRingResults\(/g) || []).length, 1);
+  assert.equal((resultsFn.match(/renderOtherResults\(/g) || []).length, 1);
+  const html = read('index.html');
+  assert.ok(html.includes('id="oc-stage"'), '3モード共通stage');
+  assert.ok(html.includes('./motion.js'), 'motion.jsを読み込む');
+  const motion = read('motion.js');
+  assert.ok(motion.includes('animateMany'));
+  assert.ok(motion.includes('onfinish'));
+  assert.ok(motion.includes('oncancel'));
 });

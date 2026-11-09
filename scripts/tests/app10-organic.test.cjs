@@ -1,5 +1,5 @@
 /**
- * 有機化学ビルダー（site/app10）の再発防止テスト
+ * 有機化学ビルダー（旧site/app10 = fixture 35120ea）の再発防止テスト
  *
  * 実行: node --test scripts/tests/app10-organic.test.cjs
  *
@@ -17,7 +17,9 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const SITE = path.join(ROOT, 'site');
-const APP = path.join(SITE, 'app10');
+// 旧公開版（commit 35120ea）の固定fixture。site/app10はNEXT版へ置換済みのため、
+// 旧83テストはこの不変fixtureを読み、ポータル・テーマ・クレジットだけ現行siteを見る。
+const APP = path.join(ROOT, 'scripts', 'tests', 'fixtures', 'app10-baseline-35120ea');
 
 const D = require(path.join(APP, 'data.js'));
 const R = require(path.join(APP, 'draw.js'));
@@ -39,6 +41,10 @@ const MOVED_TO_COMBO = [
 
 function read(relPath) {
   return fs.readFileSync(path.join(SITE, relPath), 'utf8');
+}
+
+function readApp(name) {
+  return fs.readFileSync(path.join(APP, name), 'utf8');
 }
 
 function combo(skeleton, group) {
@@ -591,7 +597,7 @@ test('[data] 台帳の未対応事項と出典', () => {
 });
 
 test('[static] 本体・台帳・ポータル・クレジット・テーマの配線', () => {
-  const html = read('app10/index.html');
+  const html = readApp('index.html');
   assert.match(html, /themes\/theme\.js/);
   assert.match(html, /themes\/pop\.css/);
   assert.match(html, /themes\/forest\.css/);
@@ -610,7 +616,7 @@ test('[static] 本体・台帳・ポータル・クレジット・テーマの�
   assert.equal(/href="\.\.\/"/.test(html), false);
   assert.equal(/INTERACTIVE MOCK|UIモック|モックです/.test(html), false);
 
-  const ledger = read('app10/ledger.html');
+  const ledger = readApp('ledger.html');
   assert.match(ledger, /\.\/data\.js/);
   assert.match(ledger, /\.\/draw\.js/);
   assert.match(ledger, /\.\/ledger\.js/);
@@ -619,7 +625,7 @@ test('[static] 本体・台帳・ポータル・クレジット・テーマの�
   assert.equal(/href="\.\.\/"/.test(ledger), false);
   assert.match(ledger, /href="\.\/"/);
   assert.match(ledger, /href="\.\.\/credits\.html"/);
-  const ledgerJs = read('app10/ledger.js');
+  const ledgerJs = readApp('ledger.js');
   assert.match(ledgerJs, /分子式・登録データ整合/);
   assert.equal(/目視確認/.test(ledgerJs), false);
   assert.match(ledgerJs, /自動検証の対象外/);
@@ -656,7 +662,7 @@ test('[static] ポータル理科カードの学年とリンク', () => {
 });
 
 test('[static] アプリは個別化合物で官能基を無効化する', () => {
-  const js = read('app10/app.js');
+  const js = readApp('app.js');
   assert.match(js, /locked/);
   assert.match(js, /btn\.disabled = !!sk\.locked/);
   assert.match(js, /個別登録された化合物です/);
@@ -666,7 +672,7 @@ test('[static] アプリは個別化合物で官能基を無効化する', () =>
 });
 
 test('[static] 個別選択のプレビューは案内だけにし、結果カードと二重表示しない', () => {
-  const js = read('app10/app.js');
+  const js = readApp('app.js');
   // locked時は名前・構造図を描かず、短い案内だけを返す。
   assert.match(js, /if \(sk\.locked\) \{[\s\S]{0,260}個別登録された物質です[\s\S]{0,260}return;/);
   const lockedBlock = js.slice(js.indexOf('function renderSkeletonPreview'), js.indexOf('function renderGroupPreview'));
@@ -676,13 +682,13 @@ test('[static] 個別選択のプレビューは案内だけにし、結果カ�
   // 通常の骨格プレビューは維持する（noneでも骨格を消さない）。
   assert.match(lockedBlock, /R\.renderStructure\(figure, c\.name \+ 'の構造式'\)/);
   assert.match(lockedBlock, /ids\.length > 1 \? ids\.length \+ '種類の骨格異性体'/);
-  const css = read('app10/app.css');
+  const css = readApp('app.css');
   assert.match(css, /\.oc-preview__locked-note \{/);
   assert.match(css, /\.oc-card--focus \{/);
 });
 
 test('[static] 旧ind URLは正準経路へ移り、無言フォールバックしない', () => {
-  const js = read('app10/app.js');
+  const js = readApp('app.js');
   assert.match(js, /legacySkeletonRoute/);
   assert.match(js, /state\.focus = legacy\.id/);
   assert.match(js, /旧URLの個別選択/);
@@ -690,10 +696,10 @@ test('[static] 旧ind URLは正準経路へ移り、無言フォールバック�
   assert.match(js, /function focusResultCard\(\)/);
   assert.match(js, /oc-card--focus/);
   assert.match(js, /scrollIntoView/);
-  const html = read('app10/index.html');
+  const html = readApp('index.html');
   assert.match(html, /id="query-notice"/);
   assert.match(html, /role="status"/);
-  const ledgerJs = read('app10/ledger.js');
+  const ledgerJs = readApp('ledger.js');
   assert.match(ledgerJs, /D\.routeFor/);
   assert.match(ledgerJs, /focus=/);
 });
@@ -712,13 +718,13 @@ test('[data] 検証ラベルは自動検証の範囲だけを示す', () => {
 });
 
 test('[static] 表示用ソースに「目視確認」の表記が残らない', () => {
-  for (const rel of ['app10/app.js', 'app10/draw.js', 'app10/index.html', 'app10/ledger.html', 'app10/ledger.js', 'app10/app.css']) {
-    assert.equal(/目視確認/.test(read(rel)), false, rel + ' に目視確認が残っています');
+  for (const rel of ['app.js', 'draw.js', 'index.html', 'ledger.html', 'ledger.js', 'app.css']) {
+    assert.equal(/目視確認/.test(readApp(rel)), false, rel + ' に目視確認が残っています');
   }
 });
 
 test('[static] 骨格分類detailsはopen属性が常に最大1で、初期選択の分類を維持する', () => {
-  const js = read('app10/app.js');
+  const js = readApp('app.js');
   assert.match(js, /<div class="oc-group__body">/);
   assert.match(js, /function bindSkeletonGroups\(\)/);
   assert.match(js, /querySelectorAll\('details\.oc-group'\)/);
@@ -741,7 +747,7 @@ test('[static] 骨格分類detailsはopen属性が常に最大1で、初期選�
 });
 
 test('[static] 高さアニメーションはprefers-reduced-motionとWAAPI非対応で無効化できる', () => {
-  const js = read('app10/app.js');
+  const js = readApp('app.js');
   assert.match(js, /prefers-reduced-motion: reduce/);
   assert.match(js, /typeof Element\.prototype\.animate === 'function'/);
   assert.match(js, /function canAnimate\(\)/);
@@ -752,7 +758,7 @@ test('[static] 高さアニメーションはprefers-reduced-motionとWAAPI非�
   assert.match(js, /animateHeight\(els\.results, renderResults\)/);
   assert.match(js, /animateHeight\(els\.skeletonPreview, renderSkeletonPreview\)/);
   assert.match(js, /animateHeight\(els\.groupPreview, renderGroupPreview\)/);
-  const css = read('app10/app.css');
+  const css = readApp('app.css');
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /animation: none !important/);
   assert.match(css, /transition: none !important/);
@@ -896,7 +902,7 @@ test('[reason] 空の組合せは2分類だけを使い、未分類・汎用理�
 });
 
 test('[static] 検証失敗は範囲外にせず、データ不備として表示する', () => {
-  const js = read('app10/app.js');
+  const js = readApp('app.js');
   assert.match(js, /function rawEntriesFor/);
   assert.match(js, /function invalidEntryErrors/);
   assert.match(js, /raw\.length/);
@@ -905,7 +911,7 @@ test('[static] 検証失敗は範囲外にせず、データ不備として表�
   assert.match(js, /範囲外の組み合わせとして扱いません/);
   assert.match(js, /unsupportedEntry/);
   assert.match(js, /未対応理由のデータがありません/);
-  const ledger = read('app10/ledger.js');
+  const ledger = readApp('ledger.js');
   assert.match(ledger, /D\.COVERAGE/);
   assert.match(ledger, /COVERAGE_STATS/);
   assert.match(ledger, /REQUIRED_CURRICULUM/);
@@ -913,7 +919,7 @@ test('[static] 検証失敗は範囲外にせず、データ不備として表�
   assert.match(ledger, /高校化学の範囲外/);
   assert.match(ledger, /化学的に成立しない/);
   assert.match(ledger, /データ不備/);
-  assert.match(read('app10/ledger.html'), /ledger-coverage-checklist/);
+  assert.match(readApp('ledger.html'), /ledger-coverage-checklist/);
 });
 
 /* ------------------------------------------------------------------
@@ -1162,17 +1168,17 @@ test('[external] 台帳は9列・URL・title・section・取得日・domainを�
     assert.equal(seen.has(key), false, '同一資料内で名称が重複: ' + key);
     seen.add(key);
   }
-  const ledger = read('app10/ledger.html');
+  const ledger = readApp('ledger.html');
   assert.match(ledger, /id="ledger-external-rows"/);
   assert.match(ledger, /\.\/external-coverage\.js/);
   assert.match(ledger, /取得日/);
   const extSec = ledger.slice(ledger.indexOf('外部公開資料との照合'), ledger.indexOf('化合物一覧'));
   assert.equal((extSec.match(/<th /g) || []).length, 9, '外部照合表は9列');
-  const js = read('app10/ledger.js');
+  const js = readApp('ledger.js');
   assert.match(js, /E\.audit\(D\)/);
   assert.match(js, /未対応/);
   assert.match(js, /D\.normalizeName\(search\.value/);
-  const css = read('app10/app.css');
+  const css = readApp('app.css');
   assert.match(css, /\.oc-ext-table \{/);
   assert.match(css, /\.oc-ext-table td \{/);
   assert.equal(/\.oc-ext-table td[^{]*\{[^}]*white-space:\s*nowrap/.test(css), false);
@@ -1294,7 +1300,7 @@ test('[external] 実取得本文の表記・文脈に根拠を合わせる', () 
 });
 
 test('[ledger] 非グラフ件数と配位錯体件数を区別する', () => {
-  const js = read('app10/ledger.js');
+  const js = readApp('ledger.js');
   assert.match(js, /var nonGraphCount/);
   assert.match(js, /var coordinationCount/);
   assert.match(js, /、非グラフは ' \+ nonGraphCount \+ ' 件/);
@@ -1607,12 +1613,14 @@ test('[static] 外部照合の出典がクレジットに記載される', () =>
   assert.match(credits, /啓林館/);
   assert.match(credits, /Try IT/);
   assert.match(credits, /日本化学会/);
-  assert.match(credits, /jstage\.jst\.go\.jp/);
+  assert.match(credits, /化学と教育 68巻6号/);
+  assert.equal(/jstage\.jst\.go\.jp|try-it\.jp|kimika\.net|jikkyo\.co\.jp/.test(credits), false, '教材出典URLはクレジットにも残さない');
+  assert.match(credits, /教材出典ページのURLと本文は配信せず/);
   assert.match(credits, /標準的に暗記する範囲であることを意味しません/);
 });
 
 test('[static] 整理記録に前後件数・11件の原因・異性体方針・出典方針がある', () => {
-  const audit = read('app10/catalog-audit.md');
+  const audit = readApp('catalog-audit.md');
   assert.match(audit, /367/);
   assert.match(audit, /300/);
   assert.match(audit, /277/);
@@ -1630,7 +1638,7 @@ test('[static] 整理記録に前後件数・11件の原因・異性体方針・
 });
 
 test('[static] 台帳の全セルはnowrapせず、4列目・7列目の幅を確保する', () => {
-  const css = read('app10/app.css');
+  const css = readApp('app.css');
   assert.equal(/\.oc-table td[^{]*\{[^}]*white-space:\s*nowrap/.test(css), false);
   assert.equal(/\.oc-src-tag[^{]*\{[^}]*white-space:\s*nowrap/.test(css), false, '出典タグはnowrapしない');
   assert.match(css, /\.oc-src-tag \{[^}]*overflow-wrap: anywhere;/);

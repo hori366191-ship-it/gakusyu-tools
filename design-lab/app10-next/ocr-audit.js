@@ -1,0 +1,154 @@
+/*
+ * 有機化学ビルダー（app10-next）— OCR二pass統合監査の記録
+ *
+ * 2026-11-09 の1399 URL / 1398 unique image のOCR二pass統合結果を、
+ * repo内で確認できる最小のmetadataとして保存する。raw OCR text全文・
+ * 動画のトークン・Cookie・リクエストヘッダーは保持しない。
+ * 全1399画像の「化学的な完全読取」を主張しない。
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.OCOcrAudit = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  var DATA = {
+    META: {
+      date: '2026-11-09',
+      id: 'ocr-two-pass-1398-20261109',
+      urls: 1399,
+      uniqueImages: 1398,
+      twoPass: { ok: 1347, empty: 51, error: 0 },
+      selectedPass: { original: 883, flattened: 515 },
+      pageMapRows: 1399,
+      ocrRows: 1398,
+      candidates: {
+        total: 766,
+        katakana: 249,
+        kanji: 403,
+        formula: 114,
+        classificationCounts: {
+          reaction_or_reagent_name: 6,
+          chemical_class_group_or_instruction: 116,
+          existing_compound_or_material_ocr_variant: 72,
+          confirmed_missing_specific_organic_ion: 1,
+          ocr_noise_or_truncated_name: 65,
+          confirmed_missing_generic_lipid_family: 3,
+          ordinary_word_or_exam_marker: 17,
+          existing_alias_missing_from_alias_table: 1,
+          inorganic_or_inorganic_fragment: 46,
+          material_or_mixture_class: 21,
+          instructional_phrase_or_ocr_noise: 305,
+          existing_structural_formula_or_ocr_variant: 30,
+          structural_formula_fragment_or_concatenation: 82,
+          molecular_formula_only_not_identifiable: 1
+        }
+      },
+      alternatePass: { uniqueCandidates: 188, occurrences: 280, differingLines: 1941 },
+      emptyImages: {
+        total: 51,
+        reviewed: true,
+        byStatus: {
+          structure_or_reaction_only_no_compound_name: 36,
+          schematic_or_icon_no_compound_name: 8,
+          photo_or_product_photo: 6,
+          annotation_only_no_compound_name: 1
+        },
+        missedCompoundNames: 0
+      },
+      confirmed: { specificIons: 1, fixedNeutralCompounds: 0, lipidFamilies: 3, aliases: 2 },
+      history: {
+        independentAuditFinalCompounds: 419,
+        ocrBaselineCompounds: 420,
+        currentCompounds: 427,
+        note: '独立625語監査のMETA.finalCompounds=419は履歴として保持し、420へ無条件に書き換えない。OCR監査時点の現在値420も履歴値として残し、今回の427とは区別する。427への+7はOCRではなくPubChem APIで独立確認した追加である。'
+      },
+      claims: {
+        allImagesChemicallyFullyRead: false,
+        allVideosTranscribed: false,
+        note: '全1399画像のOCR処理と51枚の空読み目視は行ったが、全画像の化学的な完全読取・全動画の視聴/文字起こしを主張しない。'
+      },
+      limitations: [
+        '1399 URL / 1398 unique imageを二passで統合し、ok 1347・empty 51・error 0。empty 51枚は原画像を目視し、化合物名のOCR失敗は0件と確認した。',
+        '766候補は全件分類したが、候補抽出自体の網羅性は証明しない。漢字403候補は語と文脈による分類のみで、全代表原画像の目視確認は行っていない。',
+        '未採用passから追加188語（280出現）を抽出し、相違1941行を保存した。式・一般式のRの中身を独立した構造へ復元する監査は未実施。',
+        '419件lookupでfamilyが見えなかった3件（PA/PC/PE）は、既存FAMILIES 31の一般構造・説明が実在することを確認し、新規family追加ではなく検索・表記の修正として扱った。',
+        '2026-11-10に追加した7物質（dimethyl-oxalate / diphenyl-oxalate / salicin / 1,3-dibromopropane / diethylenetriamine / adenosine / adp）はOCR由来ではなく、PubChem APIでCID・分子式・電荷0を独立確認した。OCR二passの1398画像・候補766の分類件数とは別の追加であり、混同しない。',
+        '動画127本は本文未照合。公開文字起こしの通常UI取得も未成立で、0 segmentのまま限界として記録する。'
+      ],
+      sources: {
+        reviewBundle: 'ocr-review-20261109',
+        ocrTwoPass: 'ocr-two-pass-20261109',
+        pageMap: 'page-map-1399',
+        ocrResults: 'ocr-results-1398',
+        emptyStatus: 'empty-image-status-51',
+        candidateJudgments: 'candidate-judgments-766',
+        alternatePass: 'alternate-pass-188',
+        mediaEvidence: 'media-audit-evidence-20261109'
+      },
+      sourcePolicy: {
+      distributed: false,
+      note: '教材出典ページのURL・本文抜粋・画像直リンクは配信しない。source IDとmetadataのみを保持する。'
+    },
+    imageManifest: {
+        urls: 1399,
+        uniqueImages: 1398,
+        metadataFields: ['status', 'lineCount', 'hash'],
+        rawOcrTextStoredInRepo: false,
+        note: '1399件のstatus manifestはmetadataのみを参照し、raw OCR text全文・原画像URL・sha256はrepoと配信データへ含めない。'
+      }
+    },
+    CONFIRMED_ADDITIONS: [
+      {
+        type: 'compound', id: 'phenoxide-ion', term: 'フェノキシドイオン', formula: 'C6H5O', formulaDisplay: 'C₆H₅O⁻', charge: -1,
+        source: 'idx-tryit',
+        status: 'added',
+        note: '原画像で名称とベンゼン–O⁻を確認。ナトリウムフェノキシドは別entityとして維持し、このイオンにNaを含めない。'
+      },
+      {
+        type: 'alias', alias: 'インベルターゼ', target: 'sucrase',
+        source: 'idx-tryit',
+        status: 'added',
+        note: '原画像の「スクラーゼ（インベルターゼ）」表記を既存sucraseの別名へ追加。新規entityは作らない。'
+      },
+      {
+        type: 'alias', alias: 'トレオニン', target: 'threonine',
+        source: 'idx-kimika',
+        status: 'added',
+        note: 'アミノ酸表の「トレオニン」を既存threonineの別名へ追加。表示名はスレオニンのまま維持する。'
+      }
+    ],
+    FAMILY_LOOKUP_CORRECTIONS: [
+      { term: 'ホスファチジン酸', target: 'phosphatidic-acid', previous: 'family lookupで未検出', correction: '既存familyのsynonymsへ裸名を追加', source: 'idx-kimika' },
+      { term: 'ホスファチジルコリン（レシチン）', target: 'phosphatidylcholine', previous: 'family lookupで未検出', correction: '既存familyのsynonymsへ完全形を追加', source: 'idx-kimika' },
+      { term: 'ホスファチジルエタノールアミン', target: 'phosphatidylethanolamine', previous: 'family lookupで未検出', correction: '既存familyの表記・代表構造を確認（新規追加なし）', source: 'idx-kimika' }
+    ],
+    INDEPENDENT_ADDITIONS: [
+      { id: 'dimethyl-oxalate', cid: 11120, formula: 'C4H6O4', charge: 0, source: 'pubchem', note: 'シュウ酸の両端メチルジエステル。モノメチル体とは別。' },
+      { id: 'diphenyl-oxalate', cid: 18475, formula: 'C14H10O4', charge: 0, source: 'pubchem', note: 'シュウ酸のフェニルジエステル。TCPO/CPPOとは別。発光用途は未確認のため記載しない。' },
+      { id: 'salicin', cid: 439503, formula: 'C13H18O7', charge: 0, source: 'pubchem', note: 'サリチルアルコールのβ-D-グルコピラノシド。糖の立体中心は図では省略。' },
+      { id: '1,3-dibromopropane', cid: 8001, formula: 'C3H6Br2', charge: 0, source: 'pubchem', note: 'BrCH₂CH₂CH₂Br。1,2-体とは別。環化条件は未確認。' },
+      { id: 'diethylenetriamine', cid: 8111, formula: 'C4H13N3', charge: 0, source: 'pubchem', note: '第一級N2個＋第二級N1個。個別用途は未確認。' },
+      { id: 'adenosine', cid: 60961, formula: 'C10H13N5O4', charge: 0, source: 'pubchem', note: 'アデニン—β-D-リボフラノース。リン酸0。AMP/ADP/ATPとは別。' },
+      { id: 'adp', cid: 6022, formula: 'C10H15N5O10P2', charge: 0, source: 'pubchem', note: '中性酸形P2・電荷0。生理的pHのADP³⁻・Mg²⁺錯体とは別。' }
+    ],
+    VIDEO: {
+      totalVideos: 127,
+      reviewed: false,
+      mainVideoId: 'pIdeL8PT2DM',
+      publicVideo: true,
+      japaneseAsrCaptionsVisible: true,
+      transcriptEndpoint: 'https://www.youtube.com/youtubei/v1/get_transcript',
+      httpStatus: 400,
+      error: 'Precondition check failed. (FAILED_PRECONDITION)',
+      segments: 0,
+      evidenceFile: 'media-audit-evidence-20261109',
+      tokensRecorded: false,
+      cookiesRecorded: false,
+      headersRecorded: false,
+      refetchAttempted: false,
+      bypassAttempted: false,
+      note: '通常UIの公開文字起こしでも0 segment。動画127本は本文未照合のまま限界として記録し、再取得・迂回は行わない。'
+    }
+  };
+  return DATA;
+});

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>有機化学ビルダー</title>
-<meta name="description" content="炭素骨格と官能基を選ぶと、高校化学の有機化合物を構造式・分子式・性質・用途で比較できる学習ツールです。">
+<title>有機化学ビルダー（探し方版）</title>
+<meta name="description" content="鎖式は官能基に結合する炭化水素部分のC数と骨格、芳香族・環式は固定骨格＋置換基、その他はfamilyから有機化合物を探せる学習ツールです。">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script src="../themes/theme.js"></script>
 <link rel="stylesheet" href="../themes/pop.css">
@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="./app.css">
 </head>
 <body class="oc-app">
-<a class="oc-skip" href="#results">生成結果へスキップ</a>
+<a class="oc-skip" href="#results">結果へスキップ</a>
 
 <header class="oc-header">
   <div class="oc-header__in">
@@ -29,65 +29,138 @@
       </div>
       <div>
         <h1>有機化学ビルダー</h1>
-        <p>炭素骨格と官能基から、化合物の違いを発見する。</p>
+        <p>探し方を選んで、登録済みの構造から化合物を比較する。</p>
       </div>
     </div>
     <div class="oc-header__links">
       <a class="oc-header__link" href="./ledger.html">収録台帳</a>
+      <a class="oc-header__link" href="../credits.html">クレジット</a>
     </div>
   </div>
 </header>
 
 <main class="oc-wrap">
   <div class="oc-notice">
-    高校「化学」の有機化合物を、<strong>登録済みの構造データ</strong>から表示します。未収録の組み合わせは、誤った構造を作らずに理由を表示します。
-    構造式は、グラフ構造では原子数・結合価・分子式、投影式・簡略式等では分子式・一般式と登録データの整合を確認しています。模式図・可変組成は表示式のみで、原子レベルの検証対象外です。描画の見た目は自動検証の対象外です。
+    骨格と官能基から化合物を比較します。
   </div>
   <p class="oc-query-notice" id="query-notice" role="status" hidden></p>
 
-  <section class="oc-top" aria-label="化合物の組み立て">
+  <nav class="oc-modes" aria-label="探し方のモード">
+    <button type="button" class="oc-mode" data-mode="chain" aria-pressed="true">
+      <strong class="oc-mode__main">鎖式</strong>
+      <span class="oc-mode__sub">炭化水素部分から探す</span>
+    </button>
+    <button type="button" class="oc-mode" data-mode="ring" aria-pressed="false">
+      <strong class="oc-mode__main">芳香族・<wbr>環式</strong>
+      <span class="oc-mode__sub">固定した骨格から探す</span>
+    </button>
+    <button type="button" class="oc-mode" data-mode="other" aria-pressed="false">
+      <strong class="oc-mode__main">その他</strong>
+      <span class="oc-mode__sub">糖アミノ酸高分子等</span>
+    </button>
+  </nav>
+
+  <div class="oc-stage" id="oc-stage">
+  <section class="oc-top" id="chain-panels" aria-label="鎖式の条件">
     <article class="oc-panel">
       <div class="oc-panel__head">
-        <h2><span class="oc-num">1</span>炭素骨格・化合物を選ぶ</h2>
-        <span class="oc-micro">分類 → 炭素数</span>
+        <h2><span class="oc-num">1</span>炭化水素部分を選ぶ</h2>
       </div>
       <div class="oc-panel__body">
-        <div class="oc-two">
-          <nav class="oc-list" id="skeleton-list" aria-label="炭素骨格・化合物リスト"></nav>
-          <div class="oc-preview" id="skeleton-preview-wrap">
-            <span class="oc-preview__label">炭素骨格プレビュー</span>
-            <div class="oc-preview__stack" id="skeleton-preview"></div>
-            <span class="oc-preview__hint" id="skeleton-hint"></span>
+        <p class="oc-control-label" id="carbon-label">炭化水素部分の炭素数（官能基の炭素を除く）</p>
+        <div class="oc-carbon-grid" id="carbon-list" role="group" aria-labelledby="carbon-label"></div>
+        <p class="oc-control-label" id="chain-shape-label" style="margin-top:12px">骨格の形（つながり・分かれ方）</p>
+        <div class="oc-family-list" id="chain-shape-list" role="group" aria-labelledby="chain-shape-label"></div>
+        <div class="oc-left-figure" id="chain-left-figure" aria-live="polite"></div>
+        <p class="oc-panel-foot">C=O・C≡Nの炭素は官能基側に数えます。</p>
+        <details class="oc-help">
+          <summary>数え方・図について</summary>
+          <div class="oc-help__body">
+            <p><b>炭化水素部分のC数:</b> 官能基に結合する炭化水素部分の炭素数です。カルボニル基（C=O）とニトリル基（C≡N）の炭素は官能基側に含め、OHをもつ炭素は炭化水素部分に残します。分子全体の炭素数は結果カードに表示します。</p>
+            <p><b>複数fragment:</b> メチル基が2つある場合は、1つの分子としてつながった「ジメチル」ではなく、接続点のダッシュ（−）で分けた「メチル基×2」として表示します。独立したfragmentの間に結合線は描きません。</p>
+            <p><b>C0（炭化水素部分なし）:</b> Hが結合する場合（ギ酸・ホルムアルデヒドのR=H）と、官能基どうしが炭素を介さず直接結合する場合（シュウ酸）を別の形として区別します。Hを補った親炭化水素の図に一括して偽装しません。</p>
+            <p><b>アルデヒド:</b> R−C(=O)−H。C=Oの炭素にHが結合しており、O–Hではありません。</p>
+            <p><b>図:</b> 選択カードは簡単な形（文字式または小さな構造図）で並べ、選択後は原子とHを明示した構造式で表示します。長い鎖は繰返し（CH₂の括弧）で圧縮し、各図の「拡大」で確認できます。</p>
           </div>
-        </div>
+        </details>
       </div>
     </article>
 
     <article class="oc-panel">
       <div class="oc-panel__head">
-        <h2><span class="oc-num">2</span>官能基・置換基を選ぶ</h2>
-        <span class="oc-micro">「追加なし」も選べる</span>
+        <h2><span class="oc-num">2</span>化合物分類を選ぶ</h2>
       </div>
       <div class="oc-panel__body">
-        <div class="oc-two">
-          <nav class="oc-list" id="group-list" aria-label="官能基・置換基リスト"></nav>
-          <div class="oc-preview" id="group-preview"></div>
-        </div>
+        <p class="oc-control-label" id="chain-family-label">化合物分類</p>
+        <div class="oc-family-list" id="chain-family-list" role="group" aria-labelledby="chain-family-label"></div>
+        <div class="oc-preview" id="chain-preview"></div>
       </div>
     </article>
   </section>
 
+  <section class="oc-top" id="ring-panels" aria-label="芳香族・環式の条件" hidden>
+    <article class="oc-panel">
+      <div class="oc-panel__head">
+        <h2><span class="oc-num">1</span>固定する骨格を選ぶ</h2>
+      </div>
+      <div class="oc-panel__body">
+        <nav class="oc-list oc-list--ring" id="ring-list" aria-label="固定する環のリスト"></nav>
+        <div class="oc-left-figure" id="ring-left-figure" aria-live="polite"></div>
+        <div class="oc-note-box">
+          <p><b>環は固定:</b> 選んだ環の炭素数をそのまま保持し、環のHを置換基で置き換えます。</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="oc-panel">
+      <div class="oc-panel__head">
+        <h2><span class="oc-num">2</span>置換基・組み合わせを選ぶ</h2>
+      </div>
+      <div class="oc-panel__body">
+        <p class="oc-control-label" id="ring-group-label">置換基・組み合わせ</p>
+        <div class="oc-family-list" id="ring-group-list" role="group" aria-labelledby="ring-group-label"></div>
+        <div class="oc-preview" id="ring-preview"></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="oc-top" id="other-panels" aria-label="その他の条件" hidden>
+    <article class="oc-panel">
+      <div class="oc-panel__head">
+        <h2><span class="oc-num">1</span>大きな分類を選ぶ</h2>
+      </div>
+      <div class="oc-panel__body">
+        <div class="oc-family-list" id="other-category-list" role="group" aria-label="その他の分類"></div>
+        <div class="oc-note-box">
+          <p><b>純物質と材料を区別:</b> 酵素・脂質・高分子・再生セルロースなどのfamilyや材料は、単一の固定分子式をもつ純物質カードとは区別します。</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="oc-panel">
+      <div class="oc-panel__head">
+        <h2><span class="oc-num">2</span>familyを選ぶ</h2>
+      </div>
+      <div class="oc-panel__body">
+        <p class="oc-control-label" id="other-family-label">family</p>
+        <div class="oc-family-list" id="other-family-list" role="group" aria-labelledby="other-family-label"></div>
+        <div class="oc-preview" id="other-preview"></div>
+      </div>
+    </article>
+  </section>
+  </div>
+
   <div class="oc-connector" aria-hidden="true">
     <span class="oc-connector__line"></span>
     <span class="oc-connector__plus">＋</span>
-    <span>組み合わせて表示</span>
+    <span>条件を組み合わせて表示</span>
     <span class="oc-connector__line"></span>
   </div>
 
-  <section class="oc-panel oc-results" id="results" tabindex="-1" aria-label="生成された化合物" aria-live="polite" aria-atomic="true">
+  <section class="oc-panel oc-results" id="results" tabindex="-1" aria-label="該当する化合物" aria-live="polite" aria-atomic="true">
     <div class="oc-results__head">
       <div>
-        <h2><span class="oc-num">3</span>生成された化合物</h2>
+        <h2><span class="oc-num">3</span>該当する化合物</h2>
         <p class="oc-results__sub" id="result-description">選択に対応する化合物を一覧で比較</p>
       </div>
       <span class="oc-count-pill" id="result-count">0 種類</span>
@@ -97,20 +170,19 @@
 
   <section class="oc-info" aria-label="使い方と収録範囲">
     <section>
-      <h2>使い方</h2>
-      <p>左で炭素骨格（炭素数や個別化合物）を選び、右で官能基・置換基を選びます。選んだ組合せに対応する化合物が下に並びます。</p>
-      <p>同じ分子式でも構造が異なる<strong>異性体</strong>は、由来する炭素骨格ごとにグループ分けして表示します。</p>
-      <p>「追加なし」は、<strong>新しい官能基を追加しない</strong>という意味です。化合物自体に官能基がないという意味ではありません。</p>
+      <h2>3つの探し方</h2>
+      <p><strong>鎖式</strong>は、炭化水素部分の炭素数と骨格、化合物分類を選びます。</p>
+      <p><strong>芳香族・環式</strong>は、固定した骨格と置換基の組み合わせを選びます。</p>
+      <p><strong>その他</strong>は、categoryとfamilyから、糖類・アミノ酸・脂質・高分子・材料などを探します。単一の固定分子式をもたないfamily・材料・混合物は、純物質カードに偽装しません。</p>
     </section>
     <section>
       <h2>収録範囲</h2>
-      <p>高校「化学」の有機化学で扱う19分野を対象に、アルカンC1〜C10・C20の代表例、C5アルコール8種、カルボン酸・エステル・油脂・糖類・アミノ酸・核酸・合成高分子まで体系的に収録しています。公開資料で名称を確認した発展・探究項目は、収録台帳の「外部公開資料との照合」で標準範囲とは別に確認できます。</p>
-      <p>異性体は骨格異性体・位置異性体・高校化学で重要な官能基異性体を扱います。幾何異性体（シス/トランス）と光学異性体（R/S）は、個別に名称をもつ物質（マレイン酸/フマル酸など）を除いて区別しません。</p>
-      <p><a href="./ledger.html">収録台帳</a>で、カバレッジ・チェックリスト・化合物一覧・検証状況・未対応事項・出典を確認できます。</p>
+      <p>高校「化学」の有機化学19分野を対象に、登録済みの構造データを収録しています。</p>
+      <p>外部公開資料（Try IT 7節・化学のグルメ全60記事）の索引監査、独立625語の分類、画像OCR二pass監査の記録は収録台帳にあります。画像は1398 uniqueを二pass処理済み（empty 51は原画像を確認）ですが、全画像の化学的な完全読取と動画127件の視聴/文字起こしは未完了で、教材の完全網羅を主張しません。</p>
+      <p><a href="./ledger.html">収録台帳</a>で、カバレッジ・チェックリスト・化合物一覧・検証状況・未対応事項・出典・索引監査を確認できます。</p>
     </section>
     <section>
       <h2>注意</h2>
-      <p>このアプリは構造と分類を学ぶための教材です。実際の物質の混合・合成・実験手順を示すものではありません。</p>
       <p>危険性・毒性の記載は代表的な情報です。実験・使用の判断には、必ず最新の安全データシート（SDS）や専門家の指示を確認してください。</p>
       <p>構造式は高校化学の教科書で使われる2次元表示に合わせ、ベンゼン環はケクレ式で描画しています。</p>
     </section>
@@ -119,7 +191,7 @@
   <footer class="oc-footer">
     <p><a href="./ledger.html">収録台帳</a> ・ <a href="../credits.html">クレジット</a></p>
     <p id="oc-data-status">収録データを確認中…</p>
-    <p>構造式は登録データからSVGで描画しています。糖類の投影式は教科書標準の配置に基づき、高分子は可変組成を「組成依存」と表示します。</p>
+    <p>このアプリは構造と分類を学ぶための教材であり、実際の物質の混合・合成・実験手順を示すものではありません。図の見た目は自動検証の対象外です。糖類の投影式は教科書標準の配置に基づき、高分子は可変組成を「組成依存」と表示します。</p>
   </footer>
 </main>
 
@@ -127,8 +199,20 @@
   <p style="padding:20px;text-align:center">このアプリはJavaScriptを有効にすると利用できます。</p>
 </noscript>
 
+<dialog class="oc-fig-dialog" id="fig-dialog" aria-labelledby="fig-dialog-title">
+  <div class="oc-fig-dialog__head">
+    <h2 id="fig-dialog-title">構造式</h2>
+    <button type="button" class="oc-fig-dialog__close" id="fig-dialog-close" aria-label="拡大表示を閉じる">閉じる</button>
+  </div>
+  <div class="oc-fig-dialog__body" id="fig-dialog-body"></div>
+  <p class="oc-fig-dialog__note">Escapeキーまたは「閉じる」で元の位置に戻ります。</p>
+</dialog>
+
 <script src="./data.js"></script>
 <script src="./draw.js"></script>
+<script src="./chain-descriptor.js"></script>
+<script src="./catalog.js"></script>
+<script src="./motion.js"></script>
 <script src="./app.js"></script>
 </body>
 </html>
