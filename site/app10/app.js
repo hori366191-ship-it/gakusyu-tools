@@ -17,7 +17,9 @@
 
   var state = {
     skeleton: 'alkane-c3',
-    group: 'oh'
+    group: 'oh',
+    focus: '',
+    notice: ''
   };
 
   var els = {
@@ -29,7 +31,8 @@
     results: document.getElementById('results-body'),
     resultCount: document.getElementById('result-count'),
     resultDescription: document.getElementById('result-description'),
-    dataStatus: document.getElementById('oc-data-status')
+    dataStatus: document.getElementById('oc-data-status'),
+    queryNotice: document.getElementById('query-notice')
   };
 
   if (!els.skeletonList || !els.groupList || !els.results) return;
@@ -86,16 +89,30 @@
   }
 
   function readQuery() {
-    try {
-      var params = new URLSearchParams(location.search);
-      var s = params.get('skeleton');
-      var g = params.get('group');
-      if (s && D.skeletonById(s)) {
+    var params = null;
+    try { params = new URLSearchParams(location.search); } catch (e) { params = null; }
+    var s = params ? params.get('skeleton') : null;
+    var g = params ? params.get('group') : null;
+    var f = params ? params.get('focus') : null;
+    var legacy = null;
+    if (s) {
+      if (D.skeletonById(s)) {
         state.skeleton = s;
         if (!g) state.group = 'none';
+      } else {
+        legacy = D.legacySkeletonRoute ? D.legacySkeletonRoute(s) : null;
+        if (legacy) {
+          state.skeleton = legacy.skeleton;
+          state.group = legacy.group;
+          state.focus = legacy.id;
+          state.notice = '旧URLの個別選択「' + s + '」を、同じ物質を含む炭素骨格＋官能基の結果一覧に移行しました。';
+        } else {
+          state.notice = 'URLの炭素骨格ID「' + s + '」は収録されていません。初期表示に戻しました。';
+        }
       }
-      if (g && D.groupById(g)) state.group = g;
-    } catch (e) {}
+    }
+    if (g && D.groupById(g) && !legacy) state.group = g;
+    if (f && D.COMPOUNDS[f]) state.focus = f;
     var sk = selectedSkeleton();
     if (sk.locked) state.group = 'none';
   }
@@ -356,6 +373,11 @@
 
   function renderSkeletonPreview() {
     var sk = selectedSkeleton();
+    if (sk.locked) {
+      els.skeletonPreview.innerHTML = '<p class="oc-preview__locked-note">個別登録された物質です。<br>構造式と説明は下の結果に表示します。</p>';
+      els.skeletonHint.textContent = '個別登録（下の結果に表示）';
+      return;
+    }
     var ids = validIds(sk.ids);
     var html = '';
     var hasMultiFigure = false;
@@ -370,9 +392,7 @@
     });
     if (!html) html = '<p class="oc-preview__hint">表示できる構造データがありません。</p>';
     els.skeletonPreview.innerHTML = html;
-    var hint = sk.locked
-      ? '個別登録された化合物'
-      : (ids.length > 1 ? ids.length + '種類の骨格異性体' : '選択した骨格の構造式');
+    var hint = ids.length > 1 ? ids.length + '種類の骨格異性体' : '選択した骨格の構造式';
     if (hasMultiFigure) hint += '／構造形態を複数収録';
     els.skeletonHint.textContent = hint;
   }
@@ -520,6 +540,22 @@
           return '<p class="oc-data-error"><b>' + esc(x.name) + '</b>（' + esc(x.id) + '）: ' + esc(x.errors) + '</p>';
         }).join('') + '</div>' : '') +
       '<p class="oc-results__note">※ グラフ構造は原子数・結合価・分子式を自動照合し、環＋置換・投影式・簡略式・トリグリセリド・重合体は分子式・一般式と登録データの整合を確認しています。模式図・可変組成は表示式のみで、原子レベルの検証対象外です。描画の見た目は自動検証の対象外です。</p>';
+    focusResultCard();
+  }
+
+  // 旧URLや台帳リンクで指定された化合物カードを見失わないようにする。
+  // 新しいUI要素は増やさず、結果カードの強調とスクロールだけを行う。
+  function focusResultCard() {
+    if (!state.focus) return;
+    var el = document.getElementById('c-' + state.focus);
+    if (!el) return;
+    el.classList.add('oc-card--focus');
+    state.focus = '';
+    try {
+      el.scrollIntoView({ block: 'center', behavior: canAnimate() ? 'smooth' : 'auto' });
+    } catch (e) {
+      try { el.scrollIntoView(); } catch (e2) {}
+    }
   }
 
   function renderDataStatus() {
@@ -549,10 +585,17 @@
 
   var firstRender = true;
 
+  function renderQueryNotice() {
+    if (!els.queryNotice) return;
+    els.queryNotice.textContent = state.notice || '';
+    els.queryNotice.hidden = !state.notice;
+  }
+
   function update() {
     var sk = selectedSkeleton();
     if (sk.locked) state.group = 'none';
     syncLists();
+    renderQueryNotice();
     if (firstRender) {
       firstRender = false;
       renderSkeletonPreview();
@@ -571,6 +614,8 @@
     var sk = D.skeletonById(id);
     if (!sk) return;
     state.skeleton = id;
+    state.focus = '';
+    state.notice = '';
     if (sk.locked) state.group = 'none';
     update();
   }
@@ -580,6 +625,8 @@
     if (!g) return;
     if (selectedSkeleton().locked) return;
     state.group = id;
+    state.focus = '';
+    state.notice = '';
     update();
   }
 

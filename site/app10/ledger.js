@@ -46,6 +46,16 @@
     return hasSubstitution[id] ? '組合せ生成' : '骨格のみ';
   }
 
+  // 台帳から本体へ戻すときも、現在の正準経路（COMBOSから自動生成）を使う。
+  // 削除済みの旧個別IDを直接リンクしない。
+  function appHref(id) {
+    var route = D.routeFor ? D.routeFor(id) : null;
+    if (!route) return '';
+    return './?skeleton=' + encodeURIComponent(route.skeleton) +
+      '&group=' + encodeURIComponent(route.group) +
+      '&focus=' + encodeURIComponent(id);
+  }
+
   function structureTypeLabel(spec) {
     if (!spec) return '構造: 未登録';
     if (['skeleton', 'sub', 'multi', 'custom'].indexOf(spec.type) !== -1) return '構造: グラフ';
@@ -77,14 +87,18 @@
   var atomCount = ids.filter(function (id) {
     return validation[id].ok && validation[id].verification && validation[id].verification.level === 'atom';
   }).length;
-  var otherCount = ids.filter(function (id) {
-    return validation[id].ok && (!validation[id].verification || validation[id].verification.level !== 'atom');
+  var coordinationCount = ids.filter(function (id) {
+    return validation[id].ok && validation[id].verification && validation[id].verification.level === 'coordination';
+  }).length;
+  var nonGraphCount = ids.filter(function (id) {
+    return validation[id].ok && (!validation[id].verification || validation[id].verification.level !== 'atom') &&
+      !(validation[id].verification && validation[id].verification.level === 'coordination');
   }).length;
   var stats = [
     { b: ids.length, s: '収録化合物' },
     { b: D.CATEGORIES.length, s: '対象分野' },
     { b: okCount, s: '分子式・登録データ整合' },
-    { b: atomCount, s: '原子レベルの構造検証' }
+    { b: atomCount, s: '原子レベルの構造検証（配位錯体を除く）' }
   ];
   document.getElementById('ledger-stats').innerHTML = stats.map(function (x) {
     return '<div class="oc-stat"><b>' + esc(x.b) + '</b><span>' + esc(x.s) + '</span></div>';
@@ -92,7 +106,8 @@
   var invalidCount = ids.filter(function (id) { return !validation[id].ok; }).length;
   document.getElementById('ledger-verification-note').textContent =
     '「分子式・登録データ整合」は、グラフ構造では原子数・結合価・分子式、環＋置換・投影式・簡略式・トリグリセリド・重合体・模式図では分子式・一般式と登録データの整合を確認した件数です。' +
-    '原子レベルの構造検証は ' + atomCount + ' 件、非グラフは ' + otherCount + ' 件で、非グラフは分子式・一般式と登録データの整合、模式図・可変組成は表示式のみで判定しています（原子レベルの検証対象外）。' +
+    '原子レベルの構造検証は ' + atomCount + ' 件、非グラフは ' + nonGraphCount + ' 件で、非グラフは分子式・一般式と登録データの整合、模式図・可変組成は表示式のみで判定しています（原子レベルの検証対象外）。' +
+    '配位結合を含む ' + coordinationCount + ' 件は、金属—配位原子の結合を原子価の数え方から除外し、原子レベルの検証対象外として分子式・組成のみ確認しています。' +
     (invalidCount ? ' 検証に失敗したデータが ' + invalidCount + ' 件あります（範囲外ではなくデータ不備として扱います）。' : ' すべての登録データが検証に合格しています。');
 
   // ---- 19分野の収録状況 ----
@@ -251,7 +266,7 @@
         '<td><b>' + esc(c.name) + '</b></td>' +
         '<td>' + esc(catName) + '</td>' +
         '<td><span class="oc-id">' + esc(c.formulaDisplay || R.formatFormula(c.formula)) + '</span></td>' +
-        '<td>' + esc(methodOf(id)) + '</td>' +
+        '<td>' + (appHref(id) ? '<a href="' + esc(appHref(id)) + '">' + esc(methodOf(id)) + '</a>' : esc(methodOf(id))) + '</td>' +
         '<td>' + esc(isomerInfo(c)) + '</td>' +
         '<td>' + (v.ok ? '<span class="oc-ok">✓ ' + esc(v.verification ? v.verification.short : '確認済み') + '</span>' : '<span class="oc-ng">✗ 要確認</span><br>' + esc(v.errors.join(' / '))) + '</td>' +
         '<td>' + esc(dataStatusLabel(c.dataStatus)) + '</td>' +

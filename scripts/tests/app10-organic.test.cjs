@@ -23,6 +23,20 @@ const D = require(path.join(APP, 'data.js'));
 const R = require(path.join(APP, 'draw.js'));
 const E = require(path.join(APP, 'external-coverage.js'));
 
+// 個別選択を廃止し、既存の骨格＋官能基の組合せへ集約した化合物。
+// 化合物IDは保持し、旧URL（skeleton=ind-...）は正準経路へ移行する。
+const MOVED_TO_COMBO = [
+  // 既存combo経路がある11件
+  'methylamine', 'ethylamine', 'propylamine', 'isopropylamine',
+  'butan-1-amine', 'butan-2-amine', '2-methylpropan-1-amine', '2-methylpropan-2-amine',
+  'acrylic-acid', 'methacrylic-acid', 'vinyl-chloride',
+  // 新たにcomboへ移した3件
+  'nitromethane', '1-naphthol', '2-naphthol',
+  // 新設したbr/i/cnの組合せへ移した9件
+  'bromoethane', '1-bromopropane', '2-bromopropane', 'iodoethane',
+  'acetonitrile', 'propanenitrile', 'butanenitrile', 'benzonitrile', 'acrylonitrile'
+];
+
 function read(relPath) {
   return fs.readFileSync(path.join(SITE, relPath), 'utf8');
 }
@@ -113,6 +127,202 @@ test('[data] 同一構造の重複がない', () => {
   }
 });
 
+/* ------------------------------------------------------------------
+ * 重複整理（個別選択と組合せ経路の一本化）
+ * ------------------------------------------------------------------ */
+
+test('[data] 整理後の収録件数と、個別選択の二重経路がない', () => {
+  assert.equal(Object.keys(D.COMPOUNDS).length, 367, '外部照合の367化合物を保持');
+  assert.equal(D.SKELETONS.length, 277, '個別選択23件を削除した骨格数');
+  assert.equal(D.SKELETONS.filter((s) => s.locked).length, 259, '個別選択の残数');
+  assert.equal(D.GROUPS.length, 11, 'br/i/cnを追加した置換基数');
+
+  // 定義の重複（後から上書きされて見えなくなるID）をソースレベルで検出する。
+  const source = fs.readFileSync(path.join(APP, 'data.js'), 'utf8');
+  const defined = [...source.matchAll(/\b(?:comp|cond|sub|skel|ringSub|poly)\(\s*'([^']+)'/g)].map((m) => m[1]);
+  assert.equal(defined.length, 367, '定義呼び出しの総数');
+  assert.equal(new Set(defined).size, defined.length, '化合物IDの定義が重複');
+  for (const id of defined) assert.ok(D.COMPOUNDS[id], '定義したIDがCOMPOUNDSにない: ' + id);
+  for (const row of E.ROWS) {
+    if (row.kind !== 'compound' && row.kind !== 'alias') continue;
+    assert.ok(D.routeFor(row.ref), '外部照合の参照先に正準経路がない: ' + row.ref);
+  }
+
+  const skeletonIds = new Set(D.SKELETONS.map((s) => s.id));
+  assert.equal(skeletonIds.size, D.SKELETONS.length);
+  assert.deepEqual(D.routeInvariantViolations(), [], 'locked選択とnonlocked経路の二重導線');
+  for (const sk of D.SKELETONS) {
+    assert.equal(new Set(sk.ids).size, sk.ids.length, sk.id + ' のID束に重複');
+    if (!sk.locked) continue;
+    for (const id of sk.ids) {
+      const routes = D.routesFor(id);
+      assert.ok(routes.length > 0, sk.id + ' の正準経路がない: ' + id);
+      for (const route of routes) {
+        assert.equal(route.locked, true, sk.id + ' と同じ物質がnonlocked経路にある: ' + id + ' -> ' + route.skeleton + '/' + route.group);
+      }
+    }
+  }
+});
+
+test('[data] 化合物名・別名・材料synonymの重複がない', () => {
+  const names = new Map();
+  for (const [id, c] of Object.entries(D.COMPOUNDS)) {
+    const key = D.normalizeName(c.name);
+    assert.ok(key.length > 0, id + ' の正規化名称が空');
+    assert.equal(names.has(key), false, id + ' と ' + names.get(key) + ' の名称が重複');
+    names.set(key, id);
+  }
+
+  const aliasKeys = new Map();
+  for (const a of D.ALIASES) {
+    const key = D.normalizeName(a.term);
+    assert.equal(aliasKeys.has(key), false, '別名が完全重複: ' + a.term + '（' + aliasKeys.get(key) + ' と ' + a.target + '）');
+    aliasKeys.set(key, a.target);
+    assert.ok(D.COMPOUNDS[a.target], a.term + ' の対応先がない');
+  }
+
+  const materialIds = new Set();
+  const materialTerms = new Map();
+  for (const m of D.MATERIALS) {
+    assert.equal(materialIds.has(m.id), false, '材料IDが重複: ' + m.id);
+    materialIds.add(m.id);
+    const syn = m.synonyms || [];
+    assert.equal(syn.some((s) => D.normalizeName(s) === D.normalizeName(m.name)), false, m.id + ' のsynonymに自己名称が残る');
+    for (const term of [m.name].concat(syn)) {
+      const key = D.normalizeName(term);
+      assert.ok(key.length > 0, m.id + ' の材料名が空');
+      assert.equal(materialTerms.has(key), false, '材料名が重複: ' + term);
+      materialTerms.set(key, m.id);
+    }
+  }
+});
+
+test('[data] 図・同一graph・同一セルの重複を区別する', () => {
+  for (const [id, c] of Object.entries(D.COMPOUNDS)) {
+    if (!c.figures || c.figures.length < 2) continue;
+    const sigs = c.figures.map((f) => structureSignature(f.structure));
+    assert.equal(new Set(sigs).size, sigs.length, id + ' の図が重複');
+  }
+
+  for (const sid of Object.keys(D.COMBOS)) {
+    for (const gid of Object.keys(D.COMBOS[sid])) {
+      const ids = D.COMBOS[sid][gid].map((e) => e.id);
+      assert.equal(new Set(ids).size, ids.length, '同一セルで生成物が重複: ' + sid + '/' + gid);
+    }
+  }
+
+  // 分子式が同じでも、構造が異なる異性体は同一として扱わない。
+  const byFormula = {};
+  for (const [id, c] of Object.entries(D.COMPOUNDS)) {
+    (byFormula[c.formula] || (byFormula[c.formula] = [])).push(id);
+  }
+  for (const [formula, ids] of Object.entries(byFormula)) {
+    if (ids.length < 2) continue;
+    const sigs = ids.map((id) => structureSignature(D.COMPOUNDS[id].structure));
+    assert.equal(new Set(sigs).size, sigs.length, formula + ' の異性体を同一構造として扱っている');
+  }
+  assert.notEqual(structureSignature(D.COMPOUNDS['fumaric-acid'].structure), structureSignature(D.COMPOUNDS['maleic-acid'].structure));
+  assert.notEqual(structureSignature(D.COMPOUNDS['propan-1-ol'].structure), structureSignature(D.COMPOUNDS['propan-2-ol'].structure));
+  assert.notEqual(structureSignature(D.COMPOUNDS['1-naphthol'].structure), structureSignature(D.COMPOUNDS['2-naphthol'].structure));
+});
+
+test('[data] 旧個別選択は正準経路へ移行し、元の化合物IDを保持する', () => {
+  for (const id of MOVED_TO_COMBO) {
+    assert.equal(D.skeletonById('ind-' + id), null, '旧個別選択が残っている: ' + id);
+    const route = D.routeFor(id);
+    assert.ok(route, id + ' の正準経路がない');
+    assert.equal(route.locked, false, id + ' の正準経路がlockedのまま');
+    const entries = (D.COMBOS[route.skeleton] || {})[route.group] || [];
+    assert.ok(entries.some((e) => e.id === id), id + ' が正準経路の結果一覧にない');
+    const legacy = D.legacySkeletonRoute('ind-' + id);
+    assert.deepEqual(legacy, { id: id, skeleton: route.skeleton, group: route.group }, id + ' の旧URL移行');
+  }
+  assert.equal(D.legacySkeletonRoute('ind-not-a-compound'), null);
+  assert.equal(D.legacySkeletonRoute('alkane-c1'), null);
+  assert.equal(D.routeFor('not-a-compound'), null);
+});
+
+test('[data] 異性体は同じ骨格＋基の結果一覧へ集約し、官能基異性体を混ぜない', () => {
+  assert.deepEqual(combo('alkane-c3', 'nh2'), ['propylamine', 'isopropylamine']);
+  assert.deepEqual(combo('alkane-c4', 'oh'), [
+    'butan-1-ol', 'butan-2-ol', '2-methylpropan-1-ol', '2-methylpropan-2-ol'
+  ]);
+  assert.deepEqual(combo('aromatic-naphthalene', 'oh'), ['1-naphthol', '2-naphthol']);
+
+  // プロパン＋−NH2 の位置異性体は結果一覧で比較し、個別選択を別に作らない。
+  for (const id of ['propylamine', 'isopropylamine', '1-naphthol', '2-naphthol']) {
+    assert.equal(D.skeletonById('ind-' + id), null, id + ' の個別選択が残っている');
+  }
+
+  // エタノールとジメチルエーテルは官能基異性体。同じ結果一覧に混在させない。
+  assert.deepEqual(combo('alkane-c2', 'oh'), ['ethanol']);
+  const mixed = Object.keys(D.COMBOS).some((sid) =>
+    Object.keys(D.COMBOS[sid]).some((gid) => gid === 'oh' && D.COMBOS[sid][gid].some((e) => e.id === 'dimethyl-ether'))
+  );
+  assert.equal(mixed, false, 'エタノールの結果にジメチルエーテルを混在させている');
+  assert.ok(D.skeletonById('ind-dimethyl-ether'), '官能基異性体は個別選択として残す');
+
+  const isoNote = D.LEDGER_NOTES.find((n) => /異性体の表示範囲/.test(n.title));
+  assert.ok(isoNote, '異性体の表示範囲の注記がない');
+  assert.match(isoNote.detail, /代表範囲をCOMBOSに列挙/);
+  assert.match(isoNote.detail, /官能基異性体/);
+  assert.match(isoNote.detail, /個別選択/);
+});
+
+test('[data] br/i/cnの空セルも代表範囲の理由をもち、成立しないと偽らない', () => {
+  for (const gid of ['br', 'i', 'cn']) assert.ok(D.groupById(gid), gid + ' の置換基がない');
+  let emptyNewGroup = 0;
+  for (const sk of D.SKELETONS) {
+    if (sk.locked) continue;
+    for (const gid of ['br', 'i', 'cn']) {
+      const list = (D.COMBOS[sk.id] || {})[gid] || [];
+      if (list.length) continue;
+      emptyNewGroup++;
+      const entry = D.unsupportedEntry(sk.id, gid);
+      assert.ok(entry, '理由がない: ' + sk.id + '/' + gid);
+      assert.equal(entry.type, 'out-of-scope', '代表範囲外を成立しない扱いにしている: ' + sk.id + '/' + gid);
+      assert.doesNotMatch(entry.reason, /化学的に成立しない|未収録です/, sk.id + '/' + gid);
+      assert.ok(entry.reason.length >= 20, '理由が短すぎる: ' + sk.id + '/' + gid);
+      assert.ok(entry.examples.length > 0, '具体例がない: ' + sk.id + '/' + gid);
+    }
+  }
+  assert.ok(emptyNewGroup > 0);
+
+  assert.deepEqual(combo('alkane-c1', 'cn'), ['acetonitrile']);
+  assert.deepEqual(combo('alkane-c2', 'cn'), ['propanenitrile']);
+  assert.deepEqual(combo('alkane-c3', 'cn'), ['butanenitrile']);
+  assert.deepEqual(combo('aromatic-benzene', 'cn'), ['benzonitrile']);
+  assert.deepEqual(combo('alkene-c2', 'cn'), ['acrylonitrile']);
+});
+
+test('[data] 置換と水和・付加の区別を台帳で明示する', () => {
+  const note = D.LEDGER_NOTES.find((n) => /組合せ生成の意味/.test(n.title));
+  assert.ok(note);
+  assert.match(note.detail, /水の付加（水和/);
+  assert.match(note.detail, /エテン＋H₂O→エタノール/);
+  assert.match(note.detail, /HBr・HIの付加/);
+  assert.match(note.detail, /HCNの付加ではなく/);
+  assert.match(D.COMPOUNDS.ethenol.notes, /付加反応で得られるエタノールとは異なる/);
+});
+
+test('[draw] br/i/cnのプレビューと生成物の分子式', () => {
+  assert.match(R.renderGroupPreview('br', 'br'), />Br</);
+  assert.match(R.renderGroupPreview('i', 'i'), />I</);
+  assert.match(R.renderGroupPreview('cn', 'cn'), />N</);
+  const nitrile = R.buildStructure({ type: 'sub', skeleton: 'ethane', at: 0, group: 'cn' });
+  assert.equal(R.formulaOfGraph(nitrile), 'C3H5N');
+  assert.ok(nitrile.bonds.some((b) => b.order === 3), 'C≡Nの三重結合がない');
+  const cases = [
+    ['bromoethane', 'C2H5Br'], ['1-bromopropane', 'C3H7Br'], ['2-bromopropane', 'C3H7Br'],
+    ['iodoethane', 'C2H5I'], ['acetonitrile', 'C2H3N'], ['propanenitrile', 'C3H5N'],
+    ['butanenitrile', 'C4H7N'], ['benzonitrile', 'C7H5N'], ['acrylonitrile', 'C3H3N']
+  ];
+  for (const [id, formula] of cases) {
+    assert.equal(D.COMPOUNDS[id].formula, formula, id);
+    assert.equal(R.validate(D.COMPOUNDS[id]).ok, true, id);
+  }
+});
+
 test('[data] すべての組合せが既存の化合物を参照し、重複しない', () => {
   for (const sid of Object.keys(D.COMBOS)) {
     assert.ok(D.skeletonById(sid), '未登録の骨格ID: ' + sid);
@@ -167,12 +377,12 @@ test('[plan §10] 同じ化合物は複数経路でも同じIDを参照する', 
 test('[plan §10] 未対応の組合せは分類された理由を返す', () => {
   assert.deepEqual(combo('alkane-c6', 'oh'), []);
   assert.match(D.unsupportedReason('alkane-c6', 'oh'), /C6アルカン/);
-  assert.match(D.unsupportedReason('alkane-c1', 'no2'), /ニトロアルカン/);
+  assert.match(D.unsupportedReason('alkane-c2', 'no2'), /ニトロアルカン/);
   assert.match(D.unsupportedReason('alkene-c2', 'nh2'), /エナミン/);
   assert.match(D.unsupportedReason('alkene-c4', 'oh'), /C4アルケン/);
   assert.match(D.unsupportedReason('alkyne-c4', 'ch3'), /アルキン/);
   assert.match(D.unsupportedReason('cyclo-c3', 'oh'), /環状炭化水素/);
-  assert.match(D.unsupportedReason('aromatic-naphthalene', 'oh'), /ナフトール/);
+  assert.match(D.unsupportedReason('aromatic-naphthalene', 'cl'), /ナフトール/);
   assert.equal(D.unsupportedReason('alkane-c1', 'oh'), null);
   const entry = D.unsupportedEntry('alkene-c2', 'nh2');
   assert.equal(entry.type, 'out-of-scope');
@@ -346,7 +556,7 @@ test('[draw] 二糖の模式図は糖—O—糖が連続接続', () => {
 });
 
 test('[draw] 官能基プレビューはR-基の形で描画される', () => {
-  for (const gid of ['oh', 'cooh', 'nh2', 'cho', 'no2', 'ch3', 'cl']) {
+  for (const gid of ['oh', 'cooh', 'nh2', 'cho', 'no2', 'ch3', 'cl', 'br', 'i', 'cn']) {
     const svg = R.renderGroupPreview(gid, gid);
     assert.ok(svg.includes('>R<'), gid + ' のR表記');
     assert.ok(svg.includes('data-kind="graph"'), gid + ' のSVG種別');
@@ -423,6 +633,9 @@ test('[static] 本体・台帳・ポータル・クレジット・テーマの�
   assert.match(credits, /PubChem/);
   assert.match(credits, /文部科学省/);
   assert.match(credits, /有機化学ビルダー/);
+  assert.match(credits, /収録台帳の自動集計/);
+  assert.match(ledger, /自動集計/);
+  assert.equal(/367\s*化合物|277\s*件|259\s*件/.test(credits + ledger), false, 'クレジット/台帳に固定件数を書かない');
 
   const pop = read('themes/pop.css');
   const forest = read('themes/forest.css');
@@ -450,6 +663,39 @@ test('[static] アプリは個別化合物で官能基を無効化する', () =>
   assert.match(js, /新しい官能基の追加はできません/);
   assert.match(js, /unsupportedEntry/);
   assert.match(js, /aria-pressed/);
+});
+
+test('[static] 個別選択のプレビューは案内だけにし、結果カードと二重表示しない', () => {
+  const js = read('app10/app.js');
+  // locked時は名前・構造図を描かず、短い案内だけを返す。
+  assert.match(js, /if \(sk\.locked\) \{[\s\S]{0,260}個別登録された物質です[\s\S]{0,260}return;/);
+  const lockedBlock = js.slice(js.indexOf('function renderSkeletonPreview'), js.indexOf('function renderGroupPreview'));
+  const lockedBranch = (lockedBlock.match(/if \(sk\.locked\) \{[\s\S]*?return;/) || [''])[0];
+  assert.match(lockedBranch, /個別登録された物質です/);
+  assert.doesNotMatch(lockedBranch, /R\.renderStructure/);
+  // 通常の骨格プレビューは維持する（noneでも骨格を消さない）。
+  assert.match(lockedBlock, /R\.renderStructure\(figure, c\.name \+ 'の構造式'\)/);
+  assert.match(lockedBlock, /ids\.length > 1 \? ids\.length \+ '種類の骨格異性体'/);
+  const css = read('app10/app.css');
+  assert.match(css, /\.oc-preview__locked-note \{/);
+  assert.match(css, /\.oc-card--focus \{/);
+});
+
+test('[static] 旧ind URLは正準経路へ移り、無言フォールバックしない', () => {
+  const js = read('app10/app.js');
+  assert.match(js, /legacySkeletonRoute/);
+  assert.match(js, /state\.focus = legacy\.id/);
+  assert.match(js, /旧URLの個別選択/);
+  assert.match(js, /URLの炭素骨格ID「' \+ s \+ '」は収録されていません/);
+  assert.match(js, /function focusResultCard\(\)/);
+  assert.match(js, /oc-card--focus/);
+  assert.match(js, /scrollIntoView/);
+  const html = read('app10/index.html');
+  assert.match(html, /id="query-notice"/);
+  assert.match(html, /role="status"/);
+  const ledgerJs = read('app10/ledger.js');
+  assert.match(ledgerJs, /D\.routeFor/);
+  assert.match(ledgerJs, /focus=/);
 });
 
 test('[data] 検証ラベルは自動検証の範囲だけを示す', () => {
@@ -851,23 +1097,23 @@ test('[external] 外部資料の期待名称を独立リストで照合し、未
   const expected = {
     s1: ['セロビオース', 'β-グルコース'],
     s2: ['エタノール', '酢酸', '酢酸エチル', '1-ペンタノール', '酢酸ナトリウム', 'ヨードホルム'],
-    s3: ['メタン', 'エタン', 'プロパン', 'ブタン', 'ペンタン', 'ヘキサン', 'ヘプタン', 'オクタン', 'ノナン', 'デカン', '酢酸Na', 'クロロメタン', 'ジクロロメタン', 'トリクロロメタン', 'テトラクロロメタン'],
+    s3: ['メタン', 'エタン', 'プロパン', 'ブタン', 'ペンタン', 'ヘキサン', 'ヘプタン', 'オクタン', 'ノナン', 'デカン', '酢酸ナトリウム', 'クロロメタン', 'ジクロロメタン', 'トリクロロメタン', 'テトラクロロメタン'],
     s4: ['メタン', 'エタン', 'プロパン', 'ブタン', 'ペンタン', 'ヘキサン', 'ヘプタン', 'オクタン', 'ノナン', 'デカン', 'エイコサン', 'クロロメタン', 'ジクロロメタン', 'トリクロロメタン', 'テトラクロロメタン'],
     s5: ['酢酸', '無水酢酸'],
     s6: ['塩化ベンゼンジアゾニウム', 'ナトリウムフェノキシド', 'p-ヒドロキシアゾベンゼン'],
     s7: ['DNA', 'RNA', 'リボース', 'デオキシリボース', 'アデニン', 'グアニン', 'シトシン', 'チミン', 'ウラシル'],
     s8: ['セルロース', 'セロビオース', 'グルコース', 'セルラーゼ', 'セロビアーゼ'],
     s9: ['ニンヒドリン', 'アミノ酸'],
-    s10: ['セルロース', 'レーヨン', 'セロファン', 'クプラ', 'シュヴァイツァー試薬'],
+    s10: ['セルロース', 'レーヨン', 'セロハン', 'キュプラ', 'シュワイツァー試薬'],
     s11: ['ビスコースレーヨン', 'ビスコース', 'セルロース', '二硫化炭素'],
     s12: ['スチレン', 'p-ジビニルベンゼン', '陽イオン交換樹脂'],
     s13: ['陰イオン交換樹脂'],
     s14: ['インスリン', 'ヘモグロビン', 'ヘム', 'アルブミン', 'グロブリン', 'グルテリン', 'ケラチン', 'コラーゲン', 'フィブロイン', 'ムチン', 'カゼイン', 'ニンヒドリン'],
     s15: ['アルブミン', 'グロブリン', 'ケラチン', 'コラーゲン', 'フィブロイン', 'グルテリン', 'アミラーゼ', 'カゼイン', 'ヘモグロビン'],
-    s16: ['アルブミン', 'グロブリン', 'ケラチン', 'コラーゲン', 'フィブロイン', 'グルテリン', 'アミラーゼ', 'カゼイン', 'ヘモグロビン', 'ゼラチン', 'ペプシン', 'ヒストン', 'プロタミン', 'グルテニン', 'オリゼニン', 'グリアジン', 'ホルデイン', 'グロビン', 'サルミン', 'ヘモシアニン'],
+    s16: ['アルブミン', 'グロブリン', 'ケラチン', 'コラーゲン', 'フィブロイン', 'グルテリン', 'カゼイン', 'ヘモグロビン', 'ゼラチン', 'ペプシン', 'ヒストン', 'プロタミン', 'グルテニン', 'オリゼニン', 'グリアジン', 'ホルジニン', 'グロビン', 'サルミン', 'ヘモシアニン'],
     s17: ['グルコース', 'ガラクトース', 'フルクトース', 'マルトース', 'セロビオース', 'ラクトース', 'スクロース', 'トレハロース', '無水マレイン酸', '無水フタル酸'],
     s18: ['ベンゼンスルホン酸ナトリウム', '無水酢酸', 'ナトリウムフェノキシド', 'p-ヒドロキシアゾベンゼン'],
-    s19: ['メチルオレンジ', '2-ナフトール', 'レゾルシノール', 'グアイアコール', 'N,N-ジメチルアニリン', 'スルファニル酸', 'ポリアニリン', 'アニリンブラック', 'インジゴ', 'アリザリン', 'シコニン', 'カルミン酸', 'ジブロモインジゴ', 'カルタミン', '2-ニトロベンズアルデヒド', 'ケルセチン'],
+    s19: ['メチルオレンジ', '2-ナフトール', 'レゾルシノール', 'グアヤコール', 'ジメチルアニリン', 'スルファニル酸', 'アニリンブラック', 'インジゴ', 'アリザリン', 'シコニン', 'カルミン酸', 'ジブロモインジゴ', 'カルタミン', '2-ニトロベンズアルデヒド', 'クェルセチン'],
     s20: ['アルギン酸', 'アルギン酸ナトリウム', 'アジピン酸ジクロリド', '6-アミノヘキサン酸'],
     s21: ['アスピリン', 'サリチル酸メチル', 'アセトアミノフェン', 'イブプロフェン', 'スルファニルアミド', 'p-ヒドロキシ安息香酸', 'm-ヒドロキシ安息香酸', '2,4,6-トリブロモフェノール']
   };
@@ -938,19 +1184,122 @@ test('[external] 材料・混合物・無機の扱いを水増ししない', () 
   assert.equal(D.COMPOUNDS.cupra, undefined, 'キュプラを化合物として重複収録しない');
   assert.equal(D.materialByTerm('レーヨン').of, 'cellulose');
   assert.equal(D.materialByTerm('ビスコースレーヨン').of, 'cellulose');
-  assert.equal(D.materialByTerm('セロファン').of, 'cellulose');
-  assert.equal(D.materialByTerm('クプラ').of, 'cellulose');
+  assert.equal(D.materialByTerm('セロハン').of, 'cellulose');
+  assert.equal(D.materialByTerm('キュプラ').of, 'cellulose');
   assert.equal(D.materialByTerm('ビスコース').kind, 'mixture');
-  assert.equal(D.materialByTerm('アニリンブラック').of, 'polyaniline');
+  assert.equal(D.materialByTerm('アニリンブラック').of, null);
   assert.ok(D.searchTermsFor('cellulose').includes('レーヨン'));
-  assert.ok(D.searchTermsFor('cellulose').includes('セロファン'));
-  assert.ok(D.searchTermsFor('cellulose').includes('クプラ'));
+  assert.ok(D.searchTermsFor('cellulose').includes('セロハン'));
+  assert.ok(D.searchTermsFor('cellulose').includes('キュプラ'));
   const inorganic = E.ROWS.filter((r) => r.kind === 'inorganic');
   assert.equal(inorganic.length, 2);
   for (const row of inorganic) {
     assert.equal(row.ref, null);
     assert.match(row.note, /無機/);
   }
+});
+
+test('[external] 実取得本文の表記・文脈に根拠を合わせる', () => {
+  assert.match(E.SOURCES.s2.title, /エステルの合成・分解とヨードホルム反応/);
+  assert.match(E.SOURCES.s21.title, /日本大学理工学部/);
+  assert.match(E.SOURCES.s21.section, /学術講演会予稿集/);
+
+  const s3 = E.ROWS.find((r) => r.source === 's3' && r.name === '酢酸ナトリウム');
+  assert.ok(s3, 's3は酢酸ナトリウム表記');
+  assert.match(s3.evidence, /CH3COONa/);
+  assert.equal(s3.kind, 'compound', '酢酸ナトリウムは別名ではなく化合物として統一');
+  assert.equal(E.ROWS.some((r) => r.source === 's3' && r.name === '酢酸Na'), false);
+  // 複数資料に同じ名称があっても、同じ化合物IDへの参照なら正当な重複として残す。
+  const acetateRows = E.ROWS.filter((r) => r.name === '酢酸ナトリウム');
+  assert.ok(acetateRows.length >= 2, '複数出典を1件に潰さない');
+  for (const row of acetateRows) assert.equal(row.kind, 'compound');
+
+  assert.equal(E.ROWS.some((r) => r.source === 's16' && r.name === 'アミラーゼ'), false, 's16にアミラーゼはない');
+  assert.ok(E.ROWS.some((r) => r.source === 's15' && r.name === 'アミラーゼ'), 's15のアミラーゼは保持');
+  const hordein = E.ROWS.find((r) => r.source === 's16' && r.name === 'ホルジニン');
+  assert.ok(hordein && /ホルデイン/.test(hordein.note), '原文表記の差異を注記');
+
+  assert.equal(E.ROWS.some((r) => r.source === 's19' && r.name === 'ポリアニリン'), false, 's19にポリアニリンの記載はない');
+  const quercetin = E.ROWS.find((r) => r.source === 's19' && r.name === 'クェルセチン');
+  assert.ok(quercetin, 's19のクェルセチン行');
+  assert.equal(quercetin.ref, 'quercetin');
+  assert.equal(E.resolveRow(quercetin, D).ok, true, 'クェルセチン行の対応先');
+  assert.equal(E.ROWS.some((r) => r.source === 's19' && r.name === 'ケルセチン'), false, '資料本文の表記はクェルセチン');
+  const black = E.ROWS.find((r) => r.source === 's19' && r.name === 'アニリンブラック');
+  assert.match(black.evidence, /二クロム酸カリウム/);
+  assert.match(black.evidence, /黒色/);
+  assert.doesNotMatch(black.evidence, /導電/);
+  assert.equal(D.materialByTerm('アニリンブラック').of, null, 'ポリアニリンとの同一視をしない');
+  const guaiacol = E.ROWS.find((r) => r.source === 's19' && r.name === 'グアヤコール');
+  assert.ok(guaiacol && /グアイアコール/.test(guaiacol.note));
+  const dimethyl = E.ROWS.find((r) => r.source === 's19' && r.name === 'ジメチルアニリン');
+  assert.ok(dimethyl && /N,N-ジメチルアニリン/.test(dimethyl.note));
+  assert.match(dimethyl.evidence, /氷酢酸/);
+  assert.doesNotMatch(dimethyl.evidence, /アニリンと酢酸|3\.0mL/);
+
+  const s18Phenoxide = E.ROWS.find((r) => r.source === 's18' && r.name === 'ナトリウムフェノキシド');
+  assert.ok(s18Phenoxide, 's18のナトリウムフェノキシド行');
+  assert.match(s18Phenoxide.evidence, /カップリング/);
+  assert.doesNotMatch(s18Phenoxide.evidence, /コルベ|シュミット/);
+
+  const dna = E.ROWS.find((r) => r.source === 's7' && r.name === 'DNA');
+  assert.ok(dna);
+  assert.doesNotMatch(dna.evidence, /二本鎖|プリン/);
+
+  const styrene = E.ROWS.find((r) => r.source === 's12' && r.name === 'スチレン');
+  assert.ok(styrene);
+  assert.doesNotMatch(styrene.evidence, /骨格/);
+  const anionResin = E.ROWS.find((r) => r.source === 's13' && r.name === '陰イオン交換樹脂');
+  assert.ok(anionResin);
+  assert.doesNotMatch(anionResin.evidence, /四級|架橋/);
+
+  const heme = E.ROWS.find((r) => r.source === 's14' && r.name === 'ヘム');
+  assert.ok(heme);
+  assert.doesNotMatch(heme.evidence, /補欠分子族/);
+
+  const s17Cellobiose = E.ROWS.find((r) => r.source === 's17' && r.name === 'セロビオース');
+  assert.ok(s17Cellobiose);
+  assert.doesNotMatch(s17Cellobiose.evidence, /β-1,4/);
+  const s17Trehalose = E.ROWS.find((r) => r.source === 's17' && r.name === 'トレハロース');
+  assert.ok(s17Trehalose);
+  assert.doesNotMatch(s17Trehalose.evidence, /α,α-1,1|1,1結合/);
+
+  const methylSalicylate = E.ROWS.find((r) => r.source === 's21' && r.name === 'サリチル酸メチル');
+  assert.ok(methylSalicylate);
+  assert.doesNotMatch(methylSalicylate.evidence, /メチルエステル/);
+  const ibuprofen = E.ROWS.find((r) => r.source === 's21' && r.name === 'イブプロフェン');
+  assert.ok(ibuprofen);
+  assert.doesNotMatch(ibuprofen.evidence, /非ステロイド/);
+  const sulfanilamide = E.ROWS.find((r) => r.source === 's21' && r.name === 'スルファニルアミド');
+  assert.ok(sulfanilamide);
+  assert.doesNotMatch(sulfanilamide.evidence, /基本骨格/);
+
+  for (const name of ['p-ヒドロキシ安息香酸', 'm-ヒドロキシ安息香酸', '2,4,6-トリブロモフェノール']) {
+    const row = E.ROWS.find((r) => r.source === 's21' && r.name === name);
+    assert.ok(row, name + ' の行');
+    assert.match(row.evidence, /呈色しない/);
+    assert.doesNotMatch(row.evidence, /パラベン|異性体|臭素化/);
+  }
+
+  for (const [term, expectedName] of [['セロハン', 'セロハン'], ['キュプラ', 'キュプラ'], ['シュワイツァー試薬', 'シュワイツァー試薬']]) {
+    const row = E.ROWS.find((r) => r.source === 's10' && r.name === expectedName);
+    assert.ok(row, term + ' の行');
+  }
+  const cellophane = E.ROWS.find((r) => r.source === 's10' && r.name === 'セロハン');
+  assert.match(cellophane.evidence, /再生繊維/);
+  assert.doesNotMatch(cellophane.evidence, /フィルム/);
+  assert.ok(D.materialByTerm('セロハン'));
+  assert.ok(D.materialByTerm('クプラ'));
+  assert.ok(D.materialByTerm('キュプラ'));
+});
+
+test('[ledger] 非グラフ件数と配位錯体件数を区別する', () => {
+  const js = read('app10/ledger.js');
+  assert.match(js, /var nonGraphCount/);
+  assert.match(js, /var coordinationCount/);
+  assert.match(js, /、非グラフは ' \+ nonGraphCount \+ ' 件/);
+  assert.match(js, /'配位結合を含む ' \+ coordinationCount \+ ' 件/);
+  assert.doesNotMatch(js, /'非グラフは ' \+ otherCount/);
 });
 
 test('[alias] 既存別名の正規化漏れと対応先の欠落がない', () => {
@@ -1176,8 +1525,41 @@ test('[data] 外部照合で追加した糖・タンパク質・染料の構造�
   assert.equal(D.COMPOUNDS.heme.structure.type, 'custom');
   assert.equal(D.COMPOUNDS.heme.formula, 'C34H32FeN4O4');
   assert.equal(D.COMPOUNDS.heme.pubchem, 4973);
-  assert.ok(D.COMPOUNDS.heme.structure.atoms.some((a) => a.skipValence), '金属配位の原子価除外');
-  assert.equal(R.validate(D.COMPOUNDS.heme).ok, true);
+  assert.equal(D.COMPOUNDS.heme.structure.atoms[0].el, 'Fe');
+  assert.equal(D.COMPOUNDS.heme.structure.atoms[0].charge, '2+', 'Feは2+');
+  const hemeCharge = D.COMPOUNDS.heme.structure.atoms.reduce((n, a) => n + (a.charge === '2+' ? 2 : a.charge === '+' ? 1 : a.charge === '-' ? -1 : 0), 0);
+  assert.equal(hemeCharge, 0, 'heme全体の電荷は0');
+  assert.equal(D.COMPOUNDS.heme.structure.atoms.some((a) => a.skipValence), false, 'skipValenceで原子価検証を偽装しない');
+  const hemeCoordination = D.COMPOUNDS.heme.structure.bonds.filter((b) => b.coordinate);
+  assert.equal(hemeCoordination.length, 4, 'Fe—Nの配位結合を4本もつ');
+  assert.equal(D.COMPOUNDS.heme.structure.bonds.some((b) => !b.coordinate && b.order === 6), false, '配位結合を三重結合にしない');
+  const hemeValidation = R.validate(D.COMPOUNDS.heme);
+  assert.equal(hemeValidation.ok, true);
+  assert.equal(hemeValidation.coordination, true);
+  assert.equal(hemeValidation.verification.level, 'coordination', '配位錯体は原子レベル検証済みにしない');
+  assert.match(hemeValidation.verification.short, /配位結合/);
+  const hemeSvg = R.renderStructure(D.COMPOUNDS.heme.structure, 'heme');
+  assert.match(hemeSvg, /oc-bond--coordinate/);
+  assert.match(hemeSvg, /data-charge="2\+">²⁺</);
+  assert.equal((hemeSvg.match(/CH₃/g) || []).length, 0, 'hemeは炭素ラベルを省略');
+  assert.equal(D.COMPOUNDS.heme.structure.skeletal, true);
+
+  assert.equal(D.COMPOUNDS.carthamin.structure.skeletal, true);
+  assert.ok(D.COMPOUNDS.carthamin.structure.width >= 800, 'carthaminは大図で表示');
+  const carthaminSvg = R.renderStructure(D.COMPOUNDS.carthamin.structure, 'carthamin');
+  assert.equal((carthaminSvg.match(/CH₃/g) || []).length, 0);
+  assert.match(carthaminSvg, /data-el="O"/);
+
+  assert.equal(D.COMPOUNDS.adenine.structure.atoms[0].h, 0, 'adenineのN7はHをもたない');
+  assert.equal(D.COMPOUNDS.adenine.structure.atoms[1].h, 1, 'adenineは9H体（N9にH）');
+  assert.match(D.COMPOUNDS.adenine.notes, /9H/);
+  assert.match(D.COMPOUNDS.adenine.notes, /N9/);
+  assert.equal(R.validate(D.COMPOUNDS.adenine).ok, true);
+  assert.equal(D.COMPOUNDS.guanine.structure.atoms[1].h, 0, 'guanineのN7はHをもたない');
+  assert.equal(D.COMPOUNDS.guanine.structure.atoms[4].h, 1, 'guanineは9H体（N9にH）');
+  assert.match(D.COMPOUNDS.guanine.notes, /9H/);
+  assert.match(D.COMPOUNDS.guanine.notes, /N9/);
+  assert.equal(R.validate(D.COMPOUNDS.guanine).ok, true);
 
   for (const id of ['indigo', 'alizarin', 'shikonin', 'carminic-acid', 'dibromoindigo', 'carthamin', 'quercetin']) {
     assert.equal(D.COMPOUNDS[id].structure.type, 'custom', id + ' は構造グラフ');
@@ -1186,6 +1568,36 @@ test('[data] 外部照合で追加した糖・タンパク質・染料の構造�
   assert.equal(D.COMPOUNDS['malonic-acid'].formula, 'C3H4O4');
   assert.equal(D.COMPOUNDS['maleic-anhydride'].formula, 'C4H2O3');
   assert.equal(D.COMPOUNDS['phthalic-anhydride'].formula, 'C8H4O3');
+});
+
+test('[external] 原文名が検索語で引ける（compound/alias）', () => {
+  const n = D.normalizeName;
+  for (const row of E.ROWS) {
+    if (row.kind !== 'compound' && row.kind !== 'alias') continue;
+    const terms = new Set(D.searchTermsFor(row.ref).map(n));
+    const compoundName = D.COMPOUNDS[row.ref] ? n(D.COMPOUNDS[row.ref].name) : null;
+    assert.ok(
+      terms.has(n(row.name)) || n(row.name) === compoundName,
+      row.source + '|' + row.name + ' -> ' + row.ref + ' の原文名が検索語にない'
+    );
+    if (row.kind === 'alias') {
+      assert.equal(D.aliasTarget(row.name), row.ref, row.source + '|' + row.name + ' の別名解決');
+    }
+  }
+  // 材料・混合物・無機は化合物検索とは別の索引で扱う（誤って化合物扱いしない）。
+  for (const row of E.ROWS) {
+    if (row.kind === 'material' || row.kind === 'mixture') {
+      const m = D.materialByTerm(row.name);
+      assert.ok(m && m.id === row.ref, row.source + '|' + row.name + ' の材料索引');
+    }
+    if (row.kind === 'inorganic') {
+      assert.equal(row.ref, null, row.source + '|' + row.name + ' を無機のまま扱う');
+      assert.equal(D.COMPOUNDS[row.name], undefined, row.source + '|' + row.name + ' を化合物にしない');
+    }
+  }
+  assert.equal(D.aliasTarget('クェルセチン'), 'quercetin');
+  assert.equal(D.aliasTarget('ケルセチン'), 'quercetin');
+  assert.equal(D.aliasTarget('クエルセチン'), 'quercetin');
 });
 
 test('[static] 外部照合の出典がクレジットに記載される', () => {
@@ -1199,9 +1611,29 @@ test('[static] 外部照合の出典がクレジットに記載される', () =>
   assert.match(credits, /標準的に暗記する範囲であることを意味しません/);
 });
 
+test('[static] 整理記録に前後件数・11件の原因・異性体方針・出典方針がある', () => {
+  const audit = read('app10/catalog-audit.md');
+  assert.match(audit, /367/);
+  assert.match(audit, /300/);
+  assert.match(audit, /277/);
+  assert.match(audit, /282/);
+  assert.match(audit, /259/);
+  assert.match(audit, /11件の二重導線/);
+  assert.match(audit, /INDIVIDUAL_SECTIONS/);
+  assert.match(audit, /COMBOS/);
+  assert.match(audit, /官能基異性体/);
+  assert.match(audit, /エタノールとジメチルエーテル/);
+  assert.match(audit, /旧URL/);
+  assert.match(audit, /出典/);
+  assert.match(audit, /153/);
+  assert.match(audit, /21/);
+});
+
 test('[static] 台帳の全セルはnowrapせず、4列目・7列目の幅を確保する', () => {
   const css = read('app10/app.css');
   assert.equal(/\.oc-table td[^{]*\{[^}]*white-space:\s*nowrap/.test(css), false);
+  assert.equal(/\.oc-src-tag[^{]*\{[^}]*white-space:\s*nowrap/.test(css), false, '出典タグはnowrapしない');
+  assert.match(css, /\.oc-src-tag \{[^}]*overflow-wrap: anywhere;/);
   assert.match(css, /\.oc-table th:nth-child\(4\) \{ width: 128px; \}/);
   assert.match(css, /\.oc-table th:nth-child\(7\) \{ width: 104px; \}/);
   assert.match(css, /\.oc-table \{ width: 100%; border-collapse: collapse; min-width: 1170px;/);

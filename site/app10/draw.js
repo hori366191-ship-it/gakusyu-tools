@@ -422,6 +422,17 @@
     } else if (group === 'cl') {
       var cl = addAtom('Cl', p.x, p.y, 0);
       g.bonds.push(bond(atomIndex, cl, 1));
+    } else if (group === 'br') {
+      var br = addAtom('Br', p.x, p.y, 0);
+      g.bonds.push(bond(atomIndex, br, 1));
+    } else if (group === 'i') {
+      var io = addAtom('I', p.x, p.y, 0);
+      g.bonds.push(bond(atomIndex, io, 1));
+    } else if (group === 'cn') {
+      var cy = addAtom('C', p.x, p.y, 0);
+      g.bonds.push(bond(atomIndex, cy, 1));
+      var ni = addAtom('N', p.x + 44 * u.x, p.y + 44 * u.y, 0);
+      g.bonds.push(bond(cy, ni, 3));
     } else {
       throw new Error('未対応の置換基: ' + group);
     }
@@ -454,7 +465,8 @@
         bonds: (spec.bonds || []).map(function (b) { return Object.assign({}, b); }),
         mode: spec.mode || 'condensed',
         width: spec.width || 420,
-        height: spec.height || 260
+        height: spec.height || 260,
+        skeletal: !!spec.skeletal
       };
     }
     return spec;
@@ -476,6 +488,11 @@
     if (a.el === 'Cl') return 'Cl';
     if (a.el === 'Na') return 'Na';
     return a.el;
+  }
+
+  function chargeLabel(charge) {
+    var map = { '+': '⁺', '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+    return String(charge == null ? '' : charge).split('').map(function (ch) { return map[ch] || ch; }).join('');
   }
 
   function estimateWidth(text, fontSize) {
@@ -551,13 +568,17 @@
       '" class="' + (cls || 'oc-bond') + '" stroke-width="' + (width || 2.6) + '" stroke-linecap="round"/>';
   }
 
-  function drawBondLine(a, b, order, trimA, trimB, cls) {
+  function drawBondLine(a, b, order, trimA, trimB, cls, coordinate) {
     var dx = b.x - a.x, dy = b.y - a.y;
     var len = Math.sqrt(dx * dx + dy * dy) || 1;
     var ux = dx / len, uy = dy / len;
     var px = -uy, py = ux;
     var x1 = a.x + ux * trimA, y1 = a.y + uy * trimA;
     var x2 = b.x - ux * trimB, y2 = b.y - uy * trimB;
+    if (coordinate) {
+      // 金属—配位原子の結合は三重結合ではなく、点線の配位結合として描く。
+      return lineEl(x1, y1, x2, y2, (cls || 'oc-bond') + ' oc-bond--coordinate', 2.2);
+    }
     if (order === 1) return lineEl(x1, y1, x2, y2, cls);
     var offsets = order === 2 ? [-3.6, 3.6] : [-4.8, 0, 4.8];
     return offsets.map(function (off) {
@@ -592,6 +613,12 @@
 
   function renderGraph(g, label) {
     var mode = g.mode || 'condensed';
+    var skeletal = !!g.skeletal;
+    function radiusOf(a) {
+      if (skeletal && a.el === 'C' && !a.charge && !a.label) return 0;
+      if (skeletal && a.el !== 'C') return Math.max(atomRadius(a, mode), 17);
+      return atomRadius(a, mode);
+    }
     var hPoints = g.atoms.map(function (a, i) {
       if (mode === 'condensed' && a.el === 'C') return [];
       return hDirections(g, i);
@@ -621,11 +648,11 @@
     g.bonds.forEach(function (b) {
       var a = g.atoms[b.a], c = g.atoms[b.b];
       if (b.ring) {
-        var aa = trimPoint(a, c, atomRadius(a, mode));
-        var cc = trimPoint(c, a, atomRadius(c, mode));
+        var aa = trimPoint(a, c, radiusOf(a));
+        var cc = trimPoint(c, a, radiusOf(c));
         bonds += drawRingBond(aa, cc, b.order, b.ringCenter || graphCenter);
       } else {
-        bonds += drawBondLine(a, c, b.order, atomRadius(a, mode), atomRadius(c, mode));
+        bonds += drawBondLine(a, c, b.order, radiusOf(a), radiusOf(c), null, b.coordinate);
       }
     });
 
@@ -634,8 +661,8 @@
       hPoints[i].forEach(function (p) {
         var dx = p.x - a.x, dy = p.y - a.y;
         var len = Math.sqrt(dx * dx + dy * dy) || 1;
-        var ax = a.x + dx / len * (atomRadius(a, mode) - 1);
-        var ay = a.y + dy / len * (atomRadius(a, mode) - 1);
+        var ax = a.x + dx / len * (radiusOf(a) - 1);
+        var ay = a.y + dy / len * (radiusOf(a) - 1);
         var bx = p.x - dx / len * 8;
         var by = p.y - dy / len * 8;
         hBonds += lineEl(ax, ay, bx, by, 'oc-bond oc-bond--h', 2.1);
@@ -645,11 +672,12 @@
 
     var atoms = '';
     g.atoms.forEach(function (a) {
+      if (skeletal && a.el === 'C' && !a.charge && !a.label) return;
       var lab = labelFor(a, mode);
-      var fs = mode === 'condensed' ? 19 : 23;
+      var fs = (skeletal || mode !== 'condensed') ? 23 : 19;
       atoms += textEl(a.x, a.y, lab, 'oc-atom', fs, 'data-el="' + esc(a.el) + '"');
       if (a.charge) {
-        atoms += textEl(a.x + (fs * 0.55), a.y - (fs * 0.55), a.charge, 'oc-charge', 13, 'data-charge="' + esc(a.charge) + '"');
+        atoms += textEl(a.x + (fs * 0.55), a.y - (fs * 0.55), chargeLabel(a.charge), 'oc-charge', 13, 'data-charge="' + esc(a.charge) + '"');
       }
     });
 
@@ -1190,7 +1218,9 @@
       if (!allowed) return;
       var sum = 0;
       g.bonds.forEach(function (b) {
-        if (b.a === i || b.b === i) sum += b.order;
+        if (b.a === i || b.b === i) {
+          if (!b.coordinate) sum += b.order;
+        }
       });
       var total = sum + (a.h || 0);
       var charge = a.charge === '+' ? 1 : (a.charge === '-' ? -1 : 0);
@@ -1203,8 +1233,15 @@
     return { ok: errors.length === 0, errors: errors };
   }
 
+  function hasCoordination(spec) {
+    return !!(spec && spec.bonds && spec.bonds.some(function (b) { return b.coordinate; }));
+  }
+
   function verificationForSpec(spec, formulaStatus) {
     if (!spec) return { level: 'unknown', short: '未確認', label: '構造データ未確認' };
+    if (hasCoordination(spec)) {
+      return { level: 'coordination', short: '配位結合（原子価検証対象外）', label: '配位結合を含むため原子価の自動検証対象外（分子式・組成のみ確認）' };
+    }
     if (formulaStatus === 'variable') {
       if (spec.type === 'schematic') {
         return { level: 'none', short: '模式図（可変組成）', label: '模式図・可変組成（原子レベルの検証対象外。表示式のみ）' };
@@ -1287,6 +1324,7 @@
       computed: computed,
       declared: compound.formula,
       formulaStatus: formulaStatus,
+      coordination: hasCoordination(firstSpec),
       verification: verificationForSpec(firstSpec, formulaStatus),
       errors: errors
     };
@@ -1337,9 +1375,10 @@
         else if (fig.structure.type === 'triglyceride') autoNote = 'グリセリン骨格と脂肪酸鎖を簡略化して表示しています。';
         else if (fig.structure.type === 'polymer') autoNote = '繰り返し単位と一般式で表示しています。重合度 n は特定しません。';
         else if (fig.structure.type === 'schematic') autoNote = '模式図です。立体配置の詳細は省略しています。';
+        else if (fig.structure.type === 'custom' && fig.structure.skeletal) autoNote = '炭素骨格は頂点で示し、炭素の元素記号を省略しています。ヘテロ原子と電荷は明示しています。';
       }
       var note = fig.note || autoNote;
-      return '<figure class="oc-fig" data-fig="' + idx + '">' + svg +
+      return '<figure class="oc-fig' + (fig.structure && fig.structure.skeletal ? ' oc-fig--skeletal' : '') + '" data-fig="' + idx + '">' + svg +
         (fig.label ? '<figcaption class="oc-fig__caption">' + esc(fig.label) + '</figcaption>' : '') +
         (note ? '<p class="oc-fig__note">' + esc(note) + '</p>' : '') +
         '</figure>';
