@@ -1,0 +1,4891 @@
+{
+ "version": 3,
+ "seed": 11011,
+ "edges": {
+  "2-methylpropan-2-ol-dehydration|in|2-methylpropan-2-ol": {
+   "reaction": "2-methylpropan-2-ol-dehydration",
+   "dir": "in",
+   "compound": "2-methylpropan-2-ol",
+   "points": [
+    [
+     2590.52,
+     999.47
+    ],
+    [
+     2529.63,
+     926.31
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "2-methylpropan-2-ol-dehydration|out|isobutene": {
+   "reaction": "2-methylpropan-2-ol-dehydration",
+   "dir": "out",
+   "compound": "isobutene",
+   "points": [
+    [
+     2537.78,
+     781
+    ],
+    [
+     2530.82,
+     919.57
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "2-methylpropan-2-ol-hydrogen-chloride|in|2-methylpropan-2-ol": {
+   "reaction": "2-methylpropan-2-ol-hydrogen-chloride",
+   "dir": "in",
+   "compound": "2-methylpropan-2-ol",
+   "points": [
+    [
+     2726.52,
+     999.47
+    ],
+    [
+     2772.3,
+     928.03
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "2-methylpropan-2-ol-hydrogen-chloride|out|2-chloro-2-methylpropane": {
+   "reaction": "2-methylpropan-2-ol-hydrogen-chloride",
+   "dir": "out",
+   "compound": "2-chloro-2-methylpropane",
+   "points": [
+    [
+     2796.67,
+     796.18
+    ],
+    [
+     2785.96,
+     914.37
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-butanol-esterification|in|acetic-acid": {
+   "reaction": "acetic-acid-butanol-esterification",
+   "dir": "in",
+   "compound": "acetic-acid",
+   "points": [
+    [
+     1323.86,
+     1162.09
+    ],
+    [
+     1366.91,
+     1237.78
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-butanol-esterification|in|butan-1-ol": {
+   "reaction": "acetic-acid-butanol-esterification",
+   "dir": "in",
+   "compound": "butan-1-ol",
+   "points": [
+    [
+     1057.58,
+     1471.88
+    ],
+    [
+     1164.76,
+     1421.81
+    ],
+    [
+     1289.94,
+     1255.01
+    ],
+    [
+     1325.06,
+     1235.51
+    ],
+    [
+     1347.21,
+     1237.78
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-butanol-esterification|out|butyl-acetate": {
+   "reaction": "acetic-acid-butanol-esterification",
+   "dir": "out",
+   "compound": "butyl-acetate",
+   "points": [
+    [
+     1495.99,
+     1053.02
+    ],
+    [
+     1542.56,
+     1077.75
+    ],
+    [
+     1542.56,
+     1121.75
+    ],
+    [
+     1495.38,
+     1174.94
+    ],
+    [
+     1366.91,
+     1237.78
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-ethanol-esterification|in|acetic-acid": {
+   "reaction": "acetic-acid-ethanol-esterification",
+   "dir": "in",
+   "compound": "acetic-acid",
+   "points": [
+    [
+     1215.86,
+     1139.59
+    ],
+    [
+     1107.3,
+     1149.39
+    ],
+    [
+     1078.13,
+     1111.27
+    ],
+    [
+     1078.13,
+     1049.27
+    ],
+    [
+     1168.69,
+     1039.72
+    ],
+    [
+     1168.69,
+     1000.72
+    ],
+    [
+     1241.47,
+     901.08
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-ethanol-esterification|in|ethanol": {
+   "reaction": "acetic-acid-ethanol-esterification",
+   "dir": "in",
+   "compound": "ethanol",
+   "points": [
+    [
+     1062.44,
+     850.46
+    ],
+    [
+     1174.35,
+     894.58
+    ],
+    [
+     1231.63,
+     892.82
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-ethanol-esterification|out|ethyl-acetate": {
+   "reaction": "acetic-acid-ethanol-esterification",
+   "dir": "out",
+   "compound": "ethyl-acetate",
+   "points": [
+    [
+     1295.57,
+     1063.29
+    ],
+    [
+     1311.93,
+     1030.72
+    ],
+    [
+     1311.93,
+     1009.72
+    ],
+    [
+     1260.71,
+     962.65
+    ],
+    [
+     1244.89,
+     900.48
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-glycerol-esterification|in|acetic-acid": {
+   "reaction": "acetic-acid-glycerol-esterification",
+   "dir": "in",
+   "compound": "acetic-acid",
+   "points": [
+    [
+     1225.86,
+     1173.59
+    ],
+    [
+     1286.94,
+     1279.01
+    ],
+    [
+     1379.02,
+     1320.08
+    ],
+    [
+     1407.36,
+     1366.98
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-glycerol-esterification|in|glycerol": {
+   "reaction": "acetic-acid-glycerol-esterification",
+   "dir": "in",
+   "compound": "glycerol",
+   "points": [
+    [
+     1299.5,
+     1135.37
+    ],
+    [
+     1328.86,
+     1134.59
+    ],
+    [
+     1424.18,
+     1255.01
+    ],
+    [
+     1407.36,
+     1366.98
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-glycerol-esterification|out|triacetin": {
+   "reaction": "acetic-acid-glycerol-esterification",
+   "dir": "out",
+   "compound": "triacetin",
+   "points": [
+    [
+     1449.29,
+     1568.27
+    ],
+    [
+     1495.26,
+     1512.67
+    ],
+    [
+     1495.26,
+     1491.67
+    ],
+    [
+     1436.6,
+     1480.23
+    ],
+    [
+     1404.09,
+     1385.49
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-isoamyl-esterification|in|3-methylbutan-1-ol": {
+   "reaction": "acetic-acid-isoamyl-esterification",
+   "dir": "in",
+   "compound": "3-methylbutan-1-ol",
+   "points": [
+    [
+     1548.3,
+     598.07
+    ],
+    [
+     1698.55,
+     659.01
+    ],
+    [
+     1698.55,
+     703.01
+    ],
+    [
+     1570.61,
+     796.06
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-isoamyl-esterification|in|acetic-acid": {
+   "reaction": "acetic-acid-isoamyl-esterification",
+   "dir": "in",
+   "compound": "acetic-acid",
+   "points": [
+    [
+     1295.86,
+     1139.59
+    ],
+    [
+     1392.06,
+     1232.51
+    ],
+    [
+     1498.38,
+     1177.94
+    ],
+    [
+     1545.56,
+     1124.75
+    ],
+    [
+     1545.56,
+     1074.75
+    ],
+    [
+     1487.99,
+     1078.02
+    ],
+    [
+     1495.24,
+     987.32
+    ],
+    [
+     1458.36,
+     985.7
+    ],
+    [
+     1458.36,
+     935.7
+    ],
+    [
+     1526.6,
+     905.49
+    ],
+    [
+     1555.77,
+     806.45
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-isoamyl-esterification|out|isoamyl-acetate": {
+   "reaction": "acetic-acid-isoamyl-esterification",
+   "dir": "out",
+   "compound": "isoamyl-acetate",
+   "points": [
+    [
+     1649.36,
+     780.92
+    ],
+    [
+     1570.61,
+     796.06
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-methanol-esterification|in|acetic-acid": {
+   "reaction": "acetic-acid-methanol-esterification",
+   "dir": "in",
+   "compound": "acetic-acid",
+   "points": [
+    [
+     1323.86,
+     1151.09
+    ],
+    [
+     1361.14,
+     1174.94
+    ],
+    [
+     1418.42,
+     1173.18
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1360.5,
+     1174.5
+    ]
+   ]
+  },
+  "acetic-acid-methanol-esterification|in|methanol": {
+   "reaction": "acetic-acid-methanol-esterification",
+   "dir": "in",
+   "compound": "methanol",
+   "points": [
+    [
+     1257.3,
+     1123.89
+    ],
+    [
+     1182.86,
+     1134.59
+    ],
+    [
+     1182.86,
+     1178.59
+    ],
+    [
+     1418.42,
+     1173.18
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-methanol-esterification|out|methyl-acetate": {
+   "reaction": "acetic-acid-methanol-esterification",
+   "dir": "out",
+   "compound": "methyl-acetate",
+   "points": [
+    [
+     1623.38,
+     1256.99
+    ],
+    [
+     1437.66,
+     1174.86
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetone-reduction|in|acetone": {
+   "reaction": "acetone-reduction",
+   "dir": "in",
+   "compound": "acetone",
+   "points": [
+    [
+     1015.51,
+     517.6
+    ],
+    [
+     910.74,
+     618.89
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetone-reduction|out|propan-2-ol": {
+   "reaction": "acetone-reduction",
+   "dir": "out",
+   "compound": "propan-2-ol",
+   "points": [
+    [
+     875.47,
+     507.82
+    ],
+    [
+     910.74,
+     618.89
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "alanine-glycine-peptide|in|alanine": {
+   "reaction": "alanine-glycine-peptide",
+   "dir": "in",
+   "compound": "alanine",
+   "points": [
+    [
+     3108.61,
+     400.32
+    ],
+    [
+     3144.44,
+     494.84
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "alanine-glycine-peptide|in|glycine": {
+   "reaction": "alanine-glycine-peptide",
+   "dir": "in",
+   "compound": "glycine",
+   "points": [
+    [
+     3026.26,
+     315.59
+    ],
+    [
+     3065.61,
+     405.32
+    ],
+    [
+     3144.44,
+     494.84
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "alanine-glycine-peptide|out|alanylglycine": {
+   "reaction": "alanine-glycine-peptide",
+   "dir": "out",
+   "compound": "alanylglycine",
+   "points": [
+    [
+     2941.43,
+     482.51
+    ],
+    [
+     3144.44,
+     494.84
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "alanylglycine-hydrolysis|in|alanylglycine": {
+   "reaction": "alanylglycine-hydrolysis",
+   "dir": "in",
+   "compound": "alanylglycine",
+   "points": [
+    [
+     2941.43,
+     493.51
+    ],
+    [
+     3015.82,
+     563.04
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "alanylglycine-hydrolysis|out|alanine": {
+   "reaction": "alanylglycine-hydrolysis",
+   "dir": "out",
+   "compound": "alanine",
+   "points": [
+    [
+     3168.61,
+     400.32
+    ],
+    [
+     3015.82,
+     563.04
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "alanylglycine-hydrolysis|out|glycine": {
+   "reaction": "alanylglycine-hydrolysis",
+   "dir": "out",
+   "compound": "glycine",
+   "points": [
+    [
+     3066.26,
+     315.59
+    ],
+    [
+     3054.95,
+     433.77
+    ],
+    [
+     3015.82,
+     563.04
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aniline-acetic-anhydride|in|acetic-anhydride": {
+   "reaction": "aniline-acetic-anhydride",
+   "dir": "in",
+   "compound": "acetic-anhydride",
+   "points": [
+    [
+     1081.62,
+     1525.91
+    ],
+    [
+     1096.06,
+     1455.77
+    ],
+    [
+     1167.76,
+     1424.81
+    ],
+    [
+     1167.76,
+     1397.81
+    ],
+    [
+     1062.58,
+     1288.57
+    ],
+    [
+     1035.64,
+     1223.47
+    ],
+    [
+     1006.64,
+     1203.97
+    ],
+    [
+     981.49,
+     1209.23
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aniline-acetic-anhydride|in|aniline": {
+   "reaction": "aniline-acetic-anhydride",
+   "dir": "in",
+   "compound": "aniline",
+   "points": [
+    [
+     799.34,
+     1203.44
+    ],
+    [
+     981.49,
+     1209.23
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aniline-acetic-anhydride|out|acetanilide": {
+   "reaction": "aniline-acetic-anhydride",
+   "dir": "out",
+   "compound": "acetanilide",
+   "points": [
+    [
+     1057.92,
+     786.77
+    ],
+    [
+     1152.48,
+     916.22
+    ],
+    [
+     1156.69,
+     1043.77
+    ],
+    [
+     1087.13,
+     1058.27
+    ],
+    [
+     1038.84,
+     1174.02
+    ],
+    [
+     981.49,
+     1209.23
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1078.1,
+     1079.8
+    ]
+   ]
+  },
+  "aniline-diazotization|in|aniline": {
+   "reaction": "aniline-diazotization",
+   "dir": "in",
+   "compound": "aniline",
+   "points": [
+    [
+     731.34,
+     1220.44
+    ],
+    [
+     720.89,
+     1353.54
+    ],
+    [
+     784.04,
+     1442.7
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aniline-diazotization|out|benzenediazonium-chloride": {
+   "reaction": "aniline-diazotization",
+   "dir": "out",
+   "compound": "benzenediazonium-chloride",
+   "points": [
+    [
+     856.26,
+     1370.24
+    ],
+    [
+     784.04,
+     1442.7
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aspirin-hydrolysis|in|aspirin": {
+   "reaction": "aspirin-hydrolysis",
+   "dir": "in",
+   "compound": "aspirin",
+   "points": [
+    [
+     1199.25,
+     1675.5
+    ],
+    [
+     1245.06,
+     1502.77
+    ],
+    [
+     1322.59,
+     1501.6
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aspirin-hydrolysis|out|acetic-acid": {
+   "reaction": "aspirin-hydrolysis",
+   "dir": "out",
+   "compound": "acetic-acid",
+   "points": [
+    [
+     1285.86,
+     1173.59
+    ],
+    [
+     1238.78,
+     1347.08
+    ],
+    [
+     1320.04,
+     1388.14
+    ],
+    [
+     1335.26,
+     1486.51
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1248.9,
+     1309.6
+    ]
+   ]
+  },
+  "aspirin-hydrolysis|out|salicylic-acid": {
+   "reaction": "aspirin-hydrolysis",
+   "dir": "out",
+   "compound": "salicylic-acid",
+   "points": [
+    [
+     1240.06,
+     1480.77
+    ],
+    [
+     1335.26,
+     1486.51
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzaldehyde-oxidation|in|benzaldehyde": {
+   "reaction": "benzaldehyde-oxidation",
+   "dir": "in",
+   "compound": "benzaldehyde",
+   "points": [
+    [
+     2227.97,
+     939.21
+    ],
+    [
+     2168.17,
+     1030
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzaldehyde-oxidation|out|benzoic-acid": {
+   "reaction": "benzaldehyde-oxidation",
+   "dir": "out",
+   "compound": "benzoic-acid",
+   "points": [
+    [
+     2104.72,
+     919.23
+    ],
+    [
+     2168.17,
+     1030
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzene-chlorination|in|benzene": {
+   "reaction": "benzene-chlorination",
+   "dir": "in",
+   "compound": "benzene",
+   "points": [
+    [
+     536.08,
+     1098.84
+    ],
+    [
+     457.33,
+     1261.31
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzene-chlorination|out|chlorobenzene": {
+   "reaction": "benzene-chlorination",
+   "dir": "out",
+   "compound": "chlorobenzene",
+   "points": [
+    [
+     330.71,
+     1226.37
+    ],
+    [
+     457.33,
+     1261.31
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzene-nitration|in|benzene": {
+   "reaction": "benzene-nitration",
+   "dir": "in",
+   "compound": "benzene",
+   "points": [
+    [
+     468.08,
+     1081.84
+    ],
+    [
+     383.97,
+     1113.18
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzene-nitration|out|nitrobenzene": {
+   "reaction": "benzene-nitration",
+   "dir": "out",
+   "compound": "nitrobenzene",
+   "points": [
+    [
+     320.14,
+     981.35
+    ],
+    [
+     383.97,
+     1113.18
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzene-sulfonation|in|benzene": {
+   "reaction": "benzene-sulfonation",
+   "dir": "in",
+   "compound": "benzene",
+   "points": [
+    [
+     536.08,
+     1064.84
+    ],
+    [
+     396.16,
+     1023.47
+    ],
+    [
+     396.16,
+     996.47
+    ],
+    [
+     593.84,
+     848.17
+    ],
+    [
+     613,
+     738.12
+    ],
+    [
+     607.01,
+     666.01
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzene-sulfonation|out|benzenesulfonic-acid": {
+   "reaction": "benzene-sulfonation",
+   "dir": "out",
+   "compound": "benzenesulfonic-acid",
+   "points": [
+    [
+     786.24,
+     431.22
+    ],
+    [
+     638.27,
+     515.75
+    ],
+    [
+     619.79,
+     637.97
+    ],
+    [
+     618.6,
+     654.42
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzyl-alcohol-oxidation|in|benzyl-alcohol": {
+   "reaction": "benzyl-alcohol-oxidation",
+   "dir": "in",
+   "compound": "benzyl-alcohol",
+   "points": [
+    [
+     2234.22,
+     693.77
+    ],
+    [
+     2273.89,
+     787.76
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzyl-alcohol-oxidation|out|benzaldehyde": {
+   "reaction": "benzyl-alcohol-oxidation",
+   "dir": "out",
+   "compound": "benzaldehyde",
+   "points": [
+    [
+     2295.97,
+     922.21
+    ],
+    [
+     2270.63,
+     806.27
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "butan-1-ol-oxidation|in|butan-1-ol": {
+   "reaction": "butan-1-ol-oxidation",
+   "dir": "in",
+   "compound": "butan-1-ol",
+   "points": [
+    [
+     989.58,
+     1488.88
+    ],
+    [
+     967,
+     1601.07
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "butan-1-ol-oxidation|out|butanal": {
+   "reaction": "butan-1-ol-oxidation",
+   "dir": "out",
+   "compound": "butanal",
+   "points": [
+    [
+     933.11,
+     1724.25
+    ],
+    [
+     958.58,
+     1619.13
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "butanal-reduction|in|butanal": {
+   "reaction": "butanal-reduction",
+   "dir": "in",
+   "compound": "butanal",
+   "points": [
+    [
+     873.11,
+     1724.25
+    ],
+    [
+     821.45,
+     1616.28
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "butanal-reduction|out|butan-1-ol": {
+   "reaction": "butanal-reduction",
+   "dir": "out",
+   "compound": "butan-1-ol",
+   "points": [
+    [
+     921.58,
+     1471.88
+    ],
+    [
+     826.29,
+     1605.88
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "butanoic-acid-ethanol-esterification|in|butanoic-acid": {
+   "reaction": "butanoic-acid-ethanol-esterification",
+   "dir": "in",
+   "compound": "butanoic-acid",
+   "points": [
+    [
+     1482.44,
+     467.58
+    ],
+    [
+     1481.22,
+     534.15
+    ],
+    [
+     1475.3,
+     603.07
+    ],
+    [
+     1349.19,
+     654.98
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "butanoic-acid-ethanol-esterification|in|ethanol": {
+   "reaction": "butanoic-acid-ethanol-esterification",
+   "dir": "in",
+   "compound": "ethanol",
+   "points": [
+    [
+     1062.44,
+     839.46
+    ],
+    [
+     1130.92,
+     791.77
+    ],
+    [
+     1161.44,
+     737.32
+    ],
+    [
+     1307.35,
+     652.72
+    ],
+    [
+     1329.5,
+     654.98
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "butanoic-acid-ethanol-esterification|out|ethyl-butyrate": {
+   "reaction": "butanoic-acid-ethanol-esterification",
+   "dir": "out",
+   "compound": "ethyl-butyrate",
+   "points": [
+    [
+     1557.55,
+     681.01
+    ],
+    [
+     1558.51,
+     671.21
+    ],
+    [
+     1371.35,
+     652.72
+    ],
+    [
+     1349.19,
+     654.98
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "caprolactam-ring-opening|in|caprolactam": {
+   "reaction": "caprolactam-ring-opening",
+   "dir": "in",
+   "compound": "caprolactam",
+   "points": [
+    [
+     2455.68,
+     1403.69
+    ],
+    [
+     2552.54,
+     1299.06
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "caprolactam-ring-opening|out|nylon6": {
+   "reaction": "caprolactam-ring-opening",
+   "dir": "out",
+   "compound": "nylon6",
+   "points": [
+    [
+     2457.43,
+     1177.74
+    ],
+    [
+     2563.97,
+     1282.74
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "chlorobenzene-dow-phenol|in|chlorobenzene": {
+   "reaction": "chlorobenzene-dow-phenol",
+   "dir": "in",
+   "compound": "chlorobenzene",
+   "points": [
+    [
+     262.71,
+     1209.37
+    ],
+    [
+     203.42,
+     1056.11
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "chlorobenzene-dow-phenol|out|sodium-phenoxide": {
+   "reaction": "chlorobenzene-dow-phenol",
+   "dir": "out",
+   "compound": "sodium-phenoxide",
+   "points": [
+    [
+     362.64,
+     862.86
+    ],
+    [
+     247.14,
+     942.35
+    ],
+    [
+     209.85,
+     1044.98
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cumene-hydroperoxide-decomposition|in|cumene-hydroperoxide": {
+   "reaction": "cumene-hydroperoxide-decomposition",
+   "dir": "in",
+   "compound": "cumene-hydroperoxide",
+   "points": [
+    [
+     605,
+     713.12
+    ],
+    [
+     787.86,
+     690.4
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cumene-hydroperoxide-decomposition|out|acetone": {
+   "reaction": "cumene-hydroperoxide-decomposition",
+   "dir": "out",
+   "compound": "acetone",
+   "points": [
+    [
+     947.51,
+     500.6
+    ],
+    [
+     948.47,
+     512.82
+    ],
+    [
+     827.83,
+     636.13
+    ],
+    [
+     831.71,
+     692.17
+    ],
+    [
+     807.56,
+     690.4
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cumene-hydroperoxide-decomposition|out|phenol": {
+   "reaction": "cumene-hydroperoxide-decomposition",
+   "dir": "out",
+   "compound": "phenol",
+   "points": [
+    [
+     777.68,
+     812.11
+    ],
+    [
+     795.97,
+     698.51
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cumene-oxidation|in|cumene": {
+   "reaction": "cumene-oxidation",
+   "dir": "in",
+   "compound": "cumene",
+   "points": [
+    [
+     426.66,
+     529.11
+    ],
+    [
+     385.79,
+     672.46
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cumene-oxidation|out|cumene-hydroperoxide": {
+   "reaction": "cumene-oxidation",
+   "dir": "out",
+   "compound": "cumene-hydroperoxide",
+   "points": [
+    [
+     469,
+     713.12
+    ],
+    [
+     454.94,
+     689.7
+    ],
+    [
+     385.79,
+     672.46
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cysteine-oxidation|in|cysteine": {
+   "reaction": "cysteine-oxidation",
+   "dir": "in",
+   "compound": "cysteine",
+   "points": [
+    [
+     2329.61,
+     1777.7
+    ],
+    [
+     2367.46,
+     1674.33
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cysteine-oxidation|out|cystine": {
+   "reaction": "cysteine-oxidation",
+   "dir": "out",
+   "compound": "cystine",
+   "points": [
+    [
+     2331.05,
+     1551.75
+    ],
+    [
+     2375.88,
+     1656.27
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "diazonium-phenol-coupling|in|benzenediazonium-chloride": {
+   "reaction": "diazonium-phenol-coupling",
+   "dir": "in",
+   "compound": "benzenediazonium-chloride",
+   "points": [
+    [
+     924.26,
+     1353.24
+    ],
+    [
+     1032.64,
+     1247.47
+    ],
+    [
+     1030.75,
+     1151.58
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "diazonium-phenol-coupling|in|phenol": {
+   "reaction": "diazonium-phenol-coupling",
+   "dir": "in",
+   "compound": "phenol",
+   "points": [
+    [
+     777.68,
+     846.11
+    ],
+    [
+     811.05,
+     931.08
+    ],
+    [
+     1035.6,
+     1090.33
+    ],
+    [
+     1045.6,
+     1141.19
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "diazonium-phenol-coupling|out|p-hydroxyazobenzene": {
+   "reaction": "diazonium-phenol-coupling",
+   "dir": "out",
+   "compound": "p-hydroxyazobenzene",
+   "points": [
+    [
+     1351.24,
+     1012.32
+    ],
+    [
+     1311.93,
+     1030.72
+    ],
+    [
+     1087.13,
+     1058.27
+    ],
+    [
+     1045.6,
+     1141.19
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanal-oxidation-acetic|in|ethanal": {
+   "reaction": "ethanal-oxidation-acetic",
+   "dir": "in",
+   "compound": "ethanal",
+   "points": [
+    [
+     659.14,
+     1209.85
+    ],
+    [
+     658.34,
+     1225.44
+    ],
+    [
+     809.74,
+     1315.31
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanal-oxidation-acetic|out|acetic-acid": {
+   "reaction": "ethanal-oxidation-acetic",
+   "dir": "out",
+   "compound": "acetic-acid",
+   "points": [
+    [
+     1187.86,
+     1162.09
+    ],
+    [
+     1184.84,
+     1218.02
+    ],
+    [
+     971.14,
+     1286.03
+    ],
+    [
+     809.74,
+     1315.31
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanal-reduction|in|ethanal": {
+   "reaction": "ethanal-reduction",
+   "dir": "in",
+   "compound": "ethanal",
+   "points": [
+    [
+     561.14,
+     1192.85
+    ],
+    [
+     615.28,
+     1086.91
+    ],
+    [
+     637.68,
+     989.57
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanal-reduction|out|ethanol": {
+   "reaction": "ethanal-reduction",
+   "dir": "out",
+   "compound": "ethanol",
+   "points": [
+    [
+     926.44,
+     855.96
+    ],
+    [
+     811.05,
+     887.08
+    ],
+    [
+     649.27,
+     977.99
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-dehydration-ether|in|ethanol": {
+   "reaction": "ethanol-dehydration-ether",
+   "dir": "in",
+   "compound": "ethanol",
+   "points": [
+    [
+     994.44,
+     830.71
+    ],
+    [
+     1133.92,
+     794.77
+    ],
+    [
+     1133.92,
+     744.77
+    ],
+    [
+     1076.53,
+     693.26
+    ],
+    [
+     1051.25,
+     628.55
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1122.3,
+     797.8
+    ]
+   ]
+  },
+  "ethanol-dehydration-ether|out|diethyl-ether": {
+   "reaction": "ethanol-dehydration-ether",
+   "dir": "out",
+   "compound": "diethyl-ether",
+   "points": [
+    [
+     1127.93,
+     555.8
+    ],
+    [
+     1062.84,
+     616.96
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-oxidation-acetic|in|ethanol": {
+   "reaction": "ethanol-oxidation-acetic",
+   "dir": "in",
+   "compound": "ethanol",
+   "points": [
+    [
+     964.44,
+     864.71
+    ],
+    [
+     957.05,
+     931.08
+    ],
+    [
+     925.22,
+     984.24
+    ],
+    [
+     925.22,
+     1005.24
+    ],
+    [
+     966.45,
+     1073.1
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     932.5,
+     1017.2
+    ]
+   ]
+  },
+  "ethanol-oxidation-acetic|out|acetic-acid": {
+   "reaction": "ethanol-oxidation-acetic",
+   "dir": "out",
+   "compound": "acetic-acid",
+   "points": [
+    [
+     1187.86,
+     1151.09
+    ],
+    [
+     1116.3,
+     1140.39
+    ],
+    [
+     1035.6,
+     1090.33
+    ],
+    [
+     966.45,
+     1073.1
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1086.1,
+     1121.6
+    ],
+    [
+     1150.4,
+     1145.5
+    ]
+   ]
+  },
+  "ethanol-oxidation-ethanal|in|ethanol": {
+   "reaction": "ethanol-oxidation-ethanal",
+   "dir": "in",
+   "compound": "ethanol",
+   "points": [
+    [
+     926.44,
+     850.46
+    ],
+    [
+     957.05,
+     887.08
+    ],
+    [
+     957.05,
+     931.08
+    ],
+    [
+     907.02,
+     1024.52
+    ],
+    [
+     823.1,
+     1073.21
+    ],
+    [
+     723.87,
+     1107.91
+    ],
+    [
+     679.42,
+     1106.14
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-oxidation-ethanal|out|ethanal": {
+   "reaction": "ethanol-oxidation-ethanal",
+   "dir": "out",
+   "compound": "ethanal",
+   "points": [
+    [
+     621.14,
+     1192.85
+    ],
+    [
+     663.15,
+     1112.07
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethene-bromine-addition|in|ethene": {
+   "reaction": "ethene-bromine-addition",
+   "dir": "in",
+   "compound": "ethene",
+   "points": [
+    [
+     648.51,
+     335.94
+    ],
+    [
+     636.72,
+     237.86
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethene-bromine-addition|out|1,2-dibromoethane": {
+   "reaction": "ethene-bromine-addition",
+   "dir": "out",
+   "compound": "1,2-dibromoethane",
+   "points": [
+    [
+     519.15,
+     149.55
+    ],
+    [
+     638.3,
+     219.81
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethene-hydration|in|ethene": {
+   "reaction": "ethene-hydration",
+   "dir": "in",
+   "compound": "ethene",
+   "points": [
+    [
+     678.51,
+     369.94
+    ],
+    [
+     713.24,
+     436.22
+    ],
+    [
+     796.27,
+     515.75
+    ],
+    [
+     796.27,
+     536.75
+    ],
+    [
+     758.64,
+     618.73
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethene-hydration|out|ethanol": {
+   "reaction": "ethene-hydration",
+   "dir": "out",
+   "compound": "ethanol",
+   "points": [
+    [
+     926.44,
+     839.46
+    ],
+    [
+     850.68,
+     851.11
+    ],
+    [
+     704.68,
+     851.11
+    ],
+    [
+     704.68,
+     807.11
+    ],
+    [
+     762.25,
+     783.56
+    ],
+    [
+     756.45,
+     626.89
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethene-hydrogen-bromide|in|ethene": {
+   "reaction": "ethene-hydrogen-bromide",
+   "dir": "in",
+   "compound": "ethene",
+   "points": [
+    [
+     708.51,
+     335.94
+    ],
+    [
+     726.3,
+     224.97
+    ],
+    [
+     726.32,
+     170.1
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethene-hydrogen-bromide|out|bromoethane": {
+   "reaction": "ethene-hydrogen-bromide",
+   "dir": "out",
+   "compound": "bromoethane",
+   "points": [
+    [
+     782.19,
+     85.31
+    ],
+    [
+     737.9,
+     158.51
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethene-hydrogenation|in|ethene": {
+   "reaction": "ethene-hydrogenation",
+   "dir": "in",
+   "compound": "ethene",
+   "points": [
+    [
+     610.51,
+     352.94
+    ],
+    [
+     529.55,
+     300.09
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethene-hydrogenation|out|ethane": {
+   "reaction": "ethene-hydrogenation",
+   "dir": "out",
+   "compound": "ethane",
+   "points": [
+    [
+     591.37,
+     127.31
+    ],
+    [
+     530.01,
+     294.93
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethene-polymerization|in|ethene": {
+   "reaction": "ethene-polymerization",
+   "dir": "in",
+   "compound": "ethene",
+   "points": [
+    [
+     746.51,
+     352.94
+    ],
+    [
+     832.89,
+     263.52
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethene-polymerization|out|polyethylene": {
+   "reaction": "ethene-polymerization",
+   "dir": "out",
+   "compound": "polyethylene",
+   "points": [
+    [
+     942.26,
+     270.73
+    ],
+    [
+     851.4,
+     260.26
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyl-acetate-hydrolysis|in|ethyl-acetate": {
+   "reaction": "ethyl-acetate-hydrolysis",
+   "dir": "in",
+   "compound": "ethyl-acetate",
+   "points": [
+    [
+     1355.57,
+     1063.29
+    ],
+    [
+     1337.97,
+     969
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyl-acetate-hydrolysis|out|acetic-acid": {
+   "reaction": "ethyl-acetate-hydrolysis",
+   "dir": "out",
+   "compound": "acetic-acid",
+   "points": [
+    [
+     1255.86,
+     1139.59
+    ],
+    [
+     1110.3,
+     1146.39
+    ],
+    [
+     1081.13,
+     1108.27
+    ],
+    [
+     1081.13,
+     1052.27
+    ],
+    [
+     1162.69,
+     1049.77
+    ],
+    [
+     1171.69,
+     1003.72
+    ],
+    [
+     1206.81,
+     984.22
+    ],
+    [
+     1336.29,
+     968.54
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1081.1,
+     1072.7
+    ],
+    [
+     1096.1,
+     1127.9
+    ],
+    [
+     1121.9,
+     1051
+    ],
+    [
+     1145.5,
+     1144.8
+    ],
+    [
+     1154.4,
+     1050
+    ],
+    [
+     1168.7,
+     1019.1
+    ]
+   ]
+  },
+  "ethyl-acetate-hydrolysis|out|ethanol": {
+   "reaction": "ethyl-acetate-hydrolysis",
+   "dir": "out",
+   "compound": "ethanol",
+   "points": [
+    [
+     1062.44,
+     855.96
+    ],
+    [
+     1260.71,
+     962.65
+    ],
+    [
+     1329.86,
+     960.88
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyl-propionate-saponification|in|ethyl-propionate": {
+   "reaction": "ethyl-propionate-saponification",
+   "dir": "in",
+   "compound": "ethyl-propionate",
+   "points": [
+    [
+     818.1,
+     1045.71
+    ],
+    [
+     749.02,
+     1024.52
+    ],
+    [
+     749.02,
+     1003.52
+    ],
+    [
+     806.02,
+     984.02
+    ],
+    [
+     818.17,
+     986.29
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyl-propionate-saponification|out|ethanol": {
+   "reaction": "ethyl-propionate-saponification",
+   "dir": "out",
+   "compound": "ethanol",
+   "points": [
+    [
+     926.44,
+     844.96
+    ],
+    [
+     957.05,
+     887.08
+    ],
+    [
+     957.05,
+     931.08
+    ],
+    [
+     837.87,
+     986.29
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyl-propionate-saponification|out|propionic-acid": {
+   "reaction": "ethyl-propionate-saponification",
+   "dir": "out",
+   "compound": "propionic-acid",
+   "points": [
+    [
+     947.88,
+     826.7
+    ],
+    [
+     921.44,
+     825.71
+    ],
+    [
+     811.05,
+     887.08
+    ],
+    [
+     811.05,
+     931.08
+    ],
+    [
+     837.87,
+     986.29
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     885.3,
+     845.8
+    ]
+   ]
+  },
+  "formaldehyde-oxidation-formic|in|formaldehyde": {
+   "reaction": "formaldehyde-oxidation-formic",
+   "dir": "in",
+   "compound": "formaldehyde",
+   "points": [
+    [
+     689.25,
+     778.56
+    ],
+    [
+     704.68,
+     851.11
+    ],
+    [
+     735.7,
+     909.79
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "formaldehyde-oxidation-formic|out|formic-acid": {
+   "reaction": "formaldehyde-oxidation-formic",
+   "dir": "out",
+   "compound": "formic-acid",
+   "points": [
+    [
+     1015.69,
+     1021.77
+    ],
+    [
+     925.22,
+     1005.24
+    ],
+    [
+     735.25,
+     914.95
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     896.1,
+     991.4
+    ]
+   ]
+  },
+  "formic-acid-ethanol-esterification|in|ethanol": {
+   "reaction": "formic-acid-ethanol-esterification",
+   "dir": "in",
+   "compound": "ethanol",
+   "points": [
+    [
+     1062.44,
+     844.96
+    ],
+    [
+     1219.16,
+     758.24
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "formic-acid-ethanol-esterification|in|formic-acid": {
+   "reaction": "formic-acid-ethanol-esterification",
+   "dir": "in",
+   "compound": "formic-acid",
+   "points": [
+    [
+     1083.69,
+     1004.77
+    ],
+    [
+     1152.48,
+     937.22
+    ],
+    [
+     1130.92,
+     791.77
+    ],
+    [
+     1223.56,
+     763.48
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "formic-acid-ethanol-esterification|out|ethyl-formate": {
+   "reaction": "formic-acid-ethanol-esterification",
+   "dir": "out",
+   "compound": "ethyl-formate",
+   "points": [
+    [
+     1417.51,
+     693.21
+    ],
+    [
+     1295.68,
+     758.32
+    ],
+    [
+     1238.41,
+     756.56
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "formic-acid-methanol-esterification|in|formic-acid": {
+   "reaction": "formic-acid-methanol-esterification",
+   "dir": "in",
+   "compound": "formic-acid",
+   "points": [
+    [
+     1083.69,
+     1038.77
+    ],
+    [
+     1038.6,
+     1114.33
+    ],
+    [
+     1322.06,
+     1232.51
+    ],
+    [
+     1286.94,
+     1252.01
+    ],
+    [
+     1286.94,
+     1279.01
+    ],
+    [
+     1318.75,
+     1305.84
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1192.2,
+     1178.4
+    ]
+   ]
+  },
+  "formic-acid-methanol-esterification|in|methanol": {
+   "reaction": "formic-acid-methanol-esterification",
+   "dir": "in",
+   "compound": "methanol",
+   "points": [
+    [
+     1149.3,
+     1135.39
+    ],
+    [
+     1184.84,
+     1174.02
+    ],
+    [
+     1318.75,
+     1305.84
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1280.9,
+     1268.6
+    ],
+    [
+     1295.3,
+     1282.7
+    ]
+   ]
+  },
+  "formic-acid-methanol-esterification|out|methyl-formate": {
+   "reaction": "formic-acid-methanol-esterification",
+   "dir": "out",
+   "compound": "methyl-formate",
+   "points": [
+    [
+     1541.95,
+     1378.14
+    ],
+    [
+     1543.6,
+     1372.14
+    ],
+    [
+     1376.02,
+     1323.08
+    ],
+    [
+     1340.9,
+     1303.58
+    ],
+    [
+     1318.75,
+     1305.84
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "fructose-base-isomerization|in|fructose": {
+   "reaction": "fructose-base-isomerization",
+   "dir": "in",
+   "compound": "fructose",
+   "points": [
+    [
+     2400.57,
+     535.42
+    ],
+    [
+     2375.69,
+     419.97
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "fructose-base-isomerization|out|glucose": {
+   "reaction": "fructose-base-isomerization",
+   "dir": "out",
+   "compound": "glucose",
+   "points": [
+    [
+     2286.48,
+     298.14
+    ],
+    [
+     2377.27,
+     401.92
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "fructose-base-isomerization|out|mannose": {
+   "reaction": "fructose-base-isomerization",
+   "dir": "out",
+   "compound": "mannose",
+   "points": [
+    [
+     2391.06,
+     175.75
+    ],
+    [
+     2243.48,
+     259.14
+    ],
+    [
+     2243.48,
+     303.14
+    ],
+    [
+     2377.27,
+     401.92
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glucose-reduction|in|glucose": {
+   "reaction": "glucose-reduction",
+   "dir": "in",
+   "compound": "glucose",
+   "points": [
+    [
+     2346.48,
+     298.14
+    ],
+    [
+     2225.36,
+     384.03
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glucose-reduction|out|sorbitol": {
+   "reaction": "glucose-reduction",
+   "dir": "out",
+   "compound": "sorbitol",
+   "points": [
+    [
+     2388.68,
+     286.32
+    ],
+    [
+     2389.48,
+     303.14
+    ],
+    [
+     2225.36,
+     384.03
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycerol-linoleic-esterification|in|glycerol": {
+   "reaction": "glycerol-linoleic-esterification",
+   "dir": "in",
+   "compound": "glycerol",
+   "points": [
+    [
+     1397.5,
+     1112.87
+    ],
+    [
+     1396.56,
+     1121.75
+    ],
+    [
+     1542.56,
+     1121.75
+    ],
+    [
+     1648.61,
+     1102.22
+    ],
+    [
+     1670.76,
+     1104.49
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycerol-linoleic-esterification|in|linoleic-acid": {
+   "reaction": "glycerol-linoleic-esterification",
+   "dir": "in",
+   "compound": "linoleic-acid",
+   "points": [
+    [
+     1734.74,
+     1000.43
+    ],
+    [
+     1690.46,
+     1104.49
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycerol-linoleic-esterification|out|trilinolein": {
+   "reaction": "glycerol-linoleic-esterification",
+   "dir": "out",
+   "compound": "trilinolein",
+   "points": [
+    [
+     1752.72,
+     1163.02
+    ],
+    [
+     1747.73,
+     1121.72
+    ],
+    [
+     1712.61,
+     1102.22
+    ],
+    [
+     1690.46,
+     1104.49
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycerol-oleic-esterification|in|glycerol": {
+   "reaction": "glycerol-oleic-esterification",
+   "dir": "in",
+   "compound": "glycerol",
+   "points": [
+    [
+     1359.5,
+     1135.37
+    ],
+    [
+     1241.78,
+     1323.08
+    ],
+    [
+     1241.78,
+     1344.08
+    ],
+    [
+     1259.76,
+     1373.9
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1241.8,
+     1336
+    ],
+    [
+     1248,
+     1313.2
+    ],
+    [
+     1256.6,
+     1299.4
+    ]
+   ]
+  },
+  "glycerol-oleic-esterification|in|oleic-acid": {
+   "reaction": "glycerol-oleic-esterification",
+   "dir": "in",
+   "compound": "oleic-acid",
+   "points": [
+    [
+     1423.86,
+     1317.98
+    ],
+    [
+     1376.02,
+     1344.08
+    ],
+    [
+     1259.76,
+     1373.9
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycerol-oleic-esterification|out|triolein": {
+   "reaction": "glycerol-oleic-esterification",
+   "dir": "out",
+   "compound": "triolein",
+   "points": [
+    [
+     1081.84,
+     1213.02
+    ],
+    [
+     1223.58,
+     1264.57
+    ],
+    [
+     1241.78,
+     1344.08
+    ],
+    [
+     1259.76,
+     1373.9
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycerol-palmitic-esterification|in|glycerol": {
+   "reaction": "glycerol-palmitic-esterification",
+   "dir": "in",
+   "compound": "glycerol",
+   "points": [
+    [
+     1397.5,
+     1123.87
+    ],
+    [
+     1460.26,
+     1134.44
+    ],
+    [
+     1585.7,
+     1195.13
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycerol-palmitic-esterification|in|palmitic-acid": {
+   "reaction": "glycerol-palmitic-esterification",
+   "dir": "in",
+   "compound": "palmitic-acid",
+   "points": [
+    [
+     1509.6,
+     1441.23
+    ],
+    [
+     1682.95,
+     1400.14
+    ],
+    [
+     1682.95,
+     1356.14
+    ],
+    [
+     1618.38,
+     1278.99
+    ],
+    [
+     1577.28,
+     1213.19
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycerol-palmitic-esterification|out|tripalmitin": {
+   "reaction": "glycerol-palmitic-esterification",
+   "dir": "out",
+   "compound": "tripalmitin",
+   "points": [
+    [
+     1534.36,
+     977.7
+    ],
+    [
+     1492.24,
+     1034.32
+    ],
+    [
+     1490.99,
+     1075.02
+    ],
+    [
+     1542.56,
+     1077.75
+    ],
+    [
+     1585.7,
+     1195.13
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1516.8,
+     1076.4
+    ],
+    [
+     1545.6,
+     1085.9
+    ]
+   ]
+  },
+  "glycerol-stearic-esterification|in|glycerol": {
+   "reaction": "glycerol-stearic-esterification",
+   "dir": "in",
+   "compound": "glycerol",
+   "points": [
+    [
+     1261.5,
+     1118.37
+    ],
+    [
+     1390.56,
+     1127.75
+    ],
+    [
+     1404.57,
+     1052.29
+    ],
+    [
+     1340.24,
+     1040.32
+    ],
+    [
+     1282.81,
+     984.22
+    ],
+    [
+     1123.36,
+     890.72
+    ],
+    [
+     1095.21,
+     898.98
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1141.7,
+     901.5
+    ]
+   ]
+  },
+  "glycerol-stearic-esterification|in|stearic-acid": {
+   "reaction": "glycerol-stearic-esterification",
+   "dir": "in",
+   "compound": "stearic-acid",
+   "points": [
+    [
+     952.05,
+     903.58
+    ],
+    [
+     1075.51,
+     898.98
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycerol-stearic-esterification|out|tristearin": {
+   "reaction": "glycerol-stearic-esterification",
+   "dir": "out",
+   "compound": "tristearin",
+   "points": [
+    [
+     970.33,
+     748.68
+    ],
+    [
+     921.24,
+     760.18
+    ],
+    [
+     1067.44,
+     825.71
+    ],
+    [
+     1095.21,
+     898.98
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycine-alanine-peptide|in|alanine": {
+   "reaction": "glycine-alanine-peptide",
+   "dir": "in",
+   "compound": "alanine",
+   "points": [
+    [
+     3070.61,
+     388.82
+    ],
+    [
+     2999.66,
+     395.54
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycine-alanine-peptide|in|glycine": {
+   "reaction": "glycine-alanine-peptide",
+   "dir": "in",
+   "compound": "glycine",
+   "points": [
+    [
+     3106.26,
+     315.59
+    ],
+    [
+     2999.66,
+     395.54
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycine-alanine-peptide|out|glycylalanine": {
+   "reaction": "glycine-alanine-peptide",
+   "dir": "out",
+   "compound": "glycylalanine",
+   "points": [
+    [
+     3044.88,
+     200.79
+    ],
+    [
+     2993.26,
+     276.59
+    ],
+    [
+     2999.66,
+     395.54
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycine-glycine-peptide|in|glycine": {
+   "reaction": "glycine-glycine-peptide",
+   "dir": "in",
+   "compound": "glycine",
+   "points": [
+    [
+     3066.26,
+     281.59
+    ],
+    [
+     2971.88,
+     205.79
+    ],
+    [
+     2974.37,
+     81.4
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycine-glycine-peptide|out|glycylglycine": {
+   "reaction": "glycine-glycine-peptide",
+   "dir": "out",
+   "compound": "glycylglycine",
+   "points": [
+    [
+     3061.01,
+     57.52
+    ],
+    [
+     3036.09,
+     75.5
+    ],
+    [
+     2980.8,
+     73.74
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycylalanine-hydrolysis|in|glycylalanine": {
+   "reaction": "glycylalanine-hydrolysis",
+   "dir": "in",
+   "compound": "glycylalanine",
+   "points": [
+    [
+     2976.88,
+     183.79
+    ],
+    [
+     2917.91,
+     260.07
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycylalanine-hydrolysis|out|alanine": {
+   "reaction": "glycylalanine-hydrolysis",
+   "dir": "out",
+   "compound": "alanine",
+   "points": [
+    [
+     3070.61,
+     377.82
+    ],
+    [
+     2916.72,
+     266.81
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycylalanine-hydrolysis|out|glycine": {
+   "reaction": "glycylalanine-hydrolysis",
+   "dir": "out",
+   "compound": "glycine",
+   "points": [
+    [
+     2998.26,
+     298.59
+    ],
+    [
+     2917.91,
+     263.55
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycylglycine-hydrolysis|in|glycylglycine": {
+   "reaction": "glycylglycine-hydrolysis",
+   "dir": "in",
+   "compound": "glycylglycine",
+   "points": [
+    [
+     3129.01,
+     74.52
+    ],
+    [
+     3215.2,
+     197.84
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glycylglycine-hydrolysis|out|glycine": {
+   "reaction": "glycylglycine-hydrolysis",
+   "dir": "out",
+   "compound": "glycine",
+   "points": [
+    [
+     3134.26,
+     298.59
+    ],
+    [
+     3201.54,
+     211.5
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "isobutene-hydrogen-chloride|in|isobutene": {
+   "reaction": "isobutene-hydrogen-chloride",
+   "dir": "in",
+   "compound": "isobutene",
+   "points": [
+    [
+     2605.78,
+     764
+    ],
+    [
+     2661.3,
+     712.19
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "isobutene-hydrogen-chloride|out|2-chloro-2-methylpropane": {
+   "reaction": "isobutene-hydrogen-chloride",
+   "dir": "out",
+   "compound": "2-chloro-2-methylpropane",
+   "points": [
+    [
+     2728.67,
+     779.18
+    ],
+    [
+     2679.35,
+     713.77
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "methane-chlorination|in|methane": {
+   "reaction": "methane-chlorination",
+   "dir": "in",
+   "compound": "methane",
+   "points": [
+    [
+     3130.79,
+     1177.74
+    ],
+    [
+     3225.39,
+     1282.39
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "methane-chlorination|out|chloromethane": {
+   "reaction": "methane-chlorination",
+   "dir": "out",
+   "compound": "chloromethane",
+   "points": [
+    [
+     3129.9,
+     1403.75
+    ],
+    [
+     3215.39,
+     1299.71
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "methanol-oxidation-formaldehyde|in|methanol": {
+   "reaction": "methanol-oxidation-formaldehyde",
+   "dir": "in",
+   "compound": "methanol",
+   "points": [
+    [
+     1159.3,
+     1101.39
+    ],
+    [
+     1236.13,
+     1105.27
+    ],
+    [
+     1236.13,
+     1055.27
+    ],
+    [
+     1174.69,
+     1033.72
+    ],
+    [
+     1155.48,
+     913.22
+    ],
+    [
+     1070.44,
+     822.71
+    ],
+    [
+     924.24,
+     763.18
+    ],
+    [
+     873.37,
+     764.34
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     964.6,
+     779.6
+    ],
+    [
+     1132.2,
+     888.4
+    ],
+    [
+     1141.8,
+     898.7
+    ],
+    [
+     1147.8,
+     905.1
+    ],
+    [
+     1170.7,
+     1008.7
+    ]
+   ]
+  },
+  "methanol-oxidation-formaldehyde|out|formaldehyde": {
+   "reaction": "methanol-oxidation-formaldehyde",
+   "dir": "out",
+   "compound": "formaldehyde",
+   "points": [
+    [
+     757.25,
+     761.56
+    ],
+    [
+     857.09,
+     758.42
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "methyl-salicylate-hydrolysis|in|methyl-salicylate": {
+   "reaction": "methyl-salicylate-hydrolysis",
+   "dir": "in",
+   "compound": "methyl-salicylate",
+   "points": [
+    [
+     966.14,
+     1269.53
+    ],
+    [
+     1108.07,
+     1332.61
+    ],
+    [
+     1108.07,
+     1353.61
+    ],
+    [
+     1095.61,
+     1383.57
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1102.7,
+     1330.2
+    ]
+   ]
+  },
+  "methyl-salicylate-hydrolysis|out|methanol": {
+   "reaction": "methyl-salicylate-hydrolysis",
+   "dir": "out",
+   "compound": "methanol",
+   "points": [
+    [
+     1189.3,
+     1135.39
+    ],
+    [
+     1182.86,
+     1134.59
+    ],
+    [
+     1184.84,
+     1174.02
+    ],
+    [
+     1223.58,
+     1264.57
+    ],
+    [
+     1223.58,
+     1285.57
+    ],
+    [
+     1095.61,
+     1383.57
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "methyl-salicylate-hydrolysis|out|salicylic-acid": {
+   "reaction": "methyl-salicylate-hydrolysis",
+   "dir": "out",
+   "compound": "salicylic-acid",
+   "points": [
+    [
+     1142.06,
+     1463.77
+    ],
+    [
+     1164.76,
+     1421.81
+    ],
+    [
+     1164.76,
+     1400.81
+    ],
+    [
+     1112.76,
+     1381.31
+    ],
+    [
+     1095.61,
+     1383.57
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "nitrobenzene-reduction|in|nitrobenzene": {
+   "reaction": "nitrobenzene-reduction",
+   "dir": "in",
+   "compound": "nitrobenzene",
+   "points": [
+    [
+     388.14,
+     964.35
+    ],
+    [
+     483.51,
+     982.24
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "nitrobenzene-reduction|out|aniline": {
+   "reaction": "nitrobenzene-reduction",
+   "dir": "out",
+   "compound": "aniline",
+   "points": [
+    [
+     663.34,
+     1203.44
+    ],
+    [
+     664.14,
+     1187.85
+    ],
+    [
+     615.28,
+     1107.91
+    ],
+    [
+     609.08,
+     1059.84
+    ],
+    [
+     548.16,
+     999.47
+    ],
+    [
+     490.66,
+     1001.97
+    ],
+    [
+     486.3,
+     976.23
+    ],
+    [
+     483.51,
+     982.24
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "nylon66-condensation|in|adipic-acid": {
+   "reaction": "nylon66-condensation",
+   "dir": "in",
+   "compound": "adipic-acid",
+   "points": [
+    [
+     2235.88,
+     1376.91
+    ],
+    [
+     2176.04,
+     1284.89
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "nylon66-condensation|in|hexamethylenediamine": {
+   "reaction": "nylon66-condensation",
+   "dir": "in",
+   "compound": "hexamethylenediamine",
+   "points": [
+    [
+     2104.72,
+     1273.98
+    ],
+    [
+     2176.04,
+     1267.57
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "nylon66-condensation|out|nylon66": {
+   "reaction": "nylon66-condensation",
+   "dir": "out",
+   "compound": "nylon66",
+   "points": [
+    [
+     2239.68,
+     1177.74
+    ],
+    [
+     2176.04,
+     1267.57
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "oxalic-acid-methanol-esterification|in|methanol": {
+   "reaction": "oxalic-acid-methanol-esterification",
+   "dir": "in",
+   "compound": "methanol",
+   "points": [
+    [
+     1257.3,
+     1112.89
+    ],
+    [
+     1252.57,
+     1102.29
+    ],
+    [
+     1252.57,
+     1058.29
+    ],
+    [
+     1311.93,
+     1030.72
+    ],
+    [
+     1346.24,
+     990.32
+    ],
+    [
+     1418.71,
+     962.65
+    ],
+    [
+     1418.71,
+     941.65
+    ],
+    [
+     1389.36,
+     902.49
+    ],
+    [
+     1389.36,
+     881.49
+    ],
+    [
+     1424.48,
+     861.99
+    ],
+    [
+     1446.64,
+     864.26
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "oxalic-acid-methanol-esterification|in|oxalic-acid": {
+   "reaction": "oxalic-acid-methanol-esterification",
+   "dir": "in",
+   "compound": "oxalic-acid",
+   "points": [
+    [
+     1600.57,
+     922.5
+    ],
+    [
+     1488.48,
+     861.99
+    ],
+    [
+     1466.33,
+     864.26
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "oxalic-acid-methanol-esterification|out|dimethyl-oxalate": {
+   "reaction": "oxalic-acid-methanol-esterification",
+   "dir": "out",
+   "compound": "dimethyl-oxalate",
+   "points": [
+    [
+     1408.22,
+     573.15
+    ],
+    [
+     1419.53,
+     815.29
+    ],
+    [
+     1466.33,
+     864.26
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "p-xylene-oxidation|in|p-xylene": {
+   "reaction": "p-xylene-oxidation",
+   "dir": "in",
+   "compound": "p-xylene",
+   "points": [
+    [
+     3170.63,
+     710.77
+    ],
+    [
+     3273.33,
+     855.35
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "p-xylene-oxidation|out|terephthalic-acid": {
+   "reaction": "p-xylene-oxidation",
+   "dir": "out",
+   "compound": "terephthalic-acid",
+   "points": [
+    [
+     3205.09,
+     951.64
+    ],
+    [
+     3259.67,
+     869.01
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "pet-condensation|in|ethylene-glycol": {
+   "reaction": "pet-condensation",
+   "dir": "in",
+   "compound": "ethylene-glycol",
+   "points": [
+    [
+     3080.67,
+     788.07
+    ],
+    [
+     3104.03,
+     819.19
+    ],
+    [
+     3132.68,
+     817.43
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "pet-condensation|in|terephthalic-acid": {
+   "reaction": "pet-condensation",
+   "dir": "in",
+   "compound": "terephthalic-acid",
+   "points": [
+    [
+     3137.09,
+     934.64
+    ],
+    [
+     3142.53,
+     825.69
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "pet-condensation|out|pet": {
+   "reaction": "pet-condensation",
+   "dir": "out",
+   "compound": "pet",
+   "points": [
+    [
+     3247.62,
+     716.4
+    ],
+    [
+     3181.03,
+     819.19
+    ],
+    [
+     3152.38,
+     817.43
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-acid-neutralization|in|phenol": {
+   "reaction": "phenol-acid-neutralization",
+   "dir": "in",
+   "compound": "phenol",
+   "points": [
+    [
+     709.68,
+     834.61
+    ],
+    [
+     676.9,
+     825.02
+    ],
+    [
+     608.9,
+     825.02
+    ],
+    [
+     590.84,
+     845.17
+    ],
+    [
+     526.19,
+     843.41
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-acid-neutralization|out|sodium-phenoxide": {
+   "reaction": "phenol-acid-neutralization",
+   "dir": "out",
+   "compound": "sodium-phenoxide",
+   "points": [
+    [
+     430.64,
+     840.36
+    ],
+    [
+     441.84,
+     845.17
+    ],
+    [
+     506.5,
+     843.41
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propan-1-ol-oxidation|in|propan-1-ol": {
+   "reaction": "propan-1-ol-oxidation",
+   "dir": "in",
+   "compound": "propan-1-ol",
+   "points": [
+    [
+     354.46,
+     526.5
+    ],
+    [
+     353.66,
+     534.11
+    ],
+    [
+     521.32,
+     582.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propan-1-ol-oxidation|out|propanal": {
+   "reaction": "propan-1-ol-oxidation",
+   "dir": "out",
+   "compound": "propanal",
+   "points": [
+    [
+     564.02,
+     473.24
+    ],
+    [
+     521.32,
+     582.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propan-2-ol-oxidation|in|propan-2-ol": {
+   "reaction": "propan-2-ol-oxidation",
+   "dir": "in",
+   "compound": "propan-2-ol",
+   "points": [
+    [
+     875.47,
+     473.82
+    ],
+    [
+     928.9,
+     389.53
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propan-2-ol-oxidation|out|acetone": {
+   "reaction": "propan-2-ol-oxidation",
+   "dir": "out",
+   "compound": "acetone",
+   "points": [
+    [
+     1015.51,
+     483.6
+    ],
+    [
+     938.9,
+     389.53
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propanal-oxidation|in|propanal": {
+   "reaction": "propanal-oxidation",
+   "dir": "in",
+   "compound": "propanal",
+   "points": [
+    [
+     632.02,
+     456.24
+    ],
+    [
+     638.27,
+     536.75
+    ],
+    [
+     707.42,
+     534.99
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     637.2,
+     522.9
+    ]
+   ]
+  },
+  "propanal-oxidation|out|propionic-acid": {
+   "reaction": "propanal-oxidation",
+   "dir": "out",
+   "compound": "propionic-acid",
+   "points": [
+    [
+     917.88,
+     792.7
+    ],
+    [
+     921.24,
+     739.18
+    ],
+    [
+     827.83,
+     657.13
+    ],
+    [
+     723.7,
+     540.91
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propanal-reduction|in|propanal": {
+   "reaction": "propanal-reduction",
+   "dir": "in",
+   "compound": "propanal",
+   "points": [
+    [
+     496.02,
+     456.24
+    ],
+    [
+     371.4,
+     380.17
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propanal-reduction|out|propan-1-ol": {
+   "reaction": "propanal-reduction",
+   "dir": "out",
+   "compound": "propan-1-ol",
+   "points": [
+    [
+     286.46,
+     509.5
+    ],
+    [
+     357,
+     385.41
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propene-hydration|in|propene": {
+   "reaction": "propene-hydration",
+   "dir": "in",
+   "compound": "propene",
+   "points": [
+    [
+     1055.38,
+     163.73
+    ],
+    [
+     1083.26,
+     248.73
+    ],
+    [
+     1075.44,
+     373.67
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propene-hydration|out|propan-2-ol": {
+   "reaction": "propene-hydration",
+   "dir": "out",
+   "compound": "propan-2-ol",
+   "points": [
+    [
+     943.47,
+     490.82
+    ],
+    [
+     942.51,
+     478.6
+    ],
+    [
+     1061.78,
+     387.33
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propene-hydrogenation|in|propene": {
+   "reaction": "propene-hydrogenation",
+   "dir": "in",
+   "compound": "propene",
+   "points": [
+    [
+     1123.38,
+     141.23
+    ],
+    [
+     1189.52,
+     77
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propene-hydrogenation|out|propane": {
+   "reaction": "propene-hydrogenation",
+   "dir": "out",
+   "compound": "propane",
+   "points": [
+    [
+     1306.74,
+     206.32
+    ],
+    [
+     1204.61,
+     79.66
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propene-polymerization|in|propene": {
+   "reaction": "propene-polymerization",
+   "dir": "in",
+   "compound": "propene",
+   "points": [
+    [
+     1123.38,
+     152.23
+    ],
+    [
+     1176.39,
+     233.81
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propene-polymerization|out|polypropylene": {
+   "reaction": "propene-polymerization",
+   "dir": "out",
+   "compound": "polypropylene",
+   "points": [
+    [
+     1290.89,
+     97.06
+    ],
+    [
+     1176.39,
+     233.81
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propionic-acid-ethanol-esterification|in|ethanol": {
+   "reaction": "propionic-acid-ethanol-esterification",
+   "dir": "in",
+   "compound": "ethanol",
+   "points": [
+    [
+     1024.44,
+     864.71
+    ],
+    [
+     925.22,
+     984.24
+    ],
+    [
+     877.6,
+     1090.33
+    ],
+    [
+     863.48,
+     1141.16
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     907.8,
+     1023.1
+    ],
+    [
+     934.7,
+     972.8
+    ]
+   ]
+  },
+  "propionic-acid-ethanol-esterification|in|propionic-acid": {
+   "reaction": "propionic-acid-ethanol-esterification",
+   "dir": "in",
+   "compound": "propionic-acid",
+   "points": [
+    [
+     887.88,
+     826.7
+    ],
+    [
+     918.44,
+     872.71
+    ],
+    [
+     960.05,
+     884.08
+    ],
+    [
+     960.05,
+     934.08
+    ],
+    [
+     922.22,
+     981.24
+    ],
+    [
+     863.48,
+     1141.16
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     941.1,
+     957.7
+    ],
+    [
+     946.2,
+     951.3
+    ],
+    [
+     960.1,
+     904.1
+    ]
+   ]
+  },
+  "propionic-acid-ethanol-esterification|out|ethyl-propionate": {
+   "reaction": "propionic-acid-ethanol-esterification",
+   "dir": "out",
+   "compound": "ethyl-propionate",
+   "points": [
+    [
+     818.1,
+     1056.71
+    ],
+    [
+     863.48,
+     1141.16
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propionic-acid-methanol-esterification|in|methanol": {
+   "reaction": "propionic-acid-methanol-esterification",
+   "dir": "in",
+   "compound": "methanol",
+   "points": [
+    [
+     1219.3,
+     1101.39
+    ],
+    [
+     1233.13,
+     1102.27
+    ],
+    [
+     1239.81,
+     1035.88
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propionic-acid-methanol-esterification|in|propionic-acid": {
+   "reaction": "propionic-acid-methanol-esterification",
+   "dir": "in",
+   "compound": "propionic-acid",
+   "points": [
+    [
+     985.88,
+     809.7
+    ],
+    [
+     1067.44,
+     825.71
+    ],
+    [
+     1152.48,
+     916.22
+    ],
+    [
+     1177.69,
+     1030.72
+    ],
+    [
+     1234.96,
+     1028.95
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1130,
+     892.3
+    ],
+    [
+     1165.1,
+     973.5
+    ]
+   ]
+  },
+  "propionic-acid-methanol-esterification|out|methyl-propionate": {
+   "reaction": "propionic-acid-methanol-esterification",
+   "dir": "out",
+   "compound": "methyl-propionate",
+   "points": [
+    [
+     1401.56,
+     1099.75
+    ],
+    [
+     1398.57,
+     1058.29
+    ],
+    [
+     1254.2,
+     1030.64
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1277,
+     1035
+    ],
+    [
+     1399.9,
+     1077.2
+    ]
+   ]
+  },
+  "propyne-hydration|in|propyne": {
+   "reaction": "propyne-hydration",
+   "dir": "in",
+   "compound": "propyne",
+   "points": [
+    [
+     1323.75,
+     340.38
+    ],
+    [
+     1230.99,
+     389.26
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propyne-hydration|out|acetone": {
+   "reaction": "propyne-hydration",
+   "dir": "out",
+   "compound": "acetone",
+   "points": [
+    [
+     1083.51,
+     500.6
+    ],
+    [
+     1150.07,
+     406.5
+    ],
+    [
+     1199.44,
+     399.83
+    ],
+    [
+     1204.15,
+     387
+    ],
+    [
+     1211.3,
+     389.26
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "protein-hydrolysis|in|protein": {
+   "reaction": "protein-hydrolysis",
+   "dir": "in",
+   "compound": "protein",
+   "points": [
+    [
+     2684.35,
+     1550.66
+    ],
+    [
+     2596.73,
+     1551.48
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "salicylic-acid-acetylation|in|acetic-anhydride": {
+   "reaction": "salicylic-acid-acetylation",
+   "dir": "in",
+   "compound": "acetic-anhydride",
+   "points": [
+    [
+     1149.62,
+     1542.91
+    ],
+    [
+     1246.7,
+     1611.96
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "salicylic-acid-acetylation|in|salicylic-acid": {
+   "reaction": "salicylic-acid-acetylation",
+   "dir": "in",
+   "compound": "salicylic-acid",
+   "points": [
+    [
+     1172.06,
+     1497.77
+    ],
+    [
+     1246.7,
+     1611.96
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "salicylic-acid-acetylation|out|aspirin": {
+   "reaction": "salicylic-acid-acetylation",
+   "dir": "out",
+   "compound": "aspirin",
+   "points": [
+    [
+     1199.25,
+     1686.5
+    ],
+    [
+     1233.04,
+     1625.62
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "salicylic-acid-methyl-esterification|in|methanol": {
+   "reaction": "salicylic-acid-methyl-esterification",
+   "dir": "in",
+   "compound": "methanol",
+   "points": [
+    [
+     1229.3,
+     1135.39
+    ],
+    [
+     1182.86,
+     1134.59
+    ],
+    [
+     1184.84,
+     1218.02
+    ],
+    [
+     1065.58,
+     1264.57
+    ],
+    [
+     1050.8,
+     1315.37
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "salicylic-acid-methyl-esterification|in|salicylic-acid": {
+   "reaction": "salicylic-acid-methyl-esterification",
+   "dir": "in",
+   "compound": "salicylic-acid",
+   "points": [
+    [
+     1202.06,
+     1463.77
+    ],
+    [
+     1164.76,
+     1400.81
+    ],
+    [
+     1108.07,
+     1332.61
+    ],
+    [
+     1072.95,
+     1313.11
+    ],
+    [
+     1050.8,
+     1315.37
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1101.4,
+     1328.9
+    ],
+    [
+     1127.6,
+     1356.1
+    ]
+   ]
+  },
+  "salicylic-acid-methyl-esterification|out|methyl-salicylate": {
+   "reaction": "salicylic-acid-methyl-esterification",
+   "dir": "out",
+   "compound": "methyl-salicylate",
+   "points": [
+    [
+     966.14,
+     1258.53
+    ],
+    [
+     1050.8,
+     1315.37
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1014.6,
+     1291.1
+    ]
+   ]
+  },
+  "sodium-phenoxide-acidification|in|sodium-phenoxide": {
+   "reaction": "sodium-phenoxide-acidification",
+   "dir": "in",
+   "compound": "sodium-phenoxide",
+   "points": [
+    [
+     430.64,
+     851.36
+    ],
+    [
+     441.84,
+     824.17
+    ],
+    [
+     590.84,
+     824.17
+    ],
+    [
+     608.9,
+     846.02
+    ],
+    [
+     633.05,
+     844.25
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sodium-phenoxide-acidification|out|phenol": {
+   "reaction": "sodium-phenoxide-acidification",
+   "dir": "out",
+   "compound": "phenol",
+   "points": [
+    [
+     709.68,
+     823.61
+    ],
+    [
+     676.9,
+     846.02
+    ],
+    [
+     652.74,
+     844.25
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "starch-hydrolysis-glucose|in|starch": {
+   "reaction": "starch-hydrolysis-glucose",
+   "dir": "in",
+   "compound": "starch",
+   "points": [
+    [
+     2127.74,
+     315.11
+    ],
+    [
+     2170.24,
+     209.92
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "starch-hydrolysis-glucose|out|glucose": {
+   "reaction": "starch-hydrolysis-glucose",
+   "dir": "out",
+   "compound": "glucose",
+   "points": [
+    [
+     2248.48,
+     281.14
+    ],
+    [
+     2186.56,
+     208.49
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "starch-hydrolysis-maltose|in|starch": {
+   "reaction": "starch-hydrolysis-maltose",
+   "dir": "in",
+   "compound": "starch",
+   "points": [
+    [
+     2059.74,
+     298.11
+    ],
+    [
+     2026.64,
+     189.25
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "starch-hydrolysis-maltose|out|maltose": {
+   "reaction": "starch-hydrolysis-maltose",
+   "dir": "out",
+   "compound": "maltose",
+   "points": [
+    [
+     2091.27,
+     74
+    ],
+    [
+     2033.07,
+     178.12
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "styrene-polymerization|in|styrene": {
+   "reaction": "styrene-polymerization",
+   "dir": "in",
+   "compound": "styrene",
+   "points": [
+    [
+     2793.94,
+     1177.74
+    ],
+    [
+     2900.9,
+     1282.46
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "styrene-polymerization|out|polystyrene": {
+   "reaction": "styrene-polymerization",
+   "dir": "out",
+   "compound": "polystyrene",
+   "points": [
+    [
+     2792.97,
+     1403.74
+    ],
+    [
+     2889.47,
+     1298.78
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sucrose-hydrolysis|in|sucrose": {
+   "reaction": "sucrose-hydrolysis",
+   "dir": "in",
+   "compound": "sucrose",
+   "points": [
+    [
+     2589.43,
+     312.46
+    ],
+    [
+     2539.84,
+     414.55
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sucrose-hydrolysis|out|fructose": {
+   "reaction": "sucrose-hydrolysis",
+   "dir": "out",
+   "compound": "fructose",
+   "points": [
+    [
+     2460.57,
+     535.42
+    ],
+    [
+     2528.42,
+     430.88
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sucrose-hydrolysis|out|glucose": {
+   "reaction": "sucrose-hydrolysis",
+   "dir": "out",
+   "compound": "glucose",
+   "points": [
+    [
+     2384.48,
+     281.14
+    ],
+    [
+     2383.68,
+     308.32
+    ],
+    [
+     2539.84,
+     414.55
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "triolein-hydrogenation|in|triolein": {
+   "reaction": "triolein-hydrogenation",
+   "dir": "in",
+   "compound": "triolein",
+   "points": [
+    [
+     1111.84,
+     1179.02
+    ],
+    [
+     1084.13,
+     1105.27
+    ],
+    [
+     1084.13,
+     1055.27
+    ],
+    [
+     1159.69,
+     1046.77
+    ],
+    [
+     1159.69,
+     996.77
+    ],
+    [
+     1133.92,
+     794.77
+    ],
+    [
+     1156.79,
+     696.61
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1084.1,
+     1065.5
+    ],
+    [
+     1089.2,
+     1118.9
+    ],
+    [
+     1094.4,
+     1132.5
+    ],
+    [
+     1121.9,
+     1051
+    ],
+    [
+     1137.3,
+     780.5
+    ],
+    [
+     1149.7,
+     918.5
+    ],
+    [
+     1153.6,
+     948.6
+    ]
+   ]
+  },
+  "triolein-hydrogenation|out|tristearin": {
+   "reaction": "triolein-hydrogenation",
+   "dir": "out",
+   "compound": "tristearin",
+   "points": [
+    [
+     1068.33,
+     726.18
+    ],
+    [
+     1149.13,
+     690.18
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "triolein-saponification|in|triolein": {
+   "reaction": "triolein-saponification",
+   "dir": "in",
+   "compound": "triolein",
+   "points": [
+    [
+     1141.84,
+     1213.02
+    ],
+    [
+     1154.43,
+     1247.33
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "triolein-saponification|out|glycerol": {
+   "reaction": "triolein-saponification",
+   "dir": "out",
+   "compound": "glycerol",
+   "points": [
+    [
+     1261.5,
+     1125.7
+    ],
+    [
+     1328.86,
+     1134.59
+    ],
+    [
+     1328.86,
+     1178.59
+    ],
+    [
+     1154.43,
+     1247.33
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "triolein-saponification|out|sodium-oleate": {
+   "reaction": "triolein-saponification",
+   "dir": "out",
+   "compound": "sodium-oleate",
+   "points": [
+    [
+     1160.13,
+     1097.27
+    ],
+    [
+     1116.3,
+     1096.39
+    ],
+    [
+     1116.3,
+     1140.39
+    ],
+    [
+     1184.84,
+     1174.02
+    ],
+    [
+     1184.84,
+     1218.02
+    ],
+    [
+     1154.43,
+     1247.33
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "tripalmitin-saponification|in|tripalmitin": {
+   "reaction": "tripalmitin-saponification",
+   "dir": "in",
+   "compound": "tripalmitin",
+   "points": [
+    [
+     1534.36,
+     943.7
+    ],
+    [
+     1523.6,
+     881.49
+    ],
+    [
+     1419.53,
+     815.29
+    ],
+    [
+     1399.31,
+     790.87
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1518,
+     877.9
+    ]
+   ]
+  },
+  "tripalmitin-saponification|out|glycerol": {
+   "reaction": "tripalmitin-saponification",
+   "dir": "out",
+   "compound": "glycerol",
+   "points": [
+    [
+     1359.5,
+     1101.37
+    ],
+    [
+     1387.56,
+     1130.75
+    ],
+    [
+     1407.57,
+     1049.29
+    ],
+    [
+     1337.24,
+     1043.32
+    ],
+    [
+     1285.81,
+     981.22
+    ],
+    [
+     1251.71,
+     971.65
+    ],
+    [
+     1251.71,
+     932.65
+    ],
+    [
+     1303.71,
+     913.15
+    ],
+    [
+     1391.15,
+     793.06
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1269.5,
+     976.6
+    ],
+    [
+     1301.4,
+     1000
+    ],
+    [
+     1311.5,
+     1012.3
+    ],
+    [
+     1372.4,
+     1046.3
+    ],
+    [
+     1400.1,
+     1079.7
+    ]
+   ]
+  },
+  "tripalmitin-saponification|out|sodium-palmitate": {
+   "reaction": "tripalmitin-saponification",
+   "dir": "out",
+   "compound": "sodium-palmitate",
+   "points": [
+    [
+     1268.02,
+     550.34
+    ],
+    [
+     1406.47,
+     672.22
+    ],
+    [
+     1402.73,
+     781.47
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "tristearin-hydrolysis|in|tristearin": {
+   "reaction": "tristearin-hydrolysis",
+   "dir": "in",
+   "compound": "tristearin",
+   "points": [
+    [
+     1030.33,
+     748.68
+    ],
+    [
+     1130.92,
+     747.77
+    ],
+    [
+     1130.92,
+     791.77
+    ],
+    [
+     1067.44,
+     869.71
+    ],
+    [
+     1018.24,
+     916.22
+    ],
+    [
+     1014.07,
+     967
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1108.2,
+     819.6
+    ]
+   ]
+  },
+  "tristearin-hydrolysis|out|glycerol": {
+   "reaction": "tristearin-hydrolysis",
+   "dir": "out",
+   "compound": "glycerol",
+   "points": [
+    [
+     1261.5,
+     1111.04
+    ],
+    [
+     1398.57,
+     1102.29
+    ],
+    [
+     1398.57,
+     1058.29
+    ],
+    [
+     1276.81,
+     990.22
+    ],
+    [
+     1014.07,
+     967
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1207.7,
+     984.1
+    ],
+    [
+     1305.2,
+     1006.1
+    ],
+    [
+     1379.5,
+     1047.6
+    ]
+   ]
+  },
+  "tristearin-hydrolysis|out|stearic-acid": {
+   "reaction": "tristearin-hydrolysis",
+   "dir": "out",
+   "compound": "stearic-acid",
+   "points": [
+    [
+     952.05,
+     914.58
+    ],
+    [
+     1014.07,
+     967
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "tristearin-saponification|in|tristearin": {
+   "reaction": "tristearin-saponification",
+   "dir": "in",
+   "compound": "tristearin",
+   "points": [
+    [
+     1068.33,
+     737.18
+    ],
+    [
+     1130.92,
+     747.77
+    ],
+    [
+     1167.52,
+     814.36
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "tristearin-saponification|out|glycerol": {
+   "reaction": "tristearin-saponification",
+   "dir": "out",
+   "compound": "glycerol",
+   "points": [
+    [
+     1299.5,
+     1101.37
+    ],
+    [
+     1393.56,
+     1124.75
+    ],
+    [
+     1401.57,
+     1055.29
+    ],
+    [
+     1343.24,
+     1037.32
+    ],
+    [
+     1171.35,
+     897.58
+    ],
+    [
+     1167.52,
+     831.68
+    ]
+   ],
+   "gaps": [],
+   "bridges": [
+    [
+     1233.1,
+     947.8
+    ],
+    [
+     1265.3,
+     973.9
+    ],
+    [
+     1307,
+     1007.9
+    ],
+    [
+     1372.4,
+     1046.3
+    ],
+    [
+     1382.9,
+     1049.5
+    ],
+    [
+     1399.6,
+     1072.5
+    ]
+   ]
+  },
+  "tristearin-saponification|out|sodium-stearate": {
+   "reaction": "tristearin-saponification",
+   "dir": "out",
+   "compound": "sodium-stearate",
+   "points": [
+    [
+     1193.19,
+     650.7
+    ],
+    [
+     1237.53,
+     669.26
+    ],
+    [
+     1237.53,
+     690.26
+    ],
+    [
+     1161.44,
+     737.32
+    ],
+    [
+     1167.52,
+     814.36
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "vinyl-chloride-polymerization|in|vinyl-chloride": {
+   "reaction": "vinyl-chloride-polymerization",
+   "dir": "in",
+   "compound": "vinyl-chloride",
+   "points": [
+    [
+     2037.51,
+     1551.75
+    ],
+    [
+     2118.61,
+     1656.35
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "vinyl-chloride-polymerization|out|pvc": {
+   "reaction": "vinyl-chloride-polymerization",
+   "dir": "out",
+   "compound": "pvc",
+   "points": [
+    [
+     2036.72,
+     1777.79
+    ],
+    [
+     2108.61,
+     1673.67
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  }
+ },
+ "stats": {
+  "acuteCrossings": 75,
+  "bends": 242,
+  "bridgedCrossings": 75,
+  "bridges": 66,
+  "clearanceViolations": 146,
+  "crossings": 379,
+  "edges": 207,
+  "fallback": 0,
+  "labelPenetrations": 0,
+  "markerPenetrations": 0,
+  "maxBends": 9,
+  "nodePenetrations": 0,
+  "overlapSegments": 0,
+  "totalLength": 43261,
+  "unbridgedAcute": 0
+ }
+}

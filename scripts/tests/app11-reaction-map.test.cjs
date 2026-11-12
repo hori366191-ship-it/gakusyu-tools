@@ -24,6 +24,10 @@ const D = require(path.join(APP, 'data.js'));
 const Core = require(path.join(APP, 'map-core.js'));
 const A10 = require(path.join(APP10, 'data.js'));
 const C10 = require(path.join(APP10, 'catalog.js'));
+const G = require(path.join(ROOT, 'scripts', 'app11', 'geometry.cjs'));
+const Met = require(path.join(ROOT, 'scripts', 'app11', 'metrics.cjs'));
+const Opt = require(path.join(ROOT, 'scripts', 'app11', 'optimize-layout.cjs'));
+const { spawnSync } = require('node:child_process');
 
 function read(name) {
   return fs.readFileSync(path.join(APP, name), 'utf8');
@@ -147,36 +151,50 @@ test('[data] 公開する反応は確認済みだけで、検証記録に節と�
   assert.equal(dataText.includes('openstax.org'), false, 'data.js に資料URLを含めない');
 });
 
-test('[data] 座標は固定で重ならず、分野パネルも重ならない', () => {
-  const used = new Map();
-  D.compounds.forEach((c) => {
-    assert.equal(typeof c.x, 'number');
-    assert.equal(typeof c.y, 'number');
-    assert.ok(Number.isFinite(c.x) && Number.isFinite(c.y), c.id);
-    const key = c.x + ',' + c.y;
-    assert.equal(used.has(key), false, '同じ座標の物質: ' + c.id + ' と ' + used.get(key));
-    used.set(key, c.id);
-    const region = D.regions.find((r) => r.id === c.region);
-    assert.ok(region, c.id + ' の分野が未定義');
-    assert.ok(c.x >= region.panel.x && c.x + D.meta.nodeW <= region.panel.x + region.panel.w, c.id + ' が分野の外');
-    assert.ok(c.y >= region.panel.y && c.y + D.meta.nodeH <= region.panel.y + region.panel.h, c.id + ' が分野の外');
-  });
-  for (let i = 0; i < D.regions.length; i++) {
-    for (let j = i + 1; j < D.regions.length; j++) {
-      const a = D.regions[i].panel;
-      const b = D.regions[j].panel;
+test('[data] 座標は固定で重ならず、孤立物質は外縁の棚に収まる', () => {
+  const layout = JSON.parse(fs.readFileSync(path.join(SRC, 'layout.json'), 'utf8'));
+  assert.equal(layout.version, 3);
+  assert.equal(layout.regions.some((r) => r.panel), false, '分野パネルで囲わない');
+  // 全ノードが重ならない
+  const rects = D.compounds.map((c) => ({ id: c.id, x: c.x, y: c.y, w: D.meta.nodeW, h: D.meta.nodeH }));
+  for (let i = 0; i < rects.length; i++) {
+    for (let j = i + 1; j < rects.length; j++) {
+      const a = rects[i];
+      const b = rects[j];
       const overlap = !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
-      assert.equal(overlap, false, '分野パネルが重なる: ' + D.regions[i].id + ' / ' + D.regions[j].id);
+      assert.equal(overlap, false, 'ノードが重なる: ' + a.id + ' / ' + b.id);
     }
   }
   const canvas = D.meta.canvas;
   D.compounds.forEach((c) => {
-    assert.ok(c.x >= canvas.x && c.x <= canvas.x + canvas.w, c.id);
-    assert.ok(c.y >= canvas.y && c.y <= canvas.y + canvas.h, c.id);
+    assert.ok(c.x >= canvas.x && c.x + D.meta.nodeW <= canvas.x + canvas.w, c.id + ' の x');
+    assert.ok(c.y >= canvas.y && c.y + D.meta.nodeH <= canvas.y + canvas.h, c.id + ' の y');
   });
-  D.regions.forEach((r) => {
-    assert.ok(r.count > 0, r.id + ' が空');
-    assert.equal(D.compounds.filter((c) => c.region === r.id).length, r.count, r.id + ' の件数');
+  // 孤立326件は棚の中、接続101件は棚の外
+  const shelf = layout.shelf;
+  assert.equal(shelf.count, D.compounds.filter((c) => c.incoming + c.outgoing === 0).length);
+  assert.equal(shelf.count, 326);
+  const isolated = D.compounds.filter((c) => c.incoming + c.outgoing === 0);
+  const connected = D.compounds.filter((c) => c.incoming + c.outgoing > 0);
+  assert.equal(connected.length, 101);
+  isolated.forEach((c) => {
+    assert.ok(c.x >= shelf.x - 1 && c.x <= shelf.x + shelf.cols * 152, c.id + ' が棚の外');
+    assert.ok(c.y >= shelf.y - 1 && c.y <= shelf.y + shelf.rows * 54, c.id + ' が棚の外');
+  });
+  connected.forEach((c) => {
+    assert.ok(c.x < shelf.x - 20, c.id + ' は棚の外のネットワーク側');
+  });
+  // 分野の focus は、その分野の反応関連物質を含む
+  D.regions.forEach((region) => {
+    const members = region.members.map((id) => D.compounds.find((c) => c.id === id));
+    const linked = members.filter((c) => c.incoming + c.outgoing > 0);
+    assert.ok(region.focus.w > 0 && region.focus.h > 0, region.id + ' の focus');
+    (linked.length ? linked : members).forEach((c) => {
+      assert.ok(c.x + D.meta.nodeW / 2 >= region.focus.x && c.x + D.meta.nodeW / 2 <= region.focus.x + region.focus.w,
+        region.id + ' の focus に ' + c.id + ' が入る');
+      assert.ok(c.y + D.meta.nodeH / 2 >= region.focus.y && c.y + D.meta.nodeH / 2 <= region.focus.y + region.focus.h,
+        region.id + ' の focus に ' + c.id + ' が入る');
+    });
   });
 });
 
@@ -264,18 +282,42 @@ test('[core] 全体復帰・現在位置・分野移動・検索の計算', () =
   assert.equal(Core.isOverview(fit, canvas, 1200, 600), true);
   const zoomed = Core.zoomAt(fit, 2, 600, 300);
   assert.equal(Core.isOverview(zoomed, canvas, 1200, 600), false);
-  const text = Core.positionText(fit, D.regions, null, canvas, 1200, 600);
+  const text = Core.positionText(fit, D.regions, D.compounds, null, canvas, 1200, 600);
   assert.ok(text.includes('全体表示'), text);
   const region = D.regions[0];
   const rv = Core.regionView(region, 1200, 600, 24);
-  assert.ok(rv.scale >= Core.DETAIL_THRESHOLDS[0], '分野表示は物質名が見える倍率');
-  const regionText = Core.positionText(rv, D.regions, D.compounds[0], canvas, 1200, 600);
-  assert.ok(regionText.includes(region.name), regionText);
+  assert.ok(rv.scale >= 0.08, '分野表示の倍率');
+  const regionText = Core.positionText(rv, D.regions, D.compounds, D.compounds[0], canvas, 1200, 600);
+  assert.ok(D.regions.some((r) => regionText.includes(r.name)), regionText);
   assert.ok(Core.matchCompounds(D.compounds, 'エタノール').some((c) => c.id === 'ethanol'));
   assert.ok(Core.matchCompounds(D.compounds, 'ｃ２ｈ６ｏ').some((c) => c.id === 'ethanol'), '全角の示性式でも一致する');
   assert.deepEqual(Core.matchCompounds(D.compounds, ''), []);
   const clamped = Core.clampPan({ scale: fit.scale, x: 99999, y: -99999 }, 1200, 600, canvas);
   assert.ok(clamped.x < 99999 && clamped.y > -99999, '地図が画面外へ消えない');
+});
+
+test('[state] 分類選択と現在位置の表示・解除が一貫している', () => {
+  const canvas = D.meta.canvas;
+  const fit = Core.fitTransform(canvas, 1200, 600, 14);
+  const alcohol = D.regions.find((r) => r.id === 'alcohol-ether');
+  const explicit = Core.positionText(fit, D.regions, D.compounds, null, canvas, 1200, 600, 'alcohol-ether');
+  assert.ok(explicit.includes(alcohol.name), explicit);
+  assert.equal(explicit.includes('全体表示'), false, '明示選択は全体表示より優先');
+  const withSelection = Core.positionText(fit, D.regions, D.compounds, { name: '付加の反応' }, canvas, 1200, 600, 'alcohol-ether');
+  assert.ok(withSelection.includes(alcohol.name), withSelection);
+  assert.ok(withSelection.includes('付加の反応'), withSelection);
+  // 明示選択がなければ、画面中央の最寄り物質の分野へフォールバックする
+  const fallback = Core.positionText(fit, D.regions, D.compounds, null, canvas, 1200, 600, null);
+  assert.ok(fallback.includes('全体表示'), fallback);
+
+  // アプリ側: チップ選択は activeRegion に保持し、パン/ズーム/物質・反応選択で解除する
+  const js = read('app.js');
+  assert.ok(js.includes('var activeRegion = null;'));
+  assert.ok(js.includes('activeRegion = region.id;'));
+  assert.ok(js.includes('function clearRegionSelection()'));
+  assert.ok(js.includes('viewSize.w, viewSize.h, activeRegion)'), '現在位置に選択分類を渡す');
+  assert.ok(js.includes('if (activeRegion) clearRegionSelection()'), 'パン・ズーム・フォーカスで解除');
+  assert.ok(js.includes('clearRegionSelection();\n    if (selected && selected.el)'), '物質/反応選択の前に解除');
 });
 
 test('[core] 0件の理由を未確認・収録外・不可能で区別する', () => {
@@ -440,21 +482,72 @@ test('[static] forest のヘッダーは共通テーマの汎用 header と衝�
   );
 });
 
-test('[static] 生成物が最新で、配置は layout.json に固定されている', () => {
+test('[static] 生成物が最新で、座標・マーカー・経路は layout.json / routes.json に固定されている', () => {
   const { build, renderData } = require(path.join(ROOT, 'scripts', 'app11', 'build-map-data.cjs'));
-  const { data, layout } = build();
-  assert.equal(renderData(data), read('data.js'), 'data.js が生成物と一致する（再生成が必要）');
-  const layoutOnDisk = JSON.parse(fs.readFileSync(path.join(SRC, 'layout.json'), 'utf8'));
-  assert.deepEqual(Object.keys(layoutOnDisk.positions).sort(), D.compounds.map((c) => c.id).sort());
-  // 既存ノードの位置は layout の index から導かれる（再生成しても動かない）
-  const regionById = new Map(D.regions.map((r) => [r.id, r]));
+  const F = require(path.join(ROOT, 'scripts', 'app11', 'layout-format.cjs'));
+  assert.equal(renderData(build()), read('data.js'), 'data.js が生成物と一致する（再生成が必要）');
+  const layoutPath = path.join(SRC, 'layout.json');
+  const routesPath = path.join(SRC, 'routes.json');
+  const layout = JSON.parse(fs.readFileSync(layoutPath, 'utf8'));
+  const routes = JSON.parse(fs.readFileSync(routesPath, 'utf8'));
+  assert.equal(fs.readFileSync(layoutPath, 'utf8'), F.renderLayout(layout), 'layout.json が正規形');
+  assert.equal(fs.readFileSync(routesPath, 'utf8'), F.renderRoutes(routes), 'routes.json が正規形');
+  assert.equal(layout.version, 3);
+  assert.equal(routes.version, 3);
+
+  // ノードの座標は layout.json の x/y そのもの（閲覧時に再計算しない）
+  assert.deepEqual(Object.keys(layout.positions).sort(), D.compounds.map((c) => c.id).sort());
   D.compounds.forEach((c) => {
     const pos = layout.positions[c.id];
-    assert.ok(pos, c.id + ' の配置がない');
-    const region = regionById.get(pos.r);
-    assert.equal(c.x, region.x + (pos.i % region.cols) * D.meta.cellW, c.id + ' の x');
-    assert.equal(c.y, region.y + Math.floor(pos.i / region.cols) * D.meta.cellH, c.id + ' の y');
+    assert.equal(c.x, pos.x, c.id + ' の x');
+    assert.equal(c.y, pos.y, c.id + ' の y');
+    assert.equal(c.region, pos.r, c.id + ' の分野');
   });
+
+  // 分野はパネルではなく、色 index・focus 範囲・members を持つ
+  assert.equal(layout.regions.some((r) => r.panel), false, '分野パネルを持たない');
+  D.regions.forEach((region) => {
+    const lr = layout.regions.find((x) => x.id === region.id);
+    assert.ok(lr, region.id + ' が layout にある');
+    assert.equal(lr.colorIndex, region.colorIndex, region.id + ' の色 index');
+    assert.equal(lr.members.length, region.count, region.id + ' の所属数');
+    const members = D.compounds.filter((c) => c.region === region.id);
+    assert.deepEqual(members.map((c) => c.id).sort(), lr.members.slice().sort(), region.id + ' の所属');
+    assert.deepEqual(region.focus, lr.focus, region.id + ' の focus');
+    assert.deepEqual(region.center, lr.center, region.id + ' の中心');
+  });
+
+  // 全反応に、基質・生成物の順に対応する経路がある
+  let edgeCount = 0;
+  D.reactions.forEach((r) => {
+    const expected = r.substrates.map((id) => 'in:' + id).concat(r.products.map((id) => 'out:' + id));
+    const actual = (r.edges || []).map((e) => e.dir + ':' + e.id);
+    assert.deepEqual(actual, expected, r.id + ' の辺の対応');
+    r.edges.forEach((e) => {
+      edgeCount++;
+      const key = r.id + '|' + e.dir + '|' + e.id;
+      assert.ok(routes.edges[key], key + ' が routes.json にある');
+      assert.deepEqual(routes.edges[key].points, e.points, key + ' の点列');
+      assert.deepEqual(routes.edges[key].gaps, e.gaps, key + ' の切れ目');
+      assert.deepEqual(routes.edges[key].bridges, e.bridges, key + ' の橋');
+      assert.ok(e.points.length >= 2, key + ' の点数');
+      e.points.forEach((p) => {
+        assert.ok(p[0] >= D.meta.canvas.x && p[0] <= D.meta.canvas.x + D.meta.canvas.w, key + ' の x');
+        assert.ok(p[1] >= D.meta.canvas.y && p[1] <= D.meta.canvas.y + D.meta.canvas.h, key + ' の y');
+      });
+    });
+  });
+  assert.equal(edgeCount, 207, '207 辺');
+  assert.equal(Object.keys(routes.edges).length, 207);
+  // 反応ラベルは保存済みの中心座標を使う
+  D.reactions.forEach((r) => {
+    assert.deepEqual(r.label, layout.reactions[r.id].label, r.id + ' のラベル位置');
+    assert.ok(['N', 'S', 'E', 'W'].includes(r.label.side), r.id + ' のラベル側');
+  });
+  // 分断（gaps）に頼らず、浅い交差だけ橋を持つ
+  const edges = Object.values(routes.edges);
+  assert.equal(edges.every((e) => e.gaps.length === 0), true, '経路を分断しない');
+  assert.ok(edges.some((e) => e.bridges.length > 0), '浅い交差に橋がある');
 });
 
 test('[static] 分野ごとに主要物質があり、ラベルは地図に収まる長さ', () => {
@@ -498,4 +591,188 @@ test('[static] ポータル・GAS・Worker・テーマには触れていない�
   assert.equal(dataText.includes('OCCatalog'), false);
   assert.equal(read('app.js').includes('OCData'), false);
   assert.equal(read('app.js').includes('OCCatalog'), false);
+});
+
+test('[metrics] 改善前後を同じ計測器で比較し、貫通・衝突・重なりを解消する', () => {
+  const layout = JSON.parse(fs.readFileSync(path.join(SRC, 'layout.json'), 'utf8'));
+  const routes = JSON.parse(fs.readFileSync(path.join(SRC, 'routes.json'), 'utf8'));
+  const before = Met.measure(Met.sceneFromBaseline());
+  const after = Met.measure(Met.sceneFromLayout(layout, routes));
+
+  // 改善前は、辺が無関係なノード・ラベルを貫通し、マーカーが衝突していた
+  assert.ok(before.edges.nodePenetrations > 100, '改善前のノード貫通: ' + before.edges.nodePenetrations);
+  assert.ok(before.edges.labelPenetrations > 100, '改善前のラベル貫通: ' + before.edges.labelPenetrations);
+  assert.ok(before.markers.nodeCollisions > 0, '改善前のマーカー-物質衝突');
+  assert.ok(before.markers.markerCollisions > 0, '改善前のマーカー相互衝突');
+
+  // 改善後: 無関係ノード・ラベル・他マーカーの貫通 0、マーカー衝突 0
+  assert.equal(after.edges.nodePenetrations, 0);
+  assert.equal(after.edges.endpointPenetrations, 0);
+  assert.equal(after.edges.labelPenetrations, 0);
+  assert.equal(after.edges.titlePenetrations, 0);
+  assert.equal(after.edges.markerPenetrations, 0);
+  assert.equal(after.markers.nodeCollisions, 0);
+  assert.equal(after.markers.markerCollisions, 0);
+  assert.equal(after.markers.labelNodeCollisions, 0);
+  assert.equal(after.markers.labelLabelCollisions, 0);
+  assert.equal(after.markers.labelMarkerCollisions, 0);
+  assert.equal(after.markers.labelTitleCollisions, 0);
+  assert.equal(after.nodes.overlaps, 0);
+  // 同一区間の連続共有 0（切れ目に頼らない）
+  assert.equal(after.edges.overlapSegments, 0);
+  assert.equal(after.edges.overlapSegmentsRaw, 0);
+  // 経路の分断は使わず、浅い交差だけ橋で区別する
+  assert.equal(after.edges.crossingsWithoutGap, 0);
+  assert.equal(after.edges.unbridgedAcute, 0);
+  assert.ok(after.edges.bridgedCrossings > 0, '浅い交差に橋がある');
+  assert.ok(after.edges.crossings < before.edges.crossings * 0.5,
+    '交差 ' + after.edges.crossings + ' は改善前 ' + before.edges.crossings + ' の50%未満');
+  // 辺間クリアランスは改善前より減っている
+  assert.ok(after.edges.clearanceViolations < before.edges.clearanceViolations,
+    after.edges.clearanceViolations + ' < ' + before.edges.clearanceViolations);
+  // 外周へ逃がすだけにせず、辺長も改善前より短い
+  assert.ok(after.edges.totalLength < before.edges.totalLength,
+    '総辺長 ' + after.edges.totalLength + ' / 改善前 ' + before.edges.totalLength);
+  assert.ok(after.edges.avgBends <= 3, '平均曲がり ' + after.edges.avgBends);
+  assert.ok(after.edges.maxBends <= 15, '最大曲がり ' + after.edges.maxBends);
+  // 全体fitが14%より大きい（主要ラベルが見える）
+  const fit = Core.fitTransform(D.meta.canvas, 1236, 475, 14);
+  assert.ok(fit.scale >= 0.2, '全体scale ' + fit.scale);
+});
+
+test('[placement] 接続に基づいて物質を動かし、孤立物質を反応網の通路から離す', () => {
+  const layout = JSON.parse(fs.readFileSync(path.join(SRC, 'layout.json'), 'utf8'));
+  const routes = JSON.parse(fs.readFileSync(path.join(SRC, 'routes.json'), 'utf8'));
+  const baseline = new Map(Met.sceneFromBaseline().compounds.map((c) => [c.id, c]));
+
+  let moved = 0;
+  D.compounds.forEach((c) => {
+    const before = baseline.get(c.id);
+    if (Math.hypot(c.x - before.x, c.y - before.y) > 40) moved++;
+  });
+  assert.ok(moved >= 300, '40px 以上動いた物質: ' + moved + ' / ' + D.compounds.length);
+
+  // 反応ネットワークとして、ハブの隣に反応が置かれている
+  assert.equal(layout.regions.length, 10);
+  assert.deepEqual(layout.regions.map((r) => r.colorIndex).sort((a, b) => a - b), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const hubs = D.compounds.filter((c) => c.hub && c.incoming + c.outgoing > 0);
+  hubs.forEach((c) => {
+    const incident = D.reactions.filter((r) => r.substrates.includes(c.id) || r.products.includes(c.id));
+    const nearestReaction = Math.min(...incident.map((r) => Math.hypot(r.x - (c.x + D.meta.nodeW / 2), r.y - (c.y + D.meta.nodeH / 2))));
+    assert.ok(nearestReaction < 360, c.id + ' の最寄り反応 ' + nearestReaction.toFixed(0) + 'px');
+  });
+  // 反応と端点の距離（直線）は、旧・外周方式より短い
+  let sum = 0;
+  let edges = 0;
+  D.reactions.forEach((r) => {
+    r.edges.forEach((e) => {
+      const c = D.compounds.find((x) => x.id === e.id);
+      const d = Math.hypot(r.x - (c.x + D.meta.nodeW / 2), r.y - (c.y + D.meta.nodeH / 2));
+      sum += d;
+      edges++;
+    });
+  });
+  assert.ok(sum / edges < 260, '反応-端点の平均距離 ' + (sum / edges).toFixed(1) + 'px');
+
+  // 孤立物質の中心から最寄りの辺までの距離が、反応をもつ物質より大きい
+  const routePoints = Object.keys(routes.edges).map((key) => routes.edges[key].points.map((p) => ({ x: p[0], y: p[1] })));
+  const nearest = (c) => {
+    let min = Infinity;
+    const center = { x: c.x + D.meta.nodeW / 2, y: c.y + D.meta.nodeH / 2 };
+    for (const points of routePoints) min = Math.min(min, G.distPointPolyline(center, points));
+    return min;
+  };
+  const isolated = D.compounds.filter((c) => c.incoming + c.outgoing === 0);
+  const connected = D.compounds.filter((c) => c.incoming + c.outgoing > 0);
+  const mean = (list) => list.reduce((sum, c) => sum + nearest(c), 0) / list.length;
+  const isolatedMean = mean(isolated);
+  const connectedMean = mean(connected);
+  assert.ok(isolatedMean > connectedMean * 1.15,
+    '孤立 ' + isolatedMean.toFixed(1) + 'px / 接続 ' + connectedMean.toFixed(1) + 'px');
+});
+
+test('[invariant] 反応の事実・物質数・必須数・ビルダー経路は変えない', () => {
+  assert.equal(D.meta.compoundCount, 427);
+  assert.equal(D.meta.requiredCount, 294);
+  assert.equal(D.meta.confirmedReactionCount, 86);
+  assert.equal(D.meta.reactionCount, 86);
+  assert.equal(D.reactions.filter((r) => r.cross).length, 55);
+
+  const source = JSON.parse(fs.readFileSync(path.join(SRC, 'reactions.json'), 'utf8'));
+  const confirmed = new Map(source.reactions.filter((r) => r.state === 'confirmed').map((r) => [r.id, r]));
+  assert.equal(confirmed.size, 86);
+  D.reactions.forEach((r) => {
+    const raw = confirmed.get(r.id);
+    assert.ok(raw, r.id + ' が正本にある');
+    assert.deepEqual(r.substrates, raw.substrates, r.id + ' の基質');
+    assert.deepEqual(r.products, raw.products, r.id + ' の生成物');
+    assert.deepEqual(r.reagents, raw.reagents || [], r.id + ' の試薬');
+    assert.equal(r.conditions, raw.conditions, r.id + ' の条件');
+    assert.equal(r.type, raw.type, r.id + ' の種別');
+    assert.equal(r.edges.length, raw.substrates.length + raw.products.length, r.id + ' の辺数');
+  });
+
+  // 必須物質の集合も変えない
+  const required = A10.REQUIRED_CURRICULUM.filter((id, i, arr) => arr.indexOf(id) === i);
+  const current = new Set(D.compounds.filter((c) => c.curriculum).map((c) => c.id));
+  assert.equal(required.length, 294);
+  assert.deepEqual(required.filter((id) => !current.has(id)), []);
+});
+
+test('[determinism] 同じ入力から同じ配置・経路を再生成できる', () => {
+  const one = Opt.planLayout();
+  const two = Opt.planLayout();
+  assert.equal(one.layout.version, 3);
+  assert.equal(one.layout.seed, 11011);
+  assert.equal(Opt.renderLayout(one.layout), Opt.renderLayout(two.layout), 'layout が決定的');
+  assert.equal(Opt.renderRoutes(one.routes), Opt.renderRoutes(two.routes), 'routes が決定的');
+
+  // 生成物（layout.json / routes.json）が、同じ実装から完全一致で再生成できる
+  const result = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'app11', 'optimize-layout.cjs'), '--check'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    timeout: 600000
+  });
+  assert.equal(result.status, 0, (result.stdout || '') + (result.stderr || ''));
+});
+
+test('[core] 保存済み経路の切れ目と、390px幅での全体フィット', () => {
+  const gapPath = Core.routePath([[0, 0], [100, 0]], [[50, 0]]);
+  assert.equal((gapPath.match(/M/g) || []).length, 2, '切れ目で 2 本のサブパスになる');
+  assert.ok(gapPath.includes('L47'), '切れ目の手前で止まる: ' + gapPath);
+  assert.ok(gapPath.includes('M53'), '切れ目の後ろから再開する: ' + gapPath);
+  const plain = Core.routePath([[0, 0], [10, 0]], []);
+  assert.equal((plain.match(/M/g) || []).length, 1);
+  const bridgePath = Core.routePath([[0, 0], [100, 0]], [], [[50, 0]]);
+  assert.equal((bridgePath.match(/M/g) || []).length, 1, '橋は辺を分断しない');
+  assert.ok(bridgePath.includes('Q'), '橋は小さな円弧で描く: ' + bridgePath);
+  // 旧 SCALE_MIN 0.12 では 390px 幅で全体が入らなかった。0.05 へ下げてフィットを保証する。
+  assert.equal(Core.SCALE_MIN, 0.05);
+  const fit = Core.fitTransform(D.meta.canvas, 366, 354, 14);
+  assert.ok(fit.scale >= Core.SCALE_MIN);
+  assert.ok(D.meta.canvas.w * fit.scale <= 366 + 1, '横に収まる');
+  assert.ok(D.meta.canvas.h * fit.scale <= 354 + 1, '縦に収まる');
+});
+
+test('[static] 選択した物質・反応の辺を強調する（読解補助・最小限）', () => {
+  const js = read('app.js');
+  const css = read('app.css');
+  assert.ok(js.includes('Core.routePath'), '保存済み点列からパスを作る');
+  assert.ok(js.includes('updateEdgeHighlight'), '選択時の辺強調');
+  assert.ok(js.includes("path.getAttribute('data-compound')"), '物質の接続辺');
+  assert.ok(js.includes("path.getAttribute('data-reaction')"), '反応の接続辺');
+  assert.ok(css.includes('.rp-edge.is-active'), '強調スタイル');
+  assert.ok(js.includes('showReactionStroke'), '反応選択の連続ストローク');
+  assert.ok(js.includes('rp-edge-active'), '上層の連続ストローク');
+  assert.ok(js.includes('previewFromEvent'), 'カード内の反応ホバー');
+  assert.ok(js.includes('fitReactionEndpoints'), '反応の端点をfit');
+  assert.ok(js.includes('data-action="fit-reaction"'), '端点表示ボタン');
+  assert.ok(js.includes('buildRegionLegend'), '分野色の凡例');
+  assert.ok(js.includes('activeRegion'), '明示的な分類選択の状態');
+  assert.ok(js.includes('clearRegionSelection'), '分類選択の解除');
+  assert.ok(js.includes('activeRegion) clearRegionSelection()'), 'パン等で分類選択を解除');
+  assert.ok(js.includes('viewSize.w, viewSize.h, activeRegion)'), '現在位置に明示選択を渡す');
+  assert.ok(css.includes('.rp-node__band'), 'ノードの分野色帯');
+  assert.ok(css.includes('.rp-edges-active'), '上層レイヤ');
+  assert.ok(js.includes('Core.routePath(e.points, e.gaps, e.bridges)'), '保存済み橋を使う');
 });

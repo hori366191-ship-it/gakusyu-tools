@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "反応経路マップ試験版の配置・分類の設定。分類は本ツール独自に設計した。座標は生成時に site-src/app11/layout.json へ固定して保存する。",
+  "note": "反応経路マップ試験版の配置・分類の設定。分類は本ツール独自に設計した。x/y/cols は初回レイアウトの名残で、現在の物質座標・反応マーカー・経路は scripts/app11/optimize-layout.cjs が site-src/app11/layout.json / routes.json に保存する。",
   "regions": [
     {
       "id": "hydrocarbon",

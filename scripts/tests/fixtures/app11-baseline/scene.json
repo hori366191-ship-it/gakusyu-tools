@@ -1,0 +1,4784 @@
+{
+ "version": 1,
+ "note": "app11 layout v1（2026-11-10 版）の計測用スナップショット。改善前の比較基準として保持する。",
+ "meta": {
+  "nodeW": 136,
+  "nodeH": 34,
+  "canvas": {
+   "x": -68,
+   "y": -96,
+   "w": 3228,
+   "h": 2014
+  }
+ },
+ "regions": [
+  {
+   "id": "hydrocarbon",
+   "name": "炭化水素",
+   "count": 71,
+   "panel": {
+    "x": -28,
+    "y": -56,
+    "w": 1548,
+    "h": 488
+   }
+  },
+  {
+   "id": "aromatic",
+   "name": "芳香族炭化水素",
+   "count": 12,
+   "panel": {
+    "x": 1572,
+    "y": -56,
+    "w": 940,
+    "h": 164
+   }
+  },
+  {
+   "id": "alcohol-ether",
+   "name": "アルコール・エーテル",
+   "count": 27,
+   "panel": {
+    "x": 1572,
+    "y": 144,
+    "w": 1244,
+    "h": 272
+   }
+  },
+  {
+   "id": "carbonyl",
+   "name": "アルデヒド・ケトン・カルボン酸",
+   "count": 48,
+   "panel": {
+    "x": -28,
+    "y": 504,
+    "w": 1396,
+    "h": 380
+   }
+  },
+  {
+   "id": "ester-lipid",
+   "name": "エステル・油脂・セッケン",
+   "count": 36,
+   "panel": {
+    "x": 1572,
+    "y": 424,
+    "w": 1244,
+    "h": 326
+   }
+  },
+  {
+   "id": "phenol-aromatic",
+   "name": "フェノール類・芳香族化合物",
+   "count": 54,
+   "panel": {
+    "x": 1572,
+    "y": 1054,
+    "w": 1396,
+    "h": 380
+   }
+  },
+  {
+   "id": "nitrogen",
+   "name": "窒素化合物",
+   "count": 25,
+   "panel": {
+    "x": -28,
+    "y": 944,
+    "w": 1092,
+    "h": 272
+   }
+  },
+  {
+   "id": "sugar",
+   "name": "糖類",
+   "count": 23,
+   "panel": {
+    "x": 1572,
+    "y": 764,
+    "w": 940,
+    "h": 272
+   }
+  },
+  {
+   "id": "amino",
+   "name": "アミノ酸・タンパク質",
+   "count": 66,
+   "panel": {
+    "x": -28,
+    "y": 1234,
+    "w": 1548,
+    "h": 434
+   }
+  },
+  {
+   "id": "polymer",
+   "name": "高分子・材料",
+   "count": 65,
+   "panel": {
+    "x": 1572,
+    "y": 1444,
+    "w": 1548,
+    "h": 434
+   }
+  }
+ ],
+ "compounds": [
+  {
+   "id": "1,1,2,2-tetrabromoethane",
+   "x": 0,
+   "y": 0,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "1,2-dibromoethane",
+   "x": 152,
+   "y": 0,
+   "region": "hydrocarbon",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "1,3-dibromopropane",
+   "x": 304,
+   "y": 0,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "1-bromopropane",
+   "x": 456,
+   "y": 0,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "1-chloro-2-methylpropane",
+   "x": 608,
+   "y": 0,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "1-chlorobutane",
+   "x": 760,
+   "y": 0,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "1-chloropropane",
+   "x": 912,
+   "y": 0,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2,2-dimethylbutane",
+   "x": 1064,
+   "y": 0,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2,3-dimethylbutane",
+   "x": 1216,
+   "y": 0,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-bromopropane",
+   "x": 1368,
+   "y": 0,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-chloro-2-methylpropane",
+   "x": 0,
+   "y": 54,
+   "region": "hydrocarbon",
+   "incoming": 2,
+   "outgoing": 0
+  },
+  {
+   "id": "2-chlorobutane",
+   "x": 152,
+   "y": 54,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-chloropropane",
+   "x": 304,
+   "y": 54,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methylpentane",
+   "x": 456,
+   "y": 54,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "3-methylpentane",
+   "x": 608,
+   "y": 54,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "bromoethane",
+   "x": 760,
+   "y": 54,
+   "region": "hydrocarbon",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "butane",
+   "x": 912,
+   "y": 54,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "carbon-tetrachloride",
+   "x": 1064,
+   "y": 54,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "chloroethane",
+   "x": 1216,
+   "y": 54,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "chloroform",
+   "x": 1368,
+   "y": 54,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "chloromethane",
+   "x": 0,
+   "y": 108,
+   "region": "hydrocarbon",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "decane",
+   "x": 152,
+   "y": 108,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "dichloromethane",
+   "x": 304,
+   "y": 108,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "eicosane",
+   "x": 456,
+   "y": 108,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "ethane",
+   "x": 608,
+   "y": 108,
+   "region": "hydrocarbon",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "heptane",
+   "x": 760,
+   "y": 108,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "hexane",
+   "x": 912,
+   "y": 108,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "iodoethane",
+   "x": 1064,
+   "y": 108,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "iodoform",
+   "x": 1216,
+   "y": 108,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "isobutane",
+   "x": 1368,
+   "y": 108,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "isopentane",
+   "x": 0,
+   "y": 162,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "methane",
+   "x": 152,
+   "y": 162,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "neopentane",
+   "x": 304,
+   "y": 162,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "nonane",
+   "x": 456,
+   "y": 162,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "octane",
+   "x": 608,
+   "y": 162,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pentane",
+   "x": 760,
+   "y": 162,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "propane",
+   "x": 912,
+   "y": 162,
+   "region": "hydrocarbon",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "1,2-dibromoethene",
+   "x": 1064,
+   "y": 162,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "1-chloropropene",
+   "x": 1216,
+   "y": 162,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-chloropropene",
+   "x": 1368,
+   "y": 162,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "3-chloropropene",
+   "x": 0,
+   "y": 216,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "acrolein",
+   "x": 152,
+   "y": 216,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "allyl-alcohol",
+   "x": 304,
+   "y": 216,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "bromoethene",
+   "x": 456,
+   "y": 216,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "but-1-ene",
+   "x": 608,
+   "y": 216,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "but-1-yne",
+   "x": 760,
+   "y": 216,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "but-2-ene",
+   "x": 912,
+   "y": 216,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "but-2-yne",
+   "x": 1064,
+   "y": 216,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "but-3-enoic-acid",
+   "x": 1216,
+   "y": 216,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "copper-i-acetylide",
+   "x": 1368,
+   "y": 216,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "crotonic-acid",
+   "x": 0,
+   "y": 270,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "ethene",
+   "x": 152,
+   "y": 270,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 5
+  },
+  {
+   "id": "ethenol",
+   "x": 304,
+   "y": 270,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "ethyne",
+   "x": 456,
+   "y": 270,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "isobutene",
+   "x": 608,
+   "y": 270,
+   "region": "hydrocarbon",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "pent-1-ene",
+   "x": 760,
+   "y": 270,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pent-1-yne",
+   "x": 912,
+   "y": 270,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pent-2-ene",
+   "x": 1064,
+   "y": 270,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pent-2-yne",
+   "x": 1216,
+   "y": 270,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "prop-1-en-1-ol",
+   "x": 1368,
+   "y": 270,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "prop-1-en-2-ol",
+   "x": 0,
+   "y": 324,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "propene",
+   "x": 152,
+   "y": 324,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 3
+  },
+  {
+   "id": "propyne",
+   "x": 304,
+   "y": 324,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "silver-acetylide",
+   "x": 456,
+   "y": 324,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "chlorocyclohexane",
+   "x": 608,
+   "y": 324,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cyclobutane",
+   "x": 760,
+   "y": 324,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cyclohexane",
+   "x": 912,
+   "y": 324,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cyclohexene",
+   "x": 1064,
+   "y": 324,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cyclopentane",
+   "x": 1216,
+   "y": 324,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cyclopropane",
+   "x": 1368,
+   "y": 324,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "hexachlorocyclohexane",
+   "x": 0,
+   "y": 378,
+   "region": "hydrocarbon",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "anthracene",
+   "x": 1600,
+   "y": 0,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "benzene",
+   "x": 1752,
+   "y": 0,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 3
+  },
+  {
+   "id": "cumene",
+   "x": 1904,
+   "y": 0,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "ethylbenzene",
+   "x": 2056,
+   "y": 0,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "m-xylene",
+   "x": 2208,
+   "y": 0,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "naphthalene",
+   "x": 2360,
+   "y": 0,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "o-xylene",
+   "x": 1600,
+   "y": 54,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "p-dichlorobenzene",
+   "x": 1752,
+   "y": 54,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "p-divinylbenzene",
+   "x": 1904,
+   "y": 54,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "p-xylene",
+   "x": 2056,
+   "y": 54,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "styrene",
+   "x": 2208,
+   "y": 54,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "toluene",
+   "x": 2360,
+   "y": 54,
+   "region": "aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2,2-dimethylpropan-1-ol",
+   "x": 1600,
+   "y": 200,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methylbutan-1-ol",
+   "x": 1752,
+   "y": 200,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methylbutan-2-ol",
+   "x": 1904,
+   "y": 200,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methylpropan-1-ol",
+   "x": 2056,
+   "y": 200,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methylpropan-2-ol",
+   "x": 2208,
+   "y": 200,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 2
+  },
+  {
+   "id": "3-methylbutan-1-ol",
+   "x": 2360,
+   "y": 200,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "3-methylbutan-2-ol",
+   "x": 2512,
+   "y": 200,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "butan-1-ol",
+   "x": 2664,
+   "y": 200,
+   "region": "alcohol-ether",
+   "incoming": 1,
+   "outgoing": 2
+  },
+  {
+   "id": "butan-2-ol",
+   "x": 1600,
+   "y": 254,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "ethanol",
+   "x": 1752,
+   "y": 254,
+   "region": "alcohol-ether",
+   "incoming": 4,
+   "outgoing": 7
+  },
+  {
+   "id": "ethanolamine",
+   "x": 1904,
+   "y": 254,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "ethylene-glycol",
+   "x": 2056,
+   "y": 254,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "glycerol",
+   "x": 2208,
+   "y": 254,
+   "region": "alcohol-ether",
+   "incoming": 4,
+   "outgoing": 5
+  },
+  {
+   "id": "methanol",
+   "x": 2360,
+   "y": 254,
+   "region": "alcohol-ether",
+   "incoming": 1,
+   "outgoing": 6
+  },
+  {
+   "id": "pentan-1-ol",
+   "x": 2512,
+   "y": 254,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pentan-2-ol",
+   "x": 2664,
+   "y": 254,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pentan-3-ol",
+   "x": 1600,
+   "y": 308,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "propan-1-ol",
+   "x": 1752,
+   "y": 308,
+   "region": "alcohol-ether",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "propan-2-ol",
+   "x": 1904,
+   "y": 308,
+   "region": "alcohol-ether",
+   "incoming": 2,
+   "outgoing": 1
+  },
+  {
+   "id": "propylene-glycol",
+   "x": 2056,
+   "y": 308,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-ethoxide",
+   "x": 2208,
+   "y": 308,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-methoxide",
+   "x": 2360,
+   "y": 308,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "1-methoxypropane",
+   "x": 2512,
+   "y": 308,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methoxypropane",
+   "x": 2664,
+   "y": 308,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "diethyl-ether",
+   "x": 1600,
+   "y": 362,
+   "region": "alcohol-ether",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "dimethyl-ether",
+   "x": 1752,
+   "y": 362,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "methoxyethane",
+   "x": 1904,
+   "y": 362,
+   "region": "alcohol-ether",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2,2-dimethylpropanal",
+   "x": 0,
+   "y": 560,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methylbutanal",
+   "x": 152,
+   "y": 560,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methylpropanal",
+   "x": 304,
+   "y": 560,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "3-methylbutanal",
+   "x": 456,
+   "y": 560,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "butanal",
+   "x": 608,
+   "y": 560,
+   "region": "carbonyl",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "ethanal",
+   "x": 760,
+   "y": 560,
+   "region": "carbonyl",
+   "incoming": 1,
+   "outgoing": 2
+  },
+  {
+   "id": "formaldehyde",
+   "x": 912,
+   "y": 560,
+   "region": "carbonyl",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "pentanal",
+   "x": 1064,
+   "y": 560,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "propanal",
+   "x": 1216,
+   "y": 560,
+   "region": "carbonyl",
+   "incoming": 1,
+   "outgoing": 2
+  },
+  {
+   "id": "acetone",
+   "x": 0,
+   "y": 614,
+   "region": "carbonyl",
+   "incoming": 3,
+   "outgoing": 1
+  },
+  {
+   "id": "butanone",
+   "x": 152,
+   "y": 614,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pentan-3-one",
+   "x": 304,
+   "y": 614,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2,2-dimethylpropanoic-acid",
+   "x": 456,
+   "y": 614,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methylbutanoic-acid",
+   "x": 608,
+   "y": 614,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methylpropanoic-acid",
+   "x": 760,
+   "y": 614,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "3-methylbutanoic-acid",
+   "x": 912,
+   "y": 614,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "acetic-acid",
+   "x": 1064,
+   "y": 614,
+   "region": "carbonyl",
+   "incoming": 4,
+   "outgoing": 5
+  },
+  {
+   "id": "acetic-anhydride",
+   "x": 1216,
+   "y": 614,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 2
+  },
+  {
+   "id": "acrylic-acid",
+   "x": 0,
+   "y": 668,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "adipic-acid",
+   "x": 152,
+   "y": 668,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "adipoyl-chloride",
+   "x": 304,
+   "y": 668,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "benzoic-acid",
+   "x": 456,
+   "y": 668,
+   "region": "carbonyl",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "butanoic-acid",
+   "x": 608,
+   "y": 668,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "calcium-acetate",
+   "x": 760,
+   "y": 668,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "citric-acid",
+   "x": 912,
+   "y": 668,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "formic-acid",
+   "x": 1064,
+   "y": 668,
+   "region": "carbonyl",
+   "incoming": 1,
+   "outgoing": 2
+  },
+  {
+   "id": "fumaric-acid",
+   "x": 1216,
+   "y": 668,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "glutaric-acid",
+   "x": 0,
+   "y": 722,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "ibuprofen",
+   "x": 152,
+   "y": 722,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "lactic-acid",
+   "x": 304,
+   "y": 722,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "lead-ii-acetate",
+   "x": 456,
+   "y": 722,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "m-hydroxybenzoic-acid",
+   "x": 608,
+   "y": 722,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "maleic-acid",
+   "x": 760,
+   "y": 722,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "maleic-anhydride",
+   "x": 912,
+   "y": 722,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "malic-acid",
+   "x": 1064,
+   "y": 722,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "malonic-acid",
+   "x": 1216,
+   "y": 722,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "methacrylic-acid",
+   "x": 0,
+   "y": 776,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "oxalic-acid",
+   "x": 152,
+   "y": 776,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "p-hydroxybenzoic-acid",
+   "x": 304,
+   "y": 776,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pentanoic-acid",
+   "x": 456,
+   "y": 776,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "phthalic-anhydride",
+   "x": 608,
+   "y": 776,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "propionic-acid",
+   "x": 760,
+   "y": 776,
+   "region": "carbonyl",
+   "incoming": 2,
+   "outgoing": 2
+  },
+  {
+   "id": "pyruvic-acid",
+   "x": 912,
+   "y": 776,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-acetate",
+   "x": 1064,
+   "y": 776,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-benzoate",
+   "x": 1216,
+   "y": 776,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "succinic-acid",
+   "x": 0,
+   "y": 830,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "tartaric-acid",
+   "x": 152,
+   "y": 830,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "terephthaloyl-chloride",
+   "x": 304,
+   "y": 830,
+   "region": "carbonyl",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "butyl-acetate",
+   "x": 1600,
+   "y": 480,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "dimethyl-oxalate",
+   "x": 1752,
+   "y": 480,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "diphenyl-oxalate",
+   "x": 1904,
+   "y": 480,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "ethyl-acetate",
+   "x": 2056,
+   "y": 480,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "ethyl-butyrate",
+   "x": 2208,
+   "y": 480,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "ethyl-formate",
+   "x": 2360,
+   "y": 480,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "ethyl-propionate",
+   "x": 2512,
+   "y": 480,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "isoamyl-acetate",
+   "x": 2664,
+   "y": 480,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "methyl-acetate",
+   "x": 1600,
+   "y": 534,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "methyl-formate",
+   "x": 1752,
+   "y": 534,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "methyl-propionate",
+   "x": 1904,
+   "y": 534,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "methyl-salicylate",
+   "x": 2056,
+   "y": 534,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "phenyl-acetate",
+   "x": 2208,
+   "y": 534,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "propyl-formate",
+   "x": 2360,
+   "y": 534,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "triacetin",
+   "x": 2512,
+   "y": 534,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "arachidonic-acid",
+   "x": 2664,
+   "y": 534,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "docosahexaenoic-acid",
+   "x": 1600,
+   "y": 588,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "eicosapentaenoic-acid",
+   "x": 1752,
+   "y": 588,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "elaidic-acid",
+   "x": 1904,
+   "y": 588,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "lauric-acid",
+   "x": 2056,
+   "y": 588,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "linoleic-acid",
+   "x": 2208,
+   "y": 588,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "linolenic-acid",
+   "x": 2360,
+   "y": 588,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "myristic-acid",
+   "x": 2512,
+   "y": 588,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "oleic-acid",
+   "x": 2664,
+   "y": 588,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "palmitic-acid",
+   "x": 1600,
+   "y": 642,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "stearic-acid",
+   "x": 1752,
+   "y": 642,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "trilinolein",
+   "x": 1904,
+   "y": 642,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "triolein",
+   "x": 2056,
+   "y": 642,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 2
+  },
+  {
+   "id": "tripalmitin",
+   "x": 2208,
+   "y": 642,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "tristearin",
+   "x": 2360,
+   "y": 642,
+   "region": "ester-lipid",
+   "incoming": 2,
+   "outgoing": 2
+  },
+  {
+   "id": "las",
+   "x": 2512,
+   "y": 642,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sds",
+   "x": 2664,
+   "y": 642,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-laurate",
+   "x": 1600,
+   "y": 696,
+   "region": "ester-lipid",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-oleate",
+   "x": 1752,
+   "y": 696,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-palmitate",
+   "x": 1904,
+   "y": 696,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-stearate",
+   "x": 2056,
+   "y": 696,
+   "region": "ester-lipid",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "1-naphthol",
+   "x": 1600,
+   "y": 1110,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2,4,6-tribromophenol",
+   "x": 1752,
+   "y": 1110,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-naphthol",
+   "x": 1904,
+   "y": 1110,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "catechol",
+   "x": 2056,
+   "y": 1110,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "disodium-salicylate",
+   "x": 2208,
+   "y": 1110,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "guaiacol",
+   "x": 2360,
+   "y": 1110,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "hydroquinone",
+   "x": 2512,
+   "y": 1110,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "m-cresol",
+   "x": 2664,
+   "y": 1110,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "o-cresol",
+   "x": 2816,
+   "y": 1110,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "o-nitrophenol",
+   "x": 1600,
+   "y": 1164,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "p-cresol",
+   "x": 1752,
+   "y": 1164,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "p-nitrophenol",
+   "x": 1904,
+   "y": 1164,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "phenol",
+   "x": 2056,
+   "y": 1164,
+   "region": "phenol-aromatic",
+   "incoming": 2,
+   "outgoing": 2
+  },
+  {
+   "id": "phenoxide-ion",
+   "x": 2208,
+   "y": 1164,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "picric-acid",
+   "x": 2360,
+   "y": 1164,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "resorcinol",
+   "x": 2512,
+   "y": 1164,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-phenoxide",
+   "x": 2664,
+   "y": 1164,
+   "region": "phenol-aromatic",
+   "incoming": 2,
+   "outgoing": 1
+  },
+  {
+   "id": "2-nitrobenzaldehyde",
+   "x": 2816,
+   "y": 1164,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "acetaminophen",
+   "x": 1600,
+   "y": 1218,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "acetanilide",
+   "x": 1752,
+   "y": 1218,
+   "region": "phenol-aromatic",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "alizarin",
+   "x": 1904,
+   "y": 1218,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "anisole",
+   "x": 2056,
+   "y": 1218,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "aspirin",
+   "x": 2208,
+   "y": 1218,
+   "region": "phenol-aromatic",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "benzaldehyde",
+   "x": 2360,
+   "y": 1218,
+   "region": "phenol-aromatic",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "benzenediazonium-chloride",
+   "x": 2512,
+   "y": 1218,
+   "region": "phenol-aromatic",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "benzenesulfonic-acid",
+   "x": 2664,
+   "y": 1218,
+   "region": "phenol-aromatic",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "benzonitrile",
+   "x": 2816,
+   "y": 1218,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "benzyl-alcohol",
+   "x": 1600,
+   "y": 1272,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "bisphenol-a",
+   "x": 1752,
+   "y": 1272,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "carminic-acid",
+   "x": 1904,
+   "y": 1272,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "carthamin",
+   "x": 2056,
+   "y": 1272,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "chlorobenzene",
+   "x": 2208,
+   "y": 1272,
+   "region": "phenol-aromatic",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "cumene-hydroperoxide",
+   "x": 2360,
+   "y": 1272,
+   "region": "phenol-aromatic",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "dibromoindigo",
+   "x": 2512,
+   "y": 1272,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "indigo",
+   "x": 2664,
+   "y": 1272,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "isophthalic-acid",
+   "x": 2816,
+   "y": 1272,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "m-nitrotoluene",
+   "x": 1600,
+   "y": 1326,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "methyl-orange",
+   "x": 1752,
+   "y": 1326,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "ninhydrin",
+   "x": 1904,
+   "y": 1326,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "nitrobenzene",
+   "x": 2056,
+   "y": 1326,
+   "region": "phenol-aromatic",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "o-nitrotoluene",
+   "x": 2208,
+   "y": 1326,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "p-hydroxyazobenzene",
+   "x": 2360,
+   "y": 1326,
+   "region": "phenol-aromatic",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "p-nitrotoluene",
+   "x": 2512,
+   "y": 1326,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "phenolphthalein",
+   "x": 2664,
+   "y": 1326,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "phthalic-acid",
+   "x": 2816,
+   "y": 1326,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "quercetin",
+   "x": 1600,
+   "y": 1380,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "salicylic-acid",
+   "x": 1752,
+   "y": 1380,
+   "region": "phenol-aromatic",
+   "incoming": 2,
+   "outgoing": 2
+  },
+  {
+   "id": "shikonin",
+   "x": 1904,
+   "y": 1380,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-benzenesulfonate",
+   "x": 2056,
+   "y": 1380,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-salicylate",
+   "x": 2208,
+   "y": 1380,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sulfanilamide",
+   "x": 2360,
+   "y": 1380,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sulfanilic-acid",
+   "x": 2512,
+   "y": 1380,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "terephthalic-acid",
+   "x": 2664,
+   "y": 1380,
+   "region": "phenol-aromatic",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "tnt",
+   "x": 2816,
+   "y": 1380,
+   "region": "phenol-aromatic",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "nitromethane",
+   "x": 0,
+   "y": 1000,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methylpropan-1-amine",
+   "x": 152,
+   "y": 1000,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "2-methylpropan-2-amine",
+   "x": 304,
+   "y": 1000,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "acetonitrile",
+   "x": 456,
+   "y": 1000,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "aniline",
+   "x": 608,
+   "y": 1000,
+   "region": "nitrogen",
+   "incoming": 1,
+   "outgoing": 2
+  },
+  {
+   "id": "aniline-hydrochloride",
+   "x": 760,
+   "y": 1000,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "butan-1-amine",
+   "x": 912,
+   "y": 1000,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "butan-2-amine",
+   "x": 0,
+   "y": 1054,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "butanenitrile",
+   "x": 152,
+   "y": 1054,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "diethylamine",
+   "x": 304,
+   "y": 1054,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "diethylenetriamine",
+   "x": 456,
+   "y": 1054,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "dimethylamine",
+   "x": 608,
+   "y": 1054,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "ethylamine",
+   "x": 760,
+   "y": 1054,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "ethylmethylamine",
+   "x": 912,
+   "y": 1054,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "isopropylamine",
+   "x": 0,
+   "y": 1108,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "methylamine",
+   "x": 152,
+   "y": 1108,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "n,n-dimethylaniline",
+   "x": 304,
+   "y": 1108,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "n,n-dimethylethanamine",
+   "x": 456,
+   "y": 1108,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "n-methylpropan-1-amine",
+   "x": 608,
+   "y": 1108,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "n-methylpropan-2-amine",
+   "x": 760,
+   "y": 1108,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "p-phenylenediamine",
+   "x": 912,
+   "y": 1108,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "propanenitrile",
+   "x": 0,
+   "y": 1162,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "propylamine",
+   "x": 152,
+   "y": 1162,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "triethylamine",
+   "x": 304,
+   "y": 1162,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "trimethylamine",
+   "x": 456,
+   "y": 1162,
+   "region": "nitrogen",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "amylopectin",
+   "x": 1600,
+   "y": 820,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cellobiose",
+   "x": 1752,
+   "y": 820,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cellulose",
+   "x": 1904,
+   "y": 820,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cellulose-acetate",
+   "x": 2056,
+   "y": 820,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cellulose-nitrate",
+   "x": 2208,
+   "y": 820,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "chitin",
+   "x": 2360,
+   "y": 820,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "deoxyribose",
+   "x": 1600,
+   "y": 874,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "dextrin",
+   "x": 1752,
+   "y": 874,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "fructose",
+   "x": 1904,
+   "y": 874,
+   "region": "sugar",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "galactose",
+   "x": 2056,
+   "y": 874,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "glucose",
+   "x": 2208,
+   "y": 874,
+   "region": "sugar",
+   "incoming": 3,
+   "outgoing": 1
+  },
+  {
+   "id": "glycogen",
+   "x": 2360,
+   "y": 874,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "inositol",
+   "x": 1600,
+   "y": 928,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "isomaltose",
+   "x": 1752,
+   "y": 928,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "lactose",
+   "x": 1904,
+   "y": 928,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "maltose",
+   "x": 2056,
+   "y": 928,
+   "region": "sugar",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "mannose",
+   "x": 2208,
+   "y": 928,
+   "region": "sugar",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "ribose",
+   "x": 2360,
+   "y": 928,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "salicin",
+   "x": 1600,
+   "y": 982,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sorbitol",
+   "x": 1752,
+   "y": 982,
+   "region": "sugar",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "starch",
+   "x": 1904,
+   "y": 982,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 2
+  },
+  {
+   "id": "sucrose",
+   "x": 2056,
+   "y": 982,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "trehalose",
+   "x": 2208,
+   "y": 982,
+   "region": "sugar",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "6-aminohexanoic-acid",
+   "x": 0,
+   "y": 1290,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "alanine",
+   "x": 152,
+   "y": 1290,
+   "region": "amino",
+   "incoming": 2,
+   "outgoing": 2
+  },
+  {
+   "id": "alanylglycine",
+   "x": 304,
+   "y": 1290,
+   "region": "amino",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "albumin",
+   "x": 456,
+   "y": 1290,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "amylase",
+   "x": 608,
+   "y": 1290,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "arginine",
+   "x": 760,
+   "y": 1290,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "asparagine",
+   "x": 912,
+   "y": 1290,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "aspartame",
+   "x": 1064,
+   "y": 1290,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "aspartic-acid",
+   "x": 1216,
+   "y": 1290,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "atpase",
+   "x": 1368,
+   "y": 1290,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "casein",
+   "x": 0,
+   "y": 1344,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "catalase",
+   "x": 152,
+   "y": 1344,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cellobiase",
+   "x": 304,
+   "y": 1344,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cellulase",
+   "x": 456,
+   "y": 1344,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "choline",
+   "x": 608,
+   "y": 1344,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "collagen",
+   "x": 760,
+   "y": 1344,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cysteine",
+   "x": 912,
+   "y": 1344,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "cystine",
+   "x": 1064,
+   "y": 1344,
+   "region": "amino",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "erepsin",
+   "x": 1216,
+   "y": 1344,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "fibroin",
+   "x": 1368,
+   "y": 1344,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "gelatin",
+   "x": 0,
+   "y": 1398,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "gliadin",
+   "x": 152,
+   "y": 1398,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "globin",
+   "x": 304,
+   "y": 1398,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "globulin",
+   "x": 456,
+   "y": 1398,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "glutamic-acid",
+   "x": 608,
+   "y": 1398,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "glutamine",
+   "x": 760,
+   "y": 1398,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "glutathione",
+   "x": 912,
+   "y": 1398,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "glutelin",
+   "x": 1064,
+   "y": 1398,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "glutenin",
+   "x": 1216,
+   "y": 1398,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "glycine",
+   "x": 1368,
+   "y": 1398,
+   "region": "amino",
+   "incoming": 3,
+   "outgoing": 3
+  },
+  {
+   "id": "glycylalanine",
+   "x": 0,
+   "y": 1452,
+   "region": "amino",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "glycylglycine",
+   "x": 152,
+   "y": 1452,
+   "region": "amino",
+   "incoming": 1,
+   "outgoing": 1
+  },
+  {
+   "id": "helicase",
+   "x": 304,
+   "y": 1452,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "heme",
+   "x": 456,
+   "y": 1452,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "hemocyanin",
+   "x": 608,
+   "y": 1452,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "hemoglobin",
+   "x": 760,
+   "y": 1452,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "histidine",
+   "x": 912,
+   "y": 1452,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "histone",
+   "x": 1064,
+   "y": 1452,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "hordein",
+   "x": 1216,
+   "y": 1452,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "insulin",
+   "x": 1368,
+   "y": 1452,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "isoleucine",
+   "x": 0,
+   "y": 1506,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "keratin",
+   "x": 152,
+   "y": 1506,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "lactase",
+   "x": 304,
+   "y": 1506,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "leucine",
+   "x": 456,
+   "y": 1506,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "lipase",
+   "x": 608,
+   "y": 1506,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "lysine",
+   "x": 760,
+   "y": 1506,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "maltase",
+   "x": 912,
+   "y": 1506,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "methionine",
+   "x": 1064,
+   "y": 1506,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "mucin",
+   "x": 1216,
+   "y": 1506,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "oryzenin",
+   "x": 1368,
+   "y": 1506,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pepsin",
+   "x": 0,
+   "y": 1560,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "phenylalanine",
+   "x": 152,
+   "y": 1560,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "proline",
+   "x": 304,
+   "y": 1560,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "protamine",
+   "x": 456,
+   "y": 1560,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "protease",
+   "x": 608,
+   "y": 1560,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "protein",
+   "x": 760,
+   "y": 1560,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "salmine",
+   "x": 912,
+   "y": 1560,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "serine",
+   "x": 1064,
+   "y": 1560,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sucrase",
+   "x": 1216,
+   "y": 1560,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "threonine",
+   "x": 1368,
+   "y": 1560,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "trypsin",
+   "x": 0,
+   "y": 1614,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "tryptophan",
+   "x": 152,
+   "y": 1614,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "tyrosine",
+   "x": 304,
+   "y": 1614,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "urease",
+   "x": 456,
+   "y": 1614,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "valine",
+   "x": 608,
+   "y": 1614,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "zymase",
+   "x": 760,
+   "y": 1614,
+   "region": "amino",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "adenine",
+   "x": 1600,
+   "y": 1500,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "adenosine",
+   "x": 1752,
+   "y": 1500,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "adp",
+   "x": 1904,
+   "y": 1500,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "alginic-acid",
+   "x": 2056,
+   "y": 1500,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "atp",
+   "x": 2208,
+   "y": 1500,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "cytosine",
+   "x": 2360,
+   "y": 1500,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "dna",
+   "x": 2512,
+   "y": 1500,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "guanine",
+   "x": 2664,
+   "y": 1500,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "natural-rubber",
+   "x": 2816,
+   "y": 1500,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "rna",
+   "x": 2968,
+   "y": 1500,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-alginate",
+   "x": 1600,
+   "y": 1554,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "thymine",
+   "x": 1752,
+   "y": 1554,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "uracil",
+   "x": 1904,
+   "y": 1554,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "abs",
+   "x": 2056,
+   "y": 1554,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "acrylonitrile",
+   "x": 2208,
+   "y": 1554,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "alkyd-resin",
+   "x": 2360,
+   "y": 1554,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "anion-exchange-resin",
+   "x": 2512,
+   "y": 1554,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "aramid",
+   "x": 2664,
+   "y": 1554,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "br",
+   "x": 2816,
+   "y": 1554,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "butadiene",
+   "x": 2968,
+   "y": 1554,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "caprolactam",
+   "x": 1600,
+   "y": 1608,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "cation-exchange-resin",
+   "x": 1752,
+   "y": 1608,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "chloroprene",
+   "x": 1904,
+   "y": 1608,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "chloroprene-rubber",
+   "x": 2056,
+   "y": 1608,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "dimethyldichlorosilane",
+   "x": 2208,
+   "y": 1608,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "epichlorohydrin",
+   "x": 2360,
+   "y": 1608,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "epoxy-resin",
+   "x": 2512,
+   "y": 1608,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "hexamethylenediamine",
+   "x": 2664,
+   "y": 1608,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "iir",
+   "x": 2816,
+   "y": 1608,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "isoprene",
+   "x": 2968,
+   "y": 1608,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "melamine",
+   "x": 1600,
+   "y": 1662,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "melamine-resin",
+   "x": 1752,
+   "y": 1662,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "methyl-methacrylate",
+   "x": 1904,
+   "y": 1662,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "nbr",
+   "x": 2056,
+   "y": 1662,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "nylon6",
+   "x": 2208,
+   "y": 1662,
+   "region": "polymer",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "nylon66",
+   "x": 2360,
+   "y": 1662,
+   "region": "polymer",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "pan",
+   "x": 2512,
+   "y": 1662,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pet",
+   "x": 2664,
+   "y": 1662,
+   "region": "polymer",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "phenol-resin",
+   "x": 2816,
+   "y": 1662,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "phosgene",
+   "x": 2968,
+   "y": 1662,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pla",
+   "x": 1600,
+   "y": 1716,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pmma",
+   "x": 1752,
+   "y": 1716,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "polyacetylene",
+   "x": 1904,
+   "y": 1716,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "polyaniline",
+   "x": 2056,
+   "y": 1716,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "polycarbonate",
+   "x": 2208,
+   "y": 1716,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "polyethylene",
+   "x": 2360,
+   "y": 1716,
+   "region": "polymer",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "polypropylene",
+   "x": 2512,
+   "y": 1716,
+   "region": "polymer",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "polystyrene",
+   "x": 2664,
+   "y": 1716,
+   "region": "polymer",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "polyurethane",
+   "x": 2816,
+   "y": 1716,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "ptfe",
+   "x": 2968,
+   "y": 1716,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pva",
+   "x": 1600,
+   "y": 1770,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pvac",
+   "x": 1752,
+   "y": 1770,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "pvc",
+   "x": 1904,
+   "y": 1770,
+   "region": "polymer",
+   "incoming": 1,
+   "outgoing": 0
+  },
+  {
+   "id": "pvdc",
+   "x": 2056,
+   "y": 1770,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sbr",
+   "x": 2208,
+   "y": 1770,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "silicone",
+   "x": 2360,
+   "y": 1770,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "sodium-polyacrylate",
+   "x": 2512,
+   "y": 1770,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "tetrafluoroethylene",
+   "x": 2664,
+   "y": 1770,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "unsaturated-polyester",
+   "x": 2816,
+   "y": 1770,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "urea",
+   "x": 2968,
+   "y": 1770,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "urea-resin",
+   "x": 1600,
+   "y": 1824,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "vinyl-acetate",
+   "x": 1752,
+   "y": 1824,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "vinyl-chloride",
+   "x": 1904,
+   "y": 1824,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 1
+  },
+  {
+   "id": "vinylidene-chloride",
+   "x": 2056,
+   "y": 1824,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  },
+  {
+   "id": "vinylon",
+   "x": 2208,
+   "y": 1824,
+   "region": "polymer",
+   "incoming": 0,
+   "outgoing": 0
+  }
+ ],
+ "reactions": [
+  {
+   "id": "methane-chlorination",
+   "x": 72,
+   "y": 145,
+   "substrates": [
+    "methane"
+   ],
+   "products": [
+    "chloromethane"
+   ],
+   "typeLabel": "ラジカル置換",
+   "conditions": "塩素と混合して紫外線を当てる",
+   "cross": false
+  },
+  {
+   "id": "ethene-bromine-addition",
+   "x": 135,
+   "y": 135,
+   "substrates": [
+    "ethene"
+   ],
+   "products": [
+    "1,2-dibromoethane"
+   ],
+   "typeLabel": "付加",
+   "conditions": "臭素を付加させる",
+   "cross": false
+  },
+  {
+   "id": "ethene-hydrogen-bromide",
+   "x": 451,
+   "y": 148,
+   "substrates": [
+    "ethene"
+   ],
+   "products": [
+    "bromoethane"
+   ],
+   "typeLabel": "付加",
+   "conditions": "臭化水素を付加させる",
+   "cross": false
+  },
+  {
+   "id": "ethene-hydrogenation",
+   "x": 375,
+   "y": 174,
+   "substrates": [
+    "ethene"
+   ],
+   "products": [
+    "ethane"
+   ],
+   "typeLabel": "水素付加",
+   "conditions": "パラジウムや白金の触媒で水素を付加させる",
+   "cross": false
+  },
+  {
+   "id": "ethene-hydration",
+   "x": 952,
+   "y": 266,
+   "substrates": [
+    "ethene"
+   ],
+   "products": [
+    "ethanol"
+   ],
+   "typeLabel": "水和",
+   "conditions": "強酸触媒で水を付加させる",
+   "cross": true
+  },
+  {
+   "id": "propene-hydrogenation",
+   "x": 532,
+   "y": 241,
+   "substrates": [
+    "propene"
+   ],
+   "products": [
+    "propane"
+   ],
+   "typeLabel": "水素付加",
+   "conditions": "パラジウムや白金の触媒で水素を付加させる",
+   "cross": false
+  },
+  {
+   "id": "propene-hydration",
+   "x": 1028,
+   "y": 301,
+   "substrates": [
+    "propene"
+   ],
+   "products": [
+    "propan-2-ol"
+   ],
+   "typeLabel": "水和",
+   "conditions": "強酸触媒で水を付加させる",
+   "cross": true
+  },
+  {
+   "id": "ethanol-dehydration-ether",
+   "x": 1672,
+   "y": 302,
+   "substrates": [
+    "ethanol"
+   ],
+   "products": [
+    "diethyl-ether"
+   ],
+   "typeLabel": "縮合",
+   "conditions": "硫酸触媒で脱水縮合させる",
+   "cross": false
+  },
+  {
+   "id": "methanol-oxidation-formaldehyde",
+   "x": 1632,
+   "y": 389,
+   "substrates": [
+    "methanol"
+   ],
+   "products": [
+    "formaldehyde"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "Dess–Martin 試薬で酸化する",
+   "cross": true
+  },
+  {
+   "id": "formaldehyde-oxidation-formic",
+   "x": 993,
+   "y": 607,
+   "substrates": [
+    "formaldehyde"
+   ],
+   "products": [
+    "formic-acid"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "塩基性過マンガン酸カリウムまたは熱い硝酸で酸化する",
+   "cross": false
+  },
+  {
+   "id": "ethanol-oxidation-ethanal",
+   "x": 1252,
+   "y": 393,
+   "substrates": [
+    "ethanol"
+   ],
+   "products": [
+    "ethanal"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "Dess–Martin 試薬で酸化する",
+   "cross": true
+  },
+  {
+   "id": "ethanal-oxidation-acetic",
+   "x": 913,
+   "y": 580,
+   "substrates": [
+    "ethanal"
+   ],
+   "products": [
+    "acetic-acid"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "塩基性過マンガン酸カリウムまたは熱い硝酸で酸化する",
+   "cross": false
+  },
+  {
+   "id": "ethanol-oxidation-acetic",
+   "x": 1413,
+   "y": 444,
+   "substrates": [
+    "ethanol"
+   ],
+   "products": [
+    "acetic-acid"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "塩基性水溶液中で過マンガン酸カリウムと加熱し、酸性にしてカルボン酸を得る",
+   "cross": true
+  },
+  {
+   "id": "propan-1-ol-oxidation",
+   "x": 1490,
+   "y": 446,
+   "substrates": [
+    "propan-1-ol"
+   ],
+   "products": [
+    "propanal"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "Dess–Martin 試薬で酸化する",
+   "cross": true
+  },
+  {
+   "id": "propan-2-ol-oxidation",
+   "x": 951,
+   "y": 456,
+   "substrates": [
+    "propan-2-ol"
+   ],
+   "products": [
+    "acetone"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "Dess–Martin 試薬で酸化する",
+   "cross": true
+  },
+  {
+   "id": "butan-1-ol-oxidation",
+   "x": 1636,
+   "y": 377,
+   "substrates": [
+    "butan-1-ol"
+   ],
+   "products": [
+    "butanal"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "Dess–Martin 試薬で酸化する",
+   "cross": true
+  },
+  {
+   "id": "propanal-oxidation",
+   "x": 986,
+   "y": 665,
+   "substrates": [
+    "propanal"
+   ],
+   "products": [
+    "propionic-acid"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "塩基性過マンガン酸カリウムまたは熱い硝酸で酸化する",
+   "cross": false
+  },
+  {
+   "id": "benzyl-alcohol-oxidation",
+   "x": 1981,
+   "y": 1256,
+   "substrates": [
+    "benzyl-alcohol"
+   ],
+   "products": [
+    "benzaldehyde"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "Dess–Martin 試薬で酸化する",
+   "cross": false
+  },
+  {
+   "id": "benzaldehyde-oxidation",
+   "x": 1403,
+   "y": 959,
+   "substrates": [
+    "benzaldehyde"
+   ],
+   "products": [
+    "benzoic-acid"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "塩基性過マンガン酸カリウムまたは熱い硝酸で酸化する",
+   "cross": true
+  },
+  {
+   "id": "ethanal-reduction",
+   "x": 1251,
+   "y": 390,
+   "substrates": [
+    "ethanal"
+   ],
+   "products": [
+    "ethanol"
+   ],
+   "typeLabel": "還元",
+   "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
+   "cross": true
+  },
+  {
+   "id": "acetone-reduction",
+   "x": 955,
+   "y": 479,
+   "substrates": [
+    "acetone"
+   ],
+   "products": [
+    "propan-2-ol"
+   ],
+   "typeLabel": "還元",
+   "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
+   "cross": true
+  },
+  {
+   "id": "propanal-reduction",
+   "x": 1481,
+   "y": 427,
+   "substrates": [
+    "propanal"
+   ],
+   "products": [
+    "propan-1-ol"
+   ],
+   "typeLabel": "還元",
+   "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
+   "cross": true
+  },
+  {
+   "id": "butanal-reduction",
+   "x": 1638,
+   "y": 391,
+   "substrates": [
+    "butanal"
+   ],
+   "products": [
+    "butan-1-ol"
+   ],
+   "typeLabel": "還元",
+   "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
+   "cross": true
+  },
+  {
+   "id": "acetic-acid-ethanol-esterification",
+   "x": 1731,
+   "y": 471,
+   "substrates": [
+    "acetic-acid",
+    "ethanol"
+   ],
+   "products": [
+    "ethyl-acetate"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "acetic-acid-methanol-esterification",
+   "x": 1657,
+   "y": 485,
+   "substrates": [
+    "acetic-acid",
+    "methanol"
+   ],
+   "products": [
+    "methyl-acetate"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "acetic-acid-butanol-esterification",
+   "x": 1732,
+   "y": 444,
+   "substrates": [
+    "acetic-acid",
+    "butan-1-ol"
+   ],
+   "products": [
+    "butyl-acetate"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "acetic-acid-isoamyl-esterification",
+   "x": 2187,
+   "y": 456,
+   "substrates": [
+    "acetic-acid",
+    "3-methylbutan-1-ol"
+   ],
+   "products": [
+    "isoamyl-acetate"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "acetic-acid-glycerol-esterification",
+   "x": 2076,
+   "y": 468,
+   "substrates": [
+    "acetic-acid",
+    "glycerol"
+   ],
+   "products": [
+    "triacetin"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "formic-acid-methanol-esterification",
+   "x": 1716,
+   "y": 506,
+   "substrates": [
+    "formic-acid",
+    "methanol"
+   ],
+   "products": [
+    "methyl-formate"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "formic-acid-ethanol-esterification",
+   "x": 1884,
+   "y": 462,
+   "substrates": [
+    "formic-acid",
+    "ethanol"
+   ],
+   "products": [
+    "ethyl-formate"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "propionic-acid-methanol-esterification",
+   "x": 1732,
+   "y": 524,
+   "substrates": [
+    "propionic-acid",
+    "methanol"
+   ],
+   "products": [
+    "methyl-propionate"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "propionic-acid-ethanol-esterification",
+   "x": 1884,
+   "y": 513,
+   "substrates": [
+    "propionic-acid",
+    "ethanol"
+   ],
+   "products": [
+    "ethyl-propionate"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "butanoic-acid-ethanol-esterification",
+   "x": 1694,
+   "y": 459,
+   "substrates": [
+    "butanoic-acid",
+    "ethanol"
+   ],
+   "products": [
+    "ethyl-butyrate"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "oxalic-acid-methanol-esterification",
+   "x": 1503,
+   "y": 488,
+   "substrates": [
+    "oxalic-acid",
+    "methanol"
+   ],
+   "products": [
+    "dimethyl-oxalate"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "salicylic-acid-methyl-esterification",
+   "x": 2039,
+   "y": 676,
+   "substrates": [
+    "salicylic-acid",
+    "methanol"
+   ],
+   "products": [
+    "methyl-salicylate"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "salicylic-acid-acetylation",
+   "x": 1844,
+   "y": 1114,
+   "substrates": [
+    "salicylic-acid",
+    "acetic-anhydride"
+   ],
+   "products": [
+    "aspirin"
+   ],
+   "typeLabel": "アセチル化",
+   "conditions": "無水酢酸でアセチル化する",
+   "cross": true
+  },
+  {
+   "id": "aspirin-hydrolysis",
+   "x": 1808,
+   "y": 1108,
+   "substrates": [
+    "aspirin"
+   ],
+   "products": [
+    "salicylic-acid",
+    "acetic-acid"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
+   "cross": true
+  },
+  {
+   "id": "methyl-salicylate-hydrolysis",
+   "x": 2064,
+   "y": 676,
+   "substrates": [
+    "methyl-salicylate"
+   ],
+   "products": [
+    "salicylic-acid",
+    "methanol"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
+   "cross": true
+  },
+  {
+   "id": "ethyl-acetate-hydrolysis",
+   "x": 1732,
+   "y": 461,
+   "substrates": [
+    "ethyl-acetate"
+   ],
+   "products": [
+    "acetic-acid",
+    "ethanol"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
+   "cross": true
+  },
+  {
+   "id": "glycerol-stearic-esterification",
+   "x": 2162,
+   "y": 560,
+   "substrates": [
+    "glycerol",
+    "stearic-acid"
+   ],
+   "products": [
+    "tristearin"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "glycerol-palmitic-esterification",
+   "x": 2050,
+   "y": 554,
+   "substrates": [
+    "glycerol",
+    "palmitic-acid"
+   ],
+   "products": [
+    "tripalmitin"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "glycerol-oleic-esterification",
+   "x": 2243,
+   "y": 527,
+   "substrates": [
+    "glycerol",
+    "oleic-acid"
+   ],
+   "products": [
+    "triolein"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "glycerol-linoleic-esterification",
+   "x": 2048,
+   "y": 520,
+   "substrates": [
+    "glycerol",
+    "linoleic-acid"
+   ],
+   "products": [
+    "trilinolein"
+   ],
+   "typeLabel": "エステル化",
+   "conditions": "強酸触媒を用いる（Fischer エステル化）",
+   "cross": true
+  },
+  {
+   "id": "tristearin-saponification",
+   "x": 2247,
+   "y": 558,
+   "substrates": [
+    "tristearin"
+   ],
+   "products": [
+    "sodium-stearate",
+    "glycerol"
+   ],
+   "typeLabel": "けん化",
+   "conditions": "水酸化ナトリウム水溶液と加熱する（けん化）",
+   "cross": true
+  },
+  {
+   "id": "tripalmitin-saponification",
+   "x": 2124,
+   "y": 566,
+   "substrates": [
+    "tripalmitin"
+   ],
+   "products": [
+    "sodium-palmitate",
+    "glycerol"
+   ],
+   "typeLabel": "けん化",
+   "conditions": "水酸化ナトリウム水溶液と加熱する（けん化）",
+   "cross": true
+  },
+  {
+   "id": "triolein-saponification",
+   "x": 2002,
+   "y": 566,
+   "substrates": [
+    "triolein"
+   ],
+   "products": [
+    "sodium-oleate",
+    "glycerol"
+   ],
+   "typeLabel": "けん化",
+   "conditions": "水酸化ナトリウム水溶液と加熱する（けん化）",
+   "cross": true
+  },
+  {
+   "id": "tristearin-hydrolysis",
+   "x": 2172,
+   "y": 542,
+   "substrates": [
+    "tristearin"
+   ],
+   "products": [
+    "stearic-acid",
+    "glycerol"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
+   "cross": true
+  },
+  {
+   "id": "triolein-hydrogenation",
+   "x": 2208,
+   "y": 644,
+   "substrates": [
+    "triolein"
+   ],
+   "products": [
+    "tristearin"
+   ],
+   "typeLabel": "水素付加",
+   "conditions": "パラジウムなどの触媒で水素を付加させる",
+   "cross": false
+  },
+  {
+   "id": "benzene-nitration",
+   "x": 1915,
+   "y": 660,
+   "substrates": [
+    "benzene"
+   ],
+   "products": [
+    "nitrobenzene"
+   ],
+   "typeLabel": "ニトロ化",
+   "conditions": "濃硝酸と濃硫酸の混合物でニトロ化する",
+   "cross": true
+  },
+  {
+   "id": "benzene-sulfonation",
+   "x": 2222,
+   "y": 599,
+   "substrates": [
+    "benzene"
+   ],
+   "products": [
+    "benzenesulfonic-acid"
+   ],
+   "typeLabel": "スルホン化",
+   "conditions": "発煙硫酸でスルホン化する",
+   "cross": true
+  },
+  {
+   "id": "benzene-chlorination",
+   "x": 1991,
+   "y": 632,
+   "substrates": [
+    "benzene"
+   ],
+   "products": [
+    "chlorobenzene"
+   ],
+   "typeLabel": "芳香族置換",
+   "conditions": "塩化鉄(III)触媒のもとで塩素と反応させる",
+   "cross": true
+  },
+  {
+   "id": "nitrobenzene-reduction",
+   "x": 1336,
+   "y": 1145,
+   "substrates": [
+    "nitrobenzene"
+   ],
+   "products": [
+    "aniline"
+   ],
+   "typeLabel": "還元",
+   "conditions": "スズや鉄などの還元剤で還元する",
+   "cross": true
+  },
+  {
+   "id": "aniline-diazotization",
+   "x": 1561,
+   "y": 1097,
+   "substrates": [
+    "aniline"
+   ],
+   "products": [
+    "benzenediazonium-chloride"
+   ],
+   "typeLabel": "ジアゾ化",
+   "conditions": "亜硝酸（亜硝酸ナトリウムと酸）を作用させてジアゾニウム塩にする",
+   "cross": true
+  },
+  {
+   "id": "diazonium-phenol-coupling",
+   "x": 2331,
+   "y": 1253,
+   "substrates": [
+    "benzenediazonium-chloride",
+    "phenol"
+   ],
+   "products": [
+    "p-hydroxyazobenzene"
+   ],
+   "typeLabel": "カップリング",
+   "conditions": "フェノールとカップリングさせる",
+   "cross": false
+  },
+  {
+   "id": "aniline-acetic-anhydride",
+   "x": 1326,
+   "y": 1025,
+   "substrates": [
+    "aniline",
+    "acetic-anhydride"
+   ],
+   "products": [
+    "acetanilide"
+   ],
+   "typeLabel": "アセチル化",
+   "conditions": "無水酢酸でアセチル化する",
+   "cross": true
+  },
+  {
+   "id": "cumene-oxidation",
+   "x": 2126,
+   "y": 638,
+   "substrates": [
+    "cumene"
+   ],
+   "products": [
+    "cumene-hydroperoxide"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "高温で空気（酸素）により酸化する",
+   "cross": true
+  },
+  {
+   "id": "cumene-hydroperoxide-decomposition",
+   "x": 1689,
+   "y": 1098,
+   "substrates": [
+    "cumene-hydroperoxide"
+   ],
+   "products": [
+    "phenol",
+    "acetone"
+   ],
+   "typeLabel": "分解",
+   "conditions": "酸で分解する",
+   "cross": true
+  },
+  {
+   "id": "phenol-acid-neutralization",
+   "x": 2360,
+   "y": 1175,
+   "substrates": [
+    "phenol"
+   ],
+   "products": [
+    "sodium-phenoxide"
+   ],
+   "typeLabel": "中和",
+   "conditions": "水酸化ナトリウム水溶液に溶かす",
+   "cross": false
+  },
+  {
+   "id": "sucrose-hydrolysis",
+   "x": 2051,
+   "y": 928,
+   "substrates": [
+    "sucrose"
+   ],
+   "products": [
+    "glucose",
+    "fructose"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "酸または酵素（インベルターゼ）で加水分解する",
+   "cross": false
+  },
+  {
+   "id": "starch-hydrolysis-maltose",
+   "x": 1982,
+   "y": 962,
+   "substrates": [
+    "starch"
+   ],
+   "products": [
+    "maltose"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "酵素で加水分解する",
+   "cross": false
+  },
+  {
+   "id": "starch-hydrolysis-glucose",
+   "x": 2052,
+   "y": 918,
+   "substrates": [
+    "starch"
+   ],
+   "products": [
+    "glucose"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "酵素（α-グリコシダーゼ）で加水分解する",
+   "cross": false
+  },
+  {
+   "id": "glucose-reduction",
+   "x": 1982,
+   "y": 938,
+   "substrates": [
+    "glucose"
+   ],
+   "products": [
+    "sorbitol"
+   ],
+   "typeLabel": "還元",
+   "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
+   "cross": false
+  },
+  {
+   "id": "glycine-alanine-peptide",
+   "x": 381,
+   "y": 1408,
+   "substrates": [
+    "glycine",
+    "alanine"
+   ],
+   "products": [
+    "glycylalanine"
+   ],
+   "typeLabel": "ペプチド結合",
+   "conditions": "保護基と縮合剤（DCC/EDC）を用いて結合させる",
+   "cross": false
+  },
+  {
+   "id": "glycine-glycine-peptide",
+   "x": 761,
+   "y": 1443,
+   "substrates": [
+    "glycine"
+   ],
+   "products": [
+    "glycylglycine"
+   ],
+   "typeLabel": "ペプチド結合",
+   "conditions": "保護基と縮合剤（DCC/EDC）を用いて結合させる",
+   "cross": false
+  },
+  {
+   "id": "alanine-glycine-peptide",
+   "x": 532,
+   "y": 1321,
+   "substrates": [
+    "alanine",
+    "glycine"
+   ],
+   "products": [
+    "alanylglycine"
+   ],
+   "typeLabel": "ペプチド結合",
+   "conditions": "保護基と縮合剤（DCC/EDC）を用いて結合させる",
+   "cross": false
+  },
+  {
+   "id": "cysteine-oxidation",
+   "x": 988,
+   "y": 1340,
+   "substrates": [
+    "cysteine"
+   ],
+   "products": [
+    "cystine"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "穏やかに酸化する",
+   "cross": false
+  },
+  {
+   "id": "protein-hydrolysis",
+   "x": 759,
+   "y": 1587,
+   "substrates": [
+    "protein"
+   ],
+   "products": [],
+   "typeLabel": "加水分解",
+   "conditions": "酸・塩基または酵素で加水分解する",
+   "cross": false
+  },
+  {
+   "id": "glycylalanine-hydrolysis",
+   "x": 378,
+   "y": 1384,
+   "substrates": [
+    "glycylalanine"
+   ],
+   "products": [
+    "glycine",
+    "alanine"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "酸・塩基または酵素で加水分解する",
+   "cross": false
+  },
+  {
+   "id": "glycylglycine-hydrolysis",
+   "x": 760,
+   "y": 1425,
+   "substrates": [
+    "glycylglycine"
+   ],
+   "products": [
+    "glycine"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "酸・塩基または酵素で加水分解する",
+   "cross": false
+  },
+  {
+   "id": "alanylglycine-hydrolysis",
+   "x": 533,
+   "y": 1304,
+   "substrates": [
+    "alanylglycine"
+   ],
+   "products": [
+    "alanine",
+    "glycine"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "酸・塩基または酵素で加水分解する",
+   "cross": false
+  },
+  {
+   "id": "ethene-polymerization",
+   "x": 1265,
+   "y": 979,
+   "substrates": [
+    "ethene"
+   ],
+   "products": [
+    "polyethylene"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "ラジカル開始剤（過酸化ベンゾイルなど）を用いて重合させる",
+   "cross": true
+  },
+  {
+   "id": "propene-polymerization",
+   "x": 1326,
+   "y": 1031,
+   "substrates": [
+    "propene"
+   ],
+   "products": [
+    "polypropylene"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "開始剤を用いて重合させる",
+   "cross": true
+  },
+  {
+   "id": "styrene-polymerization",
+   "x": 2426,
+   "y": 888,
+   "substrates": [
+    "styrene"
+   ],
+   "products": [
+    "polystyrene"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "ラジカル開始剤、またはアニオン重合（ブチルリチウム）で重合させる",
+   "cross": true
+  },
+  {
+   "id": "vinyl-chloride-polymerization",
+   "x": 1892,
+   "y": 1797,
+   "substrates": [
+    "vinyl-chloride"
+   ],
+   "products": [
+    "pvc"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "開始剤を用いて重合させる",
+   "cross": false
+  },
+  {
+   "id": "caprolactam-ring-opening",
+   "x": 1903,
+   "y": 1643,
+   "substrates": [
+    "caprolactam"
+   ],
+   "products": [
+    "nylon6"
+   ],
+   "typeLabel": "開環重合",
+   "conditions": "少量の水を加えて加熱し、開環重合させる",
+   "cross": false
+  },
+  {
+   "id": "nylon66-condensation",
+   "x": 1881,
+   "y": 1405,
+   "substrates": [
+    "adipic-acid",
+    "hexamethylenediamine"
+   ],
+   "products": [
+    "nylon66"
+   ],
+   "typeLabel": "縮重合",
+   "conditions": "脱水縮合させる",
+   "cross": true
+  },
+  {
+   "id": "pet-condensation",
+   "x": 2527,
+   "y": 1234,
+   "substrates": [
+    "terephthalic-acid",
+    "ethylene-glycol"
+   ],
+   "products": [
+    "pet"
+   ],
+   "typeLabel": "縮重合",
+   "conditions": "脱水縮合させる",
+   "cross": true
+  },
+  {
+   "id": "isobutene-hydrogen-chloride",
+   "x": 306,
+   "y": 158,
+   "substrates": [
+    "isobutene"
+   ],
+   "products": [
+    "2-chloro-2-methylpropane"
+   ],
+   "typeLabel": "付加",
+   "conditions": "塩化水素を付加させる",
+   "cross": false
+  },
+  {
+   "id": "propyne-hydration",
+   "x": 160,
+   "y": 477,
+   "substrates": [
+    "propyne"
+   ],
+   "products": [
+    "acetone"
+   ],
+   "typeLabel": "水和",
+   "conditions": "硫酸水銀(II)触媒と硫酸酸性水で水和させる",
+   "cross": true
+  },
+  {
+   "id": "2-methylpropan-2-ol-hydrogen-chloride",
+   "x": 1104,
+   "y": 133,
+   "substrates": [
+    "2-methylpropan-2-ol"
+   ],
+   "products": [
+    "2-chloro-2-methylpropane"
+   ],
+   "typeLabel": "置換",
+   "conditions": "塩酸と0℃で反応させる",
+   "cross": true
+  },
+  {
+   "id": "2-methylpropan-2-ol-dehydration",
+   "x": 1408,
+   "y": 227,
+   "substrates": [
+    "2-methylpropan-2-ol"
+   ],
+   "products": [
+    "isobutene"
+   ],
+   "typeLabel": "脱離",
+   "conditions": "温めた硫酸水溶液で脱水させる",
+   "cross": true
+  },
+  {
+   "id": "p-xylene-oxidation",
+   "x": 2365,
+   "y": 715,
+   "substrates": [
+    "p-xylene"
+   ],
+   "products": [
+    "terephthalic-acid"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "空気とコバルト(III)触媒で酸化する",
+   "cross": true
+  },
+  {
+   "id": "chlorobenzene-dow-phenol",
+   "x": 2434,
+   "y": 1208,
+   "substrates": [
+    "chlorobenzene"
+   ],
+   "products": [
+    "sodium-phenoxide"
+   ],
+   "typeLabel": "置換",
+   "conditions": "水酸化ナトリウムと高温・高圧で反応させる",
+   "cross": false
+  },
+  {
+   "id": "sodium-phenoxide-acidification",
+   "x": 2360,
+   "y": 1158,
+   "substrates": [
+    "sodium-phenoxide"
+   ],
+   "products": [
+    "phenol"
+   ],
+   "typeLabel": "中和",
+   "conditions": "強酸を加える",
+   "cross": false
+  },
+  {
+   "id": "ethyl-propionate-saponification",
+   "x": 1884,
+   "y": 486,
+   "substrates": [
+    "ethyl-propionate"
+   ],
+   "products": [
+    "propionic-acid",
+    "ethanol"
+   ],
+   "typeLabel": "けん化",
+   "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
+   "cross": true
+  },
+  {
+   "id": "fructose-base-isomerization",
+   "x": 2055,
+   "y": 898,
+   "substrates": [
+    "fructose"
+   ],
+   "products": [
+    "glucose",
+    "mannose"
+   ],
+   "typeLabel": "異性化",
+   "conditions": "塩基性水溶液で異性化させる",
+   "cross": false
+  }
+ ]
+}

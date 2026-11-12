@@ -12,7 +12,7 @@
 
   // semantic zoom の境界。位置は動かさず、表示する要素だけを切り替える。
   var DETAIL_THRESHOLDS = [0.5, 1.0];
-  var SCALE_MIN = 0.12;
+  var SCALE_MIN = 0.05;
   var SCALE_MAX = 3;
   var LABEL_HIDE_LEVEL = 0;
 
@@ -87,20 +87,38 @@
   function regionAt(regions, wx, wy) {
     for (var i = 0; i < regions.length; i++) {
       var p = regions[i].panel;
+      if (!p) continue;
       if (wx >= p.x && wx <= p.x + p.w && wy >= p.y && wy <= p.y + p.h) return regions[i];
     }
     return null;
   }
 
-  // 分野ごとの表示に切り替えるときの倍率と位置。
+  // 分野ごとの表示に切り替えるときの倍率と位置。分野はパネルではなく、
+  // 反応に関与する物質＋反応ラベルの範囲（focus）でフィットする。
   function regionView(region, viewW, viewH, pad) {
+    var r = region.focus || region.panel;
+    if (!r) return fitTransform({ x: 0, y: 0, w: 1, h: 1 }, viewW, viewH, pad);
     var p = typeof pad === 'number' ? pad : 24;
-    var raw = Math.min((viewW - p * 2) / region.panel.w, (viewH - p * 2) / region.panel.h);
-    var scale = clamp(raw, DETAIL_THRESHOLDS[0], 1.6);
+    var raw = Math.min((viewW - p * 2) / r.w, (viewH - p * 2) / r.h);
+    var scale = clamp(raw, 0.08, 1.8);
     return {
       scale: scale,
-      x: viewW / 2 - (region.panel.x + region.panel.w / 2) * scale,
-      y: viewH / 2 - (region.panel.y + region.panel.h / 2) * scale
+      x: viewW / 2 - (r.x + r.w / 2) * scale,
+      y: viewH / 2 - (r.y + r.h / 2) * scale
+    };
+  }
+
+  // 矩形（反応の端点など）を画面に収める。
+  function fitRect(r, viewW, viewH, pad, minScale, maxScale) {
+    var p = typeof pad === 'number' ? pad : 32;
+    var lo = typeof minScale === 'number' ? minScale : SCALE_MIN;
+    var hi = typeof maxScale === 'number' ? maxScale : 1.8;
+    var raw = Math.min((viewW - p * 2) / Math.max(1, r.w), (viewH - p * 2) / Math.max(1, r.h));
+    var scale = clamp(raw, lo, hi);
+    return {
+      scale: scale,
+      x: viewW / 2 - (r.x + r.w / 2) * scale,
+      y: viewH / 2 - (r.y + r.h / 2) * scale
     };
   }
 
@@ -117,6 +135,198 @@
     var cy = (a.y + b.y) / 2 + (dx / dist) * bend;
     return 'M' + round(a.x) + ' ' + round(a.y) +
       'Q' + round(cx) + ' ' + round(cy) + ' ' + round(b.x) + ' ' + round(b.y);
+  }
+
+  /*
+   * 保存済みの折れ線を SVG パスにする。gaps は「下を通る辺」の切れ目（交差・重なりの分断）。
+   * 位置は生成時に固定されているので、閲覧時に経路を計算し直さない。
+   */
+  function routePath(points, gaps, bridges) {
+    var pts = [];
+    for (var i = 0; i < points.length; i++) {
+      var p = points[i];
+      pts.push(Array.isArray(p) ? { x: p[0], y: p[1] } : { x: p.x, y: p.y });
+    }
+    if (pts.length < 2) return '';
+    var gapList = gaps || [];
+    if (!gapList.length && bridges && bridges.length) return bumpPath(pts, bridges);
+    var intervals = [];
+    for (var g = 0; g < gapList.length; g++) {
+      var gp = gapList[g];
+      var target = Array.isArray(gp) ? { x: gp[0], y: gp[1] } : { x: gp.x, y: gp.y };
+      var projected = projectOnPolyline(pts, target);
+      if (projected.distance == null) continue;
+      intervals.push([projected.distance - 3, projected.distance + 3]);
+    }
+    intervals.sort(function (a, b) { return a[0] - b[0]; });
+    var merged = [];
+    for (var k = 0; k < intervals.length; k++) {
+      var cur = intervals[k];
+      var last = merged[merged.length - 1];
+      if (last && cur[0] <= last[1]) last[1] = Math.max(last[1], cur[1]);
+      else merged.push([cur[0], cur[1]]);
+    }
+    if (!merged.length) return polylineD(pts);
+
+    var samples = [];
+    var total = 0;
+    for (var s = 0; s < pts.length; s++) {
+      samples.push({ d: total, p: pts[s], event: 'vertex' });
+      if (s < pts.length - 1) {
+        total += Math.hypot(pts[s + 1].x - pts[s].x, pts[s + 1].y - pts[s].y);
+      }
+    }
+    for (var m = 0; m < merged.length; m++) {
+      var a = pointAtDistance(pts, merged[m][0]);
+      var b = pointAtDistance(pts, merged[m][1]);
+      if (a) samples.push({ d: merged[m][0], p: a, event: 'gap-start' });
+      if (b) samples.push({ d: merged[m][1], p: b, event: 'gap-end' });
+    }
+    samples.sort(function (x, y) {
+      if (x.d !== y.d) return x.d - y.d;
+      var order = { 'gap-start': 0, vertex: 1, 'gap-end': 2 };
+      return order[x.event] - order[y.event];
+    });
+
+    var out = [];
+    var current = [];
+    for (var q = 0; q < samples.length; q++) {
+      var sample = samples[q];
+      if (sample.event === 'gap-start') {
+        current.push(sample.p);
+        if (current.length > 1) out.push(current);
+        current = [];
+      } else if (sample.event === 'gap-end') {
+        current = [sample.p];
+      } else if (current.length) {
+        current.push(sample.p);
+      } else {
+        current = [sample.p];
+      }
+    }
+    if (current.length > 1) out.push(current);
+    return out.map(polylineD).join('');
+  }
+
+  function polylineD(pts) {
+    if (pts.length < 2) return '';
+    if (pts.length === 2) return 'M' + round(pts[0].x) + ' ' + round(pts[0].y) + 'L' + round(pts[1].x) + ' ' + round(pts[1].y);
+    var d = 'M' + round(pts[0].x) + ' ' + round(pts[0].y);
+    for (var i = 1; i < pts.length - 1; i++) {
+      var prev = pts[i - 1];
+      var cur = pts[i];
+      var next = pts[i + 1];
+      var l1 = Math.hypot(cur.x - prev.x, cur.y - prev.y);
+      var l2 = Math.hypot(next.x - cur.x, next.y - cur.y);
+      var r = Math.min(2.5, l1 / 2, l2 / 2);
+      if (r < 0.5) {
+        d += 'L' + round(cur.x) + ' ' + round(cur.y);
+        continue;
+      }
+      var ax = cur.x + ((prev.x - cur.x) / l1) * r;
+      var ay = cur.y + ((prev.y - cur.y) / l1) * r;
+      var bx = cur.x + ((next.x - cur.x) / l2) * r;
+      var by = cur.y + ((next.y - cur.y) / l2) * r;
+      d += 'L' + round(ax) + ' ' + round(ay) + 'Q' + round(cur.x) + ' ' + round(cur.y) + ' ' + round(bx) + ' ' + round(by);
+    }
+    var last = pts[pts.length - 1];
+    return d + 'L' + round(last.x) + ' ' + round(last.y);
+  }
+
+  /*
+   * 浅い交差に小さな橋（バンプ）を付ける。辺は分断しない。
+   * bridges は保存済みの点列上の座標。前後の 4px を直線、中央を小さな円弧にする。
+   */
+  function bumpPath(pts, bridges) {
+    var total = 0;
+    var ds = [0];
+    for (var i = 0; i < pts.length - 1; i++) {
+      total += Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+      ds.push(total);
+    }
+    var events = [];
+    for (var b = 0; b < bridges.length; b++) {
+      var bp = Array.isArray(bridges[b]) ? { x: bridges[b][0], y: bridges[b][1] } : bridges[b];
+      var pr = projectOnPolyline(pts, bp);
+      if (pr.distance == null || pr.offset > 12) continue;
+      events.push(pr.distance);
+    }
+    if (!events.length) return polylineD(pts);
+    events.sort(function (a, b) { return a - b; });
+    var merged = [];
+    for (var e = 0; e < events.length; e++) {
+      if (!merged.length || events[e] - merged[merged.length - 1] > 9) merged.push(events[e]);
+    }
+    var d = 'M' + round(pts[0].x) + ' ' + round(pts[0].y);
+    var vi = 1;
+    for (var m = 0; m < merged.length; m++) {
+      var center = merged[m];
+      var d0 = Math.max(0, center - 4);
+      var d1 = Math.min(total, center + 4);
+      while (vi < pts.length && ds[vi] <= d0) {
+        d += 'L' + round(pts[vi].x) + ' ' + round(pts[vi].y);
+        vi++;
+      }
+      var p0 = pointAtDistance(pts, d0);
+      var p1 = pointAtDistance(pts, d1);
+      if (!p0 || !p1) continue;
+      var mx = (p0.x + p1.x) / 2;
+      var my = (p0.y + p1.y) / 2;
+      var tx = p1.x - p0.x;
+      var ty = p1.y - p0.y;
+      var tl = Math.hypot(tx, ty) || 1;
+      var cx = mx + (-ty / tl) * 3.2;
+      var cy = my + (tx / tl) * 3.2;
+      d += 'L' + round(p0.x) + ' ' + round(p0.y) +
+        'Q' + round(cx) + ' ' + round(cy) + ' ' + round(p1.x) + ' ' + round(p1.y);
+      while (vi < pts.length && ds[vi] <= d1) vi++;
+    }
+    while (vi < pts.length) {
+      d += 'L' + round(pts[vi].x) + ' ' + round(pts[vi].y);
+      vi++;
+    }
+    return d;
+  }
+
+  function pointAtDistance(pts, distance) {
+    var remain = Math.max(0, distance);
+    for (var i = 0; i < pts.length - 1; i++) {
+      var a = pts[i];
+      var b = pts[i + 1];
+      var len = Math.hypot(b.x - a.x, b.y - a.y);
+      if (len < 1e-9) continue;
+      if (remain <= len) {
+        var t = remain / len;
+        return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+      }
+      remain -= len;
+    }
+    return null;
+  }
+
+  function projectOnPolyline(pts, point) {
+    var best = Infinity;
+    var bestDistance = null;
+    var walked = 0;
+    for (var i = 0; i < pts.length - 1; i++) {
+      var a = pts[i];
+      var b = pts[i + 1];
+      var dx = b.x - a.x;
+      var dy = b.y - a.y;
+      var len2 = dx * dx + dy * dy;
+      if (len2 < 1e-12) continue;
+      var t = ((point.x - a.x) * dx + (point.y - a.y) * dy) / len2;
+      t = Math.max(0, Math.min(1, t));
+      var px = a.x + dx * t;
+      var py = a.y + dy * t;
+      var d = Math.hypot(point.x - px, point.y - py);
+      if (d < best) {
+        best = d;
+        bestDistance = walked + Math.sqrt(len2) * t;
+      }
+      walked += Math.sqrt(len2);
+    }
+    return { distance: bestDistance, offset: best };
   }
 
   function round(n) {
@@ -141,17 +351,54 @@
     });
   }
 
-  // 現在位置の表示文。全体表示か、どの分野・物質を見ているかを返す。
-  function positionText(t, regions, selected, canvas, viewW, viewH) {
+  // 現在位置の表示文。明示的に選んだ分類（activeRegionId）を最優先し、
+  // なければ画面中央に最も近い物質の分野を返す。
+  function positionText(t, regions, compounds, selected, canvas, viewW, viewH, activeRegionId) {
     var zoom = Math.round(t.scale * 100) + '%';
+    var parts = [];
+    if (activeRegionId) {
+      for (var i = 0; i < regions.length; i++) {
+        if (regions[i].id === activeRegionId) {
+          parts.push(regions[i].name);
+          break;
+        }
+      }
+      if (!parts.length) parts.push('選択中の分類');
+      if (selected) parts.push(selected.name);
+      return parts.join(' / ') + '（' + zoom + '）';
+    }
     if (isOverview(t, canvas, viewW, viewH)) return '全体表示（' + zoom + '）';
     var center = screenToWorld(t, viewW / 2, viewH / 2);
-    var region = regionAt(regions, center.x, center.y);
-    var parts = [];
+    var nearest = nearestCompound(compounds, center.x, center.y);
+    var region = null;
+    if (nearest) {
+      for (var j = 0; j < regions.length; j++) {
+        if (regions[j].id === nearest.region) {
+          region = regions[j];
+          break;
+        }
+      }
+    }
     if (region) parts.push(region.name);
     if (selected) parts.push(selected.name);
     if (!parts.length) parts.push('地図の外側');
     return parts.join(' / ') + '（' + zoom + '）';
+  }
+
+  function nearestCompound(compounds, wx, wy) {
+    var best = null;
+    var bestDistance = Infinity;
+    for (var i = 0; i < compounds.length; i++) {
+      var c = compounds[i];
+      var dx = c.x + 68 - wx;
+      var dy = c.y + 17 - wy;
+      var d = dx * dx + dy * dy;
+      if (d < bestDistance) {
+        bestDistance = d;
+        best = c;
+      }
+    }
+    return best;
   }
 
   function isOverview(t, canvas, viewW, viewH) {
@@ -198,14 +445,17 @@
     detailLevel: detailLevel,
     levelNote: levelNote,
     fitTransform: fitTransform,
+    fitRect: fitRect,
     centerOn: centerOn,
     regionView: regionView,
+    nearestCompound: nearestCompound,
     zoomAt: zoomAt,
     clampPan: clampPan,
     screenToWorld: screenToWorld,
     worldToScreen: worldToScreen,
     regionAt: regionAt,
     edgePath: edgePath,
+    routePath: routePath,
     normalize: normalize,
     matchCompounds: matchCompounds,
     positionText: positionText,

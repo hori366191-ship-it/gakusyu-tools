@@ -44,8 +44,9 @@
     if (!c.hub) return;
     var region = regionsById[c.region];
     if (!region) return;
-    var dx = c.x + NODE_W / 2 - (region.panel.x + region.panel.w / 2);
-    var dy = c.y + NODE_H / 2 - (region.panel.y + region.panel.h / 2);
+    var center = region.center || { x: 0, y: 0 };
+    var dx = c.x + NODE_W / 2 - center.x;
+    var dy = c.y + NODE_H / 2 - center.y;
     var distance = Math.hypot(dx, dy);
     if (!regionHub[c.region] || distance < regionHub[c.region].distance) {
       regionHub[c.region] = { compound: c, distance: distance };
@@ -61,9 +62,13 @@
 
   var nodeIndex = {};
   var reactionIndex = {};
+  var edgeIndex = {};
+  var activeEdgeLayer = null;
+  var previewReaction = null;
   var view = { scale: 1, x: 0, y: 0 };
   var viewSize = { w: 1, h: 1 };
   var selected = null;
+  var activeRegion = null;
   var returnFocus = null;
   var restoreAfterPointer = null;
   var suppressClick = false;
@@ -92,50 +97,29 @@
 
   /* ---------------- build the canvas ---------------- */
 
-  function buildRegions() {
-    D.regions.forEach(function (region) {
-      var g = el('g', { 'class': 'rp-region', 'data-region': region.id });
-      g.appendChild(el('rect', {
-        'class': 'rp-region__panel',
-        x: region.panel.x,
-        y: region.panel.y,
-        width: region.panel.w,
-        height: region.panel.h,
-        rx: 18
-      }));
-      viewport.appendChild(g);
-    });
-  }
-
   function nodeCenter(c) {
     return { x: c.x + NODE_W / 2, y: c.y + NODE_H / 2 };
   }
 
   function buildReactions() {
-    var edgeLayer = el('g', { 'class': 'rp-edges' });
+    var crossLayer = el('g', { 'class': 'rp-edges rp-edges--cross' });
+    var sameLayer = el('g', { 'class': 'rp-edges rp-edges--same' });
     var markerLayer = el('g', { 'class': 'rp-reactions' });
     D.reactions.forEach(function (r) {
-      var marker = { x: r.x, y: r.y };
       var cross = r.cross ? 'true' : 'false';
-      r.substrates.forEach(function (id) {
-        var c = compoundById[id];
-        if (!c) return;
-        edgeLayer.appendChild(el('path', {
+      (r.edges || []).forEach(function (e) {
+        var key = r.id + '|' + e.dir + '|' + e.id;
+        var path = el('path', {
           'class': 'rp-edge' + (r.cross ? ' is-cross' : ''),
-          'data-from': id,
-          'data-to': r.id,
-          d: Core.edgePath(nodeCenter(c), marker, r.cross)
-        }));
-      });
-      r.products.forEach(function (id) {
-        var c = compoundById[id];
-        if (!c) return;
-        edgeLayer.appendChild(el('path', {
-          'class': 'rp-edge' + (r.cross ? ' is-cross' : ''),
-          'data-from': r.id,
-          'data-to': id,
-          d: Core.edgePath(marker, nodeCenter(c), r.cross)
-        }));
+          'data-from': e.dir === 'in' ? e.id : r.id,
+          'data-to': e.dir === 'in' ? r.id : e.id,
+          'data-edge': key,
+          'data-reaction': r.id,
+          'data-compound': e.id,
+          d: Core.routePath(e.points, e.gaps, e.bridges)
+        });
+        (r.cross ? crossLayer : sameLayer).appendChild(path);
+        edgeIndex[key] = path;
       });
       var g = el('g', {
         'class': 'rp-reaction' + (r.state === 'confirmed' ? '' : ' is-pending'),
@@ -148,10 +132,11 @@
       });
       g.appendChild(el('circle', { 'class': 'rp-reaction__hit', cx: r.x, cy: r.y, r: 22 }));
       g.appendChild(el('circle', { 'class': 'rp-reaction__dot', cx: r.x, cy: r.y, r: 6 }));
+      var labelPos = r.label || { side: 'N', type: { x: r.x, y: r.y - 17 }, cond: { x: r.x, y: r.y + 21 } };
       var label = el('text', {
         'class': 'rp-reaction__label',
-        x: r.x,
-        y: r.y - 14,
+        x: labelPos.type.x,
+        y: labelPos.type.y,
         'text-anchor': 'middle'
       });
       label.textContent = r.typeLabel;
@@ -159,8 +144,8 @@
       if (r.conditions) {
         var cond = el('text', {
           'class': 'rp-reaction__label rp-reaction__label--cond',
-          x: r.x,
-          y: r.y + 18,
+          x: labelPos.cond ? labelPos.cond.x : labelPos.type.x,
+          y: labelPos.cond ? labelPos.cond.y : labelPos.type.y + 30,
           'text-anchor': 'middle'
         });
         cond.textContent = Core.shorten(r.conditions, 16);
@@ -169,7 +154,8 @@
       markerLayer.appendChild(g);
       reactionIndex[r.id] = g;
     });
-    viewport.appendChild(edgeLayer);
+    viewport.appendChild(crossLayer);
+    viewport.appendChild(sameLayer);
     viewport.appendChild(markerLayer);
   }
 
@@ -193,6 +179,16 @@
         height: NODE_H,
         rx: 9
       }));
+      if (typeof c.regionIndex === 'number') {
+        g.appendChild(el('rect', {
+          'class': 'rp-node__band rp-c' + c.regionIndex,
+          x: c.x + 8,
+          y: c.y + 2.5,
+          width: NODE_W - 16,
+          height: 2.5,
+          rx: 1.2
+        }));
+      }
       var text = el('text', {
         'class': 'rp-node__label',
         x: c.x + NODE_W / 2,
@@ -285,28 +281,7 @@
     while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
     var box = visibleBox();
     var placed = [];
-    if (level <= 1) {
-      D.regions.forEach(function (region) {
-        var p = region.panel;
-        var screen = Core.worldToScreen(view, p.x + p.w / 2, p.y + 20);
-        if (screen.x < box.left - 120 || screen.x > box.right + 120) return;
-        if (screen.y < box.top - 40 || screen.y > box.bottom + 40) return;
-        var label = region.name;
-        var width = label.length * 12 + String(region.count).length * 8 + 30;
-        var left = Math.min(Math.max(screen.x, width / 2 + 4), Math.max(width / 2 + 4, viewSize.w - width / 2 - 4));
-        if (!tryPlace(placed, left - width / 2, screen.y - 11, width, 22)) return;
-        var tag = document.createElement('span');
-        tag.className = 'rp-overlay__region';
-        tag.style.left = left + 'px';
-        tag.style.top = screen.y + 'px';
-        tag.textContent = label;
-        var count = document.createElement('span');
-        count.textContent = region.count;
-        tag.appendChild(count);
-        overlay.appendChild(tag);
-      });
-    }
-    if (level === 0 && view.scale >= 0.2) {
+    if (level === 0 && view.scale >= 0.15) {
       D.regions.forEach(function (region) {
         var picked = regionHub[region.id];
         if (!picked) return;
@@ -348,7 +323,7 @@
         if (r) selectedInfo = { name: r.typeLabel + 'の反応' };
       }
     }
-    var text = Core.positionText(view, D.regions, selectedInfo, D.meta.canvas, viewSize.w, viewSize.h);
+    var text = Core.positionText(view, D.regions, D.compounds, selectedInfo, D.meta.canvas, viewSize.w, viewSize.h, activeRegion);
     positionEl.innerHTML = '現在位置: <strong>' + esc(text) + '</strong>' +
       ' ／ ' + esc(Core.levelNote(level));
   }
@@ -356,15 +331,16 @@
   /* ---------------- interactions ---------------- */
 
   function zoomCenter(factor) {
+    if (activeRegion) clearRegionSelection();
     var next = Core.zoomAt(view, factor, viewSize.w / 2, viewSize.h / 2);
     setView(next, true);
   }
 
   function resetView() {
     var fit = Core.fitTransform(D.meta.canvas, viewSize.w, viewSize.h, 14);
-    animateTo(fit);
+    clearRegionSelection();
     clearSelection();
-    setChipPressed(null);
+    animateTo(fit);
   }
   function animateTo(target) {
     if (prefersReduce()) {
@@ -432,6 +408,7 @@
     var p = mapPoint(e);
     pointers[e.pointerId] = p;
     if (pointerList().length >= 2 && pinchOrigin) {
+      if (activeRegion) clearRegionSelection();
       var pts = pointerList();
       var distance = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
       var factor = distance / pinchOrigin.distance;
@@ -446,7 +423,10 @@
     if (!panOrigin) return;
     var dx = p.x - panOrigin.x;
     var dy = p.y - panOrigin.y;
-    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) suppressClick = true;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+      suppressClick = true;
+      if (activeRegion) clearRegionSelection();
+    }
     setView({ scale: panOrigin.view.scale, x: panOrigin.view.x + dx, y: panOrigin.view.y + dy }, true);
   }
 
@@ -473,6 +453,7 @@
   function onWheel(e) {
     if (!(e.ctrlKey || e.metaKey)) return;
     e.preventDefault();
+    if (activeRegion) clearRegionSelection();
     var p = mapPoint(e);
     var factor = e.deltaY < 0 ? 1.14 : 1 / 1.14;
     animateTo(Core.zoomAt({ scale: view.scale, x: view.x, y: view.y }, factor, p.x, p.y));
@@ -483,6 +464,9 @@
     if (e.target === searchInput) return;
     var step = 70;
     var handled = true;
+    if (activeRegion && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', '+', '=', '-', '_', '0', 'Home'].indexOf(e.key) !== -1) {
+      clearRegionSelection();
+    }
     switch (e.key) {
       case 'ArrowLeft': setView({ scale: view.scale, x: view.x + step, y: view.y }, true); break;
       case 'ArrowRight': setView({ scale: view.scale, x: view.x - step, y: view.y }, true); break;
@@ -506,6 +490,7 @@
   function onFocusIn(e) {
     var target = e.target.closest ? e.target.closest('[data-kind]') : null;
     if (!target) return;
+    if (activeRegion) clearRegionSelection();
     var kind = target.getAttribute('data-kind');
     var id = target.getAttribute('data-id');
     var c = kind === 'compound' ? compoundById[id] : findReaction(id);
@@ -530,21 +515,102 @@
     openCard(kind, id);
   }
 
+  function fitReactionEndpoints(id) {
+    var r = findReaction(id);
+    if (!r) return;
+    clearRegionSelection();
+    var ids = {};
+    r.substrates.concat(r.products).forEach(function (cid) { ids[cid] = true; });
+    var minX = r.x - 30;
+    var minY = r.y - 30;
+    var maxX = r.x + 30;
+    var maxY = r.y + 30;
+    Object.keys(ids).forEach(function (cid) {
+      var c = compoundById[cid];
+      if (!c) return;
+      minX = Math.min(minX, c.x);
+      minY = Math.min(minY, c.y);
+      maxX = Math.max(maxX, c.x + NODE_W);
+      maxY = Math.max(maxY, c.y + NODE_H);
+    });
+    var target = Core.fitRect(
+      { x: minX, y: minY, w: Math.max(1, maxX - minX), h: Math.max(1, maxY - minY) },
+      viewSize.w, viewSize.h, 44, 0.08, 1.5
+    );
+    animateTo(Core.clampPan(target, viewSize.w, viewSize.h, D.meta.canvas));
+  }
+
   function selectNode(kind, id) {
+    clearRegionSelection();
     if (selected && selected.el) selected.el.classList.remove('is-selected');
     selected = null;
+    previewReaction = null;
     var elm = kind === 'compound' ? nodeIndex[id] : reactionIndex[id];
     if (elm) {
       elm.classList.add('is-selected');
       selected = { kind: kind, id: id, el: elm };
     }
+    if (selected && selected.kind === 'reaction') showReactionStroke(id);
+    else clearReactionStroke();
+    updateEdgeHighlight();
     render();
   }
 
   function clearSelection() {
     if (selected && selected.el) selected.el.classList.remove('is-selected');
     selected = null;
+    previewReaction = null;
+    clearReactionStroke();
+    updateEdgeHighlight();
     render();
+  }
+
+  // 選択中の物質・反応につながる辺だけを強調する（読解の補助。位置は変えない）。
+  function updateEdgeHighlight() {
+    Object.keys(edgeIndex).forEach(function (key) {
+      var path = edgeIndex[key];
+      var active = false;
+      if (selected) {
+        active = selected.kind === 'compound'
+          ? path.getAttribute('data-compound') === selected.id
+          : path.getAttribute('data-reaction') === selected.id;
+      }
+      if (active) path.classList.add('is-active');
+      else path.classList.remove('is-active');
+    });
+  }
+
+  function ensureActiveLayer() {
+    if (activeEdgeLayer) return activeEdgeLayer;
+    activeEdgeLayer = el('g', { 'class': 'rp-edges-active', 'aria-hidden': 'true' });
+    viewport.appendChild(activeEdgeLayer);
+    return activeEdgeLayer;
+  }
+
+  // 反応の辺を、切れ目・橋のない連続ストロークとして最上層に描く。
+  function showReactionStroke(id) {
+    var r = findReaction(id);
+    var layer = ensureActiveLayer();
+    while (layer.firstChild) layer.removeChild(layer.firstChild);
+    if (!r) return;
+    (r.edges || []).forEach(function (e) {
+      layer.appendChild(el('path', {
+        'class': 'rp-edge-active',
+        'data-reaction': r.id,
+        d: Core.routePath(e.points, [], [])
+      }));
+    });
+  }
+
+  function clearReactionStroke() {
+    if (!activeEdgeLayer) return;
+    while (activeEdgeLayer.firstChild) activeEdgeLayer.removeChild(activeEdgeLayer.firstChild);
+  }
+
+  function restoreReactionStroke() {
+    if (previewReaction) showReactionStroke(previewReaction);
+    else if (selected && selected.kind === 'reaction') showReactionStroke(selected.id);
+    else clearReactionStroke();
   }
 
   /* ---------------- card ---------------- */
@@ -565,7 +631,9 @@
   function closeCard(restore) {
     if (card.hidden) return;
     card.hidden = true;
+    previewReaction = null;
     cardDetail.innerHTML = '';
+    restoreReactionStroke();
     if (restore !== false && returnFocus && document.contains(returnFocus)) {
       returnFocus.focus();
     }
@@ -658,6 +726,8 @@
     html += '<p class="rp-card__formula">' + esc(subText) + ' → ' + esc(prodText) + '</p>';
     html += '<p>' + stateBadge(r.state) + ' <span class="rp-card__note">' +
       '独立資料の本文で確認済み。' + '</span></p>';
+    html += '<p class="rp-card__actions"><button type="button" class="rp-btn rp-btn--wide" data-action="fit-reaction" data-id="' +
+      esc(r.id) + '">この反応の端点を表示</button></p>';
 
     html += '<div class="rp-common">';
     html += '<h3>共通の説明 — ' + esc(type.label) + '</h3>';
@@ -713,15 +783,20 @@
       b.className = 'rp-chip';
       b.setAttribute('data-region', region.id);
       b.setAttribute('aria-pressed', 'false');
-      b.textContent = region.name;
+      var dot = document.createElement('span');
+      dot.className = 'rp-chip__dot rp-c' + region.colorIndex;
+      b.appendChild(dot);
+      b.appendChild(document.createTextNode(region.name));
       var count = document.createElement('span');
       count.className = 'rp-chip__count';
       count.textContent = region.count;
       b.appendChild(count);
       b.addEventListener('click', function () {
         var target = Core.regionView(region, viewSize.w, viewSize.h, 24);
+        activeRegion = region.id;
         animateTo(Core.clampPan(target, viewSize.w, viewSize.h, D.meta.canvas));
         setChipPressed(region.id);
+        highlightRegion(region.id);
         clearSelection();
       });
       chipsEl.appendChild(b);
@@ -732,6 +807,28 @@
     Array.prototype.forEach.call(chipsEl.querySelectorAll('.rp-chip'), function (chip) {
       chip.setAttribute('aria-pressed', chip.getAttribute('data-region') === id ? 'true' : 'false');
     });
+  }
+
+  // 分野チップの選択を、ノードの枠線でも示す（レイアウトは動かさない）。
+  function highlightRegion(id) {
+    Object.keys(nodeIndex).forEach(function (key) {
+      var c = compoundById[key];
+      if (c && c.region === id) nodeIndex[key].classList.add('is-region');
+      else nodeIndex[key].classList.remove('is-region');
+    });
+  }
+
+  function clearRegionHighlight() {
+    Object.keys(nodeIndex).forEach(function (key) {
+      nodeIndex[key].classList.remove('is-region');
+    });
+  }
+
+  // 明示的な分類選択（チップ）を解除する。パン・ズーム・物質/反応選択の前に呼ぶ。
+  function clearRegionSelection() {
+    activeRegion = null;
+    setChipPressed(null);
+    clearRegionHighlight();
   }
 
   function buildLists() {
@@ -889,9 +986,11 @@
 
   function buildNotice() {
     var summary = '物質 ' + D.meta.compoundCount + ' 件（うち高校化学の必須 ' + D.meta.requiredCount +
-      ' 件）を収録し、独立資料で確認できた反応 ' + D.meta.confirmedReactionCount + ' 件を経路として表示しています。';
+      ' 件）を収録。反応に関与する ' + D.meta.connectedCount + ' 物質と確認済み反応 ' +
+      D.meta.confirmedReactionCount + ' 件を1つのネットワークとして配置し、残り ' +
+      D.meta.isolatedCount + ' 物質は外縁の棚に表示しています。';
     var note = '確認できなかった反応 ' + D.meta.heldReactionCount +
-      ' 件は公開データに含めていません。物質だけを収録した孤立ノードは、確認済みの経路が見つかっていないことを示し、「生成しない」という意味ではありません。';
+      ' 件は公開データに含めていません。孤立ノードは、確認済みの経路が見つかっていないことを示し、「生成しない」という意味ではありません。';
     var summaryEl = document.getElementById('rp-data-summary');
     var noteEl = document.getElementById('rp-data-note');
     if (summaryEl) summaryEl.textContent = summary;
@@ -924,15 +1023,35 @@
     });
   }
 
+  function buildRegionLegend() {
+    var legendEl = document.getElementById('rp-region-legend');
+    if (!legendEl) return;
+    D.regions.forEach(function (region) {
+      var li = document.createElement('li');
+      var dot = document.createElement('span');
+      dot.className = 'rp-region-legend__dot rp-c' + region.colorIndex;
+      var name = document.createElement('span');
+      name.textContent = region.name;
+      var count = document.createElement('span');
+      count.className = 'rp-region-legend__count';
+      count.textContent = region.count;
+      li.appendChild(dot);
+      li.appendChild(name);
+      li.appendChild(count);
+      legendEl.appendChild(li);
+    });
+  }
+
   function init() {
     measure();
-    buildRegions();
     buildReactions();
     buildNodes();
+    ensureActiveLayer();
     buildChips();
     buildLists();
     buildNotice();
     buildStates();
+    buildRegionLegend();
     setView(Core.fitTransform(D.meta.canvas, viewSize.w, viewSize.h, 14), false);
 
     mapEl.addEventListener('pointerdown', onPointerDown);
@@ -943,6 +1062,7 @@
     mapEl.addEventListener('wheel', onWheel, { passive: false });
     mapEl.addEventListener('keydown', onKeydown);
     mapEl.addEventListener('dblclick', function (e) {
+      if (activeRegion) clearRegionSelection();
       var p = mapPoint(e);
       animateTo(Core.zoomAt({ scale: view.scale, x: view.x, y: view.y }, 1.6, p.x, p.y));
     });
@@ -953,6 +1073,12 @@
     cardClose.addEventListener('click', function () { closeCard(true); });
 
     cardDetail.addEventListener('click', function (e) {
+      var action = e.target.closest ? e.target.closest('button[data-action="fit-reaction"]') : null;
+      if (action) {
+        e.preventDefault();
+        fitReactionEndpoints(action.getAttribute('data-id'));
+        return;
+      }
       var target = e.target.closest ? e.target.closest('button[data-kind]') : null;
       if (!target) return;
       var kind = target.getAttribute('data-kind');
@@ -960,6 +1086,24 @@
       selectNode(kind, id);
       openCard(kind, id);
     });
+
+    // カード内の反応項目をなぞると、その反応の辺だけを連続ストロークで上層表示する。
+    function previewFromEvent(e) {
+      var btn = e.target.closest ? e.target.closest('button[data-kind="reaction"]') : null;
+      if (!btn) return;
+      previewReaction = btn.getAttribute('data-id');
+      showReactionStroke(previewReaction);
+    }
+    function endPreview(e) {
+      var btn = e.target.closest ? e.target.closest('button[data-kind="reaction"]') : null;
+      if (!btn) return;
+      previewReaction = null;
+      restoreReactionStroke();
+    }
+    cardDetail.addEventListener('pointerover', previewFromEvent);
+    cardDetail.addEventListener('pointerout', endPreview);
+    cardDetail.addEventListener('focusin', previewFromEvent);
+    cardDetail.addEventListener('focusout', endPreview);
 
     // カード外のクリックで閉じる（カード内の操作は閉じない）
     document.addEventListener('pointerdown', function (e) {
