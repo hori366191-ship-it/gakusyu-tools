@@ -17,6 +17,9 @@
   var NODE_W = D.meta.nodeW;
   var NODE_H = D.meta.nodeH;
 
+  function nodeW(c) { return c.w || NODE_W; }
+  function nodeH(c) { return c.h || NODE_H; }
+
   var mapEl = document.getElementById('rp-map');
   var svg = document.getElementById('rp-svg');
   var viewport = document.getElementById('rp-viewport');
@@ -45,8 +48,8 @@
     var region = regionsById[c.region];
     if (!region) return;
     var center = region.center || { x: 0, y: 0 };
-    var dx = c.x + NODE_W / 2 - center.x;
-    var dy = c.y + NODE_H / 2 - center.y;
+    var dx = c.x + nodeW(c) / 2 - center.x;
+    var dy = c.y + nodeH(c) / 2 - center.y;
     var distance = Math.hypot(dx, dy);
     if (!regionHub[c.region] || distance < regionHub[c.region].distance) {
       regionHub[c.region] = { compound: c, distance: distance };
@@ -98,64 +101,90 @@
   /* ---------------- build the canvas ---------------- */
 
   function nodeCenter(c) {
-    return { x: c.x + NODE_W / 2, y: c.y + NODE_H / 2 };
+    return { x: c.x + nodeW(c) / 2, y: c.y + nodeH(c) / 2 };
+  }
+
+  function ensureArrowDefs() {
+    if (svg.querySelector('#rp-arrow-primary')) return;
+    var defs = el('defs');
+    [['rp-arrow-primary', 'rp-primary', 7], ['rp-arrow-secondary', 'rp-secondary', 5.5]].forEach(function (spec) {
+      var marker = el('marker', {
+        id: spec[0],
+        viewBox: '0 0 8 8',
+        refX: '7.2',
+        refY: '4',
+        markerWidth: String(spec[2]),
+        markerHeight: String(spec[2]),
+        markerUnits: 'userSpaceOnUse',
+        orient: 'auto'
+      });
+      marker.appendChild(el('path', { d: 'M0,0 L8,4 L0,8 z', style: 'fill:var(--' + spec[1] + ')' }));
+      defs.appendChild(marker);
+    });
+    svg.insertBefore(defs, svg.firstChild);
   }
 
   function buildReactions() {
-    var crossLayer = el('g', { 'class': 'rp-edges rp-edges--cross' });
-    var sameLayer = el('g', { 'class': 'rp-edges rp-edges--same' });
+    ensureArrowDefs();
+    var secondaryLayer = el('g', { 'class': 'rp-edges rp-edges--secondary' });
+    var primaryLayer = el('g', { 'class': 'rp-edges rp-edges--primary' });
     var markerLayer = el('g', { 'class': 'rp-reactions' });
     D.reactions.forEach(function (r) {
-      var cross = r.cross ? 'true' : 'false';
+      var tier = r.tier === 'primary' ? 'primary' : 'secondary';
       (r.edges || []).forEach(function (e) {
         var key = r.id + '|' + e.dir + '|' + e.id;
+        var edgeTier = e.tier === 'primary' ? 'primary' : 'secondary';
+        var points = e.dir === 'out' ? e.points.slice().reverse() : e.points;
         var path = el('path', {
-          'class': 'rp-edge' + (r.cross ? ' is-cross' : ''),
+          'class': 'rp-edge rp-edge--' + edgeTier,
           'data-from': e.dir === 'in' ? e.id : r.id,
           'data-to': e.dir === 'in' ? r.id : e.id,
           'data-edge': key,
           'data-reaction': r.id,
           'data-compound': e.id,
-          d: Core.routePath(e.points, e.gaps, e.bridges)
+          'data-tier': edgeTier,
+          'marker-end': 'url(#rp-arrow-' + edgeTier + ')',
+          d: Core.routePath(points, e.gaps, e.bridges)
         });
-        (r.cross ? crossLayer : sameLayer).appendChild(path);
+        (edgeTier === 'primary' ? primaryLayer : secondaryLayer).appendChild(path);
         edgeIndex[key] = path;
       });
       var g = el('g', {
-        'class': 'rp-reaction' + (r.state === 'confirmed' ? '' : ' is-pending'),
+        'class': 'rp-reaction rp-reaction--' + tier + (r.state === 'confirmed' ? '' : ' is-pending'),
         'data-kind': 'reaction',
         'data-id': r.id,
-        'data-cross': cross,
+        'data-tier': tier,
         role: 'button',
         tabindex: '0',
         'aria-label': reactionLabel(r)
       });
       g.appendChild(el('circle', { 'class': 'rp-reaction__hit', cx: r.x, cy: r.y, r: 22 }));
       g.appendChild(el('circle', { 'class': 'rp-reaction__dot', cx: r.x, cy: r.y, r: 6 }));
-      var labelPos = r.label || { side: 'N', type: { x: r.x, y: r.y - 17 }, cond: { x: r.x, y: r.y + 21 } };
-      var label = el('text', {
-        'class': 'rp-reaction__label',
-        x: labelPos.type.x,
-        y: labelPos.type.y,
-        'text-anchor': 'middle'
-      });
-      label.textContent = r.typeLabel;
-      g.appendChild(label);
-      if (r.conditions) {
-        var cond = el('text', {
-          'class': 'rp-reaction__label rp-reaction__label--cond',
-          x: labelPos.cond ? labelPos.cond.x : labelPos.type.x,
-          y: labelPos.cond ? labelPos.cond.y : labelPos.type.y + 30,
+      if (r.label) {
+        var label = el('text', {
+          'class': 'rp-reaction__label',
+          x: r.label.type.x,
+          y: r.label.type.y,
           'text-anchor': 'middle'
         });
-        cond.textContent = Core.shorten(r.conditions, 16);
-        g.appendChild(cond);
+        label.textContent = r.typeLabel;
+        g.appendChild(label);
+        if (r.conditions && r.label.cond) {
+          var cond = el('text', {
+            'class': 'rp-reaction__label rp-reaction__label--cond',
+            x: r.label.cond.x,
+            y: r.label.cond.y,
+            'text-anchor': 'middle'
+          });
+          cond.textContent = Core.shorten(r.conditions, 16);
+          g.appendChild(cond);
+        }
       }
       markerLayer.appendChild(g);
       reactionIndex[r.id] = g;
     });
-    viewport.appendChild(crossLayer);
-    viewport.appendChild(sameLayer);
+    viewport.appendChild(secondaryLayer);
+    viewport.appendChild(primaryLayer);
     viewport.appendChild(markerLayer);
   }
 
@@ -175,8 +204,8 @@
         'class': 'rp-node__box',
         x: c.x,
         y: c.y,
-        width: NODE_W,
-        height: NODE_H,
+        width: nodeW(c),
+        height: nodeH(c),
         rx: 9
       }));
       if (typeof c.regionIndex === 'number') {
@@ -184,15 +213,15 @@
           'class': 'rp-node__band rp-c' + c.regionIndex,
           x: c.x + 8,
           y: c.y + 2.5,
-          width: NODE_W - 16,
+          width: nodeW(c) - 16,
           height: 2.5,
           rx: 1.2
         }));
       }
       var text = el('text', {
         'class': 'rp-node__label',
-        x: c.x + NODE_W / 2,
-        y: c.y + NODE_H / 2 + 1,
+        x: c.x + nodeW(c) / 2,
+        y: c.y + nodeH(c) / 2 + 1,
         'text-anchor': 'middle'
       });
       text.textContent = c.label;
@@ -200,7 +229,7 @@
       if (c.pathState !== 'covered' && c.pathState !== 'confirmed') {
         g.appendChild(el('circle', {
           'class': 'rp-node__badge',
-          cx: c.x + NODE_W - 8,
+          cx: c.x + nodeW(c) - 8,
           cy: c.y + 8,
           r: 3.2
         }));
@@ -226,6 +255,7 @@
       : [r.productNote || '生成物の記載なし'];
     var text = '反応 ' + r.typeLabel + '、' + subs.join('と') + ' から ' + prods.join('と');
     if (r.conditions) text += '、条件 ' + r.conditions;
+    if (r.tier === 'primary') text += '、主要経路';
     if (r.state !== 'confirmed') text += '、未確認';
     return text;
   }
@@ -299,6 +329,109 @@
         tag.style.top = screen.y + 'px';
         tag.textContent = c.label;
         overlay.appendChild(tag);
+      });
+    }
+    if (level >= 2) {
+      // 補助ラベルは「ノードの実 stroke 矩形 + 4px 以上」と「主要 SVG ラベルの実 DOM 矩形」を避ける。
+      // 数値誤差・丸め対策として 4px に +1.5px、主要ラベル外周にも 1.5px の安全余白を足す。
+      var NODE_PAD = 4 + 0.6 * view.scale + 1.5; // stroke 半幅 + 希望4px + 数値余裕
+      var LABEL_PAD = 1.5 * view.scale + 1; // paint-order の stroke 半幅 + 余裕
+      var overlayBox = overlay.getBoundingClientRect();
+      var toLocal = function (r) {
+        return { x: r.left - overlayBox.left, y: r.top - overlayBox.top, w: r.width, h: r.height };
+      };
+      var overlaps = function (a, b) {
+        return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+      };
+      var obstacles = [];
+      // 主要 SVG ラベル（種別・条件）の実フォント矩形。text の getBBox ではなく画面実測を使う。
+      D.reactions.forEach(function (r) {
+        if (!r.label) return;
+        var g = reactionIndex[r.id];
+        if (!g) return;
+        var texts = g.querySelectorAll('.rp-reaction__label');
+        for (var ti = 0; ti < texts.length; ti++) {
+          var lr = texts[ti].getBoundingClientRect();
+          if (!lr.width || !lr.height) continue;
+          var rect = toLocal(lr);
+          obstacles.push({
+            x: rect.x - LABEL_PAD,
+            y: rect.y - LABEL_PAD,
+            w: rect.w + LABEL_PAD * 2,
+            h: rect.h + LABEL_PAD * 2
+          });
+        }
+      });
+      // ノードは stroke 幅・非 scale・丸めを含む実 DOM 矩形を測り、外側に 5.5px 取る。
+      D.compounds.forEach(function (c) {
+        var p = Core.worldToScreen(view, c.x, c.y);
+        if (p.x + nodeW(c) * view.scale < box.left - 60 || p.x > box.right + 60) return;
+        if (p.y + nodeH(c) * view.scale < box.top - 60 || p.y > box.bottom + 60) return;
+        var g = nodeIndex[c.id];
+        if (!g) return;
+        var elBox = g.querySelector('.rp-node__box');
+        if (!elBox) return;
+        var nr = elBox.getBoundingClientRect();
+        if (!nr.width || !nr.height) return;
+        var nrect = toLocal(nr);
+        obstacles.push({
+          x: nrect.x - NODE_PAD,
+          y: nrect.y - NODE_PAD,
+          w: nrect.w + NODE_PAD * 2,
+          h: nrect.h + NODE_PAD * 2
+        });
+      });
+      D.reactions.forEach(function (r) {
+        if (r.tier !== 'secondary' || r.label) return;
+        var screen = Core.worldToScreen(view, r.x, r.y);
+        if (screen.x < box.left - 80 || screen.x > box.right + 80) return;
+        if (screen.y < box.top - 40 || screen.y > box.bottom + 40) return;
+        var approxW = r.typeLabel.length * 11 + 12;
+        var offsets = [
+          [0, -30], [0, 30], [-40, 0], [40, 0],
+          [-32, -22], [32, -22], [-32, 22], [32, 22],
+          [0, -48], [0, 48], [-60, 0], [60, 0]
+        ];
+        for (var oi = 0; oi < offsets.length; oi++) {
+          var cx = screen.x + offsets[oi][0];
+          var cy = screen.y + offsets[oi][1];
+          var approx = { x: cx - approxW / 2, y: cy, w: approxW, h: 16 };
+          var blocked = false;
+          for (var bi = 0; bi < obstacles.length; bi++) {
+            if (overlaps(approx, obstacles[bi])) { blocked = true; break; }
+          }
+          if (!blocked) {
+            for (var pi = 0; pi < placed.length; pi++) {
+              if (overlaps(approx, placed[pi])) { blocked = true; break; }
+            }
+          }
+          if (blocked) continue;
+          // 候補決定後に実 DOM 寸法を測り、障害物・既配置ラベルと再検査する。
+          var tag = document.createElement('span');
+          tag.className = 'rp-overlay__reaction rp-overlay__reaction--secondary';
+          tag.style.left = cx + 'px';
+          tag.style.top = cy + 'px';
+          tag.style.visibility = 'hidden';
+          tag.textContent = r.typeLabel;
+          overlay.appendChild(tag);
+          var tr = tag.getBoundingClientRect();
+          var rect = toLocal(tr);
+          var hit = false;
+          if (!rect.w || !rect.h) hit = true;
+          for (var hi = 0; !hit && hi < obstacles.length; hi++) {
+            if (overlaps(rect, obstacles[hi])) hit = true;
+          }
+          for (var qi = 0; !hit && qi < placed.length; qi++) {
+            if (overlaps(rect, placed[qi])) hit = true;
+          }
+          if (hit) {
+            overlay.removeChild(tag);
+            continue;
+          }
+          tag.style.visibility = '';
+          placed.push({ x: rect.x, y: rect.y, w: rect.w, h: rect.h });
+          break;
+        }
       });
     }
   }
@@ -495,13 +628,13 @@
     var id = target.getAttribute('data-id');
     var c = kind === 'compound' ? compoundById[id] : findReaction(id);
     if (!c) return;
-    var cx = kind === 'compound' ? c.x + NODE_W / 2 : c.x;
-    var cy = kind === 'compound' ? c.y + NODE_H / 2 : c.y;
+    var cx = kind === 'compound' ? c.x + nodeW(c) / 2 : c.x;
+    var cy = kind === 'compound' ? c.y + nodeH(c) / 2 : c.y;
     var s = Core.worldToScreen(view, cx, cy);
     var margin = 60;
     if (s.x >= margin && s.x <= viewSize.w - margin && s.y >= margin && s.y <= viewSize.h - margin) return;
     if (kind === 'compound') {
-      animateTo(Core.centerOn({ x: c.x, y: c.y }, { w: NODE_W, h: NODE_H }, view.scale, viewSize.w, viewSize.h));
+      animateTo(Core.centerOn({ x: c.x, y: c.y }, { w: nodeW(c), h: nodeH(c) }, view.scale, viewSize.w, viewSize.h));
     } else {
       animateTo(Core.centerOn({ x: c.x - 20, y: c.y - 20 }, { w: 40, h: 40 }, view.scale, viewSize.w, viewSize.h));
     }
@@ -530,8 +663,8 @@
       if (!c) return;
       minX = Math.min(minX, c.x);
       minY = Math.min(minY, c.y);
-      maxX = Math.max(maxX, c.x + NODE_W);
-      maxY = Math.max(maxY, c.y + NODE_H);
+      maxX = Math.max(maxX, c.x + nodeW(c));
+      maxY = Math.max(maxY, c.y + nodeH(c));
     });
     var target = Core.fitRect(
       { x: minX, y: minY, w: Math.max(1, maxX - minX), h: Math.max(1, maxY - minY) },
@@ -594,10 +727,13 @@
     while (layer.firstChild) layer.removeChild(layer.firstChild);
     if (!r) return;
     (r.edges || []).forEach(function (e) {
+      var points = e.dir === 'out' ? e.points.slice().reverse() : e.points;
+      var tier = e.tier === 'primary' ? 'primary' : 'secondary';
       layer.appendChild(el('path', {
         'class': 'rp-edge-active',
         'data-reaction': r.id,
-        d: Core.routePath(e.points, [], [])
+        'marker-end': 'url(#rp-arrow-' + tier + ')',
+        d: Core.routePath(points, [], [])
       }));
     });
   }
@@ -723,6 +859,8 @@
     var prods = r.products.length ? r.products.map(compoundInline).join(' ＋ ') : esc(r.productNote || '生成物の記載なし');
     var html = '';
     html += '<h2 id="rp-card-title">' + esc(type.label) + 'の反応</h2>';
+    html += '<p class="rp-card__tier rp-card__tier--' + (r.tier === 'primary' ? 'primary' : 'secondary') + '">' +
+      (r.tier === 'primary' ? '主要経路（太い実線）' : '補助経路（細い点線）') + '</p>';
     html += '<p class="rp-card__formula">' + esc(subText) + ' → ' + esc(prodText) + '</p>';
     html += '<p>' + stateBadge(r.state) + ' <span class="rp-card__note">' +
       '独立資料の本文で確認済み。' + '</span></p>';
@@ -925,7 +1063,7 @@
       try { mapEl.scrollIntoView({ behavior: prefersReduce() ? 'auto' : 'smooth', block: 'center' }); } catch (err) { errMsg(err && err.message); }
     }
     if (target) {
-      var size = c ? { w: NODE_W, h: NODE_H } : { w: 0, h: 0 };
+      var size = c ? { w: nodeW(c), h: nodeH(c) } : { w: 0, h: 0 };
       var scale = Math.max(view.scale, 0.92);
       animateTo(Core.centerOn(target, size, scale, viewSize.w, viewSize.h));
     }

@@ -390,8 +390,8 @@
     var bestDistance = Infinity;
     for (var i = 0; i < compounds.length; i++) {
       var c = compounds[i];
-      var dx = c.x + 68 - wx;
-      var dy = c.y + 17 - wy;
+      var dx = c.x + (c.w || 136) / 2 - wx;
+      var dy = c.y + (c.h || 34) / 2 - wy;
       var d = dx * dx + dy * dy;
       if (d < bestDistance) {
         bestDistance = d;

@@ -1,0 +1,20 @@
+{
+  "note": "cf4756d (layout v3) を元の一律 136x34 ノード寸法のまま metrics.cjs で測った基準値。新しい個別寸法は適用しない。v1 fixture の 2 重なり/15 衝突とは別物。",
+  "commit": "cf4756dbb0bde2fd74b77aee42df8cc3c8676121",
+  "layoutVersion": 3,
+  "nodeW": 136,
+  "nodeH": 34,
+  "nodeOverlaps": 0,
+  "markerNodeCollisions": 0,
+  "markerMarkerCollisions": 0,
+  "labelNodeCollisions": 0,
+  "labelLabelCollisions": 0,
+  "edgeNodePenetrations": 0,
+  "edgeLabelPenetrations": 0,
+  "crossings": 404,
+  "totalLength": 43261,
+  "primaryLengthWithCurrentPriority": 23784,
+  "canvas": { "x": 0, "y": 0, "w": 5033, "h": 1852 },
+  "actualMapFit1236x475pad14": 0.24,
+  "pc1280x900pad0": 0.254
+}

@@ -1,0 +1,523 @@
+{
+  "version": 1,
+  "updated": "2026-11-13",
+  "note": "大学入試を想定した編集上の重要度候補。公開86反応を全件明示し、出題頻度の統計的検証ではない。tier は分野横断 cross から推定しない。同じ反応の全分枝は同じ tier を持つ。",
+  "reactions": {
+    "2-methylpropan-2-ol-dehydration": {
+      "tier": "secondary",
+      "topic": "hydrocarbon-addition",
+      "reason": "第三級アルコールの脱水。主幹の異性体比較用。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "2-methylpropan-2-ol-hydrogen-chloride": {
+      "tier": "secondary",
+      "topic": "hydrocarbon-addition",
+      "reason": "第三級アルコールの置換。SN1 の比較用。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acetic-acid-butanol-esterification": {
+      "tier": "secondary",
+      "topic": "ester-salicylic",
+      "reason": "酢酸とブタノールのエステル化。同族体の組合せ展開。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acetic-acid-ethanol-esterification": {
+      "tier": "primary",
+      "topic": "ester-salicylic",
+      "reason": "エステル化の代表例。酢酸エチル生成の主経路。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acetic-acid-glycerol-esterification": {
+      "tier": "secondary",
+      "topic": "lipid",
+      "reason": "グリセリンと酢酸のエステル化。油脂の組合せ展開。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acetic-acid-isoamyl-esterification": {
+      "tier": "secondary",
+      "topic": "ester-salicylic",
+      "reason": "酢酸イソアミル生成。香料の例。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acetic-acid-methanol-esterification": {
+      "tier": "secondary",
+      "topic": "ester-salicylic",
+      "reason": "酢酸メチル生成。エステル化の同族体。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acetone-reduction": {
+      "tier": "secondary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "アセトンの還元。ケトン→第二級アルコールの逆経路。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "alanine-glycine-peptide": {
+      "tier": "secondary",
+      "topic": "peptide",
+      "reason": "アラニンとグリシンのペプチド結合。配列違いの展開。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "alanylglycine-hydrolysis": {
+      "tier": "secondary",
+      "topic": "peptide",
+      "reason": "アラニルグリシンの加水分解。ペプチドの組合せ展開。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "aniline-acetic-anhydride": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "アニリンのアセチル化。アセトアニリド生成。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "aniline-diazotization": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "アニリン→ジアゾニウム塩。芳香族主幹の要。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "aspirin-hydrolysis": {
+      "tier": "primary",
+      "topic": "ester-salicylic",
+      "reason": "アスピリンの加水分解。サリチル酸系列の閉路。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "benzaldehyde-oxidation": {
+      "tier": "primary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "ベンズアルデヒド→安息香酸。芳香族側の酸化系列。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "benzene-chlorination": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "ベンゼン→クロロベンゼン。ダウ法への入口。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "benzene-nitration": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "ベンゼン→ニトロベンゼン。芳香族置換の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "benzene-sulfonation": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "ベンゼン→ベンゼンスルホン酸。可逆な置換の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "benzyl-alcohol-oxidation": {
+      "tier": "primary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "ベンジルアルコール→ベンズアルデヒド。芳香族側の第一級酸化。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "butan-1-ol-oxidation": {
+      "tier": "secondary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "1-ブタノールの酸化。第一級アルコールの同族体。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "butanal-reduction": {
+      "tier": "secondary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "ブタナールの還元。アルデヒド→アルコールの逆経路。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "butanoic-acid-ethanol-esterification": {
+      "tier": "secondary",
+      "topic": "ester-salicylic",
+      "reason": "酪酸エチル生成。エステル化の同族体。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "caprolactam-ring-opening": {
+      "tier": "primary",
+      "topic": "polymer",
+      "reason": "カプロラクタム→ナイロン6。開環重合の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "chlorobenzene-dow-phenol": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "クロロベンゼン→ナトリウムフェノキシド。ダウ法の主経路。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "cumene-hydroperoxide-decomposition": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "クメン法。フェノールとアセトンを同時に得る。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "cumene-oxidation": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "クメン→クメンヒドロペルオキシド。クメン法の前段。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "cysteine-oxidation": {
+      "tier": "secondary",
+      "topic": "peptide",
+      "reason": "システイン→シスチン。ジスルフィド結合の例。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "diazonium-phenol-coupling": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "ジアゾニウム塩とフェノールのカップリング。芳香族主幹の終点。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethanal-oxidation-acetic": {
+      "tier": "primary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "アセトアルデヒド→酢酸。脂肪族酸化系列の中心。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethanal-reduction": {
+      "tier": "secondary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "アセトアルデヒドの還元。酸化系列の逆経路として残す。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethanol-dehydration-ether": {
+      "tier": "primary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "エタノールの分子間脱水→ジエチルエーテル。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethanol-oxidation-acetic": {
+      "tier": "secondary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "エタノール→酢酸の直接経路。段階酸化の主幹と重なる補助経路。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethanol-oxidation-ethanal": {
+      "tier": "primary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "第一級アルコールの段階酸化を理解する代表系列。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethene-bromine-addition": {
+      "tier": "primary",
+      "topic": "hydrocarbon-addition",
+      "reason": "エテンへの臭素付加。付加反応の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethene-hydration": {
+      "tier": "primary",
+      "topic": "hydrocarbon-addition",
+      "reason": "エテン→エタノール。脂肪族主幹の入口。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethene-hydrogen-bromide": {
+      "tier": "primary",
+      "topic": "hydrocarbon-addition",
+      "reason": "エテンへの臭化水素付加。マルコフニコフ則の導入。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethene-hydrogenation": {
+      "tier": "primary",
+      "topic": "hydrocarbon-addition",
+      "reason": "エテンの水素付加。油脂の水素化へつながる。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethene-polymerization": {
+      "tier": "primary",
+      "topic": "polymer",
+      "reason": "エテン→ポリエチレン。付加重合の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethyl-acetate-hydrolysis": {
+      "tier": "primary",
+      "topic": "ester-salicylic",
+      "reason": "酢酸エチルの加水分解。エステル化と可逆対。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethyl-propionate-saponification": {
+      "tier": "secondary",
+      "topic": "ester-salicylic",
+      "reason": "プロピオン酸エチルのけん化。エステル加水分解の同族体。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "formaldehyde-oxidation-formic": {
+      "tier": "primary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "ホルムアルデヒド→ギ酸。アルデヒド酸化の最小例。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "formic-acid-ethanol-esterification": {
+      "tier": "secondary",
+      "topic": "ester-salicylic",
+      "reason": "ギ酸エチル生成。エステル化の同族体。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "formic-acid-methanol-esterification": {
+      "tier": "secondary",
+      "topic": "ester-salicylic",
+      "reason": "ギ酸メチル生成。エステル化の同族体。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "fructose-base-isomerization": {
+      "tier": "secondary",
+      "topic": "sugar",
+      "reason": "フルクトースの塩基性異性化。糖の平衡の例。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "glucose-reduction": {
+      "tier": "secondary",
+      "topic": "sugar",
+      "reason": "グルコース→ソルビトール。糖の還元。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "glycerol-linoleic-esterification": {
+      "tier": "secondary",
+      "topic": "lipid",
+      "reason": "グリセリンとリノール酸のエステル化。油脂の組合せ展開。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "glycerol-oleic-esterification": {
+      "tier": "secondary",
+      "topic": "lipid",
+      "reason": "グリセリンとオレイン酸のエステル化。油脂の組合せ展開。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "glycerol-palmitic-esterification": {
+      "tier": "secondary",
+      "topic": "lipid",
+      "reason": "グリセリンとパルミチン酸のエステル化。油脂の組合せ展開。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "glycerol-stearic-esterification": {
+      "tier": "primary",
+      "topic": "lipid",
+      "reason": "グリセリン＋ステアリン酸→トリステアリン。油脂の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "glycine-alanine-peptide": {
+      "tier": "primary",
+      "topic": "peptide",
+      "reason": "グリシン＋アラニン→ジペプチド。ペプチド結合の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "glycine-glycine-peptide": {
+      "tier": "secondary",
+      "topic": "peptide",
+      "reason": "グリシン同士のペプチド結合。組合せ展開。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "glycylalanine-hydrolysis": {
+      "tier": "primary",
+      "topic": "peptide",
+      "reason": "グリシルアラニンの加水分解。ペプチド結合の可逆対。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "glycylglycine-hydrolysis": {
+      "tier": "secondary",
+      "topic": "peptide",
+      "reason": "グリシルグリシンの加水分解。組合せ展開。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "isobutene-hydrogen-chloride": {
+      "tier": "secondary",
+      "topic": "hydrocarbon-addition",
+      "reason": "イソブテンへの塩化水素付加。第三級カルボカチオンの例。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "methane-chlorination": {
+      "tier": "primary",
+      "topic": "hydrocarbon-addition",
+      "reason": "メタンのラジカル置換。アルカン反応の導入。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "methanol-oxidation-formaldehyde": {
+      "tier": "primary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "メタノール→ホルムアルデヒド。第一級酸化の最小例。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "methyl-salicylate-hydrolysis": {
+      "tier": "primary",
+      "topic": "ester-salicylic",
+      "reason": "サリチル酸メチルの加水分解。サリチル酸系列の可逆対。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "nitrobenzene-reduction": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "ニトロベンゼン→アニリン。芳香族主幹の中心。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "nylon66-condensation": {
+      "tier": "primary",
+      "topic": "polymer",
+      "reason": "アジピン酸＋ヘキサメチレンジアミン→ナイロン66。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "oxalic-acid-methanol-esterification": {
+      "tier": "secondary",
+      "topic": "ester-salicylic",
+      "reason": "シュウ酸ジメチル生成。二塩基酸のエステル化。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "p-xylene-oxidation": {
+      "tier": "primary",
+      "topic": "polymer",
+      "reason": "p-キシレン→テレフタル酸。PET の原料経路。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "pet-condensation": {
+      "tier": "primary",
+      "topic": "polymer",
+      "reason": "テレフタル酸＋エチレングリコール→PET。縮合重合の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "phenol-acid-neutralization": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "フェノール→ナトリウムフェノキシド。酸塩基の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propan-1-ol-oxidation": {
+      "tier": "secondary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "1-プロパノールの酸化。第一級アルコールの同族体。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propan-2-ol-oxidation": {
+      "tier": "primary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "2-プロパノール→アセトン。第二級アルコール酸化の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propanal-oxidation": {
+      "tier": "secondary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "プロパナール→プロピオン酸。アルデヒド酸化の同族体。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propanal-reduction": {
+      "tier": "secondary",
+      "topic": "alcohol-carbonyl-acid",
+      "reason": "プロパナールの還元。アルデヒド→アルコールの逆経路。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propene-hydrogenation": {
+      "tier": "primary",
+      "topic": "hydrocarbon-addition",
+      "reason": "プロペンの水素付加。アルケンの同族体比較。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propene-hydration": {
+      "tier": "primary",
+      "topic": "hydrocarbon-addition",
+      "reason": "プロペン→2-プロパノール。位置選択性の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propene-polymerization": {
+      "tier": "primary",
+      "topic": "polymer",
+      "reason": "プロペン→ポリプロピレン。付加重合の同族体。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propionic-acid-ethanol-esterification": {
+      "tier": "secondary",
+      "topic": "ester-salicylic",
+      "reason": "プロピオン酸エチル生成。エステル化の同族体。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propionic-acid-methanol-esterification": {
+      "tier": "secondary",
+      "topic": "ester-salicylic",
+      "reason": "プロピオン酸メチル生成。エステル化の同族体。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propyne-hydration": {
+      "tier": "secondary",
+      "topic": "hydrocarbon-addition",
+      "reason": "プロピン→アセトン。アルキンの水和。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "protein-hydrolysis": {
+      "tier": "secondary",
+      "topic": "peptide",
+      "reason": "タンパク質の加水分解。高分子からアミノ酸へ。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "salicylic-acid-acetylation": {
+      "tier": "primary",
+      "topic": "ester-salicylic",
+      "reason": "サリチル酸→アスピリン。アセチル化の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "salicylic-acid-methyl-esterification": {
+      "tier": "primary",
+      "topic": "ester-salicylic",
+      "reason": "サリチル酸→サリチル酸メチル。エステル化の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "sodium-phenoxide-acidification": {
+      "tier": "primary",
+      "topic": "aromatic",
+      "reason": "ナトリウムフェノキシド→フェノール。酸塩基の可逆対。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "starch-hydrolysis-glucose": {
+      "tier": "primary",
+      "topic": "sugar",
+      "reason": "デンプン→グルコース。糖の加水分解の終点。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "starch-hydrolysis-maltose": {
+      "tier": "primary",
+      "topic": "sugar",
+      "reason": "デンプン→マルトース。二糖への分解。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "styrene-polymerization": {
+      "tier": "primary",
+      "topic": "polymer",
+      "reason": "スチレン→ポリスチレン。付加重合の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "sucrose-hydrolysis": {
+      "tier": "primary",
+      "topic": "sugar",
+      "reason": "スクロース→グルコース＋フルクトース。二糖の代表。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "triolein-hydrogenation": {
+      "tier": "primary",
+      "topic": "lipid",
+      "reason": "トリオレイン→トリステアリン。油脂の硬化。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "triolein-saponification": {
+      "tier": "secondary",
+      "topic": "lipid",
+      "reason": "トリオレインのけん化。不飽和油脂の例。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "tripalmitin-saponification": {
+      "tier": "secondary",
+      "topic": "lipid",
+      "reason": "トリパルミチンのけん化。飽和油脂の例。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "tristearin-hydrolysis": {
+      "tier": "primary",
+      "topic": "lipid",
+      "reason": "トリステアリンの加水分解。けん化との対比。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "tristearin-saponification": {
+      "tier": "primary",
+      "topic": "lipid",
+      "reason": "トリステアリンのけん化→セッケン＋グリセリン。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "vinyl-chloride-polymerization": {
+      "tier": "primary",
+      "topic": "polymer",
+      "reason": "塩化ビニル→ポリ塩化ビニル。付加重合の代表。",
+      "importanceStatus": "editorial-candidate"
+    }
+  }
+}

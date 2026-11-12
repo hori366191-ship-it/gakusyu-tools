@@ -1,0 +1,2 @@
+# app11 primary topology: development-only dependency (pinned).
+networkx==3.6.1

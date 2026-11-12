@@ -27,6 +27,8 @@
     #fbfdfe;
   --rp-same: #a8bccb;
   --rp-cross: #b26b26;
+  --rp-primary: #0d4b52;
+  --rp-secondary: #8b9aa8;
   --rp-pending: #8a5a00;
   --rp-pending-bg: #fff6e2;
   --rp-focus: #1d4ed8;
@@ -71,6 +73,8 @@ html[data-theme="pop"] {
     #faf5ee;
   --rp-same: #b6a58f;
   --rp-cross: #2f6f8f;
+  --rp-primary: #2f6f8f;
+  --rp-secondary: #9b8f7f;
   --rp-pending: #8a5a00;
   --rp-pending-bg: #fdf0d8;
   --rp-focus: #1d4ed8;
@@ -102,6 +106,8 @@ html[data-theme="forest"] {
     #f8faf4;
   --rp-same: #a7bba1;
   --rp-cross: #9a6a3c;
+  --rp-primary: #3f5d33;
+  --rp-secondary: #8f9c83;
   --rp-pending: #7d5a12;
   --rp-pending-bg: #f7efd8;
   --rp-focus: #1d4ed8;
@@ -316,23 +322,36 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-region__band { fill: var(--rp-region-line); opacity: .5; }
 
 /* ---------- svg: edges ---------- */
-.rp-edge { fill: none; stroke: var(--rp-same); stroke-width: 1.6; }
-.rp-edge.is-cross { stroke: var(--rp-cross); stroke-dasharray: 7 5; stroke-width: 1.2; opacity: .6; }
-.rp-edge.is-active { stroke-width: 2.8; opacity: 1; }
-.rp-edge.is-cross.is-active { stroke-width: 2.5; }
+.rp-edge { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.rp-edge--primary {
+  stroke: var(--rp-primary);
+  stroke-width: 3;
+  opacity: 1;
+}
+.rp-edge--secondary {
+  stroke: var(--rp-secondary);
+  stroke-width: 1.1;
+  stroke-dasharray: 6 5;
+  opacity: .62;
+}
+.rp-edge.is-active { stroke-width: 4.2; opacity: 1; }
+.rp-edge--secondary.is-active { stroke-width: 2.4; }
 .rp-edges-active { pointer-events: none; }
 .rp-edge-active {
   fill: none;
   stroke: var(--rp-accent-2);
-  stroke-width: 3.2;
+  stroke-width: 4.4;
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: 1;
 }
 .rp-edge.is-pending { opacity: .5; }
-.rp-map[data-level="0"] .rp-edge:not(.is-cross) { opacity: 0; }
-.rp-map[data-level="0"] .rp-edge.is-cross { opacity: .32; }
-.rp-map[data-level="1"] .rp-edge.is-cross { opacity: .38; }
+/* 主要線は LOD で消さない。補助線は俯瞰で薄く残し、詳細で濃くする。 */
+.rp-map[data-level="0"] .rp-edge--secondary { opacity: .16; }
+.rp-map[data-level="1"] .rp-edge--secondary { opacity: .34; }
+.rp-map[data-level="2"] .rp-edge--secondary { opacity: .62; }
+.rp-map[data-level="0"] .rp-edge--primary { opacity: .95; }
+.rp-map[data-level="1"] .rp-edge--primary { opacity: 1; }
 
 /* ---------- svg: nodes ---------- */
 .rp-node { cursor: pointer; }
@@ -371,17 +390,22 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 
 /* ---------- svg: reactions ---------- */
 .rp-reaction { cursor: pointer; }
-.rp-reaction__dot { fill: var(--rp-panel); stroke: var(--rp-cross); stroke-width: 2; }
-.rp-reaction[data-cross="false"] .rp-reaction__dot { stroke: var(--rp-same); stroke-width: 2.2; }
+.rp-reaction__dot { fill: var(--rp-panel); stroke: var(--rp-secondary); stroke-width: 1.8; }
+.rp-reaction--primary .rp-reaction__dot { stroke: var(--rp-primary); stroke-width: 2.4; fill: var(--rp-primary); }
 .rp-reaction__hit { fill: transparent; }
 .rp-reaction__label { fill: var(--rp-muted); font-size: 10px; text-anchor: middle; dominant-baseline: middle; paint-order: stroke; stroke: var(--rp-panel); stroke-width: 3px; stroke-linejoin: round; }
+.rp-reaction--primary .rp-reaction__label { fill: var(--rp-ink); font-weight: 600; }
 .rp-reaction__label--cond { font-size: 9px; fill: var(--rp-muted); opacity: .9; }
 .rp-reaction:hover .rp-reaction__dot, .rp-reaction:focus-visible .rp-reaction__dot { stroke: var(--rp-focus); stroke-width: 3; }
 .rp-reaction:focus { outline: none; }
 .rp-reaction.is-pending .rp-reaction__dot { stroke: var(--rp-pending); }
-.rp-map[data-level="0"] .rp-reaction__label,
-.rp-map[data-level="1"] .rp-reaction__label { display: none; }
+/* 主要ラベルは俯瞰でも残す。補助ラベルは詳細段階だけ。条件は最も詳細な段階だけ。 */
+.rp-map[data-level="0"] .rp-reaction--secondary .rp-reaction__label,
+.rp-map[data-level="1"] .rp-reaction--secondary .rp-reaction__label { display: none; }
+.rp-map[data-level="0"] .rp-reaction__label--cond,
+.rp-map[data-level="1"] .rp-reaction__label--cond { display: none; }
 .rp-map[data-level="0"] .rp-reaction__dot { r: 4; }
+.rp-map[data-level="1"] .rp-reaction--secondary .rp-reaction__dot { r: 4.5; }
 .rp-map[data-level="0"] .rp-reaction__hit { display: none; }
 
 /* ---------- html overlay (readable at any zoom) ---------- */
@@ -411,6 +435,19 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   white-space: nowrap;
 }
 .rp-overlay__hub.is-hub { background: var(--rp-hub); color: var(--rp-hub-ink); font-weight: 700; }
+.rp-overlay__reaction {
+  position: absolute;
+  transform: translateX(-50%);
+  padding: 0 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--rp-panel) 82%, transparent);
+  color: var(--rp-muted);
+  font-size: 10px;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.rp-overlay__reaction--secondary { border: 1px dotted var(--rp-secondary); opacity: .92; }
 
 .rp-hint {
   position: absolute;
@@ -439,8 +476,8 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-legend li { display: flex; align-items: center; gap: 6px; }
 .rp-legend__key { width: 16px; height: 8px; border-radius: 3px; display: inline-block; background: var(--rp-node); border: 1px solid var(--rp-node-line); }
 .rp-legend__key--hub { background: var(--rp-hub); border-color: var(--rp-hub); }
-.rp-legend__key--same { background: none; border: 0; border-top: 2px solid var(--rp-same); border-radius: 0; height: 0; }
-.rp-legend__key--cross { background: none; border: 0; border-top: 2px dashed var(--rp-cross); border-radius: 0; height: 0; }
+.rp-legend__key--primary { background: none; border: 0; border-top: 3px solid var(--rp-primary); border-radius: 0; height: 0; }
+.rp-legend__key--secondary { background: none; border: 0; border-top: 2px dotted var(--rp-secondary); border-radius: 0; height: 0; }
 .rp-legend__key--pending { background: var(--rp-pending-bg); border: 1px dashed var(--rp-pending); }
 .rp-region-legend {
   list-style: none;
@@ -568,6 +605,9 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-card__body h2:focus { outline: none; }
 .rp-card__body h3 { margin: 16px 0 6px; font-size: 13px; color: var(--rp-accent-2); }
 .rp-card__formula { margin: 0; font-family: var(--rp-font-mono); font-size: 13px; color: var(--rp-muted); overflow-wrap: anywhere; }
+.rp-card__tier { display: inline-block; margin: 0 0 6px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.rp-card__tier--primary { background: var(--rp-accent-bg); color: var(--rp-accent-2); border: 1px solid var(--rp-primary); }
+.rp-card__tier--secondary { background: var(--rp-panel-2); color: var(--rp-muted); border: 1px dashed var(--rp-secondary); }
 .rp-card__note { margin: 8px 0 0; font-size: 12px; color: var(--rp-muted); }
 .rp-card__actions { margin: 10px 0 0; }
 .rp-card__facts { margin: 10px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }

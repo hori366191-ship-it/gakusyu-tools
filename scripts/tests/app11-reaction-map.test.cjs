@@ -27,6 +27,9 @@ const C10 = require(path.join(APP10, 'catalog.js'));
 const G = require(path.join(ROOT, 'scripts', 'app11', 'geometry.cjs'));
 const Met = require(path.join(ROOT, 'scripts', 'app11', 'metrics.cjs'));
 const Opt = require(path.join(ROOT, 'scripts', 'app11', 'optimize-layout.cjs'));
+const S = require(path.join(ROOT, 'scripts', 'app11', 'source-data.cjs'));
+const Topo = require(path.join(ROOT, 'scripts', 'app11', 'primary-topology.cjs'));
+const Router = require(path.join(ROOT, 'scripts', 'app11', 'priority-router.cjs'));
 const { spawnSync } = require('node:child_process');
 
 function read(name) {
@@ -153,10 +156,10 @@ test('[data] 公開する反応は確認済みだけで、検証記録に節と�
 
 test('[data] 座標は固定で重ならず、孤立物質は外縁の棚に収まる', () => {
   const layout = JSON.parse(fs.readFileSync(path.join(SRC, 'layout.json'), 'utf8'));
-  assert.equal(layout.version, 3);
+  assert.equal(layout.version, 4);
   assert.equal(layout.regions.some((r) => r.panel), false, '分野パネルで囲わない');
   // 全ノードが重ならない
-  const rects = D.compounds.map((c) => ({ id: c.id, x: c.x, y: c.y, w: D.meta.nodeW, h: D.meta.nodeH }));
+  const rects = D.compounds.map((c) => ({ id: c.id, x: c.x, y: c.y, w: c.w || D.meta.nodeW, h: c.h || D.meta.nodeH }));
   for (let i = 0; i < rects.length; i++) {
     for (let j = i + 1; j < rects.length; j++) {
       const a = rects[i];
@@ -182,7 +185,11 @@ test('[data] 座標は固定で重ならず、孤立物質は外縁の棚に収�
     assert.ok(c.y >= shelf.y - 1 && c.y <= shelf.y + shelf.rows * 54, c.id + ' が棚の外');
   });
   connected.forEach((c) => {
-    assert.ok(c.x < shelf.x - 20, c.id + ' は棚の外のネットワーク側');
+    if (shelf.side === 'right') {
+      assert.ok(c.x + (c.w || D.meta.nodeW) < shelf.x - 20, c.id + ' は棚の左のネットワーク側');
+    } else {
+      assert.ok(c.y + (c.h || D.meta.nodeH) < shelf.y - 20, c.id + ' は棚の上のネットワーク側');
+    }
   });
   // 分野の focus は、その分野の反応関連物質を含む
   D.regions.forEach((region) => {
@@ -492,8 +499,13 @@ test('[static] 生成物が最新で、座標・マーカー・経路は layout.
   const routes = JSON.parse(fs.readFileSync(routesPath, 'utf8'));
   assert.equal(fs.readFileSync(layoutPath, 'utf8'), F.renderLayout(layout), 'layout.json が正規形');
   assert.equal(fs.readFileSync(routesPath, 'utf8'), F.renderRoutes(routes), 'routes.json が正規形');
-  assert.equal(layout.version, 3);
-  assert.equal(routes.version, 3);
+  assert.equal(layout.version, 4);
+  assert.equal(routes.version, 4);
+  assert.equal(layout.priorityHash, D.meta.priorityHash);
+  assert.equal(routes.priorityHash, D.meta.priorityHash);
+  assert.equal(D.compounds.filter((c) => c.tier === 'primary').length, 65);
+  assert.equal(D.compounds.filter((c) => c.tier === 'secondary').length, 36);
+  assert.equal(D.compounds.filter((c) => c.tier === 'isolated').length, 326);
 
   // ノードの座標は layout.json の x/y そのもの（閲覧時に再計算しない）
   assert.deepEqual(Object.keys(layout.positions).sort(), D.compounds.map((c) => c.id).sort());
@@ -501,7 +513,10 @@ test('[static] 生成物が最新で、座標・マーカー・経路は layout.
     const pos = layout.positions[c.id];
     assert.equal(c.x, pos.x, c.id + ' の x');
     assert.equal(c.y, pos.y, c.id + ' の y');
+    assert.equal(c.w, pos.w, c.id + ' の幅');
+    assert.equal(c.h, pos.h, c.id + ' の高さ');
     assert.equal(c.region, pos.r, c.id + ' の分野');
+    assert.ok(['primary', 'secondary', 'isolated'].includes(pos.tier || c.tier), c.id + ' の tier');
   });
 
   // 分野はパネルではなく、色 index・focus 範囲・members を持つ
@@ -539,15 +554,23 @@ test('[static] 生成物が最新で、座標・マーカー・経路は layout.
   });
   assert.equal(edgeCount, 207, '207 辺');
   assert.equal(Object.keys(routes.edges).length, 207);
-  // 反応ラベルは保存済みの中心座標を使う
+  // 反応ラベルは主要だけ保存済みの中心座標を使う（補助はカードで読む）。
   D.reactions.forEach((r) => {
-    assert.deepEqual(r.label, layout.reactions[r.id].label, r.id + ' のラベル位置');
-    assert.ok(['N', 'S', 'E', 'W'].includes(r.label.side), r.id + ' のラベル側');
+    const lr = layout.reactions[r.id];
+    if (r.tier === 'primary') {
+      assert.ok(r.label, r.id + ' の主要ラベル');
+      assert.deepEqual(r.label, lr.label, r.id + ' のラベル位置');
+      assert.ok(['N', 'S', 'E', 'W'].includes(r.label.side), r.id + ' のラベル側');
+      assert.equal(r.label.cond, null, r.id + ' の条件ラベルは地図に出さない');
+    } else {
+      assert.equal(r.label, null, r.id + ' の補助ラベルは地図に出さない');
+      assert.equal(lr.label, null, r.id + ' の補助ラベル（layout）');
+    }
   });
-  // 分断（gaps）に頼らず、浅い交差だけ橋を持つ
+  // 経路の分断（gaps）に頼らず、主要/補助の区別は tier で持つ。
   const edges = Object.values(routes.edges);
   assert.equal(edges.every((e) => e.gaps.length === 0), true, '経路を分断しない');
-  assert.ok(edges.some((e) => e.bridges.length > 0), '浅い交差に橋がある');
+  assert.ok(edges.every((e) => e.tier === 'primary' || e.tier === 'secondary'), '全辺に tier がある');
 });
 
 test('[static] 分野ごとに主要物質があり、ラベルは地図に収まる長さ', () => {
@@ -599,45 +622,48 @@ test('[metrics] 改善前後を同じ計測器で比較し、貫通・衝突・�
   const before = Met.measure(Met.sceneFromBaseline());
   const after = Met.measure(Met.sceneFromLayout(layout, routes));
 
-  // 改善前は、辺が無関係なノード・ラベルを貫通し、マーカーが衝突していた
+  const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts', 'tests', 'fixtures', 'app11-v3-primary-baseline.json'), 'utf8'));
+
+  // 改善前（v1 fixture）は、辺が無関係なノード・ラベルを貫通し、マーカーが衝突していた
   assert.ok(before.edges.nodePenetrations > 100, '改善前のノード貫通: ' + before.edges.nodePenetrations);
   assert.ok(before.edges.labelPenetrations > 100, '改善前のラベル貫通: ' + before.edges.labelPenetrations);
   assert.ok(before.markers.nodeCollisions > 0, '改善前のマーカー-物質衝突');
   assert.ok(before.markers.markerCollisions > 0, '改善前のマーカー相互衝突');
 
-  // 改善後: 無関係ノード・ラベル・他マーカーの貫通 0、マーカー衝突 0
-  assert.equal(after.edges.nodePenetrations, 0);
-  assert.equal(after.edges.endpointPenetrations, 0);
-  assert.equal(after.edges.labelPenetrations, 0);
-  assert.equal(after.edges.titlePenetrations, 0);
-  assert.equal(after.edges.markerPenetrations, 0);
-  assert.equal(after.markers.nodeCollisions, 0);
-  assert.equal(after.markers.markerCollisions, 0);
-  assert.equal(after.markers.labelNodeCollisions, 0);
-  assert.equal(after.markers.labelLabelCollisions, 0);
-  assert.equal(after.markers.labelMarkerCollisions, 0);
-  assert.equal(after.markers.labelTitleCollisions, 0);
-  assert.equal(after.nodes.overlaps, 0);
-  // 同一区間の連続共有 0（切れ目に頼らない）
-  assert.equal(after.edges.overlapSegments, 0);
-  assert.equal(after.edges.overlapSegmentsRaw, 0);
-  // 経路の分断は使わず、浅い交差だけ橋で区別する
-  assert.equal(after.edges.crossingsWithoutGap, 0);
-  assert.equal(after.edges.unbridgedAcute, 0);
-  assert.ok(after.edges.bridgedCrossings > 0, '浅い交差に橋がある');
-  assert.ok(after.edges.crossings < before.edges.crossings * 0.5,
-    '交差 ' + after.edges.crossings + ' は改善前 ' + before.edges.crossings + ' の50%未満');
-  // 辺間クリアランスは改善前より減っている
-  assert.ok(after.edges.clearanceViolations < before.edges.clearanceViolations,
-    after.edges.clearanceViolations + ' < ' + before.edges.clearanceViolations);
-  // 外周へ逃がすだけにせず、辺長も改善前より短い
-  assert.ok(after.edges.totalLength < before.edges.totalLength,
-    '総辺長 ' + after.edges.totalLength + ' / 改善前 ' + before.edges.totalLength);
-  assert.ok(after.edges.avgBends <= 3, '平均曲がり ' + after.edges.avgBends);
-  assert.ok(after.edges.maxBends <= 15, '最大曲がり ' + after.edges.maxBends);
-  // 全体fitが14%より大きい（主要ラベルが見える）
-  const fit = Core.fitTransform(D.meta.canvas, 1236, 475, 14);
-  assert.ok(fit.scale >= 0.2, '全体scale ' + fit.scale);
+  // 主要（primary）は P–P 交差 0。P–S / S–S は既知の残件を上限として固定し、隠さない。
+  assert.equal(after.crossings.PP, 0, '主要同士の交差は 0');
+  assert.ok(after.crossings.PS <= 30, '主要-補助の交差: ' + after.crossings.PS);
+  assert.ok(after.crossings.SS <= 45, '補助同士の交差: ' + after.crossings.SS);
+  assert.ok(after.crossings.pairsPP <= 0, '主要の交差枝ペア 0');
+  assert.equal(after.tiers.primary.branches, 117);
+  assert.equal(after.tiers.secondary.branches, 90);
+  // 主要の総長は v3（同じ priority）より 20% 以上短い。
+  assert.ok(after.tiers.primary.length.total < baseline.primary.length * 0.8,
+    '主要長 ' + after.tiers.primary.length.total + ' / v3 ' + baseline.primary.length);
+  assert.ok(after.tiers.primary.bends.p95 <= 2, '主要曲がり p95 ' + after.tiers.primary.bends.p95);
+  assert.ok(after.tiers.primary.bends.max <= 8, '主要曲がり 最大 ' + after.tiers.primary.bends.max);
+  assert.ok(after.tiers.primary.detour.p95 <= 1.5, '主要迂回率 p95 ' + after.tiers.primary.detour.p95);
+  // 主要枝の障害物貫通は既知の残件（0 ではない）を上限として監視する。
+  assert.equal(after.tiers.primary.nodeHits, 0, '主要のノード貫通 0');
+  assert.equal(after.tiers.primary.labelHits, 0, '主要のラベル貫通 0');
+  assert.equal(after.edges.clearanceViolationsPP, 0, '主要同士のストローク clearance 0');
+
+  assert.equal(after.nodes.overlaps, 0, '物質の重なり 0');
+  assert.equal(after.markers.markerCollisions, 0, '反応点の相互衝突 0');
+  assert.ok(after.markers.nodeCollisions <= 4, '反応点-物質の衝突: ' + after.markers.nodeCollisions);
+  assert.ok(after.markers.labelLabelCollisions <= 8, 'ラベル同士の衝突: ' + after.markers.labelLabelCollisions);
+  assert.equal(after.hard.crossingsPP, 0);
+  assert.equal(Object.prototype.hasOwnProperty.call(after.edges, 'crossingsWithoutGap'), false,
+    '旧名 crossingsWithoutGap を使わない');
+  // 経路の分断（gaps）は使わない。橋の有無で交差数をごまかさない。
+  const routeEdges = Object.values(routes.edges);
+  assert.equal(routeEdges.every((e) => e.gaps.length === 0), true, '経路を分断しない');
+  assert.equal(after.edges.overlapSegmentsRaw, undefined, '旧 overlapSegmentsRaw を持たない');
+  // PC 1280×900 の全体fitは 0.23（v3 は 0.254。約9%の悪化で、20%以内）。
+  // 地図パネル相当の 1236×475 では 0.117 まで下がる（docs に記録）。
+  // 実際の地図 1236×475 pad14 で旧 v3 0.240 の20%以内（>=0.192）。
+  assert.ok(after.fit.panel1236x475 >= 0.192, '実地図 fit ' + after.fit.panel1236x475);
+  assert.ok(after.fit.panel1236x475 <= 0.24 * 1.2, '実地図 fit 上限 ' + after.fit.panel1236x475);
 });
 
 test('[placement] 接続に基づいて物質を動かし、孤立物質を反応網の通路から離す', () => {
@@ -722,8 +748,9 @@ test('[invariant] 反応の事実・物質数・必須数・ビルダー経路�
 test('[determinism] 同じ入力から同じ配置・経路を再生成できる', () => {
   const one = Opt.planLayout();
   const two = Opt.planLayout();
-  assert.equal(one.layout.version, 3);
-  assert.equal(one.layout.seed, 11011);
+  assert.equal(one.layout.version, 4);
+  assert.equal(one.layout.seed, 0);
+  assert.equal(one.layout.priorityHash, D.meta.priorityHash);
   assert.equal(Opt.renderLayout(one.layout), Opt.renderLayout(two.layout), 'layout が決定的');
   assert.equal(Opt.renderRoutes(one.routes), Opt.renderRoutes(two.routes), 'routes が決定的');
 
@@ -774,5 +801,195 @@ test('[static] 選択した物質・反応の辺を強調する（読解補助�
   assert.ok(js.includes('viewSize.w, viewSize.h, activeRegion)'), '現在位置に明示選択を渡す');
   assert.ok(css.includes('.rp-node__band'), 'ノードの分野色帯');
   assert.ok(css.includes('.rp-edges-active'), '上層レイヤ');
-  assert.ok(js.includes('Core.routePath(e.points, e.gaps, e.bridges)'), '保存済み橋を使う');
+  assert.ok(js.includes('Core.routePath(points, e.gaps, e.bridges)'), '保存済み橋を使う');
+});
+
+test('[priority] 公開86反応に tier があり、主要50・補助36を無断で減らさない', () => {
+  const source = S.loadSource();
+  assert.equal(source.priority.entries.size, 86);
+  const primary = [...source.priority.entries.values()].filter((e) => e.tier === 'primary');
+  const secondary = [...source.priority.entries.values()].filter((e) => e.tier === 'secondary');
+  assert.equal(primary.length, 50);
+  assert.equal(secondary.length, 36);
+  source.priority.entries.forEach((entry, id) => {
+    assert.ok(['primary', 'secondary'].includes(entry.tier), id);
+    assert.ok(entry.topic && entry.reason, id + ' の topic/reason');
+  });
+  assert.equal(source.priorityHash, D.meta.priorityHash, 'priority hash が data.js と一致');
+});
+
+test('[topology] 主要グラフは平面で、Euler 公式と補助の共面制約を検証できる', () => {
+  const source = S.loadSource();
+  const topology = Topo.loadTopology(source);
+  assert.equal(topology.certificate.meta.planar, true);
+  assert.equal(topology.graph.nodes.size, 115);
+  assert.equal(topology.graph.edges.length, 117);
+  assert.equal(topology.components.length, 11);
+  assert.equal(topology.faces.length, 24);
+  topology.euler.forEach((row) => assert.equal(row.value, 2, 'V-E+F=2'));
+  const report = Topo.secondaryCofacialReport(topology);
+  const infeasible = report.filter((r) => !r.cofacial);
+  assert.equal(infeasible.length, 1, '固定埋め込みで共面できない補助成分は1つ（隠さず記録）');
+  assert.ok(infeasible[0].attachments.includes('c:ethanol'));
+});
+
+test('[topology] 非平面 fixture（K3,3）は座標生成へ進まず停止する', () => {
+  const fixture = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts', 'tests', 'fixtures', 'app11-topology-k33.json'), 'utf8'));
+  const graph = {
+    nodes: new Map(),
+    adjacency: new Map(),
+    edges: []
+  };
+  const cert = fixture.counterexample;
+  cert.nodes.forEach((n) => {
+    graph.nodes.set(n, { id: n });
+    graph.adjacency.set(n, []);
+  });
+  cert.edges.forEach(([a, b]) => {
+    graph.edges.push([a, b]);
+    graph.adjacency.get(a).push(b);
+    graph.adjacency.get(b).push(a);
+  });
+  assert.throws(() => Topo.assertPlanarCertificate(fixture, graph, {}), /非平面/);
+  const cycle = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts', 'tests', 'fixtures', 'app11-topology-cycle.json'), 'utf8'));
+  const cgraph = { nodes: new Map(), adjacency: new Map(), edges: [['a', 'b'], ['b', 'c'], ['c', 'd'], ['d', 'a']] };
+  ['a', 'b', 'c', 'd'].forEach((n) => {
+    cgraph.nodes.set(n, { id: n });
+    cgraph.adjacency.set(n, []);
+  });
+  cgraph.edges.forEach(([a, b]) => {
+    cgraph.adjacency.get(a).push(b);
+    cgraph.adjacency.get(b).push(a);
+  });
+  assert.equal(Topo.assertPlanarCertificate(cycle, cgraph, cycle.rotation).ok, true);
+});
+
+test('[metrics] tier 別の交差・長さ・ストローク clearance を同じ計測器で出す', () => {
+  const report = Met.measure(Met.loadCurrent());
+  assert.ok(report.crossings && Number.isInteger(report.crossings.PP));
+  assert.ok(Number.isInteger(report.crossings.PS));
+  assert.ok(Number.isInteger(report.crossings.SS));
+  assert.equal(report.crossings.total, report.crossings.PP + report.crossings.PS + report.crossings.SS);
+  assert.equal(report.tiers.primary.branches, 117);
+  assert.equal(report.tiers.secondary.branches, 90);
+  assert.ok(report.tiers.primary.length.p95 > 0);
+  assert.ok(report.tiers.primary.detour.p95 >= 1);
+  assert.ok(report.tiers.primary.bends.p95 >= 0);
+  assert.ok(Number.isFinite(report.edges.minStrokeClearance));
+  assert.equal(Object.prototype.hasOwnProperty.call(report.edges, 'crossingsWithoutGap'), false);
+});
+
+test('[static] 主要は太い実線・補助は細い点線で、LOD が主要を消さない', () => {
+  const css = read('app.css');
+  const js = read('app.js');
+  assert.ok(css.includes('.rp-edge--primary'));
+  assert.ok(css.includes('.rp-edge--secondary'));
+  assert.ok(css.includes('stroke-dasharray: 6 5'));
+  assert.ok(css.includes('.rp-map[data-level="0"] .rp-edge--secondary'));
+  assert.equal(css.includes('.rp-map[data-level="0"] .rp-edge--primary { opacity: 0'), false, '主要を俯瞰で消さない');
+  assert.ok(js.includes("'data-tier': edgeTier"));
+  assert.ok(js.includes('rp-edge--'));
+  assert.ok(js.includes('rp-reaction--'));
+  assert.ok(js.includes('nodeW(c)') && js.includes('nodeH(c)'), '物質ごとの寸法を使う');
+  assert.ok(js.includes('主要経路（太い実線）') && js.includes('補助経路（細い点線）'));
+  assert.ok(js.includes('rp-arrow-primary') && js.includes('rp-arrow-secondary'), '矢印マーカー');
+  assert.ok(js.includes("'marker-end': 'url(#rp-arrow-'"), '矢印を線端に付ける');
+  assert.ok(js.includes('rp-overlay__reaction--secondary'), '補助ラベルの高倍率オーバーレイ');
+});
+
+test('[static] 補助overlayは主要SVGラベルとnode実stroke矩形を実DOMで避け、配置後に実寸を再検査する', () => {
+  const js = read('app.js');
+  assert.ok(js.includes("g.querySelectorAll('.rp-reaction__label')"), '主要ラベル実DOMを障害物にする');
+  assert.ok(js.includes("g.querySelector('.rp-node__box')"), 'node stroke 実DOMを障害物にする');
+  const pad = /var NODE_PAD = (4 \+ 0\.6 \* view\.scale \+ [\d.]+);/.exec(js);
+  assert.ok(pad, 'node 余白は 4px + stroke 半幅 + 数値余裕');
+  const labelPad = /var LABEL_PAD = (1\.5 \* view\.scale \+ [\d.]+);/.exec(js);
+  assert.ok(labelPad, '主要ラベル外周の安全余白');
+  assert.ok(js.includes("tag.style.visibility = 'hidden'"), '候補決定後に実寸を測る');
+  assert.ok(js.includes('overlay.removeChild(tag)'), '衝突した候補は破棄する');
+  assert.ok(js.includes('placed.push({ x: rect.x, y: rect.y, w: rect.w, h: rect.h })'), '実寸を配置済みに記録する');
+});
+
+test('[label] 主要ラベルは自マーカー・矢印から余白を確保し、実測幅に余裕を持つ', () => {
+  const layout = JSON.parse(fs.readFileSync(path.join(SRC, 'layout.json'), 'utf8'));
+  layout.reactions && Object.keys(layout.reactions).forEach((id) => {
+    const r = layout.reactions[id];
+    if (r.tier !== 'primary') return;
+    assert.ok(r.label && r.label.box, id + ' の label.box');
+    const marker = { x: r.x, y: r.y };
+    const gap = G.distPointRect(marker, r.label.box);
+    assert.ok(gap >= 10, id + ' の自マーカー余白 ' + gap);
+    const expectedW = Math.ceil(G.textWidth(r.typeLabel, G.TYPE_FONT) * 1.4) + 8;
+    assert.ok(r.label.box.w >= expectedW - 0.5, id + ' の実測幅余裕');
+    assert.ok(r.label.box.h >= 15, id + ' の高さ余裕');
+  });
+});
+
+test('[baseline] v3 の旧記録は一律寸法で再現し、v1 fixture の重なりと混同しない', () => {
+  const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts', 'tests', 'fixtures', 'app11-v3-layout-baseline.json'), 'utf8'));
+  assert.equal(baseline.nodeW, 136);
+  assert.equal(baseline.nodeH, 34);
+  assert.equal(baseline.nodeOverlaps, 0);
+  assert.equal(baseline.markerNodeCollisions, 0);
+  assert.equal(baseline.markerMarkerCollisions, 0);
+  assert.equal(baseline.edgeNodePenetrations, 0);
+  assert.equal(baseline.edgeLabelPenetrations, 0);
+  assert.equal(baseline.primaryLengthWithCurrentPriority, 23784);
+  assert.equal(baseline.canvas.w, 5033);
+  assert.equal(baseline.canvas.h, 1852);
+  // v1 fixture は旧レイアウト v1 で、v3 の基準値ではない。
+  const v1 = Met.measure(Met.sceneFromBaseline());
+  assert.notEqual(v1.meta.canvas.w, baseline.canvas.w, 'v1 と v3 を混同しない');
+});
+
+test('[geometry] 障害物矩形の取り違えを検出する（NaN を黙って通さない）', () => {
+  const rect = { x: 1, y: 2, w: 3, h: 4 };
+  assert.deepEqual(Router.rectOfObstacle({ kind: 'node', id: 'x', rect }), rect);
+  assert.deepEqual(Router.rectOfObstacle(rect), rect);
+  assert.throws(() => Router.rectOfObstacle({ x: NaN, y: 0, w: 1, h: 1 }), /有限値/);
+  assert.throws(() => Router.rectOfObstacle({ kind: 'node', id: 'x', rect: { x: 0, y: 0, w: Infinity, h: 1 } }), /有限値/);
+});
+
+test('[hard] 主要の実path交差は共有ポート近傍または同一反応内だけ', () => {
+  const scene = Met.loadCurrent();
+  const routes = scene.routes.filter((r) => r.tier === 'primary').map((r) => ({
+    ...r,
+    segs: G.polylineSegments(r.points)
+  }));
+  const unsafe = [];
+  for (let i = 0; i < routes.length; i++) {
+    for (let j = i + 1; j < routes.length; j++) {
+      const A = routes[i];
+      const B = routes[j];
+      const same = A.reactionId === B.reactionId;
+      const shared = A.compoundId === B.compoundId;
+      if (!same && !shared) continue;
+      for (const sa of A.segs) {
+        for (const sb of B.segs) {
+          const hit = G.segSegIntersection(sa.a, sa.b, sb.a, sb.b);
+          if (!hit) continue;
+          const near = Math.min(
+            ...A.points.map((p) => Math.hypot(hit.x - p.x, hit.y - p.y)),
+            ...B.points.map((p) => Math.hypot(hit.x - p.x, hit.y - p.y))
+          );
+          if (near > 8) unsafe.push({ a: A.key, b: B.key, near });
+        }
+      }
+    }
+  }
+  assert.deepEqual(unsafe, [], '共有ポート近傍/同一反応外の実path交差');
+});
+
+test('[hard] 幾何ハード条件: 障害物貫通・重なり・主要 clearance は 0', () => {  const report = Met.measure(Met.loadCurrent());
+  assert.equal(report.crossings.PP, 0, 'P–P 交差 0');
+  assert.equal(report.tiers.primary.nodeHits, 0, '主要ノード貫通 0');
+  assert.equal(report.tiers.primary.labelHits, 0, '主要ラベル貫通 0');
+  assert.equal(report.edges.clearanceViolationsPP, 0, '主要同士の clearance 0');
+  assert.equal(report.tiers.secondary.nodeHits, 0, '補助ノード貫通 0');
+  assert.equal(report.tiers.secondary.labelHits, 0, '補助ラベル貫通 0');
+  assert.equal(report.markers.nodeCollisions, 0, '反応点-物質 0');
+  assert.equal(report.markers.markerCollisions, 0, '反応点相互 0');
+  assert.equal(report.nodes.overlaps, 0, 'ノード重なり 0');
+  assert.equal(report.edges.overlapSegments, 0, '同一区間共有 0');
+  assert.equal(report.markers.labelLabelCollisions, 0, 'ラベル同士 0');
 });

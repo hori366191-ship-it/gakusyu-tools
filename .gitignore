@@ -8,6 +8,9 @@ backup-*.bundle
 site-worker/.wrangler/
 site-worker/.dev.vars
 
+# app11 の開発時だけ使う NetworkX 環境（再現手順は scripts/app11/planarity/requirements.txt）
+.venv-app11/
+
 # Windows のデスクトップ設定
 desktop.ini
 

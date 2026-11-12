@@ -1,5 +1,8 @@
 # 有機反応マップ（試験版）— 実装・検証メモ
 
+> 2026-11-13 の主要バックボーン再設計（tier・平面性検証・太実線/補助点線）は
+> `docs/app11-primary-backbone-redesign.md` を参照。本ファイルは v3 時点の記録。
+
 - 版: 2026-11-10（初回実装、同日に反応データの独立検証を反映）／2026-11-12（反応ネットワーク配置に再設計）
 - 対象: `site/app11/`（新規）、`site-src/app11/`（新規）、`scripts/app11/`（新規）、
   `scripts/tests/app11-reaction-map.test.cjs`（新規）、`site/app10/index.html` と

@@ -1,19 +1,21 @@
 {
- "version": 3,
- "seed": 11011,
+ "version": 4,
+ "seed": 0,
+ "priorityHash": "a3c90d6744811642eba35586b872973c40a6dd4d3c69db1fffd6b299c1422fe2",
  "edges": {
   "2-methylpropan-2-ol-dehydration|in|2-methylpropan-2-ol": {
    "reaction": "2-methylpropan-2-ol-dehydration",
    "dir": "in",
    "compound": "2-methylpropan-2-ol",
+   "tier": "secondary",
    "points": [
     [
-     2590.52,
-     999.47
+     175.86,
+     109.39
     ],
     [
-     2529.63,
-     926.31
+     216.75,
+     150.57
     ]
    ],
    "gaps": [],
@@ -23,14 +25,15 @@
    "reaction": "2-methylpropan-2-ol-dehydration",
    "dir": "out",
    "compound": "isobutene",
+   "tier": "secondary",
    "points": [
     [
-     2537.78,
-     781
+     193.61,
+     54
     ],
     [
-     2530.82,
-     919.57
+     221.6,
+     145.71
     ]
    ],
    "gaps": [],
@@ -40,14 +43,15 @@
    "reaction": "2-methylpropan-2-ol-hydrogen-chloride",
    "dir": "in",
    "compound": "2-methylpropan-2-ol",
+   "tier": "secondary",
    "points": [
     [
-     2726.52,
-     999.47
+     118.91,
+     117.15
     ],
     [
-     2772.3,
-     928.03
+     218.59,
+     270.51
     ]
    ],
    "gaps": [],
@@ -57,14 +61,15 @@
    "reaction": "2-methylpropan-2-ol-hydrogen-chloride",
    "dir": "out",
    "compound": "2-chloro-2-methylpropane",
+   "tier": "secondary",
    "points": [
     [
-     2796.67,
-     796.18
+     171.5,
+     239.47
     ],
     [
-     2785.96,
-     914.37
+     214.77,
+     275.15
     ]
    ],
    "gaps": [],
@@ -74,14 +79,15 @@
    "reaction": "acetic-acid-butanol-esterification",
    "dir": "in",
    "compound": "acetic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1323.86,
-     1162.09
+     1341.5,
+     938.83
     ],
     [
-     1366.91,
-     1237.78
+     1337.13,
+     971.68
     ]
    ],
    "gaps": [],
@@ -91,26 +97,15 @@
    "reaction": "acetic-acid-butanol-esterification",
    "dir": "in",
    "compound": "butan-1-ol",
+   "tier": "secondary",
    "points": [
     [
-     1057.58,
-     1471.88
+     1449.93,
+     930.3
     ],
     [
-     1164.76,
-     1421.81
-    ],
-    [
-     1289.94,
-     1255.01
-    ],
-    [
-     1325.06,
-     1235.51
-    ],
-    [
-     1347.21,
-     1237.78
+     1355.9,
+     972.49
     ]
    ],
    "gaps": [],
@@ -120,26 +115,23 @@
    "reaction": "acetic-acid-butanol-esterification",
    "dir": "out",
    "compound": "butyl-acetate",
+   "tier": "secondary",
    "points": [
     [
-     1495.99,
-     1053.02
+     1322.91,
+     1166.95
     ],
     [
-     1542.56,
-     1077.75
+     1425.5,
+     1149.59
     ],
     [
-     1542.56,
-     1121.75
+     1405.5,
+     1089.59
     ],
     [
-     1495.38,
-     1174.94
-    ],
-    [
-     1366.91,
-     1237.78
+     1345.15,
+     985.44
     ]
    ],
    "gaps": [],
@@ -149,34 +141,15 @@
    "reaction": "acetic-acid-ethanol-esterification",
    "dir": "in",
    "compound": "acetic-acid",
+   "tier": "primary",
    "points": [
     [
-     1215.86,
-     1139.59
+     1129.5,
+     927.61
     ],
     [
-     1107.3,
-     1149.39
-    ],
-    [
-     1078.13,
-     1111.27
-    ],
-    [
-     1078.13,
-     1049.27
-    ],
-    [
-     1168.69,
-     1039.72
-    ],
-    [
-     1168.69,
-     1000.72
-    ],
-    [
-     1241.47,
-     901.08
+     1082.21,
+     797.01
     ]
    ],
    "gaps": [],
@@ -186,18 +159,15 @@
    "reaction": "acetic-acid-ethanol-esterification",
    "dir": "in",
    "compound": "ethanol",
+   "tier": "primary",
    "points": [
     [
-     1062.44,
-     850.46
+     1129.5,
+     629.59
     ],
     [
-     1174.35,
-     894.58
-    ],
-    [
-     1231.63,
-     892.82
+     1082.57,
+     782.52
     ]
    ],
    "gaps": [],
@@ -207,26 +177,15 @@
    "reaction": "acetic-acid-ethanol-esterification",
    "dir": "out",
    "compound": "ethyl-acetate",
+   "tier": "primary",
    "points": [
     [
-     1295.57,
-     1063.29
+     1167.5,
+     789.59
     ],
     [
-     1311.93,
-     1030.72
-    ],
-    [
-     1311.93,
-     1009.72
-    ],
-    [
-     1260.71,
-     962.65
-    ],
-    [
-     1244.89,
-     900.48
+     1077.59,
+     799.37
     ]
    ],
    "gaps": [],
@@ -236,22 +195,23 @@
    "reaction": "acetic-acid-glycerol-esterification",
    "dir": "in",
    "compound": "acetic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1225.86,
-     1173.59
+     1129.5,
+     938.83
     ],
     [
-     1286.94,
-     1279.01
+     775.5,
+     1029.59
     ],
     [
-     1379.02,
-     1320.08
+     745.5,
+     1049.59
     ],
     [
-     1407.36,
-     1366.98
+     427.21,
+     1126.9
     ]
    ],
    "gaps": [],
@@ -261,22 +221,27 @@
    "reaction": "acetic-acid-glycerol-esterification",
    "dir": "in",
    "compound": "glycerol",
+   "tier": "secondary",
    "points": [
     [
-     1299.5,
-     1135.37
+     729.5,
+     1520.35
     ],
     [
-     1328.86,
-     1134.59
+     685.5,
+     1429.59
     ],
     [
-     1424.18,
-     1255.01
+     675.5,
+     1399.59
     ],
     [
-     1407.36,
-     1366.98
+     565.5,
+     1359.59
+    ],
+    [
+     424.72,
+     1136.19
     ]
    ],
    "gaps": [],
@@ -286,26 +251,15 @@
    "reaction": "acetic-acid-glycerol-esterification",
    "dir": "out",
    "compound": "triacetin",
+   "tier": "secondary",
    "points": [
     [
-     1449.29,
-     1568.27
+     357.18,
+     1117.68
     ],
     [
-     1495.26,
-     1512.67
-    ],
-    [
-     1495.26,
-     1491.67
-    ],
-    [
-     1436.6,
-     1480.23
-    ],
-    [
-     1404.09,
-     1385.49
+     407.63,
+     1127.67
     ]
    ],
    "gaps": [],
@@ -315,22 +269,19 @@
    "reaction": "acetic-acid-isoamyl-esterification",
    "dir": "in",
    "compound": "3-methylbutan-1-ol",
+   "tier": "secondary",
    "points": [
     [
-     1548.3,
-     598.07
+     1205.02,
+     748.57
     ],
     [
-     1698.55,
-     659.01
+     1155.5,
+     769.59
     ],
     [
-     1698.55,
-     703.01
-    ],
-    [
-     1570.61,
-     796.06
+     1155.57,
+     836.03
     ]
    ],
    "gaps": [],
@@ -340,50 +291,15 @@
    "reaction": "acetic-acid-isoamyl-esterification",
    "dir": "in",
    "compound": "acetic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1295.86,
-     1139.59
+     1129.5,
+     920.35
     ],
     [
-     1392.06,
-     1232.51
-    ],
-    [
-     1498.38,
-     1177.94
-    ],
-    [
-     1545.56,
-     1124.75
-    ],
-    [
-     1545.56,
-     1074.75
-    ],
-    [
-     1487.99,
-     1078.02
-    ],
-    [
-     1495.24,
-     987.32
-    ],
-    [
-     1458.36,
-     985.7
-    ],
-    [
-     1458.36,
-     935.7
-    ],
-    [
-     1526.6,
-     905.49
-    ],
-    [
-     1555.77,
-     806.45
+     1157.72,
+     851.81
     ]
    ],
    "gaps": [],
@@ -393,14 +309,15 @@
    "reaction": "acetic-acid-isoamyl-esterification",
    "dir": "out",
    "compound": "isoamyl-acetate",
+   "tier": "secondary",
    "points": [
     [
-     1649.36,
-     780.92
+     1027.73,
+     663.06
     ],
     [
-     1570.61,
-     796.06
+     1143.58,
+     837.66
     ]
    ],
    "gaps": [],
@@ -410,48 +327,33 @@
    "reaction": "acetic-acid-methanol-esterification",
    "dir": "in",
    "compound": "acetic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1323.86,
-     1151.09
+     1129.5,
+     929.59
     ],
     [
-     1361.14,
-     1174.94
-    ],
-    [
-     1418.42,
-     1173.18
+     1045.5,
+     929.59
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1360.5,
-     1174.5
-    ]
-   ]
+   "bridges": []
   },
   "acetic-acid-methanol-esterification|in|methanol": {
    "reaction": "acetic-acid-methanol-esterification",
    "dir": "in",
    "compound": "methanol",
+   "tier": "secondary",
    "points": [
     [
-     1257.3,
-     1123.89
+     925.7,
+     1112.59
     ],
     [
-     1182.86,
-     1134.59
-    ],
-    [
-     1182.86,
-     1178.59
-    ],
-    [
-     1418.42,
-     1173.18
+     1030.35,
+     938.16
     ]
    ],
    "gaps": [],
@@ -461,14 +363,15 @@
    "reaction": "acetic-acid-methanol-esterification",
    "dir": "out",
    "compound": "methyl-acetate",
+   "tier": "secondary",
    "points": [
     [
-     1623.38,
-     1256.99
+     974.28,
+     936.33
     ],
     [
-     1437.66,
-     1174.86
+     1025.56,
+     930.68
     ]
    ],
    "gaps": [],
@@ -478,14 +381,15 @@
    "reaction": "acetone-reduction",
    "dir": "in",
    "compound": "acetone",
+   "tier": "secondary",
    "points": [
     [
-     1015.51,
-     517.6
+     3443.5,
+     598.83
     ],
     [
-     910.74,
-     618.89
+     3657.59,
+     823.47
     ]
    ],
    "gaps": [],
@@ -495,14 +399,15 @@
    "reaction": "acetone-reduction",
    "dir": "out",
    "compound": "propan-2-ol",
+   "tier": "secondary",
    "points": [
     [
-     875.47,
-     507.82
+     3717.5,
+     829.59
     ],
     [
-     910.74,
-     618.89
+     3675.5,
+     829.59
     ]
    ],
    "gaps": [],
@@ -512,14 +417,15 @@
    "reaction": "alanine-glycine-peptide",
    "dir": "in",
    "compound": "alanine",
+   "tier": "secondary",
    "points": [
     [
-     3108.61,
-     400.32
+     3628.46,
+     1762.59
     ],
     [
-     3144.44,
-     494.84
+     3478.6,
+     1400.8
     ]
    ],
    "gaps": [],
@@ -529,18 +435,15 @@
    "reaction": "alanine-glycine-peptide",
    "dir": "in",
    "compound": "glycine",
+   "tier": "secondary",
    "points": [
     [
-     3026.26,
-     315.59
+     3245.98,
+     1762.59
     ],
     [
-     3065.61,
-     405.32
-    ],
-    [
-     3144.44,
-     494.84
+     3469.52,
+     1400.07
     ]
    ],
    "gaps": [],
@@ -550,14 +453,15 @@
    "reaction": "alanine-glycine-peptide",
    "dir": "out",
    "compound": "alanylglycine",
+   "tier": "secondary",
    "points": [
     [
-     2941.43,
-     482.51
+     3486.14,
+     1279.22
     ],
     [
-     3144.44,
-     494.84
+     3475.78,
+     1381.61
     ]
    ],
    "gaps": [],
@@ -567,14 +471,15 @@
    "reaction": "alanylglycine-hydrolysis",
    "dir": "in",
    "compound": "alanylglycine",
+   "tier": "secondary",
    "points": [
     [
-     2941.43,
-     493.51
+     3465.94,
+     1279.22
     ],
     [
-     3015.82,
-     563.04
+     3415.15,
+     1437.76
     ]
    ],
    "gaps": [],
@@ -584,14 +489,15 @@
    "reaction": "alanylglycine-hydrolysis",
    "dir": "out",
    "compound": "alanine",
+   "tier": "secondary",
    "points": [
     [
-     3168.61,
-     400.32
+     3624.04,
+     1762.59
     ],
     [
-     3015.82,
-     563.04
+     3416.92,
+     1455.29
     ]
    ],
    "gaps": [],
@@ -601,18 +507,15 @@
    "reaction": "alanylglycine-hydrolysis",
    "dir": "out",
    "compound": "glycine",
+   "tier": "secondary",
    "points": [
     [
-     3066.26,
-     315.59
+     3244.49,
+     1762.59
     ],
     [
-     3054.95,
-     433.77
-    ],
-    [
-     3015.82,
-     563.04
+     3406.65,
+     1455.84
     ]
    ],
    "gaps": [],
@@ -622,38 +525,15 @@
    "reaction": "aniline-acetic-anhydride",
    "dir": "in",
    "compound": "acetic-anhydride",
+   "tier": "primary",
    "points": [
     [
-     1081.62,
-     1525.91
+     1765.5,
+     1392.59
     ],
     [
-     1096.06,
-     1455.77
-    ],
-    [
-     1167.76,
-     1424.81
-    ],
-    [
-     1167.76,
-     1397.81
-    ],
-    [
-     1062.58,
-     1288.57
-    ],
-    [
-     1035.64,
-     1223.47
-    ],
-    [
-     1006.64,
-     1203.97
-    ],
-    [
-     981.49,
-     1209.23
+     1979.51,
+     1037.6
     ]
    ],
    "gaps": [],
@@ -663,14 +543,15 @@
    "reaction": "aniline-acetic-anhydride",
    "dir": "in",
    "compound": "aniline",
+   "tier": "primary",
    "points": [
     [
-     799.34,
-     1203.44
+     2135.34,
+     783.59
     ],
     [
-     981.49,
-     1209.23
+     1990.72,
+     1021.06
     ]
    ],
    "gaps": [],
@@ -680,56 +561,33 @@
    "reaction": "aniline-acetic-anhydride",
    "dir": "out",
    "compound": "acetanilide",
+   "tier": "primary",
    "points": [
     [
-     1057.92,
-     786.77
+     2085.5,
+     1162.59
     ],
     [
-     1152.48,
-     916.22
-    ],
-    [
-     1156.69,
-     1043.77
-    ],
-    [
-     1087.13,
-     1058.27
-    ],
-    [
-     1038.84,
-     1174.02
-    ],
-    [
-     981.49,
-     1209.23
+     1989.65,
+     1038.69
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1078.1,
-     1079.8
-    ]
-   ]
+   "bridges": []
   },
   "aniline-diazotization|in|aniline": {
    "reaction": "aniline-diazotization",
    "dir": "in",
    "compound": "aniline",
+   "tier": "primary",
    "points": [
     [
-     731.34,
-     1220.44
+     2214.5,
+     766.59
     ],
     [
-     720.89,
-     1353.54
-    ],
-    [
-     784.04,
-     1442.7
+     2264.64,
+     649.81
     ]
    ],
    "gaps": [],
@@ -739,14 +597,15 @@
    "reaction": "aniline-diazotization",
    "dir": "out",
    "compound": "benzenediazonium-chloride",
+   "tier": "primary",
    "points": [
     [
-     856.26,
-     1370.24
+     2404.5,
+     493.59
     ],
     [
-     784.04,
-     1442.7
+     2280.33,
+     637.42
     ]
    ],
    "gaps": [],
@@ -756,18 +615,15 @@
    "reaction": "aspirin-hydrolysis",
    "dir": "in",
    "compound": "aspirin",
+   "tier": "primary",
    "points": [
     [
-     1199.25,
-     1675.5
+     1547.5,
+     1127.61
     ],
     [
-     1245.06,
-     1502.77
-    ],
-    [
-     1322.59,
-     1501.6
+     1473.06,
+     1006.14
     ]
    ],
    "gaps": [],
@@ -777,44 +633,33 @@
    "reaction": "aspirin-hydrolysis",
    "dir": "out",
    "compound": "acetic-acid",
+   "tier": "primary",
    "points": [
     [
-     1285.86,
-     1173.59
+     1341.5,
+     931.57
     ],
     [
-     1238.78,
-     1347.08
-    ],
-    [
-     1320.04,
-     1388.14
-    ],
-    [
-     1335.26,
-     1486.51
+     1455.93,
+     996.68
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1248.9,
-     1309.6
-    ]
-   ]
+   "bridges": []
   },
   "aspirin-hydrolysis|out|salicylic-acid": {
    "reaction": "aspirin-hydrolysis",
    "dir": "out",
    "compound": "salicylic-acid",
+   "tier": "primary",
    "points": [
     [
-     1240.06,
-     1480.77
+     1403.5,
+     1127.61
     ],
     [
-     1335.26,
-     1486.51
+     1457.23,
+     1005.21
     ]
    ],
    "gaps": [],
@@ -824,14 +669,15 @@
    "reaction": "benzaldehyde-oxidation",
    "dir": "in",
    "compound": "benzaldehyde",
+   "tier": "primary",
    "points": [
     [
-     2227.97,
-     939.21
+     3896.66,
+     362.59
     ],
     [
-     2168.17,
-     1030
+     3978.56,
+     252.39
     ]
    ],
    "gaps": [],
@@ -841,14 +687,15 @@
    "reaction": "benzaldehyde-oxidation",
    "dir": "out",
    "compound": "benzoic-acid",
+   "tier": "primary",
    "points": [
     [
-     2104.72,
-     919.23
+     4085.5,
+     362.59
     ],
     [
-     2168.17,
-     1030
+     3991.9,
+     267.27
     ]
    ],
    "gaps": [],
@@ -858,14 +705,15 @@
    "reaction": "benzene-chlorination",
    "dir": "in",
    "compound": "benzene",
+   "tier": "primary",
    "points": [
     [
-     536.08,
-     1098.84
+     2639.5,
+     1206.59
     ],
     [
-     457.33,
-     1261.31
+     2795.18,
+     1200.22
     ]
    ],
    "gaps": [],
@@ -875,14 +723,15 @@
    "reaction": "benzene-chlorination",
    "dir": "out",
    "compound": "chlorobenzene",
+   "tier": "primary",
    "points": [
     [
-     330.71,
-     1226.37
+     2998.5,
+     982.59
     ],
     [
-     457.33,
-     1261.31
+     2807.92,
+     1184.81
     ]
    ],
    "gaps": [],
@@ -892,14 +741,15 @@
    "reaction": "benzene-nitration",
    "dir": "in",
    "compound": "benzene",
+   "tier": "primary",
    "points": [
     [
-     468.08,
-     1081.84
+     2503.5,
+     1206.59
     ],
     [
-     383.97,
-     1113.18
+     2352.11,
+     1166.62
     ]
    ],
    "gaps": [],
@@ -909,14 +759,15 @@
    "reaction": "benzene-nitration",
    "dir": "out",
    "compound": "nitrobenzene",
+   "tier": "primary",
    "points": [
     [
-     320.14,
-     981.35
+     2391.5,
+     918.59
     ],
     [
-     383.97,
-     1113.18
+     2354.54,
+     1146.78
     ]
    ],
    "gaps": [],
@@ -926,30 +777,15 @@
    "reaction": "benzene-sulfonation",
    "dir": "in",
    "compound": "benzene",
+   "tier": "primary",
    "points": [
     [
-     536.08,
-     1064.84
+     2571.5,
+     1223.59
     ],
     [
-     396.16,
-     1023.47
-    ],
-    [
-     396.16,
-     996.47
-    ],
-    [
-     593.84,
-     848.17
-    ],
-    [
-     613,
-     738.12
-    ],
-    [
-     607.01,
-     666.01
+     2525.37,
+     1351.21
     ]
    ],
    "gaps": [],
@@ -959,22 +795,15 @@
    "reaction": "benzene-sulfonation",
    "dir": "out",
    "compound": "benzenesulfonic-acid",
+   "tier": "primary",
    "points": [
     [
-     786.24,
-     431.22
+     2383.5,
+     1309.59
     ],
     [
-     638.27,
-     515.75
-    ],
-    [
-     619.79,
-     637.97
-    ],
-    [
-     618.6,
-     654.42
+     2505.69,
+     1347.63
     ]
    ],
    "gaps": [],
@@ -984,14 +813,15 @@
    "reaction": "benzyl-alcohol-oxidation",
    "dir": "in",
    "compound": "benzyl-alcohol",
+   "tier": "primary",
    "points": [
     [
-     2234.22,
-     693.77
+     3685.5,
+     362.59
     ],
     [
-     2273.89,
-     787.76
+     3778.56,
+     252.39
     ]
    ],
    "gaps": [],
@@ -1001,14 +831,15 @@
    "reaction": "benzyl-alcohol-oxidation",
    "dir": "out",
    "compound": "benzaldehyde",
+   "tier": "primary",
    "points": [
     [
-     2295.97,
-     922.21
+     3874.34,
+     362.59
     ],
     [
-     2270.63,
-     806.27
+     3791.9,
+     267.27
     ]
    ],
    "gaps": [],
@@ -1018,14 +849,15 @@
    "reaction": "butan-1-ol-oxidation",
    "dir": "in",
    "compound": "butan-1-ol",
+   "tier": "secondary",
    "points": [
     [
-     989.58,
-     1488.88
+     1585.93,
+     921.06
     ],
     [
-     967,
-     1601.07
+     1627.93,
+     921.06
     ]
    ],
    "gaps": [],
@@ -1035,14 +867,15 @@
    "reaction": "butan-1-ol-oxidation",
    "dir": "out",
    "compound": "butanal",
+   "tier": "secondary",
    "points": [
     [
-     933.11,
-     1724.25
+     1699.93,
+     921.06
     ],
     [
-     958.58,
-     1619.13
+     1647.93,
+     921.06
     ]
    ],
    "gaps": [],
@@ -1052,14 +885,15 @@
    "reaction": "butanal-reduction",
    "dir": "in",
    "compound": "butanal",
+   "tier": "secondary",
    "points": [
     [
-     873.11,
-     1724.25
+     1835.93,
+     911.82
     ],
     [
-     821.45,
-     1616.28
+     1690.15,
+     998.84
     ]
    ],
    "gaps": [],
@@ -1069,14 +903,15 @@
    "reaction": "butanal-reduction",
    "dir": "out",
    "compound": "butan-1-ol",
+   "tier": "secondary",
    "points": [
     [
-     921.58,
-     1471.88
+     1551.02,
+     938.06
     ],
     [
-     826.29,
-     1605.88
+     1674.19,
+     1001.35
     ]
    ],
    "gaps": [],
@@ -1086,22 +921,15 @@
    "reaction": "butanoic-acid-ethanol-esterification",
    "dir": "in",
    "compound": "butanoic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1482.44,
-     467.58
+     1398.47,
+     543.16
     ],
     [
-     1481.22,
-     534.15
-    ],
-    [
-     1475.3,
-     603.07
-    ],
-    [
-     1349.19,
-     654.98
+     1355.6,
+     579.84
     ]
    ],
    "gaps": [],
@@ -1111,26 +939,15 @@
    "reaction": "butanoic-acid-ethanol-esterification",
    "dir": "in",
    "compound": "ethanol",
+   "tier": "secondary",
    "points": [
     [
-     1062.44,
-     839.46
+     1341.5,
+     620.35
     ],
     [
-     1130.92,
-     791.77
-    ],
-    [
-     1161.44,
-     737.32
-    ],
-    [
-     1307.35,
-     652.72
-    ],
-    [
-     1329.5,
-     654.98
+     1337.13,
+     587.49
     ]
    ],
    "gaps": [],
@@ -1140,22 +957,15 @@
    "reaction": "butanoic-acid-ethanol-esterification",
    "dir": "out",
    "compound": "ethyl-butyrate",
+   "tier": "secondary",
    "points": [
     [
-     1557.55,
-     681.01
+     1430.87,
+     622.82
     ],
     [
-     1558.51,
-     671.21
-    ],
-    [
-     1371.35,
-     652.72
-    ],
-    [
-     1349.19,
-     654.98
+     1355.9,
+     586.69
     ]
    ],
    "gaps": [],
@@ -1165,14 +975,15 @@
    "reaction": "caprolactam-ring-opening",
    "dir": "in",
    "compound": "caprolactam",
+   "tier": "primary",
    "points": [
     [
-     2455.68,
-     1403.69
+     3967.5,
+     2079.59
     ],
     [
-     2552.54,
-     1299.06
+     3924.44,
+     2135.12
     ]
    ],
    "gaps": [],
@@ -1182,14 +993,15 @@
    "reaction": "caprolactam-ring-opening",
    "dir": "out",
    "compound": "nylon6",
+   "tier": "primary",
    "points": [
     [
-     2457.43,
-     1177.74
+     3967.5,
+     2159.59
     ],
     [
-     2563.97,
-     1282.74
+     3906.71,
+     2144.35
     ]
    ],
    "gaps": [],
@@ -1199,14 +1011,15 @@
    "reaction": "chlorobenzene-dow-phenol",
    "dir": "in",
    "compound": "chlorobenzene",
+   "tier": "primary",
    "points": [
     [
-     262.71,
-     1209.37
+     3066.5,
+     965.59
     ],
     [
-     203.42,
-     1056.11
+     3114.36,
+     990.36
     ]
    ],
    "gaps": [],
@@ -1216,18 +1029,15 @@
    "reaction": "chlorobenzene-dow-phenol",
    "dir": "out",
    "compound": "sodium-phenoxide",
+   "tier": "primary",
    "points": [
     [
-     362.64,
-     862.86
+     3153.5,
+     713.59
     ],
     [
-     247.14,
-     942.35
-    ],
-    [
-     209.85,
-     1044.98
+     3133.92,
+     994.52
     ]
    ],
    "gaps": [],
@@ -1237,14 +1047,15 @@
    "reaction": "cumene-hydroperoxide-decomposition",
    "dir": "in",
    "compound": "cumene-hydroperoxide",
+   "tier": "primary",
    "points": [
     [
-     605,
-     713.12
+     3303.5,
+     329.59
     ],
     [
-     787.86,
-     690.4
+     3328.43,
+     422.52
     ]
    ],
    "gaps": [],
@@ -1254,26 +1065,15 @@
    "reaction": "cumene-hydroperoxide-decomposition",
    "dir": "out",
    "compound": "acetone",
+   "tier": "primary",
    "points": [
     [
-     947.51,
-     500.6
+     3355.5,
+     572.59
     ],
     [
-     948.47,
-     512.82
-    ],
-    [
-     827.83,
-     636.13
-    ],
-    [
-     831.71,
-     692.17
-    ],
-    [
-     807.56,
-     690.4
+     3336.74,
+     439.51
     ]
    ],
    "gaps": [],
@@ -1283,14 +1083,15 @@
    "reaction": "cumene-hydroperoxide-decomposition",
    "dir": "out",
    "compound": "phenol",
+   "tier": "primary",
    "points": [
     [
-     777.68,
-     812.11
+     3004.5,
+     600.61
     ],
     [
-     795.97,
-     698.51
+     3325.87,
+     432.3
     ]
    ],
    "gaps": [],
@@ -1300,14 +1101,15 @@
    "reaction": "cumene-oxidation",
    "dir": "in",
    "compound": "cumene",
+   "tier": "primary",
    "points": [
     [
-     426.66,
-     529.11
+     2853.5,
+     189.59
     ],
     [
-     385.79,
-     672.46
+     2975.92,
+     246.72
     ]
    ],
    "gaps": [],
@@ -1317,18 +1119,15 @@
    "reaction": "cumene-oxidation",
    "dir": "out",
    "compound": "cumene-hydroperoxide",
+   "tier": "primary",
    "points": [
     [
-     469,
-     713.12
+     3167.5,
+     329.59
     ],
     [
-     454.94,
-     689.7
-    ],
-    [
-     385.79,
-     672.46
+     2995.02,
+     252.64
     ]
    ],
    "gaps": [],
@@ -1338,14 +1137,15 @@
    "reaction": "cysteine-oxidation",
    "dir": "in",
    "compound": "cysteine",
+   "tier": "secondary",
    "points": [
     [
-     2329.61,
-     1777.7
+     160.67,
+     644.39
     ],
     [
-     2367.46,
-     1674.33
+     209.85,
+     661.03
     ]
    ],
    "gaps": [],
@@ -1355,14 +1155,15 @@
    "reaction": "cysteine-oxidation",
    "dir": "out",
    "compound": "cystine",
+   "tier": "secondary",
    "points": [
     [
-     2331.05,
-     1551.75
+     153.6,
+     576.97
     ],
     [
-     2375.88,
-     1656.27
+     213.54,
+     655.24
     ]
    ],
    "gaps": [],
@@ -1372,18 +1173,15 @@
    "reaction": "diazonium-phenol-coupling",
    "dir": "in",
    "compound": "benzenediazonium-chloride",
+   "tier": "primary",
    "points": [
     [
-     924.26,
-     1353.24
+     2540.5,
+     493.59
     ],
     [
-     1032.64,
-     1247.47
-    ],
-    [
-     1030.75,
-     1151.58
+     2690.09,
+     549.63
     ]
    ],
    "gaps": [],
@@ -1393,22 +1191,15 @@
    "reaction": "diazonium-phenol-coupling",
    "dir": "in",
    "compound": "phenol",
+   "tier": "primary",
    "points": [
     [
-     777.68,
-     846.11
+     2828.5,
+     602.59
     ],
     [
-     811.05,
-     931.08
-    ],
-    [
-     1035.6,
-     1090.33
-    ],
-    [
-     1045.6,
-     1141.19
+     2709.18,
+     555.51
     ]
    ],
    "gaps": [],
@@ -1418,22 +1209,15 @@
    "reaction": "diazonium-phenol-coupling",
    "dir": "out",
    "compound": "p-hydroxyazobenzene",
+   "tier": "primary",
    "points": [
     [
-     1351.24,
-     1012.32
+     2698.5,
+     266.59
     ],
     [
-     1311.93,
-     1030.72
-    ],
-    [
-     1087.13,
-     1058.27
-    ],
-    [
-     1045.6,
-     1141.19
+     2706.92,
+     545.12
     ]
    ],
    "gaps": [],
@@ -1443,18 +1227,15 @@
    "reaction": "ethanal-oxidation-acetic",
    "dir": "in",
    "compound": "ethanal",
+   "tier": "primary",
    "points": [
     [
-     659.14,
-     1209.85
+     915.5,
+     806.59
     ],
     [
-     658.34,
-     1225.44
-    ],
-    [
-     809.74,
-     1315.31
+     969.5,
+     861.59
     ]
    ],
    "gaps": [],
@@ -1464,22 +1245,15 @@
    "reaction": "ethanal-oxidation-acetic",
    "dir": "out",
    "compound": "acetic-acid",
+   "tier": "primary",
    "points": [
     [
-     1187.86,
-     1162.09
+     1129.5,
+     931.57
     ],
     [
-     1184.84,
-     1218.02
-    ],
-    [
-     971.14,
-     1286.03
-    ],
-    [
-     809.74,
-     1315.31
+     981.97,
+     877.21
     ]
    ],
    "gaps": [],
@@ -1489,18 +1263,15 @@
    "reaction": "ethanal-reduction",
    "dir": "in",
    "compound": "ethanal",
+   "tier": "secondary",
    "points": [
     [
-     561.14,
-     1192.85
+     983.5,
+     780.35
     ],
     [
-     615.28,
-     1086.91
-    ],
-    [
-     637.68,
-     989.57
+     1017.13,
+     747.49
     ]
    ],
    "gaps": [],
@@ -1510,18 +1281,15 @@
    "reaction": "ethanal-reduction",
    "dir": "out",
    "compound": "ethanol",
+   "tier": "secondary",
    "points": [
     [
-     926.44,
-     855.96
+     1129.5,
+     638.83
     ],
     [
-     811.05,
-     887.08
-    ],
-    [
-     649.27,
-     977.99
+     1035.14,
+     738.88
     ]
    ],
    "gaps": [],
@@ -1531,48 +1299,33 @@
    "reaction": "ethanol-dehydration-ether",
    "dir": "in",
    "compound": "ethanol",
+   "tier": "primary",
    "points": [
     [
-     994.44,
-     830.71
+     1129.5,
+     625.63
     ],
     [
-     1133.92,
-     794.77
-    ],
-    [
-     1133.92,
-     744.77
-    ],
-    [
-     1076.53,
-     693.26
-    ],
-    [
-     1051.25,
-     628.55
+     1124.77,
+     553.34
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1122.3,
-     797.8
-    ]
-   ]
+   "bridges": []
   },
   "ethanol-dehydration-ether|out|diethyl-ether": {
    "reaction": "ethanol-dehydration-ether",
    "dir": "out",
    "compound": "diethyl-ether",
+   "tier": "primary",
    "points": [
     [
-     1127.93,
-     555.8
+     1043.5,
+     489.59
     ],
     [
-     1062.84,
-     616.96
+     1106.31,
+     545.65
     ]
    ],
    "gaps": [],
@@ -1582,102 +1335,51 @@
    "reaction": "ethanol-oxidation-acetic",
    "dir": "in",
    "compound": "ethanol",
+   "tier": "secondary",
    "points": [
     [
-     964.44,
-     864.71
+     1341.5,
+     638.83
     ],
     [
-     957.05,
-     931.08
-    ],
-    [
-     925.22,
-     984.24
-    ],
-    [
-     925.22,
-     1005.24
-    ],
-    [
-     966.45,
-     1073.1
+     1419.48,
+     916.13
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     932.5,
-     1017.2
-    ]
-   ]
+   "bridges": []
   },
   "ethanol-oxidation-acetic|out|acetic-acid": {
    "reaction": "ethanol-oxidation-acetic",
    "dir": "out",
    "compound": "acetic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1187.86,
-     1151.09
+     1341.5,
+     920.35
     ],
     [
-     1116.3,
-     1140.39
-    ],
-    [
-     1035.6,
-     1090.33
-    ],
-    [
-     966.45,
-     1073.1
+     1414.88,
+     924.82
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1086.1,
-     1121.6
-    ],
-    [
-     1150.4,
-     1145.5
-    ]
-   ]
+   "bridges": []
   },
   "ethanol-oxidation-ethanal|in|ethanol": {
    "reaction": "ethanol-oxidation-ethanal",
    "dir": "in",
    "compound": "ethanol",
+   "tier": "primary",
    "points": [
     [
-     926.44,
-     850.46
+     1129.5,
+     633.55
     ],
     [
-     957.05,
-     887.08
-    ],
-    [
-     957.05,
-     931.08
-    ],
-    [
-     907.02,
-     1024.52
-    ],
-    [
-     823.1,
-     1073.21
-    ],
-    [
-     723.87,
-     1107.91
-    ],
-    [
-     679.42,
-     1106.14
+     985.06,
+     706.65
     ]
    ],
    "gaps": [],
@@ -1687,14 +1389,15 @@
    "reaction": "ethanol-oxidation-ethanal",
    "dir": "out",
    "compound": "ethanal",
+   "tier": "primary",
    "points": [
     [
-     621.14,
-     1192.85
+     915.5,
+     772.59
     ],
     [
-     663.15,
-     1112.07
+     966.17,
+     713.18
     ]
    ],
    "gaps": [],
@@ -1704,14 +1407,15 @@
    "reaction": "ethene-bromine-addition",
    "dir": "in",
    "compound": "ethene",
+   "tier": "primary",
    "points": [
     [
-     648.51,
-     335.94
+     1323.5,
+     327.61
     ],
     [
-     636.72,
-     237.86
+     1346.4,
+     253.74
     ]
    ],
    "gaps": [],
@@ -1721,14 +1425,15 @@
    "reaction": "ethene-bromine-addition",
    "dir": "out",
    "compound": "1,2-dibromoethane",
+   "tier": "primary",
    "points": [
     [
-     519.15,
-     149.55
+     1427.5,
+     189.59
     ],
     [
-     638.3,
-     219.81
+     1364.69,
+     245.65
     ]
    ],
    "gaps": [],
@@ -1738,26 +1443,15 @@
    "reaction": "ethene-hydration",
    "dir": "in",
    "compound": "ethene",
+   "tier": "primary",
    "points": [
     [
-     678.51,
-     369.94
+     1235.5,
+     346.59
     ],
     [
-     713.24,
-     436.22
-    ],
-    [
-     796.27,
-     515.75
-    ],
-    [
-     796.27,
-     536.75
-    ],
-    [
-     758.64,
-     618.73
+     1235.5,
+     469.59
     ]
    ],
    "gaps": [],
@@ -1767,30 +1461,15 @@
    "reaction": "ethene-hydration",
    "dir": "out",
    "compound": "ethanol",
+   "tier": "primary",
    "points": [
     [
-     926.44,
-     839.46
+     1235.5,
+     612.59
     ],
     [
-     850.68,
-     851.11
-    ],
-    [
-     704.68,
-     851.11
-    ],
-    [
-     704.68,
-     807.11
-    ],
-    [
-     762.25,
-     783.56
-    ],
-    [
-     756.45,
-     626.89
+     1235.5,
+     489.59
     ]
    ],
    "gaps": [],
@@ -1800,18 +1479,15 @@
    "reaction": "ethene-hydrogen-bromide",
    "dir": "in",
    "compound": "ethene",
+   "tier": "primary",
    "points": [
     [
-     708.51,
-     335.94
+     1147.5,
+     329.59
     ],
     [
-     726.3,
-     224.97
-    ],
-    [
-     726.32,
-     170.1
+     1124.77,
+     253.34
     ]
    ],
    "gaps": [],
@@ -1821,14 +1497,15 @@
    "reaction": "ethene-hydrogen-bromide",
    "dir": "out",
    "compound": "bromoethane",
+   "tier": "primary",
    "points": [
     [
-     782.19,
-     85.31
+     1043.5,
+     189.59
     ],
     [
-     737.9,
-     158.51
+     1106.31,
+     245.65
     ]
    ],
    "gaps": [],
@@ -1838,14 +1515,15 @@
    "reaction": "ethene-hydrogenation",
    "dir": "in",
    "compound": "ethene",
+   "tier": "primary",
    "points": [
     [
-     610.51,
-     352.94
+     1235.5,
+     312.59
     ],
     [
-     529.55,
-     300.09
+     1235.5,
+     219.59
     ]
    ],
    "gaps": [],
@@ -1855,14 +1533,15 @@
    "reaction": "ethene-hydrogenation",
    "dir": "out",
    "compound": "ethane",
+   "tier": "primary",
    "points": [
     [
-     591.37,
-     127.31
+     1235.5,
+     106.59
     ],
     [
-     530.01,
-     294.93
+     1235.5,
+     199.59
     ]
    ],
    "gaps": [],
@@ -1872,14 +1551,15 @@
    "reaction": "ethene-polymerization",
    "dir": "in",
    "compound": "ethene",
+   "tier": "primary",
    "points": [
     [
-     746.51,
-     352.94
+     1323.5,
+     331.57
     ],
     [
-     832.89,
-     263.52
+     1386.14,
+     386.08
     ]
    ],
    "gaps": [],
@@ -1889,14 +1569,15 @@
    "reaction": "ethene-polymerization",
    "dir": "out",
    "compound": "polyethylene",
+   "tier": "primary",
    "points": [
     [
-     942.26,
-     270.73
+     1487.5,
+     429.59
     ],
     [
-     851.4,
-     260.26
+     1404.98,
+     392.78
     ]
    ],
    "gaps": [],
@@ -1906,14 +1587,15 @@
    "reaction": "ethyl-acetate-hydrolysis",
    "dir": "in",
    "compound": "ethyl-acetate",
+   "tier": "primary",
    "points": [
     [
-     1355.57,
-     1063.29
+     1303.5,
+     789.59
     ],
     [
-     1337.97,
-     969
+     1385.57,
+     788.42
     ]
    ],
    "gaps": [],
@@ -1923,84 +1605,33 @@
    "reaction": "ethyl-acetate-hydrolysis",
    "dir": "out",
    "compound": "acetic-acid",
+   "tier": "primary",
    "points": [
     [
-     1255.86,
-     1139.59
+     1341.5,
+     927.61
     ],
     [
-     1110.3,
-     1146.39
-    ],
-    [
-     1081.13,
-     1108.27
-    ],
-    [
-     1081.13,
-     1052.27
-    ],
-    [
-     1162.69,
-     1049.77
-    ],
-    [
-     1171.69,
-     1003.72
-    ],
-    [
-     1206.81,
-     984.22
-    ],
-    [
-     1336.29,
-     968.54
+     1405.16,
+     787.01
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1081.1,
-     1072.7
-    ],
-    [
-     1096.1,
-     1127.9
-    ],
-    [
-     1121.9,
-     1051
-    ],
-    [
-     1145.5,
-     1144.8
-    ],
-    [
-     1154.4,
-     1050
-    ],
-    [
-     1168.7,
-     1019.1
-    ]
-   ]
+   "bridges": []
   },
   "ethyl-acetate-hydrolysis|out|ethanol": {
    "reaction": "ethyl-acetate-hydrolysis",
    "dir": "out",
    "compound": "ethanol",
+   "tier": "primary",
    "points": [
     [
-     1062.44,
-     855.96
+     1341.5,
+     629.59
     ],
     [
-     1260.71,
-     962.65
-    ],
-    [
-     1329.86,
-     960.88
+     1388.43,
+     782.52
     ]
    ],
    "gaps": [],
@@ -2010,26 +1641,19 @@
    "reaction": "ethyl-propionate-saponification",
    "dir": "in",
    "compound": "ethyl-propionate",
+   "tier": "secondary",
    "points": [
     [
-     818.1,
-     1045.71
+     1241.37,
+     854.13
     ],
     [
-     749.02,
-     1024.52
+     1315.5,
+     809.59
     ],
     [
-     749.02,
-     1003.52
-    ],
-    [
-     806.02,
-     984.02
-    ],
-    [
-     818.17,
-     986.29
+     1315.43,
+     723.15
     ]
    ],
    "gaps": [],
@@ -2039,22 +1663,15 @@
    "reaction": "ethyl-propionate-saponification",
    "dir": "out",
    "compound": "ethanol",
+   "tier": "secondary",
    "points": [
     [
-     926.44,
-     844.96
+     1341.5,
+     638.83
     ],
     [
-     957.05,
-     887.08
-    ],
-    [
-     957.05,
-     931.08
-    ],
-    [
-     837.87,
-     986.29
+     1313.28,
+     707.37
     ]
    ],
    "gaps": [],
@@ -2064,52 +1681,33 @@
    "reaction": "ethyl-propionate-saponification",
    "dir": "out",
    "compound": "propionic-acid",
+   "tier": "secondary",
    "points": [
     [
-     947.88,
-     826.7
+     1501.37,
+     740.94
     ],
     [
-     921.44,
-     825.71
-    ],
-    [
-     811.05,
-     887.08
-    ],
-    [
-     811.05,
-     931.08
-    ],
-    [
-     837.87,
-     986.29
+     1330.32,
+     715.29
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     885.3,
-     845.8
-    ]
-   ]
+   "bridges": []
   },
   "formaldehyde-oxidation-formic|in|formaldehyde": {
    "reaction": "formaldehyde-oxidation-formic",
    "dir": "in",
    "compound": "formaldehyde",
+   "tier": "primary",
    "points": [
     [
-     689.25,
-     778.56
+     643.5,
+     847.61
     ],
     [
-     704.68,
-     851.11
-    ],
-    [
-     735.7,
-     909.79
+     648.43,
+     776.66
     ]
    ],
    "gaps": [],
@@ -2119,40 +1717,33 @@
    "reaction": "formaldehyde-oxidation-formic",
    "dir": "out",
    "compound": "formic-acid",
+   "tier": "primary",
    "points": [
     [
-     1015.69,
-     1021.77
+     735.5,
+     696.59
     ],
     [
-     925.22,
-     1005.24
-    ],
-    [
-     735.25,
-     914.95
+     662.14,
+     762.11
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     896.1,
-     991.4
-    ]
-   ]
+   "bridges": []
   },
   "formic-acid-ethanol-esterification|in|ethanol": {
    "reaction": "formic-acid-ethanol-esterification",
    "dir": "in",
    "compound": "ethanol",
+   "tier": "secondary",
    "points": [
     [
-     1062.44,
-     844.96
+     1129.5,
+     620.67
     ],
     [
-     1219.16,
-     758.24
+     930.24,
+     603.89
     ]
    ],
    "gaps": [],
@@ -2162,22 +1753,15 @@
    "reaction": "formic-acid-ethanol-esterification",
    "dir": "in",
    "compound": "formic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1083.69,
-     1004.77
+     803.5,
+     670.35
     ],
     [
-     1152.48,
-     937.22
-    ],
-    [
-     1130.92,
-     791.77
-    ],
-    [
-     1223.56,
-     763.48
+     911.04,
+     606.88
     ]
    ],
    "gaps": [],
@@ -2187,18 +1771,15 @@
    "reaction": "formic-acid-ethanol-esterification",
    "dir": "out",
    "compound": "ethyl-formate",
+   "tier": "secondary",
    "points": [
     [
-     1417.51,
-     693.21
+     886.27,
+     531.7
     ],
     [
-     1295.68,
-     758.32
-    ],
-    [
-     1238.41,
-     756.56
+     912.43,
+     596.85
     ]
    ],
    "gaps": [],
@@ -2208,94 +1789,55 @@
    "reaction": "formic-acid-methanol-esterification",
    "dir": "in",
    "compound": "formic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1083.69,
-     1038.77
+     667.5,
+     688.83
     ],
     [
-     1038.6,
-     1114.33
-    ],
-    [
-     1322.06,
-     1232.51
-    ],
-    [
-     1286.94,
-     1252.01
-    ],
-    [
-     1286.94,
-     1279.01
-    ],
-    [
-     1318.75,
-     1305.84
+     356.71,
+     836.49
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1192.2,
-     1178.4
-    ]
-   ]
+   "bridges": []
   },
   "formic-acid-methanol-esterification|in|methanol": {
    "reaction": "formic-acid-methanol-esterification",
    "dir": "in",
    "compound": "methanol",
+   "tier": "secondary",
    "points": [
     [
-     1149.3,
-     1135.39
+     818.5,
+     1120.35
     ],
     [
-     1184.84,
-     1174.02
+     595.5,
+     1049.59
     ],
     [
-     1318.75,
-     1305.84
+     356.38,
+     844.85
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1280.9,
-     1268.6
-    ],
-    [
-     1295.3,
-     1282.7
-    ]
-   ]
+   "bridges": []
   },
   "formic-acid-methanol-esterification|out|methyl-formate": {
    "reaction": "formic-acid-methanol-esterification",
    "dir": "out",
    "compound": "methyl-formate",
+   "tier": "secondary",
    "points": [
     [
-     1541.95,
-     1378.14
+     286.63,
+     832.14
     ],
     [
-     1543.6,
-     1372.14
-    ],
-    [
-     1376.02,
-     1323.08
-    ],
-    [
-     1340.9,
-     1303.58
-    ],
-    [
-     1318.75,
-     1305.84
+     337.56,
+     838.98
     ]
    ],
    "gaps": [],
@@ -2305,14 +1847,15 @@
    "reaction": "fructose-base-isomerization",
    "dir": "in",
    "compound": "fructose",
+   "tier": "secondary",
    "points": [
     [
-     2400.57,
-     535.42
+     2567.5,
+     1729.59
     ],
     [
-     2375.69,
-     419.97
+     2525.5,
+     1729.59
     ]
    ],
    "gaps": [],
@@ -2322,14 +1865,19 @@
    "reaction": "fructose-base-isomerization",
    "dir": "out",
    "compound": "glucose",
+   "tier": "secondary",
    "points": [
     [
-     2286.48,
-     298.14
+     2449.1,
+     1646.59
     ],
     [
-     2377.27,
-     401.92
+     2495.5,
+     1709.59
+    ],
+    [
+     2509.25,
+     1721.78
     ]
    ],
    "gaps": [],
@@ -2339,22 +1887,15 @@
    "reaction": "fructose-base-isomerization",
    "dir": "out",
    "compound": "mannose",
+   "tier": "secondary",
    "points": [
     [
-     2391.06,
-     175.75
+     2474.02,
+     1833.29
     ],
     [
-     2243.48,
-     259.14
-    ],
-    [
-     2243.48,
-     303.14
-    ],
-    [
-     2377.27,
-     401.92
+     2511.79,
+     1738.87
     ]
    ],
    "gaps": [],
@@ -2364,14 +1905,15 @@
    "reaction": "glucose-reduction",
    "dir": "in",
    "compound": "glucose",
+   "tier": "secondary",
    "points": [
     [
-     2346.48,
-     298.14
+     2347.5,
+     1620.35
     ],
     [
-     2225.36,
-     384.03
+     2333.87,
+     1587.49
     ]
    ],
    "gaps": [],
@@ -2381,18 +1923,23 @@
    "reaction": "glucose-reduction",
    "dir": "out",
    "compound": "sorbitol",
+   "tier": "secondary",
    "points": [
     [
-     2388.68,
-     286.32
+     2250.63,
+     1440.85
     ],
     [
-     2389.48,
-     303.14
+     2415.5,
+     1449.59
     ],
     [
-     2225.36,
-     384.03
+     2415.5,
+     1509.59
+    ],
+    [
+     2320.03,
+     1574.79
     ]
    ],
    "gaps": [],
@@ -2402,26 +1949,15 @@
    "reaction": "glycerol-linoleic-esterification",
    "dir": "in",
    "compound": "glycerol",
+   "tier": "secondary",
    "points": [
     [
-     1397.5,
-     1112.87
+     729.5,
+     1538.83
     ],
     [
-     1396.56,
-     1121.75
-    ],
-    [
-     1542.56,
-     1121.75
-    ],
-    [
-     1648.61,
-     1102.22
-    ],
-    [
-     1670.76,
-     1104.49
+     733.87,
+     1571.68
     ]
    ],
    "gaps": [],
@@ -2431,14 +1967,15 @@
    "reaction": "glycerol-linoleic-esterification",
    "dir": "in",
    "compound": "linoleic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1734.74,
-     1000.43
+     672.53,
+     1616.02
     ],
     [
-     1690.46,
-     1104.49
+     715.4,
+     1579.34
     ]
    ],
    "gaps": [],
@@ -2448,22 +1985,15 @@
    "reaction": "glycerol-linoleic-esterification",
    "dir": "out",
    "compound": "trilinolein",
+   "tier": "secondary",
    "points": [
     [
-     1752.72,
-     1163.02
+     640.13,
+     1536.35
     ],
     [
-     1747.73,
-     1121.72
-    ],
-    [
-     1712.61,
-     1102.22
-    ],
-    [
-     1690.46,
-     1104.49
+     715.1,
+     1572.49
     ]
    ],
    "gaps": [],
@@ -2473,56 +2003,33 @@
    "reaction": "glycerol-oleic-esterification",
    "dir": "in",
    "compound": "glycerol",
+   "tier": "secondary",
    "points": [
     [
-     1359.5,
-     1135.37
+     941.5,
+     1526.5
     ],
     [
-     1241.78,
-     1323.08
-    ],
-    [
-     1241.78,
-     1344.08
-    ],
-    [
-     1259.76,
-     1373.9
+     1788.39,
+     1495.34
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1241.8,
-     1336
-    ],
-    [
-     1248,
-     1313.2
-    ],
-    [
-     1256.6,
-     1299.4
-    ]
-   ]
+   "bridges": []
   },
   "glycerol-oleic-esterification|in|oleic-acid": {
    "reaction": "glycerol-oleic-esterification",
    "dir": "in",
    "compound": "oleic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1423.86,
-     1317.98
+     1607.96,
+     1431.64
     ],
     [
-     1376.02,
-     1344.08
-    ],
-    [
-     1259.76,
-     1373.9
+     1786.67,
+     1498.61
     ]
    ],
    "gaps": [],
@@ -2532,22 +2039,15 @@
    "reaction": "glycerol-oleic-esterification",
    "dir": "out",
    "compound": "triolein",
+   "tier": "secondary",
    "points": [
     [
-     1081.84,
-     1213.02
+     1642.54,
+     1872.59
     ],
     [
-     1223.58,
-     1264.57
-    ],
-    [
-     1241.78,
-     1344.08
-    ],
-    [
-     1259.76,
-     1373.9
+     1792.4,
+     1510.8
     ]
    ],
    "gaps": [],
@@ -2557,18 +2057,15 @@
    "reaction": "glycerol-palmitic-esterification",
    "dir": "in",
    "compound": "glycerol",
+   "tier": "secondary",
    "points": [
     [
-     1397.5,
-     1123.87
+     729.5,
+     1520.35
     ],
     [
-     1460.26,
-     1134.44
-    ],
-    [
-     1585.7,
-     1195.13
+     733.87,
+     1487.49
     ]
    ],
    "gaps": [],
@@ -2578,26 +2075,15 @@
    "reaction": "glycerol-palmitic-esterification",
    "dir": "in",
    "compound": "palmitic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1509.6,
-     1441.23
+     672.53,
+     1443.16
     ],
     [
-     1682.95,
-     1400.14
-    ],
-    [
-     1682.95,
-     1356.14
-    ],
-    [
-     1618.38,
-     1278.99
-    ],
-    [
-     1577.28,
-     1213.19
+     715.4,
+     1479.84
     ]
    ],
    "gaps": [],
@@ -2607,94 +2093,51 @@
    "reaction": "glycerol-palmitic-esterification",
    "dir": "out",
    "compound": "tripalmitin",
+   "tier": "secondary",
    "points": [
     [
-     1534.36,
-     977.7
+     659.83,
+     1358.61
     ],
     [
-     1492.24,
-     1034.32
-    ],
-    [
-     1490.99,
-     1075.02
-    ],
-    [
-     1542.56,
-     1077.75
-    ],
-    [
-     1585.7,
-     1195.13
+     720.03,
+     1474.79
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1516.8,
-     1076.4
-    ],
-    [
-     1545.6,
-     1085.9
-    ]
-   ]
+   "bridges": []
   },
   "glycerol-stearic-esterification|in|glycerol": {
    "reaction": "glycerol-stearic-esterification",
    "dir": "in",
    "compound": "glycerol",
+   "tier": "primary",
    "points": [
     [
-     1261.5,
-     1118.37
+     941.5,
+     1525.63
     ],
     [
-     1390.56,
-     1127.75
-    ],
-    [
-     1404.57,
-     1052.29
-    ],
-    [
-     1340.24,
-     1040.32
-    ],
-    [
-     1282.81,
-     984.22
-    ],
-    [
-     1123.36,
-     890.72
-    ],
-    [
-     1095.21,
-     898.98
+     1625.57,
+     1528.42
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1141.7,
-     901.5
-    ]
-   ]
+   "bridges": []
   },
   "glycerol-stearic-esterification|in|stearic-acid": {
    "reaction": "glycerol-stearic-esterification",
    "dir": "in",
    "compound": "stearic-acid",
+   "tier": "primary",
    "points": [
     [
-     952.05,
-     903.58
+     1463.5,
+     1649.59
     ],
     [
-     1075.51,
-     898.98
+     1631.29,
+     1520.52
     ]
    ],
    "gaps": [],
@@ -2704,22 +2147,15 @@
    "reaction": "glycerol-stearic-esterification",
    "dir": "out",
    "compound": "tristearin",
+   "tier": "primary",
    "points": [
     [
-     970.33,
-     748.68
+     1410.26,
+     1872.59
     ],
     [
-     921.24,
-     760.18
-    ],
-    [
-     1067.44,
-     825.71
-    ],
-    [
-     1095.21,
-     898.98
+     1629.95,
+     1537.91
     ]
    ],
    "gaps": [],
@@ -2729,14 +2165,15 @@
    "reaction": "glycine-alanine-peptide",
    "dir": "in",
    "compound": "alanine",
+   "tier": "primary",
    "points": [
     [
-     3070.61,
-     388.82
+     3547.5,
+     1777.61
     ],
     [
-     2999.66,
-     395.54
+     3443.88,
+     1655.04
     ]
    ],
    "gaps": [],
@@ -2746,14 +2183,15 @@
    "reaction": "glycine-alanine-peptide",
    "dir": "in",
    "compound": "glycine",
+   "tier": "primary",
    "points": [
     [
-     3106.26,
-     315.59
+     3332.5,
+     1777.61
     ],
     [
-     2999.66,
-     395.54
+     3426.54,
+     1654.02
     ]
    ],
    "gaps": [],
@@ -2763,18 +2201,15 @@
    "reaction": "glycine-alanine-peptide",
    "dir": "out",
    "compound": "glycylalanine",
+   "tier": "primary",
    "points": [
     [
-     3044.88,
-     200.79
+     3435.5,
+     1762.59
     ],
     [
-     2993.26,
-     276.59
-    ],
-    [
-     2999.66,
-     395.54
+     3426.5,
+     1653.95
     ]
    ],
    "gaps": [],
@@ -2784,18 +2219,15 @@
    "reaction": "glycine-glycine-peptide",
    "dir": "in",
    "compound": "glycine",
+   "tier": "secondary",
    "points": [
     [
-     3066.26,
-     281.59
+     3138.5,
+     1779.59
     ],
     [
-     2971.88,
-     205.79
-    ],
-    [
-     2974.37,
-     81.4
+     3125.5,
+     1779.59
     ]
    ],
    "gaps": [],
@@ -2805,18 +2237,15 @@
    "reaction": "glycine-glycine-peptide",
    "dir": "out",
    "compound": "glycylglycine",
+   "tier": "secondary",
    "points": [
     [
-     3061.01,
-     57.52
+     3053.5,
+     1779.59
     ],
     [
-     3036.09,
-     75.5
-    ],
-    [
-     2980.8,
-     73.74
+     3105.5,
+     1779.59
     ]
    ],
    "gaps": [],
@@ -2826,14 +2255,15 @@
    "reaction": "glycylalanine-hydrolysis",
    "dir": "in",
    "compound": "glycylalanine",
+   "tier": "primary",
    "points": [
     [
-     2976.88,
-     183.79
+     3435.5,
+     1796.59
     ],
     [
-     2917.91,
-     260.07
+     3444.5,
+     1905.23
     ]
    ],
    "gaps": [],
@@ -2843,14 +2273,15 @@
    "reaction": "glycylalanine-hydrolysis",
    "dir": "out",
    "compound": "alanine",
+   "tier": "primary",
    "points": [
     [
-     3070.61,
-     377.82
+     3547.5,
+     1781.57
     ],
     [
-     2916.72,
-     266.81
+     3444.46,
+     1905.15
     ]
    ],
    "gaps": [],
@@ -2860,14 +2291,15 @@
    "reaction": "glycylalanine-hydrolysis",
    "dir": "out",
    "compound": "glycine",
+   "tier": "primary",
    "points": [
     [
-     2998.26,
-     298.59
+     3332.5,
+     1781.57
     ],
     [
-     2917.91,
-     263.55
+     3427.12,
+     1904.14
     ]
    ],
    "gaps": [],
@@ -2877,14 +2309,15 @@
    "reaction": "glycylglycine-hydrolysis",
    "dir": "in",
    "compound": "glycylglycine",
+   "tier": "secondary",
    "points": [
     [
-     3129.01,
-     74.52
+     3002.5,
+     1796.59
     ],
     [
-     3215.2,
-     197.84
+     3063.28,
+     1857.37
     ]
    ],
    "gaps": [],
@@ -2894,14 +2327,15 @@
    "reaction": "glycylglycine-hydrolysis",
    "dir": "out",
    "compound": "glycine",
+   "tier": "secondary",
    "points": [
     [
-     3134.26,
-     298.59
+     3138.5,
+     1788.83
     ],
     [
-     3201.54,
-     211.5
+     3079.25,
+     1859.87
     ]
    ],
    "gaps": [],
@@ -2911,14 +2345,19 @@
    "reaction": "isobutene-hydrogen-chloride",
    "dir": "in",
    "compound": "isobutene",
+   "tier": "secondary",
    "points": [
     [
-     2605.78,
-     764
+     173.19,
+     54
     ],
     [
-     2661.3,
-     712.19
+     185.5,
+     89.59
+    ],
+    [
+     221.01,
+     393.38
     ]
    ],
    "gaps": [],
@@ -2928,14 +2367,15 @@
    "reaction": "isobutene-hydrogen-chloride",
    "dir": "out",
    "compound": "2-chloro-2-methylpropane",
+   "tier": "secondary",
    "points": [
     [
-     2728.67,
-     779.18
+     115.18,
+     247.23
     ],
     [
-     2679.35,
-     713.77
+     216.74,
+     395.04
     ]
    ],
    "gaps": [],
@@ -2945,14 +2385,15 @@
    "reaction": "methane-chlorination",
    "dir": "in",
    "compound": "methane",
+   "tier": "primary",
    "points": [
     [
-     3130.79,
-     1177.74
+     735.5,
+     312.59
     ],
     [
-     3225.39,
-     1282.39
+     735.5,
+     219.59
     ]
    ],
    "gaps": [],
@@ -2962,14 +2403,15 @@
    "reaction": "methane-chlorination",
    "dir": "out",
    "compound": "chloromethane",
+   "tier": "primary",
    "points": [
     [
-     3129.9,
-     1403.75
+     735.5,
+     106.59
     ],
     [
-     3215.39,
-     1299.71
+     735.5,
+     199.59
     ]
    ],
    "gaps": [],
@@ -2979,76 +2421,33 @@
    "reaction": "methanol-oxidation-formaldehyde",
    "dir": "in",
    "compound": "methanol",
+   "tier": "primary",
    "points": [
     [
-     1159.3,
-     1101.39
+     915.5,
+     1112.59
     ],
     [
-     1236.13,
-     1105.27
-    ],
-    [
-     1236.13,
-     1055.27
-    ],
-    [
-     1174.69,
-     1033.72
-    ],
-    [
-     1155.48,
-     913.22
-    ],
-    [
-     1070.44,
-     822.71
-    ],
-    [
-     924.24,
-     763.18
-    ],
-    [
-     873.37,
-     764.34
+     844.72,
+     983.46
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     964.6,
-     779.6
-    ],
-    [
-     1132.2,
-     888.4
-    ],
-    [
-     1141.8,
-     898.7
-    ],
-    [
-     1147.8,
-     905.1
-    ],
-    [
-     1170.7,
-     1008.7
-    ]
-   ]
+   "bridges": []
   },
   "methanol-oxidation-formaldehyde|out|formaldehyde": {
    "reaction": "methanol-oxidation-formaldehyde",
    "dir": "out",
    "compound": "formaldehyde",
+   "tier": "primary",
    "points": [
     [
-     757.25,
-     761.56
+     643.5,
+     851.57
     ],
     [
-     857.09,
-     758.42
+     826.56,
+     975.12
     ]
    ],
    "gaps": [],
@@ -3058,60 +2457,33 @@
    "reaction": "methyl-salicylate-hydrolysis",
    "dir": "in",
    "compound": "methyl-salicylate",
+   "tier": "primary",
    "points": [
     [
-     966.14,
-     1269.53
+     1115.5,
+     1112.59
     ],
     [
-     1108.07,
-     1332.61
-    ],
-    [
-     1108.07,
-     1353.61
-    ],
-    [
-     1095.61,
-     1383.57
+     1106.5,
+     1003.95
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1102.7,
-     1330.2
-    ]
-   ]
+   "bridges": []
   },
   "methyl-salicylate-hydrolysis|out|methanol": {
    "reaction": "methyl-salicylate-hydrolysis",
    "dir": "out",
    "compound": "methanol",
+   "tier": "primary",
    "points": [
     [
-     1189.3,
-     1135.39
+     1012.5,
+     1127.61
     ],
     [
-     1182.86,
-     1134.59
-    ],
-    [
-     1184.84,
-     1174.02
-    ],
-    [
-     1223.58,
-     1264.57
-    ],
-    [
-     1223.58,
-     1285.57
-    ],
-    [
-     1095.61,
-     1383.57
+     1106.54,
+     1004.02
     ]
    ],
    "gaps": [],
@@ -3121,26 +2493,15 @@
    "reaction": "methyl-salicylate-hydrolysis",
    "dir": "out",
    "compound": "salicylic-acid",
+   "tier": "primary",
    "points": [
     [
-     1142.06,
-     1463.77
+     1227.5,
+     1127.61
     ],
     [
-     1164.76,
-     1421.81
-    ],
-    [
-     1164.76,
-     1400.81
-    ],
-    [
-     1112.76,
-     1381.31
-    ],
-    [
-     1095.61,
-     1383.57
+     1123.88,
+     1005.04
     ]
    ],
    "gaps": [],
@@ -3150,14 +2511,15 @@
    "reaction": "nitrobenzene-reduction",
    "dir": "in",
    "compound": "nitrobenzene",
+   "tier": "primary",
    "points": [
     [
-     388.14,
-     964.35
+     2323.5,
+     901.59
     ],
     [
-     483.51,
-     982.24
+     2116.58,
+     922.25
     ]
    ],
    "gaps": [],
@@ -3167,38 +2529,15 @@
    "reaction": "nitrobenzene-reduction",
    "dir": "out",
    "compound": "aniline",
+   "tier": "primary",
    "points": [
     [
-     663.34,
-     1203.44
+     2157.66,
+     783.59
     ],
     [
-     664.14,
-     1187.85
-    ],
-    [
-     615.28,
-     1107.91
-    ],
-    [
-     609.08,
-     1059.84
-    ],
-    [
-     548.16,
-     999.47
-    ],
-    [
-     490.66,
-     1001.97
-    ],
-    [
-     486.3,
-     976.23
-    ],
-    [
-     483.51,
-     982.24
+     2119.98,
+     902.55
     ]
    ],
    "gaps": [],
@@ -3208,14 +2547,15 @@
    "reaction": "nylon66-condensation",
    "dir": "in",
    "compound": "adipic-acid",
+   "tier": "primary",
    "points": [
     [
-     2235.88,
-     1376.91
+     3053.5,
+     1979.59
     ],
     [
-     2176.04,
-     1284.89
+     3126.01,
+     1912.73
     ]
    ],
    "gaps": [],
@@ -3225,14 +2565,15 @@
    "reaction": "nylon66-condensation",
    "dir": "in",
    "compound": "hexamethylenediamine",
+   "tier": "primary",
    "points": [
     [
-     2104.72,
-     1273.98
+     3217.5,
+     1979.59
     ],
     [
-     2176.04,
-     1267.57
+     3144.56,
+     1913.82
     ]
    ],
    "gaps": [],
@@ -3242,14 +2583,15 @@
    "reaction": "nylon66-condensation",
    "dir": "out",
    "compound": "nylon66",
+   "tier": "primary",
    "points": [
     [
-     2239.68,
-     1177.74
+     3135.5,
+     2112.59
     ],
     [
-     2176.04,
-     1267.57
+     3126.88,
+     1914.65
     ]
    ],
    "gaps": [],
@@ -3259,50 +2601,15 @@
    "reaction": "oxalic-acid-methanol-esterification",
    "dir": "in",
    "compound": "methanol",
+   "tier": "secondary",
    "points": [
     [
-     1257.3,
-     1112.89
+     818.5,
+     1129.59
     ],
     [
-     1252.57,
-     1102.29
-    ],
-    [
-     1252.57,
-     1058.29
-    ],
-    [
-     1311.93,
-     1030.72
-    ],
-    [
-     1346.24,
-     990.32
-    ],
-    [
-     1418.71,
-     962.65
-    ],
-    [
-     1418.71,
-     941.65
-    ],
-    [
-     1389.36,
-     902.49
-    ],
-    [
-     1389.36,
-     881.49
-    ],
-    [
-     1424.48,
-     861.99
-    ],
-    [
-     1446.64,
-     864.26
+     805.5,
+     1129.59
     ]
    ],
    "gaps": [],
@@ -3312,18 +2619,15 @@
    "reaction": "oxalic-acid-methanol-esterification",
    "dir": "in",
    "compound": "oxalic-acid",
+   "tier": "secondary",
    "points": [
     [
-     1600.57,
-     922.5
+     733.5,
+     1129.59
     ],
     [
-     1488.48,
-     861.99
-    ],
-    [
-     1466.33,
-     864.26
+     785.5,
+     1129.59
     ]
    ],
    "gaps": [],
@@ -3333,18 +2637,15 @@
    "reaction": "oxalic-acid-methanol-esterification",
    "dir": "out",
    "compound": "dimethyl-oxalate",
+   "tier": "secondary",
    "points": [
     [
-     1408.22,
-     573.15
+     741.12,
+     1035.75
     ],
     [
-     1419.53,
-     815.29
-    ],
-    [
-     1466.33,
-     864.26
+     787.85,
+     1123.15
     ]
    ],
    "gaps": [],
@@ -3354,14 +2655,15 @@
    "reaction": "p-xylene-oxidation",
    "dir": "in",
    "compound": "p-xylene",
+   "tier": "primary",
    "points": [
     [
-     3170.63,
-     710.77
+     2103.5,
+     1979.59
     ],
     [
-     3273.33,
-     855.35
+     2154.52,
+     1901.58
     ]
    ],
    "gaps": [],
@@ -3371,14 +2673,15 @@
    "reaction": "p-xylene-oxidation",
    "dir": "out",
    "compound": "terephthalic-acid",
+   "tier": "primary",
    "points": [
     [
-     3205.09,
-     951.64
+     2285.5,
+     2062.59
     ],
     [
-     3259.67,
-     869.01
+     2166.42,
+     1917.65
     ]
    ],
    "gaps": [],
@@ -3388,18 +2691,15 @@
    "reaction": "pet-condensation",
    "dir": "in",
    "compound": "ethylene-glycol",
+   "tier": "primary",
    "points": [
     [
-     3080.67,
-     788.07
+     2485.5,
+     1996.59
     ],
     [
-     3104.03,
-     819.19
-    ],
-    [
-     3132.68,
-     817.43
+     2442.05,
+     2092.04
     ]
    ],
    "gaps": [],
@@ -3409,14 +2709,15 @@
    "reaction": "pet-condensation",
    "dir": "in",
    "compound": "terephthalic-acid",
+   "tier": "primary",
    "points": [
     [
-     3137.09,
-     934.64
+     2353.5,
+     2079.59
     ],
     [
-     3142.53,
-     825.69
+     2425.59,
+     2098.27
     ]
    ],
    "gaps": [],
@@ -3426,18 +2727,15 @@
    "reaction": "pet-condensation",
    "dir": "out",
    "compound": "pet",
+   "tier": "primary",
    "points": [
     [
-     3247.62,
-     716.4
+     2517.5,
+     2159.59
     ],
     [
-     3181.03,
-     819.19
-    ],
-    [
-     3152.38,
-     817.43
+     2444.29,
+     2104.36
     ]
    ],
    "gaps": [],
@@ -3447,26 +2745,15 @@
    "reaction": "phenol-acid-neutralization",
    "dir": "in",
    "compound": "phenol",
+   "tier": "primary",
    "points": [
     [
-     709.68,
-     834.61
+     2916.5,
+     619.59
     ],
     [
-     676.9,
-     825.02
-    ],
-    [
-     608.9,
-     825.02
-    ],
-    [
-     590.84,
-     845.17
-    ],
-    [
-     526.19,
-     843.41
+     2887.87,
+     719.87
     ]
    ],
    "gaps": [],
@@ -3476,18 +2763,15 @@
    "reaction": "phenol-acid-neutralization",
    "dir": "out",
    "compound": "sodium-phenoxide",
+   "tier": "primary",
    "points": [
     [
-     430.64,
-     840.36
+     3085.5,
+     696.59
     ],
     [
-     441.84,
-     845.17
-    ],
-    [
-     506.5,
-     843.41
+     2883.25,
+     739.33
     ]
    ],
    "gaps": [],
@@ -3497,18 +2781,15 @@
    "reaction": "propan-1-ol-oxidation",
    "dir": "in",
    "compound": "propan-1-ol",
+   "tier": "secondary",
    "points": [
     [
-     354.46,
-     526.5
+     1990.8,
+     662.96
     ],
     [
-     353.66,
-     534.11
-    ],
-    [
-     521.32,
-     582.59
+     1967.02,
+     731.03
     ]
    ],
    "gaps": [],
@@ -3518,14 +2799,15 @@
    "reaction": "propan-1-ol-oxidation",
    "dir": "out",
    "compound": "propanal",
+   "tier": "secondary",
    "points": [
     [
-     564.02,
-     473.24
+     1907.37,
+     737.47
     ],
     [
-     521.32,
-     582.59
+     1949.37,
+     737.47
     ]
    ],
    "gaps": [],
@@ -3535,14 +2817,15 @@
    "reaction": "propan-2-ol-oxidation",
    "dir": "in",
    "compound": "propan-2-ol",
+   "tier": "primary",
    "points": [
     [
-     875.47,
-     473.82
+     3717.5,
+     827.61
     ],
     [
-     928.9,
-     389.53
+     3574.11,
+     704.68
     ]
    ],
    "gaps": [],
@@ -3552,14 +2835,15 @@
    "reaction": "propan-2-ol-oxidation",
    "dir": "out",
    "compound": "acetone",
+   "tier": "primary",
    "points": [
     [
-     1015.51,
-     483.6
+     3443.5,
+     589.59
     ],
     [
-     938.9,
-     389.53
+     3556.64,
+     694.95
     ]
    ],
    "gaps": [],
@@ -3569,48 +2853,33 @@
    "reaction": "propanal-oxidation",
    "dir": "in",
    "compound": "propanal",
+   "tier": "secondary",
    "points": [
     [
-     632.02,
-     456.24
+     1771.37,
+     737.47
     ],
     [
-     638.27,
-     536.75
-    ],
-    [
-     707.42,
-     534.99
+     1719.37,
+     737.47
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     637.2,
-     522.9
-    ]
-   ]
+   "bridges": []
   },
   "propanal-oxidation|out|propionic-acid": {
    "reaction": "propanal-oxidation",
    "dir": "out",
    "compound": "propionic-acid",
+   "tier": "secondary",
    "points": [
     [
-     917.88,
-     792.7
+     1677.37,
+     737.47
     ],
     [
-     921.24,
-     739.18
-    ],
-    [
-     827.83,
-     657.13
-    ],
-    [
-     723.7,
-     540.91
+     1699.37,
+     737.47
     ]
    ],
    "gaps": [],
@@ -3620,14 +2889,15 @@
    "reaction": "propanal-reduction",
    "dir": "in",
    "compound": "propanal",
+   "tier": "secondary",
    "points": [
     [
-     496.02,
-     456.24
+     1822.37,
+     754.47
     ],
     [
-     371.4,
-     380.17
+     1917.15,
+     659.69
     ]
    ],
    "gaps": [],
@@ -3637,14 +2907,15 @@
    "reaction": "propanal-reduction",
    "dir": "out",
    "compound": "propan-1-ol",
+   "tier": "secondary",
    "points": [
     [
-     286.46,
-     509.5
+     1990.8,
+     650.52
     ],
     [
-     357,
-     385.41
+     1934.22,
+     652.7
     ]
    ],
    "gaps": [],
@@ -3654,18 +2925,15 @@
    "reaction": "propene-hydration",
    "dir": "in",
    "compound": "propene",
+   "tier": "primary",
    "points": [
     [
-     1055.38,
-     163.73
+     3403.5,
+     1027.61
     ],
     [
-     1083.26,
-     248.73
-    ],
-    [
-     1075.44,
-     373.67
+     3546.4,
+     933.73
     ]
    ],
    "gaps": [],
@@ -3675,18 +2943,15 @@
    "reaction": "propene-hydration",
    "dir": "out",
    "compound": "propan-2-ol",
+   "tier": "primary",
    "points": [
     [
-     943.47,
-     490.82
+     3717.5,
+     831.57
     ],
     [
-     942.51,
-     478.6
-    ],
-    [
-     1061.78,
-     387.33
+     3564.67,
+     925.6
     ]
    ],
    "gaps": [],
@@ -3696,14 +2961,15 @@
    "reaction": "propene-hydrogenation",
    "dir": "in",
    "compound": "propene",
+   "tier": "primary",
    "points": [
     [
-     1123.38,
-     141.23
+     3267.5,
+     1029.59
     ],
     [
-     1189.52,
-     77
+     3164.64,
+     1105.53
     ]
    ],
    "gaps": [],
@@ -3713,14 +2979,15 @@
    "reaction": "propene-hydrogenation",
    "dir": "out",
    "compound": "propane",
+   "tier": "primary",
    "points": [
     [
-     1306.74,
-     206.32
+     3053.5,
+     1179.59
     ],
     [
-     1204.61,
-     79.66
+     3146.25,
+     1113.4
     ]
    ],
    "gaps": [],
@@ -3730,14 +2997,15 @@
    "reaction": "propene-polymerization",
    "dir": "in",
    "compound": "propene",
+   "tier": "primary",
    "points": [
     [
-     1123.38,
-     152.23
+     3403.5,
+     1031.57
     ],
     [
-     1176.39,
-     233.81
+     3526.92,
+     1144.44
     ]
    ],
    "gaps": [],
@@ -3747,14 +3015,15 @@
    "reaction": "propene-polymerization",
    "dir": "out",
    "compound": "polypropylene",
+   "tier": "primary",
    "points": [
     [
-     1290.89,
-     97.06
+     3667.5,
+     1279.59
     ],
     [
-     1176.39,
-     233.81
+     3543.88,
+     1155.04
     ]
    ],
    "gaps": [],
@@ -3764,94 +3033,51 @@
    "reaction": "propionic-acid-ethanol-esterification",
    "dir": "in",
    "compound": "ethanol",
+   "tier": "secondary",
    "points": [
     [
-     1024.44,
-     864.71
+     1341.5,
+     638.83
     ],
     [
-     925.22,
-     984.24
-    ],
-    [
-     877.6,
-     1090.33
-    ],
-    [
-     863.48,
-     1141.16
+     1580.96,
+     852.06
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     907.8,
-     1023.1
-    ],
-    [
-     934.7,
-     972.8
-    ]
-   ]
+   "bridges": []
   },
   "propionic-acid-ethanol-esterification|in|propionic-acid": {
    "reaction": "propionic-acid-ethanol-esterification",
    "dir": "in",
    "compound": "propionic-acid",
+   "tier": "secondary",
    "points": [
     [
-     887.88,
-     826.7
+     1589.37,
+     754.47
     ],
     [
-     918.44,
-     872.71
-    ],
-    [
-     960.05,
-     884.08
-    ],
-    [
-     960.05,
-     934.08
-    ],
-    [
-     922.22,
-     981.24
-    ],
-    [
-     863.48,
-     1141.16
+     1589.37,
+     847.47
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     941.1,
-     957.7
-    ],
-    [
-     946.2,
-     951.3
-    ],
-    [
-     960.1,
-     904.1
-    ]
-   ]
+   "bridges": []
   },
   "propionic-acid-ethanol-esterification|out|ethyl-propionate": {
    "reaction": "propionic-acid-ethanol-esterification",
    "dir": "out",
    "compound": "ethyl-propionate",
+   "tier": "secondary",
    "points": [
     [
-     818.1,
-     1056.71
+     1299.76,
+     868.53
     ],
     [
-     863.48,
-     1141.16
+     1579.38,
+     857.85
     ]
    ],
    "gaps": [],
@@ -3861,18 +3087,39 @@
    "reaction": "propionic-acid-methanol-esterification",
    "dir": "in",
    "compound": "methanol",
+   "tier": "secondary",
    "points": [
     [
-     1219.3,
-     1101.39
+     913.58,
+     1112.59
     ],
     [
-     1233.13,
-     1102.27
+     985.5,
+     959.59
     ],
     [
-     1239.81,
-     1035.88
+     985.5,
+     919.59
+    ],
+    [
+     835.5,
+     809.59
+    ],
+    [
+     865.5,
+     579.59
+    ],
+    [
+     895.5,
+     539.59
+    ],
+    [
+     895.5,
+     499.59
+    ],
+    [
+     835.98,
+     424.26
     ]
    ],
    "gaps": [],
@@ -3882,82 +3129,59 @@
    "reaction": "propionic-acid-methanol-esterification",
    "dir": "in",
    "compound": "propionic-acid",
+   "tier": "secondary",
    "points": [
     [
-     985.88,
-     809.7
+     1501.37,
+     728.23
     ],
     [
-     1067.44,
-     825.71
+     1345.5,
+     599.59
     ],
     [
-     1152.48,
-     916.22
+     1035.5,
+     459.59
     ],
     [
-     1177.69,
-     1030.72
-    ],
-    [
-     1234.96,
-     1028.95
+     844.05,
+     418.26
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1130,
-     892.3
-    ],
-    [
-     1165.1,
-     973.5
-    ]
-   ]
+   "bridges": []
   },
   "propionic-acid-methanol-esterification|out|methyl-propionate": {
    "reaction": "propionic-acid-methanol-esterification",
    "dir": "out",
    "compound": "methyl-propionate",
+   "tier": "secondary",
    "points": [
     [
-     1401.56,
-     1099.75
+     775.28,
+     398.57
     ],
     [
-     1398.57,
-     1058.29
-    ],
-    [
-     1254.2,
-     1030.64
+     825.04,
+     412.4
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1277,
-     1035
-    ],
-    [
-     1399.9,
-     1077.2
-    ]
-   ]
+   "bridges": []
   },
   "propyne-hydration|in|propyne": {
    "reaction": "propyne-hydration",
    "dir": "in",
    "compound": "propyne",
+   "tier": "secondary",
    "points": [
     [
-     1323.75,
-     340.38
+     3165.83,
+     482.87
     ],
     [
-     1230.99,
-     389.26
+     3227.85,
+     583.15
     ]
    ],
    "gaps": [],
@@ -3967,26 +3191,15 @@
    "reaction": "propyne-hydration",
    "dir": "out",
    "compound": "acetone",
+   "tier": "secondary",
    "points": [
     [
-     1083.51,
-     500.6
+     3267.5,
+     589.59
     ],
     [
-     1150.07,
-     406.5
-    ],
-    [
-     1199.44,
-     399.83
-    ],
-    [
-     1204.15,
-     387
-    ],
-    [
-     1211.3,
-     389.26
+     3245.5,
+     589.59
     ]
    ],
    "gaps": [],
@@ -3996,14 +3209,15 @@
    "reaction": "protein-hydrolysis",
    "dir": "in",
    "compound": "protein",
+   "tier": "secondary",
    "points": [
     [
-     2684.35,
-     1550.66
+     156,
+     982.35
     ],
     [
-     2596.73,
-     1551.48
+     207.73,
+     985.85
     ]
    ],
    "gaps": [],
@@ -4013,14 +3227,15 @@
    "reaction": "salicylic-acid-acetylation",
    "dir": "in",
    "compound": "acetic-anhydride",
+   "tier": "primary",
    "points": [
     [
-     1149.62,
-     1542.91
+     1697.5,
+     1409.59
     ],
     [
-     1246.7,
-     1611.96
+     1473.86,
+     1265.07
     ]
    ],
    "gaps": [],
@@ -4030,14 +3245,15 @@
    "reaction": "salicylic-acid-acetylation",
    "dir": "in",
    "compound": "salicylic-acid",
+   "tier": "primary",
    "points": [
     [
-     1172.06,
-     1497.77
+     1403.5,
+     1131.57
     ],
     [
-     1246.7,
-     1611.96
+     1457.94,
+     1253.04
     ]
    ],
    "gaps": [],
@@ -4047,14 +3263,15 @@
    "reaction": "salicylic-acid-acetylation",
    "dir": "out",
    "compound": "aspirin",
+   "tier": "primary",
    "points": [
     [
-     1199.25,
-     1686.5
+     1547.5,
+     1131.57
     ],
     [
-     1233.04,
-     1625.62
+     1475.01,
+     1256.5
     ]
    ],
    "gaps": [],
@@ -4064,26 +3281,15 @@
    "reaction": "salicylic-acid-methyl-esterification",
    "dir": "in",
    "compound": "methanol",
+   "tier": "primary",
    "points": [
     [
-     1229.3,
-     1135.39
+     1012.5,
+     1131.57
     ],
     [
-     1182.86,
-     1134.59
-    ],
-    [
-     1184.84,
-     1218.02
-    ],
-    [
-     1065.58,
-     1264.57
-    ],
-    [
-     1050.8,
-     1315.37
+     1107.12,
+     1254.14
     ]
    ],
    "gaps": [],
@@ -4093,86 +3299,51 @@
    "reaction": "salicylic-acid-methyl-esterification",
    "dir": "in",
    "compound": "salicylic-acid",
+   "tier": "primary",
    "points": [
     [
-     1202.06,
-     1463.77
+     1227.5,
+     1131.57
     ],
     [
-     1164.76,
-     1400.81
-    ],
-    [
-     1108.07,
-     1332.61
-    ],
-    [
-     1072.95,
-     1313.11
-    ],
-    [
-     1050.8,
-     1315.37
+     1124.46,
+     1255.15
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1101.4,
-     1328.9
-    ],
-    [
-     1127.6,
-     1356.1
-    ]
-   ]
+   "bridges": []
   },
   "salicylic-acid-methyl-esterification|out|methyl-salicylate": {
    "reaction": "salicylic-acid-methyl-esterification",
    "dir": "out",
    "compound": "methyl-salicylate",
+   "tier": "primary",
    "points": [
     [
-     966.14,
-     1258.53
+     1115.5,
+     1146.59
     ],
     [
-     1050.8,
-     1315.37
+     1124.5,
+     1255.23
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1014.6,
-     1291.1
-    ]
-   ]
+   "bridges": []
   },
   "sodium-phenoxide-acidification|in|sodium-phenoxide": {
    "reaction": "sodium-phenoxide-acidification",
    "dir": "in",
    "compound": "sodium-phenoxide",
+   "tier": "primary",
    "points": [
     [
-     430.64,
-     851.36
+     3153.5,
+     679.59
     ],
     [
-     441.84,
-     824.17
-    ],
-    [
-     590.84,
-     824.17
-    ],
-    [
-     608.9,
-     846.02
-    ],
-    [
-     633.05,
-     844.25
+     3195.42,
+     650.84
     ]
    ],
    "gaps": [],
@@ -4182,18 +3353,15 @@
    "reaction": "sodium-phenoxide-acidification",
    "dir": "out",
    "compound": "phenol",
+   "tier": "primary",
    "points": [
     [
-     709.68,
-     823.61
+     3004.5,
+     604.57
     ],
     [
-     676.9,
-     846.02
-    ],
-    [
-     652.74,
-     844.25
+     3175.65,
+     647.87
     ]
    ],
    "gaps": [],
@@ -4203,14 +3371,15 @@
    "reaction": "starch-hydrolysis-glucose",
    "dir": "in",
    "compound": "starch",
+   "tier": "primary",
    "points": [
     [
-     2127.74,
-     315.11
+     2203.5,
+     1581.57
     ],
     [
-     2170.24,
-     209.92
+     2276.01,
+     1626.43
     ]
    ],
    "gaps": [],
@@ -4220,14 +3389,15 @@
    "reaction": "starch-hydrolysis-glucose",
    "dir": "out",
    "compound": "glucose",
+   "tier": "primary",
    "points": [
     [
-     2248.48,
-     281.14
+     2347.5,
+     1629.59
     ],
     [
-     2186.56,
-     208.49
+     2294.99,
+     1632.73
     ]
    ],
    "gaps": [],
@@ -4237,14 +3407,15 @@
    "reaction": "starch-hydrolysis-maltose",
    "dir": "in",
    "compound": "starch",
+   "tier": "primary",
    "points": [
     [
-     2059.74,
-     298.11
+     2203.5,
+     1577.61
     ],
     [
-     2026.64,
-     189.25
+     2226.56,
+     1534.06
     ]
    ],
    "gaps": [],
@@ -4254,14 +3425,15 @@
    "reaction": "starch-hydrolysis-maltose",
    "dir": "out",
    "compound": "maltose",
+   "tier": "primary",
    "points": [
     [
-     2091.27,
-     74
+     2267.5,
+     1479.59
     ],
     [
-     2033.07,
-     178.12
+     2244.44,
+     1525.12
     ]
    ],
    "gaps": [],
@@ -4271,14 +3443,15 @@
    "reaction": "styrene-polymerization",
    "dir": "in",
    "compound": "styrene",
+   "tier": "primary",
    "points": [
     [
-     2793.94,
-     1177.74
+     3967.5,
+     1529.59
     ],
     [
-     2900.9,
-     1282.46
+     3906.81,
+     1474.54
     ]
    ],
    "gaps": [],
@@ -4288,14 +3461,15 @@
    "reaction": "styrene-polymerization",
    "dir": "out",
    "compound": "polystyrene",
+   "tier": "primary",
    "points": [
     [
-     2792.97,
-     1403.74
+     3967.5,
+     1409.59
     ],
     [
-     2889.47,
-     1298.78
+     3924.44,
+     1465.12
     ]
    ],
    "gaps": [],
@@ -4305,14 +3479,15 @@
    "reaction": "sucrose-hydrolysis",
    "dir": "in",
    "compound": "sucrose",
+   "tier": "primary",
    "points": [
     [
-     2589.43,
-     312.46
+     2567.5,
+     1529.59
     ],
     [
-     2539.84,
-     414.55
+     2542.57,
+     1622.52
     ]
    ],
    "gaps": [],
@@ -4322,14 +3497,15 @@
    "reaction": "sucrose-hydrolysis",
    "dir": "out",
    "compound": "fructose",
+   "tier": "primary",
    "points": [
     [
-     2460.57,
-     535.42
+     2567.5,
+     1729.59
     ],
     [
-     2528.42,
-     430.88
+     2537.73,
+     1639.34
     ]
    ],
    "gaps": [],
@@ -4339,18 +3515,15 @@
    "reaction": "sucrose-hydrolysis",
    "dir": "out",
    "compound": "glucose",
+   "tier": "primary",
    "points": [
     [
-     2384.48,
-     281.14
+     2523.5,
+     1629.59
     ],
     [
-     2383.68,
-     308.32
-    ],
-    [
-     2539.84,
-     414.55
+     2525.57,
+     1628.42
     ]
    ],
    "gaps": [],
@@ -4360,80 +3533,33 @@
    "reaction": "triolein-hydrogenation",
    "dir": "in",
    "compound": "triolein",
+   "tier": "primary",
    "points": [
     [
-     1111.84,
-     1179.02
+     1567.5,
+     1889.59
     ],
     [
-     1084.13,
-     1105.27
-    ],
-    [
-     1084.13,
-     1055.27
-    ],
-    [
-     1159.69,
-     1046.77
-    ],
-    [
-     1159.69,
-     996.77
-    ],
-    [
-     1133.92,
-     794.77
-    ],
-    [
-     1156.79,
-     696.61
+     1544.07,
+     1834.73
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1084.1,
-     1065.5
-    ],
-    [
-     1089.2,
-     1118.9
-    ],
-    [
-     1094.4,
-     1132.5
-    ],
-    [
-     1121.9,
-     1051
-    ],
-    [
-     1137.3,
-     780.5
-    ],
-    [
-     1149.7,
-     918.5
-    ],
-    [
-     1153.6,
-     948.6
-    ]
-   ]
+   "bridges": []
   },
   "triolein-hydrogenation|out|tristearin": {
    "reaction": "triolein-hydrogenation",
    "dir": "out",
    "compound": "tristearin",
+   "tier": "primary",
    "points": [
     [
-     1068.33,
-     726.18
+     1483.5,
+     1889.59
     ],
     [
-     1149.13,
-     690.18
+     1526.61,
+     1825.01
     ]
    ],
    "gaps": [],
@@ -4443,14 +3569,15 @@
    "reaction": "triolein-saponification",
    "dir": "in",
    "compound": "triolein",
+   "tier": "secondary",
    "points": [
     [
-     1141.84,
-     1213.02
+     1628.46,
+     1906.59
     ],
     [
-     1154.43,
-     1247.33
+     1478.6,
+     2268.38
     ]
    ],
    "gaps": [],
@@ -4460,22 +3587,19 @@
    "reaction": "triolein-saponification",
    "dir": "out",
    "compound": "glycerol",
+   "tier": "secondary",
    "points": [
     [
-     1261.5,
-     1125.7
+     850.03,
+     1546.59
     ],
     [
-     1328.86,
-     1134.59
+     1165.5,
+     2159.59
     ],
     [
-     1328.86,
-     1178.59
-    ],
-    [
-     1154.43,
-     1247.33
+     1468.28,
+     2270.02
     ]
    ],
    "gaps": [],
@@ -4485,30 +3609,15 @@
    "reaction": "triolein-saponification",
    "dir": "out",
    "compound": "sodium-oleate",
+   "tier": "secondary",
    "points": [
     [
-     1160.13,
-     1097.27
+     1370.8,
+     2097.45
     ],
     [
-     1116.3,
-     1096.39
-    ],
-    [
-     1116.3,
-     1140.39
-    ],
-    [
-     1184.84,
-     1174.02
-    ],
-    [
-     1184.84,
-     1218.02
-    ],
-    [
-     1154.43,
-     1247.33
+     1471.69,
+     2268.11
     ]
    ],
    "gaps": [],
@@ -4518,114 +3627,63 @@
    "reaction": "tripalmitin-saponification",
    "dir": "in",
    "compound": "tripalmitin",
+   "tier": "secondary",
    "points": [
     [
-     1534.36,
-     943.7
+     681.62,
+     1358.61
     ],
     [
-     1523.6,
-     881.49
-    ],
-    [
-     1419.53,
-     815.29
-    ],
-    [
-     1399.31,
-     790.87
+     687.29,
+     1380.83
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1518,
-     877.9
-    ]
-   ]
+   "bridges": []
   },
   "tripalmitin-saponification|out|glycerol": {
    "reaction": "tripalmitin-saponification",
    "dir": "out",
    "compound": "glycerol",
+   "tier": "secondary",
    "points": [
     [
-     1359.5,
-     1101.37
+     729.5,
+     1520.35
     ],
     [
-     1387.56,
-     1130.75
+     705.5,
+     1469.59
     ],
     [
-     1407.57,
-     1049.29
-    ],
-    [
-     1337.24,
-     1043.32
-    ],
-    [
-     1285.81,
-     981.22
-    ],
-    [
-     1251.71,
-     971.65
-    ],
-    [
-     1251.71,
-     932.65
-    ],
-    [
-     1303.71,
-     913.15
-    ],
-    [
-     1391.15,
-     793.06
+     701.15,
+     1395.24
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1269.5,
-     976.6
-    ],
-    [
-     1301.4,
-     1000
-    ],
-    [
-     1311.5,
-     1012.3
-    ],
-    [
-     1372.4,
-     1046.3
-    ],
-    [
-     1400.1,
-     1079.7
-    ]
-   ]
+   "bridges": []
   },
   "tripalmitin-saponification|out|sodium-palmitate": {
    "reaction": "tripalmitin-saponification",
    "dir": "out",
    "compound": "sodium-palmitate",
+   "tier": "secondary",
    "points": [
     [
-     1268.02,
-     550.34
+     682.41,
+     1275.86
     ],
     [
-     1406.47,
-     672.22
+     725.5,
+     1319.59
     ],
     [
-     1402.73,
-     781.47
+     725.5,
+     1369.59
+    ],
+    [
+     693.04,
+     1378.22
     ]
    ],
    "gaps": [],
@@ -4635,94 +3693,51 @@
    "reaction": "tristearin-hydrolysis",
    "dir": "in",
    "compound": "tristearin",
+   "tier": "primary",
    "points": [
     [
-     1030.33,
-     748.68
+     1380.74,
+     1872.59
     ],
     [
-     1130.92,
-     747.77
-    ],
-    [
-     1130.92,
-     791.77
-    ],
-    [
-     1067.44,
-     869.71
-    ],
-    [
-     1018.24,
-     916.22
-    ],
-    [
-     1014.07,
-     967
+     1394.33,
+     1779.52
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1108.2,
-     819.6
-    ]
-   ]
+   "bridges": []
   },
   "tristearin-hydrolysis|out|glycerol": {
    "reaction": "tristearin-hydrolysis",
    "dir": "out",
    "compound": "glycerol",
+   "tier": "primary",
    "points": [
     [
-     1261.5,
-     1111.04
+     941.5,
+     1529.59
     ],
     [
-     1398.57,
-     1102.29
-    ],
-    [
-     1398.57,
-     1058.29
-    ],
-    [
-     1276.81,
-     990.22
-    ],
-    [
-     1014.07,
-     967
+     1386.31,
+     1765.65
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1207.7,
-     984.1
-    ],
-    [
-     1305.2,
-     1006.1
-    ],
-    [
-     1379.5,
-     1047.6
-    ]
-   ]
+   "bridges": []
   },
   "tristearin-hydrolysis|out|stearic-acid": {
    "reaction": "tristearin-hydrolysis",
    "dir": "out",
    "compound": "stearic-acid",
+   "tier": "primary",
    "points": [
     [
-     952.05,
-     914.58
+     1395.5,
+     1666.59
     ],
     [
-     1014.07,
-     967
+     1403.69,
+     1763.85
     ]
    ],
    "gaps": [],
@@ -4732,18 +3747,15 @@
    "reaction": "tristearin-saponification",
    "dir": "in",
    "compound": "tristearin",
+   "tier": "primary",
    "points": [
     [
-     1068.33,
-     737.18
+     1395.5,
+     1906.59
     ],
     [
-     1130.92,
-     747.77
-    ],
-    [
-     1167.52,
-     814.36
+     1325.33,
+     2007.77
     ]
    ],
    "gaps": [],
@@ -4753,84 +3765,33 @@
    "reaction": "tristearin-saponification",
    "dir": "out",
    "compound": "glycerol",
+   "tier": "primary",
    "points": [
     [
-     1299.5,
-     1101.37
+     941.5,
+     1533.55
     ],
     [
-     1393.56,
-     1124.75
-    ],
-    [
-     1401.57,
-     1055.29
-    ],
-    [
-     1343.24,
-     1037.32
-    ],
-    [
-     1171.35,
-     897.58
-    ],
-    [
-     1167.52,
-     831.68
+     1308.43,
+     2002.52
     ]
    ],
    "gaps": [],
-   "bridges": [
-    [
-     1233.1,
-     947.8
-    ],
-    [
-     1265.3,
-     973.9
-    ],
-    [
-     1307,
-     1007.9
-    ],
-    [
-     1372.4,
-     1046.3
-    ],
-    [
-     1382.9,
-     1049.5
-    ],
-    [
-     1399.6,
-     1072.5
-    ]
-   ]
+   "bridges": []
   },
   "tristearin-saponification|out|sodium-stearate": {
    "reaction": "tristearin-saponification",
    "dir": "out",
    "compound": "sodium-stearate",
+   "tier": "primary",
    "points": [
     [
-     1193.19,
-     650.7
+     1235.5,
+     2112.59
     ],
     [
-     1237.53,
-     669.26
-    ],
-    [
-     1237.53,
-     690.26
-    ],
-    [
-     1161.44,
-     737.32
-    ],
-    [
-     1167.52,
-     814.36
+     1309.02,
+     2017.21
     ]
    ],
    "gaps": [],
@@ -4840,14 +3801,15 @@
    "reaction": "vinyl-chloride-polymerization",
    "dir": "in",
    "compound": "vinyl-chloride",
+   "tier": "primary",
    "points": [
     [
-     2037.51,
-     1551.75
+     3967.5,
+     1759.59
     ],
     [
-     2118.61,
-     1656.35
+     3924.44,
+     1815.12
     ]
    ],
    "gaps": [],
@@ -4857,14 +3819,15 @@
    "reaction": "vinyl-chloride-polymerization",
    "dir": "out",
    "compound": "pvc",
+   "tier": "primary",
    "points": [
     [
-     2036.72,
-     1777.79
+     3967.5,
+     1879.59
     ],
     [
-     2108.61,
-     1673.67
+     3906.81,
+     1824.54
     ]
    ],
    "gaps": [],
@@ -4872,20 +3835,25 @@
   }
  },
  "stats": {
-  "acuteCrossings": 75,
-  "bends": 242,
-  "bridgedCrossings": 75,
-  "bridges": 66,
-  "clearanceViolations": 146,
-  "crossings": 379,
+  "acuteCrossings": 4,
+  "bends": 21,
+  "bridgedCrossings": 0,
+  "clearanceViolations": 3,
+  "crossings": 38,
+  "crossingsPP": 0,
+  "crossingsPS": 18,
+  "crossingsSS": 20,
   "edges": 207,
-  "fallback": 0,
   "labelPenetrations": 0,
   "markerPenetrations": 0,
-  "maxBends": 9,
+  "maxBends": 6,
   "nodePenetrations": 0,
   "overlapSegments": 0,
-  "totalLength": 43261,
-  "unbridgedAcute": 0
+  "primaryBranches": 117,
+  "primaryLength": 17266.88,
+  "secondaryBranches": 90,
+  "secondaryLength": 16178.45,
+  "totalLength": 33445,
+  "unbridgedAcute": 4
  }
 }

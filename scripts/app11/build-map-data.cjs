@@ -36,7 +36,7 @@ function requireLayout() {
   }
   const layout = readJson(LAYOUT_PATH);
   const routes = readJson(ROUTES_PATH);
-  if (layout.version !== 3 || routes.version !== 3) {
+  if (layout.version !== 4 || routes.version !== 4) {
     throw new Error('layout.json / routes.json の版が古い。optimize-layout.cjs を実行してください。');
   }
   return { layout, routes };
@@ -90,8 +90,11 @@ function build() {
       recordState: c.recordState,
       curriculum: c.curriculum,
       hub: c.hub,
+      tier: pos.tier || 'isolated',
       x: pos.x,
       y: pos.y,
+      w: pos.w || layout.nodeW,
+      h: pos.h || layout.nodeH,
       incoming: ins,
       outgoing: outs,
       pathState,
@@ -130,6 +133,7 @@ function build() {
       edges.push({
         dir,
         id,
+        tier: route.tier,
         points: route.points,
         gaps: route.gaps || [],
         bridges: route.bridges || []
@@ -142,6 +146,7 @@ function build() {
       type: r.type,
       typeLabel: r.typeLabel,
       state: 'confirmed',
+      tier: marker.tier,
       substrates: r.substrates,
       reagents: r.reagents,
       products: r.products,
@@ -179,8 +184,8 @@ function build() {
 
   const data = {
     meta: {
-      version: '2026-11-12.3',
-      generatedAt: '2026-11-12',
+      version: '2026-11-13.1',
+      generatedAt: '2026-11-13',
       verifiedAt: source.source.verifiedAt,
       source: 'site/app10 の公開データ（物質名・示性式・分類・ID と focus 経路のみオフライン抽出）',
       compoundCount: compounds.length,
@@ -189,6 +194,10 @@ function build() {
       reactionCount: reactions.length,
       confirmedReactionCount: reactions.length,
       heldReactionCount: source.heldReactions.length,
+      primaryReactionCount: reactions.filter((r) => r.tier === 'primary').length,
+      secondaryReactionCount: reactions.filter((r) => r.tier === 'secondary').length,
+      primaryCompoundCount: compounds.filter((c) => c.tier === 'primary').length,
+      secondaryCompoundCount: compounds.filter((c) => c.tier === 'secondary').length,
       isolatedCount: compounds.filter((c) => c.incoming + c.outgoing === 0).length,
       connectedCount: compounds.filter((c) => c.incoming + c.outgoing > 0).length,
       sourceBook: source.source.sourceBook,
@@ -197,8 +206,14 @@ function build() {
       nodeH: layout.nodeH,
       layoutVersion: layout.version,
       layoutSeed: layout.seed,
+      priorityHash: layout.priorityHash,
+      topologyNetworkx: layout.topologyNetworkx,
       canvas: layout.canvas,
       shelf: layout.shelf,
+      tierLegend: {
+        primary: { label: '主要経路', note: '大学入試を想定した代表系列。太い実線。' },
+        secondary: { label: '補助経路', note: '同族体・組合せ・代表系列と重なる経路。細い点線。' }
+      },
       scopeNote:
         '高校「化学」の有機化学で扱う物質を広く収録する。物質だけを収録した孤立ノードは、' +
         'この地図に収録した確認済み反応の中に経路が見つかっていないことを示す（「生成しない」という意味ではない）。',

@@ -1,0 +1,16 @@
+{
+  "note": "cf4756d（layout v3）へ現在の route-priority.json を適用して計測した主要/補助の基準値。2026-11-13。座標・経路の再生成なしで、v3 の routes.json と priority から集計した。",
+  "commit": "cf4756dbb0bde2fd74b77aee42df8cc3c8676121",
+  "layoutVersion": 3,
+  "primary": {
+    "branches": 117,
+    "length": 23784,
+    "crossingsPP": 143,
+    "crossingsPS": 171,
+    "crossingsSS": 89
+  },
+  "secondary": {
+    "branches": 90,
+    "length": 19476
+  }
+}

@@ -12,6 +12,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const APP10 = path.join(ROOT, 'site', 'app10');
@@ -67,6 +68,7 @@ function loadApp10() {
 function loadSource() {
   const map = readJson(path.join(SRC, 'map.json'));
   const reactionSource = readJson(path.join(SRC, 'reactions.json'));
+  const priorityDoc = readJson(path.join(SRC, 'route-priority.json'));
   const { D, C } = loadApp10();
 
   const regionById = new Map(map.regions.map((r) => [r.id, r]));
@@ -156,6 +158,8 @@ function loadSource() {
 
   const required = D.REQUIRED_CURRICULUM.filter((id, i, arr) => arr.indexOf(id) === i);
 
+  const priority = validatePriority(priorityDoc, reactions, heldReactions);
+
   return {
     map,
     regionById,
@@ -167,11 +171,59 @@ function loadSource() {
     heldReactions,
     usedSections,
     required,
+    priority,
+    priorityHash: digestPriority(reactions, priority.entries),
     source: {
       verifiedAt: reactionSource.verifiedAt || '',
       sourceBook: 'OpenStax Organic Chemistry (McMurry)'
     }
   };
+}
+
+// route-priority.json は公開86反応の全件を明示する正本。未設定・未知ID・保留反応の混入を許さない。
+function validatePriority(doc, reactions, heldReactions) {
+  if (!doc || doc.version !== 1 || typeof doc.reactions !== 'object') {
+    throw new Error('route-priority.json の形式が想定と違う（version=1 と reactions が必要）');
+  }
+  const entries = doc.reactions;
+  const confirmedIds = new Set(reactions.map((r) => r.id));
+  const heldIds = new Set(heldReactions.map((r) => r.id));
+  const missing = [...confirmedIds].filter((id) => !entries[id]).sort();
+  if (missing.length) throw new Error('priority 未設定の確認済反応: ' + missing.join(', '));
+  for (const id of Object.keys(entries)) {
+    if (heldIds.has(id)) throw new Error('保留反応に priority が付いている: ' + id);
+    if (!confirmedIds.has(id)) throw new Error('未確認または未知の反応IDに priority が付いている: ' + id);
+    const entry = entries[id];
+    if (entry.tier !== 'primary' && entry.tier !== 'secondary') {
+      throw new Error('priority の tier が不正: ' + id + '（' + entry.tier + '）');
+    }
+    if (!entry.topic) throw new Error('priority の topic がない: ' + id);
+    if (!entry.reason) throw new Error('priority の reason がない: ' + id);
+    if (entry.importanceStatus !== 'editorial-candidate') {
+      throw new Error('priority の importanceStatus が editorial-candidate でない: ' + id);
+    }
+  }
+  const byId = new Map(Object.keys(entries).sort().map((id) => [id, entries[id]]));
+  return { version: doc.version, updated: doc.updated || '', entries: byId, doc };
+}
+
+// embed-primary.py と同じ行形式。改行コードは LF 固定。
+function digestPriority(reactions, entries) {
+  const lines = [];
+  const confirmed = reactions.slice().sort((a, b) => (a.id < b.id ? -1 : 1));
+  for (const r of confirmed) {
+    lines.push('R|' + [
+      r.id,
+      r.type,
+      r.state || 'confirmed',
+      r.substrates.join(','),
+      r.products.join(',')
+    ].join('|'));
+  }
+  for (const [id, entry] of entries) {
+    lines.push('P|' + [id, entry.tier, entry.topic || ''].join('|'));
+  }
+  return crypto.createHash('sha256').update(lines.join('\n'), 'utf8').digest('hex');
 }
 
 module.exports = {
@@ -183,5 +235,7 @@ module.exports = {
   builderHref,
   publicSource,
   loadSource,
-  loadApp10
+  loadApp10,
+  validatePriority,
+  digestPriority
 };

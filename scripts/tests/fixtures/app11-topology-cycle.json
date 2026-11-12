@@ -1,0 +1,13 @@
+{
+ "meta": {
+  "planar": true,
+  "networkx": "3.6.1",
+  "note": "4 閉路の検証用 fixture。rotation は各頂点の巡回順。"
+ },
+ "rotation": {
+  "a": ["b", "d"],
+  "b": ["a", "c"],
+  "c": ["b", "d"],
+  "d": ["c", "a"]
+ }
+}

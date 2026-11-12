@@ -15,13 +15,22 @@ const TYPE_FONT = 10;
 const COND_FONT = 9;
 const TYPE_DY = -17;
 const COND_DY = 21;
-const TYPE_H = 12;
+const TYPE_H = 16;
 const COND_H = 11;
 const COND_MAX = 16; // 画面の反応ラベルは従来どおり 16 文字で省略する
 const CLEARANCE = 4; // 無関係な辺どうしに確保する最小距離
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+// 画面に全体を収める倍率。canvas は world、view は CSS px。pad は画面側の余白。
+function fitScale(canvas, viewW, viewH, pad) {
+  const p = typeof pad === 'number' ? pad : 14;
+  const w = Math.max(1, viewW - p * 2);
+  const h = Math.max(1, viewH - p * 2);
+  if (!canvas || !(canvas.w > 0) || !(canvas.h > 0)) return 0;
+  return Math.min(w / canvas.w, h / canvas.h);
 }
 
 // 表示ラベルと同じ文字列（map-core.js の shorten と同じ規則）。
@@ -281,7 +290,7 @@ function crossBend(a, b) {
 function labelLayout(markerX, markerY, typeLabel, conditions, side) {
   const typeText = String(typeLabel || '');
   const condText = shorten(conditions, COND_MAX);
-  const typeW = textWidth(typeText, TYPE_FONT) + 4;
+  const typeW = Math.ceil(textWidth(typeText, TYPE_FONT) * 1.4) + 8;
   const condW = condText ? textWidth(condText, COND_FONT) + 4 : 0;
   const blockW = Math.max(typeW, condW);
   const dx = side === 'E' ? blockW / 2 + 12 : side === 'W' ? -(blockW / 2 + 12) : 0;
@@ -302,7 +311,7 @@ function labelLayout(markerX, markerY, typeLabel, conditions, side) {
 function labelBoxes(markerX, markerY, typeLabel, conditions) {
   const typeText = String(typeLabel || '');
   const condText = shorten(conditions, COND_MAX);
-  const typeW = textWidth(typeText, TYPE_FONT) + 4;
+  const typeW = Math.ceil(textWidth(typeText, TYPE_FONT) * 1.4) + 8;
   const condW = condText ? textWidth(condText, COND_FONT) + 4 : 0;
   const boxes = {
     type: rect(markerX - typeW / 2, markerY + TYPE_DY - TYPE_H / 2, typeW, TYPE_H)
@@ -347,6 +356,7 @@ module.exports = {
   COND_MAX,
   CLEARANCE,
   clamp,
+  fitScale,
   shorten,
   textWidth,
   rect,

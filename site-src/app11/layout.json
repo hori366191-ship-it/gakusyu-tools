@@ -1,19 +1,21 @@
 {
- "version": 3,
- "seed": 11011,
+ "version": 4,
+ "seed": 0,
+ "priorityHash": "a3c90d6744811642eba35586b872973c40a6dd4d3c69db1fffd6b299c1422fe2",
+ "topologyNetworkx": "3.6.1",
  "nodeW": 136,
  "nodeH": 34,
  "canvas": {
   "x": 0,
   "y": 0,
-  "w": 5033,
-  "h": 1852
+  "w": 6052,
+  "h": 2314
  },
  "shelf": {
-  "x": 3488.530971642872,
-  "y": 40,
-  "cols": 10,
-  "rows": 33,
+  "x": 4223.499556174887,
+  "y": 20,
+  "cols": 12,
+  "rows": 28,
   "count": 326,
   "side": "right"
  },
@@ -25,14 +27,14 @@
    "count": 71,
    "colorIndex": 0,
    "focus": {
-    "x": 330.16,
-    "y": 10,
-    "w": 3062.23,
-    "h": 1457.75
+    "x": 5.5,
+    "y": -10,
+    "w": 3428,
+    "h": 1236.59
    },
    "center": {
-    "x": 1629.11,
-    "y": 503.02
+    "x": 1464.19,
+    "y": 378.87
    },
    "members": [
     "1,1,2,2-tetrabromoethane",
@@ -115,14 +117,14 @@
    "count": 12,
    "colorIndex": 1,
    "focus": {
-    "x": 270.13,
-    "y": 465.11,
-    "w": 3168.41,
-    "h": 868.51
+    "x": 1937.5,
+    "y": 142.59,
+    "w": 2196,
+    "h": 1884
    },
    "center": {
-    "x": 1731.83,
-    "y": 862.11
+    "x": 2857,
+    "y": 1226.34
    },
    "members": [
     "anthracene",
@@ -146,14 +148,14 @@
    "count": 27,
    "colorIndex": 2,
    "focus": {
-    "x": 188.46,
-    "y": 314.75,
-    "w": 3017.57,
-    "h": 1337.48
+    "x": 9.86,
+    "y": 53.15,
+    "w": 3873.64,
+    "h": 1973.44
    },
    "center": {
-    "x": 1401.22,
-    "y": 848.11
+    "x": 1513.22,
+    "y": 899.4
    },
    "members": [
     "1-methoxypropane",
@@ -192,14 +194,14 @@
    "count": 48,
    "colorIndex": 3,
    "focus": {
-    "x": 263.94,
-    "y": 314.75,
-    "w": 2069.94,
-    "h": 1473.5
+    "x": 477.5,
+    "y": 332.59,
+    "w": 3706,
+    "h": 1694
    },
    "center": {
-    "x": 1194.28,
-    "y": 991.28
+    "x": 1767.9,
+    "y": 897.4
    },
    "members": [
     "2,2-dimethylpropanal",
@@ -259,14 +261,14 @@
    "count": 36,
    "colorIndex": 4,
    "focus": {
-    "x": 652.1,
-    "y": 486.34,
-    "w": 1266.62,
-    "h": 1145.93
+    "x": 120.63,
+    "y": 342.33,
+    "w": 1612.87,
+    "h": 1834.25
    },
    "center": {
-    "x": 1381.37,
-    "y": 1020.19
+    "x": 984.82,
+    "y": 1231.38
    },
    "members": [
     "arachidonic-acid",
@@ -314,14 +316,14 @@
    "count": 54,
    "colorIndex": 5,
    "focus": {
-    "x": 10,
-    "y": 367.22,
-    "w": 3428.53,
-    "h": 1360.78
+    "x": 1197.5,
+    "y": 202.59,
+    "w": 2786,
+    "h": 1924
    },
    "center": {
-    "x": 1167.89,
-    "y": 992.27
+    "x": 2646.79,
+    "y": 844.73
    },
    "members": [
     "1-naphthol",
@@ -387,14 +389,14 @@
    "count": 25,
    "colorIndex": 6,
    "focus": {
-    "x": 374.16,
-    "y": 941.97,
-    "w": 683.49,
-    "h": 563.96
+    "x": 2048.5,
+    "y": 719.59,
+    "w": 196,
+    "h": 94
    },
    "center": {
-    "x": 731.34,
-    "y": 1203.44
+    "x": 2146.5,
+    "y": 766.59
    },
    "members": [
     "2-methylpropan-1-amine",
@@ -431,14 +433,14 @@
    "count": 23,
    "colorIndex": 7,
    "focus": {
-    "x": 1896.22,
-    "y": 10,
-    "w": 859.22,
-    "h": 589.42
+    "x": 2037.5,
+    "y": 1376.85,
+    "w": 696,
+    "h": 520.44
    },
    "center": {
-    "x": 2343.32,
-    "y": 280.46
+    "x": 2412.36,
+    "y": 1603.15
    },
    "members": [
     "amylopectin",
@@ -473,14 +475,14 @@
    "count": 66,
    "colorIndex": 8,
    "focus": {
-    "x": 2231.61,
-    "y": 10,
-    "w": 1168.59,
-    "h": 1831.7
+    "x": -10,
+    "y": 512.97,
+    "w": 3763.5,
+    "h": 1313.62
    },
    "center": {
-    "x": 2833.15,
-    "y": 786.42
+    "x": 2137.64,
+    "y": 1319.18
    },
    "members": [
     "6-aminohexanoic-acid",
@@ -558,14 +560,14 @@
    "count": 65,
    "colorIndex": 9,
    "focus": {
-    "x": 737.55,
-    "y": 50.06,
-    "w": 2676.07,
-    "h": 1791.73
+    "x": 1457.5,
+    "y": 382.59,
+    "w": 2676,
+    "h": 1824
    },
    "center": {
-    "x": 2174.15,
-    "y": 1085.06
+    "x": 3447.5,
+    "y": 1726.59
    },
    "members": [
     "abs",
@@ -639,2155 +641,3427 @@
  "positions": {
   "1,1,2,2-tetrabromoethane": {
    "r": "hydrocarbon",
-   "x": 3488.53,
-   "y": 40
+   "x": 4223.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "1,2-dibromoethane": {
    "r": "hydrocarbon",
-   "x": 383.15,
-   "y": 132.55
+   "x": 1427.5,
+   "y": 172.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "1,2-dibromoethene": {
    "r": "hydrocarbon",
-   "x": 3640.53,
-   "y": 40
+   "x": 4375.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "1,3-dibromopropane": {
    "r": "hydrocarbon",
-   "x": 3792.53,
-   "y": 40
+   "x": 4527.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "1-bromopropane": {
    "r": "hydrocarbon",
-   "x": 3944.53,
-   "y": 40
+   "x": 4679.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "1-chloro-2-methylpropane": {
    "r": "hydrocarbon",
-   "x": 4096.53,
-   "y": 40
+   "x": 4831.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "1-chlorobutane": {
    "r": "hydrocarbon",
-   "x": 4248.53,
-   "y": 40
+   "x": 4983.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "1-chloropropane": {
    "r": "hydrocarbon",
-   "x": 4400.53,
-   "y": 40
+   "x": 5135.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "1-chloropropene": {
    "r": "hydrocarbon",
-   "x": 4552.53,
-   "y": 40
+   "x": 5287.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "1-methoxypropane": {
    "r": "alcohol-ether",
-   "x": 4704.53,
-   "y": 364
+   "x": 5439.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "1-naphthol": {
    "r": "phenol-aromatic",
-   "x": 3944.53,
-   "y": 742
+   "x": 4375.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2,2-dimethylbutane": {
    "r": "hydrocarbon",
-   "x": 4704.53,
-   "y": 40
+   "x": 5439.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2,2-dimethylpropan-1-ol": {
    "r": "alcohol-ether",
-   "x": 4856.53,
-   "y": 364
+   "x": 5591.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2,2-dimethylpropanal": {
    "r": "carbonyl",
-   "x": 4248.53,
-   "y": 472
+   "x": 4375.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2,2-dimethylpropanoic-acid": {
    "r": "carbonyl",
-   "x": 4400.53,
-   "y": 472
+   "x": 4527.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2,3-dimethylbutane": {
    "r": "hydrocarbon",
-   "x": 4856.53,
-   "y": 40
+   "x": 5591.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2,4,6-tribromophenol": {
    "r": "phenol-aromatic",
-   "x": 4096.53,
-   "y": 742
+   "x": 4527.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-bromopropane": {
    "r": "hydrocarbon",
-   "x": 3488.53,
-   "y": 94
+   "x": 5743.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-chloro-2-methylpropane": {
    "r": "hydrocarbon",
-   "x": 2728.67,
-   "y": 762.18
+   "x": 35.5,
+   "y": 213.23,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "2-chlorobutane": {
    "r": "hydrocarbon",
-   "x": 3640.53,
-   "y": 94
+   "x": 5895.5,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-chloropropane": {
    "r": "hydrocarbon",
-   "x": 3792.53,
-   "y": 94
+   "x": 4223.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-chloropropene": {
    "r": "hydrocarbon",
-   "x": 3944.53,
-   "y": 94
+   "x": 4375.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-methoxypropane": {
    "r": "alcohol-ether",
-   "x": 3488.53,
-   "y": 418
+   "x": 5743.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-methylbutan-1-ol": {
    "r": "alcohol-ether",
-   "x": 3640.53,
-   "y": 418
+   "x": 5895.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-methylbutan-2-ol": {
    "r": "alcohol-ether",
-   "x": 3792.53,
-   "y": 418
+   "x": 4223.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-methylbutanal": {
    "r": "carbonyl",
-   "x": 4552.53,
-   "y": 472
+   "x": 4679.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-methylbutanoic-acid": {
    "r": "carbonyl",
-   "x": 4704.53,
-   "y": 472
+   "x": 4831.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-methylpentane": {
    "r": "hydrocarbon",
-   "x": 4096.53,
-   "y": 94
+   "x": 4527.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-methylpropan-1-amine": {
    "r": "nitrogen",
-   "x": 3944.53,
-   "y": 958
+   "x": 4983.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-methylpropan-1-ol": {
    "r": "alcohol-ether",
-   "x": 3944.53,
-   "y": 418
+   "x": 4375.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-methylpropan-2-amine": {
    "r": "nitrogen",
-   "x": 4096.53,
-   "y": 958
+   "x": 5135.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-methylpropan-2-ol": {
    "r": "alcohol-ether",
-   "x": 2590.52,
-   "y": 982.47
+   "x": 39.86,
+   "y": 83.15,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "2-methylpropanal": {
    "r": "carbonyl",
-   "x": 4856.53,
-   "y": 472
+   "x": 4983.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-methylpropanoic-acid": {
    "r": "carbonyl",
-   "x": 3488.53,
-   "y": 526
+   "x": 5135.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-naphthol": {
    "r": "phenol-aromatic",
-   "x": 4248.53,
-   "y": 742
+   "x": 4679.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "2-nitrobenzaldehyde": {
    "r": "phenol-aromatic",
-   "x": 4400.53,
-   "y": 742
+   "x": 4831.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "3-chloropropene": {
    "r": "hydrocarbon",
-   "x": 4248.53,
-   "y": 94
+   "x": 4679.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "3-methylbutan-1-ol": {
    "r": "alcohol-ether",
-   "x": 1480.3,
-   "y": 564.07
+   "x": 1146.63,
+   "y": 714.57,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "3-methylbutan-2-ol": {
    "r": "alcohol-ether",
-   "x": 4096.53,
-   "y": 418
+   "x": 4527.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "3-methylbutanal": {
    "r": "carbonyl",
-   "x": 3640.53,
-   "y": 526
+   "x": 5287.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "3-methylbutanoic-acid": {
    "r": "carbonyl",
-   "x": 3792.53,
-   "y": 526
+   "x": 5439.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "3-methylpentane": {
    "r": "hydrocarbon",
-   "x": 4400.53,
-   "y": 94
+   "x": 4831.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "6-aminohexanoic-acid": {
    "r": "amino",
-   "x": 3944.53,
-   "y": 1174
+   "x": 5591.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "abs": {
    "r": "polymer",
-   "x": 3640.53,
-   "y": 1498
+   "x": 5287.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "acetaminophen": {
    "r": "phenol-aromatic",
-   "x": 4552.53,
-   "y": 742
+   "x": 4983.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "acetanilide": {
    "r": "phenol-aromatic",
-   "x": 989.92,
-   "y": 752.77
+   "x": 2017.5,
+   "y": 1162.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "acetic-acid": {
    "r": "carbonyl",
-   "x": 1187.86,
-   "y": 1139.59
+   "x": 1129.5,
+   "y": 912.59,
+   "w": 212,
+   "h": 34,
+   "tier": "primary"
   },
   "acetic-anhydride": {
    "r": "carbonyl",
-   "x": 1013.62,
-   "y": 1525.91
+   "x": 1697.5,
+   "y": 1392.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "acetone": {
    "r": "carbonyl",
-   "x": 947.51,
-   "y": 483.6
+   "x": 3267.5,
+   "y": 572.59,
+   "w": 176,
+   "h": 34,
+   "tier": "primary"
   },
   "acetonitrile": {
    "r": "nitrogen",
-   "x": 4248.53,
-   "y": 958
+   "x": 5287.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "acrolein": {
    "r": "hydrocarbon",
-   "x": 4552.53,
-   "y": 94
+   "x": 4983.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "acrylic-acid": {
    "r": "carbonyl",
-   "x": 3944.53,
-   "y": 526
+   "x": 5591.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "acrylonitrile": {
    "r": "polymer",
-   "x": 3792.53,
-   "y": 1498
+   "x": 5439.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "adenine": {
    "r": "polymer",
-   "x": 3944.53,
-   "y": 1498
+   "x": 5591.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "adenosine": {
    "r": "polymer",
-   "x": 4096.53,
-   "y": 1498
+   "x": 5743.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "adipic-acid": {
    "r": "carbonyl",
-   "x": 2167.88,
-   "y": 1376.91
+   "x": 2917.5,
+   "y": 1962.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "adipoyl-chloride": {
    "r": "carbonyl",
-   "x": 4096.53,
-   "y": 526
+   "x": 5743.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "adp": {
    "r": "polymer",
-   "x": 4248.53,
-   "y": 1498
+   "x": 5895.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "alanine": {
    "r": "amino",
-   "x": 3070.61,
-   "y": 366.32
+   "x": 3547.5,
+   "y": 1762.59,
+   "w": 176,
+   "h": 34,
+   "tier": "primary"
   },
   "alanylglycine": {
    "r": "amino",
-   "x": 2805.43,
-   "y": 471.01
+   "x": 3419.86,
+   "y": 1245.22,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "albumin": {
    "r": "amino",
-   "x": 4096.53,
-   "y": 1174
+   "x": 5743.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "alginic-acid": {
    "r": "polymer",
-   "x": 4400.53,
-   "y": 1498
+   "x": 4223.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "alizarin": {
    "r": "phenol-aromatic",
-   "x": 4704.53,
-   "y": 742
+   "x": 5135.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "alkyd-resin": {
    "r": "polymer",
-   "x": 4552.53,
-   "y": 1498
+   "x": 4375.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "allyl-alcohol": {
    "r": "hydrocarbon",
-   "x": 4704.53,
-   "y": 94
+   "x": 5135.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "amylase": {
    "r": "amino",
-   "x": 4248.53,
-   "y": 1174
+   "x": 5895.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "amylopectin": {
    "r": "sugar",
-   "x": 4552.53,
-   "y": 1066
+   "x": 4983.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "aniline": {
    "r": "nitrogen",
-   "x": 663.34,
-   "y": 1186.44
+   "x": 2078.5,
+   "y": 749.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "aniline-hydrochloride": {
    "r": "nitrogen",
-   "x": 4400.53,
-   "y": 958
+   "x": 5439.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "anion-exchange-resin": {
    "r": "polymer",
-   "x": 4704.53,
-   "y": 1498
+   "x": 4527.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "anisole": {
    "r": "phenol-aromatic",
-   "x": 4856.53,
-   "y": 742
+   "x": 5287.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "anthracene": {
    "r": "aromatic",
-   "x": 3488.53,
-   "y": 364
+   "x": 4223.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "arachidonic-acid": {
    "r": "ester-lipid",
-   "x": 3488.53,
-   "y": 688
+   "x": 4223.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "aramid": {
    "r": "polymer",
-   "x": 4856.53,
-   "y": 1498
+   "x": 4679.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "arginine": {
    "r": "amino",
-   "x": 4400.53,
-   "y": 1174
+   "x": 4223.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "asparagine": {
    "r": "amino",
-   "x": 4552.53,
-   "y": 1174
+   "x": 4375.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "aspartame": {
    "r": "amino",
-   "x": 4704.53,
-   "y": 1174
+   "x": 4527.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "aspartic-acid": {
    "r": "amino",
-   "x": 4856.53,
-   "y": 1174
+   "x": 4679.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "aspirin": {
    "r": "phenol-aromatic",
-   "x": 1063.25,
-   "y": 1664
+   "x": 1547.5,
+   "y": 1112.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "atp": {
    "r": "polymer",
-   "x": 3488.53,
-   "y": 1552
+   "x": 4831.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "atpase": {
    "r": "amino",
-   "x": 3488.53,
-   "y": 1228
+   "x": 4831.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "benzaldehyde": {
    "r": "phenol-aromatic",
-   "x": 2227.97,
-   "y": 922.21
+   "x": 3817.5,
+   "y": 362.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "benzene": {
    "r": "aromatic",
-   "x": 468.08,
-   "y": 1064.84
+   "x": 2503.5,
+   "y": 1189.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "benzenediazonium-chloride": {
    "r": "phenol-aromatic",
-   "x": 856.26,
-   "y": 1353.24
+   "x": 2404.5,
+   "y": 476.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "benzenesulfonic-acid": {
    "r": "phenol-aromatic",
-   "x": 718.24,
-   "y": 397.22
+   "x": 2247.5,
+   "y": 1292.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "benzoic-acid": {
    "r": "carbonyl",
-   "x": 1968.72,
-   "y": 902.23
+   "x": 4017.5,
+   "y": 362.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "benzonitrile": {
    "r": "phenol-aromatic",
-   "x": 3488.53,
-   "y": 796
+   "x": 5439.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "benzyl-alcohol": {
    "r": "phenol-aromatic",
-   "x": 2098.22,
-   "y": 676.77
+   "x": 3617.5,
+   "y": 362.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "bisphenol-a": {
    "r": "phenol-aromatic",
-   "x": 3640.53,
-   "y": 796
+   "x": 5591.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "br": {
    "r": "polymer",
-   "x": 3640.53,
-   "y": 1552
+   "x": 4983.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "bromoethane": {
    "r": "hydrocarbon",
-   "x": 782.19,
-   "y": 68.31
+   "x": 907.5,
+   "y": 172.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "bromoethene": {
    "r": "hydrocarbon",
-   "x": 4856.53,
-   "y": 94
+   "x": 5287.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "but-1-ene": {
    "r": "hydrocarbon",
-   "x": 3488.53,
-   "y": 148
+   "x": 5439.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "but-1-yne": {
    "r": "hydrocarbon",
-   "x": 3640.53,
-   "y": 148
+   "x": 5591.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "but-2-ene": {
    "r": "hydrocarbon",
-   "x": 3792.53,
-   "y": 148
+   "x": 5743.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "but-2-yne": {
    "r": "hydrocarbon",
-   "x": 3944.53,
-   "y": 148
+   "x": 5895.5,
+   "y": 74,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "but-3-enoic-acid": {
    "r": "hydrocarbon",
-   "x": 4096.53,
-   "y": 148
+   "x": 4223.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "butadiene": {
    "r": "polymer",
-   "x": 3792.53,
-   "y": 1552
+   "x": 5135.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "butan-1-amine": {
    "r": "nitrogen",
-   "x": 4552.53,
-   "y": 958
+   "x": 5591.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "butan-1-ol": {
    "r": "alcohol-ether",
-   "x": 921.58,
-   "y": 1454.88
+   "x": 1449.93,
+   "y": 904.06,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "butan-2-amine": {
    "r": "nitrogen",
-   "x": 4704.53,
-   "y": 958
+   "x": 5743.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "butan-2-ol": {
    "r": "alcohol-ether",
-   "x": 4248.53,
-   "y": 418
+   "x": 4679.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "butanal": {
    "r": "carbonyl",
-   "x": 835.11,
-   "y": 1724.25
+   "x": 1699.93,
+   "y": 904.06,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "butane": {
    "r": "hydrocarbon",
-   "x": 4248.53,
-   "y": 148
+   "x": 4375.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "butanenitrile": {
    "r": "nitrogen",
-   "x": 4856.53,
-   "y": 958
+   "x": 5895.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "butanoic-acid": {
    "r": "carbonyl",
-   "x": 1414.44,
-   "y": 433.58
+   "x": 1398.47,
+   "y": 516.92,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "butanone": {
    "r": "carbonyl",
-   "x": 4248.53,
-   "y": 526
+   "x": 5895.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "butyl-acetate": {
    "r": "ester-lipid",
-   "x": 1495.99,
-   "y": 1036.02
+   "x": 1252.83,
+   "y": 1166.95,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "calcium-acetate": {
    "r": "carbonyl",
-   "x": 4400.53,
-   "y": 526
+   "x": 4223.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "caprolactam": {
    "r": "polymer",
-   "x": 2387.68,
-   "y": 1403.69
+   "x": 3967.5,
+   "y": 2062.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "carbon-tetrachloride": {
    "r": "hydrocarbon",
-   "x": 4400.53,
-   "y": 148
+   "x": 4527.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "carminic-acid": {
    "r": "phenol-aromatic",
-   "x": 3792.53,
-   "y": 796
+   "x": 5743.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "carthamin": {
    "r": "phenol-aromatic",
-   "x": 3944.53,
-   "y": 796
+   "x": 5895.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "casein": {
    "r": "amino",
-   "x": 3640.53,
-   "y": 1228
+   "x": 4983.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "catalase": {
    "r": "amino",
-   "x": 3792.53,
-   "y": 1228
+   "x": 5135.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "catechol": {
    "r": "phenol-aromatic",
-   "x": 4096.53,
-   "y": 796
+   "x": 4223.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cation-exchange-resin": {
    "r": "polymer",
-   "x": 3944.53,
-   "y": 1552
+   "x": 5287.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cellobiase": {
    "r": "amino",
-   "x": 3944.53,
-   "y": 1228
+   "x": 5287.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cellobiose": {
    "r": "sugar",
-   "x": 4704.53,
-   "y": 1066
+   "x": 5135.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cellulase": {
    "r": "amino",
-   "x": 4096.53,
-   "y": 1228
+   "x": 5439.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cellulose": {
    "r": "sugar",
-   "x": 4856.53,
-   "y": 1066
+   "x": 5287.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cellulose-acetate": {
    "r": "sugar",
-   "x": 3488.53,
-   "y": 1120
+   "x": 5439.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cellulose-nitrate": {
    "r": "sugar",
-   "x": 3640.53,
-   "y": 1120
+   "x": 5591.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "chitin": {
    "r": "sugar",
-   "x": 3792.53,
-   "y": 1120
+   "x": 5743.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "chlorobenzene": {
    "r": "phenol-aromatic",
-   "x": 194.71,
-   "y": 1209.37
+   "x": 2930.5,
+   "y": 948.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "chlorocyclohexane": {
    "r": "hydrocarbon",
-   "x": 4552.53,
-   "y": 148
+   "x": 4679.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "chloroethane": {
    "r": "hydrocarbon",
-   "x": 4704.53,
-   "y": 148
+   "x": 4831.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "chloroform": {
    "r": "hydrocarbon",
-   "x": 4856.53,
-   "y": 148
+   "x": 4983.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "chloromethane": {
    "r": "hydrocarbon",
-   "x": 3061.9,
-   "y": 1403.75
+   "x": 667.5,
+   "y": 72.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "chloroprene": {
    "r": "polymer",
-   "x": 4096.53,
-   "y": 1552
+   "x": 5439.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "chloroprene-rubber": {
    "r": "polymer",
-   "x": 4248.53,
-   "y": 1552
+   "x": 5591.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "choline": {
    "r": "amino",
-   "x": 4248.53,
-   "y": 1228
+   "x": 5591.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "citric-acid": {
    "r": "carbonyl",
-   "x": 4552.53,
-   "y": 526
+   "x": 4375.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "collagen": {
    "r": "amino",
-   "x": 4400.53,
-   "y": 1228
+   "x": 5743.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "copper-i-acetylide": {
    "r": "hydrocarbon",
-   "x": 3488.53,
-   "y": 202
+   "x": 5135.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "crotonic-acid": {
    "r": "hydrocarbon",
-   "x": 3640.53,
-   "y": 202
+   "x": 5287.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cumene": {
    "r": "aromatic",
-   "x": 358.66,
-   "y": 495.11
+   "x": 2717.5,
+   "y": 172.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "cumene-hydroperoxide": {
    "r": "phenol-aromatic",
-   "x": 469,
-   "y": 696.12
+   "x": 3167.5,
+   "y": 312.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "cyclobutane": {
    "r": "hydrocarbon",
-   "x": 3792.53,
-   "y": 202
+   "x": 5439.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cyclohexane": {
    "r": "hydrocarbon",
-   "x": 3944.53,
-   "y": 202
+   "x": 5591.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cyclohexene": {
    "r": "hydrocarbon",
-   "x": 4096.53,
-   "y": 202
+   "x": 5743.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cyclopentane": {
    "r": "hydrocarbon",
-   "x": 4248.53,
-   "y": 202
+   "x": 5895.5,
+   "y": 128,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cyclopropane": {
    "r": "hydrocarbon",
-   "x": 4400.53,
-   "y": 202
+   "x": 4223.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "cysteine": {
    "r": "amino",
-   "x": 2261.61,
-   "y": 1777.7
+   "x": 24.67,
+   "y": 618.15,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "cystine": {
    "r": "amino",
-   "x": 2263.05,
-   "y": 1517.75
+   "x": 72.58,
+   "y": 542.97,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "cytosine": {
    "r": "polymer",
-   "x": 4400.53,
-   "y": 1552
+   "x": 5743.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "decane": {
    "r": "hydrocarbon",
-   "x": 4552.53,
-   "y": 202
+   "x": 4375.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "deoxyribose": {
    "r": "sugar",
-   "x": 3944.53,
-   "y": 1120
+   "x": 5895.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "dextrin": {
    "r": "sugar",
-   "x": 4096.53,
-   "y": 1120
+   "x": 4223.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "dibromoindigo": {
    "r": "phenol-aromatic",
-   "x": 4248.53,
-   "y": 796
+   "x": 4375.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "dichloromethane": {
    "r": "hydrocarbon",
-   "x": 4704.53,
-   "y": 202
+   "x": 4527.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "diethyl-ether": {
    "r": "alcohol-ether",
-   "x": 1059.93,
-   "y": 521.8
+   "x": 907.5,
+   "y": 472.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "diethylamine": {
    "r": "nitrogen",
-   "x": 3488.53,
-   "y": 1012
+   "x": 4223.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "diethylenetriamine": {
    "r": "nitrogen",
-   "x": 3640.53,
-   "y": 1012
+   "x": 4375.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "dimethyl-ether": {
    "r": "alcohol-ether",
-   "x": 4400.53,
-   "y": 418
+   "x": 4831.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "dimethyl-oxalate": {
    "r": "ester-lipid",
-   "x": 1340.22,
-   "y": 539.15
+   "x": 605.12,
+   "y": 1009.51,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "dimethylamine": {
    "r": "nitrogen",
-   "x": 3792.53,
-   "y": 1012
+   "x": 4527.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "dimethyldichlorosilane": {
    "r": "polymer",
-   "x": 4552.53,
-   "y": 1552
+   "x": 5895.5,
+   "y": 1262,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "diphenyl-oxalate": {
    "r": "ester-lipid",
-   "x": 3640.53,
-   "y": 688
+   "x": 4375.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "disodium-salicylate": {
    "r": "phenol-aromatic",
-   "x": 4400.53,
-   "y": 796
+   "x": 4527.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "dna": {
    "r": "polymer",
-   "x": 4704.53,
-   "y": 1552
+   "x": 4223.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "docosahexaenoic-acid": {
    "r": "ester-lipid",
-   "x": 3792.53,
-   "y": 688
+   "x": 4527.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "eicosane": {
    "r": "hydrocarbon",
-   "x": 4856.53,
-   "y": 202
+   "x": 4679.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "eicosapentaenoic-acid": {
    "r": "ester-lipid",
-   "x": 3944.53,
-   "y": 688
+   "x": 4679.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "elaidic-acid": {
    "r": "ester-lipid",
-   "x": 4096.53,
-   "y": 688
+   "x": 4831.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "epichlorohydrin": {
    "r": "polymer",
-   "x": 4856.53,
-   "y": 1552
+   "x": 4375.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "epoxy-resin": {
    "r": "polymer",
-   "x": 3488.53,
-   "y": 1606
+   "x": 4527.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "erepsin": {
    "r": "amino",
-   "x": 4552.53,
-   "y": 1228
+   "x": 5895.5,
+   "y": 992,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "ethanal": {
    "r": "carbonyl",
-   "x": 523.14,
-   "y": 1192.85
+   "x": 847.5,
+   "y": 772.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "ethane": {
    "r": "hydrocarbon",
-   "x": 523.37,
-   "y": 93.31
+   "x": 1167.5,
+   "y": 72.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "ethanol": {
    "r": "alcohol-ether",
-   "x": 926.44,
-   "y": 830.71
+   "x": 1129.5,
+   "y": 612.59,
+   "w": 212,
+   "h": 34,
+   "tier": "primary"
   },
   "ethanolamine": {
    "r": "alcohol-ether",
-   "x": 4552.53,
-   "y": 418
+   "x": 4983.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "ethene": {
    "r": "hydrocarbon",
-   "x": 610.51,
-   "y": 335.94
+   "x": 1147.5,
+   "y": 312.59,
+   "w": 176,
+   "h": 34,
+   "tier": "primary"
   },
   "ethenol": {
    "r": "hydrocarbon",
-   "x": 3488.53,
-   "y": 256
+   "x": 4831.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "ethyl-acetate": {
    "r": "ester-lipid",
-   "x": 1257.57,
-   "y": 1063.29
+   "x": 1167.5,
+   "y": 772.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "ethyl-butyrate": {
    "r": "ester-lipid",
-   "x": 1557.55,
-   "y": 664.01
+   "x": 1430.87,
+   "y": 615.06,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "ethyl-formate": {
    "r": "ester-lipid",
-   "x": 1417.51,
-   "y": 676.21
+   "x": 750.27,
+   "y": 505.46,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "ethyl-propionate": {
    "r": "ester-lipid",
-   "x": 682.1,
-   "y": 1034.21
+   "x": 1163.76,
+   "y": 854.13,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "ethylamine": {
    "r": "nitrogen",
-   "x": 3944.53,
-   "y": 1012
+   "x": 4679.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "ethylbenzene": {
    "r": "aromatic",
-   "x": 3640.53,
-   "y": 364
+   "x": 4375.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "ethylene-glycol": {
    "r": "alcohol-ether",
-   "x": 2944.67,
-   "y": 771.07
+   "x": 2417.5,
+   "y": 1962.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "ethylmethylamine": {
    "r": "nitrogen",
-   "x": 4096.53,
-   "y": 1012
+   "x": 4831.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "ethyne": {
    "r": "hydrocarbon",
-   "x": 3640.53,
-   "y": 256
+   "x": 4983.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "fibroin": {
    "r": "amino",
-   "x": 4704.53,
-   "y": 1228
+   "x": 4223.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "formaldehyde": {
    "r": "carbonyl",
-   "x": 621.25,
-   "y": 744.56
+   "x": 507.5,
+   "y": 832.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "formic-acid": {
    "r": "carbonyl",
-   "x": 1015.69,
-   "y": 1004.77
+   "x": 667.5,
+   "y": 662.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "fructose": {
    "r": "sugar",
-   "x": 2362.57,
-   "y": 535.42
+   "x": 2567.5,
+   "y": 1712.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "fumaric-acid": {
    "r": "carbonyl",
-   "x": 4704.53,
-   "y": 526
+   "x": 4527.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "galactose": {
    "r": "sugar",
-   "x": 4248.53,
-   "y": 1120
+   "x": 4375.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "gelatin": {
    "r": "amino",
-   "x": 4856.53,
-   "y": 1228
+   "x": 4375.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "gliadin": {
    "r": "amino",
-   "x": 3488.53,
-   "y": 1282
+   "x": 4527.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "globin": {
    "r": "amino",
-   "x": 3640.53,
-   "y": 1282
+   "x": 4679.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "globulin": {
    "r": "amino",
-   "x": 3792.53,
-   "y": 1282
+   "x": 4831.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "glucose": {
    "r": "sugar",
-   "x": 2248.48,
-   "y": 264.14
+   "x": 2347.5,
+   "y": 1612.59,
+   "w": 176,
+   "h": 34,
+   "tier": "primary"
   },
   "glutamic-acid": {
    "r": "amino",
-   "x": 3944.53,
-   "y": 1282
+   "x": 4983.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "glutamine": {
    "r": "amino",
-   "x": 4096.53,
-   "y": 1282
+   "x": 5135.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "glutaric-acid": {
    "r": "carbonyl",
-   "x": 4856.53,
-   "y": 526
+   "x": 4679.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "glutathione": {
    "r": "amino",
-   "x": 4248.53,
-   "y": 1282
+   "x": 5287.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "glutelin": {
    "r": "amino",
-   "x": 4400.53,
-   "y": 1282
+   "x": 5439.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "glutenin": {
    "r": "amino",
-   "x": 4552.53,
-   "y": 1282
+   "x": 5591.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "glycerol": {
    "r": "alcohol-ether",
-   "x": 1261.5,
-   "y": 1101.37
+   "x": 729.5,
+   "y": 1512.59,
+   "w": 212,
+   "h": 34,
+   "tier": "primary"
   },
   "glycine": {
    "r": "amino",
-   "x": 2998.26,
-   "y": 281.59
+   "x": 3138.5,
+   "y": 1762.59,
+   "w": 194,
+   "h": 34,
+   "tier": "primary"
   },
   "glycogen": {
    "r": "sugar",
-   "x": 4400.53,
-   "y": 1120
+   "x": 4527.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "glycylalanine": {
    "r": "amino",
-   "x": 2976.88,
-   "y": 166.79
+   "x": 3367.5,
+   "y": 1762.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "glycylglycine": {
    "r": "amino",
-   "x": 3061.01,
-   "y": 40.52
+   "x": 2917.5,
+   "y": 1762.59,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "guaiacol": {
    "r": "phenol-aromatic",
-   "x": 4552.53,
-   "y": 796
+   "x": 4679.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "guanine": {
    "r": "polymer",
-   "x": 3640.53,
-   "y": 1606
+   "x": 4679.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "helicase": {
    "r": "amino",
-   "x": 4704.53,
-   "y": 1282
+   "x": 5743.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "heme": {
    "r": "amino",
-   "x": 4856.53,
-   "y": 1282
+   "x": 5895.5,
+   "y": 1046,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "hemocyanin": {
    "r": "amino",
-   "x": 3488.53,
-   "y": 1336
+   "x": 4223.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "hemoglobin": {
    "r": "amino",
-   "x": 3640.53,
-   "y": 1336
+   "x": 4375.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "heptane": {
    "r": "hydrocarbon",
-   "x": 3792.53,
-   "y": 256
+   "x": 5135.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "hexachlorocyclohexane": {
    "r": "hydrocarbon",
-   "x": 3944.53,
-   "y": 256
+   "x": 5287.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "hexamethylenediamine": {
    "r": "polymer",
-   "x": 1968.72,
-   "y": 1256.98
+   "x": 3217.5,
+   "y": 1962.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "hexane": {
    "r": "hydrocarbon",
-   "x": 4096.53,
-   "y": 256
+   "x": 5439.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "histidine": {
    "r": "amino",
-   "x": 3792.53,
-   "y": 1336
+   "x": 4527.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "histone": {
    "r": "amino",
-   "x": 3944.53,
-   "y": 1336
+   "x": 4679.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "hordein": {
    "r": "amino",
-   "x": 4096.53,
-   "y": 1336
+   "x": 4831.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "hydroquinone": {
    "r": "phenol-aromatic",
-   "x": 4704.53,
-   "y": 796
+   "x": 4831.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "ibuprofen": {
    "r": "carbonyl",
-   "x": 3488.53,
-   "y": 580
+   "x": 4831.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "iir": {
    "r": "polymer",
-   "x": 3792.53,
-   "y": 1606
+   "x": 4831.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "indigo": {
    "r": "phenol-aromatic",
-   "x": 4856.53,
-   "y": 796
+   "x": 4983.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "inositol": {
    "r": "sugar",
-   "x": 4552.53,
-   "y": 1120
+   "x": 4679.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "insulin": {
    "r": "amino",
-   "x": 4248.53,
-   "y": 1336
+   "x": 4983.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "iodoethane": {
    "r": "hydrocarbon",
-   "x": 4248.53,
-   "y": 256
+   "x": 5591.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "iodoform": {
    "r": "hydrocarbon",
-   "x": 4400.53,
-   "y": 256
+   "x": 5743.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "isoamyl-acetate": {
    "r": "ester-lipid",
-   "x": 1649.36,
-   "y": 763.92
+   "x": 891.73,
+   "y": 636.82,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "isobutane": {
    "r": "hydrocarbon",
-   "x": 4552.53,
-   "y": 256
+   "x": 5895.5,
+   "y": 182,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "isobutene": {
    "r": "hydrocarbon",
-   "x": 2469.78,
-   "y": 747
+   "x": 102.79,
+   "y": 20,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "isoleucine": {
    "r": "amino",
-   "x": 4400.53,
-   "y": 1336
+   "x": 5135.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "isomaltose": {
    "r": "sugar",
-   "x": 4704.53,
-   "y": 1120
+   "x": 4831.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "isopentane": {
    "r": "hydrocarbon",
-   "x": 4704.53,
-   "y": 256
+   "x": 4223.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "isophthalic-acid": {
    "r": "phenol-aromatic",
-   "x": 3488.53,
-   "y": 850
+   "x": 5135.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "isoprene": {
    "r": "polymer",
-   "x": 3944.53,
-   "y": 1606
+   "x": 4983.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "isopropylamine": {
    "r": "nitrogen",
-   "x": 4248.53,
-   "y": 1012
+   "x": 4983.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "keratin": {
    "r": "amino",
-   "x": 4552.53,
-   "y": 1336
+   "x": 5287.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "lactase": {
    "r": "amino",
-   "x": 4704.53,
-   "y": 1336
+   "x": 5439.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "lactic-acid": {
    "r": "carbonyl",
-   "x": 3640.53,
-   "y": 580
+   "x": 4983.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "lactose": {
    "r": "sugar",
-   "x": 4856.53,
-   "y": 1120
+   "x": 4983.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "las": {
    "r": "ester-lipid",
-   "x": 4248.53,
-   "y": 688
+   "x": 4983.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "lauric-acid": {
    "r": "ester-lipid",
-   "x": 4400.53,
-   "y": 688
+   "x": 5135.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "lead-ii-acetate": {
    "r": "carbonyl",
-   "x": 3792.53,
-   "y": 580
+   "x": 5135.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "leucine": {
    "r": "amino",
-   "x": 4856.53,
-   "y": 1336
+   "x": 5591.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "linoleic-acid": {
    "r": "ester-lipid",
-   "x": 1734.74,
-   "y": 983.43
+   "x": 536.53,
+   "y": 1608.26,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "linolenic-acid": {
    "r": "ester-lipid",
-   "x": 4552.53,
-   "y": 688
+   "x": 5287.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "lipase": {
    "r": "amino",
-   "x": 3488.53,
-   "y": 1390
+   "x": 5743.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "lysine": {
    "r": "amino",
-   "x": 3640.53,
-   "y": 1390
+   "x": 5895.5,
+   "y": 1100,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "m-cresol": {
    "r": "phenol-aromatic",
-   "x": 3640.53,
-   "y": 850
+   "x": 5287.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "m-hydroxybenzoic-acid": {
    "r": "carbonyl",
-   "x": 3944.53,
-   "y": 580
+   "x": 5287.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "m-nitrotoluene": {
    "r": "phenol-aromatic",
-   "x": 3792.53,
-   "y": 850
+   "x": 5439.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "m-xylene": {
    "r": "aromatic",
-   "x": 3792.53,
-   "y": 364
+   "x": 4527.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "maleic-acid": {
    "r": "carbonyl",
-   "x": 4096.53,
-   "y": 580
+   "x": 5439.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "maleic-anhydride": {
    "r": "carbonyl",
-   "x": 4248.53,
-   "y": 580
+   "x": 5591.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "malic-acid": {
    "r": "carbonyl",
-   "x": 4400.53,
-   "y": 580
+   "x": 5743.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "malonic-acid": {
    "r": "carbonyl",
-   "x": 4552.53,
-   "y": 580
+   "x": 5895.5,
+   "y": 452,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "maltase": {
    "r": "amino",
-   "x": 3792.53,
-   "y": 1390
+   "x": 4223.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "maltose": {
    "r": "sugar",
-   "x": 2023.27,
-   "y": 40
+   "x": 2267.5,
+   "y": 1462.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "mannose": {
    "r": "sugar",
-   "x": 2323.06,
-   "y": 141.75
+   "x": 2399.22,
+   "y": 1833.29,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "melamine": {
    "r": "polymer",
-   "x": 4096.53,
-   "y": 1606
+   "x": 5135.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "melamine-resin": {
    "r": "polymer",
-   "x": 4248.53,
-   "y": 1606
+   "x": 5287.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "methacrylic-acid": {
    "r": "carbonyl",
-   "x": 4704.53,
-   "y": 580
+   "x": 4223.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "methane": {
    "r": "hydrocarbon",
-   "x": 3062.79,
-   "y": 1143.74
+   "x": 667.5,
+   "y": 312.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "methanol": {
    "r": "alcohol-ether",
-   "x": 1121.3,
-   "y": 1101.39
+   "x": 818.5,
+   "y": 1112.59,
+   "w": 194,
+   "h": 34,
+   "tier": "primary"
   },
   "methionine": {
    "r": "amino",
-   "x": 3944.53,
-   "y": 1390
+   "x": 4375.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "methoxyethane": {
    "r": "alcohol-ether",
-   "x": 4704.53,
-   "y": 418
+   "x": 5135.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "methyl-acetate": {
    "r": "ester-lipid",
-   "x": 1623.38,
-   "y": 1239.99
+   "x": 838.28,
+   "y": 926.82,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "methyl-formate": {
    "r": "ester-lipid",
-   "x": 1541.95,
-   "y": 1361.14
+   "x": 150.63,
+   "y": 805.99,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "methyl-methacrylate": {
    "r": "polymer",
-   "x": 4400.53,
-   "y": 1606
+   "x": 5439.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "methyl-orange": {
    "r": "phenol-aromatic",
-   "x": 3944.53,
-   "y": 850
+   "x": 5591.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "methyl-propionate": {
    "r": "ester-lipid",
-   "x": 1401.56,
-   "y": 1082.75
+   "x": 639.28,
+   "y": 372.33,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "methyl-salicylate": {
    "r": "ester-lipid",
-   "x": 830.14,
-   "y": 1247.03
+   "x": 1047.5,
+   "y": 1112.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "methylamine": {
    "r": "nitrogen",
-   "x": 4400.53,
-   "y": 1012
+   "x": 5135.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "mucin": {
    "r": "amino",
-   "x": 4096.53,
-   "y": 1390
+   "x": 4527.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "myristic-acid": {
    "r": "ester-lipid",
-   "x": 4704.53,
-   "y": 688
+   "x": 5439.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "n,n-dimethylaniline": {
    "r": "nitrogen",
-   "x": 4552.53,
-   "y": 1012
+   "x": 5287.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "n,n-dimethylethanamine": {
    "r": "nitrogen",
-   "x": 4704.53,
-   "y": 1012
+   "x": 5439.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "n-methylpropan-1-amine": {
    "r": "nitrogen",
-   "x": 4856.53,
-   "y": 1012
+   "x": 5591.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "n-methylpropan-2-amine": {
    "r": "nitrogen",
-   "x": 3488.53,
-   "y": 1066
+   "x": 5743.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "naphthalene": {
    "r": "aromatic",
-   "x": 3944.53,
-   "y": 364
+   "x": 4679.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "natural-rubber": {
    "r": "polymer",
-   "x": 4552.53,
-   "y": 1606
+   "x": 5591.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "nbr": {
    "r": "polymer",
-   "x": 4704.53,
-   "y": 1606
+   "x": 5743.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "neopentane": {
    "r": "hydrocarbon",
-   "x": 4856.53,
-   "y": 256
+   "x": 4375.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "ninhydrin": {
    "r": "phenol-aromatic",
-   "x": 4096.53,
-   "y": 850
+   "x": 5743.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "nitrobenzene": {
    "r": "phenol-aromatic",
-   "x": 252.14,
-   "y": 947.35
+   "x": 2323.5,
+   "y": 884.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "nitromethane": {
    "r": "nitrogen",
-   "x": 3640.53,
-   "y": 1066
+   "x": 5895.5,
+   "y": 830,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "nonane": {
    "r": "hydrocarbon",
-   "x": 3488.53,
-   "y": 310
+   "x": 4527.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "nylon6": {
    "r": "polymer",
-   "x": 2389.43,
-   "y": 1143.74
+   "x": 3967.5,
+   "y": 2142.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "nylon66": {
    "r": "polymer",
-   "x": 2171.68,
-   "y": 1143.74
+   "x": 3067.5,
+   "y": 2112.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "o-cresol": {
    "r": "phenol-aromatic",
-   "x": 4248.53,
-   "y": 850
+   "x": 5895.5,
+   "y": 668,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "o-nitrophenol": {
    "r": "phenol-aromatic",
-   "x": 4400.53,
-   "y": 850
+   "x": 4223.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "o-nitrotoluene": {
    "r": "phenol-aromatic",
-   "x": 4552.53,
-   "y": 850
+   "x": 4375.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "o-xylene": {
    "r": "aromatic",
-   "x": 4096.53,
-   "y": 364
+   "x": 4831.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "octane": {
    "r": "hydrocarbon",
-   "x": 3640.53,
-   "y": 310
+   "x": 4679.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "oleic-acid": {
    "r": "ester-lipid",
-   "x": 1423.86,
-   "y": 1300.98
+   "x": 1471.96,
+   "y": 1405.4,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "oryzenin": {
    "r": "amino",
-   "x": 4248.53,
-   "y": 1390
+   "x": 4679.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "oxalic-acid": {
    "r": "carbonyl",
-   "x": 1600.57,
-   "y": 905.5
+   "x": 597.5,
+   "y": 1112.59,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "p-cresol": {
    "r": "phenol-aromatic",
-   "x": 4704.53,
-   "y": 850
+   "x": 4527.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "p-dichlorobenzene": {
    "r": "aromatic",
-   "x": 4248.53,
-   "y": 364
+   "x": 4983.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "p-divinylbenzene": {
    "r": "aromatic",
-   "x": 4400.53,
-   "y": 364
+   "x": 5135.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "p-hydroxyazobenzene": {
    "r": "phenol-aromatic",
-   "x": 1351.24,
-   "y": 995.32
+   "x": 2630.5,
+   "y": 232.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "p-hydroxybenzoic-acid": {
    "r": "carbonyl",
-   "x": 4856.53,
-   "y": 580
+   "x": 4375.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "p-nitrophenol": {
    "r": "phenol-aromatic",
-   "x": 4856.53,
-   "y": 850
+   "x": 4679.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "p-nitrotoluene": {
    "r": "phenol-aromatic",
-   "x": 3488.53,
-   "y": 904
+   "x": 4831.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "p-phenylenediamine": {
    "r": "nitrogen",
-   "x": 3792.53,
-   "y": 1066
+   "x": 4223.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "p-xylene": {
    "r": "aromatic",
-   "x": 3102.63,
-   "y": 676.77
+   "x": 1967.5,
+   "y": 1962.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "palmitic-acid": {
    "r": "ester-lipid",
-   "x": 1441.6,
-   "y": 1441.23
+   "x": 536.53,
+   "y": 1416.92,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "pan": {
    "r": "polymer",
-   "x": 4856.53,
-   "y": 1606
+   "x": 5895.5,
+   "y": 1316,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pent-1-ene": {
    "r": "hydrocarbon",
-   "x": 3792.53,
-   "y": 310
+   "x": 4831.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pent-1-yne": {
    "r": "hydrocarbon",
-   "x": 3944.53,
-   "y": 310
+   "x": 4983.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pent-2-ene": {
    "r": "hydrocarbon",
-   "x": 4096.53,
-   "y": 310
+   "x": 5135.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pent-2-yne": {
    "r": "hydrocarbon",
-   "x": 4248.53,
-   "y": 310
+   "x": 5287.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pentan-1-ol": {
    "r": "alcohol-ether",
-   "x": 4856.53,
-   "y": 418
+   "x": 5287.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pentan-2-ol": {
    "r": "alcohol-ether",
-   "x": 3488.53,
-   "y": 472
+   "x": 5439.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pentan-3-ol": {
    "r": "alcohol-ether",
-   "x": 3640.53,
-   "y": 472
+   "x": 5591.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pentan-3-one": {
    "r": "carbonyl",
-   "x": 3488.53,
-   "y": 634
+   "x": 4527.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pentanal": {
    "r": "carbonyl",
-   "x": 3640.53,
-   "y": 634
+   "x": 4679.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pentane": {
    "r": "hydrocarbon",
-   "x": 4400.53,
-   "y": 310
+   "x": 5439.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pentanoic-acid": {
    "r": "carbonyl",
-   "x": 3792.53,
-   "y": 634
+   "x": 4831.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pepsin": {
    "r": "amino",
-   "x": 4400.53,
-   "y": 1390
+   "x": 4831.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pet": {
    "r": "polymer",
-   "x": 3247.62,
-   "y": 699.4
+   "x": 2517.5,
+   "y": 2142.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "phenol": {
    "r": "phenol-aromatic",
-   "x": 709.68,
-   "y": 812.11
+   "x": 2828.5,
+   "y": 585.59,
+   "w": 176,
+   "h": 34,
+   "tier": "primary"
   },
   "phenol-resin": {
    "r": "polymer",
-   "x": 3488.53,
-   "y": 1660
+   "x": 4223.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "phenolphthalein": {
    "r": "phenol-aromatic",
-   "x": 3640.53,
-   "y": 904
+   "x": 4983.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "phenoxide-ion": {
    "r": "phenol-aromatic",
-   "x": 3792.53,
-   "y": 904
+   "x": 5135.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "phenyl-acetate": {
    "r": "ester-lipid",
-   "x": 4856.53,
-   "y": 688
+   "x": 5591.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "phenylalanine": {
    "r": "amino",
-   "x": 4552.53,
-   "y": 1390
+   "x": 4983.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "phosgene": {
    "r": "polymer",
-   "x": 3640.53,
-   "y": 1660
+   "x": 4375.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "phthalic-acid": {
    "r": "phenol-aromatic",
-   "x": 3944.53,
-   "y": 904
+   "x": 5287.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "phthalic-anhydride": {
    "r": "carbonyl",
-   "x": 3944.53,
-   "y": 634
+   "x": 4983.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "picric-acid": {
    "r": "phenol-aromatic",
-   "x": 4096.53,
-   "y": 904
+   "x": 5439.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pla": {
    "r": "polymer",
-   "x": 3792.53,
-   "y": 1660
+   "x": 4527.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pmma": {
    "r": "polymer",
-   "x": 3944.53,
-   "y": 1660
+   "x": 4679.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "polyacetylene": {
    "r": "polymer",
-   "x": 4096.53,
-   "y": 1660
+   "x": 4831.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "polyaniline": {
    "r": "polymer",
-   "x": 4248.53,
-   "y": 1660
+   "x": 4983.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "polycarbonate": {
    "r": "polymer",
-   "x": 4400.53,
-   "y": 1660
+   "x": 5135.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "polyethylene": {
    "r": "polymer",
-   "x": 942.26,
-   "y": 253.73
+   "x": 1487.5,
+   "y": 412.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "polypropylene": {
    "r": "polymer",
-   "x": 1290.89,
-   "y": 80.06
+   "x": 3667.5,
+   "y": 1262.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "polystyrene": {
    "r": "polymer",
-   "x": 2724.97,
-   "y": 1403.74
+   "x": 3967.5,
+   "y": 1392.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "polyurethane": {
    "r": "polymer",
-   "x": 4552.53,
-   "y": 1660
+   "x": 5287.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "proline": {
    "r": "amino",
-   "x": 4704.53,
-   "y": 1390
+   "x": 5135.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "prop-1-en-1-ol": {
    "r": "hydrocarbon",
-   "x": 4552.53,
-   "y": 310
+   "x": 5591.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "prop-1-en-2-ol": {
    "r": "hydrocarbon",
-   "x": 4704.53,
-   "y": 310
+   "x": 5743.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "propan-1-ol": {
    "r": "alcohol-ether",
-   "x": 218.46,
-   "y": 509.5
+   "x": 1990.8,
+   "y": 636.72,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "propan-2-ol": {
    "r": "alcohol-ether",
-   "x": 807.47,
-   "y": 473.82
+   "x": 3717.5,
+   "y": 812.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "propanal": {
    "r": "carbonyl",
-   "x": 496.02,
-   "y": 439.24
+   "x": 1771.37,
+   "y": 720.47,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "propane": {
    "r": "hydrocarbon",
-   "x": 1238.74,
-   "y": 206.32
+   "x": 2917.5,
+   "y": 1162.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "propanenitrile": {
    "r": "nitrogen",
-   "x": 3944.53,
-   "y": 1066
+   "x": 4375.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "propene": {
    "r": "hydrocarbon",
-   "x": 987.38,
-   "y": 129.73
+   "x": 3267.5,
+   "y": 1012.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "propionic-acid": {
    "r": "carbonyl",
-   "x": 849.88,
-   "y": 792.7
+   "x": 1501.37,
+   "y": 720.47,
+   "w": 176,
+   "h": 34,
+   "tier": "secondary"
   },
   "propyl-formate": {
    "r": "ester-lipid",
-   "x": 3488.53,
-   "y": 742
+   "x": 5743.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "propylamine": {
    "r": "nitrogen",
-   "x": 4096.53,
-   "y": 1066
+   "x": 4527.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "propylene-glycol": {
    "r": "alcohol-ether",
-   "x": 3792.53,
-   "y": 472
+   "x": 5743.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "propyne": {
    "r": "hydrocarbon",
-   "x": 1323.75,
-   "y": 323.38
+   "x": 3029.83,
+   "y": 456.63,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "protamine": {
    "r": "amino",
-   "x": 4856.53,
-   "y": 1390
+   "x": 5287.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "protease": {
    "r": "amino",
-   "x": 3488.53,
-   "y": 1444
+   "x": 5439.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "protein": {
    "r": "amino",
-   "x": 2684.35,
-   "y": 1533.66
+   "x": 20,
+   "y": 960.76,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "ptfe": {
    "r": "polymer",
-   "x": 4704.53,
-   "y": 1660
+   "x": 5439.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pva": {
    "r": "polymer",
-   "x": 4856.53,
-   "y": 1660
+   "x": 5591.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pvac": {
    "r": "polymer",
-   "x": 3488.53,
-   "y": 1714
+   "x": 5743.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pvc": {
    "r": "polymer",
-   "x": 1968.72,
-   "y": 1777.79
+   "x": 3967.5,
+   "y": 1862.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "pvdc": {
    "r": "polymer",
-   "x": 3640.53,
-   "y": 1714
+   "x": 5895.5,
+   "y": 1370,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "pyruvic-acid": {
    "r": "carbonyl",
-   "x": 4096.53,
-   "y": 634
+   "x": 5135.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "quercetin": {
    "r": "phenol-aromatic",
-   "x": 4248.53,
-   "y": 904
+   "x": 5591.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "resorcinol": {
    "r": "phenol-aromatic",
-   "x": 4400.53,
-   "y": 904
+   "x": 5743.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "ribose": {
    "r": "sugar",
-   "x": 3488.53,
-   "y": 1174
+   "x": 5135.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "rna": {
    "r": "polymer",
-   "x": 3792.53,
-   "y": 1714
+   "x": 4223.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "salicin": {
    "r": "sugar",
-   "x": 3640.53,
-   "y": 1174
+   "x": 5287.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "salicylic-acid": {
    "r": "phenol-aromatic",
-   "x": 1104.06,
-   "y": 1463.77
+   "x": 1227.5,
+   "y": 1112.59,
+   "w": 176,
+   "h": 34,
+   "tier": "primary"
   },
   "salmine": {
    "r": "amino",
-   "x": 3640.53,
-   "y": 1444
+   "x": 5591.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sbr": {
    "r": "polymer",
-   "x": 3944.53,
-   "y": 1714
+   "x": 4375.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sds": {
    "r": "ester-lipid",
-   "x": 3640.53,
-   "y": 742
+   "x": 5895.5,
+   "y": 560,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "serine": {
    "r": "amino",
-   "x": 3792.53,
-   "y": 1444
+   "x": 5743.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "shikonin": {
    "r": "phenol-aromatic",
-   "x": 4552.53,
-   "y": 904
+   "x": 5895.5,
+   "y": 722,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "silicone": {
    "r": "polymer",
-   "x": 4096.53,
-   "y": 1714
+   "x": 4527.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "silver-acetylide": {
    "r": "hydrocarbon",
-   "x": 4856.53,
-   "y": 310
+   "x": 5895.5,
+   "y": 236,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sodium-acetate": {
    "r": "carbonyl",
-   "x": 4248.53,
-   "y": 634
+   "x": 5287.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sodium-alginate": {
    "r": "polymer",
-   "x": 4248.53,
-   "y": 1714
+   "x": 4679.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sodium-benzenesulfonate": {
    "r": "phenol-aromatic",
-   "x": 4704.53,
-   "y": 904
+   "x": 4223.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sodium-benzoate": {
    "r": "carbonyl",
-   "x": 4400.53,
-   "y": 634
+   "x": 5439.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sodium-ethoxide": {
    "r": "alcohol-ether",
-   "x": 3944.53,
-   "y": 472
+   "x": 5895.5,
+   "y": 344,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sodium-laurate": {
    "r": "ester-lipid",
-   "x": 3792.53,
-   "y": 742
+   "x": 4223.5,
+   "y": 614,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sodium-methoxide": {
    "r": "alcohol-ether",
-   "x": 4096.53,
-   "y": 472
+   "x": 4223.5,
+   "y": 398,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sodium-oleate": {
    "r": "ester-lipid",
-   "x": 1092.13,
-   "y": 1063.27
+   "x": 1292.99,
+   "y": 2063.45,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "sodium-palmitate": {
    "r": "ester-lipid",
-   "x": 1200.02,
-   "y": 516.34
+   "x": 612.64,
+   "y": 1241.86,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "sodium-phenoxide": {
    "r": "phenol-aromatic",
-   "x": 294.64,
-   "y": 828.86
+   "x": 3085.5,
+   "y": 679.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "sodium-polyacrylate": {
    "r": "polymer",
-   "x": 4400.53,
-   "y": 1714
+   "x": 4831.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sodium-salicylate": {
    "r": "phenol-aromatic",
-   "x": 4856.53,
-   "y": 904
+   "x": 4375.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sodium-stearate": {
    "r": "ester-lipid",
-   "x": 1125.19,
-   "y": 616.7
+   "x": 1167.5,
+   "y": 2112.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "sorbitol": {
    "r": "sugar",
-   "x": 2388.68,
-   "y": 269.32
+   "x": 2173.82,
+   "y": 1406.85,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "starch": {
    "r": "sugar",
-   "x": 1991.74,
-   "y": 298.11
+   "x": 2067.5,
+   "y": 1562.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "stearic-acid": {
    "r": "ester-lipid",
-   "x": 816.05,
-   "y": 892.08
+   "x": 1327.5,
+   "y": 1632.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "styrene": {
    "r": "aromatic",
-   "x": 2725.94,
-   "y": 1143.74
+   "x": 3967.5,
+   "y": 1512.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "succinic-acid": {
    "r": "carbonyl",
-   "x": 4552.53,
-   "y": 634
+   "x": 5591.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sucrase": {
    "r": "amino",
-   "x": 3944.53,
-   "y": 1444
+   "x": 5895.5,
+   "y": 1154,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sucrose": {
    "r": "sugar",
-   "x": 2589.43,
-   "y": 295.46
+   "x": 2567.5,
+   "y": 1512.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "sulfanilamide": {
    "r": "phenol-aromatic",
-   "x": 3488.53,
-   "y": 958
+   "x": 4527.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "sulfanilic-acid": {
    "r": "phenol-aromatic",
-   "x": 3640.53,
-   "y": 958
+   "x": 4679.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "tartaric-acid": {
    "r": "carbonyl",
-   "x": 4704.53,
-   "y": 634
+   "x": 5743.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "terephthalic-acid": {
    "r": "phenol-aromatic",
-   "x": 3069.09,
-   "y": 934.64
+   "x": 2217.5,
+   "y": 2062.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "terephthaloyl-chloride": {
    "r": "carbonyl",
-   "x": 4856.53,
-   "y": 634
+   "x": 5895.5,
+   "y": 506,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "tetrafluoroethylene": {
    "r": "polymer",
-   "x": 4552.53,
-   "y": 1714
+   "x": 4983.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "threonine": {
    "r": "amino",
-   "x": 4096.53,
-   "y": 1444
+   "x": 4223.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "thymine": {
    "r": "polymer",
-   "x": 4704.53,
-   "y": 1714
+   "x": 5135.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "tnt": {
    "r": "phenol-aromatic",
-   "x": 3792.53,
-   "y": 958
+   "x": 4831.5,
+   "y": 776,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "toluene": {
    "r": "aromatic",
-   "x": 4552.53,
-   "y": 364
+   "x": 5287.5,
+   "y": 290,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "trehalose": {
    "r": "sugar",
-   "x": 3792.53,
-   "y": 1174
+   "x": 5439.5,
+   "y": 938,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "triacetin": {
    "r": "ester-lipid",
-   "x": 1381.29,
-   "y": 1568.27
+   "x": 221.18,
+   "y": 1091.44,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "triethylamine": {
    "r": "nitrogen",
-   "x": 4248.53,
-   "y": 1066
+   "x": 4679.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "trilinolein": {
    "r": "ester-lipid",
-   "x": 1752.72,
-   "y": 1146.02
+   "x": 504.13,
+   "y": 1510.11,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "trimethylamine": {
    "r": "nitrogen",
-   "x": 4400.53,
-   "y": 1066
+   "x": 4831.5,
+   "y": 884,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "triolein": {
    "r": "ester-lipid",
-   "x": 1043.84,
-   "y": 1179.02
+   "x": 1567.5,
+   "y": 1872.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "tripalmitin": {
    "r": "ester-lipid",
-   "x": 1466.36,
-   "y": 943.7
+   "x": 583.02,
+   "y": 1324.61,
+   "w": 136,
+   "h": 34,
+   "tier": "secondary"
   },
   "tristearin": {
    "r": "ester-lipid",
-   "x": 932.33,
-   "y": 714.68
+   "x": 1307.5,
+   "y": 1872.59,
+   "w": 176,
+   "h": 34,
+   "tier": "primary"
   },
   "trypsin": {
    "r": "amino",
-   "x": 4248.53,
-   "y": 1444
+   "x": 4375.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "tryptophan": {
    "r": "amino",
-   "x": 4400.53,
-   "y": 1444
+   "x": 4527.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "tyrosine": {
    "r": "amino",
-   "x": 4552.53,
-   "y": 1444
+   "x": 4679.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "unsaturated-polyester": {
    "r": "polymer",
-   "x": 4856.53,
-   "y": 1714
+   "x": 5287.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "uracil": {
    "r": "polymer",
-   "x": 3488.53,
-   "y": 1768
+   "x": 5439.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "urea": {
    "r": "polymer",
-   "x": 3640.53,
-   "y": 1768
+   "x": 5591.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "urea-resin": {
    "r": "polymer",
-   "x": 3792.53,
-   "y": 1768
+   "x": 5743.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "urease": {
    "r": "amino",
-   "x": 4704.53,
-   "y": 1444
+   "x": 4831.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "valine": {
    "r": "amino",
-   "x": 4856.53,
-   "y": 1444
+   "x": 4983.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "vinyl-acetate": {
    "r": "polymer",
-   "x": 3944.53,
-   "y": 1768
+   "x": 5895.5,
+   "y": 1424,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "vinyl-chloride": {
    "r": "polymer",
-   "x": 1969.51,
-   "y": 1517.75
+   "x": 3967.5,
+   "y": 1742.59,
+   "w": 136,
+   "h": 34,
+   "tier": "primary"
   },
   "vinylidene-chloride": {
    "r": "polymer",
-   "x": 4096.53,
-   "y": 1768
+   "x": 4223.5,
+   "y": 1478,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "vinylon": {
    "r": "polymer",
-   "x": 4248.53,
-   "y": 1768
+   "x": 4375.5,
+   "y": 1478,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   },
   "zymase": {
    "r": "amino",
-   "x": 3488.53,
-   "y": 1498
+   "x": 5135.5,
+   "y": 1208,
+   "w": 136,
+   "h": 34,
+   "tier": "isolated"
   }
  },
  "reactions": {
   "2-methylpropan-2-ol-dehydration": {
-   "x": 2520.97,
-   "y": 921.31,
-   "label": {
-    "side": "W",
-    "type": {
-     "x": 2443.97,
-     "y": 915.31
-    },
-    "cond": {
-     "x": 2443.97,
-     "y": 928.31
-    }
-   },
+   "x": 225.83,
+   "y": 154.77,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "2-methylpropan-2-ol"
    ],
@@ -2799,19 +4073,10 @@
    "cross": true
   },
   "2-methylpropan-2-ol-hydrogen-chloride": {
-   "x": 2780.96,
-   "y": 923.03,
-   "label": {
-    "side": "E",
-    "type": {
-     "x": 2840.5,
-     "y": 917.03
-    },
-    "cond": {
-     "x": 2840.5,
-     "y": 930.03
-    }
-   },
+   "x": 224.04,
+   "y": 278.9,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "2-methylpropan-2-ol"
    ],
@@ -2823,19 +4088,10 @@
    "cross": true
   },
   "acetic-acid-butanol-esterification": {
-   "x": 1357.06,
-   "y": 1239.51,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 1357.06,
-     "y": 1246.51
-    },
-    "cond": {
-     "x": 1357.06,
-     "y": 1265.51
-    }
-   },
+   "x": 1346.37,
+   "y": 975.51,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "acetic-acid",
     "butan-1-ol"
@@ -2848,17 +4104,21 @@
    "cross": true
   },
   "acetic-acid-ethanol-esterification": {
-   "x": 1241.47,
-   "y": 891.08,
+   "x": 1075.5,
+   "y": 789.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "S",
     "type": {
-     "x": 1241.47,
-     "y": 865.08
+     "x": 1047.4,
+     "y": 820.8
     },
-    "cond": {
-     "x": 1241.47,
-     "y": 884.08
+    "cond": null,
+    "box": {
+     "x": 1008.4,
+     "y": 812.8,
+     "w": 78,
+     "h": 16
     }
    },
    "substrates": [
@@ -2873,19 +4133,10 @@
    "cross": true
   },
   "acetic-acid-glycerol-esterification": {
-   "x": 1402.36,
-   "y": 1375.64,
-   "label": {
-    "side": "E",
-    "type": {
-     "x": 1476.48,
-     "y": 1369.64
-    },
-    "cond": {
-     "x": 1476.48,
-     "y": 1382.64
-    }
-   },
+   "x": 417.5,
+   "y": 1129.27,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "acetic-acid",
     "glycerol"
@@ -2898,19 +4149,10 @@
    "cross": true
   },
   "acetic-acid-isoamyl-esterification": {
-   "x": 1560.77,
-   "y": 797.79,
-   "label": {
-    "side": "W",
-    "type": {
-     "x": 1486.65,
-     "y": 791.79
-    },
-    "cond": {
-     "x": 1486.65,
-     "y": 804.79
-    }
-   },
+   "x": 1150.65,
+   "y": 844.74,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "acetic-acid",
     "3-methylbutan-1-ol"
@@ -2923,19 +4165,10 @@
    "cross": true
   },
   "acetic-acid-methanol-esterification": {
-   "x": 1428.26,
-   "y": 1171.44,
-   "label": {
-    "side": "N",
-    "type": {
-     "x": 1428.26,
-     "y": 1145.44
-    },
-    "cond": {
-     "x": 1428.26,
-     "y": 1164.44
-    }
-   },
+   "x": 1035.5,
+   "y": 929.59,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "acetic-acid",
     "methanol"
@@ -2948,19 +4181,10 @@
    "cross": true
   },
   "acetone-reduction": {
-   "x": 900.89,
-   "y": 620.63,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 900.89,
-     "y": 627.63
-    },
-    "cond": {
-     "x": 900.89,
-     "y": 646.63
-    }
-   },
+   "x": 3665.5,
+   "y": 829.59,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "acetone"
    ],
@@ -2972,19 +4196,10 @@
    "cross": true
   },
   "alanine-glycine-peptide": {
-   "x": 3134.59,
-   "y": 496.57,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 3134.59,
-     "y": 503.57
-    },
-    "cond": {
-     "x": 3134.59,
-     "y": 522.57
-    }
-   },
+   "x": 3474.77,
+   "y": 1391.56,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "alanine",
     "glycine"
@@ -2997,19 +4212,10 @@
    "cross": false
   },
   "alanylglycine-hydrolysis": {
-   "x": 3005.98,
-   "y": 564.77,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 3005.98,
-     "y": 571.77
-    },
-    "cond": {
-     "x": 3005.98,
-     "y": 590.77
-    }
-   },
+   "x": 3411.33,
+   "y": 1447,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "alanylglycine"
    ],
@@ -3022,17 +4228,21 @@
    "cross": false
   },
   "aniline-acetic-anhydride": {
-   "x": 971.64,
-   "y": 1210.97,
+   "x": 1985.5,
+   "y": 1029.59,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "W",
     "type": {
-     "x": 971.64,
-     "y": 1217.97
+     "x": 1951.52,
+     "y": 1004.9
     },
-    "cond": {
-     "x": 971.64,
-     "y": 1236.97
+    "cond": null,
+    "box": {
+     "x": 1912.52,
+     "y": 996.9,
+     "w": 78,
+     "h": 16
     }
    },
    "substrates": [
@@ -3047,17 +4257,21 @@
    "cross": true
   },
   "aniline-diazotization": {
-   "x": 774.19,
-   "y": 1444.44,
+   "x": 2272.32,
+   "y": 643.41,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 774.19,
-     "y": 1451.44
+     "x": 2306.3,
+     "y": 668.1
     },
-    "cond": {
-     "x": 774.19,
-     "y": 1470.44
+    "cond": null,
+    "box": {
+     "x": 2274.3,
+     "y": 660.1,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -3071,17 +4285,21 @@
    "cross": true
   },
   "aspirin-hydrolysis": {
-   "x": 1330.26,
-   "y": 1495.17,
+   "x": 1465.5,
+   "y": 999.59,
+   "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "N",
     "type": {
-     "x": 1416.26,
-     "y": 1489.17
+     "x": 1448.42,
+     "y": 961.22
     },
-    "cond": {
-     "x": 1416.26,
-     "y": 1502.17
+    "cond": null,
+    "box": {
+     "x": 1416.42,
+     "y": 953.22,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -3096,17 +4314,21 @@
    "cross": true
   },
   "benzaldehyde-oxidation": {
-   "x": 2158.32,
-   "y": 1031.74,
+   "x": 3985.5,
+   "y": 259.59,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 2158.32,
-     "y": 1038.74
+     "x": 4027.5,
+     "y": 259.59
     },
-    "cond": {
-     "x": 2158.32,
-     "y": 1057.74
+    "cond": null,
+    "box": {
+     "x": 4009.5,
+     "y": 251.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3120,17 +4342,21 @@
    "cross": true
   },
   "benzene-chlorination": {
-   "x": 447.48,
-   "y": 1263.05,
+   "x": 2801.36,
+   "y": 1192.35,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 447.48,
-     "y": 1270.05
+     "x": 2835.34,
+     "y": 1217.04
     },
-    "cond": {
-     "x": 447.48,
-     "y": 1289.05
+    "cond": null,
+    "box": {
+     "x": 2796.34,
+     "y": 1209.04,
+     "w": 78,
+     "h": 16
     }
    },
    "substrates": [
@@ -3144,17 +4370,21 @@
    "cross": true
   },
   "benzene-nitration": {
-   "x": 374.13,
-   "y": 1114.91,
+   "x": 2353.05,
+   "y": 1156.66,
+   "tier": "primary",
    "label": {
     "side": "S",
     "type": {
-     "x": 374.13,
-     "y": 1121.91
+     "x": 2374.05,
+     "y": 1193.04
     },
-    "cond": {
-     "x": 374.13,
-     "y": 1140.91
+    "cond": null,
+    "box": {
+     "x": 2342.05,
+     "y": 1185.04,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -3168,17 +4398,21 @@
    "cross": true
   },
   "benzene-sulfonation": {
-   "x": 608.75,
-   "y": 656.16,
+   "x": 2515.5,
+   "y": 1349.59,
+   "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 540.75,
-     "y": 650.16
+     "x": 2549.48,
+     "y": 1374.28
     },
-    "cond": {
-     "x": 540.75,
-     "y": 663.16
+    "cond": null,
+    "box": {
+     "x": 2510.48,
+     "y": 1366.28,
+     "w": 78,
+     "h": 16
     }
    },
    "substrates": [
@@ -3192,17 +4426,21 @@
    "cross": true
   },
   "benzyl-alcohol-oxidation": {
-   "x": 2268.89,
-   "y": 796.42,
+   "x": 3785.5,
+   "y": 259.59,
+   "tier": "primary",
    "label": {
     "side": "E",
     "type": {
-     "x": 2330.19,
-     "y": 790.42
+     "x": 3827.5,
+     "y": 259.59
     },
-    "cond": {
-     "x": 2330.19,
-     "y": 803.42
+    "cond": null,
+    "box": {
+     "x": 3809.5,
+     "y": 251.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3216,19 +4454,10 @@
    "cross": false
   },
   "butan-1-ol-oxidation": {
-   "x": 962,
-   "y": 1609.73,
-   "label": {
-    "side": "E",
-    "type": {
-     "x": 1023.3,
-     "y": 1603.73
-    },
-    "cond": {
-     "x": 1023.3,
-     "y": 1616.73
-    }
-   },
+   "x": 1637.93,
+   "y": 921.06,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "butan-1-ol"
    ],
@@ -3240,19 +4469,10 @@
    "cross": true
   },
   "butanal-reduction": {
-   "x": 816.45,
-   "y": 1607.62,
-   "label": {
-    "side": "W",
-    "type": {
-     "x": 736.39,
-     "y": 1601.62
-    },
-    "cond": {
-     "x": 736.39,
-     "y": 1614.62
-    }
-   },
+   "x": 1683.08,
+   "y": 1005.92,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "butanal"
    ],
@@ -3264,19 +4484,10 @@
    "cross": true
   },
   "butanoic-acid-ethanol-esterification": {
-   "x": 1339.35,
-   "y": 656.72,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 1339.35,
-     "y": 663.72
-    },
-    "cond": {
-     "x": 1339.35,
-     "y": 682.72
-    }
-   },
+   "x": 1346.37,
+   "y": 583.67,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "butanoic-acid",
     "ethanol"
@@ -3289,17 +4500,21 @@
    "cross": true
   },
   "caprolactam-ring-opening": {
-   "x": 2558.97,
-   "y": 1291.4,
+   "x": 3915.5,
+   "y": 2139.59,
+   "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "S",
     "type": {
-     "x": 2644.97,
-     "y": 1285.4
+     "x": 3932.58,
+     "y": 2177.96
     },
-    "cond": {
-     "x": 2644.97,
-     "y": 1298.4
+    "cond": null,
+    "box": {
+     "x": 3900.58,
+     "y": 2169.96,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -3313,17 +4528,21 @@
    "cross": false
   },
   "chlorobenzene-dow-phenol": {
-   "x": 200,
-   "y": 1046.71,
+   "x": 3124.14,
+   "y": 992.46,
+   "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 114,
-     "y": 1040.71
+     "x": 3166.14,
+     "y": 992.46
     },
-    "cond": {
-     "x": 114,
-     "y": 1053.71
+    "cond": null,
+    "box": {
+     "x": 3148.14,
+     "y": 984.46,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3337,17 +4556,21 @@
    "cross": false
   },
   "cumene-hydroperoxide-decomposition": {
-   "x": 797.71,
-   "y": 688.67,
+   "x": 3335.5,
+   "y": 429.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "E",
     "type": {
-     "x": 797.71,
-     "y": 662.67
+     "x": 3377.5,
+     "y": 429.59
     },
-    "cond": {
-     "x": 797.71,
-     "y": 681.67
+    "cond": null,
+    "box": {
+     "x": 3359.5,
+     "y": 421.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3362,17 +4585,21 @@
    "cross": true
   },
   "cumene-oxidation": {
-   "x": 375.94,
-   "y": 674.2,
+   "x": 2985.5,
+   "y": 249.59,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 375.94,
-     "y": 681.2
+     "x": 3027.5,
+     "y": 249.59
     },
-    "cond": {
-     "x": 375.94,
-     "y": 700.2
+    "cond": null,
+    "box": {
+     "x": 3009.5,
+     "y": 241.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3386,19 +4613,10 @@
    "cross": true
   },
   "cysteine-oxidation": {
-   "x": 2370.88,
-   "y": 1664.93,
-   "label": {
-    "side": "E",
-    "type": {
-     "x": 2420.88,
-     "y": 1658.93
-    },
-    "cond": {
-     "x": 2420.88,
-     "y": 1671.93
-    }
-   },
+   "x": 219.62,
+   "y": 663.18,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "cysteine"
    ],
@@ -3410,17 +4628,21 @@
    "cross": false
   },
   "diazonium-phenol-coupling": {
-   "x": 1035.75,
-   "y": 1142.92,
+   "x": 2699.77,
+   "y": 552.12,
+   "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "S",
     "type": {
-     "x": 954.25,
-     "y": 1136.92
+     "x": 2720.77,
+     "y": 588.49
     },
-    "cond": {
-     "x": 954.25,
-     "y": 1149.92
+    "cond": null,
+    "box": {
+     "x": 2674.77,
+     "y": 580.49,
+     "w": 92,
+     "h": 16
     }
    },
    "substrates": [
@@ -3435,17 +4657,21 @@
    "cross": false
   },
   "ethanal-oxidation-acetic": {
-   "x": 799.89,
-   "y": 1317.04,
+   "x": 975.5,
+   "y": 869.59,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 799.89,
-     "y": 1324.04
+     "x": 1017.5,
+     "y": 869.59
     },
-    "cond": {
-     "x": 799.89,
-     "y": 1343.04
+    "cond": null,
+    "box": {
+     "x": 999.5,
+     "y": 861.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3459,19 +4685,10 @@
    "cross": false
   },
   "ethanal-reduction": {
-   "x": 639.42,
-   "y": 979.73,
-   "label": {
-    "side": "W",
-    "type": {
-     "x": 559.36,
-     "y": 973.73
-    },
-    "cond": {
-     "x": 559.36,
-     "y": 986.73
-    }
-   },
+   "x": 1026.37,
+   "y": 743.67,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "ethanal"
    ],
@@ -3483,17 +4700,21 @@
    "cross": true
   },
   "ethanol-dehydration-ether": {
-   "x": 1052.99,
-   "y": 618.7,
+   "x": 1115.5,
+   "y": 549.59,
+   "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 984.99,
-     "y": 612.7
+     "x": 1157.5,
+     "y": 549.59
     },
-    "cond": {
-     "x": 984.99,
-     "y": 625.7
+    "cond": null,
+    "box": {
+     "x": 1139.5,
+     "y": 541.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3507,19 +4728,10 @@
    "cross": false
   },
   "ethanol-oxidation-acetic": {
-   "x": 956.6,
-   "y": 1074.83,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 956.6,
-     "y": 1081.83
-    },
-    "cond": {
-     "x": 956.6,
-     "y": 1100.83
-    }
-   },
+   "x": 1424.88,
+   "y": 924.55,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "ethanol"
    ],
@@ -3531,17 +4743,21 @@
    "cross": true
   },
   "ethanol-oxidation-ethanal": {
-   "x": 669.57,
-   "y": 1104.41,
+   "x": 975.5,
+   "y": 709.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "E",
     "type": {
-     "x": 669.57,
-     "y": 1078.41
+     "x": 1017.5,
+     "y": 709.59
     },
-    "cond": {
-     "x": 669.57,
-     "y": 1097.41
+    "cond": null,
+    "box": {
+     "x": 999.5,
+     "y": 701.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3555,17 +4771,21 @@
    "cross": true
   },
   "ethene-bromine-addition": {
-   "x": 633.3,
-   "y": 228.47,
+   "x": 1355.5,
+   "y": 249.59,
+   "tier": "primary",
    "label": {
     "side": "E",
     "type": {
-     "x": 683.3,
-     "y": 222.47
+     "x": 1397.5,
+     "y": 249.59
     },
-    "cond": {
-     "x": 683.3,
-     "y": 235.47
+    "cond": null,
+    "box": {
+     "x": 1379.5,
+     "y": 241.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3579,17 +4799,21 @@
    "cross": false
   },
   "ethene-hydration": {
-   "x": 748.79,
-   "y": 620.47,
+   "x": 1235.5,
+   "y": 479.59,
+   "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 680.79,
-     "y": 614.47
+     "x": 1277.5,
+     "y": 479.59
     },
-    "cond": {
-     "x": 680.79,
-     "y": 627.47
+    "cond": null,
+    "box": {
+     "x": 1259.5,
+     "y": 471.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3603,17 +4827,21 @@
    "cross": true
   },
   "ethene-hydrogen-bromide": {
-   "x": 728.05,
-   "y": 160.25,
+   "x": 1115.5,
+   "y": 249.59,
+   "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 669.05,
-     "y": 154.25
+     "x": 1157.5,
+     "y": 249.59
     },
-    "cond": {
-     "x": 669.05,
-     "y": 167.25
+    "cond": null,
+    "box": {
+     "x": 1139.5,
+     "y": 241.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3627,17 +4855,21 @@
    "cross": false
   },
   "ethene-hydrogenation": {
-   "x": 520.16,
-   "y": 296.67,
+   "x": 1235.5,
+   "y": 209.59,
+   "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 434.16,
-     "y": 290.67
+     "x": 1269.48,
+     "y": 234.28
     },
-    "cond": {
-     "x": 434.16,
-     "y": 303.67
+    "cond": null,
+    "box": {
+     "x": 1237.48,
+     "y": 226.28,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -3651,17 +4883,21 @@
    "cross": false
   },
   "ethene-polymerization": {
-   "x": 841.55,
-   "y": 258.52,
+   "x": 1395.5,
+   "y": 389.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "S",
     "type": {
-     "x": 841.55,
-     "y": 232.52
+     "x": 1420.19,
+     "y": 423.57
     },
-    "cond": {
-     "x": 841.55,
-     "y": 251.52
+    "cond": null,
+    "box": {
+     "x": 1388.19,
+     "y": 415.57,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -3675,17 +4911,21 @@
    "cross": true
   },
   "ethyl-acetate-hydrolysis": {
-   "x": 1339.71,
-   "y": 959.15,
+   "x": 1395.5,
+   "y": 789.59,
+   "tier": "primary",
    "label": {
     "side": "N",
     "type": {
-     "x": 1339.71,
-     "y": 933.15
+     "x": 1416.5,
+     "y": 753.22
     },
-    "cond": {
-     "x": 1339.71,
-     "y": 952.15
+    "cond": null,
+    "box": {
+     "x": 1384.5,
+     "y": 745.22,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -3700,19 +4940,10 @@
    "cross": true
   },
   "ethyl-propionate-saponification": {
-   "x": 828.02,
-   "y": 988.02,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 828.02,
-     "y": 995.02
-    },
-    "cond": {
-     "x": 828.02,
-     "y": 1014.02
-    }
-   },
+   "x": 1320.35,
+   "y": 714.44,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "ethyl-propionate"
    ],
@@ -3725,17 +4956,21 @@
    "cross": true
   },
   "formaldehyde-oxidation-formic": {
-   "x": 725.85,
-   "y": 911.53,
+   "x": 655.5,
+   "y": 769.59,
+   "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 639.85,
-     "y": 905.53
+     "x": 697.5,
+     "y": 769.59
     },
-    "cond": {
-     "x": 639.85,
-     "y": 918.53
+    "cond": null,
+    "box": {
+     "x": 679.5,
+     "y": 761.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -3749,19 +4984,10 @@
    "cross": false
   },
   "formic-acid-ethanol-esterification": {
-   "x": 1228.56,
-   "y": 754.82,
-   "label": {
-    "side": "N",
-    "type": {
-     "x": 1228.56,
-     "y": 728.82
-    },
-    "cond": {
-     "x": 1228.56,
-     "y": 747.82
-    }
-   },
+   "x": 920.28,
+   "y": 603.05,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "formic-acid",
     "ethanol"
@@ -3774,19 +5000,10 @@
    "cross": true
   },
   "formic-acid-methanol-esterification": {
-   "x": 1308.9,
-   "y": 1307.58,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 1308.9,
-     "y": 1314.58
-    },
-    "cond": {
-     "x": 1308.9,
-     "y": 1333.58
-    }
-   },
+   "x": 347.47,
+   "y": 840.32,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "formic-acid",
     "methanol"
@@ -3799,19 +5016,10 @@
    "cross": true
   },
   "fructose-base-isomerization": {
-   "x": 2372.27,
-   "y": 410.58,
-   "label": {
-    "side": "E",
-    "type": {
-     "x": 2444.77,
-     "y": 404.58
-    },
-    "cond": {
-     "x": 2444.77,
-     "y": 417.58
-    }
-   },
+   "x": 2515.5,
+   "y": 1729.59,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "fructose"
    ],
@@ -3824,19 +5032,10 @@
    "cross": false
   },
   "glucose-reduction": {
-   "x": 2215.51,
-   "y": 385.76,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 2215.51,
-     "y": 392.76
-    },
-    "cond": {
-     "x": 2215.51,
-     "y": 411.76
-    }
-   },
+   "x": 2324.63,
+   "y": 1583.67,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "glucose"
    ],
@@ -3848,19 +5047,10 @@
    "cross": false
   },
   "glycerol-linoleic-esterification": {
-   "x": 1680.61,
-   "y": 1106.22,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 1680.61,
-     "y": 1113.22
-    },
-    "cond": {
-     "x": 1680.61,
-     "y": 1132.22
-    }
-   },
+   "x": 724.63,
+   "y": 1575.51,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "glycerol",
     "linoleic-acid"
@@ -3873,19 +5063,10 @@
    "cross": true
   },
   "glycerol-oleic-esterification": {
-   "x": 1249.92,
-   "y": 1375.64,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 1249.92,
-     "y": 1382.64
-    },
-    "cond": {
-     "x": 1249.92,
-     "y": 1401.64
-    }
-   },
+   "x": 1796.23,
+   "y": 1501.56,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "glycerol",
     "oleic-acid"
@@ -3898,19 +5079,10 @@
    "cross": true
   },
   "glycerol-palmitic-esterification": {
-   "x": 1580.7,
-   "y": 1203.79,
-   "label": {
-    "side": "E",
-    "type": {
-     "x": 1654.82,
-     "y": 1197.79
-    },
-    "cond": {
-     "x": 1654.82,
-     "y": 1210.79
-    }
-   },
+   "x": 724.63,
+   "y": 1483.67,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "glycerol",
     "palmitic-acid"
@@ -3923,17 +5095,21 @@
    "cross": true
   },
   "glycerol-stearic-esterification": {
-   "x": 1085.36,
-   "y": 900.72,
+   "x": 1635.5,
+   "y": 1529.59,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 1085.36,
-     "y": 907.72
+     "x": 1669.48,
+     "y": 1554.28
     },
-    "cond": {
-     "x": 1085.36,
-     "y": 926.72
+    "cond": null,
+    "box": {
+     "x": 1630.48,
+     "y": 1546.28,
+     "w": 78,
+     "h": 16
     }
    },
    "substrates": [
@@ -3948,17 +5124,21 @@
    "cross": true
   },
   "glycine-alanine-peptide": {
-   "x": 2989.81,
-   "y": 397.27,
+   "x": 3435.5,
+   "y": 1649.59,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "W",
     "type": {
-     "x": 2989.81,
-     "y": 404.27
+     "x": 3401.52,
+     "y": 1624.9
     },
-    "cond": {
-     "x": 2989.81,
-     "y": 423.27
+    "cond": null,
+    "box": {
+     "x": 3355.52,
+     "y": 1616.9,
+     "w": 92,
+     "h": 16
     }
    },
    "substrates": [
@@ -3973,19 +5153,10 @@
    "cross": false
   },
   "glycine-glycine-peptide": {
-   "x": 2970.95,
-   "y": 72,
-   "label": {
-    "side": "N",
-    "type": {
-     "x": 2970.95,
-     "y": 46
-    },
-    "cond": {
-     "x": 2970.95,
-     "y": 65
-    }
-   },
+   "x": 3115.5,
+   "y": 1779.59,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "glycine"
    ],
@@ -3997,17 +5168,21 @@
    "cross": false
   },
   "glycylalanine-hydrolysis": {
-   "x": 2908.06,
-   "y": 261.81,
+   "x": 3435.5,
+   "y": 1909.59,
+   "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 2822.06,
-     "y": 255.81
+     "x": 3469.48,
+     "y": 1934.28
     },
-    "cond": {
-     "x": 2822.06,
-     "y": 268.81
+    "cond": null,
+    "box": {
+     "x": 3437.48,
+     "y": 1926.28,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -4022,19 +5197,10 @@
    "cross": false
   },
   "glycylglycine-hydrolysis": {
-   "x": 3210.2,
-   "y": 206.5,
-   "label": {
-    "side": "E",
-    "type": {
-     "x": 3296.2,
-     "y": 200.5
-    },
-    "cond": {
-     "x": 3296.2,
-     "y": 213.5
-    }
-   },
+   "x": 3070.35,
+   "y": 1864.44,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "glycylglycine"
    ],
@@ -4046,19 +5212,10 @@
    "cross": false
   },
   "isobutene-hydrogen-chloride": {
-   "x": 2670.69,
-   "y": 708.77,
-   "label": {
-    "side": "N",
-    "type": {
-     "x": 2670.69,
-     "y": 682.77
-    },
-    "cond": {
-     "x": 2670.69,
-     "y": 701.77
-    }
-   },
+   "x": 222.4,
+   "y": 403.28,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "isobutene"
    ],
@@ -4070,17 +5227,21 @@
    "cross": false
   },
   "methane-chlorination": {
-   "x": 3220.39,
-   "y": 1291.05,
+   "x": 735.5,
+   "y": 209.59,
+   "tier": "primary",
    "label": {
     "side": "E",
     "type": {
-     "x": 3297.39,
-     "y": 1285.05
+     "x": 785.73,
+     "y": 238.59
     },
-    "cond": {
-     "x": 3297.39,
-     "y": 1298.05
+    "cond": null,
+    "box": {
+     "x": 739.73,
+     "y": 230.59,
+     "w": 92,
+     "h": 16
     }
    },
    "substrates": [
@@ -4094,17 +5255,21 @@
    "cross": false
   },
   "methanol-oxidation-formaldehyde": {
-   "x": 866.94,
-   "y": 756.68,
+   "x": 835.5,
+   "y": 979.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "E",
     "type": {
-     "x": 866.94,
-     "y": 730.68
+     "x": 877.5,
+     "y": 979.59
     },
-    "cond": {
-     "x": 866.94,
-     "y": 749.68
+    "cond": null,
+    "box": {
+     "x": 859.5,
+     "y": 971.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -4118,17 +5283,21 @@
    "cross": true
   },
   "methyl-salicylate-hydrolysis": {
-   "x": 1085.76,
-   "y": 1385.31,
+   "x": 1115.5,
+   "y": 999.59,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "W",
     "type": {
-     "x": 1085.76,
-     "y": 1392.31
+     "x": 1081.52,
+     "y": 974.9
     },
-    "cond": {
-     "x": 1085.76,
-     "y": 1411.31
+    "cond": null,
+    "box": {
+     "x": 1049.52,
+     "y": 966.9,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -4143,17 +5312,21 @@
    "cross": true
   },
   "nitrobenzene-reduction": {
-   "x": 473.66,
-   "y": 983.97,
+   "x": 2118.07,
+   "y": 912.36,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 473.66,
-     "y": 990.97
+     "x": 2156.44,
+     "y": 929.45
     },
-    "cond": {
-     "x": 473.66,
-     "y": 1009.97
+    "cond": null,
+    "box": {
+     "x": 2138.44,
+     "y": 921.45,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -4167,17 +5340,21 @@
    "cross": true
   },
   "nylon66-condensation": {
-   "x": 2171.04,
-   "y": 1276.23,
+   "x": 3135.5,
+   "y": 1909.59,
+   "tier": "primary",
    "label": {
     "side": "E",
     "type": {
-     "x": 2216.54,
-     "y": 1270.23
+     "x": 3177.5,
+     "y": 1909.59
     },
-    "cond": {
-     "x": 2216.54,
-     "y": 1283.23
+    "cond": null,
+    "box": {
+     "x": 3152.5,
+     "y": 1901.59,
+     "w": 50,
+     "h": 16
     }
    },
    "substrates": [
@@ -4192,19 +5369,10 @@
    "cross": true
   },
   "oxalic-acid-methanol-esterification": {
-   "x": 1456.48,
-   "y": 865.99,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 1456.48,
-     "y": 872.99
-    },
-    "cond": {
-     "x": 1456.48,
-     "y": 891.99
-    }
-   },
+   "x": 795.5,
+   "y": 1129.59,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "oxalic-acid",
     "methanol"
@@ -4217,17 +5385,21 @@
    "cross": true
   },
   "p-xylene-oxidation": {
-   "x": 3268.33,
-   "y": 864.01,
+   "x": 2160.5,
+   "y": 1909.59,
+   "tier": "primary",
    "label": {
     "side": "E",
     "type": {
-     "x": 3344.43,
-     "y": 858.01
+     "x": 2202.5,
+     "y": 1909.59
     },
-    "cond": {
-     "x": 3344.43,
-     "y": 871.01
+    "cond": null,
+    "box": {
+     "x": 2184.5,
+     "y": 1901.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -4241,17 +5413,21 @@
    "cross": true
   },
   "pet-condensation": {
-   "x": 3142.53,
-   "y": 815.69,
+   "x": 2435.5,
+   "y": 2099.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "E",
     "type": {
-     "x": 3142.53,
-     "y": 789.69
+     "x": 2477.5,
+     "y": 2099.59
     },
-    "cond": {
-     "x": 3142.53,
-     "y": 808.69
+    "cond": null,
+    "box": {
+     "x": 2452.5,
+     "y": 2091.59,
+     "w": 50,
+     "h": 16
     }
    },
    "substrates": [
@@ -4266,17 +5442,21 @@
    "cross": true
   },
   "phenol-acid-neutralization": {
-   "x": 516.34,
-   "y": 841.67,
+   "x": 2885.5,
+   "y": 729.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "E",
     "type": {
-     "x": 516.34,
-     "y": 815.67
+     "x": 2923.87,
+     "y": 746.67
     },
-    "cond": {
-     "x": 516.34,
-     "y": 834.67
+    "cond": null,
+    "box": {
+     "x": 2905.87,
+     "y": 738.67,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -4290,19 +5470,10 @@
    "cross": false
   },
   "propan-1-ol-oxidation": {
-   "x": 511.47,
-   "y": 584.33,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 511.47,
-     "y": 591.33
-    },
-    "cond": {
-     "x": 511.47,
-     "y": 610.33
-    }
-   },
+   "x": 1959.37,
+   "y": 737.47,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "propan-1-ol"
    ],
@@ -4314,17 +5485,21 @@
    "cross": true
   },
   "propan-2-ol-oxidation": {
-   "x": 933.9,
-   "y": 380.87,
+   "x": 3565.5,
+   "y": 699.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "E",
     "type": {
-     "x": 933.9,
-     "y": 354.87
+     "x": 3607.5,
+     "y": 699.59
     },
-    "cond": {
-     "x": 933.9,
-     "y": 373.87
+    "cond": null,
+    "box": {
+     "x": 3589.5,
+     "y": 691.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -4338,19 +5513,10 @@
    "cross": true
   },
   "propanal-oxidation": {
-   "x": 717.27,
-   "y": 533.25,
-   "label": {
-    "side": "N",
-    "type": {
-     "x": 717.27,
-     "y": 507.25
-    },
-    "cond": {
-     "x": 717.27,
-     "y": 526.25
-    }
-   },
+   "x": 1709.37,
+   "y": 737.47,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "propanal"
    ],
@@ -4362,19 +5528,10 @@
    "cross": false
   },
   "propanal-reduction": {
-   "x": 362,
-   "y": 376.75,
-   "label": {
-    "side": "N",
-    "type": {
-     "x": 362,
-     "y": 350.75
-    },
-    "cond": {
-     "x": 362,
-     "y": 369.75
-    }
-   },
+   "x": 1924.22,
+   "y": 652.62,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "propanal"
    ],
@@ -4386,17 +5543,21 @@
    "cross": true
   },
   "propene-hydration": {
-   "x": 1070.44,
-   "y": 382.33,
+   "x": 3555.5,
+   "y": 929.59,
+   "tier": "primary",
    "label": {
     "side": "E",
     "type": {
-     "x": 1138.44,
-     "y": 376.33
+     "x": 3597.5,
+     "y": 929.59
     },
-    "cond": {
-     "x": 1138.44,
-     "y": 389.33
+    "cond": null,
+    "box": {
+     "x": 3579.5,
+     "y": 921.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -4410,17 +5571,21 @@
    "cross": true
   },
   "propene-hydrogenation": {
-   "x": 1198.18,
-   "y": 72,
+   "x": 3155.5,
+   "y": 1109.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "E",
     "type": {
-     "x": 1198.18,
-     "y": 46
+     "x": 3189.48,
+     "y": 1134.28
     },
-    "cond": {
-     "x": 1198.18,
-     "y": 65
+    "cond": null,
+    "box": {
+     "x": 3157.48,
+     "y": 1126.28,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -4434,17 +5599,21 @@
    "cross": false
   },
   "propene-polymerization": {
-   "x": 1166.54,
-   "y": 235.54,
+   "x": 3535.5,
+   "y": 1149.59,
+   "tier": "primary",
    "label": {
     "side": "S",
     "type": {
-     "x": 1166.54,
-     "y": 242.54
+     "x": 3535.5,
+     "y": 1191.59
     },
-    "cond": {
-     "x": 1166.54,
-     "y": 261.54
+    "cond": null,
+    "box": {
+     "x": 3503.5,
+     "y": 1183.59,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -4458,19 +5627,10 @@
    "cross": true
   },
   "propionic-acid-ethanol-esterification": {
-   "x": 853.63,
-   "y": 1142.9,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 853.63,
-     "y": 1149.9
-    },
-    "cond": {
-     "x": 853.63,
-     "y": 1168.9
-    }
-   },
+   "x": 1589.37,
+   "y": 857.47,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "propionic-acid",
     "ethanol"
@@ -4483,19 +5643,10 @@
    "cross": true
   },
   "propionic-acid-methanol-esterification": {
-   "x": 1244.81,
-   "y": 1027.22,
-   "label": {
-    "side": "N",
-    "type": {
-     "x": 1244.81,
-     "y": 1001.22
-    },
-    "cond": {
-     "x": 1244.81,
-     "y": 1020.22
-    }
-   },
+   "x": 834.86,
+   "y": 414.33,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "propionic-acid",
     "methanol"
@@ -4508,19 +5659,10 @@
    "cross": true
   },
   "propyne-hydration": {
-   "x": 1221.15,
-   "y": 391,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 1221.15,
-     "y": 398
-    },
-    "cond": {
-     "x": 1221.15,
-     "y": 417
-    }
-   },
+   "x": 3235.5,
+   "y": 589.59,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "propyne"
    ],
@@ -4532,19 +5674,10 @@
    "cross": true
   },
   "protein-hydrolysis": {
-   "x": 2586.88,
-   "y": 1549.75,
-   "label": {
-    "side": "N",
-    "type": {
-     "x": 2586.88,
-     "y": 1523.75
-    },
-    "cond": {
-     "x": 2586.88,
-     "y": 1542.75
-    }
-   },
+   "x": 217.7,
+   "y": 986.52,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "protein"
    ],
@@ -4554,17 +5687,21 @@
    "cross": false
   },
   "salicylic-acid-acetylation": {
-   "x": 1241.7,
-   "y": 1620.62,
+   "x": 1465.5,
+   "y": 1259.59,
+   "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "S",
     "type": {
-     "x": 1309.7,
-     "y": 1614.62
+     "x": 1474.23,
+     "y": 1300.67
     },
-    "cond": {
-     "x": 1309.7,
-     "y": 1627.62
+    "cond": null,
+    "box": {
+     "x": 1435.23,
+     "y": 1292.67,
+     "w": 78,
+     "h": 16
     }
    },
    "substrates": [
@@ -4579,17 +5716,21 @@
    "cross": true
   },
   "salicylic-acid-methyl-esterification": {
-   "x": 1040.95,
-   "y": 1317.11,
+   "x": 1115.5,
+   "y": 1259.59,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 1040.95,
-     "y": 1324.11
+     "x": 1149.48,
+     "y": 1284.28
     },
-    "cond": {
-     "x": 1040.95,
-     "y": 1343.11
+    "cond": null,
+    "box": {
+     "x": 1110.48,
+     "y": 1276.28,
+     "w": 78,
+     "h": 16
     }
    },
    "substrates": [
@@ -4604,17 +5745,21 @@
    "cross": true
   },
   "sodium-phenoxide-acidification": {
-   "x": 642.9,
-   "y": 842.52,
+   "x": 3185.5,
+   "y": 649.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "E",
     "type": {
-     "x": 642.9,
-     "y": 816.52
+     "x": 3227.5,
+     "y": 649.59
     },
-    "cond": {
-     "x": 642.9,
-     "y": 835.52
+    "cond": null,
+    "box": {
+     "x": 3209.5,
+     "y": 641.59,
+     "w": 36,
+     "h": 16
     }
    },
    "substrates": [
@@ -4628,17 +5773,21 @@
    "cross": false
   },
   "starch-hydrolysis-glucose": {
-   "x": 2177.9,
-   "y": 203.49,
+   "x": 2285.5,
+   "y": 1629.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "E",
     "type": {
-     "x": 2177.9,
-     "y": 177.49
+     "x": 2316.71,
+     "y": 1657.69
     },
-    "cond": {
-     "x": 2177.9,
-     "y": 196.49
+    "cond": null,
+    "box": {
+     "x": 2284.71,
+     "y": 1649.69,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -4652,17 +5801,21 @@
    "cross": false
   },
   "starch-hydrolysis-maltose": {
-   "x": 2023.22,
-   "y": 179.85,
+   "x": 2235.5,
+   "y": 1529.59,
+   "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 1968.72,
-     "y": 173.85
+     "x": 2269.48,
+     "y": 1554.28
     },
-    "cond": {
-     "x": 1968.72,
-     "y": 186.85
+    "cond": null,
+    "box": {
+     "x": 2237.48,
+     "y": 1546.28,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -4676,17 +5829,21 @@
    "cross": false
   },
   "styrene-polymerization": {
-   "x": 2895.9,
-   "y": 1291.12,
+   "x": 3915.5,
+   "y": 1469.59,
+   "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "S",
     "type": {
-     "x": 2981.9,
-     "y": 1285.12
+     "x": 3898.42,
+     "y": 1507.96
     },
-    "cond": {
-     "x": 2981.9,
-     "y": 1298.12
+    "cond": null,
+    "box": {
+     "x": 3866.42,
+     "y": 1499.96,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -4700,17 +5857,21 @@
    "cross": true
   },
   "sucrose-hydrolysis": {
-   "x": 2534.84,
-   "y": 423.22,
+   "x": 2535.5,
+   "y": 1629.59,
+   "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "S",
     "type": {
-     "x": 2620.84,
-     "y": 417.22
+     "x": 2507.4,
+     "y": 1660.8
     },
-    "cond": {
-     "x": 2620.84,
-     "y": 430.22
+    "cond": null,
+    "box": {
+     "x": 2475.4,
+     "y": 1652.8,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -4725,17 +5886,21 @@
    "cross": false
   },
   "triolein-hydrogenation": {
-   "x": 1158.53,
-   "y": 686.76,
+   "x": 1535.5,
+   "y": 1829.59,
+   "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "W",
     "type": {
-     "x": 1158.53,
-     "y": 660.76
+     "x": 1501.52,
+     "y": 1804.9
     },
-    "cond": {
-     "x": 1158.53,
-     "y": 679.76
+    "cond": null,
+    "box": {
+     "x": 1469.52,
+     "y": 1796.9,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -4749,19 +5914,10 @@
    "cross": false
   },
   "triolein-saponification": {
-   "x": 1144.58,
-   "y": 1249.07,
-   "label": {
-    "side": "S",
-    "type": {
-     "x": 1144.58,
-     "y": 1256.07
-    },
-    "cond": {
-     "x": 1144.58,
-     "y": 1275.07
-    }
-   },
+   "x": 1474.77,
+   "y": 2277.62,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "triolein"
    ],
@@ -4774,19 +5930,10 @@
    "cross": true
   },
   "tripalmitin-saponification": {
-   "x": 1392.88,
-   "y": 783.21,
-   "label": {
-    "side": "W",
-    "type": {
-     "x": 1306.88,
-     "y": 777.21
-    },
-    "cond": {
-     "x": 1306.88,
-     "y": 790.21
-    }
-   },
+   "x": 694.08,
+   "y": 1388.17,
+   "tier": "secondary",
+   "label": null,
    "substrates": [
     "tripalmitin"
    ],
@@ -4799,17 +5946,21 @@
    "cross": true
   },
   "tristearin-hydrolysis": {
-   "x": 1004.22,
-   "y": 968.74,
+   "x": 1395.5,
+   "y": 1769.59,
+   "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "W",
     "type": {
-     "x": 1004.22,
-     "y": 975.74
+     "x": 1355.05,
+     "y": 1798.98
     },
-    "cond": {
-     "x": 1004.22,
-     "y": 994.74
+    "cond": null,
+    "box": {
+     "x": 1323.05,
+     "y": 1790.98,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [
@@ -4824,17 +5975,21 @@
    "cross": true
   },
   "tristearin-saponification": {
-   "x": 1162.52,
-   "y": 823.02,
+   "x": 1315.5,
+   "y": 2009.59,
+   "tier": "primary",
    "label": {
     "side": "E",
     "type": {
-     "x": 1248.52,
-     "y": 817.02
+     "x": 1357.5,
+     "y": 2009.59
     },
-    "cond": {
-     "x": 1248.52,
-     "y": 830.02
+    "cond": null,
+    "box": {
+     "x": 1332.5,
+     "y": 2001.59,
+     "w": 50,
+     "h": 16
     }
    },
    "substrates": [
@@ -4849,17 +6004,21 @@
    "cross": true
   },
   "vinyl-chloride-polymerization": {
-   "x": 2113.61,
-   "y": 1665.01,
+   "x": 3915.5,
+   "y": 1819.59,
+   "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "S",
     "type": {
-     "x": 2181.61,
-     "y": 1659.01
+     "x": 3898.42,
+     "y": 1857.96
     },
-    "cond": {
-     "x": 2181.61,
-     "y": 1672.01
+    "cond": null,
+    "box": {
+     "x": 3866.42,
+     "y": 1849.96,
+     "w": 64,
+     "h": 16
     }
    },
    "substrates": [

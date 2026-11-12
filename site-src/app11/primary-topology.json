@@ -1,0 +1,1989 @@
+{
+ "meta": {
+  "generatedBy": "scripts/app11/planarity/embed-primary.py",
+  "networkx": "3.6.1",
+  "inputHash": "a3c90d6744811642eba35586b872973c40a6dd4d3c69db1fffd6b299c1422fe2",
+  "priorityVersion": 1,
+  "planar": true,
+  "primaryReactions": 50,
+  "primaryCompounds": 65,
+  "primaryBranches": 117,
+  "nodes": 115,
+  "edges": 117,
+  "components": 11,
+  "faces": 24,
+  "secondaryComponents": 7,
+  "secondaryCofacial": 6,
+  "note": "rotation は PlanarEmbedding の巡回順。Node 側で Euler 公式と半辺重複を再検証する。"
+ },
+ "components": [
+  {
+   "id": 0,
+   "nodes": [
+    "c:1,2-dibromoethane",
+    "c:acetanilide",
+    "c:acetic-acid",
+    "c:acetic-anhydride",
+    "c:acetone",
+    "c:aniline",
+    "c:aspirin",
+    "c:benzene",
+    "c:benzenediazonium-chloride",
+    "c:benzenesulfonic-acid",
+    "c:bromoethane",
+    "c:chlorobenzene",
+    "c:cumene",
+    "c:cumene-hydroperoxide",
+    "c:diethyl-ether",
+    "c:ethanal",
+    "c:ethane",
+    "c:ethanol",
+    "c:ethene",
+    "c:ethyl-acetate",
+    "c:formaldehyde",
+    "c:formic-acid",
+    "c:methanol",
+    "c:methyl-salicylate",
+    "c:nitrobenzene",
+    "c:p-hydroxyazobenzene",
+    "c:phenol",
+    "c:polyethylene",
+    "c:polypropylene",
+    "c:propan-2-ol",
+    "c:propane",
+    "c:propene",
+    "c:salicylic-acid",
+    "c:sodium-phenoxide",
+    "r:acetic-acid-ethanol-esterification",
+    "r:aniline-acetic-anhydride",
+    "r:aniline-diazotization",
+    "r:aspirin-hydrolysis",
+    "r:benzene-chlorination",
+    "r:benzene-nitration",
+    "r:benzene-sulfonation",
+    "r:chlorobenzene-dow-phenol",
+    "r:cumene-hydroperoxide-decomposition",
+    "r:cumene-oxidation",
+    "r:diazonium-phenol-coupling",
+    "r:ethanal-oxidation-acetic",
+    "r:ethanol-dehydration-ether",
+    "r:ethanol-oxidation-ethanal",
+    "r:ethene-bromine-addition",
+    "r:ethene-hydration",
+    "r:ethene-hydrogen-bromide",
+    "r:ethene-hydrogenation",
+    "r:ethene-polymerization",
+    "r:ethyl-acetate-hydrolysis",
+    "r:formaldehyde-oxidation-formic",
+    "r:methanol-oxidation-formaldehyde",
+    "r:methyl-salicylate-hydrolysis",
+    "r:nitrobenzene-reduction",
+    "r:phenol-acid-neutralization",
+    "r:propan-2-ol-oxidation",
+    "r:propene-hydration",
+    "r:propene-hydrogenation",
+    "r:propene-polymerization",
+    "r:salicylic-acid-acetylation",
+    "r:salicylic-acid-methyl-esterification",
+    "r:sodium-phenoxide-acidification"
+   ],
+   "nodesCount": 66,
+   "edges": 73,
+   "faces": 9,
+   "euler": 2
+  },
+  {
+   "id": 1,
+   "nodes": [
+    "c:glycerol",
+    "c:sodium-stearate",
+    "c:stearic-acid",
+    "c:triolein",
+    "c:tristearin",
+    "r:glycerol-stearic-esterification",
+    "r:triolein-hydrogenation",
+    "r:tristearin-hydrolysis",
+    "r:tristearin-saponification"
+   ],
+   "nodesCount": 9,
+   "edges": 11,
+   "faces": 4,
+   "euler": 2
+  },
+  {
+   "id": 2,
+   "nodes": [
+    "c:fructose",
+    "c:glucose",
+    "c:maltose",
+    "c:starch",
+    "c:sucrose",
+    "r:starch-hydrolysis-glucose",
+    "r:starch-hydrolysis-maltose",
+    "r:sucrose-hydrolysis"
+   ],
+   "nodesCount": 8,
+   "edges": 7,
+   "faces": 1,
+   "euler": 2
+  },
+  {
+   "id": 3,
+   "nodes": [
+    "c:ethylene-glycol",
+    "c:p-xylene",
+    "c:pet",
+    "c:terephthalic-acid",
+    "r:p-xylene-oxidation",
+    "r:pet-condensation"
+   ],
+   "nodesCount": 6,
+   "edges": 5,
+   "faces": 1,
+   "euler": 2
+  },
+  {
+   "id": 4,
+   "nodes": [
+    "c:alanine",
+    "c:glycine",
+    "c:glycylalanine",
+    "r:glycine-alanine-peptide",
+    "r:glycylalanine-hydrolysis"
+   ],
+   "nodesCount": 5,
+   "edges": 6,
+   "faces": 3,
+   "euler": 2
+  },
+  {
+   "id": 5,
+   "nodes": [
+    "c:benzaldehyde",
+    "c:benzoic-acid",
+    "c:benzyl-alcohol",
+    "r:benzaldehyde-oxidation",
+    "r:benzyl-alcohol-oxidation"
+   ],
+   "nodesCount": 5,
+   "edges": 4,
+   "faces": 1,
+   "euler": 2
+  },
+  {
+   "id": 6,
+   "nodes": [
+    "c:adipic-acid",
+    "c:hexamethylenediamine",
+    "c:nylon66",
+    "r:nylon66-condensation"
+   ],
+   "nodesCount": 4,
+   "edges": 3,
+   "faces": 1,
+   "euler": 2
+  },
+  {
+   "id": 7,
+   "nodes": [
+    "c:caprolactam",
+    "c:nylon6",
+    "r:caprolactam-ring-opening"
+   ],
+   "nodesCount": 3,
+   "edges": 2,
+   "faces": 1,
+   "euler": 2
+  },
+  {
+   "id": 8,
+   "nodes": [
+    "c:chloromethane",
+    "c:methane",
+    "r:methane-chlorination"
+   ],
+   "nodesCount": 3,
+   "edges": 2,
+   "faces": 1,
+   "euler": 2
+  },
+  {
+   "id": 9,
+   "nodes": [
+    "c:polystyrene",
+    "c:styrene",
+    "r:styrene-polymerization"
+   ],
+   "nodesCount": 3,
+   "edges": 2,
+   "faces": 1,
+   "euler": 2
+  },
+  {
+   "id": 10,
+   "nodes": [
+    "c:pvc",
+    "c:vinyl-chloride",
+    "r:vinyl-chloride-polymerization"
+   ],
+   "nodesCount": 3,
+   "edges": 2,
+   "faces": 1,
+   "euler": 2
+  }
+ ],
+ "blocks": [
+  [
+   "c:aniline",
+   "c:benzene",
+   "c:benzenediazonium-chloride",
+   "c:chlorobenzene",
+   "c:nitrobenzene",
+   "c:phenol",
+   "c:sodium-phenoxide",
+   "r:aniline-diazotization",
+   "r:benzene-chlorination",
+   "r:benzene-nitration",
+   "r:chlorobenzene-dow-phenol",
+   "r:diazonium-phenol-coupling",
+   "r:nitrobenzene-reduction",
+   "r:phenol-acid-neutralization",
+   "r:sodium-phenoxide-acidification"
+  ],
+  [
+   "c:acetic-acid",
+   "c:ethanal",
+   "c:ethanol",
+   "c:ethyl-acetate",
+   "r:acetic-acid-ethanol-esterification",
+   "r:ethanal-oxidation-acetic",
+   "r:ethanol-oxidation-ethanal",
+   "r:ethyl-acetate-hydrolysis"
+  ],
+  [
+   "c:glycerol",
+   "c:stearic-acid",
+   "c:tristearin",
+   "r:glycerol-stearic-esterification",
+   "r:tristearin-hydrolysis",
+   "r:tristearin-saponification"
+  ],
+  [
+   "c:alanine",
+   "c:glycine",
+   "c:glycylalanine",
+   "r:glycine-alanine-peptide",
+   "r:glycylalanine-hydrolysis"
+  ],
+  [
+   "c:methanol",
+   "c:methyl-salicylate",
+   "c:salicylic-acid",
+   "r:methyl-salicylate-hydrolysis",
+   "r:salicylic-acid-methyl-esterification"
+  ],
+  [
+   "c:aspirin",
+   "c:salicylic-acid",
+   "r:aspirin-hydrolysis",
+   "r:salicylic-acid-acetylation"
+  ],
+  [
+   "c:1,2-dibromoethane",
+   "r:ethene-bromine-addition"
+  ],
+  [
+   "c:acetanilide",
+   "r:aniline-acetic-anhydride"
+  ],
+  [
+   "c:acetic-acid",
+   "r:aspirin-hydrolysis"
+  ],
+  [
+   "c:acetic-anhydride",
+   "r:aniline-acetic-anhydride"
+  ],
+  [
+   "c:acetic-anhydride",
+   "r:salicylic-acid-acetylation"
+  ],
+  [
+   "c:acetone",
+   "r:propan-2-ol-oxidation"
+  ],
+  [
+   "c:acetone",
+   "r:cumene-hydroperoxide-decomposition"
+  ],
+  [
+   "c:adipic-acid",
+   "r:nylon66-condensation"
+  ],
+  [
+   "c:aniline",
+   "r:aniline-acetic-anhydride"
+  ],
+  [
+   "c:benzaldehyde",
+   "r:benzyl-alcohol-oxidation"
+  ],
+  [
+   "c:benzaldehyde",
+   "r:benzaldehyde-oxidation"
+  ],
+  [
+   "c:benzene",
+   "r:benzene-sulfonation"
+  ],
+  [
+   "c:benzenesulfonic-acid",
+   "r:benzene-sulfonation"
+  ],
+  [
+   "c:benzoic-acid",
+   "r:benzaldehyde-oxidation"
+  ],
+  [
+   "c:benzyl-alcohol",
+   "r:benzyl-alcohol-oxidation"
+  ],
+  [
+   "c:bromoethane",
+   "r:ethene-hydrogen-bromide"
+  ],
+  [
+   "c:caprolactam",
+   "r:caprolactam-ring-opening"
+  ],
+  [
+   "c:chloromethane",
+   "r:methane-chlorination"
+  ],
+  [
+   "c:cumene",
+   "r:cumene-oxidation"
+  ],
+  [
+   "c:cumene-hydroperoxide",
+   "r:cumene-oxidation"
+  ],
+  [
+   "c:cumene-hydroperoxide",
+   "r:cumene-hydroperoxide-decomposition"
+  ],
+  [
+   "c:diethyl-ether",
+   "r:ethanol-dehydration-ether"
+  ],
+  [
+   "c:ethane",
+   "r:ethene-hydrogenation"
+  ],
+  [
+   "c:ethanol",
+   "r:ethanol-dehydration-ether"
+  ],
+  [
+   "c:ethanol",
+   "r:ethene-hydration"
+  ],
+  [
+   "c:ethene",
+   "r:ethene-bromine-addition"
+  ],
+  [
+   "c:ethene",
+   "r:ethene-hydrogen-bromide"
+  ],
+  [
+   "c:ethene",
+   "r:ethene-hydrogenation"
+  ],
+  [
+   "c:ethene",
+   "r:ethene-polymerization"
+  ],
+  [
+   "c:ethene",
+   "r:ethene-hydration"
+  ],
+  [
+   "c:ethylene-glycol",
+   "r:pet-condensation"
+  ],
+  [
+   "c:formaldehyde",
+   "r:formaldehyde-oxidation-formic"
+  ],
+  [
+   "c:formaldehyde",
+   "r:methanol-oxidation-formaldehyde"
+  ],
+  [
+   "c:formic-acid",
+   "r:formaldehyde-oxidation-formic"
+  ],
+  [
+   "c:fructose",
+   "r:sucrose-hydrolysis"
+  ],
+  [
+   "c:glucose",
+   "r:sucrose-hydrolysis"
+  ],
+  [
+   "c:glucose",
+   "r:starch-hydrolysis-glucose"
+  ],
+  [
+   "c:hexamethylenediamine",
+   "r:nylon66-condensation"
+  ],
+  [
+   "c:maltose",
+   "r:starch-hydrolysis-maltose"
+  ],
+  [
+   "c:methane",
+   "r:methane-chlorination"
+  ],
+  [
+   "c:methanol",
+   "r:methanol-oxidation-formaldehyde"
+  ],
+  [
+   "c:nylon6",
+   "r:caprolactam-ring-opening"
+  ],
+  [
+   "c:nylon66",
+   "r:nylon66-condensation"
+  ],
+  [
+   "c:p-hydroxyazobenzene",
+   "r:diazonium-phenol-coupling"
+  ],
+  [
+   "c:p-xylene",
+   "r:p-xylene-oxidation"
+  ],
+  [
+   "c:pet",
+   "r:pet-condensation"
+  ],
+  [
+   "c:phenol",
+   "r:cumene-hydroperoxide-decomposition"
+  ],
+  [
+   "c:polyethylene",
+   "r:ethene-polymerization"
+  ],
+  [
+   "c:polypropylene",
+   "r:propene-polymerization"
+  ],
+  [
+   "c:polystyrene",
+   "r:styrene-polymerization"
+  ],
+  [
+   "c:propan-2-ol",
+   "r:propene-hydration"
+  ],
+  [
+   "c:propan-2-ol",
+   "r:propan-2-ol-oxidation"
+  ],
+  [
+   "c:propane",
+   "r:propene-hydrogenation"
+  ],
+  [
+   "c:propene",
+   "r:propene-hydrogenation"
+  ],
+  [
+   "c:propene",
+   "r:propene-polymerization"
+  ],
+  [
+   "c:propene",
+   "r:propene-hydration"
+  ],
+  [
+   "c:pvc",
+   "r:vinyl-chloride-polymerization"
+  ],
+  [
+   "c:sodium-stearate",
+   "r:tristearin-saponification"
+  ],
+  [
+   "c:starch",
+   "r:starch-hydrolysis-maltose"
+  ],
+  [
+   "c:starch",
+   "r:starch-hydrolysis-glucose"
+  ],
+  [
+   "c:styrene",
+   "r:styrene-polymerization"
+  ],
+  [
+   "c:sucrose",
+   "r:sucrose-hydrolysis"
+  ],
+  [
+   "c:terephthalic-acid",
+   "r:pet-condensation"
+  ],
+  [
+   "c:terephthalic-acid",
+   "r:p-xylene-oxidation"
+  ],
+  [
+   "c:triolein",
+   "r:triolein-hydrogenation"
+  ],
+  [
+   "c:tristearin",
+   "r:triolein-hydrogenation"
+  ],
+  [
+   "c:vinyl-chloride",
+   "r:vinyl-chloride-polymerization"
+  ]
+ ],
+ "articulations": [
+  "c:acetic-acid",
+  "c:acetic-anhydride",
+  "c:acetone",
+  "c:aniline",
+  "c:benzaldehyde",
+  "c:benzene",
+  "c:cumene-hydroperoxide",
+  "c:ethanol",
+  "c:ethene",
+  "c:formaldehyde",
+  "c:glucose",
+  "c:methanol",
+  "c:phenol",
+  "c:propan-2-ol",
+  "c:propene",
+  "c:salicylic-acid",
+  "c:starch",
+  "c:terephthalic-acid",
+  "c:tristearin",
+  "r:aniline-acetic-anhydride",
+  "r:aspirin-hydrolysis",
+  "r:benzaldehyde-oxidation",
+  "r:benzene-sulfonation",
+  "r:benzyl-alcohol-oxidation",
+  "r:caprolactam-ring-opening",
+  "r:cumene-hydroperoxide-decomposition",
+  "r:cumene-oxidation",
+  "r:diazonium-phenol-coupling",
+  "r:ethanol-dehydration-ether",
+  "r:ethene-bromine-addition",
+  "r:ethene-hydration",
+  "r:ethene-hydrogen-bromide",
+  "r:ethene-hydrogenation",
+  "r:ethene-polymerization",
+  "r:formaldehyde-oxidation-formic",
+  "r:methane-chlorination",
+  "r:methanol-oxidation-formaldehyde",
+  "r:nylon66-condensation",
+  "r:p-xylene-oxidation",
+  "r:pet-condensation",
+  "r:propan-2-ol-oxidation",
+  "r:propene-hydration",
+  "r:propene-hydrogenation",
+  "r:propene-polymerization",
+  "r:salicylic-acid-acetylation",
+  "r:starch-hydrolysis-glucose",
+  "r:starch-hydrolysis-maltose",
+  "r:styrene-polymerization",
+  "r:sucrose-hydrolysis",
+  "r:triolein-hydrogenation",
+  "r:tristearin-saponification",
+  "r:vinyl-chloride-polymerization"
+ ],
+ "rotation": {
+  "c:1,2-dibromoethane": [
+   "r:ethene-bromine-addition"
+  ],
+  "c:acetanilide": [
+   "r:aniline-acetic-anhydride"
+  ],
+  "c:acetic-acid": [
+   "r:acetic-acid-ethanol-esterification",
+   "r:ethanal-oxidation-acetic",
+   "r:ethyl-acetate-hydrolysis",
+   "r:aspirin-hydrolysis"
+  ],
+  "c:acetic-anhydride": [
+   "r:salicylic-acid-acetylation",
+   "r:aniline-acetic-anhydride"
+  ],
+  "c:acetone": [
+   "r:cumene-hydroperoxide-decomposition",
+   "r:propan-2-ol-oxidation"
+  ],
+  "c:adipic-acid": [
+   "r:nylon66-condensation"
+  ],
+  "c:alanine": [
+   "r:glycylalanine-hydrolysis",
+   "r:glycine-alanine-peptide"
+  ],
+  "c:aniline": [
+   "r:aniline-acetic-anhydride",
+   "r:aniline-diazotization",
+   "r:nitrobenzene-reduction"
+  ],
+  "c:aspirin": [
+   "r:aspirin-hydrolysis",
+   "r:salicylic-acid-acetylation"
+  ],
+  "c:benzaldehyde": [
+   "r:benzaldehyde-oxidation",
+   "r:benzyl-alcohol-oxidation"
+  ],
+  "c:benzene": [
+   "r:benzene-chlorination",
+   "r:benzene-nitration",
+   "r:benzene-sulfonation"
+  ],
+  "c:benzenediazonium-chloride": [
+   "r:aniline-diazotization",
+   "r:diazonium-phenol-coupling"
+  ],
+  "c:benzenesulfonic-acid": [
+   "r:benzene-sulfonation"
+  ],
+  "c:benzoic-acid": [
+   "r:benzaldehyde-oxidation"
+  ],
+  "c:benzyl-alcohol": [
+   "r:benzyl-alcohol-oxidation"
+  ],
+  "c:bromoethane": [
+   "r:ethene-hydrogen-bromide"
+  ],
+  "c:caprolactam": [
+   "r:caprolactam-ring-opening"
+  ],
+  "c:chlorobenzene": [
+   "r:chlorobenzene-dow-phenol",
+   "r:benzene-chlorination"
+  ],
+  "c:chloromethane": [
+   "r:methane-chlorination"
+  ],
+  "c:cumene": [
+   "r:cumene-oxidation"
+  ],
+  "c:cumene-hydroperoxide": [
+   "r:cumene-hydroperoxide-decomposition",
+   "r:cumene-oxidation"
+  ],
+  "c:diethyl-ether": [
+   "r:ethanol-dehydration-ether"
+  ],
+  "c:ethanal": [
+   "r:ethanal-oxidation-acetic",
+   "r:ethanol-oxidation-ethanal"
+  ],
+  "c:ethane": [
+   "r:ethene-hydrogenation"
+  ],
+  "c:ethanol": [
+   "r:ethanol-oxidation-ethanal",
+   "r:acetic-acid-ethanol-esterification",
+   "r:ethyl-acetate-hydrolysis",
+   "r:ethanol-dehydration-ether",
+   "r:ethene-hydration"
+  ],
+  "c:ethene": [
+   "r:ethene-hydration",
+   "r:ethene-bromine-addition",
+   "r:ethene-hydrogen-bromide",
+   "r:ethene-hydrogenation",
+   "r:ethene-polymerization"
+  ],
+  "c:ethyl-acetate": [
+   "r:ethyl-acetate-hydrolysis",
+   "r:acetic-acid-ethanol-esterification"
+  ],
+  "c:ethylene-glycol": [
+   "r:pet-condensation"
+  ],
+  "c:formaldehyde": [
+   "r:methanol-oxidation-formaldehyde",
+   "r:formaldehyde-oxidation-formic"
+  ],
+  "c:formic-acid": [
+   "r:formaldehyde-oxidation-formic"
+  ],
+  "c:fructose": [
+   "r:sucrose-hydrolysis"
+  ],
+  "c:glucose": [
+   "r:starch-hydrolysis-glucose",
+   "r:sucrose-hydrolysis"
+  ],
+  "c:glycerol": [
+   "r:glycerol-stearic-esterification",
+   "r:tristearin-hydrolysis",
+   "r:tristearin-saponification"
+  ],
+  "c:glycine": [
+   "r:glycine-alanine-peptide",
+   "r:glycylalanine-hydrolysis"
+  ],
+  "c:glycylalanine": [
+   "r:glycylalanine-hydrolysis",
+   "r:glycine-alanine-peptide"
+  ],
+  "c:hexamethylenediamine": [
+   "r:nylon66-condensation"
+  ],
+  "c:maltose": [
+   "r:starch-hydrolysis-maltose"
+  ],
+  "c:methane": [
+   "r:methane-chlorination"
+  ],
+  "c:methanol": [
+   "r:methyl-salicylate-hydrolysis",
+   "r:salicylic-acid-methyl-esterification",
+   "r:methanol-oxidation-formaldehyde"
+  ],
+  "c:methyl-salicylate": [
+   "r:salicylic-acid-methyl-esterification",
+   "r:methyl-salicylate-hydrolysis"
+  ],
+  "c:nitrobenzene": [
+   "r:benzene-nitration",
+   "r:nitrobenzene-reduction"
+  ],
+  "c:nylon6": [
+   "r:caprolactam-ring-opening"
+  ],
+  "c:nylon66": [
+   "r:nylon66-condensation"
+  ],
+  "c:p-hydroxyazobenzene": [
+   "r:diazonium-phenol-coupling"
+  ],
+  "c:p-xylene": [
+   "r:p-xylene-oxidation"
+  ],
+  "c:pet": [
+   "r:pet-condensation"
+  ],
+  "c:phenol": [
+   "r:diazonium-phenol-coupling",
+   "r:phenol-acid-neutralization",
+   "r:sodium-phenoxide-acidification",
+   "r:cumene-hydroperoxide-decomposition"
+  ],
+  "c:polyethylene": [
+   "r:ethene-polymerization"
+  ],
+  "c:polypropylene": [
+   "r:propene-polymerization"
+  ],
+  "c:polystyrene": [
+   "r:styrene-polymerization"
+  ],
+  "c:propan-2-ol": [
+   "r:propan-2-ol-oxidation",
+   "r:propene-hydration"
+  ],
+  "c:propane": [
+   "r:propene-hydrogenation"
+  ],
+  "c:propene": [
+   "r:propene-hydration",
+   "r:propene-hydrogenation",
+   "r:propene-polymerization"
+  ],
+  "c:pvc": [
+   "r:vinyl-chloride-polymerization"
+  ],
+  "c:salicylic-acid": [
+   "r:salicylic-acid-acetylation",
+   "r:aspirin-hydrolysis",
+   "r:methyl-salicylate-hydrolysis",
+   "r:salicylic-acid-methyl-esterification"
+  ],
+  "c:sodium-phenoxide": [
+   "r:phenol-acid-neutralization",
+   "r:chlorobenzene-dow-phenol",
+   "r:sodium-phenoxide-acidification"
+  ],
+  "c:sodium-stearate": [
+   "r:tristearin-saponification"
+  ],
+  "c:starch": [
+   "r:starch-hydrolysis-glucose",
+   "r:starch-hydrolysis-maltose"
+  ],
+  "c:stearic-acid": [
+   "r:tristearin-hydrolysis",
+   "r:glycerol-stearic-esterification"
+  ],
+  "c:styrene": [
+   "r:styrene-polymerization"
+  ],
+  "c:sucrose": [
+   "r:sucrose-hydrolysis"
+  ],
+  "c:terephthalic-acid": [
+   "r:p-xylene-oxidation",
+   "r:pet-condensation"
+  ],
+  "c:triolein": [
+   "r:triolein-hydrogenation"
+  ],
+  "c:tristearin": [
+   "r:tristearin-hydrolysis",
+   "r:glycerol-stearic-esterification",
+   "r:tristearin-saponification",
+   "r:triolein-hydrogenation"
+  ],
+  "c:vinyl-chloride": [
+   "r:vinyl-chloride-polymerization"
+  ],
+  "r:acetic-acid-ethanol-esterification": [
+   "c:acetic-acid",
+   "c:ethyl-acetate",
+   "c:ethanol"
+  ],
+  "r:aniline-acetic-anhydride": [
+   "c:acetic-anhydride",
+   "c:aniline",
+   "c:acetanilide"
+  ],
+  "r:aniline-diazotization": [
+   "c:aniline",
+   "c:benzenediazonium-chloride"
+  ],
+  "r:aspirin-hydrolysis": [
+   "c:acetic-acid",
+   "c:aspirin",
+   "c:salicylic-acid"
+  ],
+  "r:benzaldehyde-oxidation": [
+   "c:benzaldehyde",
+   "c:benzoic-acid"
+  ],
+  "r:benzene-chlorination": [
+   "c:chlorobenzene",
+   "c:benzene"
+  ],
+  "r:benzene-nitration": [
+   "c:benzene",
+   "c:nitrobenzene"
+  ],
+  "r:benzene-sulfonation": [
+   "c:benzene",
+   "c:benzenesulfonic-acid"
+  ],
+  "r:benzyl-alcohol-oxidation": [
+   "c:benzaldehyde",
+   "c:benzyl-alcohol"
+  ],
+  "r:caprolactam-ring-opening": [
+   "c:caprolactam",
+   "c:nylon6"
+  ],
+  "r:chlorobenzene-dow-phenol": [
+   "c:sodium-phenoxide",
+   "c:chlorobenzene"
+  ],
+  "r:cumene-hydroperoxide-decomposition": [
+   "c:phenol",
+   "c:cumene-hydroperoxide",
+   "c:acetone"
+  ],
+  "r:cumene-oxidation": [
+   "c:cumene-hydroperoxide",
+   "c:cumene"
+  ],
+  "r:diazonium-phenol-coupling": [
+   "c:benzenediazonium-chloride",
+   "c:phenol",
+   "c:p-hydroxyazobenzene"
+  ],
+  "r:ethanal-oxidation-acetic": [
+   "c:acetic-acid",
+   "c:ethanal"
+  ],
+  "r:ethanol-dehydration-ether": [
+   "c:ethanol",
+   "c:diethyl-ether"
+  ],
+  "r:ethanol-oxidation-ethanal": [
+   "c:ethanal",
+   "c:ethanol"
+  ],
+  "r:ethene-bromine-addition": [
+   "c:ethene",
+   "c:1,2-dibromoethane"
+  ],
+  "r:ethene-hydration": [
+   "c:ethanol",
+   "c:ethene"
+  ],
+  "r:ethene-hydrogen-bromide": [
+   "c:ethene",
+   "c:bromoethane"
+  ],
+  "r:ethene-hydrogenation": [
+   "c:ethene",
+   "c:ethane"
+  ],
+  "r:ethene-polymerization": [
+   "c:ethene",
+   "c:polyethylene"
+  ],
+  "r:ethyl-acetate-hydrolysis": [
+   "c:ethanol",
+   "c:ethyl-acetate",
+   "c:acetic-acid"
+  ],
+  "r:formaldehyde-oxidation-formic": [
+   "c:formaldehyde",
+   "c:formic-acid"
+  ],
+  "r:glycerol-stearic-esterification": [
+   "c:glycerol",
+   "c:tristearin",
+   "c:stearic-acid"
+  ],
+  "r:glycine-alanine-peptide": [
+   "c:glycine",
+   "c:glycylalanine",
+   "c:alanine"
+  ],
+  "r:glycylalanine-hydrolysis": [
+   "c:glycine",
+   "c:alanine",
+   "c:glycylalanine"
+  ],
+  "r:methane-chlorination": [
+   "c:methane",
+   "c:chloromethane"
+  ],
+  "r:methanol-oxidation-formaldehyde": [
+   "c:methanol",
+   "c:formaldehyde"
+  ],
+  "r:methyl-salicylate-hydrolysis": [
+   "c:salicylic-acid",
+   "c:methanol",
+   "c:methyl-salicylate"
+  ],
+  "r:nitrobenzene-reduction": [
+   "c:nitrobenzene",
+   "c:aniline"
+  ],
+  "r:nylon66-condensation": [
+   "c:adipic-acid",
+   "c:hexamethylenediamine",
+   "c:nylon66"
+  ],
+  "r:p-xylene-oxidation": [
+   "c:p-xylene",
+   "c:terephthalic-acid"
+  ],
+  "r:pet-condensation": [
+   "c:terephthalic-acid",
+   "c:ethylene-glycol",
+   "c:pet"
+  ],
+  "r:phenol-acid-neutralization": [
+   "c:phenol",
+   "c:sodium-phenoxide"
+  ],
+  "r:propan-2-ol-oxidation": [
+   "c:acetone",
+   "c:propan-2-ol"
+  ],
+  "r:propene-hydration": [
+   "c:propan-2-ol",
+   "c:propene"
+  ],
+  "r:propene-hydrogenation": [
+   "c:propene",
+   "c:propane"
+  ],
+  "r:propene-polymerization": [
+   "c:propene",
+   "c:polypropylene"
+  ],
+  "r:salicylic-acid-acetylation": [
+   "c:aspirin",
+   "c:salicylic-acid",
+   "c:acetic-anhydride"
+  ],
+  "r:salicylic-acid-methyl-esterification": [
+   "c:methanol",
+   "c:salicylic-acid",
+   "c:methyl-salicylate"
+  ],
+  "r:sodium-phenoxide-acidification": [
+   "c:sodium-phenoxide",
+   "c:phenol"
+  ],
+  "r:starch-hydrolysis-glucose": [
+   "c:starch",
+   "c:glucose"
+  ],
+  "r:starch-hydrolysis-maltose": [
+   "c:starch",
+   "c:maltose"
+  ],
+  "r:styrene-polymerization": [
+   "c:styrene",
+   "c:polystyrene"
+  ],
+  "r:sucrose-hydrolysis": [
+   "c:glucose",
+   "c:sucrose",
+   "c:fructose"
+  ],
+  "r:triolein-hydrogenation": [
+   "c:tristearin",
+   "c:triolein"
+  ],
+  "r:tristearin-hydrolysis": [
+   "c:glycerol",
+   "c:stearic-acid",
+   "c:tristearin"
+  ],
+  "r:tristearin-saponification": [
+   "c:tristearin",
+   "c:glycerol",
+   "c:sodium-stearate"
+  ],
+  "r:vinyl-chloride-polymerization": [
+   "c:vinyl-chloride",
+   "c:pvc"
+  ]
+ },
+ "faces": [
+  [
+   "c:1,2-dibromoethane",
+   "r:ethene-bromine-addition",
+   "c:ethene",
+   "r:ethene-hydrogen-bromide",
+   "c:bromoethane",
+   "r:ethene-hydrogen-bromide",
+   "c:ethene",
+   "r:ethene-hydrogenation",
+   "c:ethane",
+   "r:ethene-hydrogenation",
+   "c:ethene",
+   "r:ethene-polymerization",
+   "c:polyethylene",
+   "r:ethene-polymerization",
+   "c:ethene",
+   "r:ethene-hydration",
+   "c:ethanol",
+   "r:ethanol-oxidation-ethanal",
+   "c:ethanal",
+   "r:ethanal-oxidation-acetic",
+   "c:acetic-acid",
+   "r:ethyl-acetate-hydrolysis",
+   "c:ethanol",
+   "r:ethanol-dehydration-ether",
+   "c:diethyl-ether",
+   "r:ethanol-dehydration-ether",
+   "c:ethanol",
+   "r:ethene-hydration",
+   "c:ethene",
+   "r:ethene-bromine-addition"
+  ],
+  [
+   "c:acetanilide",
+   "r:aniline-acetic-anhydride",
+   "c:acetic-anhydride",
+   "r:salicylic-acid-acetylation",
+   "c:aspirin",
+   "r:aspirin-hydrolysis",
+   "c:salicylic-acid",
+   "r:methyl-salicylate-hydrolysis",
+   "c:methanol",
+   "r:salicylic-acid-methyl-esterification",
+   "c:salicylic-acid",
+   "r:salicylic-acid-acetylation",
+   "c:acetic-anhydride",
+   "r:aniline-acetic-anhydride",
+   "c:aniline",
+   "r:aniline-diazotization",
+   "c:benzenediazonium-chloride",
+   "r:diazonium-phenol-coupling",
+   "c:phenol",
+   "r:phenol-acid-neutralization",
+   "c:sodium-phenoxide",
+   "r:chlorobenzene-dow-phenol",
+   "c:chlorobenzene",
+   "r:benzene-chlorination",
+   "c:benzene",
+   "r:benzene-nitration",
+   "c:nitrobenzene",
+   "r:nitrobenzene-reduction",
+   "c:aniline",
+   "r:aniline-acetic-anhydride"
+  ],
+  [
+   "c:acetic-acid",
+   "r:acetic-acid-ethanol-esterification",
+   "c:ethyl-acetate",
+   "r:ethyl-acetate-hydrolysis",
+   "c:acetic-acid",
+   "r:aspirin-hydrolysis",
+   "c:aspirin",
+   "r:salicylic-acid-acetylation",
+   "c:salicylic-acid",
+   "r:aspirin-hydrolysis"
+  ],
+  [
+   "c:acetic-acid",
+   "r:ethanal-oxidation-acetic",
+   "c:ethanal",
+   "r:ethanol-oxidation-ethanal",
+   "c:ethanol",
+   "r:acetic-acid-ethanol-esterification"
+  ],
+  [
+   "c:acetone",
+   "r:cumene-hydroperoxide-decomposition",
+   "c:phenol",
+   "r:diazonium-phenol-coupling",
+   "c:p-hydroxyazobenzene",
+   "r:diazonium-phenol-coupling",
+   "c:benzenediazonium-chloride",
+   "r:aniline-diazotization",
+   "c:aniline",
+   "r:nitrobenzene-reduction",
+   "c:nitrobenzene",
+   "r:benzene-nitration",
+   "c:benzene",
+   "r:benzene-sulfonation",
+   "c:benzenesulfonic-acid",
+   "r:benzene-sulfonation",
+   "c:benzene",
+   "r:benzene-chlorination",
+   "c:chlorobenzene",
+   "r:chlorobenzene-dow-phenol",
+   "c:sodium-phenoxide",
+   "r:sodium-phenoxide-acidification",
+   "c:phenol",
+   "r:cumene-hydroperoxide-decomposition",
+   "c:cumene-hydroperoxide",
+   "r:cumene-oxidation",
+   "c:cumene",
+   "r:cumene-oxidation",
+   "c:cumene-hydroperoxide",
+   "r:cumene-hydroperoxide-decomposition",
+   "c:acetone",
+   "r:propan-2-ol-oxidation",
+   "c:propan-2-ol",
+   "r:propene-hydration",
+   "c:propene",
+   "r:propene-hydrogenation",
+   "c:propane",
+   "r:propene-hydrogenation",
+   "c:propene",
+   "r:propene-polymerization",
+   "c:polypropylene",
+   "r:propene-polymerization",
+   "c:propene",
+   "r:propene-hydration",
+   "c:propan-2-ol",
+   "r:propan-2-ol-oxidation"
+  ],
+  [
+   "c:adipic-acid",
+   "r:nylon66-condensation",
+   "c:hexamethylenediamine",
+   "r:nylon66-condensation",
+   "c:nylon66",
+   "r:nylon66-condensation"
+  ],
+  [
+   "c:alanine",
+   "r:glycylalanine-hydrolysis",
+   "c:glycylalanine",
+   "r:glycine-alanine-peptide"
+  ],
+  [
+   "c:alanine",
+   "r:glycine-alanine-peptide",
+   "c:glycine",
+   "r:glycylalanine-hydrolysis"
+  ],
+  [
+   "c:benzaldehyde",
+   "r:benzaldehyde-oxidation",
+   "c:benzoic-acid",
+   "r:benzaldehyde-oxidation",
+   "c:benzaldehyde",
+   "r:benzyl-alcohol-oxidation",
+   "c:benzyl-alcohol",
+   "r:benzyl-alcohol-oxidation"
+  ],
+  [
+   "c:caprolactam",
+   "r:caprolactam-ring-opening",
+   "c:nylon6",
+   "r:caprolactam-ring-opening"
+  ],
+  [
+   "c:chloromethane",
+   "r:methane-chlorination",
+   "c:methane",
+   "r:methane-chlorination"
+  ],
+  [
+   "c:ethanol",
+   "r:ethyl-acetate-hydrolysis",
+   "c:ethyl-acetate",
+   "r:acetic-acid-ethanol-esterification"
+  ],
+  [
+   "c:ethylene-glycol",
+   "r:pet-condensation",
+   "c:pet",
+   "r:pet-condensation",
+   "c:terephthalic-acid",
+   "r:p-xylene-oxidation",
+   "c:p-xylene",
+   "r:p-xylene-oxidation",
+   "c:terephthalic-acid",
+   "r:pet-condensation"
+  ],
+  [
+   "c:formaldehyde",
+   "r:methanol-oxidation-formaldehyde",
+   "c:methanol",
+   "r:methyl-salicylate-hydrolysis",
+   "c:methyl-salicylate",
+   "r:salicylic-acid-methyl-esterification",
+   "c:methanol",
+   "r:methanol-oxidation-formaldehyde",
+   "c:formaldehyde",
+   "r:formaldehyde-oxidation-formic",
+   "c:formic-acid",
+   "r:formaldehyde-oxidation-formic"
+  ],
+  [
+   "c:fructose",
+   "r:sucrose-hydrolysis",
+   "c:glucose",
+   "r:starch-hydrolysis-glucose",
+   "c:starch",
+   "r:starch-hydrolysis-maltose",
+   "c:maltose",
+   "r:starch-hydrolysis-maltose",
+   "c:starch",
+   "r:starch-hydrolysis-glucose",
+   "c:glucose",
+   "r:sucrose-hydrolysis",
+   "c:sucrose",
+   "r:sucrose-hydrolysis"
+  ],
+  [
+   "c:glycerol",
+   "r:glycerol-stearic-esterification",
+   "c:tristearin",
+   "r:tristearin-saponification"
+  ],
+  [
+   "c:glycerol",
+   "r:tristearin-hydrolysis",
+   "c:stearic-acid",
+   "r:glycerol-stearic-esterification"
+  ],
+  [
+   "c:glycerol",
+   "r:tristearin-saponification",
+   "c:sodium-stearate",
+   "r:tristearin-saponification",
+   "c:tristearin",
+   "r:triolein-hydrogenation",
+   "c:triolein",
+   "r:triolein-hydrogenation",
+   "c:tristearin",
+   "r:tristearin-hydrolysis"
+  ],
+  [
+   "c:glycine",
+   "r:glycine-alanine-peptide",
+   "c:glycylalanine",
+   "r:glycylalanine-hydrolysis"
+  ],
+  [
+   "c:methyl-salicylate",
+   "r:methyl-salicylate-hydrolysis",
+   "c:salicylic-acid",
+   "r:salicylic-acid-methyl-esterification"
+  ],
+  [
+   "c:phenol",
+   "r:sodium-phenoxide-acidification",
+   "c:sodium-phenoxide",
+   "r:phenol-acid-neutralization"
+  ],
+  [
+   "c:polystyrene",
+   "r:styrene-polymerization",
+   "c:styrene",
+   "r:styrene-polymerization"
+  ],
+  [
+   "c:pvc",
+   "r:vinyl-chloride-polymerization",
+   "c:vinyl-chloride",
+   "r:vinyl-chloride-polymerization"
+  ],
+  [
+   "c:stearic-acid",
+   "r:tristearin-hydrolysis",
+   "c:tristearin",
+   "r:glycerol-stearic-esterification"
+  ]
+ ],
+ "nodeFaces": {
+  "r:acetic-acid-ethanol-esterification": [
+   2,
+   3,
+   11
+  ],
+  "c:acetic-acid": [
+   0,
+   2,
+   2,
+   3
+  ],
+  "c:ethanol": [
+   0,
+   0,
+   0,
+   3,
+   11
+  ],
+  "c:ethyl-acetate": [
+   2,
+   11
+  ],
+  "r:aniline-acetic-anhydride": [
+   1,
+   1,
+   1
+  ],
+  "c:aniline": [
+   1,
+   1,
+   4
+  ],
+  "c:acetic-anhydride": [
+   1,
+   1
+  ],
+  "c:acetanilide": [
+   1
+  ],
+  "r:aniline-diazotization": [
+   1,
+   4
+  ],
+  "c:benzenediazonium-chloride": [
+   1,
+   4
+  ],
+  "r:aspirin-hydrolysis": [
+   1,
+   2,
+   2
+  ],
+  "c:aspirin": [
+   1,
+   2
+  ],
+  "c:salicylic-acid": [
+   1,
+   1,
+   2,
+   19
+  ],
+  "r:benzaldehyde-oxidation": [
+   8,
+   8
+  ],
+  "c:benzaldehyde": [
+   8,
+   8
+  ],
+  "c:benzoic-acid": [
+   8
+  ],
+  "r:benzene-chlorination": [
+   1,
+   4
+  ],
+  "c:benzene": [
+   1,
+   4,
+   4
+  ],
+  "c:chlorobenzene": [
+   1,
+   4
+  ],
+  "r:benzene-nitration": [
+   1,
+   4
+  ],
+  "c:nitrobenzene": [
+   1,
+   4
+  ],
+  "r:benzene-sulfonation": [
+   4,
+   4
+  ],
+  "c:benzenesulfonic-acid": [
+   4
+  ],
+  "r:benzyl-alcohol-oxidation": [
+   8,
+   8
+  ],
+  "c:benzyl-alcohol": [
+   8
+  ],
+  "r:caprolactam-ring-opening": [
+   9,
+   9
+  ],
+  "c:caprolactam": [
+   9
+  ],
+  "c:nylon6": [
+   9
+  ],
+  "r:chlorobenzene-dow-phenol": [
+   1,
+   4
+  ],
+  "c:sodium-phenoxide": [
+   1,
+   4,
+   20
+  ],
+  "r:cumene-hydroperoxide-decomposition": [
+   4,
+   4,
+   4
+  ],
+  "c:cumene-hydroperoxide": [
+   4,
+   4
+  ],
+  "c:phenol": [
+   1,
+   4,
+   4,
+   20
+  ],
+  "c:acetone": [
+   4,
+   4
+  ],
+  "r:cumene-oxidation": [
+   4,
+   4
+  ],
+  "c:cumene": [
+   4
+  ],
+  "r:diazonium-phenol-coupling": [
+   1,
+   4,
+   4
+  ],
+  "c:p-hydroxyazobenzene": [
+   4
+  ],
+  "r:ethanal-oxidation-acetic": [
+   0,
+   3
+  ],
+  "c:ethanal": [
+   0,
+   3
+  ],
+  "r:ethanol-dehydration-ether": [
+   0,
+   0
+  ],
+  "c:diethyl-ether": [
+   0
+  ],
+  "r:ethanol-oxidation-ethanal": [
+   0,
+   3
+  ],
+  "r:ethene-bromine-addition": [
+   0,
+   0
+  ],
+  "c:ethene": [
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "c:1,2-dibromoethane": [
+   0
+  ],
+  "r:ethene-hydration": [
+   0,
+   0
+  ],
+  "r:ethene-hydrogen-bromide": [
+   0,
+   0
+  ],
+  "c:bromoethane": [
+   0
+  ],
+  "r:ethene-hydrogenation": [
+   0,
+   0
+  ],
+  "c:ethane": [
+   0
+  ],
+  "r:ethene-polymerization": [
+   0,
+   0
+  ],
+  "c:polyethylene": [
+   0
+  ],
+  "r:ethyl-acetate-hydrolysis": [
+   0,
+   2,
+   11
+  ],
+  "r:formaldehyde-oxidation-formic": [
+   13,
+   13
+  ],
+  "c:formaldehyde": [
+   13,
+   13
+  ],
+  "c:formic-acid": [
+   13
+  ],
+  "r:glycerol-stearic-esterification": [
+   15,
+   16,
+   23
+  ],
+  "c:glycerol": [
+   15,
+   16,
+   17
+  ],
+  "c:stearic-acid": [
+   16,
+   23
+  ],
+  "c:tristearin": [
+   15,
+   17,
+   17,
+   23
+  ],
+  "r:glycine-alanine-peptide": [
+   6,
+   7,
+   18
+  ],
+  "c:glycine": [
+   7,
+   18
+  ],
+  "c:alanine": [
+   6,
+   7
+  ],
+  "c:glycylalanine": [
+   6,
+   18
+  ],
+  "r:glycylalanine-hydrolysis": [
+   6,
+   7,
+   18
+  ],
+  "r:methane-chlorination": [
+   10,
+   10
+  ],
+  "c:methane": [
+   10
+  ],
+  "c:chloromethane": [
+   10
+  ],
+  "r:methanol-oxidation-formaldehyde": [
+   13,
+   13
+  ],
+  "c:methanol": [
+   1,
+   13,
+   13
+  ],
+  "r:methyl-salicylate-hydrolysis": [
+   1,
+   13,
+   19
+  ],
+  "c:methyl-salicylate": [
+   13,
+   19
+  ],
+  "r:nitrobenzene-reduction": [
+   1,
+   4
+  ],
+  "r:nylon66-condensation": [
+   5,
+   5,
+   5
+  ],
+  "c:adipic-acid": [
+   5
+  ],
+  "c:hexamethylenediamine": [
+   5
+  ],
+  "c:nylon66": [
+   5
+  ],
+  "r:p-xylene-oxidation": [
+   12,
+   12
+  ],
+  "c:p-xylene": [
+   12
+  ],
+  "c:terephthalic-acid": [
+   12,
+   12
+  ],
+  "r:pet-condensation": [
+   12,
+   12,
+   12
+  ],
+  "c:ethylene-glycol": [
+   12
+  ],
+  "c:pet": [
+   12
+  ],
+  "r:phenol-acid-neutralization": [
+   1,
+   20
+  ],
+  "r:propan-2-ol-oxidation": [
+   4,
+   4
+  ],
+  "c:propan-2-ol": [
+   4,
+   4
+  ],
+  "r:propene-hydration": [
+   4,
+   4
+  ],
+  "c:propene": [
+   4,
+   4,
+   4
+  ],
+  "r:propene-hydrogenation": [
+   4,
+   4
+  ],
+  "c:propane": [
+   4
+  ],
+  "r:propene-polymerization": [
+   4,
+   4
+  ],
+  "c:polypropylene": [
+   4
+  ],
+  "r:salicylic-acid-acetylation": [
+   1,
+   1,
+   2
+  ],
+  "r:salicylic-acid-methyl-esterification": [
+   1,
+   13,
+   19
+  ],
+  "r:sodium-phenoxide-acidification": [
+   4,
+   20
+  ],
+  "r:starch-hydrolysis-glucose": [
+   14,
+   14
+  ],
+  "c:starch": [
+   14,
+   14
+  ],
+  "c:glucose": [
+   14,
+   14
+  ],
+  "r:starch-hydrolysis-maltose": [
+   14,
+   14
+  ],
+  "c:maltose": [
+   14
+  ],
+  "r:styrene-polymerization": [
+   21,
+   21
+  ],
+  "c:styrene": [
+   21
+  ],
+  "c:polystyrene": [
+   21
+  ],
+  "r:sucrose-hydrolysis": [
+   14,
+   14,
+   14
+  ],
+  "c:sucrose": [
+   14
+  ],
+  "c:fructose": [
+   14
+  ],
+  "r:triolein-hydrogenation": [
+   17,
+   17
+  ],
+  "c:triolein": [
+   17
+  ],
+  "r:tristearin-hydrolysis": [
+   16,
+   17,
+   23
+  ],
+  "r:tristearin-saponification": [
+   15,
+   17,
+   17
+  ],
+  "c:sodium-stearate": [
+   17
+  ],
+  "r:vinyl-chloride-polymerization": [
+   22,
+   22
+  ],
+  "c:vinyl-chloride": [
+   22
+  ],
+  "c:pvc": [
+   22
+  ]
+ },
+ "secondary": [
+  {
+   "nodes": [
+    "c:3-methylbutan-1-ol",
+    "c:acetic-acid",
+    "c:butan-1-ol",
+    "c:butanal",
+    "c:butanoic-acid",
+    "c:butyl-acetate",
+    "c:dimethyl-oxalate",
+    "c:ethanal",
+    "c:ethanol",
+    "c:ethyl-butyrate",
+    "c:ethyl-formate",
+    "c:ethyl-propionate",
+    "c:formic-acid",
+    "c:glycerol",
+    "c:isoamyl-acetate",
+    "c:linoleic-acid",
+    "c:methanol",
+    "c:methyl-acetate",
+    "c:methyl-formate",
+    "c:methyl-propionate",
+    "c:oleic-acid",
+    "c:oxalic-acid",
+    "c:palmitic-acid",
+    "c:propan-1-ol",
+    "c:propanal",
+    "c:propionic-acid",
+    "c:sodium-oleate",
+    "c:sodium-palmitate",
+    "c:triacetin",
+    "c:trilinolein",
+    "c:triolein",
+    "c:tripalmitin",
+    "r:acetic-acid-butanol-esterification",
+    "r:acetic-acid-glycerol-esterification",
+    "r:acetic-acid-isoamyl-esterification",
+    "r:acetic-acid-methanol-esterification",
+    "r:butan-1-ol-oxidation",
+    "r:butanal-reduction",
+    "r:butanoic-acid-ethanol-esterification",
+    "r:ethanal-reduction",
+    "r:ethanol-oxidation-acetic",
+    "r:ethyl-propionate-saponification",
+    "r:formic-acid-ethanol-esterification",
+    "r:formic-acid-methanol-esterification",
+    "r:glycerol-linoleic-esterification",
+    "r:glycerol-oleic-esterification",
+    "r:glycerol-palmitic-esterification",
+    "r:oxalic-acid-methanol-esterification",
+    "r:propan-1-ol-oxidation",
+    "r:propanal-oxidation",
+    "r:propanal-reduction",
+    "r:propionic-acid-ethanol-esterification",
+    "r:propionic-acid-methanol-esterification",
+    "r:triolein-saponification",
+    "r:tripalmitin-saponification"
+   ],
+   "primaryAttachments": [
+    "c:acetic-acid",
+    "c:ethanal",
+    "c:ethanol",
+    "c:formic-acid",
+    "c:glycerol",
+    "c:methanol",
+    "c:triolein"
+   ],
+   "commonFaces": [],
+   "cofacial": false
+  },
+  {
+   "nodes": [
+    "c:alanine",
+    "c:alanylglycine",
+    "c:glycine",
+    "c:glycylglycine",
+    "r:alanine-glycine-peptide",
+    "r:alanylglycine-hydrolysis",
+    "r:glycine-glycine-peptide",
+    "r:glycylglycine-hydrolysis"
+   ],
+   "primaryAttachments": [
+    "c:alanine",
+    "c:glycine"
+   ],
+   "commonFaces": [
+    7
+   ],
+   "cofacial": true
+  },
+  {
+   "nodes": [
+    "c:2-chloro-2-methylpropane",
+    "c:2-methylpropan-2-ol",
+    "c:isobutene",
+    "r:2-methylpropan-2-ol-dehydration",
+    "r:2-methylpropan-2-ol-hydrogen-chloride",
+    "r:isobutene-hydrogen-chloride"
+   ],
+   "primaryAttachments": [],
+   "commonFaces": [],
+   "cofacial": true
+  },
+  {
+   "nodes": [
+    "c:fructose",
+    "c:glucose",
+    "c:mannose",
+    "c:sorbitol",
+    "r:fructose-base-isomerization",
+    "r:glucose-reduction"
+   ],
+   "primaryAttachments": [
+    "c:fructose",
+    "c:glucose"
+   ],
+   "commonFaces": [
+    14
+   ],
+   "cofacial": true
+  },
+  {
+   "nodes": [
+    "c:acetone",
+    "c:propan-2-ol",
+    "c:propyne",
+    "r:acetone-reduction",
+    "r:propyne-hydration"
+   ],
+   "primaryAttachments": [
+    "c:acetone",
+    "c:propan-2-ol"
+   ],
+   "commonFaces": [
+    4
+   ],
+   "cofacial": true
+  },
+  {
+   "nodes": [
+    "c:cysteine",
+    "c:cystine",
+    "r:cysteine-oxidation"
+   ],
+   "primaryAttachments": [],
+   "commonFaces": [],
+   "cofacial": true
+  },
+  {
+   "nodes": [
+    "c:protein",
+    "r:protein-hydrolysis"
+   ],
+   "primaryAttachments": [],
+   "commonFaces": [],
+   "cofacial": true
+  }
+ ]
+}

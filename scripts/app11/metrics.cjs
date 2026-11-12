@@ -1,19 +1,21 @@
 /**
  * 有機反応マップ（app11）— 配置・経路の定量計測
  *
- * 改善前（layout v1 + 直線/2次ベジェ）と改善後（v2 + 保存済み折れ線）を
- * まったく同じ計算で測るための計測器。DOM も外部依存も使わない。
+ * 改善前（v1/v3）と新案を同じ計算で測るための計測器。DOM も外部依存も使わない。
  *
  * 実行:
- *   node scripts/app11/metrics.cjs                 # 現在の layout v2 を計測
- *   node scripts/app11/metrics.cjs --baseline      # v1 スナップショットを計測
+ *   node scripts/app11/metrics.cjs                 # 現在の layout v4 を計測
  *   node scripts/app11/metrics.cjs --json          # JSON で出力
+ *   node scripts/app11/metrics.cjs --baseline      # 旧 fixture を計測
  *
  * 用語:
- * - 無関係ノード貫通: 辺が、その辺の端点ではない物質の矩形を横切る。
- * - マーカー衝突: 反応マーカー同士・マーカーと物質・マーカーとラベルの接触。
- * - 同一区間重なり: 別の辺が同じ線分上を 2px 以上共有する。
- * - 交差: 同一反応内のマーカー付近（意図した接続）と、同一物質のポート付近を除いた交差。
+ * - 主要/補助: route.tier（無い場合は反応の tier）。PP / PS / SS は枝の組。
+ * - 交差: 異なる反応の枝の中心線が交わる事象。同じ反応の枝は sameReaction で別集計。
+ * - 共有ポート免除: 2 本が同じ物質（または同じ反応点）を共有し、交点が両方の
+ *   その端点から PORT_EXEMPT px 以内にある場合だけ。ノード中心からの距離では免除しない。
+ * - ストローク clearance: 中心線距離から線幅の半分を引いた縁間距離。PP/PS は 6px、
+ *   SS は 3px を基準にする。交差そのものとは別に数える。
+ * - crossingsWithoutGap という旧名は廃止。橋の有無で交差数を減らさない。
  */
 'use strict';
 
@@ -24,17 +26,13 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const BASELINE = path.join(ROOT, 'scripts', 'tests', 'fixtures', 'app11-baseline', 'scene.json');
 
 const MARKER_MIN_DIST = 22;
-const GAP_MATCH = 4;
-const SHARED_NODE_EXEMPT = 32; // 同一物質のポート扇（意図した接続）として重なり判定から除く距離
-const SHARED_MARKER_EXEMPT = 30;
+const PORT_EXEMPT = 8;
+const OVERLAP_PORT_EXEMPT = 10;
+const STROKE = { primary: 3.0, secondary: 1.1 };
+const REQUIRED_GAP = { PP: 6, PS: 6, SS: 3 };
 
 function nodeRect(compound, nodeW, nodeH) {
-  return G.rect(compound.x, compound.y, nodeW, nodeH);
-}
-
-function edgeEndpoints(route, compoundById) {
-  const c = compoundById.get(route.compoundId);
-  return c ? [{ x: c.x + G.NODE_W / 2, y: c.y + G.NODE_H / 2 }] : [];
+  return G.rect(compound.x, compound.y, compound.w || nodeW, compound.h || nodeH);
 }
 
 function aabb(points) {
@@ -60,7 +58,70 @@ function aabbNear(a, b, pad) {
   );
 }
 
-// 旧レイアウトの描画（nodeCenter → marker の直線、分野横断は2次ベジェ）を折れ線にする。
+function sceneFromLayout(layout, routesFile) {
+  const regions = layout.regions.map((r) => ({
+    id: r.id,
+    name: r.name,
+    count: r.count,
+    focus: r.focus,
+    center: r.center
+  }));
+  const nodeW = layout.nodeW || G.NODE_W;
+  const nodeH = layout.nodeH || G.NODE_H;
+  const compounds = Object.keys(layout.positions).sort().map((id) => {
+    const p = layout.positions[id];
+    return { id, x: p.x, y: p.y, w: p.w || nodeW, h: p.h || nodeH, region: p.r };
+  });
+  const reactionTier = {};
+  const reactions = Object.keys(layout.reactions).sort().map((id) => {
+    const r = layout.reactions[id];
+    const tier = r.tier === 'primary' ? 'primary' : 'secondary';
+    reactionTier[id] = tier;
+    const labelBoxes = r.label
+      ? (r.label.box
+        ? { type: { x: r.label.box.x, y: r.label.box.y, w: r.label.box.w, h: r.label.box.h }, cond: null }
+        : G.labelLayout(r.x, r.y, r.typeLabel, r.label.cond ? r.conditions : '', r.label.side))
+      : null;
+    return {
+      id,
+      x: r.x,
+      y: r.y,
+      tier,
+      substrates: r.substrates,
+      products: r.products,
+      typeLabel: r.typeLabel,
+      conditions: r.conditions,
+      cross: r.cross,
+      labelBoxes
+    };
+  });
+  const routes = Object.keys(routesFile.edges).sort().map((key) => {
+    const e = routesFile.edges[key];
+    return {
+      key,
+      reactionId: e.reaction,
+      dir: e.dir,
+      compoundId: e.compound,
+      tier: e.tier === 'primary' || e.tier === 'secondary' ? e.tier : reactionTier[e.reaction],
+      points: e.points.map((p) => ({ x: p[0], y: p[1] })),
+      gaps: (e.gaps || []).map((p) => ({ x: p[0], y: p[1] })),
+      bridges: (e.bridges || []).map((p) => ({ x: p[0], y: p[1] }))
+    };
+  });
+  return {
+    meta: {
+      nodeW,
+      nodeH,
+      canvas: layout.canvas,
+      shelf: layout.shelf || null
+    },
+    regions,
+    compounds,
+    reactions,
+    routes
+  };
+}
+
 function legacyRoutes(scene) {
   const compoundById = new Map(scene.compounds.map((c) => [c.id, c]));
   const routes = [];
@@ -86,6 +147,7 @@ function legacyRoutes(scene) {
         reactionId: r.id,
         dir,
         compoundId: id,
+        tier: r.tier === 'primary' ? 'primary' : 'secondary',
         points,
         gaps: []
       });
@@ -93,12 +155,12 @@ function legacyRoutes(scene) {
     for (const id of r.substrates) {
       const c = compoundById.get(id);
       if (!c) continue;
-      add('in', id, { x: c.x + scene.meta.nodeW / 2, y: c.y + scene.meta.nodeH / 2 }, marker);
+      add('in', id, { x: c.x + (c.w || scene.meta.nodeW) / 2, y: c.y + (c.h || scene.meta.nodeH) / 2 }, marker);
     }
     for (const id of r.products) {
       const c = compoundById.get(id);
       if (!c) continue;
-      add('out', id, marker, { x: c.x + scene.meta.nodeW / 2, y: c.y + scene.meta.nodeH / 2 });
+      add('out', id, marker, { x: c.x + (c.w || scene.meta.nodeW) / 2, y: c.y + (c.h || scene.meta.nodeH) / 2 });
     }
   }
   return routes;
@@ -112,56 +174,32 @@ function sceneFromBaseline() {
   return scene;
 }
 
-function sceneFromLayout(layout, routesFile) {
-  const regions = layout.regions.map((r) => ({
-    id: r.id,
-    name: r.name,
-    count: r.count,
-    focus: r.focus,
-    center: r.center
-  }));
-  const compounds = Object.keys(layout.positions).sort().map((id) => {
-    const p = layout.positions[id];
-    return { id, x: p.x, y: p.y, region: p.r };
-  });
-  const reactions = Object.keys(layout.reactions).sort().map((id) => {
-    const r = layout.reactions[id];
-    const labelBoxes = G.labelLayout(r.x, r.y, r.typeLabel, r.conditions, r.label ? r.label.side : 'N');
-    return {
-      id,
-      x: r.x,
-      y: r.y,
-      substrates: r.substrates,
-      products: r.products,
-      typeLabel: r.typeLabel,
-      conditions: r.conditions,
-      cross: r.cross,
-      labelBoxes
-    };
-  });
-  const routes = Object.keys(routesFile.edges).sort().map((key) => {
-    const e = routesFile.edges[key];
-    return {
-      key,
-      reactionId: e.reaction,
-      dir: e.dir,
-      compoundId: e.compound,
-      points: e.points.map((p) => ({ x: p[0], y: p[1] })),
-      gaps: (e.gaps || []).map((p) => ({ x: p[0], y: p[1] })),
-      bridges: (e.bridges || []).map((p) => ({ x: p[0], y: p[1] }))
-    };
-  });
+function tierPair(a, b) {
+  if (a === 'primary' && b === 'primary') return 'PP';
+  if (a === 'secondary' && b === 'secondary') return 'SS';
+  return 'PS';
+}
+
+function stats(values) {
+  const arr = values.slice().sort((a, b) => a - b);
+  if (!arr.length) return { count: 0, total: 0, median: 0, p95: 0, max: 0, mean: 0 };
+  const total = arr.reduce((s, v) => s + v, 0);
+  const median = arr.length % 2
+    ? arr[(arr.length - 1) / 2]
+    : (arr[arr.length / 2 - 1] + arr[arr.length / 2]) / 2;
+  const p95 = arr[Math.min(arr.length - 1, Math.ceil(arr.length * 0.95) - 1)];
   return {
-    meta: {
-      nodeW: layout.nodeW || G.NODE_W,
-      nodeH: layout.nodeH || G.NODE_H,
-      canvas: layout.canvas
-    },
-    regions,
-    compounds,
-    reactions,
-    routes
+    count: arr.length,
+    total: round(total),
+    median: round(median),
+    p95: round(p95),
+    max: round(arr[arr.length - 1]),
+    mean: round(total / arr.length)
   };
+}
+
+function round(v) {
+  return Math.round(v * 100) / 100;
 }
 
 function measure(scene) {
@@ -189,9 +227,12 @@ function measure(scene) {
   // --- labels ------------------------------------------------------------
   const labels = [];
   for (const r of scene.reactions) {
-    const box = r.labelBoxes || G.labelBoxes(r.x, r.y, r.typeLabel, r.conditions);
-    labels.push({ reactionId: r.id, kind: 'type', box: box.type });
-    if (box.cond) labels.push({ reactionId: r.id, kind: 'cond', box: box.cond });
+    const box = r.labelBoxes !== undefined
+      ? r.labelBoxes
+      : G.labelBoxes(r.x, r.y, r.typeLabel, r.conditions);
+    if (!box) continue;
+    labels.push({ reactionId: r.id, tier: r.tier || 'secondary', kind: 'type', box: box.type });
+    if (box.cond) labels.push({ reactionId: r.id, tier: r.tier || 'secondary', kind: 'cond', box: box.cond });
   }
   const titles = scene.regions.filter((region) => region.panel).map((region) => ({
     regionId: region.id,
@@ -230,7 +271,6 @@ function measure(scene) {
       if (G.rectsOverlap(G.inflate(label.box, 1), n.r)) labelNodeCollisions++;
     }
     for (const r of scene.reactions) {
-      if (r.id === label.reactionId) continue;
       if (G.rectsOverlap(G.inflate(label.box, 1), G.markerBox(r.x, r.y))) labelMarkerCollisions++;
     }
     for (const title of titles) {
@@ -244,7 +284,7 @@ function measure(scene) {
     }
   }
 
-  // --- edge geometry -----------------------------------------------------
+  // --- edge geometry / tier stats ---------------------------------------
   let nodePenetrations = 0;
   let labelPenetrations = 0;
   let markerPenetrations = 0;
@@ -260,19 +300,30 @@ function measure(scene) {
   const hitMarker = new Set();
   const hitTitle = new Set();
   const hitEndpoint = new Set();
+  const tierStats = {
+    primary: { lengths: [], detours: [], bends: [], reactionLengths: new Map(), labelHits: 0, nodeHits: 0, markerHits: 0 },
+    secondary: { lengths: [], detours: [], bends: [], reactionLengths: new Map(), labelHits: 0, nodeHits: 0, markerHits: 0 }
+  };
 
   for (const route of routes) {
+    const tier = route.tier === 'primary' ? 'primary' : 'secondary';
     const segs = G.polylineSegments(route.points).map((s) => ({ a: s.a, b: s.b }));
-    totalLength += G.polylineLength(route.points);
+    const length = G.polylineLength(route.points);
+    totalLength += length;
     const b = G.bendCount(route.points);
     bends += b;
     maxBends = Math.max(maxBends, b);
-    routeSegments.push({ route, segs });
+    const start = route.points[0] || { x: 0, y: 0 };
+    const end = route.points[route.points.length - 1] || start;
+    const straight = Math.hypot(end.x - start.x, end.y - start.y);
+    tierStats[tier].lengths.push(length);
+    tierStats[tier].bends.push(b);
+    tierStats[tier].detours.push(length / Math.max(1, straight));
+    tierStats[tier].reactionLengths.set(route.reactionId, (tierStats[tier].reactionLengths.get(route.reactionId) || 0) + length);
+    routeSegments.push({ route, segs, tier, start, end, length });
     routeAabb.set(route.key, aabb(route.points));
     const endpoint = route.compoundId;
-    const reaction = reactionById.get(route.reactionId);
     for (const seg of segs) {
-      // 端点ノードの内側へ入り込んでいないか（ポートから 12px を超える侵入）
       if (endpoint) {
         const endNode = nodeByRectId.get(endpoint);
         if (endNode && G.segmentRect(seg.a, seg.b, G.inflate(endNode.r, -0.5))) {
@@ -282,11 +333,15 @@ function measure(scene) {
       }
       for (const n of nodeRects) {
         if (n.id === endpoint) continue;
-        if (G.segmentRect(seg.a, seg.b, G.inflate(n.r, -0.5))) hitNode.add(route.key + '|' + n.id);
+        if (G.segmentRect(seg.a, seg.b, G.inflate(n.r, -0.5))) {
+          hitNode.add(route.key + '|' + n.id);
+          tierStats[tier].nodeHits++;
+        }
       }
       for (const label of labels) {
         if (G.segmentRect(seg.a, seg.b, G.inflate(label.box, -0.5))) {
           hitLabel.add(route.key + '|' + label.reactionId + '|' + label.kind);
+          tierStats[tier].labelHits++;
         }
       }
       for (const title of titles) {
@@ -296,6 +351,7 @@ function measure(scene) {
         if (other.id === route.reactionId) continue;
         if (G.segmentRect(seg.a, seg.b, G.inflate(G.markerBox(other.x, other.y), 2))) {
           hitMarker.add(route.key + '|' + other.id);
+          tierStats[tier].markerHits++;
         }
       }
     }
@@ -307,17 +363,31 @@ function measure(scene) {
   endpointPenetrations = hitEndpoint.size;
 
   // --- edge / edge -------------------------------------------------------
-  let crossings = 0;
+  const crossings = {
+    PP: 0, PS: 0, SS: 0, total: 0, sameReaction: 0,
+    pairsPP: 0, pairsPS: 0, pairsSS: 0,
+    reactionPairsPP: 0, reactionPairsPS: 0, reactionPairsSS: 0,
+    events: 0,
+    samples: []
+  };
+  const pairSets = { PP: new Set(), PS: new Set(), SS: new Set() };
+  const reactionPairSets = { PP: new Set(), PS: new Set(), SS: new Set() };
   let acuteCrossings = 0;
   let bridgedCrossings = 0;
   let unbridgedAcute = 0;
   let overlapSegments = 0;
   let overlapLength = 0;
-  let overlapSegmentsRaw = 0;
-  let overlapLengthRaw = 0;
+  let overlapSegmentsSameReaction = 0;
   let clearanceViolations = 0;
+  let clearanceViolationsPP = 0;
+  let clearanceViolationsPS = 0;
+  let clearanceViolationsSS = 0;
+  let clearanceViolationsSameReaction = 0;
+  let protectedCorridorViolations = 0;
   let minClearance = Infinity;
-  const crossingSamples = [];
+  let minStrokeClearance = Infinity;
+  let sameReactionCrossings = 0;
+  const clearanceSamples = [];
 
   const gapPointsByKey = new Map();
   const bridgePointsByKey = new Map();
@@ -330,33 +400,47 @@ function measure(scene) {
     for (let j = i + 1; j < routeSegments.length; j++) {
       const A = routeSegments[i];
       const B = routeSegments[j];
-      if (A.route.reactionId === B.route.reactionId) continue; // 同一反応は意図した接続
-      if (!aabbNear(routeAabb.get(A.route.key), routeAabb.get(B.route.key), SHARED_MARKER_EXEMPT)) continue;
-      const shared = A.route.compoundId && A.route.compoundId === B.route.compoundId
-        ? nodeByRectId.get(A.route.compoundId)
-        : null;
+      if (!aabbNear(routeAabb.get(A.route.key), routeAabb.get(B.route.key), 24)) continue;
+      const sameReaction = A.route.reactionId === B.route.reactionId;
+      const sharedCompound = A.route.compoundId && A.route.compoundId === B.route.compoundId;
+      const pair = tierPair(A.tier, B.tier);
       for (const sa of A.segs) {
         for (const sb of B.segs) {
           const aabbA = aabb([sa.a, sa.b]);
           const aabbB = aabb([sb.a, sb.b]);
-          if (!aabbNear(aabbA, aabbB, G.CLEARANCE + 1)) continue;
+          if (!aabbNear(aabbA, aabbB, 10)) continue;
           const hit = G.segSegIntersection(sa.a, sa.b, sb.a, sb.b);
           if (hit) {
-            if (shared && G.distPointRect(hit, shared.r) < SHARED_NODE_EXEMPT) continue;
-            crossings++;
-            const aGap = nearestGap(gapPointsByKey.get(A.route.key), hit);
-            const bGap = nearestGap(gapPointsByKey.get(B.route.key), hit);
-            const aBridge = nearestGap(bridgePointsByKey.get(A.route.key), hit);
-            const bBridge = nearestGap(bridgePointsByKey.get(B.route.key), hit);
-            const distinguished = Math.min(aGap, bGap) <= GAP_MATCH ||
-              Math.min(aBridge, bBridge) <= 8;
+            if (sameReaction) {
+              if (!near(hit, A.end, PORT_EXEMPT)) sameReactionCrossings++;
+              continue;
+            }
+            if (sharedCompound && near(hit, A.start, PORT_EXEMPT) && near(hit, B.start, PORT_EXEMPT)) continue;
+            crossings[pair]++;
+            crossings.total++;
+            crossings.events++;
+            pairSets[pair].add(A.route.key + '\u0000' + B.route.key);
+            const rp = A.route.reactionId < B.route.reactionId
+              ? A.route.reactionId + '\u0000' + B.route.reactionId
+              : B.route.reactionId + '\u0000' + A.route.reactionId;
+            reactionPairSets[pair].add(rp);
             const ax = sa.b.x - sa.a.x;
             const ay = sa.b.y - sa.a.y;
             const bx = sb.b.x - sb.a.x;
             const by = sb.b.y - sb.a.y;
             const dot = Math.abs(ax * bx + ay * by) / ((Math.hypot(ax, ay) * Math.hypot(bx, by)) || 1);
             const angle = Math.acos(Math.min(1, dot));
-            crossingSamples.push({ x: hit.x, y: hit.y, a: A.route.key, b: B.route.key, angle, distinguished });
+            const aGap = nearestGap(gapPointsByKey.get(A.route.key), hit);
+            const bGap = nearestGap(gapPointsByKey.get(B.route.key), hit);
+            const aBridge = nearestGap(bridgePointsByKey.get(A.route.key), hit);
+            const bBridge = nearestGap(bridgePointsByKey.get(B.route.key), hit);
+            const distinguished = Math.min(aGap, bGap) <= 4 || Math.min(aBridge, bBridge) <= 8;
+            if (crossings.samples.length < 80) {
+              crossings.samples.push({
+                x: round(hit.x), y: round(hit.y), pair,
+                a: A.route.key, b: B.route.key, angle: round(angle), distinguished
+              });
+            }
             if (angle < (25 * Math.PI) / 180) {
               acuteCrossings++;
               if (distinguished) bridgedCrossings++;
@@ -364,31 +448,62 @@ function measure(scene) {
             }
             continue;
           }
-          // 同一線分上の重なり（下を通る辺に切れ目があれば連続共有しない）
           const overlap = G.collinearOverlap(sa.a, sa.b, sb.a, sb.b);
           if (overlap > 2) {
-            if (shared && (G.distPointRect(sa.a, shared.r) < SHARED_NODE_EXEMPT ||
-              G.distPointRect(sb.a, shared.r) < SHARED_NODE_EXEMPT)) continue;
-            const interval = overlapInterval(sa.a, sa.b, sb.a, sb.b);
-            overlapSegmentsRaw++;
-            overlapLengthRaw += overlap;
-            if (interval && (gapsCover(gapPointsByKey.get(A.route.key), interval) ||
-              gapsCover(gapPointsByKey.get(B.route.key), interval))) continue;
+            if (sameReaction) {
+              overlapSegmentsSameReaction++;
+              continue;
+            }
+            if (sharedCompound && (near(sa.a, A.start, OVERLAP_PORT_EXEMPT) || near(sb.a, B.start, OVERLAP_PORT_EXEMPT))) continue;
             overlapSegments++;
             overlapLength += overlap;
             continue;
           }
           const distance = G.segSegDistance(sa.a, sa.b, sb.a, sb.b);
           if (distance > 0.05 && distance < minClearance) minClearance = distance;
-          if (distance < G.CLEARANCE && distance > 0.05) {
-            if (shared && (G.distPointRect(sa.a, shared.r) < SHARED_NODE_EXEMPT ||
-              G.distPointRect(sb.a, shared.r) < SHARED_NODE_EXEMPT)) continue;
+          if (distance <= 0.05) continue;
+          // 同一物質のポート扇の直近だけを免除する（ノード中心からの距離では免除しない）。
+          if (sharedCompound && nearSegment(sa, A.start, 18) && nearSegment(sb, B.start, 18)) continue;
+          const gap = distance - (STROKE[A.tier] + STROKE[B.tier]) / 2;
+          if (gap < minStrokeClearance) minStrokeClearance = gap;
+          if (sameReaction) {
+            if (gap < REQUIRED_GAP[pair]) clearanceViolationsSameReaction++;
+            continue;
+          }
+          if (gap < REQUIRED_GAP[pair]) {
             clearanceViolations++;
+            if (pair === 'PP') clearanceViolationsPP++;
+            else if (pair === 'PS') clearanceViolationsPS++;
+            else clearanceViolationsSS++;
+            if (clearanceSamples.length < 120) {
+              clearanceSamples.push({
+                pair,
+                a: A.route.key,
+                b: B.route.key,
+                d: round(distance),
+                gap: round(gap),
+                shared: !!sharedCompound,
+                segA: [[round(sa.a.x), round(sa.a.y)], [round(sa.b.x), round(sa.b.y)]],
+                segB: [[round(sb.a.x), round(sb.a.y)], [round(sb.b.x), round(sb.b.y)]]
+              });
+            }
+            if (pair === 'PS' && A.tier !== B.tier) {
+              const secondary = A.tier === 'secondary' ? A : B;
+              const primary = A.tier === 'primary' ? A : B;
+              if (G.segSegDistance(sa.a, sa.b, sb.a, sb.b) < 6) protectedCorridorViolations++;
+            }
           }
         }
       }
     }
   }
+  crossings.pairsPP = pairSets.PP.size;
+  crossings.pairsPS = pairSets.PS.size;
+  crossings.pairsSS = pairSets.SS.size;
+  crossings.reactionPairsPP = reactionPairSets.PP.size;
+  crossings.reactionPairsPS = reactionPairSets.PS.size;
+  crossings.reactionPairsSS = reactionPairSets.SS.size;
+  crossings.sameReaction = sameReactionCrossings;
 
   const hard = {
     nodePenetrations,
@@ -404,15 +519,38 @@ function measure(scene) {
     labelTitleCollisions,
     nodeOverlaps,
     overlapSegments,
-    crossingsWithoutGap: unbridgedAcute,
-    unbridgedAcute,
-    clearanceViolations
+    overlapSegmentsSameReaction,
+    crossingsPP: crossings.PP,
+    crossingsPS: crossings.PS,
+    crossingsSS: crossings.SS,
+    clearanceViolations,
+    protectedCorridorViolations
   };
+
+  const tierReport = {};
+  for (const tier of ['primary', 'secondary']) {
+    const s = tierStats[tier];
+    const reactionLengths = [...s.reactionLengths.values()];
+    tierReport[tier] = {
+      branches: s.lengths.length,
+      reactions: s.reactionLengths.size,
+      length: stats(s.lengths),
+      reactionLength: stats(reactionLengths),
+      bends: stats(s.bends),
+      detour: stats(s.detours.filter((v) => Number.isFinite(v))),
+      labelHits: s.labelHits,
+      nodeHits: s.nodeHits,
+      markerHits: s.markerHits
+    };
+  }
+  tierReport.primary.length.total = round(tierReport.primary.length.total);
+  tierReport.secondary.length.total = round(tierReport.secondary.length.total);
 
   report.meta = {
     nodeW,
     nodeH,
     canvas: scene.meta.canvas || null,
+    shelf: scene.meta.shelf || null,
     routes: routes.length,
     reactions: scene.reactions.length,
     compounds: compounds.length
@@ -436,26 +574,54 @@ function measure(scene) {
     labelPenetrations,
     titlePenetrations,
     markerPenetrations,
-    crossings,
-    crossingsWithoutGap: unbridgedAcute,
+    crossings: crossings.total,
     acuteCrossings,
     bridgedCrossings,
     unbridgedAcute,
     overlapSegments,
-    overlapLength: Math.round(overlapLength * 10) / 10,
-    overlapSegmentsRaw,
-    overlapLengthRaw: Math.round(overlapLengthRaw * 10) / 10,
+    overlapLength: round(overlapLength),
+    overlapSegmentsSameReaction,
     clearanceViolations,
-    minClearance: Number.isFinite(minClearance) ? Math.round(minClearance * 100) / 100 : null,
+    clearanceViolationsPP,
+    clearanceViolationsPS,
+    clearanceViolationsSS,
+    clearanceViolationsSameReaction,
+    protectedCorridorViolations,
+    minClearance: Number.isFinite(minClearance) ? round(minClearance) : null,
+    minStrokeClearance: Number.isFinite(minStrokeClearance) ? round(minStrokeClearance) : null,
     totalLength: Math.round(totalLength),
     bends,
     maxBends,
-    avgBends: routes.length ? Math.round((bends / routes.length) * 100) / 100 : 0
+    avgBends: routes.length ? round(bends / routes.length) : 0
   };
+  report.crossings = crossings;
+  report.clearanceSamples = clearanceSamples;
+  report.tiers = tierReport;
   report.hard = hard;
-  report.crossingSamples = crossingSamples.length > 40 ? crossingSamples.slice(0, 40) : crossingSamples;
-  report.unbridgedSamples = crossingSamples.filter((s) => s.angle < (25 * Math.PI) / 180 && !s.distinguished);
+  report.bounds = {
+    network: scene.meta.canvas
+      ? { x: 0, y: 0, w: scene.meta.canvas.w, h: scene.meta.canvas.h }
+      : null,
+    canvas: scene.meta.canvas || null
+  };
+  if (scene.meta.canvas) {
+    const c = scene.meta.canvas;
+    report.fit = {
+      panel1236x475: Math.round(G.fitScale(c, 1236, 475, 14) * 1000) / 1000,
+      pc1280x900: Math.round(G.fitScale(c, 1280, 900, 0) * 1000) / 1000,
+      mobile390x844: Math.round(G.fitScale(c, 390, 844, 14) * 1000) / 1000
+    };
+  }
   return report;
+}
+
+function near(point, endpoint, radius) {
+  return endpoint && Math.hypot(point.x - endpoint.x, point.y - endpoint.y) <= radius;
+}
+
+function nearSegment(segment, point, radius) {
+  if (!point) return false;
+  return G.distPointSeg(point, segment.a, segment.b) <= radius;
 }
 
 function nearestGap(gaps, point) {
@@ -467,35 +633,6 @@ function nearestGap(gaps, point) {
   return min;
 }
 
-function overlapInterval(a, b, c, d) {
-  const ux = b.x - a.x;
-  const uy = b.y - a.y;
-  const len2 = ux * ux + uy * uy;
-  if (len2 < 1e-9) return null;
-  const t = (p) => ((p.x - a.x) * ux + (p.y - a.y) * uy) / len2;
-  const t0 = Math.max(0, Math.min(t(c), t(d)));
-  const t1 = Math.min(1, Math.max(t(c), t(d)));
-  if (t1 <= t0) return null;
-  return {
-    a: { x: a.x + ux * t0, y: a.y + uy * t0 },
-    b: { x: a.x + ux * t1, y: a.y + uy * t1 }
-  };
-}
-
-function gapsCover(gaps, interval) {
-  if (!gaps || !gaps.length) return false;
-  const steps = Math.max(2, Math.ceil(Math.hypot(interval.b.x - interval.a.x, interval.b.y - interval.a.y) / 2));
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps;
-    const point = {
-      x: interval.a.x + (interval.b.x - interval.a.x) * t,
-      y: interval.a.y + (interval.b.y - interval.a.y) * t
-    };
-    if (nearestGap(gaps, point) > 4) return false;
-  }
-  return true;
-}
-
 function distToNodeSurface(points, rect) {
   let min = Infinity;
   for (const p of points) {
@@ -505,24 +642,38 @@ function distToNodeSurface(points, rect) {
   return { distance: min };
 }
 
-// 計測結果を 1 行ずつ読みやすく整形する。
 function formatReport(report) {
   const e = report.edges;
   const m = report.markers;
+  const p = report.tiers.primary;
+  const s = report.tiers.secondary;
+  const c = report.crossings;
   return [
-    '物質 ' + report.nodes.count + ' 件 / 反応 ' + report.markers.count + ' 件 / 辺 ' + e.count + ' 本',
-    '無関係ノード貫通: ' + e.nodePenetrations + '（端点ノード内への侵入 ' + e.endpointPenetrations + '）',
-    'ラベル貫通: ' + e.labelPenetrations + ' / 分野見出し貫通: ' + e.titlePenetrations + ' / 他マーカー貫通: ' + e.markerPenetrations,
+    '物質 ' + report.nodes.count + ' 件 / 反応 ' + report.markers.count + ' 件 / 辺 ' + e.count +
+      ' 本（主要 ' + p.branches + ' / 補助 ' + s.branches + '）',
+    '交差: PP ' + c.PP + ' / PS ' + c.PS + ' / SS ' + c.SS +
+      '（枝ペア PP ' + c.pairsPP + ' / PS ' + c.pairsPS + ' / SS ' + c.pairsSS +
+      '、反応ペア PP ' + c.reactionPairsPP + ' / PS ' + c.reactionPairsPS + ' / SS ' + c.reactionPairsSS + '）',
+    '浅い交差 ' + e.acuteCrossings + '（橋あり ' + e.bridgedCrossings + ' / 橋なし ' + e.unbridgedAcute +
+      '） / 同一反応内 ' + c.sameReaction,
+    '主要: 長さ ' + p.length.total + 'px（p95 ' + p.length.p95 + ' / 最大 ' + p.length.max +
+      '） / 曲がり p95 ' + p.bends.p95 + '・最大 ' + p.bends.max +
+      ' / 迂回率 p95 ' + p.detour.p95,
+    '補助: 長さ ' + s.length.total + 'px（p95 ' + s.length.p95 + '） / 曲がり p95 ' + s.bends.p95 +
+      ' / 迂回率 p95 ' + s.detour.p95,
+    '無関係ノード貫通: ' + e.nodePenetrations + '（主要 ' + p.nodeHits + ' / 補助 ' + s.nodeHits +
+      '） / ラベル貫通: ' + e.labelPenetrations + '（主要 ' + p.labelHits + ' / 補助 ' + s.labelHits +
+      '） / 他マーカー貫通: ' + e.markerPenetrations,
     'マーカー衝突: 物質 ' + m.nodeCollisions + ' / 相互 ' + m.markerCollisions +
       ' / ラベル-物質 ' + m.labelNodeCollisions + ' / ラベル-ラベル ' + m.labelLabelCollisions +
       ' / ラベル-マーカー ' + m.labelMarkerCollisions + ' / ラベル-見出し ' + m.labelTitleCollisions,
     'ノード重なり: ' + report.nodes.overlaps + ' / 同一区間重なり: ' + e.overlapSegments +
-      ' 区間（合計 ' + e.overlapLength + 'px）' +
-      (e.overlapSegmentsRaw ? '（切れ目を入れる前の共有 ' + e.overlapSegmentsRaw + ' 区間 ' + e.overlapLengthRaw + 'px）' : ''),
-    '交差: ' + e.crossings + '（浅い交差 ' + e.acuteCrossings + ' / 橋あり ' +
-      e.bridgedCrossings + ' / 橋なし ' + e.unbridgedAcute + '）',
-    '辺間クリアランス不足: ' + e.clearanceViolations + '（最小 ' + e.minClearance + 'px）',
-    '総辺長: ' + e.totalLength + 'px / 曲がり: 合計 ' + e.bends + '・最大 ' + e.maxBends + '・平均 ' + e.avgBends
+      ' 区間（合計 ' + e.overlapLength + 'px、同一反応内 ' + e.overlapSegmentsSameReaction + '）',
+    'ストローク clearance 不足: ' + e.clearanceViolations +
+      '（PP ' + e.clearanceViolationsPP + ' / PS ' + e.clearanceViolationsPS + ' / SS ' + e.clearanceViolationsSS +
+      '、主要保護帯 ' + e.protectedCorridorViolations + '、最小縁間 ' + e.minStrokeClearance + 'px）',
+    '総辺長: ' + e.totalLength + 'px / 曲がり: 合計 ' + e.bends + '・最大 ' + e.maxBends + '・平均 ' + e.avgBends +
+      (report.fit ? ' / fit map ' + report.fit.panel1236x475 + '・PC ' + report.fit.pc1280x900 + '・mobile ' + report.fit.mobile390x844 : '')
   ].join('\n');
 }
 
@@ -540,7 +691,7 @@ function main() {
   const report = measure(scene);
   if (json) console.log(JSON.stringify(report, null, 2));
   else {
-    console.log(baseline ? '=== 改善前（layout v1） ===' : '=== 現在（layout v3・ネットワーク配置） ===');
+    console.log(baseline ? '=== 旧 fixture ===' : '=== 現在（layout v4・主要バックボーン） ===');
     console.log(formatReport(report));
   }
   return report;
@@ -556,7 +707,8 @@ module.exports = {
   legacyRoutes,
   loadCurrent,
   MARKER_MIN_DIST,
-  GAP_MATCH,
-  SHARED_NODE_EXEMPT,
-  SHARED_MARKER_EXEMPT
+  PORT_EXEMPT,
+  OVERLAP_PORT_EXEMPT,
+  STROKE,
+  REQUIRED_GAP
 };
