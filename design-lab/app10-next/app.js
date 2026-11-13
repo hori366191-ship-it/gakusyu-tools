@@ -1239,7 +1239,6 @@
     state.notice = '';
     if (previousFamily && !C.chainDescriptorFamilyValid(shape, previousFamily)) {
       state.chainFamily = '';
-      state.notice = '骨格の形が変わったため、化合物分類の選択を解除しました。分類を選び直してください。';
     }
     state.focus = '';
     update();

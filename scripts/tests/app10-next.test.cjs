@@ -2235,6 +2235,10 @@ test('[chain] ①変更は②だけを解除し、上流デスクリプタを変
   assert.ok(partialFn.includes('骨格の形を選んでください'), '勝手に別骨格へ飛ばさない案内');
   assert.equal(shapeFn.includes('state.chainPartialC ='), false, '骨格選択でC数を書き換えない');
   assert.ok(shapeFn.includes('chainDescriptorFamilyValid'), '骨格変更時は分類の有効性だけ確認する');
+  assert.equal(shapeFn.includes('骨格の形が変わったため'), false, '骨格変更では分類解除の案内文を出さない');
+  assert.ok(shapeFn.includes("state.chainFamily = '';"), '骨格変更で無効な分類は解除する');
+  assert.ok(shapeFn.includes("state.notice = '';"), '骨格変更時は案内文を空のままにする');
+  assert.ok(shapeFn.includes('update();'), '骨格変更後も再描画する');
   assert.equal(familyFn.includes('state.chainShape ='), false, '②から①の骨格を書き換えない');
   assert.equal(familyFn.includes('state.chainPartialC ='), false, '②から①のC数を書き換えない');
   assert.ok(familyFn.includes('chainDescriptorFamilyValid'), '②は有効な分類だけ選ぶ');
