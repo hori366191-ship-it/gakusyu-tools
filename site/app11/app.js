@@ -77,11 +77,14 @@
   var edgeIndex = {};
   var classNodeIndex = {};
   var classEdgeIndex = {};
+  var classEdgePathIndex = {};
   var classNodeById = {};
+  var classEdgeById = {};
   var classLayer = null;
   var classMapData = D.classMap || null;
   if (classMapData) {
     classMapData.nodes.forEach(function (n) { classNodeById[n.id] = n; });
+    classMapData.edges.forEach(function (e) { classEdgeById[e.id] = e; });
   }
   var activeEdgeLayer = null;
   var previewReaction = null;
@@ -90,6 +93,7 @@
   var selected = null;
   var activeRegion = null;
   var returnFocus = null;
+  var programmaticFocusTarget = null;
   var restoreAfterPointer = null;
   var suppressCompatFocus = false;
   var suppressClick = false;
@@ -268,29 +272,42 @@
     if (!classMapData) return;
     classLayer = el('g', { 'class': 'rp-classmap', 'aria-label': classMapData.title });
     var frame = classMapData.frame;
-    classLayer.appendChild(el('rect', {
+    var frameEl = el('rect', {
       'class': 'rp-classmap__frame',
       x: frame.x,
       y: frame.y,
       width: frame.w,
       height: frame.h,
-      rx: 18
-    }));
-    var edgeLayer = el('g', { 'class': 'rp-classmap__edges', 'aria-hidden': 'true' });
+      rx: 18,
+      'aria-hidden': 'true'
+    });
+    classLayer.appendChild(frameEl);
+    // 変換線は装飾ではない。1本＝1フォーカス（tabindex）として、透明な太い当たり判定と
+    // 同じ変換のラベルを1つのグループにまとめる。ノードより先に置き、重なった場合はノードを優先する。
+    var edgeLayer = el('g', { 'class': 'rp-classmap__edges' });
     classMapData.edges.forEach(function (e) {
+      var d = Core.routePath(e.points, [], []);
+      var group = el('g', {
+        'class': 'rp-classmap__edge-group',
+        'data-kind': 'class-edge',
+        'data-id': e.id,
+        role: 'button',
+        tabindex: '0',
+        'aria-label': classEdgeLabel(e)
+      });
+      group.appendChild(el('path', {
+        'class': 'rp-classmap__edge-hit',
+        d: d
+      }));
       var path = el('path', {
         'class': 'rp-classmap__edge',
         'data-class-edge': e.id,
         'data-from': e.from,
         'data-to': e.to,
         'marker-end': 'url(#rp-arrow-class)',
-        d: Core.routePath(e.points, [], [])
+        d: d
       });
-      edgeLayer.appendChild(path);
-      classEdgeIndex[e.id] = path;
-    });
-    var labelLayer = el('g', { 'class': 'rp-classmap__labels', 'aria-hidden': 'true' });
-    classMapData.edges.forEach(function (e) {
+      group.appendChild(path);
       var pos = e.labelPos;
       var label = el('text', {
         'class': 'rp-classmap__label',
@@ -306,7 +323,10 @@
         second.textContent = e.conditions;
         label.appendChild(second);
       }
-      labelLayer.appendChild(label);
+      group.appendChild(label);
+      edgeLayer.appendChild(group);
+      classEdgeIndex[e.id] = group;
+      classEdgePathIndex[e.id] = path;
     });
     var nodeLayer = el('g', { 'class': 'rp-classmap__nodes' });
     classMapData.nodes.forEach(function (n) {
@@ -338,13 +358,19 @@
       classNodeIndex[n.id] = g;
     });
     classLayer.appendChild(edgeLayer);
-    classLayer.appendChild(labelLayer);
     classLayer.appendChild(nodeLayer);
     viewport.appendChild(classLayer);
   }
 
   function classNodeLabel(n) {
     return n.name + '。' + n.summary + '。' + n.scope;
+  }
+
+  function classEdgeLabel(e) {
+    var from = classNodeById[e.from];
+    var to = classNodeById[e.to];
+    return '一般変換 ' + (from ? from.name : e.from) + ' から ' + (to ? to.name : e.to) +
+      '、' + e.label + '、条件 ' + e.conditions;
   }
 
   function compoundLabel(c) {
@@ -583,10 +609,12 @@
         if (r) selectedInfo = { name: r.typeLabel + 'の反応' };
       } else if (selected.kind === 'class') {
         selectedInfo = { name: selected.name };
+      } else if (selected.kind === 'class-edge') {
+        selectedInfo = { name: selected.name };
       }
     }
     var text;
-    if (selected && selected.kind === 'class') {
+    if (selected && (selected.kind === 'class' || selected.kind === 'class-edge')) {
       text = '官能基変換の一般図 / ' + selected.name + '（' + Math.round(view.scale * 100) + '%）';
     } else {
       text = Core.positionText(view, D.regions, D.compounds, selectedInfo, D.meta.canvas, viewSize.w, viewSize.h, activeRegion);
@@ -664,7 +692,13 @@
     var target = Core.fitRect(classMapData.area, viewSize.w, viewSize.h, 14, 0, 1.2);
     animateTo(Core.clampPan(target, viewSize.w, viewSize.h, D.meta.canvas));
     if (focusFirst && classMapData.nodes.length && classNodeIndex[classMapData.nodes[0].id]) {
-      classNodeIndex[classMapData.nodes[0].id].focus();
+      var first = classNodeIndex[classMapData.nodes[0].id];
+      // 「一般図へ」直後のプログラムfocusは、直後の全体fitを維持する。
+      // 発火済み・同一要素の場合は focusin が来ないため、抑制フラグを立てない。
+      if (document.activeElement !== first) {
+        programmaticFocusTarget = first;
+        first.focus();
+      }
     }
   }
   function animateTo(target) {
@@ -784,11 +818,41 @@
     animateTo(Core.zoomAt({ scale: view.scale, x: view.x, y: view.y }, factor, p.x, p.y));
   }
 
+  function mapEntityFrom(target) {
+    return target && target.closest ? target.closest('[data-kind]') : null;
+  }
+
+  // 通常のHTML操作要素は、地図のショートカットよりブラウザ既定の動作を優先する。
+  // SVGの data-kind 要素（role=button を持つ）はここでは対象外にし、地図側で処理する。
+  function isNativeKeyTarget(target) {
+    if (!target || !target.closest) return false;
+    if (target.isContentEditable) return true;
+    return !!target.closest('a[href],button,input,select,textarea,summary,' +
+      '[contenteditable=""],[contenteditable="true"],[role="button"]:not([data-kind])');
+  }
+
+  // Enter/Space は data-kind entity のときだけ open。通常要素は native activation に任せる。
+  function keyIntent(key, entity) {
+    if (key === 'Enter' || key === ' ') return entity ? 'open' : 'native';
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', '+', '=', '-', '_', '0', 'Home'].indexOf(key) !== -1) {
+      return 'map';
+    }
+    return 'native';
+  }
+
   function onKeydown(e) {
     if (!card.hidden) return;
     if (e.target === searchInput) return;
+    var entity = mapEntityFrom(e.target);
+    if (keyIntent(e.key, entity) === 'native') return;
+    // button/input/link などの上では、矢印・ズーム・0 も地図へ奪わない。
+    if (!entity && isNativeKeyTarget(e.target)) return;
+    if (entity && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      openFromElement(entity);
+      return;
+    }
     var step = 70;
-    var handled = true;
     if (activeRegion && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', '+', '=', '-', '_', '0', 'Home'].indexOf(e.key) !== -1) {
       clearRegionSelection();
     }
@@ -800,21 +864,22 @@
       case '+': case '=': zoomCenter(1.2); break;
       case '-': case '_': zoomCenter(1 / 1.2); break;
       case '0': case 'Home': resetView(); break;
-      case 'Enter': case ' ':
-        if (e.target.getAttribute && e.target.getAttribute('data-kind')) {
-          e.preventDefault();
-          openFromElement(e.target);
-        }
-        break;
-      default: handled = false;
+      default: return;
     }
-    if (handled) e.preventDefault();
+    e.preventDefault();
   }
 
   // キーボードでノードへ移動したとき、画面の外なら中央へ寄せる。
   function onFocusIn(e) {
     var target = e.target.closest ? e.target.closest('[data-kind]') : null;
     if (!target) return;
+    // focusClassMap が全体fit直後に移したプログラムfocusだけ、画面外判定の再センタリングをしない。
+    // 通常の Tab 移動（別のnode・別の機会）は従来どおり追随する。
+    if (programmaticFocusTarget) {
+      var pending = programmaticFocusTarget;
+      programmaticFocusTarget = null;
+      if (pending === target || (pending.contains && pending.contains(target))) return;
+    }
     if (activeRegion) clearRegionSelection();
     var kind = target.getAttribute('data-kind');
     var id = target.getAttribute('data-id');
@@ -825,6 +890,16 @@
       var nmargin = 60;
       if (ns.x >= nmargin && ns.x <= viewSize.w - nmargin && ns.y >= nmargin && ns.y <= viewSize.h - nmargin) return;
       animateTo(Core.centerOn({ x: n.x, y: n.y }, { w: n.w, h: n.h }, view.scale, viewSize.w, viewSize.h));
+      return;
+    }
+    if (kind === 'class-edge') {
+      var ce = classEdgeById[id];
+      if (!ce) return;
+      var lp = ce.labelPos;
+      var es = Core.worldToScreen(view, lp.x, lp.y);
+      var emargin = 60;
+      if (es.x >= emargin && es.x <= viewSize.w - emargin && es.y >= emargin && es.y <= viewSize.h - emargin) return;
+      animateTo(Core.centerOn({ x: lp.x - 40, y: lp.y - 20 }, { w: 80, h: 40 }, view.scale, viewSize.w, viewSize.h));
       return;
     }
     var c = kind === 'compound' ? compoundById[id] : findReaction(id);
@@ -892,6 +967,26 @@
       render();
       return;
     }
+    if (kind === 'class-edge') {
+      var ce = classEdgeById[id];
+      var eel = classEdgeIndex[id];
+      if (ce && eel) {
+        var from = classNodeById[ce.from];
+        var to = classNodeById[ce.to];
+        eel.classList.add('is-selected');
+        selected = {
+          kind: 'class-edge',
+          id: id,
+          name: (from ? from.name : ce.from) + ' → ' + (to ? to.name : ce.to) + '（' + ce.label + '）',
+          el: eel
+        };
+      }
+      clearReactionStroke();
+      updateEdgeHighlight();
+      updateClassEdgeHighlight();
+      render();
+      return;
+    }
     var elm = kind === 'compound' ? nodeIndex[id] : reactionIndex[id];
     if (elm) {
       elm.classList.add('is-selected');
@@ -930,10 +1025,15 @@
   }
 
   function updateClassEdgeHighlight() {
-    Object.keys(classEdgeIndex).forEach(function (key) {
-      var path = classEdgeIndex[key];
-      var active = !!selected && selected.kind === 'class' &&
-        (path.getAttribute('data-from') === selected.id || path.getAttribute('data-to') === selected.id);
+    Object.keys(classEdgePathIndex).forEach(function (key) {
+      var path = classEdgePathIndex[key];
+      var active = false;
+      if (selected && selected.kind === 'class-edge') {
+        active = key === selected.id;
+      } else if (selected && selected.kind === 'class') {
+        active = path.getAttribute('data-from') === selected.id ||
+          path.getAttribute('data-to') === selected.id;
+      }
       if (active) path.classList.add('is-active');
       else path.classList.remove('is-active');
     });
@@ -981,9 +1081,12 @@
     var html;
     if (kind === 'compound') html = compoundCard(id);
     else if (kind === 'class') html = classCard(id);
+    else if (kind === 'class-edge') html = classEdgeCard(id);
     else html = reactionCard(id);
     if (!html) return;
-    cardEyebrow.textContent = kind === 'compound' ? '物質' : kind === 'class' ? '一般図' : '反応';
+    cardEyebrow.textContent = kind === 'compound' ? '物質'
+      : kind === 'class' ? '一般図'
+        : kind === 'class-edge' ? '一般図の変換' : '反応';
     cardDetail.innerHTML = html;
     card.hidden = false;
     var heading = cardDetail.querySelector('h2');
@@ -1126,6 +1229,25 @@
     return html;
   }
 
+  function rDefsList(defs) {
+    if (!defs || !defs.length) return '';
+    return '<ul class="rp-card__list rp-rdefs">' + defs.map(function (text) {
+      return '<li>' + esc(text) + '</li>';
+    }).join('') + '</ul>';
+  }
+
+  function classStructureFigure(n) {
+    if (!SD) {
+      return '<p class="rp-struct-missing">構造データを読み込めないため、一般構造を表示していません。</p>';
+    }
+    var caption = '一般構造（分類の共通骨格）';
+    var html = structureFigure(n.structure, n.name + 'の一般構造', caption,
+      '原子団と結合の変化を示す一般構造です。具体物質の構造ではありません。');
+    if (!html) html = '<p class="rp-struct-missing">一般構造を表示できませんでした。</p>';
+    html += '<h3>Rの定義</h3>' + rDefsList(n.rDefs);
+    return html;
+  }
+
   function classCard(id) {
     var n = classNodeById[id];
     if (!n) return '';
@@ -1139,8 +1261,9 @@
     };
     var edgeList = function (list) {
       if (!list.length) return '<p class="rp-empty">この図に該当する変換はありません。</p>';
-      return '<ul class="rp-card__list">' + list.map(function (e) {
-        return '<li>' + esc(edgeText(e)) + '</li>';
+      return '<ul class="rp-card__links">' + list.map(function (e) {
+        return '<li><button type="button" class="rp-link" data-kind="class-edge" data-id="' + esc(e.id) + '">' +
+          esc(edgeText(e)) + '</button></li>';
       }).join('') + '</ul>';
     };
     var html = '';
@@ -1148,13 +1271,207 @@
     html += '<p class="rp-card__note">官能基変換の一般図 — 分類の説明であり、個別物質の反応ではありません。</p>';
     html += '<p>' + stateBadge('confirmed') + ' <span class="rp-card__note">分類間の代表的な変換として、独立資料の各節で確認済み。個別反応 ' +
       D.meta.confirmedReactionCount + ' 件には加算しません。</span></p>';
+    html += '<h3>この分類の一般構造</h3>' + classStructureFigure(n);
     html += '<h3>一般適用範囲</h3><p>' + esc(n.scope) + '</p>';
     html += '<h3>例外・注意</h3><ul class="rp-card__list">' +
       n.exceptions.map(function (text) { return '<li>' + esc(text) + '</li>'; }).join('') + '</ul>';
     html += '<h3>この分類へ進む変換（' + ins.length + ' 件）</h3>' + edgeList(ins);
     html += '<h3>この分類から進む変換（' + outs.length + ' 件）</h3>' + edgeList(outs);
     html += '<h3>資料</h3><p class="rp-card__note">' + n.sources.map(esc).join('／') + '</p>';
-    html += '<p class="rp-card__note">資料のURL・本文・図は転載していません。一般化された反応事実は独立資料で確認済みで、未検証の別データではありません。</p>';
+    html += '<p class="rp-card__note">資料のURL・本文・図は転載していません。一般化された反応事実は独立資料で確認済みで、未検証の別データではありません。適用は局所構造の一般化で、具体物質の反応ではありません。</p>';
+    return html;
+  }
+
+  function equationHasFormal(eq) {
+    var found = false;
+    ['left', 'right'].forEach(function (side) {
+      (eq[side] || []).forEach(function (item) {
+        (item.structure.atoms || []).forEach(function (a) {
+          if (a.label === '[O]' || a.label === '[H]') found = true;
+        });
+      });
+    });
+    return found;
+  }
+
+  function equationSpeciesSvg(item) {
+    var svg = SD.renderStructure(item.structure, '一般構造');
+    var geo = SD.svgGeometry(svg);
+    if (!geo) throw new Error('一般構造の寸法を読めません');
+    var inner = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+    return { geo: geo, inner: inner };
+  }
+
+  // 反応物・生成物の custom spec を1枚の SVG に並べ、係数・＋・矢印を付ける。
+  // 各構造は既存 renderStructure の出力（viewBox と内容）を平行移動・縮小して使う。
+  function buildEquationSvg(eq, ariaLabel) {
+    var ROW = 120;
+    var PAD = 16;
+    var itemGap = 10;
+    var plusGap = 26;
+    var arrowW = 64;
+    var sides = [eq.left || [], eq.right || []];
+    var prepared = sides.map(function (items) {
+      return items.map(function (item) {
+        var drawn = equationSpeciesSvg(item);
+        var scale = Math.min(1.2, ROW / Math.max(1, drawn.geo.height));
+        var width = drawn.geo.width * scale;
+        if (width > 250) {
+          scale *= 250 / width;
+          width = 250;
+        }
+        return {
+          coef: item.coef,
+          inner: drawn.inner,
+          geo: drawn.geo,
+          scale: scale,
+          width: width
+        };
+      });
+    });
+
+    var cursor = PAD;
+    var placed = [];
+    var ops = [];
+    prepared.forEach(function (items, sideIndex) {
+      var sidePlaced = [];
+      items.forEach(function (item, i) {
+        if (i > 0) {
+          ops.push({ type: 'plus', x: cursor + plusGap / 2 });
+          cursor += plusGap;
+        }
+        var coefW = item.coef > 1 ? 18 : 0;
+        var x = cursor;
+        var sx = x + coefW;
+        var top = (ROW - item.geo.height * item.scale) / 2 + PAD;
+        placed.push({ item: item, x: sx, y: top });
+        sidePlaced.push({ item: item, x: sx, coefX: x + coefW / 2 });
+        cursor += coefW + item.width + itemGap;
+      });
+      prepared[sideIndex] = sidePlaced;
+      if (sideIndex === 0) {
+        ops.push({ type: 'arrow', x: cursor + arrowW / 2, arrow: eq.arrow });
+        cursor += arrowW;
+      }
+    });
+    var width = Math.max(180, cursor - itemGap + PAD);
+    var height = ROW + PAD * 2;
+    var out = '<svg class="rp-struct-svg rp-eq-svg" viewBox="0 0 ' + width.toFixed(1) + ' ' + height.toFixed(1) +
+      '" role="img" aria-label="' + esc(ariaLabel) + '" preserveAspectRatio="xMidYMid meet">';
+    out += '<g class="rp-eq-species">';
+    placed.forEach(function (p) {
+      var item = p.item;
+      out += '<g transform="translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ') scale(' +
+        item.scale.toFixed(4) + ') translate(' + (-item.geo.x).toFixed(1) + ' ' + (-item.geo.y).toFixed(1) + ')">' +
+        item.inner + '</g>';
+    });
+    out += '</g>';
+    prepared.forEach(function (items) {
+      items.forEach(function (p) {
+        if (p.item.coef > 1) {
+          out += '<text x="' + (p.coefX || p.x).toFixed(1) + '" y="' + (height / 2 + 7).toFixed(1) +
+            '" text-anchor="middle" class="rp-eq-coef">' + esc(p.item.coef) + '</text>';
+        }
+      });
+    });
+    var midY = height / 2;
+    ops.forEach(function (op) {
+      if (op.type === 'plus') {
+        out += '<text x="' + op.x.toFixed(1) + '" y="' + midY.toFixed(1) +
+          '" text-anchor="middle" dominant-baseline="middle" class="rp-eq-op">＋</text>';
+        return;
+      }
+      if (op.arrow === 'equilibrium') {
+        out += '<g class="rp-eq-arrow"><path class="rp-eq-arrow-line" d="M' + (op.x - 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
+          ' L' + (op.x + 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
+          ' M' + (op.x + 22).toFixed(1) + ',' + (midY + 4).toFixed(1) +
+          ' L' + (op.x - 22).toFixed(1) + ',' + (midY + 4).toFixed(1) + '"/>' +
+          '<path class="rp-eq-arrow-line" d="M' + (op.x + 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
+          ' L' + (op.x + 14).toFixed(1) + ',' + (midY - 9).toFixed(1) +
+          ' M' + (op.x + 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
+          ' L' + (op.x + 14).toFixed(1) + ',' + (midY + 1).toFixed(1) +
+          ' M' + (op.x - 22).toFixed(1) + ',' + (midY + 4).toFixed(1) +
+          ' L' + (op.x - 14).toFixed(1) + ',' + (midY - 1).toFixed(1) +
+          ' M' + (op.x - 22).toFixed(1) + ',' + (midY + 4).toFixed(1) +
+          ' L' + (op.x - 14).toFixed(1) + ',' + (midY + 9).toFixed(1) + '"/></g>';
+        return;
+      }
+      out += '<g class="rp-eq-arrow"><path class="rp-eq-arrow-line" d="M' + (op.x - 24).toFixed(1) + ',' + midY.toFixed(1) +
+        ' L' + (op.x + 20).toFixed(1) + ',' + midY.toFixed(1) + '"/>' +
+        '<path class="rp-eq-arrow-head" d="M' + (op.x + 24).toFixed(1) + ',' + midY.toFixed(1) +
+        ' L' + (op.x + 14).toFixed(1) + ',' + (midY - 7).toFixed(1) +
+        ' L' + (op.x + 14).toFixed(1) + ',' + (midY + 7).toFixed(1) + ' Z"/></g>';
+    });
+    out += '</svg>';
+    return out;
+  }
+
+  function equationFigure(edge) {
+    if (!SD) {
+      return '<p class="rp-struct-missing">構造データを読み込めないため、一般反応式を表示していません。</p>';
+    }
+    var from = classNodeById[edge.from];
+    var to = classNodeById[edge.to];
+    var aria = '一般反応式（構造式）。' + (from ? from.name : edge.from) + 'から' +
+      (to ? to.name : edge.to) + 'への' + edge.label;
+    var svg;
+    try {
+      svg = buildEquationSvg(edge.equation, aria);
+    } catch (err) {
+      return '<figure class="rp-struct rp-struct--fallback"><figcaption class="rp-struct__caption">一般反応式（構造式）</figcaption>' +
+        '<p class="rp-struct__note">一般反応式を表示できませんでした。</p></figure>';
+    }
+    var vb = /viewBox="([^"]+)"/.exec(svg);
+    var width = vb ? parseFloat(String(vb[1]).trim().split(/\s+/)[2]) : 0;
+    var wide = width > 460;
+    var style = wide ? ' style="--rp-struct-width:' + Math.ceil(width) + 'px"' : '';
+    return '<figure class="rp-struct' + (wide ? ' rp-struct--wide' : '') + '">' +
+      '<figcaption class="rp-struct__caption">一般反応式（構造式）</figcaption>' +
+      '<div class="rp-struct__canvas"' + style + '>' + svg + '</div>' +
+      '<p class="rp-struct__note">係数・副生成物・矢印を含む一般化した反応式です。具体物質の反応条件を示すものではありません。</p>' +
+      '</figure>';
+  }
+
+  function typeCommon(type) {
+    if (!type) return '';
+    var html = '<div class="rp-common">';
+    html += '<h3>共通の説明 — ' + esc(type.label) + '</h3>';
+    html += '<p>' + esc(type.summary) + '</p>';
+    if (type.schematic) {
+      html += '<p class="rp-schematic">' + esc(type.schematic) + '</p>';
+      html += '<span class="rp-figcap">模式図（原子団・結合の変化）。電子の動きを示す機構図は収録していません。</span>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function classEdgeCard(id) {
+    var e = classEdgeById[id];
+    if (!e) return '';
+    var from = classNodeById[e.from];
+    var to = classNodeById[e.to];
+    var type = D.types[e.type] || { label: e.label, summary: '', schematic: '' };
+    var html = '';
+    html += '<h2 id="rp-card-title">' + esc(e.label) + ': ' +
+      esc(from ? from.name : e.from) + ' → ' + esc(to ? to.name : e.to) + '</h2>';
+    html += '<p class="rp-card__note">官能基変換の一般図の1経路 — 分類間の一般化であり、個別物質の反応ではありません。</p>';
+    html += '<p>' + stateBadge('confirmed') + ' <span class="rp-card__note">独立資料の各節で確認済み。個別反応 ' +
+      D.meta.confirmedReactionCount + ' 件には加算しません。</span></p>';
+    html += '<h3>一般反応式（構造式）</h3>' + equationFigure(e);
+    html += '<h3>Rの定義（この式）</h3>' + rDefsList(e.rDefs);
+    if (equationHasFormal(e.equation)) {
+      html += '<p class="rp-card__note">式の [O]・[H] は酸化・還元の形式当量で、試薬の単原子を意味しません。電子の移動を示す機構図ではなく、結合変化を示す模式反応式です。</p>';
+    }
+    html += typeCommon(type);
+    html += '<p class="rp-card__note">共通説明は同じ反応種別に共通する模式です。この変換の反応物・生成物・係数は、上の一般反応式を正とします。</p>';
+    html += '<h3>この一般変換</h3><dl class="rp-dl">';
+    html += '<div><dt>向き</dt><dd>' + esc(from ? from.name : e.from) + ' → ' + esc(to ? to.name : e.to) + '</dd></div>';
+    html += '<div><dt>条件</dt><dd>' + esc(e.conditions) + '</dd></div>';
+    html += '<div><dt>適用</dt><dd>一般図ではこの向きの代表的な変換として扱う。分類内のすべての物質に無条件で当てはまる変換ではない。</dd></div>';
+    html += '<div><dt>注意</dt><dd>' + esc(e.note) + '</dd></div>';
+    html += '</dl>';
+    html += '<h3>資料</h3><p class="rp-card__note">' + e.sources.map(esc).join('／') + '</p>';
+    html += '<p class="rp-card__note">資料のURL・本文・図は転載していません。適用は局所構造の一般化で、具体物質の反応ではありません。</p>';
     return html;
   }
 
@@ -1195,14 +1512,7 @@
     html += '<p class="rp-card__actions"><button type="button" class="rp-btn rp-btn--wide" data-action="fit-reaction" data-id="' +
       esc(r.id) + '">この反応の端点を表示</button></p>';
 
-    html += '<div class="rp-common">';
-    html += '<h3>共通の説明 — ' + esc(type.label) + '</h3>';
-    html += '<p>' + esc(type.summary) + '</p>';
-    if (type.schematic) {
-      html += '<p class="rp-schematic">' + esc(type.schematic) + '</p>';
-      html += '<span class="rp-figcap">模式図（原子団・結合の変化）。電子の動きを示す機構図は収録していません。</span>';
-    }
-    html += '</div>';
+    html += typeCommon(type);
 
     html += '<h3>この反応の個別情報</h3>';
     html += '<dl class="rp-dl">';

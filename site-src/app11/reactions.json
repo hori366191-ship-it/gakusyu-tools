@@ -20,8 +20,8 @@
     },
     "hydrogenation": {
       "label": "水素付加",
-      "summary": "不飽和結合に水素が付加し、単結合になる。同じ物質でも不飽和結合が減ると融点が上がり、液体が固体に近づく。",
-      "schematic": "C=C ＋ H–H → C–C(H)(H)"
+      "summary": "多重結合に水素が付加し、結合次数が下がる。条件によって部分還元（アルキン→アルケン）にも完全還元（アルケン→アルカン）にも進む。",
+      "schematic": "C=C ＋ H–H → C–C(H)(H)（アルキンは部分還元で C=C へ）"
     },
     "hydration": {
       "label": "水和",
@@ -41,7 +41,7 @@
     "reduction": {
       "label": "還元",
       "summary": "水素が入る、または酸素が取れる。カルボニル基がアルコールに、ニトロ基がアミノ基になる例がある。",
-      "schematic": "C=O ＋ H–H → C–OH"
+      "schematic": ">C=O ＋ 2[H] → >CH–OH"
     },
     "esterification": {
       "label": "エステル化",

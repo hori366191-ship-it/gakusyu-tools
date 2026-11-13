@@ -498,6 +498,22 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   stroke-linejoin: round;
   opacity: .88;
 }
+/* 変換線の当たり判定。見た目の線は動かさず、画面ピクセルで一定の太さを確保する。
+   ノードより先に描くため、重なった場合はノードのタップが優先される。 */
+.rp-classmap__edge-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 18;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: stroke;
+  vector-effect: non-scaling-stroke;
+}
+.rp-classmap__edge-group { cursor: pointer; }
+.rp-classmap__edge-group:focus { outline: none; }
+.rp-classmap__edge-group:focus-visible .rp-classmap__edge { stroke: var(--rp-focus); stroke-width: 3; opacity: 1; }
+.rp-classmap__edge-group:hover .rp-classmap__edge { stroke: var(--rp-accent-2); stroke-width: 2.4; opacity: 1; }
+.rp-classmap__edge-group.is-selected .rp-classmap__edge { stroke: var(--rp-accent-2); stroke-width: 3.4; opacity: 1; }
 .rp-classmap__edge.is-active { stroke: var(--rp-focus); stroke-width: 3; opacity: 1; }
 .rp-classmap__node { cursor: pointer; }
 .rp-classmap__node-box {

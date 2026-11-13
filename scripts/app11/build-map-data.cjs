@@ -50,7 +50,128 @@ function requireLayout() {
 /*
  * 12分類だけの一般図（site-src/app11/class-map.json）を、既存の物質・反応とは独立した
  * classMap キーへ変換する。資料URLは正本だけに残し、公開 data.js には資料名・節・確認日だけを出す。
+ * 分類・変換の構造式は、正本の species（原子・結合の配列）を custom spec へ展開する。
  */
+const R_LABEL = /^R(?:\d+|′)?$/;
+
+function resolveSpecies(speciesById, id, owner) {
+  const raw = speciesById.get(id);
+  if (!raw) throw new Error(owner + ' の構造種別が未定義: ' + id);
+  if (!Array.isArray(raw.atoms) || !raw.atoms.length) throw new Error(owner + ' の構造に原子がない: ' + id);
+  if (!Array.isArray(raw.bonds)) throw new Error(owner + ' の構造に結合がない: ' + id);
+  const atoms = raw.atoms.map((a, index) => {
+    if (!Array.isArray(a) || a.length < 4) throw new Error(owner + ' の原子が不正: ' + id + ' #' + index);
+    const el = a[0];
+    const x = a[1];
+    const y = a[2];
+    const h = a[3] || 0;
+    const label = a[4] || '';
+    if (typeof el !== 'string' || !el) throw new Error(owner + ' の元素が不正: ' + id + ' #' + index);
+    if (!isFinite(x) || !isFinite(y)) throw new Error(owner + ' の座標が不正: ' + id + ' #' + index);
+    if (!(h >= 0 && h <= 4)) throw new Error(owner + ' の水素数が不正: ' + id + ' #' + index);
+    const pseudoR = R_LABEL.test(label);
+    if (pseudoR && el !== 'C') throw new Error(owner + ' のRは炭素として扱う: ' + id + ' #' + index);
+    return {
+      el: el,
+      x: x,
+      y: y,
+      h: h,
+      label: label,
+      skipValence: pseudoR || !!a[5]
+    };
+  });
+  const bonds = raw.bonds.map((b, index) => {
+    if (!Array.isArray(b) || b.length < 2) throw new Error(owner + ' の結合が不正: ' + id + ' #' + index);
+    const a = b[0];
+    const c = b[1];
+    const order = b.length > 2 ? b[2] : 1;
+    if (!Number.isInteger(a) || !Number.isInteger(c) || a < 0 || c < 0 ||
+      a >= atoms.length || c >= atoms.length || a === c) {
+      throw new Error(owner + ' の結合の原子番号が不正: ' + id + ' #' + index);
+    }
+    if ([1, 2, 3].indexOf(order) === -1) throw new Error(owner + ' の結合次数が不正: ' + id + ' #' + index);
+    return { a: a, b: c, order: order };
+  });
+  return {
+    type: 'custom',
+    mode: 'condensed',
+    width: 420,
+    height: 260,
+    atoms: atoms,
+    bonds: bonds
+  };
+}
+
+function rLabelsOf(spec) {
+  const labels = [];
+  spec.atoms.forEach((a) => {
+    if (R_LABEL.test(a.label) && labels.indexOf(a.label) === -1) labels.push(a.label);
+  });
+  return labels;
+}
+
+function rDefKeys(defs, owner) {
+  if (!Array.isArray(defs) || !defs.length) throw new Error(owner + ' にRの定義がない');
+  const keys = [];
+  defs.forEach((text) => {
+    const m = /^\s*(R(?:\d+|′)?)\s*=/.exec(String(text));
+    if (!m) throw new Error(owner + ' のR定義の形式が不正: ' + text);
+    if (keys.indexOf(m[1]) !== -1) throw new Error(owner + ' のR定義が重複: ' + m[1]);
+    keys.push(m[1]);
+  });
+  return keys;
+}
+
+function checkRDefs(specs, defs, owner) {
+  const keys = rDefKeys(defs, owner);
+  const labels = [];
+  specs.forEach((spec) => {
+    rLabelsOf(spec).forEach((label) => {
+      if (labels.indexOf(label) === -1) labels.push(label);
+      if (keys.indexOf(label) === -1) throw new Error(owner + ' のR定義がない: ' + label);
+    });
+  });
+  keys.forEach((key) => {
+    if (labels.indexOf(key) === -1) throw new Error(owner + ' のR定義が式にない: ' + key);
+  });
+}
+
+// R置換基は具体元素の収支に数えない（式ごとに H/アルキル等の変数を表す）。
+// [O]/[H] は形式当量として O/H の1原子分に数え、係数で反応式の収支を検査する。
+function formulaCounts(spec) {
+  const counts = {};
+  const add = (el, n) => { if (n) counts[el] = (counts[el] || 0) + n; };
+  spec.atoms.forEach((a) => {
+    if (R_LABEL.test(a.label)) return;
+    add(a.el, 1);
+    add('H', a.h);
+  });
+  return counts;
+}
+
+function addCounts(total, counts, coef) {
+  Object.keys(counts).forEach((el) => {
+    total[el] = (total[el] || 0) + counts[el] * coef;
+  });
+}
+
+function checkEquationBalance(edge, left, right) {
+  const sum = (list) => {
+    const total = {};
+    list.forEach((item) => addCounts(total, formulaCounts(item.structure), item.coef));
+    return total;
+  };
+  const a = sum(left);
+  const b = sum(right);
+  const keys = Object.keys(a).concat(Object.keys(b)).filter((el, i, arr) => arr.indexOf(el) === i);
+  keys.forEach((el) => {
+    if ((a[el] || 0) !== (b[el] || 0)) {
+      throw new Error('変換 ' + edge.id + ' の元素収支が合わない: ' + el +
+        ' 左' + (a[el] || 0) + ' / 右' + (b[el] || 0));
+    }
+  });
+}
+
 function buildClassMap() {
   const raw = readJson(CLASS_MAP_PATH);
   if (raw.version !== 1) throw new Error('class-map.json の版が未対応: ' + raw.version);
@@ -60,6 +181,8 @@ function buildClassMap() {
   if (raw.edges.length !== CLASS_EDGE_COUNT) {
     throw new Error('class-map.json の変換数が ' + CLASS_EDGE_COUNT + ' ではない: ' + raw.edges.length);
   }
+  if (!raw.species || typeof raw.species !== 'object') throw new Error('class-map.json に species がない');
+  const speciesById = new Map(Object.keys(raw.species).map((id) => [id, raw.species[id]]));
 
   const sourceById = new Map();
   raw.sources.forEach((s) => {
@@ -90,6 +213,9 @@ function buildClassMap() {
       !inRect(n.x + n.w, n.y + n.h, frame)) {
       throw new Error('class-map.json の分類が枠の外: ' + n.id);
     }
+    if (!n.structure) throw new Error('class-map.json の分類に一般構造がない: ' + n.id);
+    const structure = resolveSpecies(speciesById, n.structure, '分類 ' + n.id);
+    checkRDefs([structure], n.rDefs, '分類 ' + n.id);
     return {
       id: n.id,
       name: n.name,
@@ -100,6 +226,8 @@ function buildClassMap() {
       summary: n.summary,
       scope: n.scope,
       exceptions: n.exceptions,
+      structure: structure,
+      rDefs: n.rDefs,
       sources: publicSources(n.sourceIds, '分類 ' + n.id),
       incoming: 0,
       outgoing: 0
@@ -127,6 +255,29 @@ function buildClassMap() {
       throw new Error('class-map.json のラベル位置が不正: ' + e.id);
     }
     if (!e.label || !e.conditions || !e.note) throw new Error('class-map.json の変換情報が不足: ' + e.id);
+    if (!e.type) throw new Error('class-map.json の変換に共通説明の種別がない: ' + e.id);
+    if (!e.equation || ['to', 'equilibrium'].indexOf(e.equation.arrow) === -1) {
+      throw new Error('class-map.json の一般反応式が不正: ' + e.id);
+    }
+    const resolveItems = (items, side) => {
+      if (!Array.isArray(items) || !items.length) {
+        throw new Error('class-map.json の一般反応式に' + side + 'がない: ' + e.id);
+      }
+      return items.map((item) => {
+        if (!item || !item.species) throw new Error('class-map.json の式の種別がない: ' + e.id);
+        if (!Number.isInteger(item.coef) || item.coef < 1 || item.coef > 9) {
+          throw new Error('class-map.json の係数が不正: ' + e.id);
+        }
+        return {
+          coef: item.coef,
+          structure: resolveSpecies(speciesById, item.species, '変換 ' + e.id + ' の式')
+        };
+      });
+    };
+    const left = resolveItems(e.equation.left, '反応物');
+    const right = resolveItems(e.equation.right, '生成物');
+    checkRDefs(left.concat(right).map((item) => item.structure), e.rDefs, '変換 ' + e.id);
+    checkEquationBalance(e, left, right);
     from.outgoing++;
     to.incoming++;
     return {
@@ -136,6 +287,13 @@ function buildClassMap() {
       label: e.label,
       conditions: e.conditions,
       note: e.note,
+      type: e.type,
+      equation: {
+        arrow: e.equation.arrow,
+        left: left,
+        right: right
+      },
+      rDefs: e.rDefs,
       labelPos: { x: lp.x, y: lp.y, anchor: lp.anchor },
       points: e.points,
       sources: publicSources(e.sourceIds, '変換 ' + e.id)
@@ -267,8 +425,13 @@ function build() {
     const t = source.types[key];
     types[key] = { label: t.label, summary: t.summary, schematic: t.schematic, count: t.count };
   }
+  // 一般図の変換が参照する共通説明は、既存の確認済み反応が0件でも残す。
+  const classTypeKeys = new Set(classMap.edges.map((e) => e.type));
+  classTypeKeys.forEach((key) => {
+    if (!source.types[key]) throw new Error('class-map.json の変換種別が未定義: ' + key);
+  });
   Object.keys(types).forEach((key) => {
-    if (!types[key].count) delete types[key];
+    if (!types[key].count && !classTypeKeys.has(key)) delete types[key];
   });
 
   const reactions = [];
@@ -337,7 +500,7 @@ function build() {
 
   const data = {
     meta: {
-      version: '2026-11-14.2',
+      version: '2026-11-14.3',
       generatedAt: '2026-11-14',
       verifiedAt: source.source.verifiedAt,
       source: 'site/app10 の公開データ（物質名・示性式・分類・ID と focus 経路のみオフライン抽出）',
@@ -359,7 +522,7 @@ function build() {
       classMapNote:
         '右下の「' + classMap.title + '」は、12分類の間の代表的な変換を独立資料の各節で確認した一般化。' +
         '個別物質の確認済み反応 ' + reactions.length + ' 件とは別枠で、この件数には加算しない。' +
-        '未検証の別データではない。',
+        '未検証の別データではない。変換線またはそのラベルを選ぶと、一般反応式のカードを開く。',
       sourceBook: source.source.sourceBook,
       sourceSections: usedSections,
       nodeW: layout.nodeW,

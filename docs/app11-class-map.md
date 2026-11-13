@@ -3,7 +3,8 @@
 - 日付: 2026-11-14
 - 対象: `site-src/app11/class-map.json`（新規・正本）、`scripts/app11/build-map-data.cjs`、
   `site/app11/data.js`（生成物）、`site/app11/app.js`、`site/app11/map-core.js`、
-  `site/app11/app.css`、`site/app11/index.html`、`scripts/tests/app11-class-map.test.cjs`（新規）
+  `site/app11/app.css`、`site/app11/structure.css`、`site/app11/index.html`、
+  `scripts/tests/app11-class-map.test.cjs`（新規）
 - 目的: 既存の有機反応経路図（canvas 6052×2314、427物質・86反応・207枝）の右下の空き領域
   （x 4110..6052 / y 1520..2314）に、12分類だけの独立・自己完結した一般反応ネットワークを置く。
   既存の配置・経路・物質/反応の事実・主要/補助の区分は変更しない。
@@ -55,6 +56,67 @@
 - カルボン酸 → エステルは「＋アルコール／酸触媒」を矢印ラベルに明示し、
   第一級アルコールからエステルへ無条件に線を引かない。
 
+## 一般構造（12分類）
+
+- 各分類カードに、分類の共通骨格を custom spec（`type: "custom"`）から描く一般構造 SVG を出す。
+  単なる分子式・示性式の文字列は使わない。C=O などの結合次数は実際の結合線で示す。
+- R 記号は `el: "C"`・`label: "R1"` などのダミー原子として置き、`skipValence: true` で
+  原子価検証から外す。実際の C・O・H は通常の原子価で検証する。
+- R の意味は分類ごと・式ごとに `rDefs` としてデータに持つ（例: `R1 = H またはアルキル基`、
+  `R′ = 炭素基（H不可）`）。カードでは構造図の直後に「Rの定義」として表示する。
+- 具体物質名・具体物質の構造データは持たない。分類名と一般化した R だけで構成する。
+- 代表例: アルカン `C(R1)(R2)(R3)–C(R4)(R5)(R6)`、アルケン `C(R1)(R2)=C(R3)(R4)`、
+  アルキン `R1–C≡C–R2`、アルデヒド `R–C(=O)–H`、カルボン酸 `R–C(=O)–OH`、
+  酸無水物 `R–C(=O)–O–C(=O)–R′`、エステル `R–C(=O)–O–R′`。
+
+## 一般反応式（16変換）
+
+- 16変換それぞれに、反応物・生成物・必要な副生成物（H₂・H₂O）を custom spec の構造式で並べ、
+  係数・＋・矢印（→ / ⇄）を1枚の SVG に組み立てて「一般反応式（構造式）」として表示する。
+  既存の `SD.renderStructure` の出力（viewBox と内容）を平行移動・縮小して並べるだけで、
+  `structure-draw.js`（凍結コピー）は変更しない。
+- `[O]`・`[H]` は酸化・還元の形式当量として原子1個分のラベルで示す。試薬の単原子ではないこと、
+  電子の移動を示す機構図ではないことをカードに明記する。`2[H]` は係数2で示す。
+- 反応式ごとに R の定義を独立して持つ。同じ R 記号は同じ式の両辺で同じ意味、行（式）をまたいで
+  定義を流用しない。type の共通説明（summary/schematic）は式の代用にしない。
+- 例:
+  - アルキン→アルケン: `R1–C≡C–R2 ＋ H₂ → R1–CH=CH–R2`
+  - 第一級アルコール→アルデヒド: `R–CH₂OH ＋ [O] → R–C(=O)H ＋ H₂O`
+  - ケトン→第二級アルコール: `R1–C(=O)–R2 ＋ 2[H] → R1–CH(OH)–R2`
+  - エステル化/加水分解: `R–C(=O)OH ＋ R′–OH ⇄ R–C(=O)–O–R′ ＋ H₂O`（酸性経路）
+- 既存 `reactions.json` の type 共通説明は、`reactionCard` と変換カードで同じ
+  `typeCommon(type)` helper を共有する。hydrogenation の summary は
+  「多重結合に水素が付加し結合次数が下がる。条件で部分/完全還元」へ、reduction の
+  schematic は `>C=O ＋ 2[H] → >CH–OH` へ最小修正した（個別反応の事実は変えない）。
+
+## 変換線の操作（タッチ・キーボード）
+
+- 16変換は1本＝1フォーカス（`role=button` / `tabindex=0` / `aria-label`）。変換線・ラベル・
+  透明ヒットは同じ `<g>` に入れ、ラベルのタップも同じ変換カードを開く。
+- 透明ヒットは `stroke: transparent`・`stroke-width: 18`・`pointer-events: stroke`・
+  `vector-effect: non-scaling-stroke`。見た目の線・矢印・固定座標は変えない。
+- 変換レイヤーは `aria-hidden` にしない（装飾の外枠だけ `aria-hidden`）。ノードは変換より後に
+  描くため、低倍率でヒットが重なってもノードのタップが優先される。
+- 選択中の変換は線を強調する。分類ノード選択時は接続する変換線を強調する（既存動作を維持）。
+- 変換カードは「一般反応式（構造式）」「Rの定義」「共通の説明」「この一般変換（向き・条件・
+  適用・注意）」「資料」を分離して表示する。分類カードの入出変換リストも変換カードへの
+  ボタンにした。
+- Escape・カード外タップ・起点フォーカス復帰・タッチ互換 mousedown ガード・現在位置の固定は
+  既存実装を維持する。現在位置は選択中の変換名（例: アルキン → アルケン（水素付加））を出す。
+- 地図の keydown は `data-kind` entity の Enter/Space だけ `preventDefault` して開き、
+  通常の button/input/link 等はブラウザ既定の activation を維持する。矢印・ズーム・0 も
+  button/input/link の上では地図へ奪わない（「一般図へ」ボタンの Enter/Space を含む）。
+- 「一般図へ」の直後に先頭分類へ移すプログラム focus は、直後の `classMap.area` 全体 fit を
+  維持する（`onFocusIn` の画面外再センタリングをその1回だけ抑止）。通常の Tab で画面外の
+  分類・反応へ移った場合は従来どおり追随する。reduce motion / 通常アニメーションの両方で
+  fit を書き換えない。
+
+## 資料
+
+- `class-map.json` の内部資料に OpenStax Organic Chemistry の 3.1（官能基）、17.1（アルコールの
+  命名）、21.6（エステルの化学）を追加し、8.6 は URL 欠落のまま節・確認日だけを保持する。
+- 公開 `data.js` には資料名・節・確認日だけを出し、URL・本文・図は出さない。確認日は 2026-11-14。
+
 ## 幾何・表示
 
 - 配置は既存 SVG の viewport と同座標。フレームは `x=4116,y=1526,w=1930,h=782`、
@@ -95,10 +157,12 @@ node --test scripts/tests/app11-reaction-map.test.cjs
 ```
 
 - `build-map-data.cjs --check`: 一致（物質427・必須294・反応86、classMap 12分類16変換）
-- `app11-class-map.test.cjs`: 13/13 pass
+- `app11-class-map.test.cjs`: 19/19 pass（一般構造12・一般反応式16・R定義・元素収支・
+  原子価・変換線の静的配線・キーボードnative activation・reduce/animate両方の一般図fit維持を含む）
+- `app11-structure.test.cjs`: 15/15 pass
 - `app11-reaction-map.test.cjs`: 39/39 pass（既存の配置・経路・件数・決定性を含む）
 - 幾何カウンタ（上記ユニット内）: ノード重なり0 / 線交差0 / 線重なり0 /
-  ノード貫通0 / ラベル衝突0 / 矢印・分類名衝突0
+  ノード貫通0 / ラベル衝突0 / 矢印・分類名衝突0（座標・points・labelPos は不変）
 
 ## 残課題
 
@@ -107,6 +171,9 @@ node --test scripts/tests/app11-reaction-map.test.cjs
   ユニット・静的検証までの記録。
 - ラベル幅は `geometry.cjs` の文字幅近似で検査している。実フォント描画での
   最終目視は上記の操作確認に含める。
+- 一般反応式の合成 SVG（複数構造の縮小配置・係数・矢印）と、変換線の透明ヒット
+  （低倍率での重なり・タッチ）は、実ブラウザでの確認項目。ユニットでは
+  `viewBox` を持つ構造 SVG と元素収支・原子価までを確認した。
 - 2026-11-14 の test NG（390px の fit 切れ、CSS `text-anchor: middle` による
   ラベル・自線衝突4箇所）を修正した。修正後の最終ブラウザ確認は再実行待ち。
 - 一般図ボタンは俯瞰時だけ表示する。局所拡大中は「全体表示」で戻ってから使う。

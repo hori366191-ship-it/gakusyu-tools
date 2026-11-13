@@ -60,6 +60,29 @@
   color: var(--rp-muted);
   overflow-wrap: anywhere;
 }
+/* 一般反応式（複数の構造を1枚に並べた図） */
+.rp-struct__canvas .rp-eq-svg { display: block; width: 100%; height: auto; max-height: 320px; overflow: visible; }
+.rp-struct--wide .rp-struct__canvas .rp-eq-svg { width: var(--rp-struct-width, 100%); max-width: none; max-height: none; }
+.rp-eq-svg .rp-eq-coef {
+  fill: var(--rp-accent-2);
+  font-family: var(--rp-font-mono);
+  font-size: 18px;
+  font-weight: 800;
+}
+.rp-eq-svg .rp-eq-op {
+  fill: var(--rp-node-ink);
+  font-size: 20px;
+  font-weight: 700;
+}
+.rp-eq-svg .rp-eq-arrow-line {
+  fill: none;
+  stroke: var(--rp-node-ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rp-eq-svg .rp-eq-arrow-head { fill: var(--rp-node-ink); stroke: none; }
+.rp-rdefs { margin: 4px 0 8px; }
 .rp-struct-missing {
   margin: 8px 0 10px;
   padding: 8px 10px;

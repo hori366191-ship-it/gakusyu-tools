@@ -407,7 +407,9 @@ test('[static] カードは共通説明と個別情報を分離し、キーボ�
   assert.ok(js.includes('card.contains(e.target)'), 'カード内の操作では閉じない');
   assert.ok(js.includes('returnFocus'), '起点へフォーカスを戻す');
   assert.ok(js.includes('returnFocus.focus()'));
-  assert.ok(js.includes("case 'Enter'"), 'Enter で開く');
+  assert.ok(js.includes("if (entity && (e.key === 'Enter' || e.key === ' '))"),
+    'data-kind entity を Enter/Space で開く');
+  assert.ok(js.includes('openFromElement(entity)'), 'entity の open 配線');
   assert.ok(js.includes("case 'ArrowLeft'") && js.includes("case 'ArrowRight'"), '矢印キーで移動');
   assert.ok(js.includes("case '+'") && js.includes("case '-'"), 'キーで拡大縮小');
   assert.ok(js.includes("case '0'"), 'キーで全体表示');

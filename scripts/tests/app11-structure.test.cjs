@@ -496,7 +496,7 @@ test('[draw] 凍結コピーは RPStructure 名前空間で、app10 の実行時
   assert.equal(app.includes('SD.renderCompound'), false, '拡大ボタン付きrenderCompoundを使わない');
 });
 
-test('[card] compoundCard は formula 行を構造図へ置換し、classCard には構造を入れない', () => {
+test('[card] compoundCard は formula 行を構造図へ置換し、classCard は個別構造ではなく一般構造だけを出す', () => {
   const app = read('app.js');
   const compoundStart = app.indexOf('function structureFigure(');
   const compoundEnd = app.indexOf('function compoundCard(');
@@ -515,10 +515,18 @@ test('[card] compoundCard は formula 行を構造図へ置換し、classCard �
   assert.ok(compoundCard.includes('structureFigureBlock(c)'));
   assert.equal(compoundCard.includes('rp-card__formula'), false, '冒頭のformulaだけの行を残さない');
   const classStart = app.indexOf('function classCard(');
-  const classEnd = app.indexOf('function byTypeThenId(');
+  const classEnd = app.indexOf('function equationHasFormal(');
   const classCard = app.slice(classStart, classEnd);
-  assert.equal(classCard.includes('structure'), false, '一般classCardに具体構造を入れない');
-  assert.equal(classCard.includes('renderStructure'), false);
+  assert.ok(classCard.includes('classStructureFigure(n)'), '分類の一般構造を出す');
+  assert.ok(app.includes('rDefsList(n.rDefs)'), '式ごとのR定義を出す');
+  assert.equal(classCard.includes('SD.structureView'), false, '個別物質の構造データを使わない');
+  assert.equal(classCard.includes('structureFigureBlock'), false, '個別物質の構造図を混ぜない');
+  assert.equal(classCard.includes('compoundById'), false, '具体物質名を引かない');
+  assert.ok(classCard.includes("data-kind=\"class-edge\""), '入出変換を変換カードへのボタンにする');
+  assert.ok(app.includes('function classEdgeCard('), '変換専用カード');
+  assert.ok(app.includes('equationFigure(e)'), '一般反応式を構造式SVGで出す');
+  assert.ok(app.includes('function typeCommon('), '共通説明のshared helper');
+  assert.ok(app.includes('html += typeCommon(type);'), '個別reactionCardも共通説明を共有する');
 });
 
 test('[theme] 構造図CSSは既存テーマ変数だけを使い、横overflowをカード内に閉じる', () => {

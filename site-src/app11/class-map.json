@@ -8,6 +8,13 @@
   "frame": { "x": 4116, "y": 1526, "w": 1930, "h": 782 },
   "sources": [
     {
+      "id": "openstax-3-1",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "3.1",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/3-1-functional-groups"
+    },
+    {
       "id": "openstax-8-1",
       "book": "OpenStax Organic Chemistry (McMurry)",
       "section": "8.1",
@@ -33,6 +40,13 @@
       "section": "9.5",
       "checkedAt": "2026-11-14",
       "url": "https://openstax.org/books/organic-chemistry/pages/9-5-reduction-of-alkynes"
+    },
+    {
+      "id": "openstax-17-1",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "17.1",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-1-naming-alcohols-and-phenols"
     },
     {
       "id": "openstax-17-4",
@@ -82,8 +96,155 @@
       "section": "21.5",
       "checkedAt": "2026-11-14",
       "url": "https://openstax.org/books/organic-chemistry/pages/21-5-chemistry-of-acid-anhydrides"
+    },
+    {
+      "id": "openstax-21-6",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "21.6",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters"
     }
   ],
+  "species": {
+    "alkane": {
+      "atoms": [["C", 110, 100, 0], ["C", 220, 100, 0],
+        ["C", 55, 55, 0, "R1"], ["C", 55, 145, 0, "R2"], ["C", 110, 40, 0, "R3"],
+        ["C", 275, 55, 0, "R4"], ["C", 275, 145, 0, "R5"], ["C", 220, 40, 0, "R6"]],
+      "bonds": [[0, 1], [0, 2], [0, 3], [0, 4], [1, 5], [1, 6], [1, 7]]
+    },
+    "alkene": {
+      "atoms": [["C", 120, 100, 0], ["C", 215, 100, 0],
+        ["C", 60, 55, 0, "R1"], ["C", 60, 145, 0, "R2"], ["C", 275, 55, 0, "R3"], ["C", 275, 145, 0, "R4"]],
+      "bonds": [[0, 1, 2], [0, 2], [0, 3], [1, 4], [1, 5]]
+    },
+    "alkyne": {
+      "atoms": [["C", 70, 100, 0, "R1"], ["C", 145, 100, 0], ["C", 220, 100, 0], ["C", 295, 100, 0, "R2"]],
+      "bonds": [[0, 1], [1, 2, 3], [2, 3]]
+    },
+    "ether": {
+      "atoms": [["C", 65, 100, 0, "R"], ["O", 140, 100, 0], ["C", 215, 100, 0, "R′"]],
+      "bonds": [[0, 1], [1, 2]]
+    },
+    "primary-alcohol": {
+      "atoms": [["C", 55, 100, 0, "R"], ["C", 130, 100, 2], ["O", 205, 100, 1]],
+      "bonds": [[0, 1], [1, 2]]
+    },
+    "secondary-alcohol": {
+      "atoms": [["C", 55, 50, 0, "R1"], ["C", 55, 150, 0, "R2"], ["C", 135, 100, 1], ["O", 210, 100, 1]],
+      "bonds": [[0, 2], [1, 2], [2, 3]]
+    },
+    "tertiary-alcohol": {
+      "atoms": [["C", 55, 50, 0, "R1"], ["C", 55, 150, 0, "R2"], ["C", 135, 180, 0, "R3"],
+        ["C", 135, 100, 0], ["O", 210, 100, 1]],
+      "bonds": [[0, 3], [1, 3], [2, 3], [3, 4]]
+    },
+    "aldehyde": {
+      "atoms": [["C", 55, 100, 0, "R"], ["C", 130, 100, 0], ["O", 130, 45, 0], ["H", 205, 100, 0]],
+      "bonds": [[0, 1], [1, 2, 2], [1, 3]]
+    },
+    "ketone": {
+      "atoms": [["C", 50, 100, 0, "R"], ["C", 125, 100, 0], ["O", 125, 45, 0], ["C", 200, 100, 0, "R′"]],
+      "bonds": [[0, 1], [1, 2, 2], [1, 3]]
+    },
+    "ketone-R1R2": {
+      "atoms": [["C", 50, 100, 0, "R1"], ["C", 125, 100, 0], ["O", 125, 45, 0], ["C", 200, 100, 0, "R2"]],
+      "bonds": [[0, 1], [1, 2, 2], [1, 3]]
+    },
+    "carboxylic-acid": {
+      "atoms": [["C", 50, 100, 0, "R"], ["C", 125, 100, 0], ["O", 125, 45, 0], ["O", 200, 100, 1]],
+      "bonds": [[0, 1], [1, 2, 2], [1, 3]]
+    },
+    "acid-anhydride": {
+      "atoms": [["C", 30, 100, 0, "R"], ["C", 105, 100, 0], ["O", 105, 45, 0],
+        ["O", 170, 100, 0], ["C", 235, 100, 0], ["O", 235, 45, 0], ["C", 310, 100, 0, "R′"]],
+      "bonds": [[0, 1], [1, 2, 2], [1, 3], [3, 4], [4, 5, 2], [4, 6]]
+    },
+    "ester": {
+      "atoms": [["C", 40, 100, 0, "R"], ["C", 115, 100, 0], ["O", 115, 45, 0],
+        ["O", 185, 100, 0], ["C", 260, 100, 0, "R′"]],
+      "bonds": [[0, 1], [1, 2, 2], [1, 3], [3, 4]]
+    },
+    "hydrogen": {
+      "atoms": [["H", 90, 100, 0], ["H", 150, 100, 0]],
+      "bonds": [[0, 1]]
+    },
+    "water": {
+      "atoms": [["O", 130, 100, 0], ["H", 80, 60, 0], ["H", 180, 60, 0]],
+      "bonds": [[0, 1], [0, 2]]
+    },
+    "formal-oxygen": {
+      "atoms": [["O", 100, 100, 0, "[O]", 1]],
+      "bonds": []
+    },
+    "formal-hydrogen": {
+      "atoms": [["H", 100, 100, 0, "[H]", 1]],
+      "bonds": []
+    },
+    "alcohol-Rprime": {
+      "atoms": [["C", 70, 100, 0, "R′"], ["O", 140, 100, 1]],
+      "bonds": [[0, 1]]
+    },
+    "acid-Rprime": {
+      "atoms": [["C", 50, 100, 0, "R′"], ["C", 125, 100, 0], ["O", 125, 45, 0], ["O", 200, 100, 1]],
+      "bonds": [[0, 1], [1, 2, 2], [1, 3]]
+    },
+    "ether-chain": {
+      "atoms": [["C", 40, 100, 0, "R"], ["C", 110, 100, 2], ["O", 180, 100, 0],
+        ["C", 250, 100, 2], ["C", 320, 100, 0, "R"]],
+      "bonds": [[0, 1], [1, 2], [2, 3], [3, 4]]
+    },
+    "alkene-HH-R1R2": {
+      "atoms": [["C", 120, 100, 1], ["C", 210, 100, 1], ["C", 60, 100, 0, "R1"], ["C", 270, 100, 0, "R2"]],
+      "bonds": [[0, 1, 2], [0, 2], [1, 3]]
+    },
+    "alkene-R1R2-HR3": {
+      "atoms": [["C", 115, 100, 0], ["C", 210, 100, 1],
+        ["C", 55, 55, 0, "R1"], ["C", 55, 145, 0, "R2"], ["C", 280, 100, 0, "R3"]],
+      "bonds": [[0, 1, 2], [0, 2], [0, 3], [1, 4]]
+    },
+    "alkene-H2-R1R2": {
+      "atoms": [["C", 120, 100, 2], ["C", 205, 100, 0],
+        ["C", 280, 55, 0, "R1"], ["C", 280, 145, 0, "R2"]],
+      "bonds": [[0, 1, 2], [1, 2], [1, 3]]
+    },
+    "alkene-R1H-R2R3": {
+      "atoms": [["C", 115, 100, 1], ["C", 210, 100, 0],
+        ["C", 55, 100, 0, "R1"], ["C", 285, 55, 0, "R2"], ["C", 285, 145, 0, "R3"]],
+      "bonds": [[0, 1, 2], [0, 2], [1, 3], [1, 4]]
+    },
+    "alkane-H2-R4": {
+      "atoms": [["C", 110, 100, 1], ["C", 220, 100, 1],
+        ["C", 55, 55, 0, "R1"], ["C", 55, 145, 0, "R2"],
+        ["C", 275, 55, 0, "R3"], ["C", 275, 145, 0, "R4"]],
+      "bonds": [[0, 1], [0, 2], [0, 3], [1, 4], [1, 5]]
+    },
+    "tertiary-hydration-product": {
+      "atoms": [["C", 115, 100, 0], ["C", 215, 100, 2],
+        ["C", 55, 50, 0, "R1"], ["C", 55, 150, 0, "R2"], ["O", 115, 40, 1], ["C", 290, 100, 0, "R3"]],
+      "bonds": [[0, 1], [0, 2], [0, 3], [0, 4], [1, 5]]
+    },
+    "secondary-hydration-product": {
+      "atoms": [["C", 115, 100, 1], ["C", 215, 100, 2],
+        ["C", 55, 100, 0, "R1"], ["O", 115, 40, 1], ["C", 290, 100, 0, "R2"]],
+      "bonds": [[0, 1], [0, 2], [0, 3], [1, 4]]
+    },
+    "tertiary-elim-reactant": {
+      "atoms": [["C", 115, 100, 0], ["C", 215, 100, 1],
+        ["C", 55, 50, 0, "R1"], ["C", 55, 150, 0, "R2"], ["O", 115, 40, 1],
+        ["C", 290, 55, 0, "R3"], ["C", 290, 145, 0, "R4"]],
+      "bonds": [[0, 1], [0, 2], [0, 3], [0, 4], [1, 5], [1, 6]]
+    },
+    "secondary-elim-reactant": {
+      "atoms": [["C", 115, 100, 1], ["C", 215, 100, 1],
+        ["C", 55, 100, 0, "R1"], ["O", 115, 40, 1], ["C", 290, 55, 0, "R2"], ["C", 290, 145, 0, "R3"]],
+      "bonds": [[0, 1], [0, 2], [0, 3], [1, 4], [1, 5]]
+    },
+    "primary-elim-reactant": {
+      "atoms": [["O", 55, 100, 1], ["C", 130, 100, 2], ["C", 215, 100, 1],
+        ["C", 290, 55, 0, "R1"], ["C", 290, 145, 0, "R2"]],
+      "bonds": [[0, 1], [1, 2], [2, 3], [2, 4]]
+    }
+  },
   "nodes": [
     {
       "id": "alkane",
@@ -94,8 +255,16 @@
       "h": 40,
       "summary": "炭素間が単結合だけの飽和炭化水素。",
       "scope": "アルケンの水素付加で得られる。アルキンは部分還元を経てアルケンに進む。",
-      "exceptions": ["置換反応など、この基本図に含めない反応もある。"],
-      "sourceIds": ["openstax-8-6", "openstax-9-5"]
+      "exceptions": [
+        "示すのは C–C 部分の局所骨格で、1炭素のアルカンを含む分子一般式ではない。",
+        "置換反応など、この基本図に含めない反応もある。"
+      ],
+      "structure": "alkane",
+      "rDefs": [
+        "R1 = H またはアルキル基", "R2 = H またはアルキル基", "R3 = H またはアルキル基",
+        "R4 = H またはアルキル基", "R5 = H またはアルキル基", "R6 = H またはアルキル基"
+      ],
+      "sourceIds": ["openstax-3-1", "openstax-8-6", "openstax-9-5"]
     },
     {
       "id": "alkene",
@@ -110,7 +279,12 @@
         "水和で第一級アルコールを直接得る経路は、この基本図では扱わない。",
         "同じアルケンから第二級・第三級アルコールの両方が必ず得られるわけではない。"
       ],
-      "sourceIds": ["openstax-9-5", "openstax-8-1", "openstax-17-6", "openstax-8-4"]
+      "structure": "alkene",
+      "rDefs": [
+        "R1 = H またはアルキル基", "R2 = H またはアルキル基",
+        "R3 = H またはアルキル基", "R4 = H またはアルキル基"
+      ],
+      "sourceIds": ["openstax-3-1", "openstax-9-5", "openstax-8-1", "openstax-17-6", "openstax-8-4"]
     },
     {
       "id": "alkyne",
@@ -122,7 +296,9 @@
       "summary": "炭素間三重結合をもつ不飽和炭化水素。",
       "scope": "この図では、部分還元でアルケンへ進む入口として扱う。",
       "exceptions": ["アルキンからケトンへの変換は、この基本図では扱わない。"],
-      "sourceIds": ["openstax-9-5"]
+      "structure": "alkyne",
+      "rDefs": ["R1 = H またはアルキル基", "R2 = H またはアルキル基"],
+      "sourceIds": ["openstax-3-1", "openstax-9-5"]
     },
     {
       "id": "ether",
@@ -134,7 +310,9 @@
       "summary": "酸素原子が2つの炭素に結合した分類。",
       "scope": "第一級アルコール中心の分子間脱水で得られる例を扱う。",
       "exceptions": ["適用できる第一級アルコールの範囲は限られる。"],
-      "sourceIds": ["openstax-18-2"]
+      "structure": "ether",
+      "rDefs": ["R = 炭素基（H不可）", "R′ = 炭素基（H不可）"],
+      "sourceIds": ["openstax-3-1", "openstax-18-2"]
     },
     {
       "id": "primary-alcohol",
@@ -149,7 +327,9 @@
         "酸化条件によってはカルボン酸まで進む。",
         "分子内脱水にはβ-Hが必要。"
       ],
-      "sourceIds": ["openstax-17-7", "openstax-17-6", "openstax-18-2", "openstax-8-1"]
+      "structure": "primary-alcohol",
+      "rDefs": ["R = 炭素基（H不可。R=Hは級分類の例外）"],
+      "sourceIds": ["openstax-3-1", "openstax-17-1", "openstax-17-7", "openstax-17-6", "openstax-18-2", "openstax-8-1"]
     },
     {
       "id": "secondary-alcohol",
@@ -161,7 +341,9 @@
       "summary": "ヒドロキシ基が第二級炭素に結合したアルコール。",
       "scope": "酸化でケトン、分子内脱水でアルケンへ進む。ケトンの還元でも得られる。",
       "exceptions": ["分子内脱水にはβ-Hが必要。"],
-      "sourceIds": ["openstax-17-7", "openstax-17-6", "openstax-17-4", "openstax-8-1"]
+      "structure": "secondary-alcohol",
+      "rDefs": ["R1 = 炭素基（H不可）", "R2 = 炭素基（H不可）"],
+      "sourceIds": ["openstax-3-1", "openstax-17-1", "openstax-17-7", "openstax-17-6", "openstax-17-4", "openstax-8-1"]
     },
     {
       "id": "tertiary-alcohol",
@@ -173,7 +355,9 @@
       "summary": "ヒドロキシ基が第三級炭素に結合したアルコール。",
       "scope": "分子内脱水でアルケンへ進む。",
       "exceptions": ["酸化によるカルボニル化合物への変換は、この基本図では扱わない。"],
-      "sourceIds": ["openstax-17-6", "openstax-8-1"]
+      "structure": "tertiary-alcohol",
+      "rDefs": ["R1 = 炭素基（H不可）", "R2 = 炭素基（H不可）", "R3 = 炭素基（H不可）"],
+      "sourceIds": ["openstax-3-1", "openstax-17-1", "openstax-17-6", "openstax-8-1"]
     },
     {
       "id": "aldehyde",
@@ -185,7 +369,9 @@
       "summary": "末端のカルボニル基をもつ分類。",
       "scope": "第一級アルコールの酸化で得られ、酸化でカルボン酸、還元で第一級アルコールへ進む。",
       "exceptions": ["酸化条件によってはカルボン酸まで進む。"],
-      "sourceIds": ["openstax-17-7", "openstax-19-3", "openstax-17-4"]
+      "structure": "aldehyde",
+      "rDefs": ["R = H または炭素基"],
+      "sourceIds": ["openstax-3-1", "openstax-17-7", "openstax-19-3", "openstax-17-4"]
     },
     {
       "id": "ketone",
@@ -197,7 +383,9 @@
       "summary": "鎖の内部にカルボニル基をもつ分類。",
       "scope": "第二級アルコールの酸化で得られ、還元で第二級アルコールへ戻る。",
       "exceptions": ["この図ではカルボン酸への酸化を扱わない。"],
-      "sourceIds": ["openstax-17-7", "openstax-17-4"]
+      "structure": "ketone",
+      "rDefs": ["R = 炭素基（H不可）", "R′ = 炭素基（H不可）"],
+      "sourceIds": ["openstax-3-1", "openstax-17-7", "openstax-17-4"]
     },
     {
       "id": "carboxylic-acid",
@@ -209,7 +397,9 @@
       "summary": "カルボキシ基をもつ分類。",
       "scope": "アルデヒドの酸化、または酸無水物の加水分解で得られ、エステル化とエステルの加水分解の中心になる。",
       "exceptions": ["酸を加熱するだけの酸無水物化は、条件依存のためこの図では扱わない。"],
-      "sourceIds": ["openstax-19-3", "openstax-21-3", "openstax-21-5"]
+      "structure": "carboxylic-acid",
+      "rDefs": ["R = H または炭素基"],
+      "sourceIds": ["openstax-3-1", "openstax-19-3", "openstax-21-3", "openstax-21-5"]
     },
     {
       "id": "acid-anhydride",
@@ -221,7 +411,12 @@
       "summary": "2つのアシル基が酸素を介して結合した分類。",
       "scope": "この図では、加水分解でカルボン酸へ進む向きだけを扱う。",
       "exceptions": ["酸無水物とアルコールからエステルを与える反応は、図が密集するため省略している。"],
-      "sourceIds": ["openstax-21-5"]
+      "structure": "acid-anhydride",
+      "rDefs": [
+        "R = 通常は炭素基（非対称も含む。環状ではR同士が連結）",
+        "R′ = 通常は炭素基（非対称も含む。環状ではR同士が連結）"
+      ],
+      "sourceIds": ["openstax-3-1", "openstax-21-5"]
     },
     {
       "id": "ester",
@@ -233,7 +428,9 @@
       "summary": "カルボキシ基の水素を炭素基で置き換えた分類。",
       "scope": "カルボン酸とアルコールのエステル化で得られ、加水分解でカルボン酸とアルコールに戻る。",
       "exceptions": ["エステル化にはアルコールと酸触媒が必要。"],
-      "sourceIds": ["openstax-21-3"]
+      "structure": "ester",
+      "rDefs": ["R = H または炭素基", "R′ = 炭素基（H不可）"],
+      "sourceIds": ["openstax-3-1", "openstax-21-3", "openstax-21-6"]
     }
   ],
   "edges": [
@@ -243,7 +440,14 @@
       "to": "alkene",
       "label": "水素付加（部分還元）",
       "conditions": "部分還元・触媒条件を選ぶ",
-      "note": "アルキンからアルケンで止めるには、部分還元の条件を選ぶ。",
+      "note": "アルキンからアルケンで止めるには、部分還元の条件（Lindlar 等）を選ぶ。立体（E/Z）は指定しない。",
+      "type": "hydrogenation",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "alkyne", "coef": 1 }, { "species": "hydrogen", "coef": 1 }],
+        "right": [{ "species": "alkene-HH-R1R2", "coef": 1 }]
+      },
+      "rDefs": ["R1 = H またはアルキル基", "R2 = H またはアルキル基"],
       "labelPos": { "x": 4408, "y": 1815, "anchor": "end" },
       "points": [[4340, 1740], [4420, 1740], [4420, 1920], [4490, 1920]],
       "sourceIds": ["openstax-9-5"]
@@ -255,6 +459,16 @@
       "label": "水素付加",
       "conditions": "触媒",
       "note": "アルケンに水素を付加してアルカンにする。",
+      "type": "hydrogenation",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "alkene", "coef": 1 }, { "species": "hydrogen", "coef": 1 }],
+        "right": [{ "species": "alkane-H2-R4", "coef": 1 }]
+      },
+      "rDefs": [
+        "R1 = H またはアルキル基", "R2 = H またはアルキル基",
+        "R3 = H またはアルキル基", "R4 = H またはアルキル基"
+      ],
       "labelPos": { "x": 4440, "y": 1990, "anchor": "middle" },
       "points": [[4580, 1940], [4580, 2010], [4300, 2010], [4300, 2080]],
       "sourceIds": ["openstax-8-6", "openstax-9-5"]
@@ -265,7 +479,16 @@
       "to": "tertiary-alcohol",
       "label": "水和",
       "conditions": "酸触媒・構造に依存",
-      "note": "水和の位置は構造で決まる。第二級と同時に得る意味ではない。",
+      "note": "水和の位置は構造で決まる。転位を伴う場合があり、第二級と同時に得る意味ではない。",
+      "type": "hydration",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "alkene-R1R2-HR3", "coef": 1 }, { "species": "water", "coef": 1 }],
+        "right": [{ "species": "tertiary-hydration-product", "coef": 1 }]
+      },
+      "rDefs": [
+        "R1 = アルキル基", "R2 = アルキル基", "R3 = H またはアルキル基"
+      ],
       "labelPos": { "x": 4680, "y": 1732, "anchor": "middle" },
       "points": [[4600, 1900], [4600, 1760], [4740, 1760], [4740, 1680], [4790, 1680]],
       "sourceIds": ["openstax-8-4"]
@@ -277,6 +500,13 @@
       "label": "水和",
       "conditions": "構造に依存",
       "note": "同じアルケンから第二級・第三級の両方が必ず得られるわけではない。",
+      "type": "hydration",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "alkene-HH-R1R2", "coef": 1 }, { "species": "water", "coef": 1 }],
+        "right": [{ "species": "secondary-hydration-product", "coef": 1 }]
+      },
+      "rDefs": ["R1 = アルキル基", "R2 = H またはアルキル基"],
       "labelPos": { "x": 4715, "y": 1888, "anchor": "middle" },
       "points": [[4640, 1910], [4790, 1910]],
       "sourceIds": ["openstax-8-4"]
@@ -288,6 +518,15 @@
       "label": "分子内脱水",
       "conditions": "酸・加熱／β-H必要",
       "note": "分子内脱水にはβ-Hが必要。",
+      "type": "elimination",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "tertiary-elim-reactant", "coef": 1 }],
+        "right": [{ "species": "alkene", "coef": 1 }, { "species": "water", "coef": 1 }]
+      },
+      "rDefs": [
+        "R1 = 炭素基", "R2 = 炭素基", "R3 = H または炭素基", "R4 = H または炭素基"
+      ],
       "labelPos": { "x": 4710, "y": 1815, "anchor": "middle" },
       "points": [[4830, 1700], [4830, 1790], [4635, 1790], [4635, 1900]],
       "sourceIds": ["openstax-8-1", "openstax-17-6"]
@@ -299,6 +538,13 @@
       "label": "分子内脱水",
       "conditions": "酸・加熱／β-H必要",
       "note": "分子内脱水にはβ-Hが必要。",
+      "type": "elimination",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "secondary-elim-reactant", "coef": 1 }],
+        "right": [{ "species": "alkene-R1H-R2R3", "coef": 1 }, { "species": "water", "coef": 1 }]
+      },
+      "rDefs": ["R1 = 炭素基", "R2 = H または炭素基", "R3 = H または炭素基"],
       "labelPos": { "x": 4715, "y": 1952, "anchor": "middle" },
       "points": [[4790, 1930], [4640, 1930]],
       "sourceIds": ["openstax-8-1", "openstax-17-6"]
@@ -310,6 +556,13 @@
       "label": "分子内脱水",
       "conditions": "酸・加熱／β-H必要",
       "note": "分子内脱水にはβ-Hが必要。",
+      "type": "elimination",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "primary-elim-reactant", "coef": 1 }],
+        "right": [{ "species": "alkene-H2-R1R2", "coef": 1 }, { "species": "water", "coef": 1 }]
+      },
+      "rDefs": ["R1 = H または炭素基", "R2 = H または炭素基"],
       "labelPos": { "x": 4625, "y": 2065, "anchor": "start" },
       "points": [[4790, 2150], [4610, 2150], [4610, 1960], [4610, 1940]],
       "sourceIds": ["openstax-8-1", "openstax-17-6"]
@@ -321,6 +574,13 @@
       "label": "酸化",
       "conditions": "条件選択（更なる酸化あり）",
       "note": "条件によってはカルボン酸まで酸化が進む。",
+      "type": "oxidation",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "primary-alcohol", "coef": 1 }, { "species": "formal-oxygen", "coef": 1 }],
+        "right": [{ "species": "aldehyde", "coef": 1 }, { "species": "water", "coef": 1 }]
+      },
+      "rDefs": ["R = 通常は炭素基（アルデヒドで止める条件）"],
       "labelPos": { "x": 5015, "y": 2118, "anchor": "middle" },
       "points": [[4940, 2150], [5090, 2150]],
       "sourceIds": ["openstax-17-7"]
@@ -332,6 +592,13 @@
       "label": "還元",
       "conditions": "水素化／還元",
       "note": "アルデヒドの還元で第一級アルコールになる。",
+      "type": "reduction",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "aldehyde", "coef": 1 }, { "species": "formal-hydrogen", "coef": 2 }],
+        "right": [{ "species": "primary-alcohol", "coef": 1 }]
+      },
+      "rDefs": ["R = H または炭素基（R=Hは級分類の例外）"],
       "labelPos": { "x": 5015, "y": 2192, "anchor": "middle" },
       "points": [[5090, 2170], [4940, 2170]],
       "sourceIds": ["openstax-17-4"]
@@ -343,6 +610,13 @@
       "label": "酸化",
       "conditions": "ケトンへ",
       "note": "第二級アルコールの酸化でケトンになる。",
+      "type": "oxidation",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "secondary-alcohol", "coef": 1 }, { "species": "formal-oxygen", "coef": 1 }],
+        "right": [{ "species": "ketone-R1R2", "coef": 1 }, { "species": "water", "coef": 1 }]
+      },
+      "rDefs": ["R1 = 炭素基", "R2 = 炭素基"],
       "labelPos": { "x": 5015, "y": 1888, "anchor": "middle" },
       "points": [[4940, 1910], [5090, 1910]],
       "sourceIds": ["openstax-17-7"]
@@ -354,6 +628,13 @@
       "label": "還元",
       "conditions": "第二級へ",
       "note": "ケトンの還元で第二級アルコールになる。",
+      "type": "reduction",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "ketone-R1R2", "coef": 1 }, { "species": "formal-hydrogen", "coef": 2 }],
+        "right": [{ "species": "secondary-alcohol", "coef": 1 }]
+      },
+      "rDefs": ["R1 = 炭素基", "R2 = 炭素基"],
       "labelPos": { "x": 5015, "y": 1952, "anchor": "middle" },
       "points": [[5090, 1930], [4940, 1930]],
       "sourceIds": ["openstax-17-4"]
@@ -365,6 +646,13 @@
       "label": "酸化",
       "conditions": "カルボン酸へ",
       "note": "アルデヒドの酸化でカルボン酸になる。",
+      "type": "oxidation",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "aldehyde", "coef": 1 }, { "species": "formal-oxygen", "coef": 1 }],
+        "right": [{ "species": "carboxylic-acid", "coef": 1 }]
+      },
+      "rDefs": ["R = H または炭素基"],
       "labelPos": { "x": 5315, "y": 2118, "anchor": "middle" },
       "points": [[5240, 2150], [5390, 2150]],
       "sourceIds": ["openstax-19-3"]
@@ -376,9 +664,16 @@
       "label": "エステル化",
       "conditions": "＋アルコール／酸触媒",
       "note": "アルコールと酸触媒を必要とする。第一級アルコールから直接エステルへ無条件に進む線ではない。",
+      "type": "esterification",
+      "equation": {
+        "arrow": "equilibrium",
+        "left": [{ "species": "carboxylic-acid", "coef": 1 }, { "species": "alcohol-Rprime", "coef": 1 }],
+        "right": [{ "species": "ester", "coef": 1 }, { "species": "water", "coef": 1 }]
+      },
+      "rDefs": ["R = H または炭素基", "R′ = アルキル基（H不可）"],
       "labelPos": { "x": 5615, "y": 2118, "anchor": "middle" },
       "points": [[5540, 2150], [5690, 2150]],
-      "sourceIds": ["openstax-21-3"]
+      "sourceIds": ["openstax-21-3", "openstax-21-6"]
     },
     {
       "id": "ester-carboxylic-acid",
@@ -386,10 +681,17 @@
       "to": "carboxylic-acid",
       "label": "加水分解",
       "conditions": "＋水／アルコールも生じる",
-      "note": "エステルの加水分解でカルボン酸とアルコールが生じる。",
+      "note": "酸性経路の式。塩基条件ではまず塩が生じ、この式で直接カルボン酸へ進むとは扱わない。",
+      "type": "hydrolysis",
+      "equation": {
+        "arrow": "equilibrium",
+        "left": [{ "species": "ester", "coef": 1 }, { "species": "water", "coef": 1 }],
+        "right": [{ "species": "carboxylic-acid", "coef": 1 }, { "species": "alcohol-Rprime", "coef": 1 }]
+      },
+      "rDefs": ["R = H または炭素基", "R′ = アルキル基（H不可）"],
       "labelPos": { "x": 5615, "y": 2194, "anchor": "middle" },
       "points": [[5690, 2170], [5540, 2170]],
-      "sourceIds": ["openstax-21-3"]
+      "sourceIds": ["openstax-21-3", "openstax-21-6"]
     },
     {
       "id": "acid-anhydride-carboxylic-acid",
@@ -397,7 +699,17 @@
       "to": "carboxylic-acid",
       "label": "加水分解",
       "conditions": "＋水",
-      "note": "酸無水物の加水分解でカルボン酸になる。",
+      "note": "酸無水物の加水分解でカルボン酸になる。環状酸無水物はこの非環式の式の適用外。",
+      "type": "hydrolysis",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "acid-anhydride", "coef": 1 }, { "species": "water", "coef": 1 }],
+        "right": [{ "species": "carboxylic-acid", "coef": 1 }, { "species": "acid-Rprime", "coef": 1 }]
+      },
+      "rDefs": [
+        "R = 通常は炭素基（同一なら同じ酸2分子、異なれば各1分子）",
+        "R′ = 通常は炭素基（同一なら同じ酸2分子、異なれば各1分子）"
+      ],
       "labelPos": { "x": 5480, "y": 2035, "anchor": "start" },
       "points": [[5465, 1940], [5465, 2140]],
       "sourceIds": ["openstax-21-5"]
@@ -408,7 +720,14 @@
       "to": "ether",
       "label": "分子間脱水",
       "conditions": "単純な第一級中心・適用制限",
-      "note": "第一級アルコール中心の分子間脱水。適用できる範囲は限られる。",
+      "note": "第一級アルコール中心の分子間脱水。適用できる範囲は限られ、異種混合から単一のエーテルを選択的に得る式ではない。",
+      "type": "condensation",
+      "equation": {
+        "arrow": "to",
+        "left": [{ "species": "primary-alcohol", "coef": 2 }],
+        "right": [{ "species": "ether-chain", "coef": 1 }, { "species": "water", "coef": 1 }]
+      },
+      "rDefs": ["R = 通常はアルキル基（同一の単純な一級アルコール。R=Hは級分類の例外）"],
       "labelPos": { "x": 4880, "y": 2222, "anchor": "start" },
       "points": [[4865, 2180], [4865, 2260]],
       "sourceIds": ["openstax-18-2"]
