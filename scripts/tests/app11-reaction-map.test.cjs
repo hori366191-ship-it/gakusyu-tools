@@ -260,7 +260,7 @@ test('[builder] ビルダー経路は routeFor と一致し、focus を必ず含
   });
   assert.equal(linked, D.compounds.length, '全物質にビルダー経路がある');
   // 実行時に app10 を読み込まない
-  for (const file of ['index.html', 'app.js', 'map-core.js']) {
+  for (const file of ['index.html', 'app.js', 'map-core.js', 'structure-draw.js']) {
     const text = file.endsWith('.html') ? read(file) : read(file);
     assert.equal(/<script[^>]+\.\.\/app10\//.test(text), false, file + ' が app10 のスクリプトを読み込む');
     assert.equal(text.includes("require('./data.js')"), false, file + ' が app10 を require する');
@@ -370,7 +370,7 @@ test('[data] 状態区分の語彙が揃い、未確認を不可能として扱�
 test('[static] index.html は読込順・テーマ・クレジット・一覧の導線をもつ', () => {
   const html = read('index.html');
   const scripts = [...html.matchAll(/<script src="\.\/([^"]+)"><\/script>/g)].map((m) => m[1]);
-  assert.deepEqual(scripts, ['data.js', 'map-core.js', 'app.js']);
+  assert.deepEqual(scripts, ['data.js', 'map-core.js', 'structure-draw.js', 'app.js']);
   assert.ok(html.includes('../themes/theme.js'));
   assert.ok(html.includes('../themes/pop.css'));
   assert.ok(html.includes('../themes/forest.css'));
@@ -730,7 +730,7 @@ test('[static] app10 は右上の収録台帳と同じ領域に試験版への�
 });
 
 test('[static] ポータル・GAS・Worker・テーマには触れていない（独立性）', () => {
-  const files = ['index.html', 'app.css', 'data.js', 'map-core.js', 'app.js', 'favicon.svg'];
+  const files = ['index.html', 'app.css', 'structure.css', 'data.js', 'map-core.js', 'structure-draw.js', 'app.js', 'favicon.svg'];
   files.forEach((file) => assert.equal(fs.existsSync(path.join(APP, file)), true, file + ' がある'));
   const dataText = read('data.js');
   assert.equal(dataText.includes('oc-'), false, 'app10 のクラス名を流用しない');

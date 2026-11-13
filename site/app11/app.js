@@ -2,6 +2,7 @@
  * 有機反応マップ（試験版）— 画面の組み立てと操作
  *
  * - 単一の SVG キャンバスに、物質（四角）と反応（丸）を固定座標で置く。
+ * - 右下には12分類だけの一般図を、既存の物質・反応とは別レイヤーで固定座標に置く。
  * - ズーム・パンしても位置関係は変えない。表示する要素だけを semantic zoom で切り替える。
  * - 詳細は同じページのフローティングカードで開く（外側クリックと Escape で閉じ、起点へフォーカスを戻す）。
  * - 実行時に site/app10 の実装は読み込まない。データは data.js の静的値だけを使う。
@@ -11,6 +12,7 @@
 
   var D = window.RPMapData;
   var Core = window.RPMapCore;
+  var SD = window.RPStructure;
   if (!D || !Core) return;
 
   var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -73,6 +75,14 @@
   var nodeIndex = {};
   var reactionIndex = {};
   var edgeIndex = {};
+  var classNodeIndex = {};
+  var classEdgeIndex = {};
+  var classNodeById = {};
+  var classLayer = null;
+  var classMapData = D.classMap || null;
+  if (classMapData) {
+    classMapData.nodes.forEach(function (n) { classNodeById[n.id] = n; });
+  }
   var activeEdgeLayer = null;
   var previewReaction = null;
   var view = { scale: 1, x: 0, y: 0 };
@@ -81,6 +91,7 @@
   var activeRegion = null;
   var returnFocus = null;
   var restoreAfterPointer = null;
+  var suppressCompatFocus = false;
   var suppressClick = false;
   var animToken = 0;
   var lastLevel = -1;
@@ -119,7 +130,7 @@
   function ensureArrowDefs() {
     if (svg.querySelector('#rp-arrow-primary')) return;
     var defs = el('defs');
-    [['rp-arrow-primary', 'rp-primary', 7], ['rp-arrow-secondary', 'rp-secondary', 5.5]].forEach(function (spec) {
+    [['rp-arrow-primary', 'rp-primary', 7], ['rp-arrow-secondary', 'rp-secondary', 5.5], ['rp-arrow-class', 'rp-accent', 6]].forEach(function (spec) {
       var marker = el('marker', {
         id: spec[0],
         viewBox: '0 0 8 8',
@@ -252,6 +263,90 @@
     viewport.appendChild(nodeLayer);
   }
 
+  // 12分類だけの一般図。既存の物質・反応とは別レイヤーに固定座標で描き、D.compounds / D.reactions には混ぜない。
+  function buildClassMap() {
+    if (!classMapData) return;
+    classLayer = el('g', { 'class': 'rp-classmap', 'aria-label': classMapData.title });
+    var frame = classMapData.frame;
+    classLayer.appendChild(el('rect', {
+      'class': 'rp-classmap__frame',
+      x: frame.x,
+      y: frame.y,
+      width: frame.w,
+      height: frame.h,
+      rx: 18
+    }));
+    var edgeLayer = el('g', { 'class': 'rp-classmap__edges', 'aria-hidden': 'true' });
+    classMapData.edges.forEach(function (e) {
+      var path = el('path', {
+        'class': 'rp-classmap__edge',
+        'data-class-edge': e.id,
+        'data-from': e.from,
+        'data-to': e.to,
+        'marker-end': 'url(#rp-arrow-class)',
+        d: Core.routePath(e.points, [], [])
+      });
+      edgeLayer.appendChild(path);
+      classEdgeIndex[e.id] = path;
+    });
+    var labelLayer = el('g', { 'class': 'rp-classmap__labels', 'aria-hidden': 'true' });
+    classMapData.edges.forEach(function (e) {
+      var pos = e.labelPos;
+      var label = el('text', {
+        'class': 'rp-classmap__label',
+        x: pos.x,
+        y: pos.y,
+        'text-anchor': pos.anchor
+      });
+      var first = el('tspan', { x: pos.x, y: pos.y });
+      first.textContent = e.label;
+      label.appendChild(first);
+      if (e.conditions) {
+        var second = el('tspan', { x: pos.x, y: pos.y + 12 });
+        second.textContent = e.conditions;
+        label.appendChild(second);
+      }
+      labelLayer.appendChild(label);
+    });
+    var nodeLayer = el('g', { 'class': 'rp-classmap__nodes' });
+    classMapData.nodes.forEach(function (n) {
+      var g = el('g', {
+        'class': 'rp-classmap__node',
+        'data-kind': 'class',
+        'data-id': n.id,
+        role: 'button',
+        tabindex: '0',
+        'aria-label': classNodeLabel(n)
+      });
+      g.appendChild(el('rect', {
+        'class': 'rp-classmap__node-box',
+        x: n.x,
+        y: n.y,
+        width: n.w,
+        height: n.h,
+        rx: 9
+      }));
+      var text = el('text', {
+        'class': 'rp-classmap__node-label',
+        x: n.x + n.w / 2,
+        y: n.y + n.h / 2 + 1,
+        'text-anchor': 'middle'
+      });
+      text.textContent = n.name;
+      g.appendChild(text);
+      nodeLayer.appendChild(g);
+      classNodeIndex[n.id] = g;
+    });
+    classLayer.appendChild(edgeLayer);
+    classLayer.appendChild(labelLayer);
+    classLayer.appendChild(nodeLayer);
+    viewport.appendChild(classLayer);
+  }
+
+  function classNodeLabel(n) {
+    return n.name + '。' + n.summary + '。' + n.scope;
+  }
+
   function compoundLabel(c) {
     var parts = [c.name, c.formula];
     if (c.pathState === 'unverified') parts.push('反応経路は未確認');
@@ -323,6 +418,26 @@
     while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
     var box = visibleBox();
     var placed = [];
+    if (classMapData) {
+      var frame = classMapData.frame;
+      var titlePoint = Core.worldToScreen(view, frame.x + 28, frame.y + 24);
+      if (titlePoint.x < box.right && titlePoint.y < box.bottom &&
+        titlePoint.x + 240 > box.left && titlePoint.y + 40 > box.top) {
+        var heading = document.createElement('div');
+        heading.className = 'rp-overlay__classmap';
+        heading.style.left = titlePoint.x + 'px';
+        heading.style.top = titlePoint.y + 'px';
+        heading.style.maxWidth = Math.min(340, Math.max(140, viewSize.w - titlePoint.x - 12)) + 'px';
+        var strong = document.createElement('strong');
+        strong.textContent = classMapData.title;
+        var note = document.createElement('span');
+        note.textContent = classMapData.note;
+        heading.appendChild(strong);
+        heading.appendChild(note);
+        overlay.appendChild(heading);
+        placed.push({ x: titlePoint.x, y: titlePoint.y, w: 250, h: 40 });
+      }
+    }
     if (level === 0 && view.scale >= 0.15) {
       D.regions.forEach(function (region) {
         var picked = regionHub[region.id];
@@ -463,12 +578,21 @@
     if (selected) {
       if (selected.kind === 'compound') {
         selectedInfo = compoundById[selected.id];
-      } else {
+      } else if (selected.kind === 'reaction') {
         var r = findReaction(selected.id);
         if (r) selectedInfo = { name: r.typeLabel + 'の反応' };
+      } else if (selected.kind === 'class') {
+        selectedInfo = { name: selected.name };
       }
     }
-    var text = Core.positionText(view, D.regions, D.compounds, selectedInfo, D.meta.canvas, viewSize.w, viewSize.h, activeRegion);
+    var text;
+    if (selected && selected.kind === 'class') {
+      text = '官能基変換の一般図 / ' + selected.name + '（' + Math.round(view.scale * 100) + '%）';
+    } else {
+      text = Core.positionText(view, D.regions, D.compounds, selectedInfo, D.meta.canvas, viewSize.w, viewSize.h, activeRegion);
+      var classText = Core.classMapPosition(view, classMapData, viewSize.w, viewSize.h);
+      if (classText) text = classText;
+    }
     var note = Core.levelNote(level);
     positionFullValue = text;
     positionLevelValue = note;
@@ -531,6 +655,18 @@
     clearSelection();
     animateTo(fit);
   }
+
+  function focusClassMap(focusFirst) {
+    if (!classMapData) return;
+    clearRegionSelection();
+    clearSelection();
+    // 狭い画面でも外枠・注記が切れないよう、fit 倍率に下限を設けない。文字の読解は後から拡大する。
+    var target = Core.fitRect(classMapData.area, viewSize.w, viewSize.h, 14, 0, 1.2);
+    animateTo(Core.clampPan(target, viewSize.w, viewSize.h, D.meta.canvas));
+    if (focusFirst && classMapData.nodes.length && classNodeIndex[classMapData.nodes[0].id]) {
+      classNodeIndex[classMapData.nodes[0].id].focus();
+    }
+  }
   function animateTo(target) {
     if (prefersReduce()) {
       setView(target, true);
@@ -570,7 +706,7 @@
   }
 
   function onPointerDown(e) {
-    if (e.target.closest && e.target.closest('.rp-legend,.rp-hint')) return;
+    if (e.target.closest && e.target.closest('.rp-legend,.rp-hint,.rp-classmap-jump')) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     var p = mapPoint(e);
     pointers[e.pointerId] = p;
@@ -682,6 +818,15 @@
     if (activeRegion) clearRegionSelection();
     var kind = target.getAttribute('data-kind');
     var id = target.getAttribute('data-id');
+    if (kind === 'class') {
+      var n = classNodeById[id];
+      if (!n) return;
+      var ns = Core.worldToScreen(view, n.x + n.w / 2, n.y + n.h / 2);
+      var nmargin = 60;
+      if (ns.x >= nmargin && ns.x <= viewSize.w - nmargin && ns.y >= nmargin && ns.y <= viewSize.h - nmargin) return;
+      animateTo(Core.centerOn({ x: n.x, y: n.y }, { w: n.w, h: n.h }, view.scale, viewSize.w, viewSize.h));
+      return;
+    }
     var c = kind === 'compound' ? compoundById[id] : findReaction(id);
     if (!c) return;
     var cx = kind === 'compound' ? c.x + nodeW(c) / 2 : c.x;
@@ -734,6 +879,19 @@
     if (selected && selected.el) selected.el.classList.remove('is-selected');
     selected = null;
     previewReaction = null;
+    if (kind === 'class') {
+      var cn = classNodeById[id];
+      var cel = classNodeIndex[id];
+      if (cn && cel) {
+        cel.classList.add('is-selected');
+        selected = { kind: 'class', id: id, name: cn.name, el: cel };
+      }
+      clearReactionStroke();
+      updateEdgeHighlight();
+      updateClassEdgeHighlight();
+      render();
+      return;
+    }
     var elm = kind === 'compound' ? nodeIndex[id] : reactionIndex[id];
     if (elm) {
       elm.classList.add('is-selected');
@@ -742,6 +900,7 @@
     if (selected && selected.kind === 'reaction') showReactionStroke(id);
     else clearReactionStroke();
     updateEdgeHighlight();
+    updateClassEdgeHighlight();
     render();
   }
 
@@ -751,6 +910,7 @@
     previewReaction = null;
     clearReactionStroke();
     updateEdgeHighlight();
+    updateClassEdgeHighlight();
     render();
   }
 
@@ -762,8 +922,18 @@
       if (selected) {
         active = selected.kind === 'compound'
           ? path.getAttribute('data-compound') === selected.id
-          : path.getAttribute('data-reaction') === selected.id;
+          : selected.kind === 'reaction' && path.getAttribute('data-reaction') === selected.id;
       }
+      if (active) path.classList.add('is-active');
+      else path.classList.remove('is-active');
+    });
+  }
+
+  function updateClassEdgeHighlight() {
+    Object.keys(classEdgeIndex).forEach(function (key) {
+      var path = classEdgeIndex[key];
+      var active = !!selected && selected.kind === 'class' &&
+        (path.getAttribute('data-from') === selected.id || path.getAttribute('data-to') === selected.id);
       if (active) path.classList.add('is-active');
       else path.classList.remove('is-active');
     });
@@ -808,9 +978,12 @@
   /* ---------------- card ---------------- */
 
   function openCard(kind, id) {
-    var html = kind === 'compound' ? compoundCard(id) : reactionCard(id);
+    var html;
+    if (kind === 'compound') html = compoundCard(id);
+    else if (kind === 'class') html = classCard(id);
+    else html = reactionCard(id);
     if (!html) return;
-    cardEyebrow.textContent = kind === 'compound' ? '物質' : '反応';
+    cardEyebrow.textContent = kind === 'compound' ? '物質' : kind === 'class' ? '一般図' : '反応';
     cardDetail.innerHTML = html;
     card.hidden = false;
     var heading = cardDetail.querySelector('h2');
@@ -841,17 +1014,84 @@
     return '<span class="rp-status rp-status--' + esc(state) + '">' + esc(label) + '</span>';
   }
 
+  function structureFigure(spec, ariaLabel, caption, note) {
+    if (!SD || !spec) return '';
+    var svg;
+    try {
+      svg = SD.renderStructure(spec, ariaLabel);
+    } catch (err) {
+      return '<figure class="rp-struct rp-struct--fallback"><figcaption class="rp-struct__caption">' +
+        esc(caption) + '</figcaption><p class="rp-struct__note">構造図を表示できませんでした。</p></figure>';
+    }
+    var vb = /viewBox="([^"]+)"/.exec(svg);
+    var width = vb ? parseFloat(String(vb[1]).trim().split(/\s+/)[2]) : 0;
+    var wide = width > 460;
+    var fallback = caption.indexOf('示性式') === 0;
+    var styleParts = [];
+    if (wide) styleParts.push('--rp-struct-width:' + Math.ceil(width) + 'px');
+    if (fallback && width) styleParts.push('--rp-struct-max:' + Math.ceil(width) + 'px');
+    var style = styleParts.length ? ' style="' + styleParts.join(';') + '"' : '';
+    return '<figure class="rp-struct' + (wide ? ' rp-struct--wide' : '') +
+      (fallback ? ' rp-struct--fallback' : '') + '">' +
+      '<figcaption class="rp-struct__caption">' + esc(caption) + '</figcaption>' +
+      '<div class="rp-struct__canvas"' + style + '>' + svg + '</div>' +
+      (note ? '<p class="rp-struct__note">' + esc(note) + '</p>' : '') +
+      '</figure>';
+  }
+
+  function structureFigureBlock(c) {
+    if (!SD) {
+      return '<p class="rp-struct-missing">構造データを読み込めないため、構造図を表示していません。式だけを構造式として表示することはありません。</p>';
+    }
+    var view;
+    try {
+      view = SD.structureView(c);
+    } catch (err) {
+      return '<p class="rp-struct-missing">構造データを確認できないため、構造図を表示していません。</p>';
+    }
+    if (!view || !view.figures || !view.figures.length) {
+      return '<p class="rp-struct-missing">' + esc((view && view.caption) || '構造データ未整備') +
+        ': ' + esc((view && view.note) || '構造データが未整備です。') + '</p>';
+    }
+    if (view.kind === 'projection' && view.figures.length > 1) {
+      var figures = view.figures.map(function (fig) {
+        var label = fig.label || view.caption;
+        return structureFigure(fig.structure, c.name + 'の' + label, label, fig.note || '');
+      }).join('');
+      return '<div class="rp-struct-group"><p class="rp-struct__heading">' + esc(view.caption) + '</p>' + figures + '</div>';
+    }
+    return view.figures.map(function (fig) {
+      var caption = fig.label || view.caption;
+      return structureFigure(fig.structure, c.name + 'の' + caption, caption, fig.note || view.note || '');
+    }).join('');
+  }
+
+  function structureDetailState(c) {
+    if (!SD) return 'missing';
+    var view;
+    try { view = SD.structureView(c); } catch (err) { return 'missing'; }
+    if (!view) return 'missing';
+    if (view.kind === 'fallback') return 'fallback';
+    if (view.kind === 'missing') return 'missing';
+    return 'full';
+  }
+
   function compoundCard(id) {
     var c = compoundById[id];
     if (!c) return '';
     var ins = (incoming[id] || []).slice().sort(byTypeThenId);
     var outs = (outgoing[id] || []).slice().sort(byTypeThenId);
     var region = regionsById[c.region];
+    var detail = structureDetailState(c);
     var html = '';
     html += '<h2 id="rp-card-title">' + esc(c.name) + '</h2>';
-    html += '<p class="rp-card__formula">' + esc(c.formula || '示性式なし') + '</p>';
-    html += '<p>' + stateBadge(c.recordState) + ' <span class="rp-card__note">' +
-      (c.recordState === 'confirmed' ? '構造データは確認済み。' : '独立資料での確認が済んでいません。') + '</span></p>';
+    html += structureFigureBlock(c);
+    var stateNote;
+    if (c.recordState !== 'confirmed') stateNote = '独立資料での確認が済んでいません。';
+    else if (detail === 'fallback') stateNote = '物質データは確認済み。詳細構造は未収録です。';
+    else if (detail === 'missing') stateNote = '物質データは確認済み。構造データは未整備です。';
+    else stateNote = '構造データは確認済み。';
+    html += '<p>' + stateBadge(c.recordState) + ' <span class="rp-card__note">' + stateNote + '</span></p>';
     html += '<p class="rp-card__note">分野: ' + esc(regionName(c.region)) +
       (c.curriculum ? ' ／ 高校化学の必須物質リストに収録' : '') + '</p>';
     if (region && region.note) html += '<p class="rp-card__note">' + esc(region.note) + '</p>';
@@ -883,6 +1123,38 @@
         esc(D.states[c.pathState] ? D.states[c.pathState].label : c.pathState) + '。' +
         esc(D.states[c.pathState] ? D.states[c.pathState].note : '') + '</p>';
     }
+    return html;
+  }
+
+  function classCard(id) {
+    var n = classNodeById[id];
+    if (!n) return '';
+    var ins = classMapData.edges.filter(function (e) { return e.to === id; });
+    var outs = classMapData.edges.filter(function (e) { return e.from === id; });
+    var edgeText = function (e) {
+      var from = classNodeById[e.from];
+      var to = classNodeById[e.to];
+      return (from ? from.name : e.from) + ' → ' + (to ? to.name : e.to) +
+        '（' + e.label + '／' + e.conditions + '）';
+    };
+    var edgeList = function (list) {
+      if (!list.length) return '<p class="rp-empty">この図に該当する変換はありません。</p>';
+      return '<ul class="rp-card__list">' + list.map(function (e) {
+        return '<li>' + esc(edgeText(e)) + '</li>';
+      }).join('') + '</ul>';
+    };
+    var html = '';
+    html += '<h2 id="rp-card-title">' + esc(n.name) + '</h2>';
+    html += '<p class="rp-card__note">官能基変換の一般図 — 分類の説明であり、個別物質の反応ではありません。</p>';
+    html += '<p>' + stateBadge('confirmed') + ' <span class="rp-card__note">分類間の代表的な変換として、独立資料の各節で確認済み。個別反応 ' +
+      D.meta.confirmedReactionCount + ' 件には加算しません。</span></p>';
+    html += '<h3>一般適用範囲</h3><p>' + esc(n.scope) + '</p>';
+    html += '<h3>例外・注意</h3><ul class="rp-card__list">' +
+      n.exceptions.map(function (text) { return '<li>' + esc(text) + '</li>'; }).join('') + '</ul>';
+    html += '<h3>この分類へ進む変換（' + ins.length + ' 件）</h3>' + edgeList(ins);
+    html += '<h3>この分類から進む変換（' + outs.length + ' 件）</h3>' + edgeList(outs);
+    html += '<h3>資料</h3><p class="rp-card__note">' + n.sources.map(esc).join('／') + '</p>';
+    html += '<p class="rp-card__note">資料のURL・本文・図は転載していません。一般化された反応事実は独立資料で確認済みで、未検証の別データではありません。</p>';
     return html;
   }
 
@@ -1184,7 +1456,8 @@
       D.meta.confirmedReactionCount + ' 件を1つのネットワークとして配置し、残り ' +
       D.meta.isolatedCount + ' 物質は外縁の棚に表示しています。';
     var note = '確認できなかった反応 ' + D.meta.heldReactionCount +
-      ' 件は公開データに含めていません。孤立ノードは、確認済みの経路が見つかっていないことを示し、「生成しない」という意味ではありません。';
+      ' 件は公開データに含めていません。孤立ノードは、確認済みの経路が見つかっていないことを示し、「生成しない」という意味ではありません。' +
+      (D.classMap ? ' ' + D.meta.classMapNote : '');
     var summaryEl = document.getElementById('rp-data-summary');
     var noteEl = document.getElementById('rp-data-note');
     if (summaryEl) summaryEl.textContent = summary;
@@ -1197,6 +1470,11 @@
     }
     var scopeEl = document.getElementById('rp-scope-note');
     if (scopeEl) scopeEl.textContent = D.meta.scopeNote;
+    var classNoteEl = document.getElementById('rp-classmap-note');
+    if (classNoteEl && D.classMap) {
+      classNoteEl.textContent = D.meta.classMapNote + ' 資料: ' + D.classMap.sourceBook +
+        ' の各節（' + D.classMap.verifiedAt + ' 確認）。';
+    }
     var dataEl = document.getElementById('rp-data-note-long');
     if (dataEl) {
       dataEl.textContent = D.meta.dataNote + ' 反応の確認には ' + D.meta.sourceBook +
@@ -1240,6 +1518,7 @@
     measure();
     buildReactions();
     buildNodes();
+    buildClassMap();
     ensureActiveLayer();
     buildChips();
     buildLists();
@@ -1264,6 +1543,11 @@
     document.getElementById('rp-zoom-in').addEventListener('click', function () { zoomCenter(1.25); });
     document.getElementById('rp-zoom-out').addEventListener('click', function () { zoomCenter(1 / 1.25); });
     document.getElementById('rp-reset').addEventListener('click', resetView);
+    var classJump = document.getElementById('rp-classmap-jump');
+    if (classJump) {
+      if (!classMapData) classJump.hidden = true;
+      else classJump.addEventListener('click', function (e) { focusClassMap(e.detail === 0); });
+    }
     cardClose.addEventListener('click', function () { closeCard(true); });
     positionTrigger.addEventListener('click', function () {
       if (positionPopover.hidden) openPositionPopover();
@@ -1304,6 +1588,7 @@
     cardDetail.addEventListener('focusout', endPreview);
 
     // カード外のクリックで閉じる（カード内の操作は閉じない）
+    document.addEventListener('pointerdown', function () { suppressCompatFocus = false; }, true);
     document.addEventListener('pointerdown', function (e) {
       if (card.hidden) return;
       if (card.contains(e.target)) return;
@@ -1312,12 +1597,25 @@
       closeCard(false);
     }, true);
 
-    document.addEventListener('pointerup', function () {
+    document.addEventListener('pointerup', function (e) {
       var target = restoreAfterPointer;
       restoreAfterPointer = null;
       if (!target || !document.contains(target)) return;
       if (!card.hidden) return;
       target.focus();
+      // タッチの互換mousedownは pointerup の後に来てフォーカスをBODYへ戻す。
+      // 次の1回だけ、非操作要素へのmousedown既定動作を止めて起点focusを保つ。
+      if (e.pointerType === 'touch' || e.pointerType === 'pen') suppressCompatFocus = true;
+    }, true);
+
+    document.addEventListener('mousedown', function (e) {
+      if (!suppressCompatFocus) return;
+      suppressCompatFocus = false;
+      var interactive = e.target && e.target.closest
+        ? e.target.closest('a,button,input,select,textarea,summary,[tabindex],[contenteditable],[role="button"]')
+        : null;
+      if (interactive) return;
+      e.preventDefault();
     }, true);
 
     // 現在位置の全文popoverも、外側のクリックで閉じる（popover内の操作では閉じない）

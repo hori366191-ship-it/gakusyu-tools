@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=M+PLUS+1+Code:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./app.css">
+<link rel="stylesheet" href="./structure.css">
 </head>
 <body class="rp-app">
 <a class="rp-skip" href="#rp-list">物質一覧へスキップ</a>
@@ -82,6 +83,7 @@
       </svg>
       <div class="rp-overlay" id="rp-overlay" aria-hidden="true"></div>
       <p class="rp-hint" id="rp-hint">ドラッグで移動、ピンチまたは Ctrl＋ホイールで拡大。キー: 矢印で移動、＋ / − で拡大縮小、0 で全体表示。</p>
+      <button type="button" class="rp-classmap-jump" id="rp-classmap-jump">官能基変換の一般図へ</button>
     </div>
   </section>
 
@@ -104,6 +106,8 @@
       <h2>データと検証</h2>
       <p>物質名・示性式・分類・ID とビルダーの focus 経路は、有機化学ビルダーの公開データからオフラインで抽出しました。地図が実行時にビルダーの実装を読み込むことはありません。</p>
       <p>反応は独自データとして持ち、独立した資料の本文で確認できたものだけを「確認済」として表示します。確認できなかった反応は公開データに含めません。</p>
+      <p>構造図は有機化学ビルダーの登録済み構造データからオフラインで抽出し、app11内の描画器で表示しています。反応メモなどの自由文は取り込んでいません。</p>
+      <p id="rp-classmap-note"></p>
       <p id="rp-scope-note"></p>
       <p id="rp-data-note-long"></p>
       <p>学習に必要な触媒・温度などの条件は記載しますが、試薬量・濃度・具体的な操作手順・装置の使い方は扱いません。</p>
@@ -146,6 +150,7 @@
 
 <script src="./data.js"></script>
 <script src="./map-core.js"></script>
+<script src="./structure-draw.js"></script>
 <script src="./app.js"></script>
 </body>
 </html>

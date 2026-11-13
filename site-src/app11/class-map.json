@@ -1,0 +1,417 @@
+{
+  "version": 1,
+  "verifiedAt": "2026-11-14",
+  "title": "官能基変換の一般図",
+  "note": "分類間の代表的な変換。適用は構造・条件に依存",
+  "sourceBook": "OpenStax Organic Chemistry (McMurry)",
+  "area": { "x": 4110, "y": 1520, "w": 1942, "h": 794 },
+  "frame": { "x": 4116, "y": 1526, "w": 1930, "h": 782 },
+  "sources": [
+    {
+      "id": "openstax-8-1",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "8.1",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/8-1-preparing-alkenes-a-preview-of-elimination-reactions"
+    },
+    {
+      "id": "openstax-8-4",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "8.4",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/8-4-hydration-of-alkenes-addition-of-h2o-by-oxymercuration"
+    },
+    {
+      "id": "openstax-8-6",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "8.6",
+      "checkedAt": "2026-11-14"
+    },
+    {
+      "id": "openstax-9-5",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "9.5",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/9-5-reduction-of-alkynes"
+    },
+    {
+      "id": "openstax-17-4",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "17.4",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-4-alcohols-from-carbonyl-compounds-reduction"
+    },
+    {
+      "id": "openstax-17-6",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "17.6",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols"
+    },
+    {
+      "id": "openstax-17-7",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "17.7",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols"
+    },
+    {
+      "id": "openstax-18-2",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "18.2",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/18-2-preparing-ethers"
+    },
+    {
+      "id": "openstax-19-3",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "19.3",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones"
+    },
+    {
+      "id": "openstax-21-3",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "21.3",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/21-3-reactions-of-carboxylic-acids"
+    },
+    {
+      "id": "openstax-21-5",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "21.5",
+      "checkedAt": "2026-11-14",
+      "url": "https://openstax.org/books/organic-chemistry/pages/21-5-chemistry-of-acid-anhydrides"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "alkane",
+      "name": "アルカン",
+      "x": 4190,
+      "y": 2080,
+      "w": 150,
+      "h": 40,
+      "summary": "炭素間が単結合だけの飽和炭化水素。",
+      "scope": "アルケンの水素付加で得られる。アルキンは部分還元を経てアルケンに進む。",
+      "exceptions": ["置換反応など、この基本図に含めない反応もある。"],
+      "sourceIds": ["openstax-8-6", "openstax-9-5"]
+    },
+    {
+      "id": "alkene",
+      "name": "アルケン",
+      "x": 4490,
+      "y": 1900,
+      "w": 150,
+      "h": 40,
+      "summary": "炭素間二重結合をもつ不飽和炭化水素。",
+      "scope": "アルキンの部分還元、またはアルコールの分子内脱水で得られる。",
+      "exceptions": [
+        "水和で第一級アルコールを直接得る経路は、この基本図では扱わない。",
+        "同じアルケンから第二級・第三級アルコールの両方が必ず得られるわけではない。"
+      ],
+      "sourceIds": ["openstax-9-5", "openstax-8-1", "openstax-17-6", "openstax-8-4"]
+    },
+    {
+      "id": "alkyne",
+      "name": "アルキン",
+      "x": 4190,
+      "y": 1720,
+      "w": 150,
+      "h": 40,
+      "summary": "炭素間三重結合をもつ不飽和炭化水素。",
+      "scope": "この図では、部分還元でアルケンへ進む入口として扱う。",
+      "exceptions": ["アルキンからケトンへの変換は、この基本図では扱わない。"],
+      "sourceIds": ["openstax-9-5"]
+    },
+    {
+      "id": "ether",
+      "name": "エーテル",
+      "x": 4790,
+      "y": 2260,
+      "w": 150,
+      "h": 40,
+      "summary": "酸素原子が2つの炭素に結合した分類。",
+      "scope": "第一級アルコール中心の分子間脱水で得られる例を扱う。",
+      "exceptions": ["適用できる第一級アルコールの範囲は限られる。"],
+      "sourceIds": ["openstax-18-2"]
+    },
+    {
+      "id": "primary-alcohol",
+      "name": "第一級アルコール",
+      "x": 4790,
+      "y": 2140,
+      "w": 150,
+      "h": 40,
+      "summary": "ヒドロキシ基が第一級炭素に結合したアルコール。",
+      "scope": "酸化でアルデヒド、分子内脱水でアルケン、分子間脱水でエーテルへ進む。",
+      "exceptions": [
+        "酸化条件によってはカルボン酸まで進む。",
+        "分子内脱水にはβ-Hが必要。"
+      ],
+      "sourceIds": ["openstax-17-7", "openstax-17-6", "openstax-18-2", "openstax-8-1"]
+    },
+    {
+      "id": "secondary-alcohol",
+      "name": "第二級アルコール",
+      "x": 4790,
+      "y": 1900,
+      "w": 150,
+      "h": 40,
+      "summary": "ヒドロキシ基が第二級炭素に結合したアルコール。",
+      "scope": "酸化でケトン、分子内脱水でアルケンへ進む。ケトンの還元でも得られる。",
+      "exceptions": ["分子内脱水にはβ-Hが必要。"],
+      "sourceIds": ["openstax-17-7", "openstax-17-6", "openstax-17-4", "openstax-8-1"]
+    },
+    {
+      "id": "tertiary-alcohol",
+      "name": "第三級アルコール",
+      "x": 4790,
+      "y": 1660,
+      "w": 150,
+      "h": 40,
+      "summary": "ヒドロキシ基が第三級炭素に結合したアルコール。",
+      "scope": "分子内脱水でアルケンへ進む。",
+      "exceptions": ["酸化によるカルボニル化合物への変換は、この基本図では扱わない。"],
+      "sourceIds": ["openstax-17-6", "openstax-8-1"]
+    },
+    {
+      "id": "aldehyde",
+      "name": "アルデヒド",
+      "x": 5090,
+      "y": 2140,
+      "w": 150,
+      "h": 40,
+      "summary": "末端のカルボニル基をもつ分類。",
+      "scope": "第一級アルコールの酸化で得られ、酸化でカルボン酸、還元で第一級アルコールへ進む。",
+      "exceptions": ["酸化条件によってはカルボン酸まで進む。"],
+      "sourceIds": ["openstax-17-7", "openstax-19-3", "openstax-17-4"]
+    },
+    {
+      "id": "ketone",
+      "name": "ケトン",
+      "x": 5090,
+      "y": 1900,
+      "w": 150,
+      "h": 40,
+      "summary": "鎖の内部にカルボニル基をもつ分類。",
+      "scope": "第二級アルコールの酸化で得られ、還元で第二級アルコールへ戻る。",
+      "exceptions": ["この図ではカルボン酸への酸化を扱わない。"],
+      "sourceIds": ["openstax-17-7", "openstax-17-4"]
+    },
+    {
+      "id": "carboxylic-acid",
+      "name": "カルボン酸",
+      "x": 5390,
+      "y": 2140,
+      "w": 150,
+      "h": 40,
+      "summary": "カルボキシ基をもつ分類。",
+      "scope": "アルデヒドの酸化、または酸無水物の加水分解で得られ、エステル化とエステルの加水分解の中心になる。",
+      "exceptions": ["酸を加熱するだけの酸無水物化は、条件依存のためこの図では扱わない。"],
+      "sourceIds": ["openstax-19-3", "openstax-21-3", "openstax-21-5"]
+    },
+    {
+      "id": "acid-anhydride",
+      "name": "酸無水物",
+      "x": 5390,
+      "y": 1900,
+      "w": 150,
+      "h": 40,
+      "summary": "2つのアシル基が酸素を介して結合した分類。",
+      "scope": "この図では、加水分解でカルボン酸へ進む向きだけを扱う。",
+      "exceptions": ["酸無水物とアルコールからエステルを与える反応は、図が密集するため省略している。"],
+      "sourceIds": ["openstax-21-5"]
+    },
+    {
+      "id": "ester",
+      "name": "エステル",
+      "x": 5690,
+      "y": 2140,
+      "w": 150,
+      "h": 40,
+      "summary": "カルボキシ基の水素を炭素基で置き換えた分類。",
+      "scope": "カルボン酸とアルコールのエステル化で得られ、加水分解でカルボン酸とアルコールに戻る。",
+      "exceptions": ["エステル化にはアルコールと酸触媒が必要。"],
+      "sourceIds": ["openstax-21-3"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "alkyne-alkene",
+      "from": "alkyne",
+      "to": "alkene",
+      "label": "水素付加（部分還元）",
+      "conditions": "部分還元・触媒条件を選ぶ",
+      "note": "アルキンからアルケンで止めるには、部分還元の条件を選ぶ。",
+      "labelPos": { "x": 4408, "y": 1815, "anchor": "end" },
+      "points": [[4340, 1740], [4420, 1740], [4420, 1920], [4490, 1920]],
+      "sourceIds": ["openstax-9-5"]
+    },
+    {
+      "id": "alkene-alkane",
+      "from": "alkene",
+      "to": "alkane",
+      "label": "水素付加",
+      "conditions": "触媒",
+      "note": "アルケンに水素を付加してアルカンにする。",
+      "labelPos": { "x": 4440, "y": 1990, "anchor": "middle" },
+      "points": [[4580, 1940], [4580, 2010], [4300, 2010], [4300, 2080]],
+      "sourceIds": ["openstax-8-6", "openstax-9-5"]
+    },
+    {
+      "id": "alkene-tertiary-alcohol",
+      "from": "alkene",
+      "to": "tertiary-alcohol",
+      "label": "水和",
+      "conditions": "酸触媒・構造に依存",
+      "note": "水和の位置は構造で決まる。第二級と同時に得る意味ではない。",
+      "labelPos": { "x": 4680, "y": 1732, "anchor": "middle" },
+      "points": [[4600, 1900], [4600, 1760], [4740, 1760], [4740, 1680], [4790, 1680]],
+      "sourceIds": ["openstax-8-4"]
+    },
+    {
+      "id": "alkene-secondary-alcohol",
+      "from": "alkene",
+      "to": "secondary-alcohol",
+      "label": "水和",
+      "conditions": "構造に依存",
+      "note": "同じアルケンから第二級・第三級の両方が必ず得られるわけではない。",
+      "labelPos": { "x": 4715, "y": 1888, "anchor": "middle" },
+      "points": [[4640, 1910], [4790, 1910]],
+      "sourceIds": ["openstax-8-4"]
+    },
+    {
+      "id": "tertiary-alcohol-alkene",
+      "from": "tertiary-alcohol",
+      "to": "alkene",
+      "label": "分子内脱水",
+      "conditions": "酸・加熱／β-H必要",
+      "note": "分子内脱水にはβ-Hが必要。",
+      "labelPos": { "x": 4710, "y": 1815, "anchor": "middle" },
+      "points": [[4830, 1700], [4830, 1790], [4635, 1790], [4635, 1900]],
+      "sourceIds": ["openstax-8-1", "openstax-17-6"]
+    },
+    {
+      "id": "secondary-alcohol-alkene",
+      "from": "secondary-alcohol",
+      "to": "alkene",
+      "label": "分子内脱水",
+      "conditions": "酸・加熱／β-H必要",
+      "note": "分子内脱水にはβ-Hが必要。",
+      "labelPos": { "x": 4715, "y": 1952, "anchor": "middle" },
+      "points": [[4790, 1930], [4640, 1930]],
+      "sourceIds": ["openstax-8-1", "openstax-17-6"]
+    },
+    {
+      "id": "primary-alcohol-alkene",
+      "from": "primary-alcohol",
+      "to": "alkene",
+      "label": "分子内脱水",
+      "conditions": "酸・加熱／β-H必要",
+      "note": "分子内脱水にはβ-Hが必要。",
+      "labelPos": { "x": 4625, "y": 2065, "anchor": "start" },
+      "points": [[4790, 2150], [4610, 2150], [4610, 1960], [4610, 1940]],
+      "sourceIds": ["openstax-8-1", "openstax-17-6"]
+    },
+    {
+      "id": "primary-alcohol-aldehyde",
+      "from": "primary-alcohol",
+      "to": "aldehyde",
+      "label": "酸化",
+      "conditions": "条件選択（更なる酸化あり）",
+      "note": "条件によってはカルボン酸まで酸化が進む。",
+      "labelPos": { "x": 5015, "y": 2118, "anchor": "middle" },
+      "points": [[4940, 2150], [5090, 2150]],
+      "sourceIds": ["openstax-17-7"]
+    },
+    {
+      "id": "aldehyde-primary-alcohol",
+      "from": "aldehyde",
+      "to": "primary-alcohol",
+      "label": "還元",
+      "conditions": "水素化／還元",
+      "note": "アルデヒドの還元で第一級アルコールになる。",
+      "labelPos": { "x": 5015, "y": 2192, "anchor": "middle" },
+      "points": [[5090, 2170], [4940, 2170]],
+      "sourceIds": ["openstax-17-4"]
+    },
+    {
+      "id": "secondary-alcohol-ketone",
+      "from": "secondary-alcohol",
+      "to": "ketone",
+      "label": "酸化",
+      "conditions": "ケトンへ",
+      "note": "第二級アルコールの酸化でケトンになる。",
+      "labelPos": { "x": 5015, "y": 1888, "anchor": "middle" },
+      "points": [[4940, 1910], [5090, 1910]],
+      "sourceIds": ["openstax-17-7"]
+    },
+    {
+      "id": "ketone-secondary-alcohol",
+      "from": "ketone",
+      "to": "secondary-alcohol",
+      "label": "還元",
+      "conditions": "第二級へ",
+      "note": "ケトンの還元で第二級アルコールになる。",
+      "labelPos": { "x": 5015, "y": 1952, "anchor": "middle" },
+      "points": [[5090, 1930], [4940, 1930]],
+      "sourceIds": ["openstax-17-4"]
+    },
+    {
+      "id": "aldehyde-carboxylic-acid",
+      "from": "aldehyde",
+      "to": "carboxylic-acid",
+      "label": "酸化",
+      "conditions": "カルボン酸へ",
+      "note": "アルデヒドの酸化でカルボン酸になる。",
+      "labelPos": { "x": 5315, "y": 2118, "anchor": "middle" },
+      "points": [[5240, 2150], [5390, 2150]],
+      "sourceIds": ["openstax-19-3"]
+    },
+    {
+      "id": "carboxylic-acid-ester",
+      "from": "carboxylic-acid",
+      "to": "ester",
+      "label": "エステル化",
+      "conditions": "＋アルコール／酸触媒",
+      "note": "アルコールと酸触媒を必要とする。第一級アルコールから直接エステルへ無条件に進む線ではない。",
+      "labelPos": { "x": 5615, "y": 2118, "anchor": "middle" },
+      "points": [[5540, 2150], [5690, 2150]],
+      "sourceIds": ["openstax-21-3"]
+    },
+    {
+      "id": "ester-carboxylic-acid",
+      "from": "ester",
+      "to": "carboxylic-acid",
+      "label": "加水分解",
+      "conditions": "＋水／アルコールも生じる",
+      "note": "エステルの加水分解でカルボン酸とアルコールが生じる。",
+      "labelPos": { "x": 5615, "y": 2194, "anchor": "middle" },
+      "points": [[5690, 2170], [5540, 2170]],
+      "sourceIds": ["openstax-21-3"]
+    },
+    {
+      "id": "acid-anhydride-carboxylic-acid",
+      "from": "acid-anhydride",
+      "to": "carboxylic-acid",
+      "label": "加水分解",
+      "conditions": "＋水",
+      "note": "酸無水物の加水分解でカルボン酸になる。",
+      "labelPos": { "x": 5480, "y": 2035, "anchor": "start" },
+      "points": [[5465, 1940], [5465, 2140]],
+      "sourceIds": ["openstax-21-5"]
+    },
+    {
+      "id": "primary-alcohol-ether",
+      "from": "primary-alcohol",
+      "to": "ether",
+      "label": "分子間脱水",
+      "conditions": "単純な第一級中心・適用制限",
+      "note": "第一級アルコール中心の分子間脱水。適用できる範囲は限られる。",
+      "labelPos": { "x": 4880, "y": 2222, "anchor": "start" },
+      "points": [[4865, 2180], [4865, 2260]],
+      "sourceIds": ["openstax-18-2"]
+    }
+  ]
+}

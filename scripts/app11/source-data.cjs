@@ -59,6 +59,26 @@ function publicSource(entry) {
   return name + section + date;
 }
 
+// app11 の構造図用に、app10 の構造specだけを深いコピーで持ち出す。
+// precursors / reactions / nature などの自由文は取り込まない。
+function cloneStructureSpec(value) {
+  if (value == null) return null;
+  return JSON.parse(JSON.stringify(value));
+}
+
+function structureFields(compound) {
+  const out = {
+    structure: cloneStructureSpec(compound.structure || null)
+  };
+  if (compound.figures && compound.figures.length) {
+    out.figures = cloneStructureSpec(compound.figures);
+  }
+  if (compound.formulaVariable) out.formulaVariable = true;
+  if (compound.formulaDisplay) out.formulaDisplay = compound.formulaDisplay;
+  if (compound.formulaReference) out.formulaReference = compound.formulaReference;
+  return out;
+}
+
 function loadApp10() {
   const D = require(path.join(APP10, 'data.js'));
   const C = require(path.join(APP10, 'catalog.js'));
@@ -91,11 +111,13 @@ function loadSource() {
       throw new Error('物質 ' + id + ' の分野が決まらない（category=' + c.category + '）');
     }
     const route = C.routeFor(id) || null;
+    const structure = structureFields(c);
     compounds.set(id, {
       id,
       name: c.name,
       label: shortLabel(c.name),
       formula: c.formula || '',
+      ...structure,
       category: c.category,
       region,
       recordState: c.verified ? 'confirmed' : 'unverified',

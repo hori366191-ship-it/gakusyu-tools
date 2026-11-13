@@ -385,6 +385,17 @@
     return parts.join(' / ') + '（' + zoom + '）';
   }
 
+  // 12分類の一般図の現在位置。図の枠内に画面中央があるときだけ、図名と選択中の分類を返す。
+  function classMapPosition(t, classMap, viewW, viewH, selectedName) {
+    if (!classMap || !classMap.area) return '';
+    var center = screenToWorld(t, viewW / 2, viewH / 2);
+    var r = classMap.area;
+    if (center.x < r.x || center.x > r.x + r.w || center.y < r.y || center.y > r.y + r.h) return '';
+    var parts = [classMap.title || '官能基変換の一般図'];
+    if (selectedName) parts.push(selectedName);
+    return parts.join(' / ') + '（' + Math.round(t.scale * 100) + '%）';
+  }
+
   function nearestCompound(compounds, wx, wy) {
     var best = null;
     var bestDistance = Infinity;
@@ -459,6 +470,7 @@
     normalize: normalize,
     matchCompounds: matchCompounds,
     positionText: positionText,
+    classMapPosition: classMapPosition,
     isOverview: isOverview,
     shorten: shorten,
     listJoin: listJoin,

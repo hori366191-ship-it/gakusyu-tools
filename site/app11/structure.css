@@ -1,0 +1,112 @@
+/* ============================================================
+   app11 物質カード内の構造図
+   draw.js の凍結コピー（structure-draw.js）が出す rp-struct-* を
+   既存の --rp-* テーマ変数だけで表示する。
+   ============================================================ */
+
+.rp-struct {
+  margin: 8px 0 10px;
+  padding: 8px;
+  min-width: 0;
+  border: 1px solid var(--rp-line);
+  border-radius: 10px;
+  background: var(--rp-panel-2);
+}
+.rp-struct-group { min-width: 0; }
+.rp-struct__heading {
+  margin: 0 0 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--rp-accent-2);
+}
+.rp-struct__caption {
+  margin: 0 0 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--rp-accent-2);
+  overflow-wrap: anywhere;
+}
+.rp-struct__canvas {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.rp-struct__canvas .rp-struct-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 320px;
+  overflow: visible;
+}
+/* 長い図は縮小で潰さず、カード内で横スクロールできる自然幅にする。 */
+.rp-struct--wide .rp-struct__canvas .rp-struct-svg {
+  width: var(--rp-struct-width, 100%);
+  max-width: none;
+  max-height: none;
+}
+/* 示性式だけのfallbackは式を主役にしない。自然幅を上限にして中央に置く。 */
+.rp-struct--fallback .rp-struct__canvas .rp-struct-svg {
+  max-width: var(--rp-struct-max, 100%);
+  margin: 0 auto;
+}
+.rp-struct__note {
+  margin: 5px 0 0;
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: var(--rp-muted);
+  overflow-wrap: anywhere;
+}
+.rp-struct-missing {
+  margin: 8px 0 10px;
+  padding: 8px 10px;
+  border: 1px dashed var(--rp-line);
+  border-radius: 8px;
+  background: var(--rp-panel-2);
+  color: var(--rp-muted);
+  font-size: 12px;
+}
+
+/* SVG 内の線・文字。色はテーマ変数だけを使う。 */
+.rp-struct-svg .rp-struct-bond { stroke: var(--rp-node-ink); fill: none; }
+.rp-struct-svg .rp-struct-bond--h { stroke: var(--rp-muted); }
+.rp-struct-svg .rp-struct-bond--coordinate { stroke: var(--rp-node-ink); stroke-dasharray: 5 4; opacity: .75; }
+.rp-struct-svg .rp-struct-bond--front { stroke: var(--rp-node-ink); }
+.rp-struct-svg .rp-struct-atom {
+  fill: var(--rp-node-ink);
+  stroke: var(--rp-panel);
+  stroke-width: 4.5;
+  paint-order: stroke;
+  font-family: 'Zen Kaku Gothic New', 'Arial', sans-serif;
+  font-weight: 500;
+}
+.rp-struct-svg .rp-struct-h {
+  fill: var(--rp-muted);
+  stroke: var(--rp-panel);
+  stroke-width: 4;
+  paint-order: stroke;
+  font-family: 'Zen Kaku Gothic New', 'Arial', sans-serif;
+  font-weight: 500;
+}
+.rp-struct-svg .rp-struct-charge { fill: var(--rp-accent-2); font-weight: 800; }
+.rp-struct-svg .rp-struct-condensed {
+  fill: var(--rp-node-ink);
+  font-family: var(--rp-font-mono);
+  font-weight: 500;
+}
+.rp-struct-svg .rp-struct-bracket { stroke: var(--rp-node-ink); fill: none; }
+.rp-struct-svg .rp-struct-vertex { fill: var(--rp-node-ink); stroke: none; }
+.rp-struct-svg .rp-struct-ring-num { fill: var(--rp-muted); font-family: var(--rp-font-mono); }
+.rp-struct-svg .rp-struct-anomer { fill: var(--rp-accent-2); font-weight: 800; }
+.rp-struct-svg .rp-struct-projection-note { fill: var(--rp-muted); }
+.rp-struct-svg .rp-struct-schematic-box { fill: var(--rp-panel-2); stroke: var(--rp-line); stroke-width: 1.5; }
+.rp-struct-svg .rp-struct-schematic-text { fill: var(--rp-ink); font-family: 'Zen Kaku Gothic New', sans-serif; font-weight: 700; }
+.rp-struct-svg .rp-struct-schematic-note { fill: var(--rp-muted); font-family: var(--rp-font-mono); }
+
+@media (max-width: 430px) {
+  .rp-struct__canvas .rp-struct-svg { max-height: 260px; }
+  .rp-struct--wide .rp-struct__canvas .rp-struct-svg { max-height: none; }
+}

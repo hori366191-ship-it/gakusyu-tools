@@ -8,6 +8,8 @@
  * - 物質の名称・示性式・分類・ID と、ビルダーの focus 経路（catalog.js の routeFor）だけを
  *   site/app10 からオフラインで抽出する。反応メモなどの自由文は取り込まない。
  * - 反応は site-src/app11/reactions.json（本ツール独自のデータ）だけを根拠にする。
+ * - 12分類の一般図は site-src/app11/class-map.json（独立正本）から classMap キーへ出力し、
+ *   物質・反応の配列には混ぜない。資料URLは公開 data.js に含めず、資料名・節・確認日だけを出す。
  * - 座標・反応マーカー・経路の全点列は site-src/app11/layout.json と routes.json に固定済み。
  *   このスクリプトはそれらを読み、data.js に埋め込むだけ（最適化は optimize-layout.cjs が行う）。
  * - 実行時に site/app10 を読み込まない。出力する data.js は値だけの静的データ。
@@ -24,6 +26,9 @@ const OUT_DIR = path.join(S.ROOT, 'site', 'app11');
 const OUT_DATA = path.join(OUT_DIR, 'data.js');
 const LAYOUT_PATH = path.join(S.SRC, 'layout.json');
 const ROUTES_PATH = path.join(S.SRC, 'routes.json');
+const CLASS_MAP_PATH = path.join(S.SRC, 'class-map.json');
+const CLASS_NODE_COUNT = 12;
+const CLASS_EDGE_COUNT = 16;
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -42,9 +47,152 @@ function requireLayout() {
   return { layout, routes };
 }
 
+/*
+ * 12分類だけの一般図（site-src/app11/class-map.json）を、既存の物質・反応とは独立した
+ * classMap キーへ変換する。資料URLは正本だけに残し、公開 data.js には資料名・節・確認日だけを出す。
+ */
+function buildClassMap() {
+  const raw = readJson(CLASS_MAP_PATH);
+  if (raw.version !== 1) throw new Error('class-map.json の版が未対応: ' + raw.version);
+  if (raw.nodes.length !== CLASS_NODE_COUNT) {
+    throw new Error('class-map.json の分類数が ' + CLASS_NODE_COUNT + ' ではない: ' + raw.nodes.length);
+  }
+  if (raw.edges.length !== CLASS_EDGE_COUNT) {
+    throw new Error('class-map.json の変換数が ' + CLASS_EDGE_COUNT + ' ではない: ' + raw.edges.length);
+  }
+
+  const sourceById = new Map();
+  raw.sources.forEach((s) => {
+    if (sourceById.has(s.id)) throw new Error('class-map.json の資料IDが重複: ' + s.id);
+    if (!s.book || !s.section || !s.checkedAt) throw new Error('class-map.json の資料情報が不足: ' + s.id);
+    sourceById.set(s.id, s);
+  });
+  const publicSources = (ids, owner) => {
+    if (!Array.isArray(ids) || !ids.length) throw new Error(owner + ' に資料がない');
+    return ids.map((id) => {
+      const s = sourceById.get(id);
+      if (!s) throw new Error(owner + ' の資料IDが未定義: ' + id);
+      return s.book + ' ' + s.section + '（' + s.checkedAt + ' 確認）';
+    });
+  };
+
+  const area = raw.area;
+  const frame = raw.frame;
+  const inRect = (x, y, r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
+  const nodeIds = new Set();
+  const nodes = raw.nodes.map((n) => {
+    if (nodeIds.has(n.id)) throw new Error('class-map.json の分類IDが重複: ' + n.id);
+    nodeIds.add(n.id);
+    if (!n.name || !n.summary || !n.scope || !Array.isArray(n.exceptions)) {
+      throw new Error('class-map.json の分類情報が不足: ' + n.id);
+    }
+    if (!(n.w > 0 && n.h > 0) || !inRect(n.x, n.y, frame) ||
+      !inRect(n.x + n.w, n.y + n.h, frame)) {
+      throw new Error('class-map.json の分類が枠の外: ' + n.id);
+    }
+    return {
+      id: n.id,
+      name: n.name,
+      x: n.x,
+      y: n.y,
+      w: n.w,
+      h: n.h,
+      summary: n.summary,
+      scope: n.scope,
+      exceptions: n.exceptions,
+      sources: publicSources(n.sourceIds, '分類 ' + n.id),
+      incoming: 0,
+      outgoing: 0
+    };
+  });
+  const nodeById = new Map(nodes.map((n) => [n.id, n]));
+
+  const edgeIds = new Set();
+  const edges = raw.edges.map((e) => {
+    if (edgeIds.has(e.id)) throw new Error('class-map.json の変換IDが重複: ' + e.id);
+    edgeIds.add(e.id);
+    const from = nodeById.get(e.from);
+    const to = nodeById.get(e.to);
+    if (!from) throw new Error('class-map.json の変換元が未定義: ' + e.id + ' -> ' + e.from);
+    if (!to) throw new Error('class-map.json の変換先が未定義: ' + e.id + ' -> ' + e.to);
+    if (e.from === e.to) throw new Error('class-map.json の自己変換: ' + e.id);
+    if (!Array.isArray(e.points) || e.points.length < 2) throw new Error('class-map.json の経路が不足: ' + e.id);
+    e.points.forEach((p) => {
+      if (!Array.isArray(p) || p.length !== 2 || !inRect(p[0], p[1], frame)) {
+        throw new Error('class-map.json の経路点が枠の外: ' + e.id);
+      }
+    });
+    const lp = e.labelPos;
+    if (!lp || !inRect(lp.x, lp.y, frame) || ['start', 'middle', 'end'].indexOf(lp.anchor) === -1) {
+      throw new Error('class-map.json のラベル位置が不正: ' + e.id);
+    }
+    if (!e.label || !e.conditions || !e.note) throw new Error('class-map.json の変換情報が不足: ' + e.id);
+    from.outgoing++;
+    to.incoming++;
+    return {
+      id: e.id,
+      from: e.from,
+      to: e.to,
+      label: e.label,
+      conditions: e.conditions,
+      note: e.note,
+      labelPos: { x: lp.x, y: lp.y, anchor: lp.anchor },
+      points: e.points,
+      sources: publicSources(e.sourceIds, '変換 ' + e.id)
+    };
+  });
+
+  // 弱連結1成分であること（外部の図へ線を出さない自己完結した一般図）。
+  const parent = new Map(nodes.map((n) => [n.id, n.id]));
+  const find = (id) => {
+    let root = id;
+    while (parent.get(root) !== root) root = parent.get(root);
+    while (parent.get(id) !== id) {
+      const next = parent.get(id);
+      parent.set(id, root);
+      id = next;
+    }
+    return root;
+  };
+  edges.forEach((e) => {
+    const a = find(e.from);
+    const b = find(e.to);
+    if (a !== b) parent.set(a, b);
+  });
+  const roots = new Set(nodes.map((n) => find(n.id)));
+  if (roots.size !== 1) throw new Error('class-map.json が弱連結1成分ではない: ' + roots.size);
+
+  const sourceStrings = [];
+  nodes.concat(edges).forEach((item) => {
+    item.sources.forEach((s) => {
+      if (sourceStrings.indexOf(s) === -1) sourceStrings.push(s);
+    });
+  });
+  sourceStrings.sort((a, b) => {
+    const na = parseFloat((a.match(/(\d+\.\d+)/) || [])[1] || '0');
+    const nb = parseFloat((b.match(/(\d+\.\d+)/) || [])[1] || '0');
+    return na - nb;
+  });
+
+  return {
+    title: raw.title,
+    note: raw.note,
+    verifiedAt: raw.verifiedAt,
+    sourceBook: raw.sourceBook,
+    area: { x: area.x, y: area.y, w: area.w, h: area.h },
+    frame: { x: frame.x, y: frame.y, w: frame.w, h: frame.h },
+    nodeCount: nodes.length,
+    edgeCount: edges.length,
+    nodes,
+    edges,
+    sources: sourceStrings
+  };
+}
+
 function build() {
   const source = S.loadSource();
   const { layout, routes } = requireLayout();
+  const classMap = buildClassMap();
 
   const layoutRegionIds = new Set(layout.regions.map((r) => r.id));
   for (const region of source.map.regions) {
@@ -84,6 +232,11 @@ function build() {
       name: c.name,
       label: c.label,
       formula: c.formula,
+      structure: c.structure || null,
+      figures: c.figures || null,
+      formulaVariable: c.formulaVariable || false,
+      formulaDisplay: c.formulaDisplay || '',
+      formulaReference: c.formulaReference || '',
       region: pos.r,
       regionIndex: regionColorIndex.get(pos.r),
       category: c.category,
@@ -184,8 +337,8 @@ function build() {
 
   const data = {
     meta: {
-      version: '2026-11-13.1',
-      generatedAt: '2026-11-13',
+      version: '2026-11-14.2',
+      generatedAt: '2026-11-14',
       verifiedAt: source.source.verifiedAt,
       source: 'site/app10 の公開データ（物質名・示性式・分類・ID と focus 経路のみオフライン抽出）',
       compoundCount: compounds.length,
@@ -200,6 +353,13 @@ function build() {
       secondaryCompoundCount: compounds.filter((c) => c.tier === 'secondary').length,
       isolatedCount: compounds.filter((c) => c.incoming + c.outgoing === 0).length,
       connectedCount: compounds.filter((c) => c.incoming + c.outgoing > 0).length,
+      classMapNodeCount: classMap.nodeCount,
+      classMapEdgeCount: classMap.edgeCount,
+      classMapVerifiedAt: classMap.verifiedAt,
+      classMapNote:
+        '右下の「' + classMap.title + '」は、12分類の間の代表的な変換を独立資料の各節で確認した一般化。' +
+        '個別物質の確認済み反応 ' + reactions.length + ' 件とは別枠で、この件数には加算しない。' +
+        '未検証の別データではない。',
       sourceBook: source.source.sourceBook,
       sourceSections: usedSections,
       nodeW: layout.nodeW,
@@ -236,7 +396,8 @@ function build() {
     },
     types,
     compounds,
-    reactions
+    reactions,
+    classMap
   };
 
   return data;
@@ -250,6 +411,7 @@ function renderData(data) {
   lines.push(' * このファイルは scripts/app11/build-map-data.cjs が生成する。直接編集しない。');
   lines.push(' * 物質名・示性式・分類・ID とビルダーの focus 経路は site/app10 からオフラインで抽出した値で、');
   lines.push(' * 実行時に app10 の実装を読み込むことはない。反応の内容は site-src/app11/reactions.json が正本。');
+  lines.push(' * 12分類の一般図は site-src/app11/class-map.json が正本で、classMap キーに独立して出力する。');
   lines.push(' * 座標・反応マーカー・経路の全点列は site-src/app11/layout.json / routes.json に固定されている。');
   lines.push(' */');
   lines.push('(function (root, factory) {');
@@ -269,7 +431,8 @@ function renderData(data) {
   lines.push('  var REACTIONS = [');
   data.reactions.forEach((r) => lines.push('    ' + JSON.stringify(r) + ','));
   lines.push('  ];');
-  lines.push('  return { meta: META, states: STATES, regions: REGIONS, types: TYPES, compounds: COMPOUNDS, reactions: REACTIONS };');
+  lines.push('  var CLASS_MAP = ' + JSON.stringify(data.classMap) + ';');
+  lines.push('  return { meta: META, states: STATES, regions: REGIONS, types: TYPES, compounds: COMPOUNDS, reactions: REACTIONS, classMap: CLASS_MAP };');
   lines.push('});');
   lines.push('');
   return lines.join('\n');

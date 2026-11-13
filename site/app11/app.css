@@ -482,6 +482,57 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-map[data-level="1"] .rp-reaction--secondary .rp-reaction__dot { r: 4.5; }
 .rp-map[data-level="0"] .rp-reaction__hit { display: none; }
 
+/* ---------- svg: class map (12 classes) ---------- */
+.rp-classmap__frame {
+  fill: var(--rp-panel);
+  fill-opacity: .66;
+  stroke: var(--rp-region-line);
+  stroke-width: 1.3;
+  stroke-dasharray: 8 6;
+}
+.rp-classmap__edge {
+  fill: none;
+  stroke: var(--rp-accent);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .88;
+}
+.rp-classmap__edge.is-active { stroke: var(--rp-focus); stroke-width: 3; opacity: 1; }
+.rp-classmap__node { cursor: pointer; }
+.rp-classmap__node-box {
+  fill: var(--rp-panel);
+  stroke: var(--rp-node-line);
+  stroke-width: 1.4;
+}
+.rp-classmap__node-label {
+  fill: var(--rp-node-ink);
+  font-size: 14px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+.rp-classmap__label {
+  fill: var(--rp-muted);
+  font-size: 10.5px;
+  dominant-baseline: middle;
+  paint-order: stroke;
+  stroke: var(--rp-panel);
+  stroke-width: 2.6px;
+  stroke-linejoin: round;
+}
+.rp-classmap__node:hover .rp-classmap__node-box { stroke: var(--rp-accent); stroke-width: 2.2; }
+.rp-classmap__node:focus { outline: none; }
+.rp-classmap__node:focus-visible .rp-classmap__node-box { stroke: var(--rp-focus); stroke-width: 3; }
+.rp-classmap__node.is-selected .rp-classmap__node-box { stroke: var(--rp-accent-2); stroke-width: 2.8; }
+/* 低倍率では見出しだけ。局所拡大で分類名・矢印・反応名を出す。 */
+.rp-map[data-level="0"] .rp-classmap__node-label,
+.rp-map[data-level="0"] .rp-classmap__label { display: none; }
+.rp-map[data-level="0"] .rp-classmap__edge { opacity: .22; }
+.rp-map[data-level="0"] .rp-classmap__node-box { opacity: .82; }
+.rp-map[data-level="1"] .rp-classmap__label { opacity: .72; }
+.rp-map[data-level="2"] .rp-classmap__label { opacity: 1; }
+
 /* ---------- html overlay (readable at any zoom) ---------- */
 .rp-overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .rp-overlay__region {
@@ -522,6 +573,21 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   pointer-events: none;
 }
 .rp-overlay__reaction--secondary { border: 1px dotted var(--rp-secondary); opacity: .92; }
+.rp-overlay__classmap {
+  position: absolute;
+  display: grid;
+  gap: 1px;
+  max-width: min(340px, 70vw);
+  padding: 3px 8px 4px;
+  border-left: 3px solid var(--rp-accent);
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in srgb, var(--rp-panel) 88%, transparent);
+  color: var(--rp-ink);
+  font-size: 11px;
+  line-height: 1.35;
+}
+.rp-overlay__classmap strong { font-size: 13px; white-space: nowrap; }
+.rp-overlay__classmap span { color: var(--rp-muted); font-size: 10.5px; white-space: normal; }
 
 .rp-hint {
   position: absolute;
@@ -537,6 +603,28 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   padding: 3px 9px;
   pointer-events: none;
 }
+.rp-classmap-jump {
+  position: absolute;
+  right: 10px;
+  bottom: 36px;
+  z-index: 5;
+  display: none;
+  max-width: calc(100% - 20px);
+  padding: 4px 12px;
+  border: 1px solid var(--rp-line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rp-panel) 92%, transparent);
+  color: var(--rp-accent-2);
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: var(--rp-shadow);
+}
+.rp-map[data-level="0"] .rp-classmap-jump { display: inline-block; }
+.rp-classmap-jump:hover { border-color: var(--rp-accent); }
+.rp-classmap-jump:focus-visible { outline: 3px solid var(--rp-focus); outline-offset: 2px; }
 .rp-legend {
   margin: 0 0 8px;
   padding: 0;
@@ -689,6 +777,7 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-card__facts dt { font-size: 10.5px; color: var(--rp-muted); }
 .rp-card__facts dd { margin: 0; font-size: 13px; font-weight: 700; }
 .rp-card__links { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.rp-card__list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 12.5px; }
 .rp-link {
   width: 100%;
   text-align: left;
@@ -745,6 +834,8 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   .rp-position { order: 4; margin-left: 0; flex: 1 1 100%; max-width: none; }
   .rp-map { height: clamp(280px, 42vh, 420px); min-height: 260px; }
   .rp-hint { font-size: 10px; right: 8px; left: 8px; }
+  .rp-classmap-jump { right: 8px; bottom: 32px; font-size: 11px; }
+  .rp-overlay__classmap { max-width: calc(100vw - 32px); }
   .rp-list { padding: 14px 12px 18px; }
   .rp-list__items { grid-template-columns: 1fr; }
   .rp-card {
