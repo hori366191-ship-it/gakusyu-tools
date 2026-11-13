@@ -3187,3 +3187,252 @@ test('[static] 更新はstage/body/resultsを1回ずつ描画し、preview単体
   assert.ok(motion.includes('onfinish'));
   assert.ok(motion.includes('oncancel'));
 });
+
+/* ------------------------------------------------------------------
+ * ②「?」分類ガイド（分類別 / 比較一覧）
+ * ------------------------------------------------------------------ */
+
+const GUIDE_FIELDS = ['key', 'label', 'functional', 'general', 'generalNote', 'examples', 'acidBase', 'solubility', 'natureShort', 'solubleShort', 'properties', 'isomer'];
+
+function guideBlock(js) {
+  const start = js.indexOf("var guideDialog = document.getElementById('guide-dialog')");
+  const end = js.indexOf("els.results.addEventListener('click'");
+  assert.ok(start > 0 && end > start, 'guideダイアログのブロックが見つからない');
+  return js.slice(start, end);
+}
+
+test('[guide] 16分類＋関連3が実データの分類・代表例に接続する', () => {
+  const chainIds = C.CHAIN_FAMILIES.map((f) => f.id);
+  assert.deepEqual(Object.keys(D.CHAIN_FAMILY_GUIDE), chainIds, 'ガイドの16分類がCHAIN_FAMILIESと一致');
+  assert.deepEqual(Object.keys(D.CHAIN_FAMILY_GUIDE_RELATED), ['phenol', 'amide', 'aromatic'], '関連3項目');
+  for (const key of chainIds) {
+    const g = D.CHAIN_FAMILY_GUIDE[key];
+    assert.equal(g.key, key, key + ' のkey');
+    assert.equal(g.label, C.CHAIN_FAMILY_LABEL[key], key + ' の表示名は既存ラベルと一致');
+    for (const field of GUIDE_FIELDS) {
+      assert.ok(g[field] != null && String(g[field]).length > 0, key + ' の' + field + 'がない');
+    }
+    assert.ok(Array.isArray(g.examples) && g.examples.length >= 1 && g.examples.length <= 3, key + ' の代表例は1〜3件');
+    for (const id of g.examples) {
+      assert.ok(D.COMPOUNDS[id], key + ' の代表例IDがない: ' + id);
+      assert.equal(C.classify(id).family, key, key + ' の代表例が別family: ' + id);
+    }
+    assert.ok(g.properties.length >= 1 && g.properties.length <= 3, key + ' の代表変換は1〜3件');
+    assert.equal(g.related, undefined, key + ' は本体の16分類であり関連項目ではない');
+  }
+  // 関連項目は②の本体分類に混ぜない。
+  for (const key of Object.keys(D.CHAIN_FAMILY_GUIDE_RELATED)) {
+    const g = D.CHAIN_FAMILY_GUIDE_RELATED[key];
+    assert.equal(g.related, true, key + ' は関連項目');
+    assert.equal(chainIds.includes(key), false, key + ' を②の16分類に追加しない');
+    assert.equal(C.CHAIN_FAMILY_LABEL[key], undefined, key + ' に本体ラベルを作らない');
+    assert.ok(g.examples.length >= 1 && g.examples.length <= 3);
+    for (const id of g.examples) assert.ok(D.COMPOUNDS[id], key + ' の代表例IDがない: ' + id);
+  }
+  assert.ok(D.CHAIN_FAMILY_GUIDE_META.symbols.includes('R=炭化水素基'));
+  assert.ok(D.CHAIN_FAMILY_GUIDE_META.formula.includes('分子全体の炭素数'));
+  assert.ok(D.CHAIN_FAMILY_GUIDE_META.formula.includes('分子式そのものではありません'));
+  assert.ok(D.CHAIN_FAMILY_GUIDE_META.tendency.includes('純物質のpH'));
+});
+
+test('[guide] 一般式の条件・異性体の例・代表変換がデータと整合する', () => {
+  const G = D.CHAIN_FAMILY_GUIDE;
+  const formulas = {
+    alkane: ['CₙH₂ₙ₊₂', 'n≥1'],
+    alkene: ['CₙH₂ₙ', 'n≥2'],
+    alkyne: ['CₙH₂ₙ₋₂', 'n≥2'],
+    halogen: ['CₙH₂ₙ₊₁X', 'n≥1'],
+    alcohol: ['CₙH₂ₙ₊₂O', 'n≥1'],
+    ether: ['CₙH₂ₙ₊₂O', 'n≥2'],
+    aldehyde: ['CₙH₂ₙO', 'n≥1'],
+    ketone: ['CₙH₂ₙO', 'n≥3'],
+    carboxylic: ['CₙH₂ₙO₂', 'n≥1'],
+    ester: ['CₙH₂ₙO₂', 'n≥2'],
+    amine: ['CₙH₂ₙ₊₃N', 'n≥1'],
+    nitrile: ['CₙH₂ₙ₋₁N', 'n≥2'],
+    nitro: ['CₙH₂ₙ₊₁NO₂', 'n≥1']
+  };
+  for (const [key, [formula, condition]] of Object.entries(formulas)) {
+    assert.equal(G[key].general, formula, key + ' の一般式');
+    assert.ok(G[key].generalNote.includes(condition), key + ' のn条件');
+  }
+  // 単一の一般式を当てない分類（固定式・一価式の流用をしない）。
+  for (const key of ['polyol', 'anhydride', 'amino-alcohol']) {
+    assert.equal(G[key].general, '—', key + ' は一般式を固定しない');
+  }
+  assert.ok(G.polyol.generalNote.includes('当てはめない'));
+  assert.ok(G.polyol.isomer.includes('分子式が一致する場合だけ'), '異性体は式一致が条件');
+  assert.ok(G['amino-alcohol'].generalNote.includes('当てはめない'));
+  assert.ok(G.anhydride.acidBase.includes('中性と断言しない'));
+  assert.equal(G.anhydride.isomer.includes('一般機能異性'), true);
+  assert.ok(G.ether.solubility.includes('受容'), 'エーテルの水素結合は受容/供与を区別');
+  assert.ok(G.ether.isomer.includes('必ず'), '対応アルコールより必ず難とは断定しない');
+  assert.ok(G.alkane.solubility.includes('溶けない'));
+  assert.ok(G.amine.acidBase.includes('塩基性'));
+  const Amide = D.CHAIN_FAMILY_GUIDE_RELATED.amide;
+  assert.ok(Amide.acidBase.includes('ほぼ中性'));
+  assert.ok(Amide.properties.join('').includes('受容体にならない'));
+  assert.ok(D.CHAIN_FAMILY_GUIDE_RELATED.phenol.acidBase.includes('カルボン酸より弱い'));
+  assert.ok(D.CHAIN_FAMILY_GUIDE_RELATED.phenol.properties.join('').includes('CO₂を発生しない'));
+  assert.ok(D.CHAIN_FAMILY_GUIDE_RELATED.phenol.isomer.includes('異性体とは言わない'));
+  assert.ok(D.CHAIN_FAMILY_GUIDE_RELATED.aromatic.generalNote.includes('n≥6'));
+
+  // 同じ分子式で結合・官能基が違う例（実データの式で確認）。
+  const formulaPair = (a, b) => [D.COMPOUNDS[a].formula, D.COMPOUNDS[b].formula];
+  assert.deepEqual(formulaPair('ethanol', 'dimethyl-ether'), ['C2H6O', 'C2H6O'], 'アルコール/エーテル');
+  assert.deepEqual(formulaPair('propanal', 'acetone'), ['C3H6O', 'C3H6O'], 'アルデヒド/ケトン');
+  assert.deepEqual(formulaPair('acetic-acid', 'methyl-formate'), ['C2H4O2', 'C2H4O2'], 'カルボン酸/エステル');
+  assert.deepEqual(formulaPair('ethylamine', 'dimethylamine'), ['C2H7N', 'C2H7N'], 'アミン1級/2級');
+  assert.deepEqual(formulaPair('butane', 'isobutane'), ['C4H10', 'C4H10'], '骨格異性');
+  assert.deepEqual(formulaPair('ethyne', 'ethene'), ['C2H2', 'C2H4'], 'アルキン/アルケンは式が違う');
+  assert.ok(G.alkene.isomer.includes('シクロプロパン'), 'プロペンとシクロプロパンの環/鎖');
+  assert.ok(G.alkyne.isomer.includes('プロパジエン'), 'プロピンとプロパジエン');
+  assert.ok(G.carboxylic.isomer.includes('ギ酸メチル'), '酢酸とギ酸メチル');
+  // 代表変換の例外・条件
+  assert.ok(G.alcohol.properties.join('').includes('三級アルコール'));
+  assert.ok(G.halogen.properties.join('').includes('競合'));
+  assert.ok(G.nitrile.properties.join('').includes('アミドを経て'));
+  assert.ok(G.aldehyde.properties.join('').includes('銀鏡'));
+});
+
+test('[static] ②見出しの「?」は専用dialogを開き、aria・focus/scroll復帰・閉じる経路をもつ', () => {
+  const html = read('index.html');
+  const openTag = html.match(/<button[^>]*id="chain-family-guide-open"[^>]*>/);
+  assert.ok(openTag, '?ボタンがない');
+  assert.ok(openTag[0].includes('aria-haspopup="dialog"'), 'aria-haspopup=dialog');
+  assert.ok(openTag[0].includes('aria-controls="guide-dialog"'), 'aria-controls');
+  assert.ok(openTag[0].includes('aria-label="'), 'aria-label');
+  const dialogTag = html.match(/<dialog[^>]*id="guide-dialog"[^>]*>/);
+  assert.ok(dialogTag, '専用dialogがない');
+  assert.ok(dialogTag[0].includes('aria-labelledby="guide-dialog-title"'), 'dialogのラベル');
+  assert.ok(dialogTag[0].includes('class="oc-guide-dialog"'), '既存fig-dialogとは別のクラス');
+  assert.equal(/<dialog[^>]*id="guide-dialog"[^>]*role="dialog"/.test(html), false, 'native dialogに冗長roleを付けない');
+  assert.ok(html.includes('role="tablist"'));
+  assert.equal((html.match(/data-guide-tab=/g) || []).length, 2, '分類別/比較一覧の2タブ');
+  assert.equal((html.match(/role="tab"/g) || []).length, 2);
+  assert.ok(html.includes('aria-selected="true"') && html.includes('tabindex="-1"'), '選択タブとroving tabindex');
+  assert.ok(html.includes('id="guide-panel-detail"') && html.includes('id="guide-panel-compare"'), 'tabpanel');
+  assert.ok(html.includes('aria-controls="guide-panel-detail"') && html.includes('aria-controls="guide-panel-compare"'));
+  assert.ok(html.includes('id="guide-dialog-close"'), 'X/閉じるボタン');
+  // 通常画面に長い説明を足さない（?だけ）。
+  assert.equal(html.includes('分類を選ぶと、官能基'), false, '通常画面に詳細説明を出さない');
+  assert.ok(/<button[^>]*class="oc-guide-open"[^>]*>\?<\/button>/.test(html), '見出し右端は?アイコンだけ');
+
+  const js = read('app.js');
+  const block = guideBlock(js);
+  assert.ok(block.includes('showModal'), 'native showModal');
+  assert.ok(block.includes('setAttribute(\'open\', \'\')'), 'showModal未対応のfallback');
+  assert.ok(block.includes("addEventListener('close'"), 'closeイベントで復帰');
+  assert.ok(block.includes("addEventListener('cancel'") && block.includes('e.preventDefault()'), 'Escapeを閉じる');
+  assert.ok(block.includes('e.target === guideDialog'), '外側clickで閉じる');
+  assert.ok(block.includes('lastGuideTrigger') && block.includes('lastGuideScrollY'), 'focus/scroll復帰');
+  assert.ok(block.includes('guideFocusables') && block.includes('!e.shiftKey'), 'Tabトラップ');
+  assert.ok(block.includes("addEventListener('keydown', guideKeydown)"));
+  assert.ok(block.includes("e.key === 'ArrowRight'") && block.includes("e.key === 'Home'"), 'タブのキーボード操作');
+  assert.ok(block.includes("guideState.key = D.CHAIN_FAMILY_GUIDE[state.chainFamily] ? state.chainFamily : ''"), '開いた時点の分類を表示');
+  assert.ok(block.includes('分類を選ぶと、官能基'), '未選択はneutral案内');
+  assert.ok(block.includes('R.renderFunctionalFigure'), '既存の一般構造図を再利用');
+  assert.ok(block.includes('figure === \'amine\''), 'amineは専用の小型構造式');
+  // dialog操作から本体の選択・URL・履歴を変えない。
+  assert.equal(block.includes('writeQuery'), false, 'URLを書換えない');
+  assert.equal(block.includes('history.'), false, 'historyを触らない');
+  assert.equal(block.includes('selectChainFamily'), false, '本体の分類選択を呼ばない');
+  assert.equal(block.includes('selectChainShape'), false);
+  assert.equal(block.includes('update('), false, 'updateを呼ばない');
+  assert.equal(/(?:^|[^A-Za-z])state\.[A-Za-z]+\s*=/.test(block), false, '本体stateを書き換えない');
+  assert.ok(block.includes('guideState'), '表示専用のlocal stateをもつ');
+});
+
+test('[guide] 比較一覧はレスポンシブなカードグリッドで、詳細はdialog内で切り替える', () => {
+  const js = read('app.js');
+  const c = js.slice(js.indexOf('function guideCompareHtml'), js.indexOf('function renderGuide'));
+  assert.ok(c.includes('oc-guide-compare'), 'カードグリッド');
+  assert.ok(c.includes('data-guide-detail'), '各カードから詳細へ');
+  assert.ok(c.includes('natureShort') && c.includes('solubleShort'), '性質・溶け方を短く並べる');
+  assert.equal(c.includes('<table'), false, '巨大な横tableを作らない');
+  const click = js.slice(js.indexOf("guideCompareEl.addEventListener('click'"), js.indexOf("els.results.addEventListener('click'"));
+  assert.ok(click.includes("guideState.tab = 'detail'"), '同じdialog内で分類別へ切替');
+  assert.equal(click.includes('state.chainFamily'), false);
+  const css = read('app.css');
+  assert.ok(/\.oc-guide-compare\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit,\s*minmax\(230px,\s*1fr\)\)/s.test(css), 'PCは可変カード');
+  assert.ok(/@media \(max-width: 760px\)[\s\S]*?\.oc-guide-compare\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s.test(css), 'スマホは1列');
+  assert.ok(/\.oc-guide-dialog__body\s*\{[^}]*overflow-x:\s*hidden/s.test(css), '横overflowを出さない');
+  assert.ok(/\.oc-guide-dialog\s*\{[^}]*width:\s*min\(1180px,\s*96vw\)/s.test(css), 'PCの幅');
+  assert.ok(/\.oc-guide-dialog\s*\{[^}]*max-height:\s*92vh/s.test(css), 'PCの高さ');
+  assert.ok(/@media \(max-width: 760px\)[\s\S]*?\.oc-guide-dialog\s*\{[^}]*width:\s*100vw/s.test(css), 'スマホはほぼ全画面');
+  assert.ok(/@media \(max-width: 760px\)[\s\S]*?\.oc-guide-dialog\s*\{[^}]*height:\s*100dvh/s.test(css));
+  assert.ok(/\.oc-guide-open\s*\{[^}]*width:\s*44px[^}]*height:\s*44px/s.test(css), 'タップ領域44px');
+  assert.ok(/\.oc-guide-tab\s*\{[^}]*min-height:\s*40px/s.test(css));
+  assert.ok(css.includes('.oc-guide-dialog[open]'), '閉じている間はUAのdisplay:noneを保つ');
+  // 3テーマは--oc-*トークン経由で追随する。
+  const guideCss = css.slice(css.indexOf('.oc-guide-open {'), css.indexOf('@media (max-width: 760px)', css.indexOf('.oc-guide-open {')));
+  assert.ok(guideCss.includes('var(--oc-panel)') && guideCss.includes('var(--oc-accent)'), 'テーマトークンを使う');
+  assert.equal(/#[0-9a-fA-F]{3,8}\b/.test(guideCss.replace(/rgba?\([^)]*\)/g, '')), false, '色を直書きしない');
+  assert.equal(guideCss.includes('animation'), false, 'アニメーションを足さない');
+});
+
+test('[guide] フェノール類の酸性は代表例に合わせ、NaHCO₃のCO₂を一律に否定しない', () => {
+  const p = D.CHAIN_FAMILY_GUIDE_RELATED.phenol;
+  assert.deepEqual(p.examples, ['phenol', 'o-cresol', 'picric-acid'], '代表例にピクリン酸を含む');
+  assert.ok(p.acidBase.includes('フェノール・クレゾール'), '弱酸の代表を限定する');
+  assert.ok(p.acidBase.includes('ニトロ基'), '置換で酸性が強まることを書く');
+  assert.ok(p.acidBase.includes('強まる'));
+  assert.equal(p.acidBase.includes('カルボン酸より弱い。'), false, 'フェノール類全体を一律にカルボン酸より弱いとしない');
+  const text = p.properties.join('');
+  assert.ok(text.includes('フェノール・クレゾールなどはNaHCO₃と通常反応せずCO₂を発生しない'));
+  assert.ok(text.includes('ピクリン酸'));
+  assert.ok(text.includes('NaHCO₃と反応してCO₂を発生する'), 'ピクリン酸のCO₂発生を明記');
+  assert.equal(text.includes('カルボン酸より弱い酸性のため'), false, '一律の理由づけを残さない');
+  assert.ok(D.COMPOUNDS['picric-acid'], '代表IDが実在する');
+  assert.equal(C.classify('picric-acid').preset, 'p-no2x3_ohx1', 'ピクリン酸はフェノール性OH＋3ニトロ');
+});
+
+test('[guide] 多価アルコールの図は代表構造（エチレングリコール）で、一般式図と区別する', () => {
+  const js = read('app.js');
+  const fn = js.slice(js.indexOf('function guideFigureHtml'), js.indexOf('function guideFact'));
+  assert.ok(fn.includes("entry.key === 'polyol'"), 'polyol専用の分岐がある');
+  assert.ok(fn.includes('代表構造：エチレングリコール'));
+  assert.ok(fn.indexOf("entry.key === 'polyol'") < fn.indexOf('R.renderFunctionalFigure'), '一般図より先に代表図を返す');
+  assert.ok(fn.includes('一般式の図ではなく'), '一般式図との区別を書く');
+  const svgFn = js.slice(js.indexOf('function guidePolyolSvg'), js.indexOf('function guideFigureHtml'));
+  assert.ok(svgFn.includes('HO') && svgFn.includes('CH₂') && svgFn.includes('OH'), 'エチレングリコールの原子を明示');
+  assert.ok((svgFn.match(/<line /g) || []).length >= 3, 'C–CとC–Oの結合線を描く');
+  assert.equal(svgFn.includes('renderFunctionalFigure'), false, 'geminal diolの一般図を使わない');
+  // 本体のpreview・結果は従来の一般構造図のまま変更しない。
+  const preview = js.slice(js.indexOf('function renderChainPreview'), js.indexOf('function chainCardBadges'));
+  assert.ok(preview.includes('R.renderFunctionalFigure(family'), '本体previewは既存の一般図');
+  assert.equal(preview.includes('guidePolyolSvg'), false, '本体previewをガイド図へ差し替えない');
+});
+
+test('[guide] 多価アルコールのOH数はmで表し、n（分子全体の炭素数）と衝突しない', () => {
+  const g = D.CHAIN_FAMILY_GUIDE.polyol;
+  assert.ok(g.functional.includes('m≥2'), 'OHの数はm');
+  assert.equal(g.functional.includes('n≥2'), false, '分子全体のnと混同しない');
+  assert.ok(g.generalNote.includes('mはOHの数'));
+  assert.ok(D.CHAIN_FAMILY_GUIDE_META.symbols.includes('m=OHの数'), '記号説明にmを短く追加');
+  const all = JSON.stringify(D.CHAIN_FAMILY_GUIDE) + JSON.stringify(D.CHAIN_FAMILY_GUIDE_RELATED);
+  assert.equal(all.includes('R−(OH)ₙ'), false, 'OH数をnで書かない');
+  assert.ok(D.CHAIN_FAMILY_GUIDE_META.formula.includes('分子全体の炭素数'), 'nは分子全体の炭素数のまま');
+});
+
+test('[static] ②見出しの「?」は320/390でも右端に残り、見出しは左列内で折り返す', () => {
+  const html = read('index.html');
+  const heads = [...html.matchAll(/<div class="oc-panel__head([^"]*)">/g)].map((m) => m[1]);
+  assert.equal(heads.filter((c) => /oc-panel__head--guide/.test(c)).length, 1, '専用classは②だけ');
+  const guideHead = html.slice(html.indexOf('oc-panel__head--guide'), html.indexOf('oc-panel__head--guide') + 600);
+  assert.ok(guideHead.includes('化合物分類を選ぶ') && guideHead.includes('id="chain-family-guide-open"'), '②見出しと?が同じhead');
+  const css = read('app.css');
+  assert.ok(/\.oc-panel__head--guide\s*\{[^}]*flex-wrap:\s*nowrap/s.test(css), '②だけnowrap');
+  assert.ok(/\.oc-panel__head--guide h2\s*\{[^}]*min-width:\s*0/s.test(css), '見出しは左列内で折返し可能');
+  assert.ok(/\.oc-panel__head--guide h2\s*\{[^}]*overflow-wrap:\s*anywhere/s.test(css));
+  assert.ok(/\.oc-guide-open\s*\{[^}]*flex:\s*0 0 auto[^}]*width:\s*44px[^}]*height:\s*44px/s.test(css), '?は44x44で縮まない');
+  assert.ok(css.indexOf('.oc-panel__head--guide {') > css.indexOf('.oc-panel__head { flex-wrap: wrap;'), 'モバイルの全体wrapより後で上書き');
+  // 他パネルのモバイル折返しは残し、全headerをnowrapにしない。
+  assert.ok(/@media \(max-width: 760px\)[\s\S]*?\.oc-panel__head\s*\{[^}]*flex-wrap:\s*wrap/s.test(css), '他パネルのwrapを維持');
+  assert.equal(/\.oc-panel__head\s*\{[^}]*flex-wrap:\s*nowrap/s.test(css), false, '全headerをnowrapにしない');
+  // モバイルの列数（①carbon/shape・②分類・結果）は不変。
+  assert.ok(/@media \(max-width: 760px\)[\s\S]*?\.oc-top\s*\{[^}]*repeat\(2,?\s*minmax\(0,\s*1fr\)\)/s.test(css));
+  assert.ok(/@media \(max-width: 760px\)[\s\S]*?#carbon-list\s*\{[^}]*repeat\(6,\s*minmax\(0,\s*1fr\)\)/s.test(css));
+  assert.ok(/@media \(max-width: 760px\)[\s\S]*?#chain-shape-list\s*\{[^}]*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s.test(css));
+  assert.ok(/@media \(max-width: 760px\)[\s\S]*?\.oc-cards\s*\{[^}]*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s.test(css));
+});

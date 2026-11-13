@@ -5316,6 +5316,362 @@
     'phenoxide-ion': [{ key: 'O-', label: 'O⁻', count: 1, positions: [1] }]
   };
 
+  /* ------------------------------------------------------------------
+   * 化合物分類の見方（②の「?」ダイアログ用の解説）
+   * - catalog.js の CHAIN_FAMILIES（16分類）と同じ key を使う。
+   * - 本体の分類・カード・経路は作らない。表示用の解説だけをもつ。
+   * - 代表例は実在する COMPOUNDS のIDだけを書く（1〜3件）。
+   * - 一般式は「鎖式・飽和・一官能」などの条件を満たす場合の形。
+   *   n は分子全体の炭素数（①の炭化水素部分のC数とは別）。
+   * ------------------------------------------------------------------ */
+  var CHAIN_FAMILY_GUIDE = {
+    alkane: {
+      key: 'alkane',
+      label: 'アルカン',
+      functional: 'C−C 単結合だけ（官能基なし）',
+      general: 'CₙH₂ₙ₊₂',
+      generalNote: '鎖式・飽和でn≥1。環状（シクロアルカン）やC=C・C≡Cをもつものは含めない。',
+      examples: ['methane', 'ethane', 'isobutane'],
+      acidBase: '通常の水中ではほぼ中性。',
+      solubility: '水にほとんど溶けない。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '溶けにくい',
+      properties: [
+        '光を当てると塩素・臭素と置換反応し、水素がハロゲンに置き換わる（複数の生成物が生じる）。',
+        '燃焼するとCO₂とH₂Oになる。'
+      ],
+      isomer: '同じ分子式で炭素のつながり方が違う骨格異性体がある。例: ブタンC₄H₁₀とイソブタン（2-メチルプロパン）C₄H₁₀。'
+    },
+    alkene: {
+      key: 'alkene',
+      label: 'アルケン',
+      functional: 'C=C（二重結合）',
+      general: 'CₙH₂ₙ',
+      generalNote: '鎖式でC=Cを1本だけもつ場合。n≥2。C=Cを2本以上もつジエンや環状アルケンは当てはまらない。',
+      examples: ['ethene', 'propene'],
+      acidBase: '通常の水中ではほぼ中性。',
+      solubility: '水にほとんど溶けない。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '溶けにくい',
+      properties: [
+        '触媒を用いて水素を付加するとアルカンになる。',
+        '酸触媒で水を付加するとアルコールになる。Hは水素の多い側の炭素に付くので位置に注意する。',
+        '付加重合で高分子になる。'
+      ],
+      isomer: 'C=Cの位置が違う位置異性体がある（例: ブタ-1-エンとブタ-2-エン）。プロペンC₃H₆とシクロプロパンC₃H₆は同じ分子式だが、環式でC=Cをもたない別分類。'
+    },
+    alkyne: {
+      key: 'alkyne',
+      label: 'アルキン',
+      functional: 'C≡C（三重結合）',
+      general: 'CₙH₂ₙ₋₂',
+      generalNote: '鎖式でC≡Cを1本だけもつ場合。n≥2。',
+      examples: ['ethyne', 'propyne'],
+      acidBase: '通常の水中ではほぼ中性。',
+      solubility: '水にほとんど溶けない。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '溶けにくい',
+      properties: [
+        '触媒で水素を付加させると、条件によってアルケンの段階で止められる。',
+        'さらに付加させるとアルカンになる。',
+        '付加重合で高分子になる。'
+      ],
+      isomer: 'C≡Cの位置が違う位置異性体がある（例: ブタ-1-インとブタ-2-イン）。プロピンC₃H₄とプロパジエン（アレン）C₃H₄は同じ分子式だが、三重結合と二重結合2本で結合が違う。'
+    },
+    halogen: {
+      key: 'halogen',
+      label: 'ハロゲン化物',
+      functional: 'C−X（X=Cl・Br・I）',
+      general: 'CₙH₂ₙ₊₁X',
+      generalNote: '鎖式・飽和でXが1個。n≥1。Xが2個以上のものは当てはまらない。',
+      examples: ['chloroethane', 'bromoethane'],
+      acidBase: '通常の水中ではほぼ中性。',
+      solubility: '水に溶けにくいものが多い。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '溶けにくい',
+      properties: [
+        'アルカンの光置換、アルケンへの付加、アルコールの置換で得られる。',
+        '水酸化ナトリウム水溶液と加熱するとアルコールになる（置換）。',
+        '水酸化ナトリウムのアルコール溶液と加熱するとアルケンになる（脱離）。条件で置換と競合する。'
+      ],
+      isomer: 'ハロゲンの付く炭素の位置で異性体になる（例: 1-クロロプロパンと2-クロロプロパン）。芳香環に直結したハロゲンは同じ条件で置換されやすいと一般化しない。'
+    },
+    alcohol: {
+      key: 'alcohol',
+      label: 'アルコール（一価）',
+      functional: 'R−OH',
+      general: 'CₙH₂ₙ₊₂O',
+      generalNote: '鎖式・飽和・OHが1個。n≥1。多価アルコールやC=Cをもつものは当てはまらない。',
+      examples: ['ethanol', 'propan-2-ol'],
+      acidBase: 'ほぼ中性。',
+      solubility: '低級アルコールは水によく溶ける。炭素鎖が長くなると溶けにくくなる。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '低級は溶ける',
+      properties: [
+        '一級アルコールは酸化でアルデヒドを経てカルボン酸になる。',
+        '二級アルコールは酸化でケトンになる。',
+        '三級アルコールは通常の酸化を受けにくい。'
+      ],
+      isomer: 'エタノールC₂H₆OとジメチルエーテルC₂H₆Oは同じ分子式で、OHとC−O−Cの結合が違う。'
+    },
+    polyol: {
+      key: 'polyol',
+      label: '多価アルコール',
+      functional: 'R−(OH)ₘ（m≥2）',
+      general: '—',
+      generalNote: 'OHが2個以上の多価アルコール。mはOHの数（m≥2）。一価アルコールの一般式CₙH₂ₙ₊₂Oを当てはめない。',
+      examples: ['ethylene-glycol', 'glycerol'],
+      acidBase: 'ほぼ中性。',
+      solubility: 'OHの数が増えるほど水になじみやすい。溶け方は炭素骨格にも依存する。',
+      natureShort: 'ほぼ中性',
+      solubleShort: 'OH数で変化',
+      properties: [
+        'エチレングリコールは二価、グリセリンは三価。',
+        'カルボン酸とエステル化する（グリセリン＋高級脂肪酸→油脂）。'
+      ],
+      isomer: '異性体と言えるのは分子式が一致する場合だけ。エチレングリコールC₂H₆O₂とエタノールC₂H₆Oは式が違うので異性体ではない。'
+    },
+    ether: {
+      key: 'ether',
+      label: 'エーテル',
+      functional: 'R−O−R′',
+      general: 'CₙH₂ₙ₊₂O',
+      generalNote: '鎖式・飽和でn≥2（炭素1個ではR−O−R′を作れない）。アルコールと同じ一般式だが官能基が違う。',
+      examples: ['dimethyl-ether', 'methoxyethane'],
+      acidBase: 'ほぼ中性。',
+      solubility: '水素結合の受容はできるが供与はできない（水から水素結合を受け取れることとは別）。溶解性は構造に依存し、炭化水素部分が大きいほど水に溶けにくい。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '構造による',
+      properties: [
+        '穏やかな条件では酸化されにくい。',
+        '強酸と加熱するとC−O結合が切れる。'
+      ],
+      isomer: 'エタノールC₂H₆OとジメチルエーテルC₂H₆Oは同じ分子式で、OHとC−O−Cが違う。対応するアルコールより必ず溶けにくいとは決めつけない。'
+    },
+    aldehyde: {
+      key: 'aldehyde',
+      label: 'アルデヒド',
+      functional: 'R−CHO（R−C(=O)−H）',
+      general: 'CₙH₂ₙO',
+      generalNote: '鎖式・飽和・CHOが1個。n≥1。ホルムアルデヒドはR=H。ケトンと同じ一般式。',
+      examples: ['formaldehyde', 'ethanal', 'propanal'],
+      acidBase: 'ほぼ中性。',
+      solubility: '低級アルデヒドは水に溶ける。炭素鎖が長くなると溶けにくい。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '低級は溶ける',
+      properties: [
+        '酸化されやすく還元性を示す。アンモニア性硝酸銀水溶液で銀鏡、フェーリング液で赤色沈殿。',
+        '還元で一級アルコールになる。',
+        '酸化でカルボン酸になり、塩基性ではカルボン酸塩として存在する。'
+      ],
+      isomer: 'プロパナールC₃H₆OとアセトンC₃H₆Oは同じ分子式で、CHOとC=O（鎖の途中）が違う。'
+    },
+    ketone: {
+      key: 'ketone',
+      label: 'ケトン',
+      functional: 'R−CO−R′',
+      general: 'CₙH₂ₙO',
+      generalNote: '鎖式・飽和でC=Oが鎖の途中。n≥3（C=Oの炭素の両側に炭素が必要）。',
+      examples: ['acetone', 'butanone'],
+      acidBase: 'ほぼ中性。',
+      solubility: '低級ケトンは水に溶ける。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '低級は溶ける',
+      properties: [
+        '還元で二級アルコールになる。',
+        '通常の酸化ではカルボン酸にならず、銀鏡反応も示さない。'
+      ],
+      isomer: 'アセトンC₃H₆OとプロパナールC₃H₆Oは官能基が違う異性体。'
+    },
+    carboxylic: {
+      key: 'carboxylic',
+      label: 'カルボン酸',
+      functional: 'R−COOH',
+      general: 'CₙH₂ₙO₂',
+      generalNote: '鎖式・飽和・COOHが1個。n≥1。COOHの炭素をnに含める。ギ酸はR=H。',
+      examples: ['formic-acid', 'acetic-acid'],
+      acidBase: '弱酸。水に溶けると一部が電離してH⁺を出す。',
+      solubility: '低級カルボン酸は水に溶ける。炭素鎖が長くなると溶けにくい。',
+      natureShort: '弱酸性',
+      solubleShort: '低級は溶ける',
+      properties: [
+        '塩基と中和してカルボン酸塩になる。',
+        '酸触媒でアルコールとエステル化する（可逆）。'
+      ],
+      isomer: '酢酸C₂H₄O₂とギ酸メチルHCOOCH₃ C₂H₄O₂は同じ分子式で官能基が違う（カルボン酸とエステル）。'
+    },
+    anhydride: {
+      key: 'anhydride',
+      label: 'カルボン酸無水物',
+      functional: 'R−CO−O−CO−R′',
+      general: '—',
+      generalNote: '2つのアシル基の組み合わせで式が変わるため、固定の一般式を省略する。',
+      examples: ['acetic-anhydride'],
+      acidBase: '水と反応してカルボン酸を生じるため、水中で中性と断言しない。',
+      solubility: '水と反応しやすく、そのままの溶解性として扱わない。',
+      natureShort: '水と反応',
+      solubleShort: '水と反応',
+      properties: [
+        '水と反応してカルボン酸を生じる。',
+        'アルコールと反応してエステルとカルボン酸を生じる。'
+      ],
+      isomer: 'エステルとの「一般機能異性」とは言わない（式の関係も加水分解の生成物も一様でない）。'
+    },
+    ester: {
+      key: 'ester',
+      label: 'エステル',
+      functional: 'R−COO−R′',
+      general: 'CₙH₂ₙO₂',
+      generalNote: '鎖式・飽和・エステル結合1個。n≥2。ギ酸エステルはR=H。',
+      examples: ['methyl-formate', 'methyl-acetate'],
+      acidBase: 'ほぼ中性。',
+      solubility: '水に溶けにくいものが多い（低級はいくらか溶ける）。溶解性は構造に依存する。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '溶けにくい',
+      properties: [
+        '酸触媒で加水分解するとカルボン酸とアルコールになる（可逆）。',
+        '塩基で加水分解するとカルボン酸塩とアルコールになる。',
+        '低級のものには果実のような香りがある。'
+      ],
+      isomer: '酢酸CH₃COOHとギ酸メチルHCOOCH₃は同じC₂H₄O₂で官能基が違う。'
+    },
+    amine: {
+      key: 'amine',
+      label: 'アミン',
+      functional: 'R−NH₂／R−NH−R′／R−N(R′)−R″',
+      general: 'CₙH₂ₙ₊₃N',
+      generalNote: '鎖式・飽和でNが1個、ほかの官能基をもたないアミン。n≥1。NH₃とアンモニウム塩は含めない。',
+      examples: ['methylamine', 'dimethylamine', 'trimethylamine'],
+      acidBase: '塩基性。水中で水酸化物イオンを生じる。',
+      solubility: '低級アミンは水に溶ける。',
+      natureShort: '塩基性',
+      solubleShort: '低級は溶ける',
+      properties: [
+        '酸と反応してアンモニウム塩になる。',
+        '一級・二級アミンはアシル化でアミドになる。'
+      ],
+      isomer: 'エチルアミンC₂H₇NとジメチルアミンC₂H₇Nは、Nに結合する炭化水素基の数が違う構造異性体（別の官能基分類ではない）。',
+      figure: 'amine'
+    },
+    nitrile: {
+      key: 'nitrile',
+      label: 'ニトリル',
+      functional: 'R−C≡N',
+      general: 'CₙH₂ₙ₋₁N',
+      generalNote: '鎖式・飽和でCNが1個。n≥2。CNの炭素をnに含める。HCN（n=1）は対象外。',
+      examples: ['acetonitrile', 'propanenitrile'],
+      acidBase: '通常の水中ではほぼ中性。',
+      solubility: '低級のものは水に溶けるものがある。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '低級は溶ける',
+      properties: [
+        '加水分解するとアミドを経てカルボン酸になる。',
+        '還元で一級アミンになる。'
+      ],
+      isomer: 'ニトリルはC≡Nを含むため、同じ炭素数のアミンとは分子式が違う（例: アセトニトリルC₂H₃NとエチルアミンC₂H₇N）。'
+    },
+    nitro: {
+      key: 'nitro',
+      label: 'ニトロ化合物',
+      functional: 'R−NO₂',
+      general: 'CₙH₂ₙ₊₁NO₂',
+      generalNote: '鎖式・飽和でNO₂が1個。n≥1。Ar−NO₂（ニトロベンゼンなど）は別扱い。',
+      examples: ['nitromethane'],
+      acidBase: '通常の水中ではほぼ中性だが、構造に依存する。',
+      solubility: '水に溶けにくいものが多い。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '溶けにくい',
+      properties: [
+        '芳香族ニトロ化合物は還元でアミンになる。',
+        '還元で生じたアミンは、酸性ではアンモニウム塩として存在する。'
+      ],
+      isomer: 'NO₂が付く炭素の位置が違えば位置異性体になる。'
+    },
+    'amino-alcohol': {
+      key: 'amino-alcohol',
+      label: 'アミノアルコール（多官能）',
+      functional: '−NH₂と−OHを併せもつ',
+      general: '—',
+      generalNote: 'アミノ基とヒドロキシ基を併せもつ多官能化合物。一価アルコールの一般式CₙH₂ₙ₊₂Oを当てはめない。',
+      examples: ['ethanolamine'],
+      acidBase: 'アミノ基により塩基性を示す。OHは中性。',
+      solubility: 'OHは水素結合を作るため親水的。溶解性は炭素骨格にも依存する。',
+      natureShort: '塩基性',
+      solubleShort: '骨格による',
+      properties: [
+        'エタノールアミンが代表例。',
+        'アミノ基とヒドロキシ基が別々に反応するため、一方を保護することがある。'
+      ],
+      isomer: '単純なアミンと同じ分子式になるとは限らない（例: エタノールアミンC₂H₇NOとエチルアミンC₂H₇N）。'
+    }
+  };
+
+  // ②の本体分類には出さない関連項目（環式・芳香族など）。
+  // 比較のために解説だけを分離して置く。本体の分類・選択肢は増やさない。
+  var CHAIN_FAMILY_GUIDE_RELATED = {
+    phenol: {
+      key: 'phenol',
+      label: 'フェノール類',
+      related: true,
+      functional: 'Ar−OH（ベンゼン環に直結したOH）',
+      general: 'Ar−OH',
+      generalNote: 'ベンゼン環にOHが直結した分類。環の数・置換基で式が変わるため固定の一般式を置かない。',
+      examples: ['phenol', 'o-cresol', 'picric-acid'],
+      acidBase: '弱酸。NaOHと反応して塩（フェノキシド）になる。フェノール・クレゾールなどはカルボン酸より弱いが、ニトロ基などの置換で酸性は強まる。',
+      solubility: '常温で水に少し溶ける。溶け方は骨格と置換基に依存する。',
+      natureShort: '弱酸性',
+      solubleShort: '少し溶ける',
+      properties: [
+        'NaOHと反応してナトリウム塩になる。',
+        'フェノール・クレゾールなどはNaHCO₃と通常反応せずCO₂を発生しない。',
+        'ピクリン酸（2,4,6-トリニトロフェノール）はNaHCO₃と反応してCO₂を発生する。'
+      ],
+      isomer: 'フェノールC₆H₆OとアニソールC₇H₈Oは分子式が違うので、異性体とは言わない。'
+    },
+    amide: {
+      key: 'amide',
+      label: 'アミド',
+      related: true,
+      functional: 'R−CO−NH₂（Nに置換基がある場合を含む）',
+      general: 'CₙH₂ₙ₊₁NO',
+      generalNote: '鎖式・飽和でアミド結合1個、ほかの官能基なし。n≥1。収録している代表例のアセトアニリドなどはN-アリールアミド（芳香族）で、この一般式の条件とは別。',
+      examples: ['acetanilide', 'acetaminophen'],
+      acidBase: 'アミンより著しく弱い塩基で、通常の水中ではほぼ中性。',
+      solubility: '低級のものは水に溶ける。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '低級は溶ける',
+      properties: [
+        'アミドのNは水素結合の受容体にならない（C=O側が受容体）。',
+        '酸または塩基と加熱すると加水分解する。酸性ではカルボン酸とアンモニウム塩、塩基性ではカルボン酸塩とNH₃（またはアミン）を生じる。'
+      ],
+      isomer: '代表的な機能異性体の例はここに挙げないが、「存在しない」と断定する意味ではない。'
+    },
+    aromatic: {
+      key: 'aromatic',
+      label: '芳香族炭化水素',
+      related: true,
+      functional: 'ベンゼン環（C₆H₆）と飽和側鎖',
+      general: 'CₙH₂ₙ₋₆',
+      generalNote: '単環ベンゼンに飽和の側鎖だけが付く場合。n≥6。ナフタレンなどの縮合環は当てはまらない。',
+      examples: ['benzene', 'toluene', 'ethylbenzene'],
+      acidBase: '通常の水中ではほぼ中性。',
+      solubility: '水にほとんど溶けない。',
+      natureShort: 'ほぼ中性',
+      solubleShort: '溶けにくい',
+      properties: [
+        '触媒を用いた置換反応が中心（付加は条件次第）。',
+        '側鎖は酸化や置換の影響を受ける。'
+      ],
+      isomer: '置換基の位置でo-／m-／p-の位置異性体がある（例: キシレンC₈H₁₀）。'
+    }
+  };
+
+  var CHAIN_FAMILY_GUIDE_META = {
+    symbols: 'R=炭化水素基、Ar=芳香族基、X=Cl・Br・I、m=OHの数（多価アルコールだけ）。',
+    formula: 'nは分子全体の炭素数です（①の炭化水素部分のC数とは別）。一般式は「鎖式・飽和・一官能」などの条件を満たす場合の形で、分子式そのものではありません。',
+    tendency: '「ほぼ中性」「溶けにくい」は通常の水中での傾向です。純物質のpHを断言するものではなく、溶解性は炭素骨格・官能基の数・温度・電離の程度で変わります。'
+  };
+
   return {
     CATEGORIES: CATEGORIES,
     GROUPS: GROUPS,
@@ -5332,6 +5688,9 @@
     MATERIALS: MATERIALS,
     FAMILIES: FAMILIES,
     RING_SUBS: RING_SUBS,
+    CHAIN_FAMILY_GUIDE: CHAIN_FAMILY_GUIDE,
+    CHAIN_FAMILY_GUIDE_RELATED: CHAIN_FAMILY_GUIDE_RELATED,
+    CHAIN_FAMILY_GUIDE_META: CHAIN_FAMILY_GUIDE_META,
     normalizeName: normalizeName,
     aliasTarget: aliasTarget,
     aliasesFor: aliasesFor,

@@ -88,8 +88,9 @@
     </article>
 
     <article class="oc-panel">
-      <div class="oc-panel__head">
+      <div class="oc-panel__head oc-panel__head--guide">
         <h2><span class="oc-num">2</span>化合物分類を選ぶ</h2>
+        <button type="button" class="oc-guide-open" id="chain-family-guide-open" aria-haspopup="dialog" aria-controls="guide-dialog" aria-label="化合物分類の見方（分類別・比較一覧）を開く" title="分類の見方">?</button>
       </div>
       <div class="oc-panel__body">
         <p class="oc-control-label" id="chain-family-label">化合物分類</p>
@@ -207,6 +208,27 @@
   </div>
   <div class="oc-fig-dialog__body" id="fig-dialog-body"></div>
   <p class="oc-fig-dialog__note">Escapeキーまたは「閉じる」で元の位置に戻ります。</p>
+</dialog>
+
+<dialog class="oc-guide-dialog" id="guide-dialog" aria-labelledby="guide-dialog-title">
+  <div class="oc-guide-dialog__head">
+    <h2 id="guide-dialog-title">化合物分類の見方</h2>
+    <button type="button" class="oc-guide-dialog__close" id="guide-dialog-close" aria-label="分類の見方を閉じる">閉じる</button>
+  </div>
+  <div class="oc-guide-dialog__tabs" role="tablist" aria-label="表示の切替">
+    <button type="button" class="oc-guide-tab is-current" id="guide-tab-detail" role="tab" data-guide-tab="detail" aria-selected="true" aria-controls="guide-panel-detail" tabindex="0">分類別</button>
+    <button type="button" class="oc-guide-tab" id="guide-tab-compare" role="tab" data-guide-tab="compare" aria-selected="false" aria-controls="guide-panel-compare" tabindex="-1">比較一覧</button>
+  </div>
+  <div class="oc-guide-dialog__body">
+    <p class="oc-guide-meta" id="guide-meta"></p>
+    <section class="oc-guide-panel" id="guide-panel-detail" role="tabpanel" aria-labelledby="guide-tab-detail">
+      <div class="oc-guide-families" id="guide-family-list" role="group" aria-label="分類の選択"></div>
+      <div class="oc-guide-detail" id="guide-detail"></div>
+    </section>
+    <section class="oc-guide-panel" id="guide-panel-compare" role="tabpanel" aria-labelledby="guide-tab-compare" hidden>
+      <div class="oc-guide-compare" id="guide-compare"></div>
+    </section>
+  </div>
 </dialog>
 
 <script src="./data.js"></script>

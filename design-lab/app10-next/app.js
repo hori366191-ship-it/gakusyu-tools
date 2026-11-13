@@ -1668,6 +1668,329 @@
     if (figDialogClose) figDialogClose.addEventListener('click', closeFigureDialog);
   }
 
+  /* ------------------------------------------------------------------
+   * 化合物分類の見方（②見出しの「?」）— 専用ダイアログ
+   * 分類別 / 比較一覧の切替と分類の選択だけをローカルにもつ。
+   * 本体の選択（selectChainFamily）・update・writeQuery・history は呼ばない。
+   * 一般構造図は既存の R.renderFunctionalFigure を再利用する。
+   * ------------------------------------------------------------------ */
+  var guideDialog = document.getElementById('guide-dialog');
+  var guideOpenBtn = document.getElementById('chain-family-guide-open');
+  var guideDialogClose = document.getElementById('guide-dialog-close');
+  var guideMetaEl = document.getElementById('guide-meta');
+  var guideListEl = document.getElementById('guide-family-list');
+  var guideDetailEl = document.getElementById('guide-detail');
+  var guideCompareEl = document.getElementById('guide-compare');
+  var guideTabButtons = Array.prototype.slice.call(document.querySelectorAll('[data-guide-tab]'));
+  var guidePanels = {
+    detail: document.getElementById('guide-panel-detail'),
+    compare: document.getElementById('guide-panel-compare')
+  };
+  var guideState = { tab: 'detail', key: '' };
+  var lastGuideTrigger = null;
+  var lastGuideScrollY = 0;
+
+  function guideEntry(key) {
+    return D.CHAIN_FAMILY_GUIDE[key] || D.CHAIN_FAMILY_GUIDE_RELATED[key] || null;
+  }
+
+  function guideAll() {
+    var out = [];
+    Object.keys(D.CHAIN_FAMILY_GUIDE).forEach(function (k) { out.push(D.CHAIN_FAMILY_GUIDE[k]); });
+    Object.keys(D.CHAIN_FAMILY_GUIDE_RELATED).forEach(function (k) { out.push(D.CHAIN_FAMILY_GUIDE_RELATED[k]); });
+    return out;
+  }
+
+  // アミンだけは既存の一般構造図（renderFunctionalFigure）が空になるため、
+  // 1〜3級の結合が見える小さな構造式をここで描く。
+  function guideAmineSvg(degree) {
+    var lines = '<line x1="40" y1="70" x2="100" y2="70" class="oc-bond" stroke-width="2.4"/>';
+    var texts = '<text x="30" y="70" class="oc-atom" font-size="17" text-anchor="end" dominant-baseline="middle">R</text>' +
+      '<text x="110" y="70" class="oc-atom" font-size="17" text-anchor="middle" dominant-baseline="middle">N</text>';
+    if (degree === 1) {
+      lines += '<line x1="110" y1="58" x2="110" y2="38" class="oc-bond oc-bond--h" stroke-width="2"/>' +
+        '<line x1="110" y1="82" x2="110" y2="102" class="oc-bond oc-bond--h" stroke-width="2"/>';
+      texts += '<text x="110" y="30" class="oc-h" font-size="15" text-anchor="middle">H</text>' +
+        '<text x="110" y="118" class="oc-h" font-size="15" text-anchor="middle">H</text>';
+    } else if (degree === 2) {
+      lines += '<line x1="110" y1="58" x2="110" y2="38" class="oc-bond oc-bond--h" stroke-width="2"/>' +
+        '<line x1="122" y1="70" x2="170" y2="70" class="oc-bond" stroke-width="2.4"/>';
+      texts += '<text x="110" y="30" class="oc-h" font-size="15" text-anchor="middle">H</text>' +
+        '<text x="182" y="70" class="oc-atom" font-size="17" text-anchor="middle" dominant-baseline="middle">R′</text>';
+    } else {
+      lines += '<line x1="122" y1="70" x2="170" y2="70" class="oc-bond" stroke-width="2.4"/>' +
+        '<line x1="110" y1="82" x2="110" y2="108" class="oc-bond" stroke-width="2.4"/>';
+      texts += '<text x="182" y="70" class="oc-atom" font-size="17" text-anchor="middle" dominant-baseline="middle">R′</text>' +
+        '<text x="110" y="126" class="oc-atom" font-size="17" text-anchor="middle">R″</text>';
+    }
+    return '<svg class="oc-svg oc-guide-svg" viewBox="0 0 230 140" role="img" aria-label="' +
+      esc(degree + '級アミンの一般構造') + '"><g class="oc-bond-layer">' + lines +
+      '</g><g class="oc-atom-layer">' + texts + '</g></svg>';
+  }
+
+  // 多価アルコールの代表（エチレングリコール）を、結合が見える形で描く。
+  // 既存の renderFunctionalFigure('polyol') は同じ炭素にOHが2個付く形になるため使わない。
+  function guidePolyolSvg() {
+    var y = 56;
+    var bonds = '<line x1="38" y1="' + y + '" x2="70" y2="' + y + '" class="oc-bond" stroke-width="2.4"/>' +
+      '<line x1="106" y1="' + y + '" x2="146" y2="' + y + '" class="oc-bond" stroke-width="2.4"/>' +
+      '<line x1="180" y1="' + y + '" x2="222" y2="' + y + '" class="oc-bond" stroke-width="2.4"/>';
+    var texts = '<text x="6" y="' + y + '" class="oc-atom" font-size="16" text-anchor="start" dominant-baseline="middle">HO</text>' +
+      '<text x="88" y="' + y + '" class="oc-atom" font-size="16" text-anchor="middle" dominant-baseline="middle">CH₂</text>' +
+      '<text x="162" y="' + y + '" class="oc-atom" font-size="16" text-anchor="middle" dominant-baseline="middle">CH₂</text>' +
+      '<text x="258" y="' + y + '" class="oc-atom" font-size="16" text-anchor="end" dominant-baseline="middle">OH</text>';
+    return '<svg class="oc-svg oc-guide-svg" viewBox="0 0 266 92" role="img" aria-label="' +
+      esc('エチレングリコール HO–CH₂–CH₂–OH の構造') + '"><g class="oc-bond-layer">' + bonds +
+      '</g><g class="oc-atom-layer">' + texts + '</g></svg>';
+  }
+
+  function guideFigureHtml(entry) {
+    if (entry.figure === 'amine') {
+      return '<div class="oc-guide-figs">' + [1, 2, 3].map(function (d) {
+        return '<figure class="oc-guide-fig">' + guideAmineSvg(d) + '<figcaption>' + d + '級</figcaption></figure>';
+      }).join('') + '</div>';
+    }
+    // 多価アルコールは既存の一般構造図が R−CH(OH)₂（同じ炭素にOHが2個）になり、
+    // 代表例のエチレングリコール・グリセリンと形が違って誤解を招く。
+    // 本体のpreviewは変えず、ガイドだけ実在代表の結合を明示して描く。
+    if (entry.key === 'polyol') {
+      return '<figure class="oc-guide-fig oc-guide-fig--single">' + guidePolyolSvg() +
+        '<figcaption>代表構造：エチレングリコール（HO–CH₂–CH₂–OH）' +
+        '<br>一般式の図ではなく、代表例の構造</figcaption></figure>';
+    }
+    if (!D.CHAIN_FAMILY_GUIDE[entry.key]) return '';
+    var svg = R.renderFunctionalFigure(entry.key, { label: entry.label + 'の一般構造' });
+    return svg ? '<div class="oc-guide-fig oc-guide-fig--single">' + svg + '</div>' : '';
+  }
+
+  function guideFact(label, value) {
+    return '<div class="oc-guide__fact"><dt>' + esc(label) + '</dt><dd>' + esc(value) + '</dd></div>';
+  }
+
+  // 一般式を固定しない分類は、ダッシュだけを出さずに理由を短く添える。
+  function guideFormulaText(entry) {
+    return entry.general === '—' ? '固定の一般式なし' : entry.general;
+  }
+
+  function guideDetailHtml() {
+    var entry = guideEntry(guideState.key);
+    if (!entry) {
+      return '<p class="oc-guide__prompt">分類を選ぶと、官能基・一般式・代表例・異性体の関係を表示します。' +
+        'ここでの選択は②の分類選択を変えません。</p>';
+    }
+    var html = '<div class="oc-guide__head"><h3 class="oc-guide__name">' + esc(entry.label) + '</h3>' +
+      '<span class="oc-guide__badge">' + (entry.related ? '関連' : '②の分類') + '</span></div>';
+    if (entry.related) {
+      html += '<p class="oc-guide__warn">この項目は関連する分類の解説です。②の選択肢には追加していません。</p>';
+    }
+    var figure = guideFigureHtml(entry);
+    if (figure) html += '<div class="oc-guide__figure">' + figure + '</div>';
+    html += '<dl class="oc-guide__facts">' +
+      guideFact('官能基・結合', entry.functional) +
+      guideFact('一般式', guideFormulaText(entry)) +
+      guideFact('式の条件', entry.generalNote) +
+      guideFact('酸・塩基', entry.acidBase) +
+      guideFact('水への溶け方', entry.solubility) +
+      guideFact('異性体の関係', entry.isomer) +
+      '</dl>';
+    html += '<div class="oc-guide__props"><h4>主な性質と代表的な変化</h4><ul>' +
+      entry.properties.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join('') + '</ul></div>';
+    html += '<div class="oc-guide__examples"><h4>代表例</h4><div class="oc-guide__chips">' +
+      entry.examples.map(function (id) {
+        var c = D.COMPOUNDS[id];
+        return '<span class="oc-guide__chip"><b>' + esc(c.name) + '</b><span>' +
+          esc(c.formulaDisplay || R.formatFormula(c.formula)) + '</span></span>';
+      }).join('') + '</div></div>';
+    return html;
+  }
+
+  function guideListHtml() {
+    function button(entry) {
+      return '<button type="button" class="oc-guide-key' + (entry.key === guideState.key ? ' is-current' : '') +
+        '" data-guide-key="' + esc(entry.key) + '" aria-pressed="' + (entry.key === guideState.key ? 'true' : 'false') + '">' +
+        esc(entry.label) + '</button>';
+    }
+    var html = Object.keys(D.CHAIN_FAMILY_GUIDE).map(function (k) {
+      return button(D.CHAIN_FAMILY_GUIDE[k]);
+    }).join('');
+    html += '<span class="oc-guide-key__sep" aria-hidden="true"></span>';
+    html += '<span class="oc-guide-key__label">関連する分類（②には出ません）</span>';
+    html += Object.keys(D.CHAIN_FAMILY_GUIDE_RELATED).map(function (k) {
+      return button(D.CHAIN_FAMILY_GUIDE_RELATED[k]);
+    }).join('');
+    return html;
+  }
+
+  function guideCompareHtml() {
+    return '<div class="oc-guide-compare">' + guideAll().map(function (entry) {
+      return '<article class="oc-guide-card" data-guide-card="' + esc(entry.key) + '">' +
+        '<div class="oc-guide-card__head"><h3>' + esc(entry.label) + '</h3>' +
+        '<span class="oc-guide-card__badge">' + (entry.related ? '関連' : '本体') + '</span></div>' +
+        '<p class="oc-guide-card__formula">' + esc(guideFormulaText(entry)) + '</p>' +
+        '<dl class="oc-guide-card__meta">' +
+        '<div><dt>性質</dt><dd>' + esc(entry.natureShort) + '</dd></div>' +
+        '<div><dt>溶け方</dt><dd>' + esc(entry.solubleShort) + '</dd></div>' +
+        '</dl>' +
+        '<button type="button" class="oc-guide-card__more" data-guide-detail="' + esc(entry.key) + '">詳細を見る</button>' +
+        '</article>';
+    }).join('') + '</div>';
+  }
+
+  function renderGuide() {
+    if (!guideListEl || !guideDetailEl || !guideCompareEl) return;
+    if (guideMetaEl) {
+      var meta = D.CHAIN_FAMILY_GUIDE_META;
+      guideMetaEl.innerHTML = '<span>' + esc(meta.symbols) + '</span>' +
+        '<span>' + esc(meta.formula) + '</span>' +
+        '<span>' + esc(meta.tendency) + '</span>';
+    }
+    guideListEl.innerHTML = guideListHtml();
+    guideDetailEl.innerHTML = guideDetailHtml();
+    guideCompareEl.innerHTML = guideCompareHtml();
+    guideTabButtons.forEach(function (btn) {
+      var active = btn.getAttribute('data-guide-tab') === guideState.tab;
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      btn.setAttribute('tabindex', active ? '0' : '-1');
+      if (active) btn.classList.add('is-current');
+      else btn.classList.remove('is-current');
+    });
+    Object.keys(guidePanels).forEach(function (key) {
+      if (guidePanels[key]) guidePanels[key].hidden = key !== guideState.tab;
+    });
+  }
+
+  function setGuideTab(tab) {
+    if (tab !== 'detail' && tab !== 'compare') return;
+    guideState.tab = tab;
+    renderGuide();
+  }
+
+  function guideFocusables() {
+    if (!guideDialog) return [];
+    return Array.prototype.filter.call(
+      guideDialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+      function (el) {
+        return !el.disabled && el.tabIndex !== -1 && (!el.getClientRects || el.getClientRects().length > 0);
+      }
+    );
+  }
+
+  function restoreGuideDialog() {
+    document.body.classList.remove('oc-dialog-open');
+    if (lastGuideTrigger && lastGuideTrigger.focus && document.contains(lastGuideTrigger)) {
+      try { lastGuideTrigger.focus(); } catch (e) { if (guideOpenBtn) guideOpenBtn.focus(); }
+    } else if (guideOpenBtn) {
+      guideOpenBtn.focus();
+    }
+    try { window.scrollTo(0, lastGuideScrollY); } catch (e) {}
+    lastGuideTrigger = null;
+  }
+
+  function openGuideDialog() {
+    if (!guideDialog) return;
+    lastGuideTrigger = document.activeElement && document.activeElement.focus ? document.activeElement : null;
+    lastGuideScrollY = window.scrollY || window.pageYOffset || 0;
+    // 開いた時点の②の分類に対応する詳細を出す。未選択なら neutral な案内のみ。
+    guideState.key = D.CHAIN_FAMILY_GUIDE[state.chainFamily] ? state.chainFamily : '';
+    guideState.tab = 'detail';
+    renderGuide();
+    document.body.classList.add('oc-dialog-open');
+    if (typeof guideDialog.showModal === 'function') {
+      try { guideDialog.showModal(); } catch (e) { guideDialog.setAttribute('open', ''); }
+    } else {
+      guideDialog.setAttribute('open', '');
+    }
+    var activeTab = guideTabButtons.filter(function (b) {
+      return b.getAttribute('data-guide-tab') === 'detail';
+    })[0];
+    if (activeTab) activeTab.focus();
+    else if (guideDialogClose) guideDialogClose.focus();
+  }
+
+  function closeGuideDialog() {
+    if (!guideDialog) return;
+    if (typeof guideDialog.close === 'function' && guideDialog.open) guideDialog.close();
+    else { guideDialog.removeAttribute('open'); restoreGuideDialog(); }
+  }
+
+  function guideKeydown(e) {
+    if (e.key === 'Tab' && guideDialog) {
+      var list = guideFocusables();
+      if (!list.length) return;
+      var first = list[0];
+      var last = list[list.length - 1];
+      var active = document.activeElement;
+      var outside = !active || !guideDialog.contains(active);
+      if (e.shiftKey && (active === first || outside)) {
+        e.preventDefault();
+        last.focus();
+        return;
+      }
+      if (!e.shiftKey && (active === last || outside)) {
+        e.preventDefault();
+        first.focus();
+        return;
+      }
+    }
+    var current = document.activeElement;
+    if (!current || !current.hasAttribute || !current.hasAttribute('data-guide-tab')) return;
+    var idx = guideTabButtons.indexOf(current);
+    if (idx === -1) return;
+    var next = -1;
+    if (e.key === 'ArrowRight') next = (idx + 1) % guideTabButtons.length;
+    else if (e.key === 'ArrowLeft') next = (idx - 1 + guideTabButtons.length) % guideTabButtons.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = guideTabButtons.length - 1;
+    if (next === -1) return;
+    e.preventDefault();
+    setGuideTab(guideTabButtons[next].getAttribute('data-guide-tab'));
+    guideTabButtons[next].focus();
+  }
+
+  if (guideOpenBtn) guideOpenBtn.addEventListener('click', openGuideDialog);
+  if (guideDialog) {
+    guideDialog.addEventListener('close', restoreGuideDialog);
+    guideDialog.addEventListener('cancel', function (e) {
+      e.preventDefault();
+      closeGuideDialog();
+    });
+    guideDialog.addEventListener('click', function (e) {
+      if (e.target === guideDialog) closeGuideDialog();
+    });
+    guideDialog.addEventListener('keydown', guideKeydown);
+    if (guideDialogClose) guideDialogClose.addEventListener('click', closeGuideDialog);
+    guideTabButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () { setGuideTab(btn.getAttribute('data-guide-tab')); });
+    });
+  }
+  if (guideListEl) {
+    guideListEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-guide-key]');
+      if (!btn) return;
+      var key = btn.getAttribute('data-guide-key');
+      if (!guideEntry(key)) return;
+      guideState.key = key;
+      renderGuide();
+      var again = guideListEl.querySelector('[data-guide-key="' + key + '"]');
+      if (again && again.focus) again.focus();
+    });
+  }
+  if (guideCompareEl) {
+    guideCompareEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-guide-detail]');
+      if (!btn) return;
+      var key = btn.getAttribute('data-guide-detail');
+      if (!guideEntry(key)) return;
+      guideState.key = key;
+      guideState.tab = 'detail';
+      renderGuide();
+      var detailTab = guideTabButtons.filter(function (b) {
+        return b.getAttribute('data-guide-tab') === 'detail';
+      })[0];
+      if (detailTab) detailTab.focus();
+    });
+  }
+
   els.results.addEventListener('click', function (e) {
     var fig = e.target.closest('.oc-fig--zoom');
     if (!fig) return;
