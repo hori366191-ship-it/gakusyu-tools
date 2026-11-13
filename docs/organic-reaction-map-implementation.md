@@ -295,3 +295,15 @@ node scripts/app11/metrics.cjs --baseline       # v1 の計測
   選択ストロークで個別反応は追えるが、全体俯瞰では混雑が残る。
 - 保留81反応は未公開のまま（`site-src/app11/reactions.json` に保持し、`data.js` には出力しない）。
 - `optimize-layout.cjs` は約8秒。データ更新時のみ実行する。
+
+## 7. モバイル現在位置の折返し修正（2026-11-13）
+
+- 現在位置は常に2行固定（1行目=現在位置の省略表示、2行目=詳細度の説明）。省略はCSSの
+  `text-overflow: ellipsis` だけで行い、全文はDOMに残す。`Core.positionText` の引数・仕様は変えない。
+- 全文は起点ボタンの下に絶対配置のpopoverで表示する。起点ボタンは通常フローのままなので、
+  開閉してもtoolbarの高さと地図の上端は動かない。外側タップ／Escapeで閉じ、`aria-expanded` と
+  フォーカスを起点へ戻す。長文は `max-width` / `max-height` / `overflow-wrap` で画面外へ出さない。
+- 表示更新は `textContent` の差分のみ（毎フレームの `innerHTML` 差し替えをやめた）。`aria-live` は
+  表示と分離し、パン・ズームが落ち着いてから500ms後に1回だけ通知する。
+- 回帰: `node --test --test-name-pattern="\[(static|core|state)\]" scripts/tests/app11-reaction-map.test.cjs`。
+  実操作（長短名・3種の説明・popover・390px幅）は `test` サブエージェントが確認する。

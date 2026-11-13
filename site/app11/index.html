@@ -61,7 +61,17 @@
           <label class="rp-search__label" for="rp-search">物質名・示性式で検索</label>
           <input class="rp-search__input" id="rp-search" type="search" autocomplete="off" spellcheck="false" placeholder="例: エタノール / C2H6O">
         </div>
-        <p class="rp-position" id="rp-position" role="status" aria-live="polite">現在位置: 全体表示</p>
+        <div class="rp-position" id="rp-position">
+          <button type="button" class="rp-position__trigger" id="rp-position-trigger" aria-expanded="false" aria-controls="rp-position-popover">
+            <span class="rp-position__line"><span class="rp-position__label">現在位置: </span><strong class="rp-position__text" id="rp-position-text">全体表示</strong></span>
+            <span class="rp-position__line rp-position__note"><span class="rp-position__label">表示: </span><span id="rp-position-level">分野名のみ</span></span>
+          </button>
+          <div class="rp-position__popover" id="rp-position-popover" role="region" aria-label="現在位置の全文" tabindex="-1" hidden>
+            <p class="rp-position__full" id="rp-position-full"></p>
+            <p class="rp-position__full-note" id="rp-position-full-note"></p>
+          </div>
+          <span class="rp-position__live" id="rp-position-live" role="status" aria-live="polite"></span>
+        </div>
       </div>
       <div class="rp-chips" id="rp-chips" role="group" aria-label="分野へ移動"></div>
     </div>

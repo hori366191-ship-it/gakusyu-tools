@@ -30,6 +30,13 @@
   var cardClose = document.getElementById('rp-card-close');
   var searchInput = document.getElementById('rp-search');
   var positionEl = document.getElementById('rp-position');
+  var positionTrigger = document.getElementById('rp-position-trigger');
+  var positionText = document.getElementById('rp-position-text');
+  var positionLevel = document.getElementById('rp-position-level');
+  var positionPopover = document.getElementById('rp-position-popover');
+  var positionFull = document.getElementById('rp-position-full');
+  var positionFullNote = document.getElementById('rp-position-full-note');
+  var positionLive = document.getElementById('rp-position-live');
   var chipsEl = document.getElementById('rp-chips');
   var listAll = document.getElementById('rp-list-all');
   var listResults = document.getElementById('rp-list-results');
@@ -77,6 +84,11 @@
   var suppressClick = false;
   var animToken = 0;
   var lastLevel = -1;
+  var positionFullValue = '';
+  var positionLevelValue = '';
+  var positionLiveText = '';
+  var positionLiveTimer = 0;
+  var POSITION_LIVE_DELAY = 500;
 
   function esc(text) {
     return String(text == null ? '' : text).replace(/[&<>"']/g, function (ch) {
@@ -457,8 +469,52 @@
       }
     }
     var text = Core.positionText(view, D.regions, D.compounds, selectedInfo, D.meta.canvas, viewSize.w, viewSize.h, activeRegion);
-    positionEl.innerHTML = '現在位置: <strong>' + esc(text) + '</strong>' +
-      ' ／ ' + esc(Core.levelNote(level));
+    var note = Core.levelNote(level);
+    positionFullValue = text;
+    positionLevelValue = note;
+    // 毎フレームの innerHTML 差し替えをやめ、変わったときだけ textContent を更新する。
+    if (positionText.textContent !== text) positionText.textContent = text;
+    if (positionLevel.textContent !== note) positionLevel.textContent = note;
+    if (!positionPopover.hidden) fillPositionPopover();
+    // 連続するパン・ズームでは読み上げず、操作が落ち着いてから1回だけ通知する。
+    if (positionPopover.hidden) schedulePositionLive(text, note);
+  }
+
+  function fillPositionPopover() {
+    var full = '現在位置: ' + positionFullValue;
+    var note = '表示: ' + positionLevelValue;
+    if (positionFull.textContent !== full) positionFull.textContent = full;
+    if (positionFullNote.textContent !== note) positionFullNote.textContent = note;
+  }
+
+  function schedulePositionLive(text, note) {
+    if (positionLiveTimer) window.clearTimeout(positionLiveTimer);
+    positionLiveTimer = window.setTimeout(function () {
+      positionLiveTimer = 0;
+      var message = '現在位置: ' + text + '。表示: ' + note;
+      if (positionLiveText === message) return;
+      positionLiveText = message;
+      positionLive.textContent = message;
+    }, POSITION_LIVE_DELAY);
+  }
+
+  function openPositionPopover() {
+    if (positionLiveTimer) {
+      window.clearTimeout(positionLiveTimer);
+      positionLiveTimer = 0;
+    }
+    fillPositionPopover();
+    positionPopover.hidden = false;
+    positionTrigger.setAttribute('aria-expanded', 'true');
+    positionPopover.focus();
+  }
+
+  function closePositionPopover(restoreFocus) {
+    if (positionPopover.hidden) return;
+    var restore = restoreFocus && positionEl.contains(document.activeElement);
+    positionPopover.hidden = true;
+    positionTrigger.setAttribute('aria-expanded', 'false');
+    if (restore) positionTrigger.focus();
   }
 
   /* ---------------- interactions ---------------- */
@@ -1209,6 +1265,10 @@
     document.getElementById('rp-zoom-out').addEventListener('click', function () { zoomCenter(1 / 1.25); });
     document.getElementById('rp-reset').addEventListener('click', resetView);
     cardClose.addEventListener('click', function () { closeCard(true); });
+    positionTrigger.addEventListener('click', function () {
+      if (positionPopover.hidden) openPositionPopover();
+      else closePositionPopover(true);
+    });
 
     cardDetail.addEventListener('click', function (e) {
       var action = e.target.closest ? e.target.closest('button[data-action="fit-reaction"]') : null;
@@ -1260,10 +1320,24 @@
       target.focus();
     }, true);
 
+    // 現在位置の全文popoverも、外側のクリックで閉じる（popover内の操作では閉じない）
+    document.addEventListener('pointerdown', function (e) {
+      if (positionPopover.hidden) return;
+      if (positionEl.contains(e.target)) return;
+      closePositionPopover(false);
+    }, true);
+
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !card.hidden) {
-        e.preventDefault();
-        closeCard(true);
+      if (e.key === 'Escape') {
+        if (!positionPopover.hidden) {
+          e.preventDefault();
+          closePositionPopover(true);
+          return;
+        }
+        if (!card.hidden) {
+          e.preventDefault();
+          closeCard(true);
+        }
       }
     });
 

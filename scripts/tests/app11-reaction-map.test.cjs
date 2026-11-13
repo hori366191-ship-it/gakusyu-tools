@@ -51,6 +51,12 @@ function cssValue(block, name) {
   return m ? m[1].trim() : '';
 }
 
+function ruleBody(css, selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = css.match(new RegExp(escaped + '\\s*\\{([^}]*)\\}'));
+  return m ? m[1] : '';
+}
+
 function channel(value) {
   const v = value / 255;
   return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
@@ -417,6 +423,123 @@ test('[static] カードは共通説明と個別情報を分離し、キーボ�
   assert.ok(js.includes('独立資料の本文で確認済み'), '反応カードに確認済みを明示する');
   assert.ok(js.includes('r.sources.join'), '検証記録（資料名・節・確認日）を表示する');
   assert.equal(js.includes('未確認（独立資料での確認前）'), false, '未確認の反応を公開する前提の文言を残さない');
+});
+
+test('[static] 現在位置は固定2行で、長短名・3種の説明でも高さが変わらない', () => {
+  const html = read('index.html');
+  const css = read('app.css');
+
+  // 起点ボタン（通常フロー・高さ維持）と、絶対配置のpopoverを兄弟に置く
+  assert.ok(html.includes('id="rp-position-trigger"'), '起点ボタン');
+  assert.ok(html.includes('aria-expanded="false"'), '初期の展開状態');
+  assert.ok(/aria-controls="rp-position-popover"/.test(html), 'popoverとの関連付け');
+  assert.ok(/<button[^>]*id="rp-position-trigger"[\s\S]*?<\/button>\s*<div[^>]*id="rp-position-popover"/.test(html),
+    'popoverは起点ボタンの兄弟（開閉で行の高さを変えない）');
+  assert.ok(html.includes('class="rp-position__line rp-position__note"'), '説明は固定の別行');
+  assert.ok(html.includes('id="rp-position-text"'), '現在位置の全文をDOMに残す');
+  assert.ok(html.includes('id="rp-position-level"'), '詳細度の説明');
+  assert.ok(/id="rp-position-popover"[^>]*\bhidden\b/.test(html), '初期は閉じる');
+  assert.ok(/id="rp-position-popover"[^>]*tabindex="-1"/.test(html), 'キーボードで全文へ移動できる');
+
+  const wrap = ruleBody(css, '.rp-position');
+  assert.match(wrap, /min-width:\s*0/, '長文のintrinsic幅でdesktopを押さない');
+  assert.match(wrap, /max-width:/, 'desktopの幅に上限');
+  assert.match(wrap, /font-size:\s*12\.5px/);
+
+  const trigger = ruleBody(css, '.rp-position__trigger');
+  assert.match(trigger, /display:\s*block/);
+  assert.match(trigger, /width:\s*100%/);
+  assert.equal(/position:\s*absolute/.test(trigger), false, '起点ボタン自体はabsoluteにしない');
+  assert.match(trigger, /cursor:\s*pointer/);
+
+  const line = ruleBody(css, '.rp-position__line');
+  assert.match(line, /height:\s*1\.45em/, '行の高さを固定');
+  assert.match(line, /line-height:\s*1\.45em/);
+  assert.match(line, /white-space:\s*nowrap/);
+  assert.match(line, /overflow:\s*hidden/);
+
+  const textRule = ruleBody(css, '.rp-position__text');
+  assert.match(textRule, /min-width:\s*0/);
+  assert.match(textRule, /overflow:\s*hidden/);
+  assert.match(textRule, /white-space:\s*nowrap/);
+  assert.match(textRule, /text-overflow:\s*ellipsis/, '省略はCSSだけで行う');
+  assert.match(textRule, /var\(--rp-ink\)/);
+
+  const note = ruleBody(css, '.rp-position__note');
+  assert.match(note, /display:\s*block/);
+  assert.match(note, /text-overflow:\s*ellipsis/);
+
+  // popoverは行の高さに関与しない絶対配置。右端基準・幅/高さ上限で画面外とmap-panelのclipを避ける
+  assert.match(ruleBody(css, '.rp-toolbar__row'), /position:\s*relative/, 'popoverの基準はtoolbar行');
+  const popover = ruleBody(css, '.rp-position__popover');
+  assert.match(popover, /position:\s*absolute/);
+  assert.match(popover, /top:\s*calc\(100% \+ 6px\)/);
+  assert.match(popover, /right:\s*0/);
+  assert.match(popover, /max-width:\s*100%/);
+  assert.match(popover, /max-height:/);
+  assert.match(popover, /overflow:\s*auto/);
+  assert.match(popover, /var\(--rp-panel\)/);
+  assert.match(popover, /var\(--rp-line\)/);
+  assert.match(popover, /var\(--rp-shadow\)/);
+  assert.match(ruleBody(css, '.rp-position__full'), /overflow-wrap:\s*anywhere/);
+
+  const mobile = css.split('@media (max-width: 760px)')[1].split('@media (max-width: 430px)')[0];
+  assert.match(mobile, /\.rp-position\s*\{[^}]*order:\s*4[^}]*flex:\s*1 1 100%[^}]*max-width:\s*none/,
+    'モバイルは全幅・固定2行');
+
+  // 3種の説明はいずれも1行で、行の高さを変える要素ではない
+  const notes = [0, 1, 2].map((level) => Core.levelNote(level));
+  assert.equal(new Set(notes).size, 3);
+  notes.forEach((value) => {
+    assert.ok(value.length > 0 && !value.includes('\n'), value);
+    assert.ok(value.length <= 20, '説明は1行に収まる長さ: ' + value);
+  });
+});
+
+test('[static] 現在位置の全文popoverは外側/Escapeで閉じ、aria-expandedとフォーカスを戻す', () => {
+  const js = read('app.js');
+  assert.ok(js.includes("positionTrigger.addEventListener('click'"), 'タップ/キーボードで開閉');
+  assert.ok(js.includes("positionTrigger.setAttribute('aria-expanded', 'true')"));
+  assert.ok(js.includes("positionTrigger.setAttribute('aria-expanded', 'false')"));
+  assert.ok(js.includes('positionPopover.hidden = false'));
+  assert.ok(js.includes('positionPopover.hidden = true'));
+  assert.ok(js.includes('positionPopover.focus()'), '開いた全文へフォーカス');
+  assert.ok(js.includes('positionTrigger.focus()'), '閉じたら起点へ戻す');
+  assert.ok(js.includes('positionEl.contains(document.activeElement)'), '焦点がpopover内のときだけ起点へ戻す');
+  assert.ok(js.includes('positionEl.contains(e.target)'), 'popover内の操作では閉じない');
+  assert.ok(js.includes('closePositionPopover(false)'), '外側クリックで閉じる');
+  assert.ok(js.includes('closePositionPopover(true)'), 'Escapeで閉じてフォーカス復帰');
+  assert.ok(/if \(positionPopover\.hidden\) return;[\s\S]*?positionEl\.contains/.test(js),
+    '外側クリックの閉じ処理は開いているときだけ');
+  assert.ok(/closePositionPopover\(true\);[\s\S]*?closeCard\(true\)/.test(js), 'Escapeはpopover優先');
+  assert.ok(js.includes('positionFull.textContent'), '全文はpopoverのtextContentで表示');
+  assert.equal(js.includes('positionTrigger.title'), false, 'hover titleだけに頼らない');
+});
+
+test('[static] 現在位置の更新はtextContent差分で、aria-liveは操作の落ち着き後に1回だけ', () => {
+  const js = read('app.js');
+  const html = read('index.html');
+  assert.ok(js.includes('if (positionText.textContent !== text) positionText.textContent = text;'),
+    '現在位置は差分更新');
+  assert.ok(js.includes('if (positionLevel.textContent !== note) positionLevel.textContent = note;'),
+    '説明も差分更新');
+  assert.equal(js.includes('positionEl.innerHTML'), false, '現在位置をinnerHTMLで丸ごと差し替えない');
+  const updateFn = js.slice(js.indexOf('function updatePosition'), js.indexOf('function fillPositionPopover'));
+  assert.equal(/\.(?:slice|substring|substr)\(/.test(updateFn), false, '全文をJSで切り詰めない（省略はCSS）');
+  assert.ok(js.includes("var full = '現在位置: ' + positionFullValue;"), 'popoverは省略前の全文を出す');
+  assert.ok(js.includes('viewSize.w, viewSize.h, activeRegion)'), 'Core.positionText の引数仕様を維持');
+  assert.ok(js.includes('var POSITION_LIVE_DELAY = 500;'), '読み上げは操作の落ち着きを待つ');
+  assert.ok(js.includes('window.clearTimeout(positionLiveTimer)'), '連続更新では前の読み上げを捨てる');
+  assert.ok(js.includes('positionLive.textContent = message'));
+  assert.ok(js.includes('if (positionPopover.hidden) schedulePositionLive(text, note);'),
+    '全文を開いている間は二重に読み上げない');
+
+  const live = html.match(/id="rp-position-live"[^>]*/);
+  assert.ok(live, 'live領域を表示と分離する');
+  assert.ok(live[0].includes('role="status"'));
+  assert.ok(live[0].includes('aria-live="polite"'));
+  assert.match(ruleBody(read('app.css'), '.rp-position__live'), /clip-path:\s*inset\(50%\)/,
+    'live領域はレイアウトを持たない');
 });
 
 test('[static] 3テーマ・reduced motion・390px幅の規約に従う', () => {
