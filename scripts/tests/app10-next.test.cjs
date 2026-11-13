@@ -3436,3 +3436,142 @@ test('[static] ②見出しの「?」は320/390でも右端に残り、見出し
   assert.ok(/@media \(max-width: 760px\)[\s\S]*?#chain-shape-list\s*\{[^}]*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s.test(css));
   assert.ok(/@media \(max-width: 760px\)[\s\S]*?\.oc-cards\s*\{[^}]*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s.test(css));
 });
+
+/* ------------------------------------------------------------------
+ * アルコールの級タグ（graph由来・鎖式の一価/多価/アミノアルコール限定）
+ * ------------------------------------------------------------------ */
+
+function alcoholTestGraph(atoms, bonds) {
+  return {
+    atoms: atoms.map((a) => ({ el: a[0], h: a[1], charge: a[2] || '' })),
+    bonds: bonds.map((b) => ({ a: b[0], b: b[1], order: b[2] }))
+  };
+}
+
+test('[chain] アルコール級タグ: 対象21件のgraph由来countと表示タグ', () => {
+  const families = ['alcohol', 'polyol', 'amino-alcohol'];
+  const familyIds = Object.keys(D.COMPOUNDS)
+    .filter((id) => families.includes(C.classify(id).family))
+    .sort();
+  assert.equal(familyIds.length, 24, 'アルコールfamilyはエノール3件を含む24件');
+
+  const expected = {
+    'methanol': '第一級アルコール',
+    'ethanol': '第一級アルコール',
+    'propan-1-ol': '第一級アルコール',
+    'butan-1-ol': '第一級アルコール',
+    '2-methylpropan-1-ol': '第一級アルコール',
+    'pentan-1-ol': '第一級アルコール',
+    '2-methylbutan-1-ol': '第一級アルコール',
+    '3-methylbutan-1-ol': '第一級アルコール',
+    '2,2-dimethylpropan-1-ol': '第一級アルコール',
+    'allyl-alcohol': '第一級アルコール',
+    'ethanolamine': '第一級アルコール',
+    'propan-2-ol': '第二級アルコール',
+    'butan-2-ol': '第二級アルコール',
+    'pentan-2-ol': '第二級アルコール',
+    'pentan-3-ol': '第二級アルコール',
+    '3-methylbutan-2-ol': '第二級アルコール',
+    '2-methylpropan-2-ol': '第三級アルコール',
+    '2-methylbutan-2-ol': '第三級アルコール',
+    'ethylene-glycol': '第一級OH×2',
+    'glycerol': '第一級OH×2・第二級OH×1',
+    'propylene-glycol': '第一級OH×1・第二級OH×1'
+  };
+  const expectedIds = Object.keys(expected).sort();
+  const taggedIds = familyIds.filter((id) => C.alcoholDegreeTags(id).length > 0);
+  assert.deepEqual(taggedIds, expectedIds, '級タグは対象21件だけ');
+  for (const id of expectedIds) {
+    assert.deepEqual(C.alcoholDegreeTags(id), [expected[id]], id + ' の級タグ');
+    const degrees = C.chainDescriptorFor(id).groups.alcoholDegrees;
+    assert.equal((degrees[1] || 0) + (degrees[2] || 0) + (degrees[3] || 0) >= 1, true, id + ' の級count');
+    assert.ok(C.chainRoleLabel(C.chainRoleFor(id)), id + ' の旧roleを残す');
+  }
+  assert.deepEqual(C.chainDescriptorFor('ethylene-glycol').groups.alcoholDegrees, { 1: 2, 2: 0, 3: 0 });
+  assert.deepEqual(C.chainDescriptorFor('propylene-glycol').groups.alcoholDegrees, { 1: 1, 2: 1, 3: 0 });
+  assert.deepEqual(C.chainDescriptorFor('glycerol').groups.alcoholDegrees, { 1: 2, 2: 1, 3: 0 });
+  assert.deepEqual(C.chainDescriptorFor('2-methylpropan-2-ol').groups.alcoholDegrees, { 1: 0, 2: 0, 3: 1 });
+  assert.deepEqual(C.chainDescriptorFor('3-methylbutan-2-ol').groups.alcoholDegrees, { 1: 0, 2: 1, 3: 0 });
+  assert.deepEqual(C.chainDescriptorFor('2-methylbutan-1-ol').groups.alcoholDegrees, { 1: 1, 2: 0, 3: 0 });
+  // エノール3件はC=C上のOHなので級を推測しない。
+  for (const id of ['ethenol', 'prop-1-en-1-ol', 'prop-1-en-2-ol']) {
+    assert.deepEqual(C.chainDescriptorFor(id).groups.alcoholDegrees, { 1: 0, 2: 0, 3: 0 }, id + ' は級なし');
+    assert.deepEqual(C.alcoholDegreeTags(id), [], id + ' はタグなし');
+  }
+  // 鎖式family限定。酸・フェノール・糖などへ広げない。
+  assert.deepEqual(C.alcoholDegreeTags('acetic-acid'), []);
+  assert.deepEqual(C.alcoholDegreeTags('phenol'), []);
+  assert.deepEqual(C.alcoholDegreeTags('glucose'), []);
+});
+
+test('[chain] アルコール級helper: メタノール例外・sp3・非アルコールOHをfail-closed', () => {
+  const degrees = (atoms, bonds) => X.alcoholDegrees(alcoholTestGraph(atoms, bonds));
+  const none = { 1: 0, 2: 0, 3: 0 };
+
+  // implicit Hのメタノールだけ炭素隣接0を第一級へ読み替える。
+  assert.deepEqual(degrees([['C', 3], ['O', 1]], [[0, 1, 1]]), { 1: 1, 2: 0, 3: 0 });
+  // explicit Hでも同じ。
+  assert.deepEqual(degrees([
+    ['C', 0], ['O', 0], ['H', 0], ['H', 0], ['H', 0], ['H', 0]
+  ], [[0, 1, 1], [0, 2, 1], [0, 3, 1], [0, 4, 1], [1, 5, 1]]), { 1: 1, 2: 0, 3: 0 });
+  // 炭素隣接0でもメタノールでなければ第一級にしない。
+  assert.deepEqual(degrees([['C', 2], ['O', 1]], [[0, 1, 1]]), none, 'CH2OHラジカル');
+  assert.deepEqual(degrees([['C', 2], ['O', 1], ['N', 2]], [[0, 1, 1], [0, 2, 1]]), none, 'HOCH2NH2');
+
+  // アリルアルコールはOH炭素がsp3なので第一級。エノールはC=C上なので級なし。
+  assert.deepEqual(degrees([
+    ['C', 2], ['C', 1], ['C', 2], ['O', 1]
+  ], [[0, 1, 2], [1, 2, 1], [2, 3, 1]]), { 1: 1, 2: 0, 3: 0 }, 'sp3のアリルOH');
+  assert.deepEqual(degrees([
+    ['C', 2], ['C', 1], ['O', 1]
+  ], [[0, 1, 2], [1, 2, 1]]), none, 'エノールOH');
+
+  // implicit/explicit Hで同じ級になる。
+  const implicitEthanol = degrees([['C', 3], ['C', 2], ['O', 1]], [[0, 1, 1], [1, 2, 1]]);
+  const explicitEthanol = degrees([
+    ['C', 0], ['C', 2], ['O', 0], ['H', 0], ['H', 0], ['H', 0], ['H', 0]
+  ], [[0, 1, 1], [0, 3, 1], [0, 4, 1], [0, 5, 1], [1, 2, 1], [2, 6, 1]]);
+  assert.deepEqual(implicitEthanol, { 1: 1, 2: 0, 3: 0 });
+  assert.deepEqual(explicitEthanol, implicitEthanol);
+
+  // O–Hの結合次数が単結合でなければ数えない。
+  assert.deepEqual(degrees([['C', 3], ['O', 0], ['H', 0]], [[0, 1, 1], [1, 2, 2]]), none, 'O–Hが二重');
+
+  // カルボン酸・フェノール類・過酸化物・gem-ジオール・エーテル・アルコキシド・N–Oは対象外。
+  assert.deepEqual(degrees([
+    ['C', 3], ['C', 0], ['O', 0], ['O', 1]
+  ], [[0, 1, 1], [1, 2, 2], [1, 3, 1]]), none, 'カルボン酸OH');
+  assert.deepEqual(degrees([
+    ['C', 0], ['C', 1], ['C', 1], ['C', 1], ['C', 1], ['C', 1], ['O', 1]
+  ], [[0, 1, 2], [1, 2, 1], [2, 3, 2], [3, 4, 1], [4, 5, 2], [5, 0, 1], [0, 6, 1]]), none, 'フェノールOH');
+  assert.deepEqual(degrees([
+    ['C', 3], ['O', 0], ['O', 0], ['H', 0]
+  ], [[0, 1, 1], [1, 2, 1], [2, 3, 1]]), none, '過酸化物');
+  assert.deepEqual(degrees([['C', 2], ['O', 1], ['O', 1]], [[0, 1, 1], [0, 2, 1]]), none, 'gem-ジオール');
+  assert.deepEqual(degrees([
+    ['C', 3], ['O', 0], ['C', 3]
+  ], [[0, 1, 1], [1, 2, 1]]), none, 'エーテル');
+  assert.deepEqual(degrees([['C', 3], ['O', 1, '-']], [[0, 1, 1]]), none, 'アルコキシド');
+  assert.deepEqual(degrees([['C', 3], ['O', 1, '+']], [[0, 1, 1]]), none, '陽イオンのOH');
+  assert.deepEqual(degrees([
+    ['C', 3], ['C', 0], ['N', 0], ['O', 1]
+  ], [[0, 1, 1], [1, 2, 2], [2, 3, 1]]), none, 'N–O');
+});
+
+test('[chain] 級タグ追加後も旧amineDegrees・47shape・427routes・カード呼出・16ファイルを維持する', () => {
+  assert.deepEqual(C.chainDescriptorFor('diethylenetriamine').groups.amineDegrees, { 1: 2, 2: 1, 3: 0 });
+  assert.deepEqual(C.chainDescriptorFor('trimethylamine').groups.amineDegrees, { 1: 0, 2: 0, 3: 1 });
+  assert.equal(C.CHAIN_DESCRIPTOR_LIST.length, 47, '①shapeは47件のまま');
+  assert.equal(Object.keys(D.COMPOUNDS).length, 427, '化合物は427件のまま');
+  assert.equal(Object.keys(D.COMPOUNDS).filter((id) => C.routeFor(id)).length, 427, 'route欠落0');
+  assert.equal(PRODUCTION_FILES.length, 16, '本番16ファイル');
+  for (const file of PRODUCTION_FILES) {
+    assert.equal(fs.existsSync(path.join(APP, file)), true, file + ' が存在する');
+  }
+  const js = read('app.js');
+  assert.equal((js.match(/alcoholDegreeTags/g) || []).length, 1, '級タグは結果カードの1か所だけ');
+  const fn = js.slice(js.indexOf('function chainCardBadges'), js.indexOf('function renderChainResults'));
+  assert.ok(fn.includes('C.chainRoleLabel(role)'), '旧role badgeを残す');
+  assert.ok(fn.indexOf('C.chainRoleLabel(role)') < fn.indexOf('C.alcoholDegreeTags(id)'), '旧roleの後に級タグ');
+  assert.ok(fn.includes('c.formulaDisplay || R.formatFormula(c.formula)'), '分子式badgeを残す');
+});

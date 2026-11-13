@@ -837,6 +837,19 @@
     return X.roleLabel(role);
   }
 
+  // 級タグを出す鎖式family。糖・芳香族・ヒドロキシ酸などは今回の対象外とし、
+  // 未知構造の級を推測しない（graph由来の0件はfail-closedでタグなし）。
+  var ALCOHOL_DEGREE_FAMILIES = { alcohol: true, polyol: true, 'amino-alcohol': true };
+
+  function alcoholDegreeTags(id) {
+    var route = CLASSIFICATION[id];
+    if (!route || route.mode !== 'chain' || !ALCOHOL_DEGREE_FAMILIES[route.family]) return [];
+    var d = CHAIN_DESCRIPTOR_BY_COMPOUND[id];
+    if (!d || !d.groups || !d.groups.alcoholDegrees) return [];
+    var label = X.alcoholDegreeLabel(d.groups.alcoholDegrees);
+    return label ? [label] : [];
+  }
+
   var ROLE_ORDER = {
     'amine-1': 1, 'amine-2': 2, 'amine-3': 3, 'amine-1-2': 4,
     monocarboxy: 1, dicarboxy: 2, 'hydroxy-acid': 3, 'hydroxy-polycarboxy': 4,
@@ -1051,6 +1064,7 @@
     chainDescriptorFamilyValid: chainDescriptorFamilyValid,
     chainRoleFor: chainRoleFor,
     chainRoleLabel: chainRoleLabel,
+    alcoholDegreeTags: alcoholDegreeTags,
     chainDescriptorRoles: chainDescriptorRoles,
     chainDescriptorPreview: chainDescriptorPreview,
     chainDescriptorLabel: chainDescriptorLabel,

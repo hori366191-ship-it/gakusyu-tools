@@ -448,6 +448,115 @@
   }
 
   /* ------------------------------------------------------------------
+   * アルコールの級（graph から数える）
+   * ------------------------------------------------------------------
+   * 中性の O–H だけを対象にする。O の重原子隣接は単結合の C 1個に限り、
+   * 結合先Cは全結合が単結合（sp3）であることを要求する。これにより
+   * カルボキシ基・フェノール類・エノール・アルコキシド・過酸化物・
+   * オキシム等の O–H は級を推測せず対象外（0件）にする。
+   * 同じ炭素に2個以上のOHが付くgem-ジオールも級を一意に決めないため除外する。
+   * メタノール（CH3OH）だけは炭素隣接0を例外的に第一級として扱う。
+   */
+  function atomHasNetCharge(a) {
+    if (!a) return false;
+    var charge = a.charge;
+    if (charge === undefined || charge === null || charge === '' || charge === 0 || charge === '0') return false;
+    return true;
+  }
+
+  function hydroxylOxygenInfo(graph, adj, index) {
+    var a = graph.atoms[index];
+    if (!a || a.el !== 'O' || atomHasNetCharge(a)) return null;
+    var neighbors = adj[index] || [];
+    var carbonIndex = -1;
+    var hydrogens = a.h || 0;
+    var ok = true;
+    neighbors.forEach(function (n) {
+      var el = graph.atoms[n.atom] ? graph.atoms[n.atom].el : '';
+      if (el === 'H') {
+        // O–Hは単結合だけを認める（明示Hでも結合次数を確認する）。
+        if (n.order !== 1) { ok = false; return; }
+        hydrogens++;
+        return;
+      }
+      if (el === 'C' && carbonIndex === -1 && n.order === 1) {
+        carbonIndex = n.atom;
+        return;
+      }
+      // エーテル（C–O–C）、過酸化物（O–O）、N–O等はアルコールのO–Hとしない。
+      ok = false;
+    });
+    if (!ok || carbonIndex === -1 || hydrogens !== 1) return null;
+    var carbonNeighbors = adj[carbonIndex] || [];
+    // C=C・C≡C・C=O・芳香環の炭素はsp3ではないため対象外。
+    if (carbonNeighbors.some(function (n) { return n.order !== 1; })) return null;
+    return { carbon: carbonIndex, hydrogens: hydrogens };
+  }
+
+  function isMethanolCarbon(graph, adj, index) {
+    var totalC = graph.atoms.filter(function (a) { return a.el === 'C'; }).length;
+    if (totalC !== 1) return false;
+    var neighbors = adj[index] || [];
+    var heavy = neighbors.filter(function (n) {
+      return graph.atoms[n.atom] && graph.atoms[n.atom].el !== 'H';
+    });
+    if (heavy.length !== 1 || heavy[0].order !== 1) return false;
+    if (graph.atoms[heavy[0].atom].el !== 'O') return false;
+    var hydrogens = (graph.atoms[index].h || 0) + neighbors.filter(function (n) {
+      return graph.atoms[n.atom] && graph.atoms[n.atom].el === 'H' && n.order === 1;
+    }).length;
+    return hydrogens === 3;
+  }
+
+  function alcoholDegrees(graph, adj) {
+    var counts = { 1: 0, 2: 0, 3: 0 };
+    if (!graph || !graph.atoms) return counts;
+    var bonds = adj || atomAdjacency(graph);
+    graph.atoms.forEach(function (a, i) {
+      if (a.el !== 'O') return;
+      var info = hydroxylOxygenInfo(graph, bonds, i);
+      if (!info) return;
+      var carbonNeighbors = bonds[info.carbon] || [];
+      // gem-ジオール（同一炭素にOHが2個以上）は級を決めない。
+      var hydroxylOnCarbon = carbonNeighbors.filter(function (n) {
+        if (!graph.atoms[n.atom] || graph.atoms[n.atom].el !== 'O') return false;
+        var other = hydroxylOxygenInfo(graph, bonds, n.atom);
+        return other && other.carbon === info.carbon;
+      });
+      if (hydroxylOnCarbon.length !== 1) return;
+      var carbonCount = carbonNeighbors.filter(function (n) {
+        return graph.atoms[n.atom] && graph.atoms[n.atom].el === 'C';
+      }).length;
+      if (carbonCount >= 1 && carbonCount <= 3) {
+        counts[carbonCount]++;
+        return;
+      }
+      if (carbonCount === 0 && isMethanolCarbon(graph, bonds, info.carbon)) counts[1]++;
+    });
+    return counts;
+  }
+
+  function alcoholDegreeLabel(degrees) {
+    var d = degrees || {};
+    var first = d[1] || 0;
+    var second = d[2] || 0;
+    var third = d[3] || 0;
+    var total = first + second + third;
+    if (!total) return '';
+    if (total === 1) {
+      if (first === 1) return '第一級アルコール';
+      if (second === 1) return '第二級アルコール';
+      if (third === 1) return '第三級アルコール';
+      return '';
+    }
+    var parts = [];
+    if (first) parts.push('第一級OH×' + first);
+    if (second) parts.push('第二級OH×' + second);
+    if (third) parts.push('第三級OH×' + third);
+    return parts.join('・');
+  }
+
+  /* ------------------------------------------------------------------
    * 官能基の役割（graph から数える）
    * ------------------------------------------------------------------ */
   function analyzeGroups(graph, adj) {
@@ -541,6 +650,7 @@
       ketone: ketone,
       anhydride: anhydride,
       hydroxyl: hydroxyl,
+      alcoholDegrees: alcoholDegrees(graph, adj),
       ether: ether,
       amineDegrees: amineDegrees,
       amine: amineDegrees[1] + amineDegrees[2] + amineDegrees[3],
@@ -1385,6 +1495,8 @@
     shapeFigure: shapeFigure,
     roleLabel: function (role) { return ROLE_LABELS[role] || role; },
     ROLE_LABELS: ROLE_LABELS,
+    alcoholDegrees: alcoholDegrees,
+    alcoholDegreeLabel: alcoholDegreeLabel,
     sameFragmentShape: sameFragmentShape,
     _internal: {
       atomAdjacency: atomAdjacency,
@@ -1393,6 +1505,8 @@
       componentInfo: componentInfo,
       componentShape: componentShape,
       analyzeGroups: analyzeGroups,
+      alcoholDegrees: alcoholDegrees,
+      alcoholDegreeLabel: alcoholDegreeLabel,
       hasRHydrogenOnCore: hasRHydrogenOnCore,
       roleFor: roleFor,
       treeCanonical: treeCanonical,

@@ -595,6 +595,7 @@
     var badges = [];
     var role = C.chainRoleFor(id);
     if (role) badges.push(C.chainRoleLabel(role));
+    C.alcoholDegreeTags(id).forEach(function (tag) { badges.push(tag); });
     badges.push(c.formulaDisplay || R.formatFormula(c.formula));
     badges.push('分子全体 C' + C.carbonCount(c));
     return badges;
