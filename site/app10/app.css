@@ -842,12 +842,12 @@ a { color: var(--oc-accent); }
 .oc-ext-level--探究 { font-style: italic; }
 
 /* ============================================================
-   app10-next: 3つの探し方（鎖式 / 芳香族・環式 / その他）
+   app10-next: 4つの探し方（鎖式 / 芳香族・環式 / その他 / 検索）
    ============================================================ */
-/* モバイルでも3列を維持する。ラベルは折り返し、押せる高さを確保する。 */
+/* モバイルでも4列を維持する。ラベルは折り返し、押せる高さを確保する。 */
 .oc-modes {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin-top: 16px;
 }
@@ -1347,4 +1347,47 @@ body.oc-dialog-open { overflow: hidden; }
     line-height: 1.5;
   }
   .oc-fam, .oc-ring-frag { min-height: 58px; padding: 6px 7px 5px; }
+}
+
+/* ============================================================
+   app10-next: 物質名検索（mode=search）
+   入力は結果領域の外に固定し、結果カードは既存の2列グリッドを使う。
+   ============================================================ */
+.oc-top--search { grid-template-columns: minmax(0, 1fr); }
+.oc-search-field { display: flex; align-items: center; gap: 8px; }
+.oc-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 1px solid var(--oc-line);
+  border-radius: 9px;
+  background: var(--oc-panel-2);
+  color: var(--oc-ink);
+  font: inherit;
+  font-size: 15px;
+}
+.oc-search-input:focus-visible { outline: 2px solid var(--oc-accent); outline-offset: 1px; }
+.oc-search-clear {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--oc-line);
+  border-radius: 9px;
+  background: var(--oc-panel-2);
+  color: var(--oc-ink);
+  font: inherit;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+.oc-search-clear:hover { border-color: var(--oc-accent); background: var(--oc-panel); }
+.oc-search-clear:focus-visible { outline: 2px solid var(--oc-accent); outline-offset: 1px; }
+@media (max-width: 760px) {
+  .oc-top--search { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 430px) {
+  .oc-top--search { grid-template-columns: minmax(0, 1fr); }
+  .oc-search-input { font-size: 14px; padding: 8px 10px; }
 }

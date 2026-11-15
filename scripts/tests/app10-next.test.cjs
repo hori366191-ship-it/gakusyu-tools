@@ -1375,6 +1375,74 @@ test('[search] 索引監査の全用語を名前検索で引ける', () => {
  * 静的配線
  * ------------------------------------------------------------------ */
 
+test('[search2] 物質名検索は化合物だけを exact→prefix→substring で返す', () => {
+  assert.deepEqual(C.searchCompounds('   '), [], '空白だけは0件');
+  assert.deepEqual(C.searchCompounds('!!?！？'), [], '記号だけは0件');
+  assert.deepEqual(C.searchCompounds('C2H6O'), [], '分子式は対象外');
+  assert.deepEqual(C.searchCompounds('DME'), [], '未知の略号を自動生成しない');
+  const ethanol = C.searchCompounds('エタノール');
+  assert.equal(ethanol[0], 'ethanol', '完全一致が先頭');
+  const english = C.searchCompounds('ethanol');
+  assert.equal(english[0], 'ethanol', '英語の完全一致が先頭');
+  assert.ok(english.indexOf('ethanolamine') < english.indexOf('methanol'),
+    'exact → prefix → substring の順（methanolはid内の部分一致）');
+  assert.ok(C.searchCompounds('インベルターゼ').includes('sucrase'), '日本語の既存別名');
+  assert.ok(C.searchCompounds('トレオニン').includes('threonine'), '日本語の既存別名');
+  assert.ok(C.searchCompounds('invertase').includes('sucrase'), '既存の英語別名');
+  assert.equal(D.ALIASES.length, 228, '別名件数は増やさない');
+  const acid = C.searchCompounds('acid');
+  assert.ok(acid.length > 10);
+  assert.equal(new Set(acid).size, acid.length, 'compound idを重複させない');
+  assert.deepEqual(C.searchCompounds('acid'), acid, '同じ入力は同じ順序');
+  assert.ok(C.search('再生セルロース').some((r) => r.id === 'rayon'), '既存C.searchは不変');
+});
+
+test('[search2] 検索モードは入力DOMを結果外に置き、IME確定時だけ1回描画する', () => {
+  const html = read('index.html');
+  const js = read('app.js');
+  const css = read('app.css');
+  const inputAt = html.indexOf('id="compound-search"');
+  const resultsAt = html.indexOf('id="results-body"');
+  assert.ok(inputAt > 0 && resultsAt > 0 && inputAt < resultsAt, '入力は結果領域の外');
+  assert.ok(html.includes('type="search"'));
+  assert.ok(html.includes('autocomplete="off"'));
+  assert.ok(html.includes('for="compound-search"'));
+  assert.ok(html.includes('aria-label="物質名検索"'));
+  assert.ok(html.includes('id="compound-search-clear"'));
+  assert.ok(js.includes("addEventListener('compositionstart'"));
+  assert.ok(js.includes("addEventListener('compositionend'"));
+  assert.ok(js.includes('e.isComposing'));
+  assert.ok(js.includes('lastSearchRenderedQuery === value'), '同じ確定queryの二重描画を防ぐ');
+  assert.ok(js.includes('cancelSearchJobs'));
+  assert.ok(js.includes('searchRenderToken'));
+  assert.ok(js.includes('SEARCH_BATCH'));
+  assert.ok(js.includes('requestAnimationFrame'), '全件を段階描画する');
+  assert.ok(js.includes('C.searchCompounds'));
+  assert.ok(js.includes('chainCardBadges(id)'), '鎖式の級・分子式badgeを再利用');
+  assert.ok(js.includes('renderCard(c, { mode: mode, badges: badges })'), '既存renderCardを再利用');
+  assert.equal((js.match(/alcoholDegreeTags/g) || []).length, 1, '級タグの直接呼出を増やさない');
+  assert.ok(js.includes("url.searchParams.set('q'"), 'qをreplaceStateで復元');
+  assert.equal(js.includes('pushState'), false, '履歴をpushしない');
+  const readQ = js.slice(js.indexOf('function readQuery('), js.indexOf('function writeQuery('));
+  assert.ok(readQ.includes("params.get('q')"));
+  assert.ok(readQ.includes('searchFocus'), 'focus付きの旧URLは正規routeを優先');
+  const writeQ = js.slice(js.indexOf('function writeQuery('), js.indexOf('/* ------------------------------------------------------------------\n   * 初期化'));
+  assert.ok(writeQ.includes("url.searchParams.delete('q')"));
+  assert.ok(js.includes("setAttribute('aria-live', searching ? 'off' : 'polite')"), '検索中は全カードを読み上げない');
+  assert.ok(js.includes("els.resultCount.setAttribute('aria-live', 'polite')"), '件数だけpolite');
+  assert.ok(js.includes("connector.hidden = state.mode === 'search'"), '検索中は条件区切りを出さない');
+  assert.ok(js.includes('els.resultDescription.textContent'));
+  assert.ok(!js.includes('検索語を入力してください'), '空検索に案内文を出さない');
+  const searchRender = js.slice(js.indexOf('function renderSearchResults('), js.indexOf('function categoryForCompound('));
+  assert.equal(searchRender.includes('animateMany'), false, '入力中のheight補間をしない');
+  assert.equal(searchRender.includes('focusResultCard'), false);
+  assert.equal(searchRender.includes('scrollIntoView'), false);
+  assert.equal((css.match(/\.oc-modes\s*\{[^}]*grid-template-columns:/g) || []).length, 1, 'モード列は1定義');
+  assert.ok(/\.oc-modes\s*\{[^}]*repeat\(4,\s*minmax\(0,\s*1fr\)\)/s.test(css), '320/390/1280で4列');
+  assert.ok(/\.oc-top--search\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s.test(css), '検索パネルは1列');
+  assert.ok(/\.oc-cards\s*\{[^}]*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s.test(css), '結果カードは既存2列');
+});
+
 test('[chain] 157件すべてが検証済みexact graphからデスクリプタを持つ', () => {
   const chainIds = Object.keys(D.COMPOUNDS).filter((id) => C.classify(id).mode === 'chain');
   assert.equal(chainIds.length, 157);
@@ -2048,11 +2116,12 @@ test('[chain] 旧totalC URLは一意なら移行し、複数なら通知せず�
   assert.equal(html.includes('chain-structure-list'), false);
 });
 
-test('[static] index.htmlは3モード・テーマ共有・クレジット・favicon・台帳導線をもつ', () => {
+test('[static] index.htmlは4モード・テーマ共有・クレジット・favicon・台帳導線をもつ', () => {
   const html = read('index.html');
   assert.ok(html.includes('data-mode="chain"'));
   assert.ok(html.includes('data-mode="ring"'));
   assert.ok(html.includes('data-mode="other"'));
+  assert.ok(html.includes('data-mode="search"'));
   assert.ok(html.includes('../themes/theme.js'));
   assert.ok(html.includes('../themes/pop.css'));
   assert.ok(html.includes('../themes/forest.css'));
@@ -2501,8 +2570,8 @@ test('[static] 2カラム維持・図の縦併記・拡大dialog・3テーマ', 
   assert.ok(css.includes('.oc-fig__zoom-btn'), '明示的な拡大ボタン');
   assert.equal(css.includes('min-width: 400px'), false, 'モバイルでも全SVGへ最小幅を強制しない');
   assert.equal(/@media \(max-width: 900px\)[\s\S]{0,200}?\.oc-modes\s*\{[^}]*grid-template-columns:\s*1fr/s.test(css), false, 'モードボタンを1列に落とさない');
-  assert.ok(/\.oc-modes\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/s.test(css), 'モードは3列');
-  assert.ok(/@media \(max-width: 430px\)[\s\S]*?\.oc-mode\s*\{[^}]*padding:/s.test(css), '320pxでも3列が収まる余白');
+  assert.ok(/\.oc-modes\s*\{[^}]*grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/s.test(css), 'モードは4列');
+  assert.ok(/@media \(max-width: 430px\)[\s\S]*?\.oc-mode\s*\{[^}]*padding:/s.test(css), '320pxでも4列が収まる余白');
   assert.ok(/\.oc-mode\s*\{[^}]*min-height:\s*44px/s.test(css), '押しやすい高さ');
   const html = read('index.html');
   assert.ok(html.includes('id="fig-dialog"'));
@@ -2882,9 +2951,9 @@ test('[ring] ②の置換基カードは上段fragment・下段置換基名、no
   assert.ok(js.includes('C.ringPresetCard'));
 });
 
-test('[static] モードボタンは320/390/1280で3列、横はみ出しを防ぐ', () => {
+test('[static] モードボタンは320/390/1280で4列、横はみ出しを防ぐ', () => {
   const css = read('app.css');
-  assert.ok(/\.oc-modes\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/s.test(css));
+  assert.ok(/\.oc-modes\s*\{[^}]*grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/s.test(css));
   assert.equal(/@media\s*\(max-width:\s*900px\)[\s\S]{0,300}?\.oc-modes\s*\{[^}]*grid-template-columns:\s*1fr/s.test(css), false, '900pxで1列に落とさない');
   assert.ok(/@media\s*\(max-width:\s*760px\)[\s\S]*?\.oc-mode\s*\{[^}]*padding:\s*9px 8px/s.test(css), '390pxの余白');
   assert.ok(/@media\s*\(max-width:\s*430px\)[\s\S]*?\.oc-mode\s*\{[^}]*padding:\s*8px 6px/s.test(css), '320pxの余白');
@@ -2892,7 +2961,7 @@ test('[static] モードボタンは320/390/1280で3列、横はみ出しを防�
   assert.ok(/\.oc-mode\s*\{[^}]*min-height:\s*44px/s.test(css), 'タップ領域44px');
   assert.ok(/\.oc-mode__main\s*\{[^}]*overflow-wrap:\s*anywhere/s.test(css));
   const html = read('index.html');
-  assert.equal(svgCountText(html, /data-mode="/g), 3, '3モード');
+  assert.equal(svgCountText(html, /data-mode="/g), 4, '4モード');
   assert.ok(html.includes('芳香族・<wbr>環式'), '長いラベルを折り返し可能');
   assert.ok(html.includes('aria-label="探し方のモード"'));
 });

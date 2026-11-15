@@ -54,6 +54,10 @@
       <strong class="oc-mode__main">その他</strong>
       <span class="oc-mode__sub">糖アミノ酸高分子等</span>
     </button>
+    <button type="button" class="oc-mode" data-mode="search" aria-pressed="false">
+      <strong class="oc-mode__main">検索</strong>
+      <span class="oc-mode__sub">物質名から探す</span>
+    </button>
   </nav>
 
   <div class="oc-stage" id="oc-stage">
@@ -145,6 +149,21 @@
       </div>
     </article>
   </section>
+
+  <section class="oc-top oc-top--search" id="search-panels" aria-label="物質名検索" hidden>
+    <article class="oc-panel">
+      <div class="oc-panel__head">
+        <h2><span class="oc-num">1</span>検索</h2>
+      </div>
+      <div class="oc-panel__body">
+        <label class="oc-control-label" for="compound-search">物質名検索</label>
+        <div class="oc-search-field">
+          <input type="search" id="compound-search" class="oc-search-input" autocomplete="off" spellcheck="false" maxlength="80" aria-label="物質名検索" placeholder="名前の一部">
+          <button type="button" class="oc-search-clear" id="compound-search-clear" aria-label="検索語を消す" hidden>×</button>
+        </div>
+      </div>
+    </article>
+  </section>
   </div>
 
   <div class="oc-connector" aria-hidden="true">
@@ -167,10 +186,11 @@
 
   <section class="oc-info" aria-label="使い方と収録範囲">
     <section>
-      <h2>3つの探し方</h2>
+      <h2>4つの探し方</h2>
       <p><strong>鎖式</strong>は、炭化水素部分の炭素数と骨格、化合物分類を選びます。</p>
       <p><strong>芳香族・環式</strong>は、固定した骨格と置換基の組み合わせを選びます。</p>
       <p><strong>その他</strong>は、categoryとfamilyから、糖類・アミノ酸・脂質・高分子・材料などを探します。単一の固定分子式をもたないfamily・材料・混合物は、純物質カードに偽装しません。</p>
+      <p><strong>検索</strong>は、物質名の一部から登録済みの化合物を探します。</p>
     </section>
     <section>
       <h2>収録範囲</h2>

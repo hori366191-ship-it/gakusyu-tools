@@ -2,7 +2,7 @@
  * 有機化学ビルダー（app10-next）— UIロジック
  *
  * 依存: data.js (window.OCData), draw.js (window.OCDraw), catalog.js (window.OCCatalog)
- * 3つの探し方（鎖式 / 芳香族・環式 / その他）を同じ画面で切り替える。
+ * 3つの探し方（鎖式 / 芳香族・環式 / その他）と物質名検索を同じ画面で切り替える。
  * 既存のカード・構造図・3テーマ・高さアニメーションを引き継ぐ。
  */
 (function () {
@@ -30,6 +30,7 @@
     ringPreset: 'none',
     otherCategory: 'sugar',
     otherFamily: 'monosaccharide',
+    searchQuery: '', // 検索モード専用（他モードの条件とは独立）
     focus: ''
   };
   // 初回描画（URLのfocus含む）はアニメーションしない。
@@ -67,6 +68,9 @@
     otherCategoryList: document.getElementById('other-category-list'),
     otherFamilyList: document.getElementById('other-family-list'),
     otherPreview: document.getElementById('other-preview'),
+    searchPanels: document.getElementById('search-panels'),
+    searchInput: document.getElementById('compound-search'),
+    searchClear: document.getElementById('compound-search-clear'),
     results: document.getElementById('results-body'),
     resultCount: document.getElementById('result-count'),
     resultDescription: document.getElementById('result-description'),
@@ -1026,6 +1030,94 @@
       '<a href="./ledger.html#m-' + encodeURIComponent(m.id) + '">収録台帳で見る →</a></div></article>';
   }
 
+  /* ------------------------------------------------------------------
+   * 物質名検索（mode=search）
+   * 入力DOMは結果領域の外に固定し、結果だけを描き替える。
+   * 変換中は前回の確定結果を残し、確定時に1回だけ描画する。
+   * ------------------------------------------------------------------ */
+  var SEARCH_QUERY_MAX = 80;
+  var SEARCH_BATCH = 24;
+  var searchRenderToken = 0;
+  var searchCardCache = {};
+  var searchComposing = false;
+  var lastSearchRenderedQuery = null;
+
+  function cancelSearchJobs() {
+    searchRenderToken++;
+  }
+
+  function syncSearchClear() {
+    if (!els.searchClear || !els.searchInput) return;
+    els.searchClear.hidden = !els.searchInput.value;
+  }
+
+  function commitSearch() {
+    if (!els.searchInput) return;
+    var value = String(els.searchInput.value || '').slice(0, SEARCH_QUERY_MAX);
+    state.searchQuery = value;
+    syncSearchClear();
+    if (state.mode !== 'search') return;
+    // compositionend直後のinputなど、同じ確定queryの二重描画を避ける。
+    if (lastSearchRenderedQuery === value) return;
+    lastSearchRenderedQuery = value;
+    renderSearchResults();
+    writeQuery();
+  }
+
+  // 化合物の出自（元のmode）は変えず、既存のカード描画をそのまま使う。
+  function searchCardHtml(id) {
+    if (searchCardCache[id]) return searchCardCache[id];
+    var c = D.COMPOUNDS[id];
+    if (!c) return '';
+    var route = C.routeFor(id);
+    var mode = route ? route.mode : 'other';
+    var badges;
+    if (mode === 'chain') {
+      badges = chainCardBadges(id);
+    } else if (mode === 'ring') {
+      var rs = C.RING_SYSTEM_MAP[route.system];
+      badges = [rs ? rs.label : '環式'];
+    } else {
+      var fam = C.OTHER_GROUP_MAP[route.family];
+      badges = [fam && fam.label ? fam.label : 'その他'];
+    }
+    var html = renderCard(c, { mode: mode, badges: badges });
+    searchCardCache[id] = html;
+    return html;
+  }
+
+  function renderSearchResults() {
+    var token = ++searchRenderToken;
+    lastSearchRenderedQuery = state.searchQuery;
+    var ids = C.searchCompounds(state.searchQuery || '');
+    els.resultDescription.textContent = '物質名検索';
+    els.resultCount.textContent = ids.length + ' 種類';
+    if (!ids.length) {
+      // 空・空白・記号だけ、または0件。案内文は出さず、件数だけ正直に残す。
+      els.results.innerHTML = '';
+      return;
+    }
+    // 最初のbatchは同期的に描画し、残りはrAFで続ける（図の全量生成で入力が詰まらない）。
+    els.results.innerHTML = '<div class="oc-cards' + (ids.length === 1 ? ' oc-cards--single' : '') + '">' +
+      ids.slice(0, SEARCH_BATCH).map(searchCardHtml).join('') + '</div>' + resultsNote();
+    var wrap = els.results.querySelector('.oc-cards');
+    var next = SEARCH_BATCH;
+    function step() {
+      if (token !== searchRenderToken || !wrap) return;
+      var end = Math.min(next + SEARCH_BATCH, ids.length);
+      wrap.insertAdjacentHTML('beforeend', ids.slice(next, end).map(searchCardHtml).join(''));
+      next = end;
+      if (next < ids.length) {
+        if (typeof requestAnimationFrame === 'function') requestAnimationFrame(step);
+        else step();
+      }
+    }
+    if (next < ids.length) {
+      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(step);
+      else step();
+    }
+  }
+
   function categoryForCompound(id) {
     var r = C.routeFor(id);
     if (!r) return 'other';
@@ -1062,6 +1154,21 @@
     els.chainPanels.hidden = state.mode !== 'chain';
     els.ringPanels.hidden = state.mode !== 'ring';
     els.otherPanels.hidden = state.mode !== 'other';
+    if (els.searchPanels) els.searchPanels.hidden = state.mode !== 'search';
+    // 検索は条件の組み合わせではないため、区切り（＋ 条件を組み合わせて表示）を出さない。
+    var connector = document.querySelector('.oc-connector');
+    if (connector) connector.hidden = state.mode === 'search';
+    // 検索中はカード全量のatomic読み上げを止め、件数だけをpoliteにする。
+    var searching = state.mode === 'search';
+    els.results.setAttribute('aria-live', searching ? 'off' : 'polite');
+    if (searching) {
+      els.resultCount.setAttribute('aria-live', 'polite');
+      els.resultCount.setAttribute('aria-atomic', 'true');
+    } else {
+      els.resultCount.removeAttribute('aria-live');
+      els.resultCount.removeAttribute('aria-atomic');
+    }
+    syncSearchClear();
   }
 
   function renderDataStatus() {
@@ -1099,7 +1206,8 @@
   }
 
   function renderModeResults() {
-    if (state.mode === 'ring') renderRingResults();
+    if (state.mode === 'search') renderSearchResults();
+    else if (state.mode === 'ring') renderRingResults();
     else if (state.mode === 'other') renderOtherResults();
     else renderChainResults();
   }
@@ -1122,7 +1230,7 @@
         { el: els.stage, before: stageBefore, render: function () {
           if (state.mode === 'ring') renderRingPanels();
           else if (state.mode === 'other') renderOtherPanels();
-          else renderChainPanels();
+          else if (state.mode === 'chain') renderChainPanels();
         } },
         { el: els.results, render: renderModeResults }
       ], { animate: animate });
@@ -1141,6 +1249,12 @@
         right = els.otherRightBody;
         renderLeft = function () { syncOther(); };
         renderRight = function () { renderOtherPreview(); };
+      } else if (state.mode === 'search') {
+        // 検索欄は静的DOM。条件パネルは無いので結果だけを描く。
+        left = null;
+        right = null;
+        renderLeft = function () {};
+        renderRight = function () {};
       }
       animateMany([
         { el: left, render: renderLeft },
@@ -1153,10 +1267,14 @@
   }
 
   function selectMode(mode) {
-    if (mode !== 'chain' && mode !== 'ring' && mode !== 'other') return;
+    if (mode !== 'chain' && mode !== 'ring' && mode !== 'other' && mode !== 'search') return;
     var changed = state.mode !== mode;
     state.mode = mode;
     state.focus = '';
+    if (changed) {
+      cancelSearchJobs();
+      lastSearchRenderedQuery = null;
+    }
     update({ modeChanged: changed });
   }
 
@@ -1286,6 +1404,18 @@
     try { params = new URLSearchParams(location.search); } catch (e) { params = null; }
     if (!params) return;
     var mode = params.get('mode');
+    if (mode === 'search') {
+      state.mode = 'search';
+      var searchQ = params.get('q');
+      if (searchQ) state.searchQuery = String(searchQ).slice(0, SEARCH_QUERY_MAX);
+      // focus付きの旧URLは、検索より既存の正規route復元を優先する。
+      var searchFocus = params.get('focus');
+      if (searchFocus && D.COMPOUNDS[searchFocus] && C.routeFor(searchFocus)) {
+        applyRoute(C.routeFor(searchFocus));
+        state.focus = searchFocus;
+      }
+      return;
+    }
     if (mode === 'chain') {
       state.mode = 'chain';
       var focusParam = params.get('focus');
@@ -1446,8 +1576,19 @@
       var url = new URL(location.href);
       url.searchParams.delete('skeleton');
       url.searchParams.delete('group');
+      url.searchParams.delete('q');
       url.searchParams.set('mode', state.mode);
-      if (state.mode === 'chain') {
+      if (state.mode === 'search') {
+        if (state.searchQuery) url.searchParams.set('q', state.searchQuery);
+        url.searchParams.delete('family');
+        url.searchParams.delete('cpartial');
+        url.searchParams.delete('shape');
+        url.searchParams.delete('system');
+        url.searchParams.delete('preset');
+        url.searchParams.delete('category');
+        url.searchParams.delete('c');
+        url.searchParams.delete('structure');
+      } else if (state.mode === 'chain') {
         if (state.chainFamily) url.searchParams.set('family', state.chainFamily);
         else url.searchParams.delete('family');
         url.searchParams.set('cpartial', String(state.chainPartialC));
@@ -1526,6 +1667,41 @@
   document.querySelectorAll('[data-mode]').forEach(function (btn) {
     btn.addEventListener('click', function () { selectMode(btn.getAttribute('data-mode')); });
   });
+
+  if (els.searchInput) {
+    els.searchInput.addEventListener('compositionstart', function () {
+      searchComposing = true;
+    });
+    els.searchInput.addEventListener('compositionend', function () {
+      searchComposing = false;
+      commitSearch();
+    });
+    els.searchInput.addEventListener('input', function (e) {
+      // 変換中は前回の確定結果を維持し、描画しない。
+      if (searchComposing || e.isComposing) {
+        state.searchQuery = els.searchInput.value.slice(0, SEARCH_QUERY_MAX);
+        syncSearchClear();
+        return;
+      }
+      commitSearch();
+    });
+    // type=searchのネイティブclear（Escape含む）でも同じ確定経路を通す。
+    els.searchInput.addEventListener('search', function () { commitSearch(); });
+    els.searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && els.searchInput.value) {
+        els.searchInput.value = '';
+        commitSearch();
+        e.preventDefault();
+      }
+    });
+  }
+  if (els.searchClear) {
+    els.searchClear.addEventListener('click', function () {
+      els.searchInput.value = '';
+      commitSearch();
+      try { els.searchInput.focus(); } catch (e) {}
+    });
+  }
 
   /* ------------------------------------------------------------------
    * 図の拡大ダイアログ（Escape・フォーカス復帰・スクロール復元）
@@ -1937,6 +2113,10 @@
   buildRingList();
   bindHelp(document);
   readQuery();
+  if (els.searchInput) {
+    els.searchInput.value = state.searchQuery || '';
+    syncSearchClear();
+  }
   if (C.chainPartialOptions().indexOf(state.chainPartialC) === -1) {
     state.chainPartialC = C.INITIAL_CHAIN_PARTIAL;
     state.chainShape = C.INITIAL_CHAIN_SHAPE;

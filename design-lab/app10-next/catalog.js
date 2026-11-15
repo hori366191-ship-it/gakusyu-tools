@@ -1005,6 +1005,56 @@
 
   var SEARCH_INDEX = searchIndex();
 
+  // 物質名検索（mode=search）専用の索引。対象はD.COMPOUNDSの name / id / 既存別名だけ。
+  // formula・material・family・categoryは混ぜない。既存の search() とは独立。
+  var COMPOUND_SEARCH_INDEX = null;
+
+  function compoundSearchIndex() {
+    if (COMPOUND_SEARCH_INDEX) return COMPOUND_SEARCH_INDEX;
+    COMPOUND_SEARCH_INDEX = Object.keys(D.COMPOUNDS).map(function (id) {
+      var c = D.COMPOUNDS[id];
+      var terms = [c.name, id].concat(D.aliasesFor ? D.aliasesFor(id) : []).map(function (t) {
+        return D.normalizeName(t);
+      });
+      return { id: id, terms: terms };
+    });
+    return COMPOUND_SEARCH_INDEX;
+  }
+
+  // 記号・空白だけの入力は0件（normalizeNameは記号を残すため、文字の有無で判定する）。
+  function searchHasMeaning(query) {
+    return /[0-9a-z\u3040-\u30ff\u3400-\u9fff]/i.test(query);
+  }
+
+  function searchCompounds(query) {
+    var q = D.normalizeName(query || '');
+    if (!q || !searchHasMeaning(q)) return [];
+    var rows = compoundSearchIndex();
+    var hits = [];
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var score = 0;
+      for (var j = 0; j < row.terms.length; j++) {
+        var term = row.terms[j];
+        if (!term) continue;
+        if (term === q) { score = 3; break; }
+        if (term.indexOf(q) === 0) { if (score < 2) score = 2; continue; }
+        if (term.indexOf(q) !== -1 && score < 1) score = 1;
+      }
+      if (score) hits.push({ id: row.id, score: score, order: i });
+    }
+    // 完全一致 → 前方一致 → 部分一致。同じscoreは索引順（Object.keys順）で安定。
+    hits.sort(function (a, b) { return b.score - a.score || a.order - b.order; });
+    var seen = {};
+    var out = [];
+    hits.forEach(function (hit) {
+      if (seen[hit.id]) return;
+      seen[hit.id] = true;
+      out.push(hit.id);
+    });
+    return out;
+  }
+
   function search(query) {
     var q = D.normalizeName(query || '');
     if (!q) return [];
@@ -1091,6 +1141,7 @@
     hasRing: hasRing,
     searchIndex: searchIndex,
     search: search,
+    searchCompounds: searchCompounds,
     auditCoverage: auditCoverage
   };
 });
