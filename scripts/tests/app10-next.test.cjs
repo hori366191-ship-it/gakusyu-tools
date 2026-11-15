@@ -2029,19 +2029,20 @@ test('[static] 本番16ファイルはdesign-labとHTML正規化後・非HTML by
   }
 });
 
-test('[chain] 旧totalC URLは一意なら移行し、複数なら明示して選び直す', () => {
+test('[chain] 旧totalC URLは一意なら移行し、複数なら通知せず選択解除だけ行う', () => {
   const js = read('app.js');
   assert.ok(js.includes("params.get('cpartial')"));
   assert.ok(js.includes("params.get('shape')"));
   assert.ok(js.includes('chainCandidatesForLegacy'));
-  assert.ok(js.includes('先頭の物質へは自動で移動しません'));
-  assert.ok(js.includes('focusを優先'));
+  assert.equal(js.includes('先頭の物質へは自動で移動しません'), false, '案内文を出さない');
+  assert.ok(js.includes('applyRoute(C.routeFor(focusParam))'), 'focusは正確な経路へ復元');
   assert.ok(js.includes("url.searchParams.set('cpartial'"));
   assert.ok(js.includes("url.searchParams.delete('c')"));
   assert.ok(js.includes("url.searchParams.delete('structure')"));
   assert.equal(js.includes("url.searchParams.set('c', String(state.chainCarbon))"), false);
   assert.ok(js.includes('legacySkeletonRoute'), '旧ind互換を残す');
-  assert.ok(js.includes('旧URLの骨格'));
+  assert.ok(js.includes('legacyPresetForGroup'), '旧骨格+groupの移行を残す');
+  assert.equal(js.includes('旧URLの骨格「'), false, '移行通知を出さない');
   const html = read('index.html');
   assert.ok(html.includes('chain-shape-list'));
   assert.equal(html.includes('chain-structure-list'), false);
@@ -2208,7 +2209,7 @@ test('[chain] 分類順・初期値・炭化水素部分Cの選択肢が分類�
   assert.ok(js.includes('C.chainFamiliesForDescriptor'), '表示はchainFamiliesForDescriptorで0件を除外');
   assert.ok(js.includes('C.chainPartialOptions'), '炭素選択肢はデスクリプタから作る');
   assert.ok(js.includes("state.chainShape = '';"), '無効時は骨格の形を解除する');
-  assert.ok(js.includes('骨格の形を選んでください'), '未選択時の案内');
+  assert.equal(js.includes('骨格の形を選んでください'), false, '未選択の案内文を出さない');
   assert.equal(js.includes('state.chainCarbon ='), false, '新UIで総炭素数を選択しない');
 });
 
@@ -2232,18 +2233,83 @@ test('[chain] ①変更は②だけを解除し、上流デスクリプタを変
   const familyFn = js.slice(js.indexOf('function selectChainFamily'), js.indexOf('function selectChainPartial'));
   assert.ok(partialFn.includes("state.chainShape = '';"), 'C変更で骨格の形を解除する');
   assert.ok(partialFn.includes("state.chainFamily = '';"), 'C変更で分類も解除する');
-  assert.ok(partialFn.includes('骨格の形を選んでください'), '勝手に別骨格へ飛ばさない案内');
+  assert.equal(partialFn.includes('notice'), false, '解除時に通知文を出さない');
+  assert.ok(partialFn.includes('state.focus = \'\';'), '解除後もfocusは正規経路に任せる');
   assert.equal(shapeFn.includes('state.chainPartialC ='), false, '骨格選択でC数を書き換えない');
   assert.ok(shapeFn.includes('chainDescriptorFamilyValid'), '骨格変更時は分類の有効性だけ確認する');
   assert.equal(shapeFn.includes('骨格の形が変わったため'), false, '骨格変更では分類解除の案内文を出さない');
   assert.ok(shapeFn.includes("state.chainFamily = '';"), '骨格変更で無効な分類は解除する');
-  assert.ok(shapeFn.includes("state.notice = '';"), '骨格変更時は案内文を空のままにする');
+  assert.equal(shapeFn.includes('notice'), false, '骨格変更時に通知文を出さない');
   assert.ok(shapeFn.includes('update();'), '骨格変更後も再描画する');
   assert.equal(familyFn.includes('state.chainShape ='), false, '②から①の骨格を書き換えない');
   assert.equal(familyFn.includes('state.chainPartialC ='), false, '②から①のC数を書き換えない');
   assert.ok(familyFn.includes('chainDescriptorFamilyValid'), '②は有効な分類だけ選ぶ');
   assert.ok(js.includes('if (!C.chainDescriptorFamilyValid(state.chainShape, family)) return;'),
     '非表示分類へのstaleイベントは①を変えない');
+});
+
+test('[ui] 不具合以外の通知・未選択案内は出さず、検証エラーだけ残す', () => {
+  const js = read('app.js');
+  const html = read('index.html');
+  const css = read('app.css');
+  // 通知用のstate・helper・DOM・スタイルを持たない。
+  assert.equal(/state\.notice|\bnotice\s*:/.test(js), false, '通知stateを残さない');
+  assert.equal(js.includes('queryNotice'), false, '通知helperを残さない');
+  assert.equal(html.includes('query-notice'), false, '通知DOMを残さない');
+  assert.equal(html.includes('oc-notice'), false, '上部の案内バナーを残さない');
+  assert.equal(html.includes('role="status"'), false, '通知専用のlive regionを残さない');
+  assert.equal(css.includes('.oc-query-notice'), false, '通知のスタイルを残さない');
+  assert.equal(css.includes('.oc-preview__locked-note'), false, '未選択案内のスタイルを残さない');
+  // 操作案内・移行通知の文言を別文言で再導入しない。
+  for (const phrase of [
+    '骨格の形を選んでください',
+    '化合物分類を選んでください',
+    '選び直してください',
+    '移行しました',
+    '先頭の物質へは自動で移動しません',
+    '初期表示に戻しました',
+    '化学的に存在しない',
+    '登録範囲を確認してください'
+  ]) {
+    assert.equal(js.includes(phrase), false, '案内文を残さない: ' + phrase);
+  }
+  // 未選択時は空文字で描画し、件数だけ正直に残す。
+  const chainResults = js.slice(js.indexOf('function renderChainResults('), js.indexOf('function ringSystem('));
+  assert.ok(chainResults.includes("els.resultCount.textContent = '0 種類';"), '未選択でも0件を正直に表示');
+  assert.ok(chainResults.includes("els.results.innerHTML = '';"), '未選択の空カードを残さない');
+  assert.ok(js.includes('この条件では0種類です'), '0件は結果見出しで示す');
+  assert.equal(js.includes('登録データの範囲を示しています'), false, '0件の長い免責を残さない');
+  // 未確認ラベルはデータ状態として残す（不具合を隠さない）。
+  assert.ok(js.includes(": '未確認'"), '検証ラベル未確認を残す');
+});
+
+test('[ui] 登録データ検証エラーと構造式の失敗表示は残す', () => {
+  const js = read('app.js');
+  const card = js.slice(js.indexOf('function renderCard'), js.indexOf('function routeHref'));
+  assert.ok(card.includes('登録データの検証に失敗しました'), '検証エラーの見出しを残す');
+  assert.ok(card.includes('check.errors'), '具体的なerrorsを残す');
+  assert.ok(card.includes('表示を停止しています'), '停止理由を残す');
+  const draw = read('draw.js');
+  assert.ok(draw.includes('構造式を表示できません'), '図の失敗表示を残す');
+});
+
+test('[url] 通知を出さずにURL復元と選択解除だけを維持する', () => {
+  const js = read('app.js');
+  const readQuery = js.slice(js.indexOf('function readQuery('), js.indexOf('function writeQuery('));
+  assert.equal(readQuery.includes('notice'), false, 'URL復元で通知しない');
+  assert.ok(readQuery.includes('applyRoute(C.routeFor(focusParam))'), 'focusは正確な経路へ復元');
+  assert.ok(readQuery.includes('state.focus = focusParam'), 'focusを保持');
+  assert.ok(readQuery.includes('C.chainDescriptorById'), '未収録shapeは適用しない');
+  assert.ok(readQuery.includes("state.chainShape = '';"), '未収録shapeは選択解除だけ行う');
+  assert.ok(readQuery.includes("state.chainFamily = '';"), '不正な分類は選択解除だけ行う');
+  assert.ok(readQuery.includes('chainCandidatesForLegacy'), '旧URLの移行判定を維持');
+  assert.ok(readQuery.includes('legacySkeletonRoute'), '旧骨格URLの移行を維持');
+  assert.ok(readQuery.includes('matches.length === 1'), '一意な旧URLだけ自動移行');
+  assert.ok(readQuery.includes('chainRoutes.every'), '複数候補は条件だけ移行して先頭を選ばない');
+  const selectPartial = js.slice(js.indexOf('function selectChainPartial'), js.indexOf('function selectChainShape'));
+  assert.equal(selectPartial.includes('notice'), false, 'C数変更で通知しない');
+  assert.ok(selectPartial.includes("state.chainShape = '';"), 'C数変更で骨格の形を解除');
+  assert.ok(selectPartial.includes("state.chainFamily = '';"), 'C数変更で分類を解除');
 });
 
 test('[ring] 追加なしは骨格単体だけを返す', () => {
@@ -2465,7 +2531,7 @@ test('[static] 2カラム維持・図の縦併記・拡大dialog・3テーマ', 
     assert.ok(text.includes('../themes/forest.css'));
   }
   assert.ok(js.includes('ringSubPreviewHtml'));
-  assert.ok(js.includes('置換基を追加しません'));
+  assert.equal(js.includes('置換基を追加しません'), false, '追加なしの操作案内を出さない');
 });
 
 test('[figures] 派生graph32件＋複合3件の独立構造signatureと結合価', () => {
@@ -3170,7 +3236,7 @@ test('[static] 更新はstage/body/resultsを1回ずつ描画し、preview単体
   assert.ok(js.includes('els.stage'));
   assert.ok(js.includes('bindHelp'));
   assert.ok(js.includes('motion.animateDisclosure'));
-  const updateFn = js.slice(js.indexOf('function update('), js.indexOf('function renderQueryNotice'));
+  const updateFn = js.slice(js.indexOf('function update('), js.indexOf('function selectMode('));
   assert.equal((updateFn.match(/renderChainPreview\(/g) || []).length, 1);
   assert.equal((updateFn.match(/renderRingPreview\(/g) || []).length, 1);
   assert.equal((updateFn.match(/renderOtherPreview\(/g) || []).length, 1);

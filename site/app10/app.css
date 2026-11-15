@@ -124,30 +124,6 @@ a { color: var(--oc-accent); }
 .oc-header__link:hover { opacity: 1; background: rgba(255, 255, 255, .12); }
 .oc-header__link:focus-visible { outline: 3px solid #8fd6d9; outline-offset: 2px; }
 
-/* ---------- notice ---------- */
-.oc-notice {
-  margin: 18px 0 0;
-  padding: 11px 15px;
-  background: var(--oc-panel);
-  border: var(--oc-panel-border);
-  border-left: 4px solid var(--oc-accent);
-  border-radius: var(--oc-radius-sm);
-  box-shadow: var(--oc-shadow);
-  color: var(--oc-muted);
-  font-size: 12.5px;
-}
-.oc-notice strong { color: var(--oc-ink); }
-.oc-query-notice {
-  margin: 12px 0 0;
-  padding: 9px 13px;
-  background: var(--oc-accent-bg);
-  border: 1px solid var(--oc-accent);
-  border-radius: var(--oc-radius-sm);
-  color: var(--oc-accent-ink);
-  font-size: 12.5px;
-  font-weight: 700;
-}
-
 /* ---------- panels ---------- */
 /* 3モード共通の外枠。モード切替時はこの高さだけを伸縮する。 */
 .oc-stage { min-width: 0; }
@@ -370,14 +346,6 @@ a { color: var(--oc-accent); }
 }
 .oc-preview .oc-micro { white-space: normal; max-width: 100%; overflow-wrap: anywhere; text-align: center; }
 .oc-ring-preview__meta .oc-micro { white-space: normal; overflow-wrap: anywhere; }
-.oc-preview__locked-note {
-  margin: auto;
-  max-width: 270px;
-  font-size: 12.5px;
-  line-height: 1.85;
-  color: var(--oc-muted);
-  text-align: center;
-}
 .oc-preview__stack { width: 100%; display: grid; gap: 7px; }
 .oc-group-preview { flex: 1; display: grid; place-items: center; width: 100%; min-height: 150px; }
 .oc-group-formula {

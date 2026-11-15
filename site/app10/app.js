@@ -30,8 +30,7 @@
     ringPreset: 'none',
     otherCategory: 'sugar',
     otherFamily: 'monosaccharide',
-    focus: '',
-    notice: ''
+    focus: ''
   };
   // 初回描画（URLのfocus含む）はアニメーションしない。
   var firstUpdate = true;
@@ -71,8 +70,7 @@
     results: document.getElementById('results-body'),
     resultCount: document.getElementById('result-count'),
     resultDescription: document.getElementById('result-description'),
-    dataStatus: document.getElementById('oc-data-status'),
-    queryNotice: document.getElementById('query-notice')
+    dataStatus: document.getElementById('oc-data-status')
   };
 
   if (!els.chainPanels || !els.results) return;
@@ -86,19 +84,6 @@
   function compoundName(id) {
     var c = D.COMPOUNDS[id];
     return c ? c.name : id;
-  }
-
-  function familyName(id) {
-    var f = D.familyById ? D.familyById(id) : null;
-    if (f) return f.name;
-    if (C.CHAIN_FAMILY_LABEL[id]) return C.CHAIN_FAMILY_LABEL[id];
-    var g = C.OTHER_GROUP_MAP[id];
-    return g ? g.label : id;
-  }
-
-  function groupLabel(id) {
-    var g = D.groupById(id);
-    return g ? g.label : id;
   }
 
   function modeLabel(mode) {
@@ -312,7 +297,6 @@
     }
     if (state.chainFamily && !C.chainDescriptorFamilyValid(state.chainShape, state.chainFamily)) {
       state.chainFamily = '';
-      state.notice = '骨格の形に該当しない化合物分類だったため、分類の選択を解除しました。分類を選び直してください。';
     }
   }
 
@@ -379,7 +363,6 @@
     if (state.chainShape && !shapes.some(function (d) { return d.id === state.chainShape; })) {
       state.chainShape = '';
       state.chainFamily = '';
-      state.notice = '炭化水素部分の炭素数が変わったため、骨格の形の選択を解除しました。骨格の形を選んでください。';
     }
     var active = document.activeElement && document.activeElement.closest ? document.activeElement.closest('[data-chain-shape]') : null;
     var activeShape = active ? active.getAttribute('data-chain-shape') : null;
@@ -422,8 +405,7 @@
   function renderChainLeftFigure() {
     if (!els.chainLeftFigure) return;
     if (!state.chainShape) {
-      els.chainLeftFigure.innerHTML = '<span class="oc-left-figure__label">親炭化水素</span>' +
-        '<p class="oc-left-figure__note">骨格の形を選んでください。</p>';
+      els.chainLeftFigure.innerHTML = '<span class="oc-left-figure__label">親炭化水素</span>';
       return;
     }
     var fig = C.chainShapeFigure(state.chainShape);
@@ -454,7 +436,7 @@
 
   function renderChainFamilyList() {
     if (!state.chainShape) {
-      els.chainFamilyList.innerHTML = '<p class="oc-empty-note">先に①で骨格の形を選んでください。炭素数を変えた場合は、骨格の形を選び直します（別の骨格へ自動では移動しません）。</p>';
+      els.chainFamilyList.innerHTML = '';
       return;
     }
     var families = C.chainFamiliesForDescriptor(state.chainShape);
@@ -464,7 +446,7 @@
     var active = document.activeElement && document.activeElement.closest ? document.activeElement.closest('[data-chain-family]') : null;
     var activeFamily = active ? active.getAttribute('data-chain-family') : null;
     if (!families.length) {
-      els.chainFamilyList.innerHTML = '<p class="oc-empty-note">この骨格に該当する鎖式の分類がありません。骨格の形を変えてください（未収録・化学的不存在とは断定しません）。</p>';
+      els.chainFamilyList.innerHTML = '<p class="oc-empty-note">この骨格に該当する鎖式の分類がありません。</p>';
       return;
     }
     els.chainFamilyList.innerHTML = families.map(function (f) {
@@ -532,14 +514,8 @@
   }
 
   function renderChainPreview() {
-    if (!state.chainShape) {
-      els.chainPreview.innerHTML = '<span class="oc-preview__label">化合物分類</span>' +
-        '<p class="oc-preview__locked-note">骨格の形を選んでください。</p>';
-      return;
-    }
-    if (!state.chainFamily) {
-      els.chainPreview.innerHTML = '<span class="oc-preview__label">化合物分類</span>' +
-        '<p class="oc-preview__locked-note">化合物分類を選んでください。</p>';
+    if (!state.chainShape || !state.chainFamily) {
+      els.chainPreview.innerHTML = '<span class="oc-preview__label">化合物分類</span>';
       return;
     }
     var family = state.chainFamily;
@@ -585,7 +561,7 @@
         ' が含まれます。</p></div>';
     }
     if (!ids.length) {
-      html += '<p class="oc-preview__hint">この条件に該当する登録済み化合物はありません。化学的に存在しないという意味ではありません。</p>';
+      html += '<p class="oc-preview__hint">この条件に該当する登録済み化合物はありません。</p>';
     }
     els.chainPreview.innerHTML = html;
   }
@@ -602,18 +578,10 @@
   }
 
   function renderChainResults() {
-    if (!state.chainShape) {
-      els.resultDescription.textContent = '炭化水素部分の骨格を選んでください';
+    if (!state.chainShape || !state.chainFamily) {
+      els.resultDescription.textContent = '';
       els.resultCount.textContent = '0 種類';
-      els.results.innerHTML = '<div class="oc-empty"><strong>骨格の形が未選択です</strong>' +
-        '<p>骨格の形を選んでください。</p></div>';
-      return;
-    }
-    if (!state.chainFamily) {
-      els.resultDescription.textContent = '化合物分類を選んでください';
-      els.resultCount.textContent = '0 種類';
-      els.results.innerHTML = '<div class="oc-empty"><strong>化合物分類が未選択です</strong>' +
-        '<p>化合物分類を選んでください。</p></div>';
+      els.results.innerHTML = '';
       return;
     }
     var ids = C.chainIdsForDescriptor(state.chainShape, state.chainFamily);
@@ -622,9 +590,7 @@
       '・' + chainShapeLabel(state.chainShape) + ' ／ ' + label;
     els.resultCount.textContent = ids.length + ' 種類';
     if (!ids.length) {
-      els.results.innerHTML = '<div class="oc-empty"><strong>この条件では0種類です</strong><p>' +
-        'この骨格と分類に該当する登録済み化合物がありません。化学的に存在しない、または高校外であると断定せず、登録データの範囲を示しています。</p>' +
-        '<p>骨格の形または分類を変えるか、<a href="./ledger.html">収録台帳</a>で登録範囲を確認してください。</p></div>';
+      els.results.innerHTML = '<div class="oc-empty"><strong>この条件では0種類です</strong></div>';
       return;
     }
 
@@ -764,23 +730,17 @@
     var rs = ringSystem();
     var base = baseRingStructure(rs);
     els.ringLeftFigure.innerHTML = '<span class="oc-left-figure__label">固定した骨格</span>' +
-      (base
-        ? '<div class="oc-left-figure__svg">' + R.renderStructure(base, rs.label + 'の構造') + '</div>'
-        : '<p class="oc-left-figure__note">複合芳香族・その他は固定した単一骨格をもたないため、左の骨格図はありません。右の一覧から登録済み化合物を選びます。</p>');
+      (base ? '<div class="oc-left-figure__svg">' + R.renderStructure(base, rs.label + 'の構造') + '</div>' : '');
   }
 
   function renderRingPreview() {
     var rs = ringSystem();
     var preset = ringPreset();
     var html = '';
-    if (preset.kind === 'none') {
-      html += rs.id === 'complex-ring'
-        ? '<p class="oc-preview__locked-note">複合芳香族・その他は固定した単一骨格をもたないため、「追加なし」の結果はありません。<br>「その他の登録済み化合物」から選んでください。</p>'
-        : '<p class="oc-preview__locked-note">置換基を追加しません。<br>固定した骨格そのものだけを結果に表示します。</p>';
-    } else if (preset.kind === 'tray') {
+    if (preset.kind === 'tray') {
       html += '<div class="oc-ring-preview__sub"><b>その他の登録済み化合物:</b> ' + preset.ids.length +
         ' 種<br><span class="oc-micro">単純な置換基プリセットに分類できない、または塩・複雑な置換基をもつ登録済み化合物です。</span></div>';
-    } else {
+    } else if (preset.kind !== 'none') {
       html += ringSubPreviewHtml(preset);
     }
     els.ringPreview.innerHTML = html;
@@ -798,8 +758,8 @@
     if (!ids.length) {
       html = '<div class="oc-empty"><strong>この条件では0種類です</strong><p>' +
         (preset.kind === 'none'
-          ? 'この骨格は単体の登録がありません。置換基のプリセットを選ぶか、別の骨格を選んでください。'
-          : 'このプリセットに該当する登録済み化合物がありません。化学的に成立しない、または高校外であると断定せず、登録データの範囲を示しています。') +
+          ? 'この骨格は単体の登録がありません。'
+          : 'このプリセットに該当する登録済み化合物がありません。') +
         '</p></div>';
     } else {
       // 位置異性体のカードも、同じ2列グリッドに並べる。
@@ -1189,14 +1149,7 @@
       ], { animate: animate });
     }
     firstUpdate = false;
-    renderQueryNotice();
     writeQuery();
-  }
-
-  function renderQueryNotice() {
-    if (!els.queryNotice) return;
-    els.queryNotice.textContent = state.notice || '';
-    els.queryNotice.hidden = !state.notice;
   }
 
   function selectMode(mode) {
@@ -1212,7 +1165,6 @@
     // ②から①（炭化水素部分・骨格）を書き換えない。
     if (!C.chainDescriptorFamilyValid(state.chainShape, family)) return;
     state.chainFamily = family;
-    state.notice = '';
     state.focus = '';
     update();
   }
@@ -1226,7 +1178,6 @@
     // 勝手に別の骨格へ飛ばさず、shapeと②を解除して選び直してもらう。
     state.chainShape = '';
     state.chainFamily = '';
-    state.notice = '炭化水素部分の炭素数を' + (value === 0 ? '炭化水素基なし〈H〉' : 'C' + value) + 'に変えたため、骨格の形の選択を解除しました。骨格の形を選んでください。';
     state.focus = '';
     update();
   }
@@ -1237,7 +1188,6 @@
     if (descriptor.partialC !== state.chainPartialC) return;
     var previousFamily = state.chainFamily;
     state.chainShape = shape;
-    state.notice = '';
     if (previousFamily && !C.chainDescriptorFamilyValid(shape, previousFamily)) {
       state.chainFamily = '';
     }
@@ -1293,7 +1243,6 @@
       state.ringPreset = route.preset || route.group || 'none';
       if (!ringPresets().some(function (p) { return p.id === state.ringPreset; })) {
         state.ringPreset = 'none';
-        state.notice = 'URLの置換基条件は現在の骨格にないため、「追加なし」に戻しました。';
       }
     } else {
       state.mode = 'other';
@@ -1343,9 +1292,6 @@
       if (focusParam && D.COMPOUNDS[focusParam] && C.routeFor(focusParam)) {
         applyRoute(C.routeFor(focusParam));
         state.focus = focusParam;
-        if (params.get('c') != null) {
-          state.notice = 'URLのfocusを優先し、物質「' + compoundName(focusParam) + '」の正確な経路へ移行しました。';
-        }
         return;
       }
       var shapeParam = params.get('shape');
@@ -1359,15 +1305,11 @@
           var famParam = params.get('family');
           if (famParam && C.chainDescriptorFamilyValid(descriptor.id, famParam)) {
             state.chainFamily = famParam;
-          } else if (famParam) {
-            state.chainFamily = '';
-            state.notice = 'URLの化合物分類「' + familyName(famParam) + '」はこの骨格に該当しないため、分類の選択を解除しました。';
           } else {
             state.chainFamily = '';
           }
           return;
         }
-        state.notice = 'URLの骨格の形「' + shapeParam + '」は収録されていません。骨格の形を選び直してください。';
         state.chainPartialC = (cpartialRaw != null && C.chainPartialOptions().indexOf(cpartial) !== -1)
           ? cpartial : C.INITIAL_CHAIN_PARTIAL;
         state.chainShape = '';
@@ -1378,7 +1320,6 @@
         state.chainPartialC = cpartial;
         state.chainShape = '';
         state.chainFamily = '';
-        if (!state.notice) state.notice = '骨格の形を選んでください。';
         return;
       }
       // 旧URL（?mode=chain&c=<総炭素数>&family=...&structure=...）の移行。
@@ -1391,15 +1332,11 @@
         if (matches.length === 1) {
           applyRoute(C.routeFor(matches[0]));
           state.focus = matches[0];
-          state.notice = '旧URL（総炭素数 C' + legacyCarbon + '）を、新しい炭化水素部分の条件へ移行しました。';
           return;
         }
         state.chainPartialC = C.INITIAL_CHAIN_PARTIAL;
         state.chainShape = '';
         state.chainFamily = '';
-        state.notice = matches.length > 1
-          ? '旧URLの総炭素数条件には ' + matches.length + ' 件が該当するため、骨格の形を選んでください。先頭の物質へは自動で移動しません。'
-          : '旧URLの条件に該当する鎖式化合物がありません。骨格の形から選び直してください。';
         return;
       }
       state.chainPartialC = C.INITIAL_CHAIN_PARTIAL;
@@ -1445,7 +1382,6 @@
         state.ringSystem = ringSystem.id;
         state.ringPreset = legacyPresetForGroup(ringSystem.id, oldGroup);
         if (oldFocus && D.COMPOUNDS[oldFocus] && C.routeFor(oldFocus)) state.focus = oldFocus;
-        state.notice = '旧URLの骨格「' + s + '」を、固定骨格＋置換基の条件へ移行しました。';
         return;
       }
       var legacy = D.legacySkeletonRoute ? D.legacySkeletonRoute(s) : null;
@@ -1453,7 +1389,6 @@
       if (targetId && C.routeFor(targetId)) {
         applyRoute(C.routeFor(targetId));
         state.focus = targetId;
-        state.notice = '旧URLの骨格「' + s + '」を、新しい探し方の同じ物質の結果へ移行しました。';
         return;
       }
       var sk = D.skeletonById(s);
@@ -1468,7 +1403,6 @@
         if (sk.ids.length === 1 && routes.length === 1) {
           applyRoute(routes[0]);
           state.focus = sk.ids[0];
-          state.notice = '旧URLの骨格「' + s + '」を、新しい探し方の同じ物質の結果へ移行しました。';
           return;
         }
         if (sigList.length === 1 && routes.length === sk.ids.length) {
@@ -1483,7 +1417,6 @@
             category: routes[0].category
           });
           state.focus = '';
-          state.notice = '旧URLの骨格「' + s + '」を、同じ条件の結果へ移行しました。';
           return;
         }
         var chainRoutes = routes.filter(function (r) { return r.mode === 'chain'; });
@@ -1494,12 +1427,9 @@
           state.chainPartialC = samePartial ? partial : C.INITIAL_CHAIN_PARTIAL;
           state.chainShape = '';
           state.chainFamily = '';
-          state.notice = '旧URLの骨格「' + s + '」には ' + sk.ids.length +
-            ' 件が含まれるため、骨格の形を選んでください。先頭の物質へは自動で移動しません。';
           return;
         }
       }
-      state.notice = 'URLの骨格ID「' + s + '」は収録されていません。初期表示に戻しました。';
       return;
     }
 
@@ -1508,9 +1438,6 @@
       applyRoute(C.routeFor(focus));
       state.focus = focus;
       return;
-    }
-    if (oldGroup && D.groupById(oldGroup)) {
-      state.notice = '旧URLの官能基指定は、新しい探し方では物質ごとの経路に移行しました。';
     }
   }
 
