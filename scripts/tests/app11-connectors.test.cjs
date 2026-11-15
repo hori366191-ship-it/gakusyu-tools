@@ -655,7 +655,14 @@ test('[static] 反応の丸は DOM を残したまま非表示、説明文は矢
   const css = fs.readFileSync(path.join(APP, 'app.css'), 'utf8');
   const html = fs.readFileSync(path.join(APP, 'index.html'), 'utf8');
   assert.match(css, /\.rp-reaction__dot\s*\{[^}]*display:\s*none/);
-  assert.ok(css.includes('.rp-reaction__hit'));
+  assert.equal(css.includes('.rp-reaction__hit'), false, '円ヒットは廃止');
+  assert.match(css, /\.rp-edge-hit,\s*\n\.rp-classmap__edge-hit\s*\{[^}]*stroke-width:\s*18/,
+    '当たり判定は画面18px幅の透明ヒット');
+  const js = fs.readFileSync(path.join(APP, 'app.js'), 'utf8');
+  assert.equal(js.includes('rp-reaction__hit'), false, '円ヒットの DOM を出さない');
+  assert.ok(js.includes("'class': 'rp-edge-hit'"), '反応線の透明ヒット');
+  assert.ok(js.includes("tabindex: '0'") && js.includes('reactionIndex[r.id] = g'),
+    'フォーカス可能な反応マーカーは残す');
   assert.ok(html.includes('生成物へ向かう矢印'));
   assert.equal(html.includes('反応の丸から出る線'), false);
 });

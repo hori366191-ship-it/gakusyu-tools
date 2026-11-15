@@ -12,6 +12,8 @@
 
   // semantic zoom の境界。位置は動かさず、表示する要素だけを切り替える。
   var DETAIL_THRESHOLDS = [0.5, 1.0];
+  // 反応線・一般図の変換線の透明な当たり判定の幅（画面ピクセル）。CSS と必ず同じ値にする。
+  var HIT_WIDTH = 18;
   var SCALE_MIN = 0.05;
   var SCALE_MAX = 3;
   var LABEL_HIDE_LEVEL = 0;
@@ -1100,6 +1102,143 @@
     return subpaths;
   }
 
+  // 点が多角形の内側か（ray casting）。矢印 triangle の「塗り」を距離0で扱うために使う。
+  function pointInPolygon(p, poly) {
+    if (!poly || poly.length < 3) return false;
+    var inside = false;
+    for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      var a = poly[i];
+      var b = poly[j];
+      if ((a.y > p.y) !== (b.y > p.y) &&
+        p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y || 1e-12) + a.x) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
+
+  // 透明な当たり判定（画面 18px 幅 = 半径 9px）の距離判定。
+  // shape は折れ線の配列（旧形式）か { lines: [[点...]], fills: [[頂点...]] }。
+  // 塗り（triangle 内部）は距離0、輪郭は折れ線として測る。
+  function hitDistanceDetail(shape, p) {
+    var lines = !shape ? [] : (Array.isArray(shape) ? shape : (shape.lines || shape.points || []));
+    var fills = !shape || Array.isArray(shape) ? [] : (shape.fills || []);
+    var best = Infinity;
+    var i;
+    var k;
+    var onLine = false;
+    for (i = 0; i < lines.length; i++) {
+      var poly = lines[i];
+      if (!poly || poly.length < 2) continue;
+      for (k = 0; k < poly.length - 1; k++) {
+        var a = poly[k];
+        var b = poly[k + 1];
+        var vx = b.x - a.x;
+        var vy = b.y - a.y;
+        var len2 = vx * vx + vy * vy;
+        var t = len2 ? ((p.x - a.x) * vx + (p.y - a.y) * vy) / len2 : 0;
+        if (t < 0) t = 0;
+        else if (t > 1) t = 1;
+        var d = Math.hypot(p.x - a.x - t * vx, p.y - a.y - t * vy);
+        if (d <= 1e-9) onLine = true;
+        if (d < best) best = d;
+      }
+    }
+    var insideFill = false;
+    for (i = 0; i < fills.length; i++) {
+      var ring = fills[i];
+      if (!ring || ring.length < 3) continue;
+      if (pointInPolygon(p, ring)) insideFill = true;
+      // 輪郭（全3辺）も距離に含める。samplePath は Z の閉じ辺を落とすため、ここで補う。
+      for (k = 0; k < ring.length; k++) {
+        var a2 = ring[k];
+        var b2 = ring[(k + 1) % ring.length];
+        var d2 = Math.hypot(p.x - a2.x, p.y - a2.y);
+        var ex = b2.x - a2.x;
+        var ey = b2.y - a2.y;
+        var el2 = ex * ex + ey * ey;
+        var t2 = el2 ? ((p.x - a2.x) * ex + (p.y - a2.y) * ey) / el2 : 0;
+        if (t2 < 0) t2 = 0;
+        else if (t2 > 1) t2 = 1;
+        d2 = Math.hypot(p.x - a2.x - t2 * ex, p.y - a2.y - t2 * ey);
+        if (d2 <= 1e-9) onLine = true;
+        if (d2 < best) best = d2;
+      }
+    }
+    var distance = insideFill ? 0 : best;
+    return { distance: distance, via: onLine ? 'line' : (insideFill ? 'fill' : 'line') };
+  }
+
+  // 距離だけ欲しいときの薄いラッパ（既存の呼び出し・テストとの互換）。
+  function hitDistance(shape, p) {
+    return hitDistanceDetail(shape, p).distance;
+  }
+
+  // 重なった当たり判定の候補から、タップ位置に最も近い1本を選ぶ。
+  // 同じ ID の枝は同じ反応として扱い（最短距離を採用）。同じ距離なら
+  // 塗り（triangle 内部）より線を優先し、最後は order の小さい方で安定させる。
+  function nearestHit(candidates, p, radius) {
+    var limit = typeof radius === 'number' ? radius : 0;
+    var best = null;
+    if (!candidates) return best;
+    var rank = function (via) { return via === 'line' ? 0 : 1; };
+    for (var i = 0; i < candidates.length; i++) {
+      var c = candidates[i];
+      var detail = hitDistanceDetail(c, p);
+      var d = detail.distance;
+      if (!(d <= limit + 1e-9)) continue;
+      var order = typeof c.order === 'number' ? c.order : 0;
+      var next = { kind: c.kind, id: c.id, distance: d, order: order, via: detail.via };
+      if (!best) {
+        best = next;
+        continue;
+      }
+      if (d < best.distance - 1e-9) {
+        best = next;
+      } else if (Math.abs(d - best.distance) <= 1e-9) {
+        if (next.id === best.id && next.kind === best.kind) {
+          if (rank(next.via) < rank(best.via)) best = next;
+        } else if (rank(next.via) < rank(best.via) || (rank(next.via) === rank(best.via) && order < best.order)) {
+          best = next;
+        }
+      }
+    }
+    return best;
+  }
+
+  // タップ対象の決定。ラベル・ノードの直接ヒット（isHitPath=false）は無条件で優先し、
+  // 透明ヒットのときだけ幾何的に最も近い候補へ置き換える。
+  function resolveHitTarget(direct, isHitPath, nearest) {
+    if (direct && !isHitPath) return { kind: direct.kind, id: direct.id, source: 'direct' };
+    if (nearest) return { kind: nearest.kind, id: nearest.id, source: 'hit' };
+    if (direct) return { kind: direct.kind, id: direct.id, source: 'direct' };
+    return null;
+  }
+
+  // ダブルクリックの扱い。実体（線・矢印・ラベル・物質・一般図）の上では地図の拡大をせず、
+  // 通常のクリック（カード）操作に任せる。背景だけ従来どおり拡大する。
+  function dblclickAction(isEntity, isControl) {
+    if (isControl) return 'none';
+    return isEntity ? 'none' : 'zoom';
+  }
+
+  // 実座標での当たり対象の決定。candidates は「描画順（上から）」の
+  // { role: 'control'|'node'|'label'|'line', kind, id, inside }。
+  // inside=false はその形状の物理的な内側ではない（別要素のハロー等）ため無視する。
+  // pointer capture やタッチ補正で event.target が変わっても、この物理判定だけで決める。
+  function resolvePhysicalTarget(candidates) {
+    if (!candidates) return { type: 'background' };
+    for (var i = 0; i < candidates.length; i++) {
+      var c = candidates[i];
+      if (!c || !c.inside) continue;
+      if (c.role === 'control') return { type: 'control', kind: c.kind || null, id: c.id || null };
+      if (c.role === 'node') return { type: 'entity', kind: c.kind, id: c.id, via: 'node' };
+      if (c.role === 'label') return { type: 'entity', kind: c.kind, id: c.id, via: 'label' };
+      if (c.role === 'line') return { type: 'line', kind: c.kind, id: c.id };
+    }
+    return { type: 'background' };
+  }
+
   // data-* の compound 一覧を厳密に復元する。ID 自体にカンマが入るため split(',') は使わない。
   function compoundList(rawList, rawSingle) {
     if (rawList) {
@@ -1255,6 +1394,14 @@
     portPointOnOutline: portPointOnOutline,
     separateSharedPorts: separateSharedPorts,
     samplePath: samplePath,
+    pointInPolygon: pointInPolygon,
+    hitDistanceDetail: hitDistanceDetail,
+    hitDistance: hitDistance,
+    nearestHit: nearestHit,
+    resolveHitTarget: resolveHitTarget,
+    dblclickAction: dblclickAction,
+    resolvePhysicalTarget: resolvePhysicalTarget,
+    HIT_WIDTH: HIT_WIDTH,
     SCALE_MIN: SCALE_MIN,
     SCALE_MAX: SCALE_MAX,
     LABEL_HIDE_LEVEL: LABEL_HIDE_LEVEL,

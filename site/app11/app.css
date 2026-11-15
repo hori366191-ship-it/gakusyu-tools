@@ -226,9 +226,11 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   border-left: 4px solid var(--rp-accent);
   border-radius: var(--rp-radius-sm);
   padding: 12px 16px;
-  margin: 0 0 14px;
+  margin: 14px 0;
   box-shadow: var(--rp-shadow);
 }
+/* データの注意枠は地図の直後（物質一覧の前）に置く。上に別の注意枠は残さず、地図と密着させない。 */
+.rp-map-panel + .rp-notice { margin-top: 14px; }
 .rp-notice p { margin: 0; }
 .rp-notice__sub { margin-top: 4px !important; color: var(--rp-muted); font-size: 12.5px; }
 
@@ -470,11 +472,10 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 
 /* ---------- svg: reactions ---------- */
 .rp-reaction { cursor: pointer; }
-/* 反応は「丸」ではなく線の合流点として示す。DOM は残し、semantic zoom の r 更新と
-   透明な当たり判定（.rp-reaction__hit）・キーボード操作はそのまま使う。 */
+/* 反応は「丸」ではなく線の合流点として示す。DOM のマーカー（フォーカス可能な実体）は残し、
+   タップは反応線の透明ヒット（.rp-edge-hit）と反応ラベルで受ける。キーボード操作はそのまま使う。 */
 .rp-reaction__dot { display: none; fill: var(--rp-panel); stroke: var(--rp-secondary); stroke-width: 1.8; }
 .rp-reaction--primary .rp-reaction__dot { stroke: var(--rp-primary); stroke-width: 2.4; fill: var(--rp-primary); }
-.rp-reaction__hit { fill: transparent; }
 .rp-reaction__label { fill: var(--rp-muted); font-size: 10px; text-anchor: middle; dominant-baseline: middle; paint-order: stroke; stroke: var(--rp-panel); stroke-width: 3px; stroke-linejoin: round; }
 .rp-reaction--primary .rp-reaction__label { fill: var(--rp-ink); font-weight: 600; }
 .rp-reaction__label--cond { font-size: 9px; fill: var(--rp-muted); opacity: .9; }
@@ -488,7 +489,8 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-map[data-level="1"] .rp-reaction__label--cond { display: none; }
 .rp-map[data-level="0"] .rp-reaction__dot { r: 4; }
 .rp-map[data-level="1"] .rp-reaction--secondary .rp-reaction__dot { r: 4.5; }
-.rp-map[data-level="0"] .rp-reaction__hit { display: none; }
+/* 反応の丸は表示しない。当たり判定は反応線の透明ヒット（画面18px）と反応ラベルが担う。
+   LOD で無効化しない（低倍率でも一般図と同じく線から開ける）。 */
 
 /* ---------- svg: class map (12 classes) ---------- */
 .rp-classmap__frame {
@@ -513,6 +515,9 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-classmap__edge.is-active + .rp-classmap__arrowhead { fill: var(--rp-focus); }
 /* 変換線の当たり判定。見た目の線は動かさず、画面ピクセルで一定の太さを確保する。
    ノードより先に描くため、重なった場合はノードのタップが優先される。 */
+/* 反応線（shaft + triangle）と一般図の変換線は、同じ「見えない画面18px幅（半径9px）」の
+   当たり判定を共有する。見た目の線幅・色・端点・geometry は変えない。 */
+.rp-edge-hit,
 .rp-classmap__edge-hit {
   fill: none;
   stroke: transparent;

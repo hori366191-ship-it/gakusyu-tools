@@ -72,8 +72,16 @@
     r.products.forEach(function (id) { (incoming[id] || (incoming[id] = [])).push(r); });
   });
 
+  // 反応線・一般図の変換線の当たり判定は、見た目の線を変えず画面ピクセルで 18px 幅
+  // （半径 9px）を確保する。CSS の stroke-width:18 と必ず同じ値を使う。
+  var HIT_WIDTH = Core.HIT_WIDTH;
+  var HIT_RADIUS = HIT_WIDTH / 2;
+  // 距離計算に使う折れ線の刻み（world）。実際の描画形状（shaft + triangle）をそのまま落とす。
+  var HIT_SAMPLE_STEP = 2;
+
   var nodeIndex = {};
   var reactionIndex = {};
+  var hitCandidates = [];
   var edgeIndex = {};
   var classNodeIndex = {};
   var classEdgeIndex = {};
@@ -159,14 +167,60 @@
     Core.enforcePaintClearance(all);
   }
 
+  // path 文字列を、当たり判定の距離計算に使う折れ線（world 座標）へ落とす。
+  function hitPolylines(d) {
+    var subpaths = Core.samplePath(d, HIT_SAMPLE_STEP) || [];
+    var out = [];
+    subpaths.forEach(function (points) {
+      if (points && points.length > 1) out.push(points);
+    });
+    return out;
+  }
+
+  // 透明ヒットの path 文字列と距離計算用の形状を、同じ connector から一度だけ作って共有する。
+  // triangle は「描画と同じ頂点」の塗り多角形として持つ（内部は距離0）。
+  function connectorHitShape(connector, shaftD) {
+    if (connector.__hitShape) return connector.__hitShape;
+    var head = connector.arrowHead;
+    var hitD = head ? shaftD + ' ' + Core.arrowHeadPath(head) : shaftD;
+    var shape = {
+      d: hitD,
+      lines: hitPolylines(hitD),
+      fills: head ? [[head.tip, head.left, head.right]] : []
+    };
+    connector.__hitShape = shape;
+    return shape;
+  }
+
+  function hitCandidate(kind, id, order, shape) {
+    var box = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+    var expand = function (poly) {
+      poly.forEach(function (p) {
+        if (p.x < box.minX) box.minX = p.x;
+        if (p.y < box.minY) box.minY = p.y;
+        if (p.x > box.maxX) box.maxX = p.x;
+        if (p.y > box.maxY) box.maxY = p.y;
+      });
+    };
+    (shape.lines || []).forEach(expand);
+    (shape.fills || []).forEach(expand);
+    return { kind: kind, id: id, order: order || 0, lines: shape.lines, fills: shape.fills, box: box };
+  }
+
   function buildReactions() {
     var secondaryLayer = el('g', { 'class': 'rp-edges rp-edges--secondary' });
     var primaryLayer = el('g', { 'class': 'rp-edges rp-edges--primary' });
+    // 見えない当たり判定の層は、可視線の上・反応ラベル（marker）の下に置く。
+    // 反応ラベルと物質ノードのタップは無条件で優先される（後から描くため）。
+    var hitLayer = el('g', { 'class': 'rp-edge-hits', 'aria-hidden': 'true' });
     var markerLayer = el('g', { 'class': 'rp-reactions' });
-    D.reactions.forEach(function (r) {
+    var hitShapes = {};
+    var hitOrder = {};
+    D.reactions.forEach(function (r, reactionOrder) {
       var tier = r.tier === 'primary' ? 'primary' : 'secondary';
       (reactionConnectors[r.id] || []).forEach(function (c) {
         var edgeTier = c.tier === 'primary' ? 'primary' : 'secondary';
+        var shaftD = Core.routePath(c.shaft || c.points, c.gaps, c.bridges);
         var attrs = {
           'class': 'rp-edge rp-edge--' + edgeTier,
           'data-from': c.dir === 'in' ? c.edgeId : r.id,
@@ -178,13 +232,28 @@
           // ID 自体にカンマが入るため JSON 配列で厳密に保持する。
           'data-compounds': JSON.stringify(c.compounds),
           'data-tier': edgeTier,
-          d: Core.routePath(c.shaft || c.points, c.gaps, c.bridges)
+          d: shaftD
         };
         var path = el('path', attrs);
         var targetLayer = edgeTier === 'primary' ? primaryLayer : secondaryLayer;
         targetLayer.appendChild(path);
         if (c.arrowHead) targetLayer.appendChild(el('path', arrowHeadAttrs(c)));
         c.edgeKeys.forEach(function (key) { edgeIndex[key] = path; });
+        // 可視線と同じ形状（shaft + triangle）の透明な当たり判定を、枝ごとに1本ずつ置く。
+        // 幅は CSS の 18px（画面ピクセル）で、拡大率が変わっても一定。
+        var hitShape = connectorHitShape(c, shaftD);
+        hitLayer.appendChild(el('path', {
+          'class': 'rp-edge-hit',
+          'data-kind': 'reaction',
+          'data-id': r.id,
+          'data-reaction': r.id,
+          d: hitShape.d
+        }));
+        if (!hitShapes[r.id]) {
+          hitShapes[r.id] = [];
+          hitOrder[r.id] = reactionOrder;
+        }
+        hitShapes[r.id].push(hitShape);
       });
       var g = el('g', {
         'class': 'rp-reaction rp-reaction--' + tier + (r.state === 'confirmed' ? '' : ' is-pending'),
@@ -195,7 +264,6 @@
         tabindex: '0',
         'aria-label': reactionLabel(r)
       });
-      g.appendChild(el('circle', { 'class': 'rp-reaction__hit', cx: r.x, cy: r.y, r: 22 }));
       g.appendChild(el('circle', { 'class': 'rp-reaction__dot', cx: r.x, cy: r.y, r: 6 }));
       if (r.label) {
         var label = el('text', {
@@ -220,8 +288,18 @@
       markerLayer.appendChild(g);
       reactionIndex[r.id] = g;
     });
+    Object.keys(hitShapes).forEach(function (id) {
+      var lines = [];
+      var fills = [];
+      hitShapes[id].forEach(function (shape) {
+        lines = lines.concat(shape.lines);
+        fills = fills.concat(shape.fills);
+      });
+      hitCandidates.push(hitCandidate('reaction', id, hitOrder[id], { lines: lines, fills: fills }));
+    });
     viewport.appendChild(secondaryLayer);
     viewport.appendChild(primaryLayer);
+    viewport.appendChild(hitLayer);
     viewport.appendChild(markerLayer);
   }
 
@@ -299,11 +377,15 @@
       return { e: e, cc: Core.classConnector(e, { nodeById: classNodeById }) };
     });
     Core.enforcePaintClearance(classConnectorList.map(function (item) { return item.cc; }));
-    classConnectorList.forEach(function (item) {
+    var classHitPoints = [];
+    classConnectorList.forEach(function (item, classOrder) {
       // 一般図も同じ端点規則（角丸枠・butt cap・分離した triangle）で描く。座標・配置は変えない。
       var e = item.e;
       var cc = item.cc;
       var d = Core.routePath(cc.shaft || cc.points, [], []);
+      // 具体図とまったく同じ規則（同じ shape を hit path と距離計算で共有）を使う。
+      var hitShape = connectorHitShape(cc, d);
+      classHitPoints.push(hitCandidate('class-edge', e.id, classOrder, hitShape));
       var group = el('g', {
         'class': 'rp-classmap__edge-group',
         'data-kind': 'class-edge',
@@ -314,7 +396,10 @@
       });
       group.appendChild(el('path', {
         'class': 'rp-classmap__edge-hit',
-        d: d
+        'data-kind': 'class-edge',
+        'data-id': e.id,
+        'data-class-edge': e.id,
+        d: hitShape.d
       }));
       var path = el('path', {
         'class': 'rp-classmap__edge',
@@ -377,6 +462,7 @@
       nodeLayer.appendChild(g);
       classNodeIndex[n.id] = g;
     });
+    hitCandidates = hitCandidates.concat(classHitPoints);
     classLayer.appendChild(edgeLayer);
     classLayer.appendChild(nodeLayer);
     viewport.appendChild(classLayer);
@@ -445,9 +531,7 @@
       var g = reactionIndex[r.id];
       if (!g) return;
       var dot = g.querySelector('.rp-reaction__dot');
-      var hit = g.querySelector('.rp-reaction__hit');
       if (dot) dot.setAttribute('r', small ? '4' : '6');
-      if (hit) hit.setAttribute('r', small ? '12' : '22');
     });
   }
 
@@ -759,13 +843,180 @@
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   }
 
+  // 反応・一般図の変換・物質のフォーカス可能な実体。透明ヒットは使わない。
+  function entityElement(kind, id) {
+    if (kind === 'reaction') return reactionIndex[id] || null;
+    if (kind === 'class-edge') return classEdgeIndex[id] || null;
+    if (kind === 'class') return classNodeIndex[id] || null;
+    return nodeIndex[id] || null;
+  }
+
+  // 画面18px（半径9px）の当たり判定が重なったとき、DOM順ではなく
+  // 「タップ位置に最も近い可視線の形状」で反応を選ぶ。距離は画面ピクセル基準。
+  function nearestHitAt(kind, point) {
+    var scale = view.scale || 1;
+    var radius = HIT_RADIUS / scale;
+    var world = Core.screenToWorld(view, point.x, point.y);
+    var list = [];
+    for (var i = 0; i < hitCandidates.length; i++) {
+      var c = hitCandidates[i];
+      if (c.kind !== kind) continue;
+      if (world.x < c.box.minX - radius || world.x > c.box.maxX + radius) continue;
+      if (world.y < c.box.minY - radius || world.y > c.box.maxY + radius) continue;
+      list.push(c);
+    }
+    return Core.nearestHit(list, world, radius);
+  }
+
+  // 透明ヒット（と、その下にある可視線）は「線」として幾何判定へ回す。
+  var HIT_LINE_SELECTOR = '.rp-edge-hit,.rp-edge,.rp-classmap__edge-hit,.rp-classmap__edge';
+  var PHYSICAL_NODE_SELECTOR = '.rp-node,.rp-classmap__node';
+  var PHYSICAL_LABEL_SELECTOR = '.rp-reaction__label,.rp-node__label,.rp-classmap__label';
+  var PHYSICAL_CONTROL_SELECTOR = '.rp-legend,.rp-hint,.rp-classmap-jump,button,a[href],input,select,textarea';
+
+  function hitLineTarget(target) {
+    return target && target.closest ? target.closest(HIT_LINE_SELECTOR) : null;
+  }
+
+  // client 座標を要素のユーザー座標へ（SVG の isPointInFill 用）。
+  function localPoint(element, clientX, clientY) {
+    var ctm = element.getScreenCTM ? element.getScreenCTM() : null;
+    if (!ctm || !ctm.inverse) return null;
+    var inv = ctm.inverse();
+    return {
+      x: inv.a * clientX + inv.c * clientY + inv.e,
+      y: inv.b * clientX + inv.d * clientY + inv.f
+    };
+  }
+
+  // 実 point がその形状の内側か。SVG は塗り・輪郭を geometry で判定し、
+  // drop-shadow / halo の見た目には引っ張られない。HTML は実矩形で判定する。
+  function geometryContains(element, clientX, clientY) {
+    if (!element) return false;
+    if (element.isPointInFill && element.getScreenCTM) {
+      var local = localPoint(element, clientX, clientY);
+      if (!local) return false;
+      try {
+        if (element.isPointInFill(local)) return true;
+        if (element.isPointInStroke && element.isPointInStroke(local)) return true;
+      } catch (err) {
+        errMsg(err && err.message);
+      }
+      return false;
+    }
+    var rect = element.getBoundingClientRect ? element.getBoundingClientRect() : null;
+    if (!rect) return false;
+    return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+  }
+
+  function lineKindAndId(line) {
+    var kind = line.getAttribute('data-kind');
+    var id = line.getAttribute('data-id');
+    if (kind) return { kind: kind, id: id };
+    if (line.getAttribute('data-reaction')) return { kind: 'reaction', id: line.getAttribute('data-reaction') };
+    if (line.getAttribute('data-class-edge')) return { kind: 'class-edge', id: line.getAttribute('data-class-edge') };
+    var owner = line.closest ? line.closest('[data-kind]') : null;
+    return owner ? { kind: owner.getAttribute('data-kind'), id: owner.getAttribute('data-id') } : null;
+  }
+
+  // pointer capture やタッチ補正で event.target が変わっても、実 client 座標だけから
+  // 「物理的にその点にある描画」を拾い直す。document.elementsFromPoint は
+  // capture / touch adjust の補正を受けない幾何クエリ。
+  function physicalCandidates(clientX, clientY) {
+    var list = [];
+    if (!document.elementsFromPoint) return list;
+    var stack = document.elementsFromPoint(clientX, clientY);
+    for (var i = 0; i < stack.length; i++) {
+      var el = stack[i];
+      if (!el || !el.closest) continue;
+      var control = el.closest(PHYSICAL_CONTROL_SELECTOR);
+      if (control && geometryContains(control, clientX, clientY)) {
+        list.push({ role: 'control', inside: true, el: control });
+        continue;
+      }
+      var node = el.closest(PHYSICAL_NODE_SELECTOR);
+      if (node) {
+        var box = node.querySelector('.rp-node__box,.rp-classmap__node-box');
+        var insideNode = geometryContains(box, clientX, clientY) || geometryContains(el, clientX, clientY);
+        list.push({
+          role: 'node',
+          kind: node.getAttribute('data-kind'),
+          id: node.getAttribute('data-id'),
+          inside: insideNode,
+          el: node
+        });
+        continue;
+      }
+      var label = el.closest(PHYSICAL_LABEL_SELECTOR);
+      if (label) {
+        var owner = label.closest('[data-kind]');
+        list.push({
+          role: 'label',
+          kind: owner ? owner.getAttribute('data-kind') : null,
+          id: owner ? owner.getAttribute('data-id') : null,
+          inside: geometryContains(label, clientX, clientY),
+          el: owner || label
+        });
+        continue;
+      }
+      var line = el.closest(HIT_LINE_SELECTOR);
+      if (line) {
+        var info = lineKindAndId(line);
+        if (info && info.kind && info.id) {
+          list.push({ role: 'line', kind: info.kind, id: info.id, inside: true, el: line });
+        }
+      }
+    }
+    return list;
+  }
+
+  function resolvePhysicalAt(clientX, clientY) {
+    return Core.resolvePhysicalTarget(physicalCandidates(clientX, clientY));
+  }
+
+  // 透明ヒットがスタックに無いときの保険。全候補のうち距離0（矢印の塗り内部・線の上）だけ拾う。
+  function nearestAnyAt(point) {
+    var scale = view.scale || 1;
+    var radius = HIT_RADIUS / scale;
+    var world = Core.screenToWorld(view, point.x, point.y);
+    var list = [];
+    for (var i = 0; i < hitCandidates.length; i++) {
+      var c = hitCandidates[i];
+      if (world.x < c.box.minX - radius || world.x > c.box.maxX + radius) continue;
+      if (world.y < c.box.minY - radius || world.y > c.box.maxY + radius) continue;
+      list.push(c);
+    }
+    return Core.nearestHit(list, world, radius);
+  }
+
+  // タップ対象を決める。実座標の物理判定だけで決め、event.target の補正結果は使わない。
+  // 物質・ラベルはその点が実形状/実 bbox の内側にあるときだけ優先し、線は最近傍で選ぶ。
+  function pickDownEntity(e, point) {
+    var decided = resolvePhysicalAt(e.clientX, e.clientY);
+    if (decided.type === 'control') return null;
+    if (decided.type === 'entity') return entityElement(decided.kind, decided.id) || null;
+    var kind = decided.type === 'line' ? decided.kind : null;
+    var id = decided.type === 'line' ? decided.id : null;
+    var nearest;
+    if (kind) {
+      nearest = nearestHitAt(kind, point);
+    } else {
+      nearest = nearestAnyAt(point);
+      // 背景のタップで近くの線を拾わない。塗り内部・線の上（距離0）だけ反応させる。
+      if (nearest && nearest.distance > 1e-6) nearest = null;
+    }
+    var picked = Core.resolveHitTarget(kind ? { kind: kind, id: id } : null, true, nearest);
+    if (!picked) return null;
+    return entityElement(picked.kind, picked.id) || null;
+  }
+
   function onPointerDown(e) {
     if (e.target.closest && e.target.closest('.rp-legend,.rp-hint,.rp-classmap-jump')) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     var p = mapPoint(e);
     pointers[e.pointerId] = p;
     suppressClick = false;
-    downEntity = e.target.closest ? e.target.closest('[data-kind]') : null;
+    downEntity = pickDownEntity(e, p);
     panOrigin = { x: p.x, y: p.y, view: { scale: view.scale, x: view.x, y: view.y } };
     if (mapEl.setPointerCapture) {
       try { mapEl.setPointerCapture(e.pointerId); } catch (err) { errMsg(err && err.message); }
@@ -1866,6 +2117,13 @@
     mapEl.addEventListener('wheel', onWheel, { passive: false });
     mapEl.addEventListener('keydown', onKeydown);
     mapEl.addEventListener('dblclick', function (e) {
+      // 実体（線・矢印・ラベル・物質・一般図）の上のダブルクリックは、地図を拡大しない。
+      // 1回目のクリックで開いたカードの操作をそのまま優先する（応答を遅らせない）。
+      // pointer capture で dblclick.target が #rp-map に変わっても、実座標で判定し直す。
+      var decided = resolvePhysicalAt(e.clientX, e.clientY);
+      var isEntity = decided.type === 'entity' || decided.type === 'line';
+      var isControl = decided.type === 'control';
+      if (Core.dblclickAction(isEntity, isControl) !== 'zoom') return;
       if (activeRegion) clearRegionSelection();
       var p = mapPoint(e);
       animateTo(Core.zoomAt({ scale: view.scale, x: view.x, y: view.y }, 1.6, p.x, p.y));

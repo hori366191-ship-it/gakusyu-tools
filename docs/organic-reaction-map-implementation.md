@@ -365,3 +365,161 @@ node scripts/app11/metrics.cjs --baseline       # v1 の計測
 - 実 paint 形状の source butt 端面・triangle 全頂点 gap >= 0.75（斜めbutt / 受入NG triangle 4件を含む）
 - 一般図16、カンマID、全427 ID の highlight 往復、短い最終線分の triangle
 - 3テーマ/mobile/エラー表示は test サブエージェントで最終確認
+
+## 反応線の当たり判定と注意枠の位置（2026-11-15 追加・未公開）
+
+ユーザー承認済みの2点を実装した記録。公開（デプロイ反映）はまだ行っていない。
+
+### 対象と不変条件
+- 対象は `site/app11/app.js` / `app.css` / `index.html` / `map-core.js` と `scripts/tests/app11-*.cjs`、`docs/` のみ。
+- `structure-draw.js`、`data.js`（427物質・294必須・86反応・保留81・一般図12分類16変換）は変更しない。
+  端点半径・paint 形状・`enforcePaintClearance` など既存の geometry 計算も変えない。
+- 可視線（`.rp-edge`）の幅・色・点線・端点、一般図の座標・配置・16タブは変更前と同一。
+
+### 1. 反応の具体図も一般図と同じ「見えない画面18px幅」で開く
+- 反応マーカーの円ヒット（`.rp-reaction__hit`、r=12/22）を廃止した。円は元々 `fill: transparent` で、
+  ラベルの無い36反応はこの円だけがタップ対象だったため、代わりに線そのものへ当たり判定を移した。
+- `buildReactions()` が connector（158枝）ごとに `path.rp-edge-hit` を1本置く。`d` は可視線と同じ
+  `routePath(shaft, gaps, bridges)` に `Core.arrowHeadPath()` の triangle を足したもので、線も矢印も覆う。
+- 定義は一般図の `.rp-classmap__edge-hit` と共有: `fill:none / stroke:transparent / stroke-width:18 /
+  round cap・join / pointer-events:stroke / vector-effect:non-scaling-stroke`。幅は `HIT_WIDTH = Core.HIT_WIDTH = 18`。
+- LOD で無効化しない（旧 `.rp-map[data-level="0"] .rp-reaction__hit{display:none}` は削除）。
+  低倍率でも線から開け、届かない密集は拡大・一覧・ラベルで到達する。
+
+### 2. 重なった18pxヒットは DOM 順ではなく最近傍の可視線で決める
+- 18px（半径9px）の帯は近接する反応同士で重なるため、`elementsFromPoint` の順（DOM 順）では
+  遠い長い枝を誤選択する。`onPointerDown` は触れたヒットから `nearestHitAt(kind, point)` を引き、
+  `Core.nearestHit()` が「タップ位置と可視線形状（shaft + triangle の折れ線）の画面距離」で選ぶ。
+- 距離は画面ピクセル基準（world 距離 ÷ `view.scale`、半径 = `9 / scale`）。8px は選び、10px は選ばない。
+- 同じ反応 ID の複数枝は同じ反応（最短距離を採用）。同距離の別反応は `data.js` の反応順（order）で安定化。
+- `Core.resolveHitTarget()`: 反応ラベル・物質ノード・一般図ノードの直接タップは無条件で優先し、
+  透明ヒットのときだけ最近傍へ置き換える。開く対象・`returnFocus` はヒット path ではなく
+  `reactionIndex[id]`（role=button / tabindex=0 / aria-label）のフォーカス可能な実体へ戻す。
+- DOM 描画順は「可視線 → 透明ヒット → 反応ラベル（マーカー）→ 物質ノード」。透明ヒットに tabindex は足さず、
+  フォーカス可能な反応は従来どおり86個。パン（>4px）とピンチは従来どおり click を抑止する。
+
+### 3. 「試験版です」注意枠を地図の直後へ移動
+- `index.html` の `#rp-data-notice` ブロックを、`.rp-wrap` 先頭（地図の上）から `.rp-map-panel` の直後・
+  物質一覧の前へ移動した。DOM 全文（`rp-data-summary` / `rp-data-note` / 文章）は移動前と同一で、
+  `buildNotice()` も変更していない（427物質・保留81などの文言は `data.js` の meta から生成）。
+- 地図の上に注意枠は残さない。`.rp-notice` の margin を `14px 0` にし、`.rp-map-panel + .rp-notice` で
+  上マージン14pxを明示（密着させない）。現在位置や popover、フォーカス挙動は変更なし。
+
+### 4. 検査
+- `node --test scripts/tests/app11-hit-targets.test.cjs`（新規12件）: 半径9pxの厳密性（8px選択 / 10px非選択）、
+  実在の近接ペア `ethanol-oxidation-ethanal` と `ethanal-reduction` の最近傍選択、同一反応の枝の重複排除、
+  同距離 tie の安定性、カンマ入り ID、拡大0.2〜3倍での画面px換算、ラベル・ノード優先、
+  18px 共有定義、描画順、data.js / 注意枠 DOM の全文ハッシュ不変、注意枠の順序と margin。
+- 既存: `app11-connectors`（22件）の円ヒット前提の assert を、18px 幅・円廃止・フォーカス維持へ更新。
+  `app11-class-map` 19件 / `app11-structure` 15件 は変更なしで通過。
+- ヘッドレスChrome（1280×900 / 390×844）でのスモーク: 反応線158本・反応マーカー86個（tabindex付き）・
+  一般図の変換16・物質427のままで、線の中ほど20点のタップがすべて期待どおりの反応を開いた。
+  近接ペア（fit倍率で線間 1.3px）でも `ethanol-oxidation-ethanal` を正しく選択。矢印のtriangle内タップ、
+  反応ラベルの直タップ、物質ノードの直タップ（線より優先）、>4pxのドラッグで開かないこと、
+  低倍率（fit後さらに縮小）での線タップ、一般図の変換タップ、カードを閉じた後のフォーカス復帰
+  （`data-kind="reaction"` の実体へ戻る）、390px で横はみ出し0・注意枠が地図の直後14px、
+  コンソールエラー0 を確認した。
+
+### 未確認・残課題
+- 実機タッチ（指）での精度と、18px 帯が密集する箇所での選び分けは `test` サブエージェントの最終確認に回す。
+- `app11-reaction-map` 39件は通過。実行中に別作業が `site/app10` / `design-lab/app10-next` を編集中で
+  一時的に1件落ちたが、単独・再実行では通過しており、app11 側の変更とは無関係。
+- デプロイ・公開は未実施（本番公開候補のまま）。
+
+## final UI test の NG 3種の修正（2026-11-15 追加・未公開）
+
+最終 UI テスト（`Temp/opencode/shot/app11-hit-notice-final/REPORT.md`）で見つかった3種だけを修正した。
+具体図の色・幅・端点・geometry、`data.js`、一般図の配置、注意枠の DOM/文言は変更していない。
+
+### 1. 一般図の候補選択が DOM 順依存だった
+- 原因: `pickDownEntity()` が「解決後の `[data-kind]` 要素」の classList で線ヒットを判定していたため、
+  一般図では常にグループ（`.rp-classmap__edge-group`）が返り、`isHitPath=false` のまま DOM 順の先頭が勝っていた。
+- 修正: 触れた要素側から `HIT_LINE_SELECTOR`（`.rp-edge-hit / .rp-edge / .rp-classmap__edge-hit /
+  .rp-classmap__edge`）で線ヒットを取り、反応・一般図の両方で同じ `nearestHitAt()` を通す。
+  一般図の透明ヒット自身へ `data-kind="class-edge"` / `data-id` を付与し、無い場合は `closest('[data-kind]')` で補う。
+  一般図のラベル（テキスト）は線ヒットに該当しないため、従来どおり直接ヒットとして無条件優先。
+- 実測: fit 倍率 0.1993 で `alkene-alkane`（距離0）と `primary-alcohol-alkene`（5.447px）が重なる点を
+  実マウスでクリックし `alkene-alkane` を選択（修正前は DOM 順で別の変換）。候補順を反転しても同じ結果。
+
+### 2. 矢印 triangle の内部が距離0で評価されていなかった
+- 原因: 距離判定が「輪郭の折れ線」だけで、しかも `samplePath` は `Z` の閉じ辺を落とすため三角形の1辺が未計測。
+  塗りの内部（重心）は輪郭から 1〜2px 離れており、近くを通る別反応の線（1px 未満）に負けていた。
+- 修正: 矢印を「描画と同じ頂点（`tip/left/right`）」の塗り多角形として距離計算に持ち、
+  内部は ray casting（`Core.pointInPolygon`）で距離0、輪郭は3辺すべてを測る。
+  hit path の `d` と距離用 geometry は `connector.__hitShape` に一度だけ作って共有する（一般図も同じ関数）。
+- 同距離0のときは線を優先し、最後は反応順（order）で安定化。同じ反応の複数枝は同じ反応。
+- 実測: 見えている triangle 重心 71/71 が自分の反応を選択（`tripalmitin-saponification` /
+  `aspirin-hydrolysis` / `ethyl-acetate-hydrolysis` を含む）。覆われている27点は対象外（final UI test と同じ扱い）。
+
+### 3. 線のダブルクリックで拡大とカードが同時に起きていた
+- 原因: `dblclick` が無条件に地図を拡大し、クリックで開いたカードと競合していた。
+- 修正: `Core.dblclickAction(isEntity, isControl)` を追加し、実体（線・矢印・ラベル・物質・一般図）と
+  操作要素（凡例・ヒント・一般図ジャンプ）の上では拡大しない。背景だけ従来どおり拡大し、カードは開かない。
+  単一クリックの応答（カード即時オープン）は遅延させない。ヒント文にはダブルクリックの記載がないため変更なし。
+- 実測: 線・ラベル・ノードの dblclick で倍率不変（0.1993 のまま）。背景 dblclick は 0.1993→0.3188。
+  線の連続2クリックも倍率不変でカードのみ開く。
+
+### 4. 回帰
+- `node --test scripts/tests/app11-hit-targets.test.cjs`（19件）: 幅18pxの厳密性（8px選択 / 10px非選択）、
+  world→screen の半径一致（曲線含む・0.2/1/3倍）、一般図の候補順反転で同一選択、実在の近接ペア、
+  三角形の内部/辺/外側近点/重なり、全 triangle 重心が自分の反応、dblclick の対象別判定、
+  `data.js` と注意枠 DOM のハッシュ不変、描画順、LOD 非無効化。
+- 既存: `app11-connectors` 22 / `app11-class-map` 19 / `app11-reaction-map` 39 / `app11-structure` 15 すべて pass。
+- 具体図の再確認: 158枝の線中央タップが fit で 158/158 正解、拡大後も可視 63/63 正解。
+  ラベル/ノードの直接タップ、ドラッグ非オープン、低倍率、一般図キーボード、390px（はみ出し0・注意枠14px）も維持。
+
+### 未確認・申し送り
+- 最終受け入れ（3テーマ×2サイズ×4倍率の全マトリクス、指タッチの再ターゲット）は `test` サブエージェントが再実行する。
+- 実機の指タッチは Chromium の touch adjustment で近傍の意味要素へ寄ることがあり、クリック精度の保証とは別扱い。
+- 並行作業の app10 変更（staged）には触れていない。commit / push / デプロイは未実施。
+
+## 実座標（physical）での当たり解決へ統一（2026-11-15 追加・未公開）
+
+再テスト（`Temp/opencode/shot/app11-hit-notice-fixed/REPORT.md`）の残り2種は、どちらも
+「`event.target` を信じていた」ことが原因だった。共通の解決に置き換えた。
+
+### 原因
+1. 実体のダブルクリック: `mapEl.setPointerCapture()` により `dblclick.target` が `#rp-map` に付け替えられ、
+   `event.target` だけを見る判定では「背景」と誤認して拡大していた（カードも同時に開く）。
+2. 390px の指タッチ: Chromium の touch adjustment で `pointerdown.target` が近傍の `rp-node__box` に変わり、
+   物理点は矢印の塗り内部でそのノードの外側なのに、補正後の target を優先して別の物質を開いていた。
+
+### 解法（共通化）
+- `resolvePhysicalAt(clientX, clientY)` を追加し、**pointerdown と dblclick の両方**で `event.target` ではなく
+  実 client 座標から決め直す。`document.elementsFromPoint()` は pointer capture / touch adjustment の
+  補正を受けない幾何クエリなので、その候補列（描画順＝上から）を `Core.resolvePhysicalTarget()` に渡す。
+- 候補は「実 point がその形状の内側か」を必ず検証する。SVG は `isPointInFill()` / `isPointInStroke()`、
+  テキストは実 `getBoundingClientRect()`。物質ノードは `rx=9` の塗り／輪郭で判定するため、
+  drop-shadow / hover halo の見た目とは混同しない。内側でない候補（`inside:false`）は捨てる。
+- 優先順は描画順のまま: 物理的に内側の **ノード／ラベルが最優先**、次に **線**（透明ヒット or 可視線）、
+  操作要素（凡例・ヒント・一般図ジャンプ・button 等）は実 point がその中にあるときだけ control として維持。
+- 線は従来どおり `nearestHitAt()`（画面18px＝半径9px、矢印 triangle 内部は距離0）で最近傍を選ぶ。
+  線が候補列に無い場合も、全候補のうち距離0（塗り内部・線の上）だけを拾うフォールバックを持つ。
+  背景タップで近くの線を拾わないよう、距離>0 は採用しない。
+- dblclick は同じ resolver を実座標で再評価し、`entity`/`line` なら **拡大しない（カード操作のみ）**、
+  `background` なら **拡大のみ（カードなし）**、`control` なら何もしない。capture で target が
+  `#rp-map` に変わっても誤って背景扱いにしない。`downEntity` 保存・>4px パン抑止・ピンチ抑止は変更なし。
+
+### 検証（実測）
+- 旧NG1（entity ダブルクリック）: **実マウスの本物の dblclick**（`count:2`）で、線・ラベル・ノードの
+  いずれも倍率 0.1993 のまま（拡大なし）でカードが開く。このとき `dblclick.target` は実際に `rp-map`。
+  背景の dblclick は 0.1993→0.3188 でカードは開かない。連続2クリックも倍率不変＋カードのみ。
+- 旧NG2（指タッチの取り違え）: 390px・CDP native touch で矢印重心をタップ。`pointerdown.target` は
+  **`rp-node__box`（acetic-acid）に補正されている**のに、選択は `ethyl-acetate-hydrolysis`（物理点の矢印）。
+  `tripalmitin-saponification` / `aspirin-hydrolysis` / `ethyl-acetate-hydrolysis` の 3件 × 倍率1・1.5 で 6/6 正解。
+- 回帰: 具体図158枝の線中央タップ fit 158/158・拡大後 63/63、一般図の近接（0 vs 5.447px）で距離0を選択、
+  可視 triangle 重心 71/71 が自分の反応、ノード直タップ優先、>4px ドラッグ非オープン、低倍率、
+  一般図キーボード、390px（はみ出し0・注意枠14px）、コンソールエラー0。
+- 単体: `app11-hit-targets` 23件（+4: 物理候補解決、旧NG triangle の枠外検証、dblclick の retarget 相当、
+  `event.target` 非依存の静的検査）、`app11-connectors` 22 / `app11-class-map` 19 / `app11-reaction-map` 39 /
+  `app11-structure` 15 すべて pass。
+
+### 不変
+- 可視線の幅・色・破線・端点・矢印・geometry、`data.js`、一般図の配置、注意枠の DOM/文言は変更なし。
+  当たり判定は画面18px（半径9px）のまま。フォーカス可能な反応86・hit のタブストップ0 も維持。
+
+### 申し送り
+- 3テーマ×2サイズ×4倍率の全マトリクスと実機の指タッチは `test` サブエージェントが再実行する。
+- `elementsFromPoint` は主要ブラウザで利用可。未対応環境では従来の `elementFromPoint` 相当にフォールバックし、
+  その場合は物理候補が1件だけになる。
+- 並行作業の app10 変更には触れていない。commit / push / デプロイは未実施。
