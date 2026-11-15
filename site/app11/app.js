@@ -108,11 +108,22 @@
   var suppressClick = false;
   var animToken = 0;
   var lastLevel = -1;
+  // ホイールの累積目標と補間用の状態。1イベントごとに animateTo を再始動すると
+  // 途中の移動が消えるため、目標だけを更新し、rAF 1本で追従する。
+  var wheelZoom = null;
+  var wheelRaf = 0;
+  var wheelApplying = false;
+  var WHEEL_FOLLOW = 0.4;
+  var WHEEL_SETTLE_SCALE = 1e-4;
+  var WHEEL_SETTLE_PX = 0.5;
   var positionFullValue = '';
   var positionLevelValue = '';
   var positionLiveText = '';
   var positionLiveTimer = 0;
   var POSITION_LIVE_DELAY = 500;
+  // 右下フローティングの実寸（スクリーン座標の予約に使う）。syncPositionInset が更新する。
+  var positionBox = { w: 0, h: 0 };
+  var jumpBox = { w: 0, h: 0 };
 
   function esc(text) {
     return String(text == null ? '' : text).replace(/[&<>"']/g, function (ch) {
@@ -508,6 +519,9 @@
   }
 
   function setView(next, clamp) {
+    // ホイール以外の操作（パン・ピンチ・キー・ボタン・fit・resize）が入ったら、
+    // 途中のホイール目標は捨てる。古い目標へ戻る「巻き戻り」を起こさない。
+    if (!wheelApplying) cancelWheelZoom();
     view = clamp ? Core.clampPan(next, viewSize.w, viewSize.h, D.meta.canvas) : next;
     render();
   }
@@ -520,6 +534,8 @@
       mapEl.setAttribute('data-level', String(level));
       mapEl.setAttribute('data-detail', Core.levelNote(level));
       updateMarkers(level);
+      // 「一般図へ」の表示/非表示が変わると右下の予約寸法も変わる。
+      syncPositionInset();
     }
     updateOverlay(level);
     updatePosition(level);
@@ -544,20 +560,158 @@
     };
   }
 
+  /* 一般図の見出し（HTML overlay）。ノードの上に重ねない。
+     分類ノード・具体図の全物質・表示中の反応ラベル・現在位置・「一般図へ」と重ならない
+     スクリーン位置を探し、無ければ題名だけの小さな見出し、それでも無ければ出さない。 */
+  var captionMetrics = { key: '', w: 0, h: 0 };
+  // 反応ラベルの world bbox（拡大率に依存しない）。表示中のときだけ測って使い回す。
+  var reactionLabelWorld = null;
+
+  function ensureReactionLabelBoxes() {
+    if (reactionLabelWorld) return reactionLabelWorld;
+    var boxes = {};
+    try {
+      D.reactions.forEach(function (r) {
+        var g = reactionIndex[r.id];
+        if (!g) return;
+        var texts = g.querySelectorAll('.rp-reaction__label');
+        var minX = Infinity;
+        var minY = Infinity;
+        var maxX = -Infinity;
+        var maxY = -Infinity;
+        for (var i = 0; i < texts.length; i += 1) {
+          var b = texts[i].getBBox();
+          if (!b.width || !b.height) continue;
+          minX = Math.min(minX, b.x);
+          minY = Math.min(minY, b.y);
+          maxX = Math.max(maxX, b.x + b.width);
+          maxY = Math.max(maxY, b.y + b.height);
+        }
+        if (minX === Infinity) return;
+        boxes[r.id] = {
+          x: minX,
+          y: minY,
+          w: Math.max(1, maxX - minX),
+          h: Math.max(1, maxY - minY)
+        };
+      });
+    } catch (err) {
+      return null;
+    }
+    if (!Object.keys(boxes).length) return null; // 低倍率でラベルが隠れている間は測れない
+    reactionLabelWorld = boxes;
+    return boxes;
+  }
+
+  function classMapCaptionSize(heading, key) {
+    if (captionMetrics.key === key) return { w: captionMetrics.w, h: captionMetrics.h };
+    var w = heading.offsetWidth;
+    var h = heading.offsetHeight;
+    if (w > 0 && h > 0) captionMetrics = { key: key, w: w, h: h };
+    return { w: w, h: h };
+  }
+
+  function rectHit(a, b, pad) {
+    var p = typeof pad === 'number' ? pad : 1;
+    return a.x < b.x + b.w + p && b.x < a.x + a.w + p &&
+      a.y < b.y + b.h + p && b.y < a.y + a.h + p;
+  }
+
+  // 見出しを置けない障害物（いま画面に見えているものだけ）を集める。
+  function captionBlockers(box) {
+    var list = [];
+    function add(x, y, w, h) {
+      if (!(w > 0 && h > 0)) return;
+      if (x > box.right || y > box.bottom || x + w < box.left || y + h < box.top) return;
+      list.push({ x: x, y: y, w: w, h: h });
+    }
+    if (classMapData) {
+      classMapData.nodes.forEach(function (n) {
+        var p = Core.worldToScreen(view, n.x, n.y);
+        add(p.x, p.y, n.w * view.scale, n.h * view.scale);
+      });
+    }
+    // 具体図の物質（427件）。表示中のものだけ、ラベルがはみ出す分を少し広げる。
+    var padPx = 4;
+    D.compounds.forEach(function (c) {
+      var p = Core.worldToScreen(view, c.x, c.y);
+      add(p.x - padPx, p.y - padPx, nodeW(c) * view.scale + padPx * 2, nodeH(c) * view.scale + padPx * 2);
+    });
+    // 反応ラベルは低倍率では非表示。表示されるときだけ、world bbox を画面へ写す。
+    if (Core.detailLevel(view.scale) > 0) {
+      var labels = ensureReactionLabelBoxes();
+      if (labels) {
+        Object.keys(labels).forEach(function (id) {
+          var b = labels[id];
+          var p = Core.worldToScreen(view, b.x, b.y);
+          add(p.x - 2, p.y - 2, b.w * view.scale + 4, b.h * view.scale + 4);
+        });
+      }
+    }
+    if (positionBox.w && positionBox.h) {
+      add(viewSize.w - 12 - positionBox.w, viewSize.h - 12 - positionBox.h, positionBox.w, positionBox.h);
+    }
+    if (jumpBox.w && jumpBox.h) {
+      add(viewSize.w - 12 - jumpBox.w,
+        viewSize.h - (12 + (positionBox.h || 0) + 10) - jumpBox.h, jumpBox.w, jumpBox.h);
+    }
+    return list;
+  }
+
+  function classMapCaptionSlot(frameScreen, size, box, blockersIn) {
+    if (!(size.w > 0 && size.h > 0)) return null;
+    var blockers = blockersIn || captionBlockers(box);
+    var right = frameScreen.x + frameScreen.w;
+    var bottom = frameScreen.y + frameScreen.h;
+    var raw = [
+      { x: frameScreen.x + 8, y: frameScreen.y - size.h - 6 },
+      { x: frameScreen.x + 8, y: bottom + 6 },
+      { x: frameScreen.x + 8, y: frameScreen.y + 8 },
+      { x: right - size.w - 8, y: frameScreen.y + 8 },
+      { x: frameScreen.x + 8, y: bottom - size.h - 8 },
+      { x: right - size.w - 8, y: bottom - size.h - 8 },
+      { x: frameScreen.x + 8, y: frameScreen.y + frameScreen.h * 0.35 },
+      { x: right - size.w - 8, y: frameScreen.y + frameScreen.h * 0.35 },
+      { x: frameScreen.x + 8, y: frameScreen.y + frameScreen.h * 0.62 },
+      { x: right - size.w - 8, y: frameScreen.y + frameScreen.h * 0.62 },
+      { x: 8, y: 8 },
+      { x: viewSize.w - size.w - 8, y: 8 },
+      { x: 8, y: viewSize.h - size.h - 8 },
+      { x: viewSize.w - size.w - 8, y: viewSize.h - size.h - 8 }
+    ];
+    for (var i = 0; i < raw.length; i += 1) {
+      var x = Math.round(Math.min(Math.max(raw[i].x, 4), viewSize.w - 4 - size.w));
+      var y = Math.round(raw[i].y);
+      var rect = { x: x, y: y, w: size.w, h: size.h };
+      if (rect.x < 4 || rect.y < 4 || rect.x + rect.w > viewSize.w - 4 || rect.y + rect.h > viewSize.h - 4) continue;
+      var blocked = false;
+      for (var b = 0; b < blockers.length && !blocked; b += 1) {
+        if (rectHit(rect, blockers[b])) blocked = true;
+      }
+      if (!blocked) return rect;
+    }
+    return null;
+  }
+
   function updateOverlay(level) {
     while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
     var box = visibleBox();
     var placed = [];
     if (classMapData) {
       var frame = classMapData.frame;
-      var titlePoint = Core.worldToScreen(view, frame.x + 28, frame.y + 24);
-      if (titlePoint.x < box.right && titlePoint.y < box.bottom &&
-        titlePoint.x + 240 > box.left && titlePoint.y + 40 > box.top) {
+      var frameScreen = {
+        x: view.x + frame.x * view.scale,
+        y: view.y + frame.y * view.scale,
+        w: frame.w * view.scale,
+        h: frame.h * view.scale
+      };
+      if (frameScreen.x < box.right && frameScreen.y < box.bottom &&
+        frameScreen.x + frameScreen.w > box.left && frameScreen.y + frameScreen.h > box.top) {
         var heading = document.createElement('div');
         heading.className = 'rp-overlay__classmap';
-        heading.style.left = titlePoint.x + 'px';
-        heading.style.top = titlePoint.y + 'px';
-        heading.style.maxWidth = Math.min(340, Math.max(140, viewSize.w - titlePoint.x - 12)) + 'px';
+        var maxWidth = Math.min(340, Math.max(160, viewSize.w - 24));
+        heading.style.maxWidth = maxWidth + 'px';
+        heading.style.visibility = 'hidden';
         var strong = document.createElement('strong');
         strong.textContent = classMapData.title;
         var note = document.createElement('span');
@@ -565,7 +719,27 @@
         heading.appendChild(strong);
         heading.appendChild(note);
         overlay.appendChild(heading);
-        placed.push({ x: titlePoint.x, y: titlePoint.y, w: 250, h: 40 });
+        var themeKey = document.documentElement.getAttribute('data-theme') || 'default';
+        var size = classMapCaptionSize(heading, maxWidth + '|' + themeKey);
+        var blockers = captionBlockers(box);
+        var slot = classMapCaptionSlot(frameScreen, size, box, blockers);
+        if (!slot) {
+          // 全2行が入らないときは題名だけの小さな見出し（副説明はデータ欄・カードにある）。
+          heading.removeChild(note);
+          heading.classList.add('is-title-only');
+          size = classMapCaptionSize(heading, maxWidth + '|title|' + themeKey);
+          slot = classMapCaptionSlot(frameScreen, size, box, blockers);
+        }
+        if (slot) {
+          heading.style.left = slot.x + 'px';
+          heading.style.top = slot.y + 'px';
+          heading.style.visibility = '';
+          placed.push({ x: slot.x, y: slot.y, w: slot.w, h: slot.h });
+        } else {
+          // どの位置でも既存のノード・ラベルに重なる場合だけ出さない。
+          // 識別は現在位置の「官能基変換の一般図」表示と「一般図へ」の導線が担う。
+          heading.style.display = 'none';
+        }
       }
     }
     if (level === 0 && view.scale >= 0.15) {
@@ -754,6 +928,31 @@
     }, POSITION_LIVE_DELAY);
   }
 
+  // 全文popoverの高さは地図の高さに合わせる。map-panel は overflow: hidden なので、
+  // 地図の外へはみ出す高さにしない（内部スクロールで全文を読む）。
+  function syncPositionPopoverBox() {
+    var mapH = mapEl.clientHeight || 0;
+    var ownH = positionEl.offsetHeight || 0;
+    var avail = mapH - ownH - 12 - 6 - 10;
+    positionPopover.style.maxHeight = Math.max(96, Math.round(avail)) + 'px';
+  }
+
+  // 現在位置の高さを地図の右下余白として反映する。文字サイズを変えても
+  // 「一般図へ」の導線が現在位置と重ならない。
+  function syncPositionInset() {
+    positionBox.w = Math.round(positionEl.offsetWidth || 0);
+    positionBox.h = Math.round(positionEl.offsetHeight || 0);
+    mapEl.style.setProperty('--rp-position-h', positionBox.h + 'px');
+    var jump = document.getElementById('rp-classmap-jump');
+    if (jump && jump.offsetParent !== null) {
+      jumpBox.w = Math.round(jump.offsetWidth || 0);
+      jumpBox.h = Math.round(jump.offsetHeight || 0);
+    } else {
+      jumpBox.w = 0;
+      jumpBox.h = 0;
+    }
+  }
+
   function openPositionPopover() {
     if (positionLiveTimer) {
       window.clearTimeout(positionLiveTimer);
@@ -761,6 +960,7 @@
     }
     fillPositionPopover();
     positionPopover.hidden = false;
+    syncPositionPopoverBox();
     positionTrigger.setAttribute('aria-expanded', 'true');
     positionPopover.focus();
   }
@@ -771,6 +971,33 @@
     positionPopover.hidden = true;
     positionTrigger.setAttribute('aria-expanded', 'false');
     if (restore) positionTrigger.focus();
+  }
+
+  // 地図の touch-action: none は祖先の制約なので、popover 側の touch-action だけでは
+  // 指スクロールを有効にできない。popover 内のドラッグはここでスクロールへ変換する。
+  var popoverDrag = null;
+
+  function onPopoverPointerDown(e) {
+    // マウスのドラッグは全文の選択に使う。指・ペンだけスクロールへ変換する。
+    if (e.pointerType === 'mouse') return;
+    if (positionPopover.scrollHeight <= positionPopover.clientHeight + 1) return;
+    popoverDrag = { id: e.pointerId, y: e.clientY, top: positionPopover.scrollTop };
+    if (positionPopover.setPointerCapture) {
+      try { positionPopover.setPointerCapture(e.pointerId); } catch (err) { errMsg(err && err.message); }
+    }
+  }
+
+  function onPopoverPointerMove(e) {
+    if (!popoverDrag || popoverDrag.id !== e.pointerId) return;
+    positionPopover.scrollTop = popoverDrag.top - (e.clientY - popoverDrag.y);
+  }
+
+  function onPopoverPointerUp(e) {
+    if (!popoverDrag || popoverDrag.id !== e.pointerId) return;
+    if (positionPopover.releasePointerCapture) {
+      try { positionPopover.releasePointerCapture(e.pointerId); } catch (err) { errMsg(err && err.message); }
+    }
+    popoverDrag = null;
   }
 
   /* ---------------- interactions ---------------- */
@@ -793,8 +1020,21 @@
     clearRegionSelection();
     clearSelection();
     // 狭い画面でも外枠・注記が切れないよう、fit 倍率に下限を設けない。文字の読解は後から拡大する。
-    var target = Core.fitRect(classMapData.area, viewSize.w, viewSize.h, 14, 0, 1.2);
-    animateTo(Core.clampPan(target, viewSize.w, viewSize.h, D.meta.canvas));
+    // 上は一般図の見出し（HTML overlay）、下は右下の現在位置と「一般図へ」の帯を予約し、
+    // fit した全図と注記がフローティングに覆われないようにする。
+    var reserveTop = (captionMetrics.h >= 20 ? captionMetrics.h : 40) + 12;
+    var posH = positionBox.h || 48;
+    var jumpH = jumpBox.h || 0;
+    function fitWithBottom(bottom) {
+      var innerH = Math.max(140, viewSize.h - reserveTop - bottom);
+      var box = Core.fitRect(classMapData.area, viewSize.w, innerH, 14, 0, 1.2);
+      box.y += reserveTop;
+      return Core.clampPan(box, viewSize.w, viewSize.h, D.meta.canvas);
+    }
+    var target = fitWithBottom(12 + posH + (jumpH ? jumpH + 10 : 0));
+    // fit 後に詳細度が上がって導線が消える場合は、その分の予約を戻して図を大きく見せる。
+    if (jumpH && Core.detailLevel(target.scale) > 0) target = fitWithBottom(12 + posH);
+    animateTo(target);
     if (focusFirst && classMapData.nodes.length && classNodeIndex[classMapData.nodes[0].id]) {
       var first = classNodeIndex[classMapData.nodes[0].id];
       // 「一般図へ」直後のプログラムfocusは、直後の全体fitを維持する。
@@ -834,6 +1074,42 @@
   var pinchOrigin = null;
   var downEntity = null;
 
+  /* ホイールの拡大縮小。目標を累積し、短い比例補間で追従する（毎イベントの再始動をしない）。
+     拡大率の上限・下限に当たったら、その位置で止めて行き過ぎを残さない。 */
+  function cancelWheelZoom() {
+    if (!wheelZoom && !wheelRaf) return;
+    wheelZoom = null;
+    if (wheelRaf) {
+      window.cancelAnimationFrame(wheelRaf);
+      wheelRaf = 0;
+    }
+  }
+
+  function applyWheelView(next) {
+    wheelApplying = true;
+    try { setView(next, true); } finally { wheelApplying = false; }
+  }
+
+  function wheelStep() {
+    wheelRaf = 0;
+    var target = wheelZoom;
+    if (!target) return;
+    var ds = target.scale - view.scale;
+    var dx = target.x - view.x;
+    var dy = target.y - view.y;
+    if (Math.abs(ds) < WHEEL_SETTLE_SCALE && Math.abs(dx) < WHEEL_SETTLE_PX && Math.abs(dy) < WHEEL_SETTLE_PX) {
+      wheelZoom = null;
+      applyWheelView(target);
+      return;
+    }
+    applyWheelView({
+      scale: view.scale + ds * WHEEL_FOLLOW,
+      x: view.x + dx * WHEEL_FOLLOW,
+      y: view.y + dy * WHEEL_FOLLOW
+    });
+    wheelRaf = window.requestAnimationFrame(wheelStep);
+  }
+
   function pointerList() {
     return Object.keys(pointers).map(function (k) { return pointers[k]; });
   }
@@ -872,7 +1148,7 @@
   var HIT_LINE_SELECTOR = '.rp-edge-hit,.rp-edge,.rp-classmap__edge-hit,.rp-classmap__edge';
   var PHYSICAL_NODE_SELECTOR = '.rp-node,.rp-classmap__node';
   var PHYSICAL_LABEL_SELECTOR = '.rp-reaction__label,.rp-node__label,.rp-classmap__label';
-  var PHYSICAL_CONTROL_SELECTOR = '.rp-legend,.rp-hint,.rp-classmap-jump,button,a[href],input,select,textarea';
+  var PHYSICAL_CONTROL_SELECTOR = '.rp-legend,.rp-classmap-jump,.rp-position,button,a[href],input,select,textarea';
 
   function hitLineTarget(target) {
     return target && target.closest ? target.closest(HIT_LINE_SELECTOR) : null;
@@ -1011,8 +1287,10 @@
   }
 
   function onPointerDown(e) {
-    if (e.target.closest && e.target.closest('.rp-legend,.rp-hint,.rp-classmap-jump')) return;
+    // 凡例・一般図への導線・現在位置などの通常のHTML操作要素は地図のパンに使わない。
+    if (e.target.closest && e.target.closest(PHYSICAL_CONTROL_SELECTOR)) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    cancelWheelZoom();
     var p = mapPoint(e);
     pointers[e.pointerId] = p;
     suppressClick = false;
@@ -1081,12 +1359,27 @@
   }
 
   function onWheel(e) {
-    if (!(e.ctrlKey || e.metaKey)) return;
+    // 地図の上だけで、修飾キー無しのホイールを拡大縮小に使う。
+    // 現在位置・凡例・ボタンなどの通常のHTML操作要素の上ではブラウザ既定（スクロール等）を優先し、
+    // preventDefault も document へのリスナー追加もしない。
+    if (e.target && e.target.closest && e.target.closest(PHYSICAL_CONTROL_SELECTOR)) return;
+    var factor = Core.wheelZoomFactor(e.deltaY, e.deltaMode, mapEl.clientHeight);
+    if (factor === 1) return; // delta 0・横方向だけの操作では拡大しない
     e.preventDefault();
+    // ホイールは実行中のfit/ボタン拡大より優先する（途中で奪われない）。
+    animToken += 1;
     if (activeRegion) clearRegionSelection();
     var p = mapPoint(e);
-    var factor = e.deltaY < 0 ? 1.14 : 1 / 1.14;
-    animateTo(Core.zoomAt({ scale: view.scale, x: view.x, y: view.y }, factor, p.x, p.y));
+    var base = wheelZoom || { scale: view.scale, x: view.x, y: view.y };
+    var next = Core.zoomAt(base, factor, p.x, p.y);
+    if (next.scale === base.scale) {
+      // 上限・下限に達している。追従中のrAFは止めず、目標も動かさない（古い目標へ戻さない）。
+      if (!wheelRaf) wheelZoom = null;
+      return;
+    }
+    // カーソル位置を軸にしたまま累積する（連続入力でも飛ばない）。
+    wheelZoom = Core.clampPan(next, viewSize.w, viewSize.h, D.meta.canvas);
+    if (!wheelRaf) wheelRaf = window.requestAnimationFrame(wheelStep);
   }
 
   function mapEntityFrom(target) {
@@ -1114,6 +1407,8 @@
   function onKeydown(e) {
     if (!card.hidden) return;
     if (e.target === searchInput) return;
+    // 現在位置（全文popover）の中では、地図のショートカットへ奪わない。
+    if (positionEl && positionEl.contains(e.target)) return;
     var entity = mapEntityFrom(e.target);
     if (keyIntent(e.key, entity) === 'native') return;
     // button/input/link などの上では、矢印・ズーム・0 も地図へ奪わない。
@@ -2120,6 +2415,7 @@
       // 実体（線・矢印・ラベル・物質・一般図）の上のダブルクリックは、地図を拡大しない。
       // 1回目のクリックで開いたカードの操作をそのまま優先する（応答を遅らせない）。
       // pointer capture で dblclick.target が #rp-map に変わっても、実座標で判定し直す。
+      if (e.target.closest && e.target.closest('.rp-position')) return;
       var decided = resolvePhysicalAt(e.clientX, e.clientY);
       var isEntity = decided.type === 'entity' || decided.type === 'line';
       var isControl = decided.type === 'control';
@@ -2214,6 +2510,14 @@
       closePositionPopover(false);
     }, true);
 
+    // 全文popoverは地図の上に浮かぶ。中のスクロールと選択を地図のパン・ズームから守る。
+    // （wheel は mapEl のリスナーへ渡さない。指スクロールは祖先の touch-action: none のため自前で行う）
+    positionPopover.addEventListener('wheel', function (e) { e.stopPropagation(); }, { passive: true });
+    positionPopover.addEventListener('pointerdown', onPopoverPointerDown);
+    positionPopover.addEventListener('pointermove', onPopoverPointerMove);
+    positionPopover.addEventListener('pointerup', onPopoverPointerUp);
+    positionPopover.addEventListener('pointercancel', onPopoverPointerUp);
+
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         if (!positionPopover.hidden) {
@@ -2242,13 +2546,32 @@
 
     window.addEventListener('resize', function () {
       measure();
+      syncPositionInset();
+      if (!positionPopover.hidden) syncPositionPopoverBox();
       setView(view, true);
     });
-    if (window.ResizeObserver) {
+    // webfont の読み込みで文字幅が変わると、反応ラベルの測り直しが必要になる。
+    if (document.fonts && document.fonts.addEventListener) {
       try {
-        new ResizeObserver(function () { measure(); setView(view, true); }).observe(mapEl);
+        document.fonts.addEventListener('loadingdone', function () {
+          reactionLabelWorld = null;
+          render();
+        });
       } catch (err) { errMsg(err && err.message); }
     }
+    if (window.ResizeObserver) {
+      try {
+        new ResizeObserver(function () {
+          measure();
+          syncPositionInset();
+          if (!positionPopover.hidden) syncPositionPopoverBox();
+          setView(view, true);
+        }).observe(mapEl);
+        // 文字サイズや2行の折返しが変わっても、「一般図へ」の導線との重なりを作らない。
+        new ResizeObserver(function () { syncPositionInset(); }).observe(positionEl);
+      } catch (err) { errMsg(err && err.message); }
+    }
+    syncPositionInset();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

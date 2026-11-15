@@ -243,7 +243,7 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   overflow: hidden;
 }
 .rp-toolbar { padding: 12px 14px 10px; border-bottom: 1px solid var(--rp-line); background: var(--rp-panel-2); }
-.rp-toolbar__row { position: relative; display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.rp-toolbar__row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
 .rp-zoom { display: flex; gap: 6px; }
 .rp-btn {
   border: 1px solid var(--rp-line);
@@ -274,12 +274,24 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   border-radius: 9px;
 }
 .rp-search__input:focus-visible { outline: 3px solid var(--rp-focus); outline-offset: 1px; border-color: var(--rp-focus); }
-/* 現在位置は常に2行固定。文字量で高さが変わると地図の上端が動くため、
-   省略はCSSだけで行い、全文は絶対配置のpopoverに出す（行の高さは変えない）。 */
+/* 現在位置は地図の右下に浮かせる。常に2行固定で、文字量が変わっても地図の高さ・上端は動かさない。
+   全文は絶対配置のpopoverへ出し、地図(.rp-map-panel の overflow: hidden)の内側に収める。 */
 .rp-position {
-  margin: 0 0 0 auto;
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 6;
+  box-sizing: border-box;
+  width: min(420px, calc(100% - 24px));
   min-width: 0;
-  max-width: min(440px, 46%);
+  max-width: min(420px, calc(100% - 24px));
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--rp-line);
+  border-radius: var(--rp-radius-sm);
+  background: color-mix(in srgb, var(--rp-panel) 94%, transparent);
+  box-shadow: var(--rp-shadow);
+  cursor: auto;
   font-size: 12.5px;
   color: var(--rp-muted);
 }
@@ -321,13 +333,16 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-position__note .rp-position__label { display: inline; }
 .rp-position__popover {
   position: absolute;
-  top: calc(100% + 6px);
+  bottom: calc(100% + 6px);
+  top: auto;
   right: 0;
   z-index: 20;
-  width: min(360px, calc(100vw - 32px));
+  box-sizing: border-box;
+  width: min(360px, 100%);
   max-width: 100%;
-  max-height: min(240px, 35vh);
+  max-height: 240px;
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 10px 12px;
   border: 1px solid var(--rp-line);
   border-radius: var(--rp-radius-sm);
@@ -622,25 +637,14 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 }
 .rp-overlay__classmap strong { font-size: 13px; white-space: nowrap; }
 .rp-overlay__classmap span { color: var(--rp-muted); font-size: 10.5px; white-space: normal; }
+/* 全2行を置ける余白が無いときは題名だけの小さな見出しにする（副説明はデータ欄・カード）。 */
+.rp-overlay__classmap.is-title-only { padding: 2px 8px 3px; }
 
-.rp-hint {
-  position: absolute;
-  left: 10px;
-  bottom: 8px;
-  margin: 0;
-  max-width: calc(100% - 20px);
-  font-size: 11px;
-  color: var(--rp-muted);
-  background: color-mix(in srgb, var(--rp-panel) 86%, transparent);
-  border: 1px solid var(--rp-line);
-  border-radius: 8px;
-  padding: 3px 9px;
-  pointer-events: none;
-}
 .rp-classmap-jump {
   position: absolute;
-  right: 10px;
-  bottom: 36px;
+  right: 12px;
+  /* 右下の現在位置（--rp-position-h はJSが実測）の上に置く。文字サイズが変わっても重ならない。 */
+  bottom: calc(12px + var(--rp-position-h, 50px) + 10px);
   z-index: 5;
   display: none;
   max-width: calc(100% - 20px);
@@ -863,12 +867,12 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   .rp-brand h1 { font-size: 18px; }
   .rp-brand p { display: none; }
   .rp-toolbar__row { gap: 8px; }
-  .rp-search { order: 3; flex: 1 1 100%; }
+  .rp-search { order: 2; flex: 1 1 100%; }
   .rp-search__label { display: none; }
-  .rp-position { order: 4; margin-left: 0; flex: 1 1 100%; max-width: none; }
   .rp-map { height: clamp(280px, 42vh, 420px); min-height: 260px; }
-  .rp-hint { font-size: 10px; right: 8px; left: 8px; }
-  .rp-classmap-jump { right: 8px; bottom: 32px; font-size: 11px; }
+  /* 地図内の右下フローティングなので、モバイルでも幅は地図に合わせる。 */
+  .rp-position { font-size: 11.5px; }
+  .rp-classmap-jump { right: 8px; font-size: 11px; }
   .rp-overlay__classmap { max-width: calc(100vw - 32px); }
   .rp-list { padding: 14px 12px 18px; }
   .rp-list__items { grid-template-columns: 1fr; }

@@ -421,6 +421,45 @@ test('[geometry] 矢印・ラベルはノード文字・線・他のラベルと
   });
 });
 
+test('[geometry] frameは詰めても余白を均し、面積25%以上・辺長を短縮し、具体図と棚から離す', () => {
+  CM.nodes.forEach((n) => {
+    assert.equal(n.w, 150, n.id + ' の幅は変えない');
+    assert.equal(n.h, 40, n.id + ' の高さは変えない');
+  });
+  const frame = CM.frame;
+  const area = CM.area;
+  // area は frame の周囲6px
+  assert.deepEqual(area, { x: frame.x - 6, y: frame.y - 6, w: frame.w + 12, h: frame.h + 12 });
+  // 旧配置（4116,1526 1930x782 / 辺総長3575）からの削減
+  const oldArea = 1930 * 782;
+  assert.ok(frame.w * frame.h <= oldArea * 0.75, 'frame面積: ' + frame.w * frame.h);
+  const edgeLength = CM.edges.reduce((sum, e) => sum + G.polylineLength(e.points.map(point)), 0);
+  assert.ok(edgeLength < 3575, '辺総長: ' + edgeLength);
+  assert.ok(edgeLength <= 3575 * 0.95, '辺総長を5%以上短縮: ' + edgeLength);
+  // ノード範囲の余白は四辺とも明確に取る（旧 74/134/206/8 の偏りを残さない）
+  const xs = CM.nodes.map((n) => n.x).concat(CM.nodes.map((n) => n.x + n.w));
+  const ys = CM.nodes.map((n) => n.y).concat(CM.nodes.map((n) => n.y + n.h));
+  const margins = {
+    left: Math.min(...xs) - frame.x,
+    top: Math.min(...ys) - frame.y,
+    right: frame.x + frame.w - Math.max(...xs),
+    bottom: frame.y + frame.h - Math.max(...ys)
+  };
+  Object.keys(margins).forEach((key) => {
+    assert.ok(margins[key] >= 55, '余白 ' + key + ': ' + margins[key]);
+  });
+  // 近隣の具体図（右端 4103.5）と分野見出しの棚（下端 1512）から60以上離す
+  assert.ok(frame.x - 4103.5 >= 60, '具体図との間隔: ' + (frame.x - 4103.5));
+  assert.ok(frame.y - 1512 >= 60, '棚との間隔: ' + (frame.y - 1512));
+  // canvas は広げない
+  const canvas = D.meta.canvas;
+  assert.deepEqual(canvas, { x: 0, y: 0, w: 6052, h: 2314 });
+  assert.ok(frame.x >= canvas.x && frame.y >= canvas.y &&
+    frame.x + frame.w <= canvas.x + canvas.w && frame.y + frame.h <= canvas.y + canvas.h);
+  assert.ok(area.x >= canvas.x && area.y >= canvas.y &&
+    area.x + area.w <= canvas.x + canvas.w && area.y + area.h <= canvas.y + canvas.h);
+});
+
 test('[geometry] 390pxでも一般図の外枠がviewport内に収まり、倍率下限で切らない', () => {
   const viewW = 364;
   const viewH = 354.47;
@@ -458,6 +497,69 @@ test('[core] 現在位置は一般図の枠内だけ図名を返し、選択中�
   assert.equal(Core.classMapPosition(overview, CM, 1200, 600), '', '全体表示では一般図を名乗らない');
 });
 
+test('[geometry] 狭い画面の一般図fitで見出し帯・右下フローティングが分類ノードを覆わない', () => {
+  // focusClassMap と同じ予約（上: 見出し40+12 / 下: 12+現在位置50+導線24+10）で fit し、
+  // 見出しを「外枠の上」へ置いたときにノード・現在位置と重ならないことを data 幾何で確かめる。
+  const CAPTION_H = 40;
+  const POSITION_H = 50;
+  const JUMP_H = 24;
+  const cases = [
+    { w: 364, h: 354.47, label: '390px' },
+    { w: 294, h: 280, label: '320px' },
+    { w: 1236, h: 594, label: '1280px' }
+  ];
+  function hit(a, b) {
+    return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  }
+  cases.forEach((c) => {
+    const reserveTop = CAPTION_H + 12;
+    const reserveBottom = 12 + POSITION_H + JUMP_H + 10;
+    const innerH = Math.max(140, c.h - reserveTop - reserveBottom);
+    const fit = Core.fitRect(CM.area, c.w, innerH, 14, 0, 1.2);
+    const off = { x: fit.x, y: fit.y + reserveTop, scale: fit.scale };
+    const screen = (r) => ({ x: off.x + r.x * off.scale, y: off.y + r.y * off.scale, w: r.w * off.scale, h: r.h * off.scale });
+    const frame = screen(CM.frame);
+    const nodes = CM.nodes.map(screen);
+    const position = { x: c.w - 12 - 300, y: c.h - 12 - POSITION_H, w: 300, h: POSITION_H };
+    const jump = { x: c.w - 12 - 160, y: c.h - (12 + POSITION_H + 10) - JUMP_H, w: 160, h: JUMP_H };
+
+    // 外枠も area も viewport 内、右下フローティングと重ならない
+    assert.ok(frame.x >= 0 && frame.y >= 0, c.label + ' frame 左上');
+    assert.ok(frame.x + frame.w <= c.w && frame.y + frame.h <= c.h, c.label + ' frame 右下: ' + JSON.stringify(frame));
+    assert.equal(hit(frame, position), false, c.label + ' frame と現在位置');
+    assert.equal(hit(frame, jump), false, c.label + ' frame と導線');
+
+    // 見出しは frame の上（帯の中）に置け、ノードにもフローティングにも重ならない
+    const width = Math.min(340, Math.max(160, c.w - 24));
+    const x = Math.min(Math.max(frame.x + 8, 4), c.w - 4 - width);
+    const caption = { x: x, y: frame.y - CAPTION_H - 6, w: width, h: CAPTION_H };
+    assert.ok(caption.y >= 4, c.label + ' 見出しの上端: ' + caption.y);
+    assert.ok(caption.x + caption.w <= c.w - 4, c.label + ' 見出しの右端');
+    assert.ok(caption.y + caption.h <= frame.y, c.label + ' 見出しは外枠の上');
+    nodes.forEach((n) => assert.equal(hit(caption, n), false, c.label + ' 見出しとノード'));
+    assert.equal(hit(caption, position), false, c.label + ' 見出しと現在位置');
+    assert.equal(hit(caption, jump), false, c.label + ' 見出しと導線');
+  });
+});
+
+test('[static] 一般図の見出しはノードに重ねず、置けなければ題名だけ／出さない', () => {
+  const app = read('app.js');
+  const css = read('app.css');
+  assert.ok(app.includes('function classMapCaptionSlot'), 'スクリーン座標で位置を選ぶ');
+  assert.ok(app.includes('classMapCaptionSlot(frameScreen, size, box, blockers)'));
+  assert.ok(app.includes('function captionBlockers'), '障害物をまとめて集める');
+  assert.ok(app.includes('D.compounds.forEach(function (c) {'), '具体図の全物質も障害物にする');
+  assert.ok(app.includes('function ensureReactionLabelBoxes'), '表示中の反応ラベルも障害物にする');
+  assert.ok(app.includes('Core.detailLevel(view.scale) > 0'), '低倍率で隠れているラベルは測らない');
+  assert.ok(app.includes("heading.classList.add('is-title-only')"), '入らなければ題名だけにする');
+  assert.ok(app.includes("heading.style.display = 'none';"), 'それでも入らなければ出さない');
+  assert.ok(app.includes('positionBox.w && positionBox.h'), '現在位置を予約に入れる');
+  assert.ok(app.includes('jumpBox.w && jumpBox.h'), '「一般図へ」も予約に入れる');
+  assert.match(css, /\.rp-overlay__classmap\.is-title-only\s*\{/, '題名だけの見出しのCSS');
+  assert.equal(/titlePoint/.test(app), false, 'world基準の固定位置を残さない');
+  assert.ok(app.includes('classMapData.title') && app.includes('classMapData.note'), 'タイトルと注記は同じ文言');
+});
+
 test('[static] 既存の entity 処理を壊さず、分類ノードをキーボード・タップで開く', () => {
   const js = read('app.js');
   const html = read('index.html');
@@ -475,8 +577,12 @@ test('[static] 既存の entity 処理を壊さず、分類ノードをキーボ
   assert.ok(js.includes('classMapPosition'), '現在位置の対応');
   assert.ok(js.includes('updateClassEdgeHighlight'), '分類選択時の変換線の強調');
   assert.ok(js.includes('focusClassMap'), '導線の移動処理');
-  assert.ok(js.includes('Core.fitRect(classMapData.area, viewSize.w, viewSize.h, 14, 0, 1.2)'),
-    '狭い画面でも切らないfit（倍率下限なし）');
+  assert.ok(js.includes('Core.fitRect(classMapData.area, viewSize.w, innerH, 14, 0, 1.2)'),
+    '狭い画面でも切らないfit（倍率下限なし・上帯/下帯の予約込み）');
+  assert.ok(js.includes('var reserveTop = (captionMetrics.h >= 20 ? captionMetrics.h : 40) + 12;'),
+    '上は見出し、下は現在位置と導線の帯を予約する');
+  assert.ok(js.includes('box.y += reserveTop;'), '予約した帯の下へfitをずらす');
+  assert.ok(js.includes('var jumpH = jumpBox.h || 0;'), '右下の導線の実寸を使う');
   assert.equal(js.includes('28, 0.55, 1.2'), false, '旧fit下限を残さない');
   assert.ok(js.includes("document.getElementById('rp-classmap-jump')"), '導線の配線');
   assert.ok(js.includes("if (entity && (e.key === 'Enter' || e.key === ' '))"),
@@ -575,8 +681,8 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
     let focusHandler = function () {};
     const first = {
       id: 'alkane',
-      x: 4190,
-      y: 2080,
+      x: 4230,
+      y: 2040,
       w: 150,
       h: 40,
       getAttribute(name) {
@@ -591,7 +697,7 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
     const second = {
       id: 'alkene',
       x: 4490,
-      y: 1900,
+      y: 1880,
       w: 150,
       h: 40,
       getAttribute(name) {
@@ -618,13 +724,14 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
       'Core', 'viewSize', 'classMapData', 'D', 'animateTo', 'classNodeIndex',
       'classNodeById', 'view', 'activeRegion', 'clearRegionSelection', 'clearSelection',
       'compoundById', 'findReaction', 'nodeW', 'nodeH', 'document',
+      'captionMetrics', 'positionBox', 'jumpBox',
       'var programmaticFocusTarget = null;\n' + focusSrc + '\n' + focusInSrc +
       '\nreturn { focusClassMap: focusClassMap, onFocusIn: onFocusIn };'
     );
     const api = factory(
       Core,
       { w: 364, h: 354.47 },
-      { area: { x: 4110, y: 1520, w: 1942, h: 794 }, nodes: [{ id: 'alkane' }] },
+      { area: CM.area, nodes: [{ id: 'alkane' }] },
       { meta: { canvas: { x: 0, y: 0, w: 6052, h: 2314 } } },
       animateTo,
       { alkane: first, alkene: second },
@@ -634,20 +741,25 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
       function () {},
       function () {},
       {}, function () { return null; }, function () { return 150; }, function () { return 40; },
-      documentStub
+      documentStub,
+      { h: 28 },
+      { w: 300, h: 50 },
+      { w: 0, h: 0 }
     );
+    // 上帯（見出し28+12）と下帯（12+現在位置50）を予約した高さでfitし、上帯の分だけ下げる。
+    const expected = { scale: fit.scale, x: fit.x, y: fit.y + 40 };
     focusHandler = function (el) { api.onFocusIn({ target: el }); };
 
     api.focusClassMap(true);
     assert.equal(calls.length, 1, (reduce ? 'reduce' : 'animate') + ': 全体fit以外へviewを書き換えない');
-    assert.deepEqual(calls[0], fit, (reduce ? 'reduce' : 'animate') + ': fit先');
+    assert.deepEqual(calls[0], expected, (reduce ? 'reduce' : 'animate') + ': fit先（上帯の予約分だけ下）');
     assert.equal(activeEl, first, (reduce ? 'reduce' : 'animate') + ': 先頭nodeへfocusする');
     if (reduce) {
-      assert.deepEqual(view, fit, 'reduceではfitが即時反映される');
+      assert.deepEqual(view, expected, 'reduceではfitが即時反映される');
     } else {
       Object.assign(view, calls[0]);
     }
-    assert.deepEqual(view, fit, (reduce ? 'reduce' : 'animate') + ': fitを維持');
+    assert.deepEqual(view, expected, (reduce ? 'reduce' : 'animate') + ': fitを維持');
 
     const before = calls.length;
     api.onFocusIn({ target: second });

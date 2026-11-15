@@ -96,6 +96,35 @@
     return { scale: next, x: sx - (sx - t.x) * ratio, y: sy - (sy - t.y) * ratio };
   }
 
+  /* ホイール1ノッチ（deltaY = 100px）で 1.35 倍。行・ページ単位は px へ正規化し、
+     トラックパッドの微小 delta はそのまま比例させる（勝手に丸めない）。
+     1イベントの変化は 3ノッチ分で頭打ちにし、行単位・ページ単位の入力でも飛ばさない。 */
+  var WHEEL = {
+    NOTCH_PX: 100,
+    NOTCH_FACTOR: 1.35,
+    MAX_NOTCHES: 3,
+    LINE_PX: 100 / 3, // 3行 = 1ノッチ（Firefox の行単位入力）
+    PAGE_PX: 800 // viewH が取れないときのページ単位の既定
+  };
+
+  function normalizeWheelDelta(deltaY, deltaMode, viewH) {
+    var d = Number(deltaY);
+    if (!isFinite(d) || d === 0) return 0;
+    if (deltaMode === 1) return d * WHEEL.LINE_PX;
+    if (deltaMode === 2) {
+      var page = isFinite(viewH) && viewH > 0 ? viewH : WHEEL.PAGE_PX;
+      return d * page;
+    }
+    return d;
+  }
+
+  function wheelZoomFactor(deltaY, deltaMode, viewH) {
+    var px = normalizeWheelDelta(deltaY, deltaMode, viewH);
+    if (!px) return 1;
+    var notches = clamp(px / WHEEL.NOTCH_PX, -WHEEL.MAX_NOTCHES, WHEEL.MAX_NOTCHES);
+    return Math.pow(WHEEL.NOTCH_FACTOR, -notches);
+  }
+
   // 地図が画面から完全に消えないように移動範囲を制限する。
   function clampPan(t, viewW, viewH, canvas, keep) {
     var guard = typeof keep === 'number' ? keep : 90;
@@ -1414,6 +1443,9 @@
     regionView: regionView,
     nearestCompound: nearestCompound,
     zoomAt: zoomAt,
+    wheelZoomFactor: wheelZoomFactor,
+    normalizeWheelDelta: normalizeWheelDelta,
+    WHEEL: WHEEL,
     clampPan: clampPan,
     screenToWorld: screenToWorld,
     worldToScreen: worldToScreen,

@@ -427,11 +427,11 @@ test('[static] カードは共通説明と個別情報を分離し、キーボ�
   assert.equal(js.includes('未確認（独立資料での確認前）'), false, '未確認の反応を公開する前提の文言を残さない');
 });
 
-test('[static] 現在位置は固定2行で、長短名・3種の説明でも高さが変わらない', () => {
+test('[static] 現在位置は地図内右下のフローティングで2行固定、全文は上向きpopoverに出す', () => {
   const html = read('index.html');
   const css = read('app.css');
 
-  // 起点ボタン（通常フロー・高さ維持）と、絶対配置のpopoverを兄弟に置く
+  // 起点ボタン（2行固定）と、絶対配置のpopoverを兄弟に置く
   assert.ok(html.includes('id="rp-position-trigger"'), '起点ボタン');
   assert.ok(html.includes('aria-expanded="false"'), '初期の展開状態');
   assert.ok(/aria-controls="rp-position-popover"/.test(html), 'popoverとの関連付け');
@@ -443,10 +443,25 @@ test('[static] 現在位置は固定2行で、長短名・3種の説明でも高
   assert.ok(/id="rp-position-popover"[^>]*\bhidden\b/.test(html), '初期は閉じる');
   assert.ok(/id="rp-position-popover"[^>]*tabindex="-1"/.test(html), 'キーボードで全文へ移動できる');
 
+  // 現在位置はtoolbarではなく地図の右下に浮かぶ
+  const mapStart = html.indexOf('id="rp-map"');
+  const mapEnd = html.indexOf('id="rp-data-notice"');
+  const positionAt = html.indexOf('id="rp-position"');
+  assert.ok(mapStart >= 0 && mapEnd > mapStart, '地図の範囲');
+  assert.ok(positionAt > mapStart && positionAt < mapEnd, '現在位置は #rp-map の中');
+  assert.ok(html.slice(0, mapStart).includes('id="rp-position"') === false, 'toolbar側に残さない');
+  assert.ok(/<div class="rp-toolbar__row">[\s\S]*?<\/div>\s*<div class="rp-chips"/.test(html),
+    'toolbar行は拡大縮小と検索だけ');
+
   const wrap = ruleBody(css, '.rp-position');
-  assert.match(wrap, /min-width:\s*0/, '長文のintrinsic幅でdesktopを押さない');
-  assert.match(wrap, /max-width:/, 'desktopの幅に上限');
+  assert.match(wrap, /position:\s*absolute/, '地図の上に浮かせる');
+  assert.match(wrap, /right:\s*12px/);
+  assert.match(wrap, /bottom:\s*12px/);
+  assert.match(wrap, /max-width:\s*min\(420px,\s*calc\(100% - 24px\)\)/, '地図幅に収める');
+  assert.match(wrap, /min-width:\s*0/, '長文のintrinsic幅で地図を押さない');
   assert.match(wrap, /font-size:\s*12\.5px/);
+  assert.match(wrap, /var\(--rp-panel\)/);
+  assert.match(wrap, /box-shadow:\s*var\(--rp-shadow\)/);
 
   const trigger = ruleBody(css, '.rp-position__trigger');
   assert.match(trigger, /display:\s*block/);
@@ -471,23 +486,29 @@ test('[static] 現在位置は固定2行で、長短名・3種の説明でも高
   assert.match(note, /display:\s*block/);
   assert.match(note, /text-overflow:\s*ellipsis/);
 
-  // popoverは行の高さに関与しない絶対配置。右端基準・幅/高さ上限で画面外とmap-panelのclipを避ける
-  assert.match(ruleBody(css, '.rp-toolbar__row'), /position:\s*relative/, 'popoverの基準はtoolbar行');
+  // popoverは行の高さに関与しない絶対配置。上向きに開き、地図の内側で内部スクロールする
+  assert.equal(/\.rp-toolbar__row\s*\{[^}]*position:\s*relative/.test(css), false,
+    'toolbar行をpopoverの基準にしない');
   const popover = ruleBody(css, '.rp-position__popover');
   assert.match(popover, /position:\s*absolute/);
-  assert.match(popover, /top:\s*calc\(100% \+ 6px\)/);
+  assert.match(popover, /bottom:\s*calc\(100% \+ 6px\)/, '上向きに開く');
+  assert.match(popover, /top:\s*auto/);
   assert.match(popover, /right:\s*0/);
   assert.match(popover, /max-width:\s*100%/);
   assert.match(popover, /max-height:/);
-  assert.match(popover, /overflow:\s*auto/);
+  assert.match(popover, /overflow:\s*auto/, '地図の高さを超えたら内部スクロール');
+  assert.match(popover, /overscroll-behavior:\s*contain/);
   assert.match(popover, /var\(--rp-panel\)/);
   assert.match(popover, /var\(--rp-line\)/);
   assert.match(popover, /var\(--rp-shadow\)/);
   assert.match(ruleBody(css, '.rp-position__full'), /overflow-wrap:\s*anywhere/);
+  // map-panel の overflow: hidden で切られないよう、高さはJSで地図の内側に収める
+  assert.ok(read('app.js').includes('function syncPositionPopoverBox'), 'popoverの高さを地図に合わせる');
+  assert.match(read('app.js'), /mapEl\.clientHeight[\s\S]{0,200}positionEl\.offsetHeight/);
 
   const mobile = css.split('@media (max-width: 760px)')[1].split('@media (max-width: 430px)')[0];
-  assert.match(mobile, /\.rp-position\s*\{[^}]*order:\s*4[^}]*flex:\s*1 1 100%[^}]*max-width:\s*none/,
-    'モバイルは全幅・固定2行');
+  assert.equal(/\.rp-position\s*\{[^}]*order:/.test(mobile), false, 'toolbarの並び順から外れた');
+  assert.match(mobile, /\.rp-position\s*\{/, 'モバイルの文字サイズ調整は残す');
 
   // 3種の説明はいずれも1行で、行の高さを変える要素ではない
   const notes = [0, 1, 2].map((level) => Core.levelNote(level));

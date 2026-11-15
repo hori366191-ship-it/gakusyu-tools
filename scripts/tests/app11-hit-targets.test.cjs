@@ -24,9 +24,34 @@ const Core = require(path.join(APP, 'map-core.js'));
 const HIT_WIDTH = 18;
 const HIT_RADIUS = HIT_WIDTH / 2;
 const HIT_SAMPLE_STEP = 2;
-// data.js（427物質・86反応・一般図12分類16変換の描画元）と、注意枠 DOM 全文の固定ハッシュ。
-const DATA_SHA256 = '6a78f56cc1ac2d671d0bd50f156ef3180340deb797704da2ad990640dacdd14d';
+// 具体図（427物質・86反応・分野・型・状態）の投影と、一般図12分類16変換の配置の固定ハッシュ。
+// data.js 全文のハッシュは一般図の座標を詰めるたびに変わるため、投影ごとに分けて守る。
+const CONCRETE_SHA256 = 'e227216f0a72f0f75003ff424e1ef61052e6c246b70dd486906cfc6ffa9b69a4';
+const CLASS_GEOMETRY_SHA256 = 'f5401dbcc0ecead27031694de550c7fafc649d2f845883092bfdade030ea029c';
 const NOTICE_SHA256 = '0839382096a9683caeb9c7ead3999e95299bc38e7808edfb9577d5ec29ceb8ef';
+
+function concreteFingerprint() {
+  const meta = Object.assign({}, D.meta);
+  ['classMapNodeCount', 'classMapEdgeCount', 'classMapVerifiedAt', 'classMapNote']
+    .forEach((key) => { delete meta[key]; });
+  return crypto.createHash('sha256').update(JSON.stringify({
+    compounds: D.compounds,
+    reactions: D.reactions,
+    regions: D.regions,
+    types: D.types,
+    states: D.states,
+    meta: meta
+  })).digest('hex');
+}
+
+function classGeometryFingerprint() {
+  return crypto.createHash('sha256').update(JSON.stringify({
+    area: D.classMap.area,
+    frame: D.classMap.frame,
+    nodes: D.classMap.nodes.map((n) => ({ id: n.id, x: n.x, y: n.y, w: n.w, h: n.h })),
+    edges: D.classMap.edges.map((e) => ({ id: e.id, points: e.points, labelPos: e.labelPos }))
+  })).digest('hex');
+}
 
 const byId = {};
 D.compounds.forEach((c) => { byId[c.id] = c; });
@@ -523,7 +548,10 @@ test('[static] 反応線の見た目（幅・色・端点）と data は変え�
   assert.match(css, /\.rp-edge--primary\s*\{[^}]*stroke-width:\s*3/, '主要線は3px');
   assert.match(css, /\.rp-edge--secondary\s*\{[^}]*stroke-width:\s*1\.1/, '補助線は1.1px');
   assert.match(css, /\.rp-edge--secondary\s*\{[^}]*stroke-dasharray:\s*6 5/, '補助線は点線');
-  assert.equal(crypto.createHash('sha256').update(data).digest('hex'), DATA_SHA256, 'data.js の全文ハッシュ');
+  assert.equal(concreteFingerprint(), CONCRETE_SHA256,
+    '具体図（427物質・86反応・分野・型・状態）の投影を変えない');
+  assert.equal(classGeometryFingerprint(), CLASS_GEOMETRY_SHA256,
+    '一般図の配置（12分類・16変換の座標・経路・area/frame）は意図した詰め方だけ');
   assert.equal(D.meta.compoundCount, 427);
   assert.equal(D.meta.requiredCount, 294);
   assert.equal(D.meta.reactionCount, 86);
