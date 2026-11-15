@@ -34,6 +34,7 @@ function connectorsForAll() {
     all.push(...list);
   });
   Core.separateSharedPorts(all);
+  Core.enforcePaintClearance(all);
   return all;
 }
 
@@ -150,8 +151,8 @@ test('[fixture] 斜めの曲線でも最終線分と角丸輪郭の交点に寄�
 test('[fixture] gap 0.75 / 1 / 1.5・butt cap・tip の数値規則が一意', () => {
   for (const gap of [0.75, 1, 1.5]) {
     const o = Core.endpointOffsets(3, 3, gap);
-    assert.equal(o.arrow, 1.5 + gap);
-    assert.equal(o.cap, 1.5 + gap + 1.5, 'round cap の互換計算');
+    assert.equal(o.arrow, 1.5 + gap + Core.CONNECTOR.PAINT_SAFETY);
+    assert.equal(o.cap, 1.5 + gap + Core.CONNECTOR.PAINT_SAFETY + 1.5, 'round cap の互換計算');
     const butt = Core.endpointOffsets(3, 3, gap, 'butt');
     assert.equal(butt.cap, butt.arrow, 'butt は path 終点で止まる');
     assert.equal(Core.CONNECTOR.ARROW_REF_X, 8, 'tip を path 終点に置く');
@@ -159,12 +160,12 @@ test('[fixture] gap 0.75 / 1 / 1.5・butt cap・tip の数値規則が一意', (
   const meta = Core.connectorMetadata([0.75, 1, 1.5]);
   assert.equal(meta.nodeRx, 9);
   assert.deepEqual(meta.variants.map((v) => v.gap), [0.75, 1, 1.5]);
-  assert.equal(meta.variants[0].node.arrow, 0.6 + 0.75);
-  assert.equal(meta.variants[0].hub.arrow, 0.8 + 0.75);
-  assert.equal(meta.variants[2].class.arrow, 0.7 + 1.5);
+  assert.equal(meta.variants[0].node.arrow, 0.6 + 0.75 + Core.CONNECTOR.PAINT_SAFETY);
+  assert.equal(meta.variants[0].hub.arrow, 0.8 + 0.75 + Core.CONNECTOR.PAINT_SAFETY);
+  assert.equal(meta.variants[2].class.arrow, 0.7 + 1.5 + Core.CONNECTOR.PAINT_SAFETY);
   assert.equal(meta.variants[0].node.cap, meta.variants[0].node.arrow);
   assert.equal(meta.variants[0].capMode, 'butt');
-  assert.deepEqual(meta.variants[0].actualGap, { node: 0.75, hub: 0.75, class: 0.75 });
+  assert.deepEqual(meta.variants[0].actualGap, { node: 0.76, hub: 0.76, class: 0.76 });
 });
 
 test('[data] 207 辺・86 反応・一般図16変換の保存値は変えない', () => {
@@ -284,6 +285,34 @@ test('[actual] 描画 path を sampling して主系列どうしの交差 0・no
     assert.ok(Math.abs(actual - Core.CONNECTOR.EDGE_GAP) <= 0.02,
       c.rid + ' ' + e.compoundId + ' gap=' + actual);
   }));
+
+  // 実 paint 形状: source butt端面全体・destination triangle全頂点が node外周+0.75 の外。
+  let shapeMin = Infinity;
+  const shapeBad = [];
+  all.forEach((c) => c.ends.forEach((e) => {
+    const g = Core.connectorShapeGap(c, e);
+    if (g == null) return;
+    shapeMin = Math.min(shapeMin, g);
+    if (g < Core.CONNECTOR.EDGE_GAP) shapeBad.push([c.rid, e.compoundId, e.role, g]);
+  }));
+  assert.deepEqual(shapeBad.slice(0, 5), [], 'paint形状の侵入');
+  assert.ok(shapeMin >= Core.CONNECTOR.EDGE_GAP, 'shape min gap=' + shapeMin);
+
+  // 受入NGだった斜めbutt / triangle 4件を固定回帰にする。
+  const shapeFor = (rid, id, role) => {
+    const c = all.find((x) => x.rid === rid && x.ends.some((e) => e.compoundId === id && e.role === role));
+    const e = c.ends.find((x) => x.compoundId === id && x.role === role);
+    return Core.connectorShapeGap(c, e);
+  };
+  assert.ok(shapeFor('glycerol-palmitic-esterification', 'glycerol', 'cap') >= 0.73);
+  assert.ok(shapeFor('sucrose-hydrolysis', 'sucrose', 'cap') >= 0.73);
+  ['ethyl-propionate-saponification', 'glucose-reduction',
+    'acetic-acid-butanol-esterification', 'sucrose-hydrolysis'].forEach((rid) => {
+    all.filter((c) => c.rid === rid).forEach((c) => c.ends.forEach((e) => {
+      if (e.role !== 'arrow') return;
+      assert.ok(Core.connectorShapeGap(c, e) >= 0.73, rid + ' ' + e.compoundId);
+    }));
+  });
 
   // node 貫通: centerline だけでなく実 stroke halo と arrowhead 外形も見る。
   const nodeHits = [];
@@ -434,6 +463,20 @@ test('[classmap] 一般図16変換も同じ端点規則で、配置は変えな�
   });
 });
 
+test('[classmap shape] 一般図16も butt端面/triangle 全体が外周+0.75の外', () => {
+  const nodes = {};
+  D.classMap.nodes.forEach((n) => { nodes[n.id] = n; });
+  const list = D.classMap.edges.map((e) => Core.classConnector(e, { nodeById: nodes }));
+  Core.enforcePaintClearance(list);
+  let min = Infinity;
+  list.forEach((c) => c.ends.forEach((e) => {
+    const g = Core.connectorShapeGap(c, e);
+    min = Math.min(min, g);
+    assert.ok(g >= Core.CONNECTOR.EDGE_GAP, e.compoundId + ' gap=' + g);
+  }));
+  assert.ok(min >= Core.CONNECTOR.EDGE_GAP);
+});
+
 test('[ids] 全427物質IDで選択→highlight往復。カンマ入りIDも split しない', () => {
   const all = connectorsForAll();
   let matched = 0;
@@ -471,6 +514,140 @@ test('[arrow] 短い最終線分でも triangle の向き・長さを確保し�
   assert.ok(Math.abs(c.arrowHead.angle) < 1e-9, '最終線分の tangent を使う');
   assert.deepEqual(c.shaft[c.shaft.length - 1], c.arrowHead.base);
   assert.ok(c.shaft[c.shaft.length - 1].x < c.points[c.points.length - 1].x);
+});
+
+test('[secondary] active 4.4 の butt 端面でも gap 0.75 を満たす', () => {
+  assert.equal(Core.CONNECTOR.MAX_PAINT_STROKE.secondary, 4.4);
+  const all = connectorsForAll();
+  const sec = all.filter((c) => c.tier === 'secondary');
+  assert.ok(sec.length > 0);
+  sec.forEach((c) => c.ends.forEach((e) => {
+    assert.ok(Core.connectorShapeGap(c, e) >= Core.CONNECTOR.EDGE_GAP,
+      c.rid + ' ' + e.compoundId + ' secondary gap');
+  }));
+});
+
+test('[triangle] 3頂点が外でも辺がノードを横切る形を検出できる', () => {
+  const node = { x: 0, y: 0, w: 20, h: 20, stroke: 1.4 };
+  // 左右の頂点はノード外、上辺の内側を通る細長い triangle
+  const head = {
+    tip: { x: 10, y: -10 },
+    left: { x: -10, y: 10 },
+    right: { x: 30, y: 10 }
+  };
+  const rx = 9;
+  const vertexMin = Math.min(
+    Core.nodePaintGap(head.tip, node, rx),
+    Core.nodePaintGap(head.left, node, rx),
+    Core.nodePaintGap(head.right, node, rx)
+  );
+  const edgeMin = Core.minTriangleGap(head, node, rx);
+  assert.ok(vertexMin > 0, '頂点は外');
+  assert.ok(edgeMin < 0, '辺はノード内を横切る');
+  assert.ok(edgeMin < vertexMin);
+});
+
+test('[rounding] routePath は 0.01 world 精度で、端点誤差を gap に残さない', () => {
+  const d = Core.routePath([{ x: 1.234, y: 5.678 }, { x: 2.345, y: 6.789 }], []);
+  assert.ok(d.includes('1.23') && d.includes('5.68'), d);
+  assert.ok(d.includes('2.35') && d.includes('6.79'), d);
+});
+
+test('[short] 実 arrow の短い経路でも shaft/triangle が成立する', () => {
+  const all = connectorsForAll();
+  const short = all.filter((c) => c.arrow && c.length < 80).sort((a, b) => a.length - b.length);
+  assert.ok(short.length >= 1);
+  short.forEach((c) => {
+    assert.ok(c.headLength >= 1);
+    assert.ok(c.length - c.headLength > 0.5, c.rid + ' shaft余長');
+    c.ends.forEach((e) => {
+      assert.ok(Core.connectorShapeGap(c, e) >= Core.CONNECTOR.EDGE_GAP, c.rid + ' shape');
+    });
+  });
+});
+
+test('[evidence] fix5 で実測NGだった secondary butt / triangle辺 / stub後shaft を回帰固定', () => {
+  const all = connectorsForAll();
+  const shape = (rid, id) => {
+    const c = all.find((x) => x.rid === rid && x.ends.some((e) => e.compoundId === id));
+    const e = c.ends.find((x) => x.compoundId === id);
+    return Core.connectorShapeGap(c, e);
+  };
+  // secondary も active 4.4。3-methylbutan-1-ol の butt 端面
+  assert.equal(Core.CONNECTOR.MAX_PAINT_STROKE.secondary, 4.4);
+  assert.ok(shape('acetic-acid-isoamyl-esterification', '3-methylbutan-1-ol') >= 0.75);
+  // 3頂点ではなく三角形の全辺（aspirin→salicylic acid の内部不足）
+  assert.ok(shape('aspirin-hydrolysis', 'salicylic-acid') >= 0.75);
+  // normal stub 後の shaft 全長（ethyl-propionate→ethanol）
+  assert.ok(shape('ethyl-propionate-saponification', 'ethanol') >= 0.75);
+  // 斜め butt（glycerol）と短 sucrose→fructose
+  assert.ok(shape('glycerol-palmitic-esterification', 'glycerol') >= 0.75);
+  assert.ok(shape('sucrose-hydrolysis', 'fructose') >= 0.75);
+  // 生成条件は安全マージン込み（丸め後も >=0.75）
+  assert.ok(Core.CONNECTOR.PAINT_SAFETY > 0);
+});
+
+test('[independent] Core helper を使わない外周SDF式で全paint gap >= 0.75', () => {
+  const rawSdf = (p, r) => {
+    const rx = Math.min(9, Math.min(r.w, r.h) / 2);
+    const qx = Math.abs(p.x - r.x - r.w / 2) - (r.w / 2 - rx);
+    const qy = Math.abs(p.y - r.y - r.h / 2) - (r.h / 2 - rx);
+    return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - rx;
+  };
+  const nodeHalf = (r) => (typeof r.stroke === 'number' ? r.stroke : 1.2) / 2;
+  const segMin = (a, b, r) => {
+    const f = (t) => rawSdf({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }, r);
+    let lo = 0;
+    let hi = 1;
+    for (let i = 0; i < 70; i++) {
+      const m1 = lo + (hi - lo) / 3;
+      const m2 = hi - (hi - lo) / 3;
+      if (f(m1) < f(m2)) hi = m2; else lo = m1;
+    }
+    return Math.min(f(0), f(1), f((lo + hi) / 2));
+  };
+  const independentGap = (c, e) => {
+    const halfLine = (Core.CONNECTOR.MAX_PAINT_STROKE[c.tier] || 4.4) / 2;
+    let min = Infinity;
+    if (e.role === 'cap') {
+      const p = c.points[e.index];
+      const nb = e.index === 0 ? c.points[1] : c.points[c.points.length - 2];
+      const len = Math.hypot(nb.x - p.x, nb.y - p.y) || 1;
+      const tx = (nb.x - p.x) / len;
+      const ty = (nb.y - p.y) / len;
+      const a = { x: p.x - ty * halfLine, y: p.y + tx * halfLine };
+      const b = { x: p.x + ty * halfLine, y: p.y - tx * halfLine };
+      min = Math.min(min, segMin(a, b, e.rect) - nodeHalf(e.rect));
+    } else {
+      const h = c.arrowHead;
+      [[h.tip, h.left], [h.left, h.right], [h.right, h.tip]].forEach((edge) => {
+        min = Math.min(min, segMin(edge[0], edge[1], e.rect) - nodeHalf(e.rect));
+      });
+    }
+    const shaft = c.shaft || c.points;
+    for (let i = 0; i < shaft.length - 1; i++) {
+      min = Math.min(min, segMin(shaft[i], shaft[i + 1], e.rect) - nodeHalf(e.rect) - halfLine);
+    }
+    return min;
+  };
+  const all = connectorsForAll();
+  all.forEach((c) => c.ends.forEach((e) => {
+    const ours = Core.connectorShapeGap(c, e);
+    const ind = independentGap(c, e);
+    assert.ok(Math.abs(ours - ind) <= 1e-5, c.rid + ' model差 ' + (ours - ind));
+    assert.ok(ind >= Core.CONNECTOR.EDGE_GAP, c.rid + ' independent gap=' + ind);
+  }));
+  const classNodes = {};
+  D.classMap.nodes.forEach((n) => { classNodes[n.id] = n; });
+  const classConns = D.classMap.edges.map((e) => Core.classConnector(e, { nodeById: classNodes }));
+  Core.enforcePaintClearance(classConns);
+  classConns.forEach((c) => c.ends.forEach((e) => {
+    assert.ok(independentGap(c, e) >= Core.CONNECTOR.EDGE_GAP, e.compoundId + ' class independent');
+  }));
+
+  // rect.stroke 未指定は実際の通常ノード 1.2 として扱う。
+  const rect = { x: 0, y: 0, w: 20, h: 20 };
+  assert.ok(Math.abs(Core.nodePaintGap({ x: 11, y: 10 }, rect) - (rawSdf({ x: 11, y: 10 }, rect) - 0.6)) < 1e-9);
 });
 
 test('[static] 反応の丸は DOM を残したまま非表示、説明文は矢印基準に直す', () => {

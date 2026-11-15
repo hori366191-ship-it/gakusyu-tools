@@ -36,9 +36,14 @@
     HUB_STROKE: 1.6,
     CLASS_STROKE: 1.4,
     EDGE_GAP: 0.75,
+    // path 出力の丸め・ブラウザ描画の微小差を吸収する生成時マージン。
+    PAINT_SAFETY: 0.01,
     // refX=8 は旧markerの名残。triangle tip を path 終点に置く考え方は維持する。
     ARROW_REF_X: 8,
     ARROW_SIZE: { primary: 7, secondary: 5.5, class: 6 },
+    // 選択・preview を含む最大の線幅。paint外形の検査に使う。
+    // showReactionStroke は tier に関係なく .rp-edge-active 4.4 を使う。
+    MAX_PAINT_STROKE: { primary: 4.4, secondary: 4.4, class: 3.4 },
     TIER_STROKE: { primary: 3, secondary: 1.1, class: 1.6 },
     CAP_STROKE: { primary: 3, secondary: 1.1, class: 1.6 },
     PORT_SPACING: 7, // 別反応の近接port間隔（最大stroke4.4 + gap + 余裕）
@@ -359,7 +364,8 @@
   }
 
   function round(n) {
-    return Math.round(n * 10) / 10;
+    // connector の paint gap を丸め誤差で崩さないため 0.01 world 精度で出力する。
+    return Math.round(n * 100) / 100;
   }
 
   /* ---------------- connector geometry (pure) ---------------- */
@@ -389,6 +395,14 @@
     var cy = p.y < y + rx ? y + rx : p.y > y + h - rx ? y + h - rx : p.y;
     if (cx === p.x && cy === p.y) return true;
     return Math.hypot(p.x - cx, p.y - cy) <= rx + 1e-9;
+  }
+
+  // 角丸矩形の符号付き距離。外側正、内側負。境界は 0。
+  function roundRectSdf(p, rect, rx) {
+    var r = Math.max(0, Math.min(rx || 0, Math.min(rect.w, rect.h) / 2));
+    var qx = Math.abs(p.x - rect.x - rect.w / 2) - (rect.w / 2 - r);
+    var qy = Math.abs(p.y - rect.y - rect.h / 2) - (rect.h / 2 - r);
+    return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;
   }
 
   // 枠の外側から枠の内側へ向かう線分が、角丸の外周と交わる点を返す。
@@ -470,12 +484,12 @@
     var ref = typeof nodeStrokeRef === 'number' ? nodeStrokeRef : CONNECTOR.NODE_STROKE;
     var maxHalf = ref / 2;
     var roundCap = capMode !== 'butt';
-    var arrow = maxHalf + g;
+    var arrow = maxHalf + g + (CONNECTOR.PAINT_SAFETY || 0);
     return {
       arrow: arrow,
       cap: arrow + (roundCap ? (strokeWidth || 0) / 2 : 0),
       tipFromOutline: arrow,
-      capEdgeFromOutline: maxHalf + g
+      capEdgeFromOutline: maxHalf + g + (CONNECTOR.PAINT_SAFETY || 0)
     };
   }
 
@@ -501,9 +515,10 @@
     var uy = dy / seg;
     var tier = connector.tier || 'primary';
     var full = edgeLength(pts);
-    var nominal = CONNECTOR.ARROW_SIZE[tier] || 7;
+    var nominal = connector.headLengthOverride || CONNECTOR.ARROW_SIZE[tier] || 7;
     // 線が短い場合も head を潰さず、かつ shaft を残す。反応ごとの個別補正はしない。
-    var headLength = Math.min(nominal, Math.max(4, full - 1.5));
+    var headLength = Math.min(nominal, Math.max(1, full - 1.5));
+    if (connector.headLengthOverride) headLength = Math.min(nominal, Math.max(1, full - 0.5));
     if (!(headLength > 0)) headLength = Math.max(1, full * 0.5);
     var half = headLength / 2;
     var base = { x: tip.x - ux * headLength, y: tip.y - uy * headLength };
@@ -542,9 +557,9 @@
         capMode: 'butt',
         // 外周 stroke からの実 gap。geometry の値そのもの。
         actualGap: {
-          node: g,
-          hub: g,
-          class: g
+          node: g + CONNECTOR.PAINT_SAFETY,
+          hub: g + CONNECTOR.PAINT_SAFETY,
+          class: g + CONNECTOR.PAINT_SAFETY
         }
       };
     });
@@ -555,6 +570,7 @@
       classStroke: CONNECTOR.CLASS_STROKE,
       arrowRefX: CONNECTOR.ARROW_REF_X,
       edgeGap: CONNECTOR.EDGE_GAP,
+      paintSafety: CONNECTOR.PAINT_SAFETY,
       portSpacing: CONNECTOR.PORT_SPACING,
       arrowSize: CONNECTOR.ARROW_SIZE,
       variants: list
@@ -599,14 +615,15 @@
       return { points: snapEndpoint(pts, index, rect, rx, off), offset: off, index: index, rect: rect };
     }
 
-    function endInfo(edgeId, index, border, rect, offset) {
+    function endInfo(edgeId, index, border, rect, offset, role) {
       return {
         compoundId: edgeId,
         index: index,
         border: { x: border.x, y: border.y },
         rect: rect,
         nodeStroke: rect.stroke,
-        offset: offset
+        offset: offset,
+        role: role
       };
     }
 
@@ -630,8 +647,8 @@
         var merged = {
           points: p1,
           ends: [
-            endInfo(ins[0].id, 0, borderIn, rectIn, offs.cap),
-            endInfo(outs[0].id, p1.length - 1, borderOut, rectOut, offs.arrow)
+            endInfo(ins[0].id, 0, borderIn, rectIn, offs.cap, 'cap'),
+            endInfo(outs[0].id, p1.length - 1, borderOut, rectOut, offs.arrow, 'arrow')
           ],
           tier: tier,
           arrow: true,
@@ -655,7 +672,7 @@
       var snapped = snapFor(pts, e, false);
       list.push({
         points: snapped.points,
-        ends: [endInfo(e.id, snapped.index, pts[snapped.index], snapped.rect, snapped.offset)],
+        ends: [endInfo(e.id, snapped.index, pts[snapped.index], snapped.rect, snapped.offset, 'cap')],
         tier: e.tier === 'primary' ? 'primary' : 'secondary',
         arrow: false,
         dir: 'in',
@@ -673,7 +690,7 @@
       var snapped = snapFor(pts, e, true);
       list.push({
         points: snapped.points,
-        ends: [endInfo(e.id, snapped.index, pts[snapped.index], snapped.rect, snapped.offset)],
+        ends: [endInfo(e.id, snapped.index, pts[snapped.index], snapped.rect, snapped.offset, 'arrow')],
         tier: e.tier === 'primary' ? 'primary' : 'secondary',
         arrow: true,
         dir: 'out',
@@ -707,7 +724,223 @@
     };
     var a = snapEndpoint(pts, 0, rectFrom, rx, offs.cap);
     var b = snapEndpoint(a, a.length - 1, rectTo, rx, offs.arrow);
-    return attachArrow({ points: b, arrow: true, tier: 'class', length: edgeLength(b) });
+    return attachArrow({
+      points: b,
+      arrow: true,
+      tier: 'class',
+      length: edgeLength(b),
+      ends: [
+        { compoundId: edge.from, index: 0, border: { x: pts[0].x, y: pts[0].y }, rect: rectFrom, nodeStroke: rectFrom.stroke, offset: offs.cap, role: 'cap' },
+        { compoundId: edge.to, index: b.length - 1, border: { x: pts[pts.length - 1].x, y: pts[pts.length - 1].y }, rect: rectTo, nodeStroke: rectTo.stroke, offset: offs.arrow, role: 'arrow' }
+      ]
+    });
+  }
+
+  function maxPaintHalf(connector) {
+    var w = CONNECTOR.MAX_PAINT_STROKE[connector.tier] || CONNECTOR.MAX_PAINT_STROKE.primary;
+    return w / 2;
+  }
+
+  // 実際の DOM と同じノード境界 stroke 幅。未指定時は通常ノードの 1.2。
+  function nodeStrokeOf(rect) {
+    return typeof rect.stroke === 'number' ? rect.stroke : CONNECTOR.NODE_STROKE;
+  }
+
+  // SDF の唯一の基準: 角丸矩形中心線 - ノード境界 stroke/2。
+  function nodePaintGap(p, rect, rx) {
+    return roundRectSdf(p, rect, rx) - nodeStrokeOf(rect) / 2;
+  }
+
+  function facePoints(p, tangent, half) {
+    var px = -tangent.y;
+    var py = tangent.x;
+    return [
+      { x: p.x - px * half, y: p.y - py * half },
+      { x: p.x + px * half, y: p.y + py * half }
+    ];
+  }
+
+  /*
+   * 線分上の SDF 最小値。SDF は凸なので三分探索で厳密に近づける。
+   * 端点と内部最小の小さい方を返す（サンプル間隔に依存しない）。
+   */
+  function segmentMinSdf(a, b, rect, rx) {
+    function f(t) {
+      return roundRectSdf({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }, rect, rx);
+    }
+    var lo = 0;
+    var hi = 1;
+    for (var i = 0; i < 80; i++) {
+      var m1 = lo + (hi - lo) / 3;
+      var m2 = hi - (hi - lo) / 3;
+      if (f(m1) < f(m2)) hi = m2;
+      else lo = m1;
+    }
+    return Math.min(f(0), f(1), f((lo + hi) / 2));
+  }
+
+  // 線分の paint 外周 gap。ノード境界 stroke と線幅 stroke を一度ずつ引く。
+  function segmentPaintGap(a, b, rect, rx, strokeWidth) {
+    return segmentMinSdf(a, b, rect, rx) - nodeStrokeOf(rect) / 2 - (strokeWidth || 0) / 2;
+  }
+
+  function minFaceGap(p, tangent, half, rect, rx) {
+    var fp = facePoints(p, tangent, half);
+    return segmentPaintGap(fp[0], fp[1], rect, rx, 0);
+  }
+
+  function minTriangleGap(head, rect, rx) {
+    if (!head) return Infinity;
+    var edges = [
+      [head.tip, head.left],
+      [head.left, head.right],
+      [head.right, head.tip]
+    ];
+    var min = Infinity;
+    edges.forEach(function (e) {
+      min = Math.min(min, segmentPaintGap(e[0], e[1], rect, rx, 0));
+    });
+    // contract: triangle 塗り全体は境界（辺）の最小で押さえられる。
+    return min;
+  }
+
+  function sdfNormal(p, rect, rx) {
+    var e = 0.05;
+    var gx = roundRectSdf({ x: p.x + e, y: p.y }, rect, rx) - roundRectSdf({ x: p.x - e, y: p.y }, rect, rx);
+    var gy = roundRectSdf({ x: p.x, y: p.y + e }, rect, rx) - roundRectSdf({ x: p.x, y: p.y - e }, rect, rx);
+    var len = Math.hypot(gx, gy);
+    if (len < 1e-9) {
+      var cx = rect.x + rect.w / 2;
+      var cy = rect.y + rect.h / 2;
+      var dx = p.x - cx;
+      var dy = p.y - cy;
+      len = Math.hypot(dx, dy) || 1;
+      return { x: dx / len, y: dy / len };
+    }
+    return { x: gx / len, y: gy / len };
+  }
+
+  /*
+   * source の butt 端面（幅 = 最大paint幅）全体を、ノード外周 + gap の外へ出す。
+   * 中心点だけでなく端面の両端・中間を SDF で検査し、必要なら線方向へ最小限押し出す。
+   */
+  function shaftGap(connector, rect, rx) {
+    var pts = connector.shaft || connector.points;
+    if (!pts || pts.length < 2) return Infinity;
+    var width = maxPaintHalf(connector) * 2;
+    var min = Infinity;
+    for (var i = 0; i < pts.length - 1; i++) {
+      min = Math.min(min, segmentPaintGap(pts[i], pts[i + 1], rect, rx, width));
+    }
+    return min;
+  }
+
+  function capShapeGap(connector, end, rx) {
+    var pts = connector.points;
+    var p = pts[end.index];
+    var neighbor = end.index === 0 ? pts[1] : pts[pts.length - 2];
+    if (!neighbor) return Infinity;
+    var dx = neighbor.x - p.x;
+    var dy = neighbor.y - p.y;
+    var len = Math.hypot(dx, dy) || 1;
+    var tangent = { x: dx / len, y: dy / len };
+    return Math.min(
+      minFaceGap(p, tangent, maxPaintHalf(connector), end.rect, rx),
+      shaftGap(connector, end.rect, rx)
+    );
+  }
+
+  function arrowShapeGap(connector, end, rx) {
+    return Math.min(
+      minTriangleGap(connector.arrowHead, end.rect, rx),
+      shaftGap(connector, end.rect, rx)
+    );
+  }
+
+  function settleCapEndpoint(connector, end, rx, gap) {
+    var pts = connector.points;
+    var idx = end.index;
+    var p = pts[idx];
+    var neighbor = idx === 0 ? pts[1] : pts[pts.length - 2];
+    if (!neighbor) return;
+    var n = sdfNormal(p, end.rect, rx);
+    var maxD = 15;
+    var step = 0.02;
+    var chosen = 0;
+    for (var d = 0; d <= maxD; d += step) {
+      var q = { x: p.x + n.x * d, y: p.y + n.y * d };
+      pts[idx] = q;
+      attachArrow(connector);
+      if (capShapeGap(connector, end, rx) >= gap - 1e-6) {
+        chosen = d;
+        break;
+      }
+      chosen = d;
+    }
+    if (chosen > maxD) chosen = maxD;
+    pts[idx] = { x: p.x + n.x * chosen, y: p.y + n.y * chosen };
+    attachArrow(connector);
+  }
+
+
+  /*
+   * destination triangle 全体をノード外周 + gap の外へ出す。
+   * tip は共通 gap の位置に保ち、最終アプローチだけノード法線方向の局所 stub にする。
+   */
+  function settleArrowEndpoint(connector, end, rx, gap) {
+    if (!connector.arrowHead) return;
+    if (arrowShapeGap(connector, end, rx) >= gap - 1e-6) return;
+    var tip = connector.points[connector.points.length - 1];
+    var normal = sdfNormal(tip, end.rect, rx);
+    var baseline = connector.points.slice();
+    var full = connector.length || edgeLength(baseline);
+    var start = connector.arrowHead.headLength;
+    var maxL = Math.min(start + 12, Math.max(start, full - 0.5));
+    for (var L = start; L <= maxL + 1e-9; L += 0.25) {
+      var anchor = { x: tip.x + normal.x * L, y: tip.y + normal.y * L };
+      var candidate = baseline.slice(0, baseline.length - 1).concat([anchor, tip]);
+      var temp = {
+        points: candidate,
+        arrow: true,
+        tier: connector.tier,
+        length: edgeLength(candidate),
+        headLengthOverride: L
+      };
+      attachArrow(temp);
+      if (arrowShapeGap(temp, end, rx) >= gap - 1e-6) {
+        connector.points = candidate;
+        connector.shaft = temp.shaft;
+        connector.arrowHead = temp.arrowHead;
+        connector.headLength = temp.headLength;
+        connector.headLengthOverride = L;
+        connector.length = temp.length;
+        end.index = candidate.length - 1;
+        return;
+      }
+    }
+  }
+
+  function enforcePaintClearance(connectors, opts) {
+    var o = opts || {};
+    var rx = typeof o.rx === 'number' ? o.rx : CONNECTOR.NODE_RX;
+    var gap = typeof o.gap === 'number' ? o.gap : CONNECTOR.EDGE_GAP + CONNECTOR.PAINT_SAFETY;
+    (connectors || []).forEach(function (c) {
+      (c.ends || []).forEach(function (end) {
+        if (!end.rect) return;
+        if (end.role === 'cap') settleCapEndpoint(c, end, rx, gap);
+        else if (end.role === 'arrow') settleArrowEndpoint(c, end, rx, gap);
+      });
+    });
+    return connectors;
+  }
+
+  // テスト・metadata用: 実際の paint 形状の最小 gap。
+  function connectorShapeGap(connector, end) {
+    if (!end || !end.rect) return null;
+    var rx = CONNECTOR.NODE_RX;
+    if (end.role === 'cap') return capShapeGap(connector, end, rx);
+    if (end.role === 'arrow') return arrowShapeGap(connector, end, rx);
+    return null;
   }
 
   function shiftBorderAlongSide(border, rect, delta, rx) {
@@ -1003,6 +1236,12 @@
     inflateRoundRect: inflateRoundRect,
     pointInRoundRect: pointInRoundRect,
     roundRectCrossing: roundRectCrossing,
+    roundRectSdf: roundRectSdf,
+    nodePaintGap: nodePaintGap,
+    segmentMinSdf: segmentMinSdf,
+    minTriangleGap: minTriangleGap,
+    connectorShapeGap: connectorShapeGap,
+    enforcePaintClearance: enforcePaintClearance,
     snapEndpoint: snapEndpoint,
     endpointOffsets: endpointOffsets,
     attachArrow: attachArrow,

@@ -329,9 +329,15 @@ node scripts/app11/metrics.cjs --baseline       # v1 の計測
    最終線分が短い場合は `min(nominal, max(4, full - 1.5))`。向きは最終線分の tangent。
 6. `EDGE_GAP = 0.75`。ノード境界 stroke は concrete 1.2 / hub 1.6 / class 1.4 で
    **全 state 一定**にし、選択・hover・focus は stroke 色と drop-shadow halo で示す。
-   これにより tip と source butt 端の実 gap は concrete/hub/class すべて 0.75。\n   path の 0.1 world 丸めを含めても拡大3倍で誤差 <= 0.15 CSS px（目標 <= 0.2）。
+   これにより tip と source butt 端の実 gap は concrete/hub/class すべて 0.75。\n   path は 0.01 world 精度で出力するため、丸め誤差は拡大3倍でも < 0.02 CSS px。
    edge stroke の primary 3 / active 4.4 / secondary 破線は従来どおり。
-   数値確認は `endpointOffsets()` と `connectorMetadata()`。
+   ただし中心点の gap だけでは斜め入射の butt 端面や triangle の翼が内側へ入るため、
+    `enforcePaintClearance()` が source butt 端面全体・destination triangle 全3辺と shaft 全長を
+    角丸矩形 SDF（線分は三分探索で最小化）で検査する。source は外向き法線方向へ必要最小だけ押し、
+    destination はノード法線方向の局所 stub と必要最小の head 長で逃がす。
+    `MAX_PAINT_STROKE` は secondary も active 4.4。SDF 基準は「角丸矩形中心線 - 実ノード stroke/2」に統一し、
+    shaft はさらに線幅/2を一度だけ引く。生成時は `PAINT_SAFETY=0.01` を加え、path 出力は 0.01 world 精度。
+    その結果 actual paint gap は全 source butt / triangle / shaft / class で 0.76 以上。
 
 ### 近接ポート
 `separateSharedPorts()` が保存点列を変えず、描画端点だけを分ける。
@@ -355,6 +361,7 @@ node scripts/app11/metrics.cjs --baseline       # v1 の計測
 `node --test scripts/tests/app11-connectors.test.cjs`
 - 207/86/16 不変、角丸・斜め・short stub・multi・reactant only・選択共通化
 - 実描画 path sampling の PP0、node/label 貫通 0（stroke halo + arrow 外形）、
-  別反応の近接 paint 重なり 0（同一物質の近接portのみ限定免除）
+- 実 paint 形状の source butt 端面・triangle 全3辺・shaft 全長 gap >= 0.75（斜めbutt / 受入NG triangle 4件を含む）
+- 実 paint 形状の source butt 端面・triangle 全頂点 gap >= 0.75（斜めbutt / 受入NG triangle 4件を含む）
 - 一般図16、カンマID、全427 ID の highlight 往復、短い最終線分の triangle
 - 3テーマ/mobile/エラー表示は test サブエージェントで最終確認

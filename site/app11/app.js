@@ -155,6 +155,8 @@
     });
     // 同じ物質の同じ端点に集まる別反応の線だけ、描画端点を辺に沿って分ける。
     Core.separateSharedPorts(all);
+    // 実際の paint 形状（butt端面・triangle全体）がノード外周+gapの外にあることを保証する。
+    Core.enforcePaintClearance(all);
   }
 
   function buildReactions() {
@@ -293,9 +295,14 @@
     // 変換線は装飾ではない。1本＝1フォーカス（tabindex）として、透明な太い当たり判定と
     // 同じ変換のラベルを1つのグループにまとめる。ノードより先に置き、重なった場合はノードを優先する。
     var edgeLayer = el('g', { 'class': 'rp-classmap__edges' });
-    classMapData.edges.forEach(function (e) {
+    var classConnectorList = classMapData.edges.map(function (e) {
+      return { e: e, cc: Core.classConnector(e, { nodeById: classNodeById }) };
+    });
+    Core.enforcePaintClearance(classConnectorList.map(function (item) { return item.cc; }));
+    classConnectorList.forEach(function (item) {
       // 一般図も同じ端点規則（角丸枠・butt cap・分離した triangle）で描く。座標・配置は変えない。
-      var cc = Core.classConnector(e, { nodeById: classNodeById });
+      var e = item.e;
+      var cc = item.cc;
       var d = Core.routePath(cc.shaft || cc.points, [], []);
       var group = el('g', {
         'class': 'rp-classmap__edge-group',

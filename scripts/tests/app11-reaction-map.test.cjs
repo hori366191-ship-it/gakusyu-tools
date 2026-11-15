@@ -926,7 +926,9 @@ test('[static] 選択した物質・反応の辺を強調する（読解補助�
   assert.ok(js.includes('viewSize.w, viewSize.h, activeRegion)'), '現在位置に明示選択を渡す');
   assert.ok(css.includes('.rp-node__band'), 'ノードの分野色帯');
   assert.ok(css.includes('.rp-edges-active'), '上層レイヤ');
-  assert.ok(js.includes('Core.routePath(c.points, c.gaps, c.bridges)'), '保存済み橋を connector 経由で使う');
+  assert.ok(js.includes('Core.routePath(c.shaft || c.points, c.gaps, c.bridges)'), '通常/選択で同じconnectorのshaftを使う');
+  assert.equal(js.includes("'marker-end':"), false, 'marker-end属性を使わない');
+  assert.ok(js.includes('Core.arrowHeadPath'), 'triangleを別pathで描く');
 });
 
 test('[priority] 公開86反応に tier があり、主要50・補助36を無断で減らさない', () => {
