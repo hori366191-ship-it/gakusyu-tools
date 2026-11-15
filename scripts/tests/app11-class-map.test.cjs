@@ -567,16 +567,20 @@ test('[geometry] 狭い画面の一般図fitで枠内見出し帯・右下フロ
   });
 });
 
-test('[static] 一般図のfitは見出しの画面帯を予約せず、枠内world見出しと右下フローティングだけを避ける', () => {
+test('[static] 一般図のfitは見出しの画面帯を予約せず、枠内world見出しと浮遊コントロールだけを避ける', () => {
   const app = read('app.js');
   const css = read('app.css');
-  assert.ok(app.includes('var innerH = Math.max(140, viewSize.h - bottom);'), '下帯だけを予約する');
-  assert.equal(app.includes('reserveTop'), false, '上帯（見出し）の予約を残さない');
+  assert.ok(app.includes('var innerH = Math.max(140, viewSize.h - bottom - top);'),
+    '下帯（現在位置・導線）と上の浮遊コントロール分だけを予約する');
+  assert.equal(app.includes('reserveTop'), false, '見出し用の上帯予約を残さない');
   assert.ok(app.includes('Core.fitRect(classMapData.area, viewSize.w, innerH, 14, 0, 1.2)'),
     '倍率下限なしのfitを維持');
   assert.ok(app.includes('var jumpH = jumpBox.h || 0;'), '右下の導線の実寸を使う');
   assert.ok(app.includes('var posH = positionBox.h || 48;'), '現在位置の実寸を予約に入れる');
-  assert.ok(app.includes('var jumpH = jumpBox.h || 0;'), '「一般図へ」も予約に入れる');
+  assert.ok(app.includes('var top = fitTopInset();'), '上部ツールバーの実寸を予約に入れる');
+  assert.ok(app.includes('y: fit.y + top'), 'top を足して実表示領域の中心へ移す（top/2 では H/2 に戻る）');
+  assert.ok(app.includes('Core.clampPan(insetFitView(fit, top), viewSize.w, viewSize.h, D.meta.canvas)'),
+    'クランプは中心補正の後に行う');
   assert.match(css, /\.rp-classmap__caption\s*\{/);
   assert.match(css, /\.rp-classmap__caption-title\s*\{/);
   assert.match(css, /\.rp-classmap__caption-note\s*\{/);
@@ -604,9 +608,10 @@ test('[static] 既存の entity 処理を壊さず、分類ノードをキーボ
   assert.ok(js.includes('focusClassMap'), '導線の移動処理');
   assert.ok(js.includes('Core.fitRect(classMapData.area, viewSize.w, innerH, 14, 0, 1.2)'),
     '狭い画面でも切らないfit（倍率下限なし・下帯の予約込み）');
-  assert.ok(js.includes('var innerH = Math.max(140, viewSize.h - bottom);'),
-    '下は現在位置と導線の帯だけを予約する');
-  assert.equal(js.includes('reserveTop'), false, '上帯（見出し）の予約を残さない');
+  assert.ok(js.includes('var innerH = Math.max(140, viewSize.h - bottom - top);'),
+    '下の帯と上の浮遊コントロール分を予約する');
+  assert.equal(js.includes('reserveTop'), false, '見出し用の上帯予約を残さない');
+  assert.ok(js.includes('var top = fitTopInset();'), '上の浮遊コントロールの実寸を使う');
   assert.ok(js.includes('var jumpH = jumpBox.h || 0;'), '右下の導線の実寸を使う');
   assert.equal(js.includes('28, 0.55, 1.2'), false, '旧fit下限を残さない');
   assert.ok(js.includes("document.getElementById('rp-classmap-jump')"), '導線の配線');
@@ -697,10 +702,12 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
   const app = read('app.js');
   const focusSrc = extractFunctionSource(app, 'focusClassMap');
   const focusInSrc = extractFunctionSource(app, 'onFocusIn');
+  const insetSrc = extractFunctionSource(app, 'insetFitView');
 
-  function run(reduce) {
+  function run(reduce, top) {
     const view = { scale: 0.1993, x: 0, y: 0 };
     const fit = { scale: 0.45, x: 12, y: 20 };
+    const topInset = typeof top === 'number' ? top : 0;
     const calls = [];
     let activeEl = null;
     let focusHandler = function () {};
@@ -749,8 +756,8 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
       'Core', 'viewSize', 'classMapData', 'D', 'animateTo', 'classNodeIndex',
       'classNodeById', 'view', 'activeRegion', 'clearRegionSelection', 'clearSelection',
       'compoundById', 'findReaction', 'nodeW', 'nodeH', 'document',
-      'positionBox', 'jumpBox',
-      'var programmaticFocusTarget = null;\n' + focusSrc + '\n' + focusInSrc +
+      'positionBox', 'jumpBox', 'fitTopInset',
+      'var programmaticFocusTarget = null;\n' + insetSrc + '\n' + focusSrc + '\n' + focusInSrc +
       '\nreturn { focusClassMap: focusClassMap, onFocusIn: onFocusIn };'
     );
     const api = factory(
@@ -768,15 +775,17 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
       {}, function () { return null; }, function () { return 150; }, function () { return 40; },
       documentStub,
       { w: 300, h: 50 },
-      { w: 0, h: 0 }
+      { w: 0, h: 0 },
+      function () { return topInset; }
     );
-    // 下帯（12+現在位置50）だけを予約した高さでfitし、上帯の分はずらさない。
-    const expected = { scale: fit.scale, x: fit.x, y: fit.y };
+    // 下帯（12+現在位置50）と上の浮遊コントロール分を予約した高さでfitし、上余白 top だけ下げる
+    // （fitRect は innerH の中央へ置くため、実表示領域の中心へは top 加算）。
+    const expected = { scale: fit.scale, x: fit.x, y: fit.y + topInset };
     focusHandler = function (el) { api.onFocusIn({ target: el }); };
 
     api.focusClassMap(true);
     assert.equal(calls.length, 1, (reduce ? 'reduce' : 'animate') + ': 全体fit以外へviewを書き換えない');
-    assert.deepEqual(calls[0], expected, (reduce ? 'reduce' : 'animate') + ': fit先（上帯の予約なし）');
+    assert.deepEqual(calls[0], expected, (reduce ? 'reduce' : 'animate') + ': fit先（上余白の予約込み）');
     assert.equal(activeEl, first, (reduce ? 'reduce' : 'animate') + ': 先頭nodeへfocusする');
     if (reduce) {
       assert.deepEqual(view, expected, 'reduceではfitが即時反映される');
@@ -790,8 +799,10 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
     assert.equal(calls.length, before + 1, '通常Tabの画面外nodeは従来どおり再センタリングする');
   }
 
-  run(true);
-  run(false);
+  run(true, 0);
+  run(false, 0);
+  run(true, 40);
+  run(false, 40);
   assert.ok(app.includes('programmaticFocusTarget = first;'), 'プログラムfocusの目印');
   assert.ok(app.includes('if (pending === target || (pending.contains && pending.contains(target))) return;'),
     'プログラムfocusだけonFocusInの再センタリングを抑止');

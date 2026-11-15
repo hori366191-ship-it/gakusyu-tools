@@ -40,6 +40,11 @@
   var positionFullNote = document.getElementById('rp-position-full-note');
   var positionLive = document.getElementById('rp-position-live');
   var chipsEl = document.getElementById('rp-chips');
+  var toolbarEl = document.querySelector('.rp-toolbar');
+  var aboutEl = document.getElementById('rp-about');
+  var aboutButton = document.getElementById('rp-about-open');
+  var aboutClose = document.getElementById('rp-about-close');
+  var searchStatus = document.getElementById('rp-search-status');
   var listAll = document.getElementById('rp-list-all');
   var listResults = document.getElementById('rp-list-results');
   var listStatus = document.getElementById('rp-list-status');
@@ -124,6 +129,8 @@
   // 右下フローティングの実寸（スクリーン座標の予約に使う）。syncPositionInset が更新する。
   var positionBox = { w: 0, h: 0 };
   var jumpBox = { w: 0, h: 0 };
+  // 上部フローティング操作群が地図を覆う高さ。fit のときだけ上余白として予約する。
+  var mapTopInset = 0;
 
   function esc(text) {
     return String(text == null ? '' : text).replace(/[&<>"']/g, function (ch) {
@@ -546,6 +553,56 @@
     viewSize.h = Math.max(1, rect.height || mapEl.clientHeight || 1);
   }
 
+  function fitTopInset() {
+    return mapTopInset;
+  }
+
+  // 地図の上に浮かぶ操作群の実寸を測る。地図の SVG viewport は full サイズのままなので、
+  // fit では「上を toolbar 分だけ狭めた領域」に収め、その中心へ下げる（座標の二重補正はしない）。
+  // 小さすぎる画面で地図が消えないよう、予約は地図高の 42% までにする。
+  function syncToolbarInset() {
+    var inset = 0;
+    if (toolbarEl) {
+      var mapRect = mapEl.getBoundingClientRect();
+      var toolbarRect = toolbarEl.getBoundingClientRect();
+      if (toolbarRect && toolbarRect.height) inset = Math.round(toolbarRect.bottom - mapRect.top + 8);
+    }
+    var cap = Math.round((viewSize.h || 0) * 0.42);
+    mapTopInset = Math.max(0, cap > 0 ? Math.min(inset, cap) : inset);
+    mapEl.style.setProperty('--rp-toolbar-h', mapTopInset + 'px');
+    return mapTopInset;
+  }
+
+  // 上の浮遊コントロール分を狭めた領域で求めた fit を、その領域の中心へ移す。
+  // fitTransform / centerOn / regionView / fitRect は [0, innerH] の中央に置くので、
+  // 実表示領域 [top, H] の中心 (H + top) / 2 へは top を足す（top/2 では H/2 に戻ってしまう）。
+  function insetFitView(fit, top) {
+    return { scale: fit.scale, x: fit.x, y: fit.y + top };
+  }
+
+  // 全体表示の fit。上部の操作群に重要部分が隠れない高さで合わせる。
+  // innerH の下限 160 は、極端に低い画面でも倍率が潰れないための最小値。
+  function fitCanvasView() {
+    var top = fitTopInset();
+    var innerH = Math.max(160, viewSize.h - top);
+    var fit = Core.fitTransform(D.meta.canvas, viewSize.w, innerH, 14);
+    return insetFitView(fit, top);
+  }
+
+  // 分野チップの fit。上下の予約は fitCanvasView と同じ考え方。
+  function regionTarget(region) {
+    var top = fitTopInset();
+    var innerH = Math.max(160, viewSize.h - top);
+    return insetFitView(Core.regionView(region, viewSize.w, innerH, 24), top);
+  }
+
+  // 物質・反応を画面中央へ寄せる。中心は実表示領域の中央にする。
+  function entityTarget(target, size, scale) {
+    var top = fitTopInset();
+    var innerH = Math.max(160, viewSize.h - top);
+    return insetFitView(Core.centerOn(target, size, scale, viewSize.w, innerH), top);
+  }
+
   function setView(next, clamp) {
     // ホイール以外の操作（パン・ピンチ・キー・ボタン・fit・resize）が入ったら、
     // 途中のホイール目標は捨てる。古い目標へ戻る「巻き戻り」を起こさない。
@@ -796,6 +853,10 @@
     positionBox.w = Math.round(positionEl.offsetWidth || 0);
     positionBox.h = Math.round(positionEl.offsetHeight || 0);
     mapEl.style.setProperty('--rp-position-h', positionBox.h + 'px');
+    // カード（body 直下の fixed）も現在位置の上に置けるよう、body 側にも同じ実寸を渡す。
+    if (document.body && document.body.style) {
+      document.body.style.setProperty('--rp-position-h', positionBox.h + 'px');
+    }
     var jump = document.getElementById('rp-classmap-jump');
     if (jump && jump.offsetParent !== null) {
       jumpBox.w = Math.round(jump.offsetWidth || 0);
@@ -857,12 +918,12 @@
 
   function zoomCenter(factor) {
     if (activeRegion) clearRegionSelection();
-    var next = Core.zoomAt(view, factor, viewSize.w / 2, viewSize.h / 2);
+    var next = Core.zoomAt(view, factor, viewSize.w / 2, (viewSize.h + fitTopInset()) / 2);
     setView(next, true);
   }
 
   function resetView() {
-    var fit = Core.fitTransform(D.meta.canvas, viewSize.w, viewSize.h, 14);
+    var fit = fitCanvasView();
     clearRegionSelection();
     clearSelection();
     animateTo(fit);
@@ -873,14 +934,15 @@
     clearRegionSelection();
     clearSelection();
     // 狭い画面でも外枠・注記が切れないよう、fit 倍率に下限を設けない。文字の読解は後から拡大する。
-    // 見出しは枠内の world 座標に固定したので上帯は予約しない。下は右下の現在位置と
-    // 「一般図へ」の帯だけを予約し、fit した全図がフローティングに覆われないようにする。
+    // 見出しは枠内の world 座標に固定したので上帯は予約しない。上は浮遊する操作群の実寸、
+    // 下は右下の現在位置と「一般図へ」の帯だけを予約し、fit した全図がフローティングに覆われないようにする。
     var posH = positionBox.h || 48;
     var jumpH = jumpBox.h || 0;
+    var top = fitTopInset();
     function fitWithBottom(bottom) {
-      var innerH = Math.max(140, viewSize.h - bottom);
-      return Core.clampPan(Core.fitRect(classMapData.area, viewSize.w, innerH, 14, 0, 1.2),
-        viewSize.w, viewSize.h, D.meta.canvas);
+      var innerH = Math.max(140, viewSize.h - bottom - top);
+      var fit = Core.fitRect(classMapData.area, viewSize.w, innerH, 14, 0, 1.2);
+      return Core.clampPan(insetFitView(fit, top), viewSize.w, viewSize.h, D.meta.canvas);
     }
     var target = fitWithBottom(12 + posH + (jumpH ? jumpH + 10 : 0));
     // fit 後に詳細度が上がって導線が消える場合は、その分の予約を戻して図を大きく見せる。
@@ -1361,9 +1423,9 @@
     });
     var target = Core.fitRect(
       { x: minX, y: minY, w: Math.max(1, maxX - minX), h: Math.max(1, maxY - minY) },
-      viewSize.w, viewSize.h, 44, 0.08, 1.5
+      viewSize.w, Math.max(160, viewSize.h - fitTopInset()), 44, 0.08, 1.5
     );
-    animateTo(Core.clampPan(target, viewSize.w, viewSize.h, D.meta.canvas));
+    animateTo(Core.clampPan(insetFitView(target, fitTopInset()), viewSize.w, viewSize.h, D.meta.canvas));
   }
 
   function selectNode(kind, id) {
@@ -1501,6 +1563,8 @@
     else if (kind === 'class-edge') html = classEdgeCard(id);
     else html = reactionCard(id);
     if (!html) return;
+    // カードは現在位置の上に出るため、全文popoverが背後に残らないよう閉じる。
+    closePositionPopover(false);
     cardEyebrow.textContent = kind === 'compound' ? '物質'
       : kind === 'class' ? '一般図'
         : kind === 'class-edge' ? '一般図の変換' : '反応';
@@ -1985,7 +2049,7 @@
       count.textContent = region.count;
       b.appendChild(count);
       b.addEventListener('click', function () {
-        var target = Core.regionView(region, viewSize.w, viewSize.h, 24);
+        var target = regionTarget(region);
         activeRegion = region.id;
         animateTo(Core.clampPan(target, viewSize.w, viewSize.h, D.meta.canvas));
         setChipPressed(region.id);
@@ -2075,7 +2139,7 @@
       meta.textContent = r.conditions || '条件の記載なし';
       b.appendChild(name);
       b.appendChild(meta);
-      b.addEventListener('click', function () { gotoEntity('reaction', r.id, b); });
+      b.addEventListener('click', function () { activateListEntity('reaction', r.id); });
       li.appendChild(b);
       rul.appendChild(li);
     });
@@ -2104,7 +2168,7 @@
     meta.innerHTML = esc(c.formula) + ' ／ 製法 <b>' + c.incoming + '</b> ・ 生成先 <b>' + c.outgoing + '</b>';
     b.appendChild(name);
     b.appendChild(meta);
-    b.addEventListener('click', function () { gotoEntity('compound', c.id, b); });
+    b.addEventListener('click', function () { activateListEntity('compound', c.id); });
     li.appendChild(b);
     return li;
   }
@@ -2120,10 +2184,35 @@
     if (target) {
       var size = c ? { w: nodeW(c), h: nodeH(c) } : { w: 0, h: 0 };
       var scale = Math.max(view.scale, 0.92);
-      animateTo(Core.centerOn(target, size, scale, viewSize.w, viewSize.h));
+      animateTo(entityTarget(target, size, scale));
     }
     selectNode(kind, id);
     openCard(kind, id);
+  }
+
+  // 「このアプリについて」はモーダルの dialog。開く前にカードと現在位置の全文を閉じる。
+  function openAbout() {
+    if (!aboutEl) return;
+    closeCard(false);
+    closePositionPopover(false);
+    if (typeof aboutEl.showModal === 'function') aboutEl.showModal();
+    else aboutEl.setAttribute('open', '');
+  }
+
+  function closeAbout() {
+    if (aboutEl && aboutEl.open) aboutEl.close();
+  }
+
+  // ダイアログ内の一覧から選んだときは、先にダイアログを閉じてから地図とカードへ移る。
+  // 閉じた dialog 内のボタンをフォーカス復帰先にしないよう、起点はヘッダーの起動ボタンにする。
+  function activateListEntity(kind, id) {
+    closeAbout();
+    gotoEntity(kind, id, aboutButton || searchInput);
+  }
+
+  function setSearchStatus(text) {
+    if (!searchStatus) return;
+    if (searchStatus.textContent !== text) searchStatus.textContent = text;
   }
 
   function findReaction(id) {
@@ -2141,6 +2230,7 @@
       listResults.innerHTML = '';
       listAll.hidden = false;
       listStatus.textContent = '';
+      setSearchStatus('');
       return;
     }
     var found = Core.matchCompounds(D.compounds, query);
@@ -2151,6 +2241,7 @@
     listResults.hidden = false;
     listResults.innerHTML = '';
     listStatus.textContent = found.length + ' 件の物質が一致しました。';
+    setSearchStatus(found.length ? found.length + ' 件' : '一致なし');
     if (!found.length) {
       listResults.innerHTML = '<p class="rp-empty">一致する物質がありません。名称・示性式・ID の一部で検索できます。</p>';
       return;
@@ -2171,8 +2262,16 @@
   }
 
   function focusFirstResult() {
-    var first = listResults.querySelector('button.rp-item') || listAll.querySelector('button.rp-item');
-    if (first) first.focus();
+    // 検索結果の一覧はダイアログ内へ移した。Enter では（閉じている可能性のある）一覧ボタンへ
+    // フォーカスせず、先頭の一致物質へ地図を移動してカードを開く。
+    if (!Core.normalize(searchInput.value)) return;
+    var found = Core.matchCompounds(D.compounds, searchInput.value);
+    if (!found.length) {
+      setSearchStatus('一致なし');
+      return;
+    }
+    closeAbout();
+    gotoEntity('compound', found[0].id, searchInput);
   }
 
   /* ---------------- initial render ---------------- */
@@ -2253,7 +2352,9 @@
     buildNotice();
     buildStates();
     buildRegionLegend();
-    setView(Core.fitTransform(D.meta.canvas, viewSize.w, viewSize.h, 14), false);
+    // チップを並べた後の実際のツールバー高さで、最初の全体表示を合わせる。
+    syncToolbarInset();
+    setView(fitCanvasView(), false);
 
     mapEl.addEventListener('pointerdown', onPointerDown);
     mapEl.addEventListener('pointermove', onPointerMove);
@@ -2284,6 +2385,8 @@
       if (!classMapData) classJump.hidden = true;
       else classJump.addEventListener('click', function (e) { focusClassMap(e.detail === 0); });
     }
+    if (aboutButton && aboutEl) aboutButton.addEventListener('click', openAbout);
+    if (aboutClose && aboutEl) aboutClose.addEventListener('click', function () { closeAbout(); });
     cardClose.addEventListener('click', function () { closeCard(true); });
     positionTrigger.addEventListener('click', function () {
       if (positionPopover.hidden) openPositionPopover();
@@ -2371,6 +2474,8 @@
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
+        // ダイアログの Escape は native の閉じ処理に任せる（フォーカスも native が戻す）。
+        if (aboutEl && aboutEl.open) return;
         if (!positionPopover.hidden) {
           e.preventDefault();
           closePositionPopover(true);
@@ -2397,6 +2502,7 @@
 
     window.addEventListener('resize', function () {
       measure();
+      syncToolbarInset();
       syncPositionInset();
       if (!positionPopover.hidden) syncPositionPopoverBox();
       setView(view, true);
@@ -2405,14 +2511,18 @@
       try {
         new ResizeObserver(function () {
           measure();
+          syncToolbarInset();
           syncPositionInset();
           if (!positionPopover.hidden) syncPositionPopoverBox();
           setView(view, true);
         }).observe(mapEl);
         // 文字サイズや2行の折返しが変わっても、「一般図へ」の導線との重なりを作らない。
         new ResizeObserver(function () { syncPositionInset(); }).observe(positionEl);
+        // 浮遊する操作群の折り返しが変わったら、fit 用の上余白だけを測り直す（現在の表示は動かさない）。
+        if (toolbarEl) new ResizeObserver(function () { syncToolbarInset(); }).observe(toolbarEl);
       } catch (err) { errMsg(err && err.message); }
     }
+    syncToolbarInset();
     syncPositionInset();
   }
 

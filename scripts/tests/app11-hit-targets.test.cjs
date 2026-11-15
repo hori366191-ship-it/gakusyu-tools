@@ -563,13 +563,23 @@ test('[static] 反応線の見た目（幅・色・端点）と data は変え�
   assert.equal(D.reactions.filter((r) => !r.label).length, 36, 'ラベルの無い反応は線ヒットで開く');
 });
 
-test('[static] データ注意枠は地図の直後（一覧の前）にあり、文言は移動前と同一', () => {
+test('[static] 注意枠・一覧・説明・フッターは「このアプリについて」ダイアログへ移し、文言は移動前と同一', () => {
   const html = fs.readFileSync(path.join(APP, 'index.html'), 'utf8');
   const mapAt = html.indexOf('class="rp-map-panel"');
+  const dialogAt = html.indexOf('<dialog class="rp-about" id="rp-about"');
   const noticeAt = html.indexOf('id="rp-data-notice"');
   const listAt = html.indexOf('id="rp-list"');
-  assert.ok(mapAt >= 0 && noticeAt > mapAt && listAt > noticeAt, '地図 → 注意枠 → 物質一覧の順');
-  assert.equal(html.slice(0, mapAt).includes('rp-data-notice'), false, '地図の上に注意枠を残さない');
+  const infoAt = html.indexOf('class="rp-info"');
+  const footerAt = html.indexOf('class="rp-footer"');
+  assert.ok(mapAt >= 0 && dialogAt > mapAt, '地図の後ろに about ダイアログ');
+  assert.ok(noticeAt > dialogAt && listAt > noticeAt && infoAt > listAt && footerAt > infoAt,
+    '注意枠 → 一覧 → 説明 → フッターの順でダイアログ内');
+  assert.ok(html.indexOf('</dialog>') > footerAt, 'フッターまでダイアログ内');
+  assert.equal(html.slice(0, dialogAt).includes('rp-data-notice'), false, '地図の上に注意枠を残さない');
+
+  // 常設の下部情報ブロックを残さない（地図は残り画面いっぱい）。
+  assert.equal(html.slice(mapAt, dialogAt).includes('rp-footer'), false, '地図の下に常設フッターを置かない');
+  assert.equal(html.slice(mapAt, dialogAt).includes('class="rp-info"'), false, '地図の下に常設の説明を置かない');
 
   const start = html.indexOf('<div class="rp-notice" id="rp-data-notice">');
   const end = html.indexOf('</div>', html.indexOf('id="rp-data-note"'));
@@ -577,6 +587,11 @@ test('[static] データ注意枠は地図の直後（一覧の前）にあり�
   assert.equal(crypto.createHash('sha256').update(block.replace(/\s+/g, '')).digest('hex'), NOTICE_SHA256,
     '注意枠の DOM 全文（空白を除く）が移動前と同一');
   assert.ok(block.includes('rp-data-summary') && block.includes('rp-data-note'));
+  assert.ok(start > html.indexOf('<div class="rp-about__body">'), 'ダイアログ本文の先頭に置く');
+  assert.ok(/<dialog class="rp-about" id="rp-about" aria-labelledby="rp-about-title">/.test(html),
+    'ダイアログの名前は見出しと関連付く');
+  assert.ok(html.includes('id="rp-about-open"'), 'ヘッダーの起動ボタン');
+  assert.ok(html.includes('id="rp-about-close"'), 'ダイアログの閉じるボタン');
 
   const app = fs.readFileSync(path.join(APP, 'app.js'), 'utf8');
   assert.ok(app.includes("document.getElementById('rp-data-summary')"));
@@ -584,8 +599,8 @@ test('[static] データ注意枠は地図の直後（一覧の前）にあり�
   assert.ok(app.includes('D.meta.heldReactionCount'), '保留件数の文言は生成側のまま');
 });
 
-test('[static] 地図と注意枠は密着させない（上マージンのみ調整）', () => {
+test('[static] 地図パネルの外側に余白を作らず、注意枠を常設しない', () => {
   const css = fs.readFileSync(path.join(APP, 'app.css'), 'utf8');
-  assert.match(css, /\.rp-map-panel \+ \.rp-notice\s*\{\s*margin-top:\s*14px;?\s*\}/);
-  assert.match(css, /\.rp-notice\s*\{[^}]*margin:\s*14px 0/);
+  assert.match(css, /\.rp-wrap\s*\{[^}]*padding:\s*0/, '地図の外側にページ余白を置かない');
+  assert.equal(/\.rp-map-panel \+ \.rp-notice/.test(css), false, '地図直後の常設注意枠の規則を残さない');
 });
