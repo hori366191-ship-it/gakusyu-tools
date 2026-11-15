@@ -274,6 +274,23 @@ test('[static] 現在位置は地図内の右下に固定され、パン・ズ�
   assert.equal(/\.rp-position[^}]*user-select:\s*none/.test(css), false);
 });
 
+test('[static] 地図の文字は描画層だけ非選択にし、カード・現在位置・popoverの選択/コピーは保つ', () => {
+  const css = read('app.css');
+  // 描画層（SVGとHTMLオーバーレイ）はパン開始前から非選択。
+  const svgRule = ruleBody(css, '.rp-svg');
+  assert.match(svgRule, /-webkit-user-select:\s*none/);
+  assert.match(svgRule, /(^|;)\s*user-select:\s*none/);
+  const overlayRule = ruleBody(css, '.rp-overlay');
+  assert.match(overlayRule, /-webkit-user-select:\s*none/);
+  assert.match(overlayRule, /(^|;)\s*user-select:\s*none/);
+  // 地図全体やカード・現在位置・popover には掛けない（内側の全文コピーを壊さない）。
+  assert.equal(/user-select/.test(ruleBody(css, '.rp-map')), false, '.rp-map 全域に掛けない');
+  assert.equal(/user-select/.test(ruleBody(css, '.rp-card')), false, 'カード外側は選択できる');
+  assert.equal(/user-select/.test(ruleBody(css, '.rp-position')), false, '現在位置は選択できる');
+  assert.equal(/user-select/.test(ruleBody(css, '.rp-position__popover')), false, 'popoverは選択できる');
+  assert.equal(/user-select/.test(ruleBody(css, '.rp-card__body')), false, 'カード本文は選択できる');
+});
+
 test('[static] 「一般図へ」の導線は現在位置の高さの上に置き、ヒント行は残さない', () => {
   const app = read('app.js');
   const html = read('index.html');

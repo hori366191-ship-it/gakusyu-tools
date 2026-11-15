@@ -4,8 +4,8 @@
   "title": "官能基変換の一般図",
   "note": "分類間の代表的な変換。適用は構造・条件に依存",
   "sourceBook": "OpenStax Organic Chemistry (McMurry)",
-  "area": { "x": 4164, "y": 1594, "w": 1592, "h": 702 },
-  "frame": { "x": 4170, "y": 1600, "w": 1580, "h": 690 },
+  "area": { "x": 4164, "y": 1594, "w": 1482, "h": 602 },
+  "frame": { "x": 4170, "y": 1600, "w": 1470, "h": 590 },
   "sources": [
     {
       "id": "openstax-3-1",
@@ -249,8 +249,8 @@
     {
       "id": "alkane",
       "name": "アルカン",
-      "x": 4230,
-      "y": 2040,
+      "x": 4470,
+      "y": 1960,
       "w": 150,
       "h": 40,
       "summary": "炭素間が単結合だけの飽和炭化水素。",
@@ -269,8 +269,8 @@
     {
       "id": "alkene",
       "name": "アルケン",
-      "x": 4490,
-      "y": 1880,
+      "x": 4470,
+      "y": 1830,
       "w": 150,
       "h": 40,
       "summary": "炭素間二重結合をもつ不飽和炭化水素。",
@@ -290,7 +290,7 @@
       "id": "alkyne",
       "name": "アルキン",
       "x": 4230,
-      "y": 1700,
+      "y": 1830,
       "w": 150,
       "h": 40,
       "summary": "炭素間三重結合をもつ不飽和炭化水素。",
@@ -303,8 +303,8 @@
     {
       "id": "ether",
       "name": "エーテル",
-      "x": 4750,
-      "y": 2180,
+      "x": 4710,
+      "y": 2090,
       "w": 150,
       "h": 40,
       "summary": "酸素原子が2つの炭素に結合した分類。",
@@ -317,8 +317,8 @@
     {
       "id": "primary-alcohol",
       "name": "第一級アルコール",
-      "x": 4750,
-      "y": 2080,
+      "x": 4710,
+      "y": 1960,
       "w": 150,
       "h": 40,
       "summary": "ヒドロキシ基が第一級炭素に結合したアルコール。",
@@ -334,8 +334,8 @@
     {
       "id": "secondary-alcohol",
       "name": "第二級アルコール",
-      "x": 4750,
-      "y": 1880,
+      "x": 4710,
+      "y": 1830,
       "w": 150,
       "h": 40,
       "summary": "ヒドロキシ基が第二級炭素に結合したアルコール。",
@@ -348,8 +348,8 @@
     {
       "id": "tertiary-alcohol",
       "name": "第三級アルコール",
-      "x": 4750,
-      "y": 1680,
+      "x": 4710,
+      "y": 1700,
       "w": 150,
       "h": 40,
       "summary": "ヒドロキシ基が第三級炭素に結合したアルコール。",
@@ -362,8 +362,8 @@
     {
       "id": "aldehyde",
       "name": "アルデヒド",
-      "x": 5010,
-      "y": 2080,
+      "x": 4950,
+      "y": 1960,
       "w": 150,
       "h": 40,
       "summary": "末端のカルボニル基をもつ分類。",
@@ -376,8 +376,8 @@
     {
       "id": "ketone",
       "name": "ケトン",
-      "x": 5010,
-      "y": 1880,
+      "x": 4950,
+      "y": 1830,
       "w": 150,
       "h": 40,
       "summary": "鎖の内部にカルボニル基をもつ分類。",
@@ -390,8 +390,8 @@
     {
       "id": "carboxylic-acid",
       "name": "カルボン酸",
-      "x": 5270,
-      "y": 2080,
+      "x": 5190,
+      "y": 1960,
       "w": 150,
       "h": 40,
       "summary": "カルボキシ基をもつ分類。",
@@ -404,8 +404,8 @@
     {
       "id": "acid-anhydride",
       "name": "酸無水物",
-      "x": 5270,
-      "y": 1880,
+      "x": 5190,
+      "y": 1830,
       "w": 150,
       "h": 40,
       "summary": "2つのアシル基が酸素を介して結合した分類。",
@@ -421,8 +421,8 @@
     {
       "id": "ester",
       "name": "エステル",
-      "x": 5530,
-      "y": 2080,
+      "x": 5430,
+      "y": 1960,
       "w": 150,
       "h": 40,
       "summary": "カルボキシ基の水素を炭素基で置き換えた分類。",
@@ -448,8 +448,8 @@
         "right": [{ "species": "alkene-HH-R1R2", "coef": 1 }]
       },
       "rDefs": ["R1 = H またはアルキル基", "R2 = H またはアルキル基"],
-      "labelPos": { "x": 4370, "y": 1815, "anchor": "end" },
-      "points": [[4380, 1720], [4440, 1720], [4440, 1900], [4490, 1900]],
+      "labelPos": { "x": 4425, "y": 1900, "anchor": "middle" },
+      "points": [[4380, 1850], [4470, 1850]],
       "sourceIds": ["openstax-9-5"]
     },
     {
@@ -469,8 +469,8 @@
         "R1 = H またはアルキル基", "R2 = H またはアルキル基",
         "R3 = H またはアルキル基", "R4 = H またはアルキル基"
       ],
-      "labelPos": { "x": 4440, "y": 1970, "anchor": "middle" },
-      "points": [[4590, 1920], [4590, 1990], [4300, 1990], [4300, 2040]],
+      "labelPos": { "x": 4555, "y": 1936, "anchor": "start" },
+      "points": [[4545, 1870], [4545, 1960]],
       "sourceIds": ["openstax-8-6", "openstax-9-5"]
     },
     {
@@ -489,8 +489,8 @@
       "rDefs": [
         "R1 = アルキル基", "R2 = アルキル基", "R3 = H またはアルキル基"
       ],
-      "labelPos": { "x": 4640, "y": 1736, "anchor": "middle" },
-      "points": [[4560, 1880], [4560, 1760], [4700, 1760], [4700, 1690], [4750, 1690]],
+      "labelPos": { "x": 4540, "y": 1762, "anchor": "middle" },
+      "points": [[4600, 1830], [4600, 1714], [4710, 1714]],
       "sourceIds": ["openstax-8-4"]
     },
     {
@@ -507,8 +507,8 @@
         "right": [{ "species": "secondary-hydration-product", "coef": 1 }]
       },
       "rDefs": ["R1 = アルキル基", "R2 = H またはアルキル基"],
-      "labelPos": { "x": 4695, "y": 1858, "anchor": "middle" },
-      "points": [[4640, 1890], [4750, 1890]],
+      "labelPos": { "x": 4662, "y": 1762, "anchor": "middle" },
+      "points": [[4620, 1840], [4710, 1840]],
       "sourceIds": ["openstax-8-4"]
     },
     {
@@ -527,8 +527,8 @@
       "rDefs": [
         "R1 = 炭素基", "R2 = 炭素基", "R3 = H または炭素基", "R4 = H または炭素基"
       ],
-      "labelPos": { "x": 4720, "y": 1826, "anchor": "middle" },
-      "points": [[4810, 1720], [4810, 1800], [4630, 1800], [4630, 1880]],
+      "labelPos": { "x": 4540, "y": 1794, "anchor": "middle" },
+      "points": [[4710, 1726], [4610, 1726], [4610, 1830]],
       "sourceIds": ["openstax-8-1", "openstax-17-6"]
     },
     {
@@ -545,8 +545,8 @@
         "right": [{ "species": "alkene-R1H-R2R3", "coef": 1 }, { "species": "water", "coef": 1 }]
       },
       "rDefs": ["R1 = 炭素基", "R2 = H または炭素基", "R3 = H または炭素基"],
-      "labelPos": { "x": 4695, "y": 1942, "anchor": "middle" },
-      "points": [[4750, 1910], [4640, 1910]],
+      "labelPos": { "x": 4627, "y": 1890, "anchor": "middle" },
+      "points": [[4710, 1860], [4620, 1860]],
       "sourceIds": ["openstax-8-1", "openstax-17-6"]
     },
     {
@@ -563,8 +563,8 @@
         "right": [{ "species": "alkene-H2-R1R2", "coef": 1 }, { "species": "water", "coef": 1 }]
       },
       "rDefs": ["R1 = H または炭素基", "R2 = H または炭素基"],
-      "labelPos": { "x": 4608, "y": 2062, "anchor": "start" },
-      "points": [[4750, 2090], [4600, 2090], [4600, 1920]],
+      "labelPos": { "x": 4667, "y": 2020, "anchor": "middle" },
+      "points": [[4710, 1970], [4683, 1970], [4683, 1866], [4620, 1866]],
       "sourceIds": ["openstax-8-1", "openstax-17-6"]
     },
     {
@@ -581,8 +581,8 @@
         "right": [{ "species": "aldehyde", "coef": 1 }, { "species": "water", "coef": 1 }]
       },
       "rDefs": ["R = 通常は炭素基（アルデヒドで止める条件）"],
-      "labelPos": { "x": 4955, "y": 2048, "anchor": "middle" },
-      "points": [[4900, 2090], [5010, 2090]],
+      "labelPos": { "x": 4905, "y": 1936, "anchor": "middle" },
+      "points": [[4860, 1970], [4950, 1970]],
       "sourceIds": ["openstax-17-7"]
     },
     {
@@ -599,8 +599,8 @@
         "right": [{ "species": "primary-alcohol", "coef": 1 }]
       },
       "rDefs": ["R = H または炭素基（R=Hは級分類の例外）"],
-      "labelPos": { "x": 4955, "y": 2148, "anchor": "middle" },
-      "points": [[5010, 2110], [4900, 2110]],
+      "labelPos": { "x": 4905, "y": 2020, "anchor": "middle" },
+      "points": [[4950, 1990], [4860, 1990]],
       "sourceIds": ["openstax-17-4"]
     },
     {
@@ -617,8 +617,8 @@
         "right": [{ "species": "ketone-R1R2", "coef": 1 }, { "species": "water", "coef": 1 }]
       },
       "rDefs": ["R1 = 炭素基", "R2 = 炭素基"],
-      "labelPos": { "x": 4955, "y": 1858, "anchor": "middle" },
-      "points": [[4900, 1890], [5010, 1890]],
+      "labelPos": { "x": 4905, "y": 1762, "anchor": "middle" },
+      "points": [[4860, 1840], [4950, 1840]],
       "sourceIds": ["openstax-17-7"]
     },
     {
@@ -635,8 +635,8 @@
         "right": [{ "species": "secondary-alcohol", "coef": 1 }]
       },
       "rDefs": ["R1 = 炭素基", "R2 = 炭素基"],
-      "labelPos": { "x": 4955, "y": 1942, "anchor": "middle" },
-      "points": [[5010, 1910], [4900, 1910]],
+      "labelPos": { "x": 4905, "y": 1890, "anchor": "middle" },
+      "points": [[4950, 1860], [4860, 1860]],
       "sourceIds": ["openstax-17-4"]
     },
     {
@@ -653,8 +653,8 @@
         "right": [{ "species": "carboxylic-acid", "coef": 1 }]
       },
       "rDefs": ["R = H または炭素基"],
-      "labelPos": { "x": 5215, "y": 2048, "anchor": "middle" },
-      "points": [[5160, 2090], [5270, 2090]],
+      "labelPos": { "x": 5145, "y": 1940, "anchor": "middle" },
+      "points": [[5100, 1970], [5190, 1970]],
       "sourceIds": ["openstax-19-3"]
     },
     {
@@ -671,8 +671,8 @@
         "right": [{ "species": "ester", "coef": 1 }, { "species": "water", "coef": 1 }]
       },
       "rDefs": ["R = H または炭素基", "R′ = アルキル基（H不可）"],
-      "labelPos": { "x": 5475, "y": 2048, "anchor": "middle" },
-      "points": [[5420, 2090], [5530, 2090]],
+      "labelPos": { "x": 5385, "y": 1936, "anchor": "middle" },
+      "points": [[5340, 1970], [5430, 1970]],
       "sourceIds": ["openstax-21-3", "openstax-21-6"]
     },
     {
@@ -689,8 +689,8 @@
         "right": [{ "species": "carboxylic-acid", "coef": 1 }, { "species": "alcohol-Rprime", "coef": 1 }]
       },
       "rDefs": ["R = H または炭素基", "R′ = アルキル基（H不可）"],
-      "labelPos": { "x": 5475, "y": 2148, "anchor": "middle" },
-      "points": [[5530, 2110], [5420, 2110]],
+      "labelPos": { "x": 5385, "y": 2020, "anchor": "middle" },
+      "points": [[5430, 1990], [5340, 1990]],
       "sourceIds": ["openstax-21-3", "openstax-21-6"]
     },
     {
@@ -710,8 +710,8 @@
         "R = 通常は炭素基（同一なら同じ酸2分子、異なれば各1分子）",
         "R′ = 通常は炭素基（同一なら同じ酸2分子、異なれば各1分子）"
       ],
-      "labelPos": { "x": 5362, "y": 2000, "anchor": "start" },
-      "points": [[5350, 1920], [5350, 2080]],
+      "labelPos": { "x": 5275, "y": 1905, "anchor": "start" },
+      "points": [[5265, 1870], [5265, 1960]],
       "sourceIds": ["openstax-21-5"]
     },
     {
@@ -728,8 +728,8 @@
         "right": [{ "species": "ether-chain", "coef": 1 }, { "species": "water", "coef": 1 }]
       },
       "rDefs": ["R = 通常はアルキル基（同一の単純な一級アルコール。R=Hは級分類の例外）"],
-      "labelPos": { "x": 4810, "y": 2140, "anchor": "end" },
-      "points": [[4825, 2120], [4825, 2180]],
+      "labelPos": { "x": 4865, "y": 2066, "anchor": "middle" },
+      "points": [[4785, 2000], [4785, 2090]],
       "sourceIds": ["openstax-18-2"]
     }
   ]

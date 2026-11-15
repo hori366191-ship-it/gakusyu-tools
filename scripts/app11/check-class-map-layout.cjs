@@ -10,6 +10,7 @@
  *   - 変換線が枠内、端点が分類の辺、ノード貫通・交差・重なりなし
  *   - ラベル矩形が枠内、ノード・線・他ラベルと衝突しない
  *   - 旧配置（frame 4116,1526 1930x782）との面積・辺長・余白の比較
+ *   - 直前版（frame 1580x690 / 辺総長2950）からの辺長短縮の比較
  * 座標を詰めるときの確認用。data.js の再生成は build-map-data.cjs が行う。
  */
 'use strict';
@@ -26,6 +27,11 @@ const OLD = {
   frame: { x: 4116, y: 1526, w: 1930, h: 782 },
   nodeBox: 1650 * 640,
   edgeLength: 3575
+};
+// 直前版（frame 1580x690 / 辺総長 2950）。今回の圧縮はここからの短縮で評価する。
+const PREV = {
+  frame: { w: 1580, h: 690 },
+  edgeLength: 2950
 };
 // 一般図の外にある具体図（styrene/vinyl chloride/PVC/caprolactam/nylon6）の右端と、
 // 分野見出しの棚の下端。frame はここから離す。
@@ -173,6 +179,9 @@ function inspect(cm) {
       edgeLength,
       oldEdgeLength: OLD.edgeLength,
       edgeLengthRatio: edgeLength / OLD.edgeLength,
+      prevEdgeLength: PREV.edgeLength,
+      prevEdgeLengthRatio: edgeLength / PREV.edgeLength,
+      prevFrameAreaRatio: (frame.w * frame.h) / (PREV.frame.w * PREV.frame.h),
       nodeBox,
       margins: {
         left: nodeBox.x - frame.x,
@@ -204,7 +213,8 @@ function main() {
     console.log('nodes   ' + [m.nodeBox.x, m.nodeBox.y, m.nodeBox.w, m.nodeBox.h].join(', ') +
       '  margins L' + pad(m.margins.left) + ' T' + pad(m.margins.top) +
       ' R' + pad(m.margins.right) + ' B' + pad(m.margins.bottom));
-    console.log('edges   length ' + pad(m.edgeLength) + ' (' + pad(m.edgeLengthRatio * 100) + '% of old)');
+    console.log('edges   length ' + pad(m.edgeLength) + ' (' + pad(m.edgeLengthRatio * 100) + '% of old, ' +
+      pad(m.prevEdgeLengthRatio * 100) + '% of prev ' + m.prevEdgeLength + ')');
     console.log('gaps    left ' + pad(m.neighborGap.left) + '  top ' + pad(m.neighborGap.top) +
       '  canvas ' + (m.inCanvas ? 'ok' : 'OUT'));
     if (result.problems.length) {

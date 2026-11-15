@@ -27,7 +27,7 @@ const HIT_SAMPLE_STEP = 2;
 // 具体図（427物質・86反応・分野・型・状態）の投影と、一般図12分類16変換の配置の固定ハッシュ。
 // data.js 全文のハッシュは一般図の座標を詰めるたびに変わるため、投影ごとに分けて守る。
 const CONCRETE_SHA256 = 'e227216f0a72f0f75003ff424e1ef61052e6c246b70dd486906cfc6ffa9b69a4';
-const CLASS_GEOMETRY_SHA256 = 'f5401dbcc0ecead27031694de550c7fafc649d2f845883092bfdade030ea029c';
+const CLASS_GEOMETRY_SHA256 = '7f413639125c3a6ea6795c2bc2f54bcc49ac7e27c23cb5120896b17cef5ec224';
 const NOTICE_SHA256 = '0839382096a9683caeb9c7ead3999e95299bc38e7808edfb9577d5ec29ceb8ef';
 
 function concreteFingerprint() {
@@ -319,7 +319,8 @@ test('[pure] 一般図の変換線も最近傍で選び、候補順（DOM順）�
   const b = CLASS_CANDIDATES.find((c) => c.id === 'primary-alcohol-alkene');
   assert.ok(a && b, '再現に使う一般図の変換がある');
 
-  // a の線上の点で、b が 18px 以内に重なる場所（final UI test の 5.979px 例と同じ状況）
+  // 詰めた一般図では、近い別変換（例: 逆方向レーン）との間隔が global fit で
+  // 18px ヒットより広がった。重ならないこと自体を固定し、近傍候補でも自分の線を選ぶ。
   let point = null;
   let gap = Infinity;
   a.lines.forEach((poly) => {
@@ -330,7 +331,8 @@ test('[pure] 一般図の変換線も最近傍で選び、候補順（DOM順）�
   });
   assert.ok(point, 'a の形状サンプル');
   const scale = 0.1993; // final UI test の global fit
-  assert.ok(gap * scale <= HIT_RADIUS, 'この倍率では 18px ヒットが重なる（' + (gap * scale).toFixed(3) + 'px）');
+  assert.ok(gap * scale > HIT_RADIUS,
+    'global fit では 18px ヒットが重ならない（' + (gap * scale).toFixed(3) + 'px）');
 
   const radiusWorld = HIT_RADIUS / scale;
   const first = nearestFor([a, b], point, radiusWorld);

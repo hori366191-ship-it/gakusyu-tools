@@ -434,8 +434,10 @@ test('[geometry] frameは詰めても余白を均し、面積25%以上・辺長�
   const oldArea = 1930 * 782;
   assert.ok(frame.w * frame.h <= oldArea * 0.75, 'frame面積: ' + frame.w * frame.h);
   const edgeLength = CM.edges.reduce((sum, e) => sum + G.polylineLength(e.points.map(point)), 0);
-  assert.ok(edgeLength < 3575, '辺総長: ' + edgeLength);
-  assert.ok(edgeLength <= 3575 * 0.95, '辺総長を5%以上短縮: ' + edgeLength);
+  // 直前の配置（frame 1580x690 / 辺総長2950）からさらに25%以上短縮する。
+  // 3575 だけを基準にすると今回の後退を検出できないため、2950 比で確かめる。
+  assert.ok(edgeLength < 2950, '辺総長: ' + edgeLength);
+  assert.ok(edgeLength <= 2950 * 0.75, '辺総長を2950から25%以上短縮: ' + edgeLength);
   // ノード範囲の余白は四辺とも明確に取る（旧 74/134/206/8 の偏りを残さない）
   const xs = CM.nodes.map((n) => n.x).concat(CM.nodes.map((n) => n.x + n.w));
   const ys = CM.nodes.map((n) => n.y).concat(CM.nodes.map((n) => n.y + n.h));
@@ -458,6 +460,35 @@ test('[geometry] frameは詰めても余白を均し、面積25%以上・辺長�
     frame.x + frame.w <= canvas.x + canvas.w && frame.y + frame.h <= canvas.y + canvas.h);
   assert.ok(area.x >= canvas.x && area.y >= canvas.y &&
     area.x + area.w <= canvas.x + canvas.w && area.y + area.h <= canvas.y + canvas.h);
+});
+
+test('[geometry] 見出しはframe内のworld帯に固定され、ノード・変換線と重ならない', () => {
+  const heading = { x: CM.frame.x + 28, y: CM.frame.y + 24, w: 250, h: 40 };
+  assert.ok(heading.x > CM.frame.x && heading.y > CM.frame.y, '枠の内側');
+  assert.ok(heading.x + heading.w < CM.frame.x + CM.frame.w, '枠の右内側');
+  assert.ok(heading.y + heading.h < CM.frame.y + CM.frame.h, '枠の下内側');
+  CM.nodes.forEach((n) => {
+    assert.equal(G.rectsOverlap(heading, n), false, '見出しとノード: ' + n.id);
+  });
+  CM.edges.forEach((e) => {
+    G.polylineSegments(e.points.map(point)).forEach((s) => {
+      assert.equal(G.segmentRect(s.a, s.b, heading), false, '見出しと変換線: ' + e.id);
+      assert.equal(G.segmentRect(s.a, s.b, G.inflate(heading, 6)), false, '見出しの余白と変換線: ' + e.id);
+    });
+  });
+  const topNode = Math.min(...CM.nodes.map((n) => n.y));
+  assert.ok(topNode >= heading.y + heading.h + 20, '見出し帯の下にノードを置く: ' + topNode);
+});
+
+test('[core] 見出しはパン・ズームで図と一緒に動き、画面の空き場所を探さない', () => {
+  const app = read('app.js');
+  assert.ok(app.includes("'rp-classmap__caption'"), 'world座標の見出しグループ');
+  assert.ok(app.includes('frame.x + 28') && app.includes('frame.y + 24'), '枠内上帯の固定アンカー');
+  assert.equal(/classMapCaptionSlot|captionBlockers|ensureReactionLabelBoxes|captionMetrics/.test(app), false,
+    '画面位置の探索・障害物収集・ラベルbboxキャッシュを残さない');
+  assert.equal(app.includes('is-title-only'), false, '題名だけへ縮める分岐を残さない');
+  assert.equal(app.includes("heading.style.display = 'none'"), false, '見出しを消す分岐を残さない');
+  assert.ok(app.includes('classMapData.title') && app.includes('classMapData.note'), 'タイトルと注記は同じ文言');
 });
 
 test('[geometry] 390pxでも一般図の外枠がviewport内に収まり、倍率下限で切らない', () => {
@@ -497,10 +528,9 @@ test('[core] 現在位置は一般図の枠内だけ図名を返し、選択中�
   assert.equal(Core.classMapPosition(overview, CM, 1200, 600), '', '全体表示では一般図を名乗らない');
 });
 
-test('[geometry] 狭い画面の一般図fitで見出し帯・右下フローティングが分類ノードを覆わない', () => {
-  // focusClassMap と同じ予約（上: 見出し40+12 / 下: 12+現在位置50+導線24+10）で fit し、
-  // 見出しを「外枠の上」へ置いたときにノード・現在位置と重ならないことを data 幾何で確かめる。
-  const CAPTION_H = 40;
+test('[geometry] 狭い画面の一般図fitで枠内見出し帯・右下フローティングが分類ノードを覆わない', () => {
+  // focusClassMap と同じ予約（下: 12+現在位置50+導線24+10 のみ。上帯はworld固定なので予約しない）で
+  // fit し、枠内の見出しbandがノード・現在位置と重ならないことを data 幾何で確かめる。
   const POSITION_H = 50;
   const JUMP_H = 24;
   const cases = [
@@ -511,52 +541,47 @@ test('[geometry] 狭い画面の一般図fitで見出し帯・右下フローテ
   function hit(a, b) {
     return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
   }
+  const headingWorld = { x: CM.frame.x + 28, y: CM.frame.y + 24, w: 250, h: 40 };
   cases.forEach((c) => {
-    const reserveTop = CAPTION_H + 12;
     const reserveBottom = 12 + POSITION_H + JUMP_H + 10;
-    const innerH = Math.max(140, c.h - reserveTop - reserveBottom);
+    const innerH = Math.max(140, c.h - reserveBottom);
     const fit = Core.fitRect(CM.area, c.w, innerH, 14, 0, 1.2);
-    const off = { x: fit.x, y: fit.y + reserveTop, scale: fit.scale };
-    const screen = (r) => ({ x: off.x + r.x * off.scale, y: off.y + r.y * off.scale, w: r.w * off.scale, h: r.h * off.scale });
+    const screen = (r) => ({ x: fit.x + r.x * fit.scale, y: fit.y + r.y * fit.scale, w: r.w * fit.scale, h: r.h * fit.scale });
     const frame = screen(CM.frame);
+    const heading = screen(headingWorld);
     const nodes = CM.nodes.map(screen);
     const position = { x: c.w - 12 - 300, y: c.h - 12 - POSITION_H, w: 300, h: POSITION_H };
     const jump = { x: c.w - 12 - 160, y: c.h - (12 + POSITION_H + 10) - JUMP_H, w: 160, h: JUMP_H };
 
-    // 外枠も area も viewport 内、右下フローティングと重ならない
+    // area/frame と world 固定の見出しは viewport 内、右下フローティングと重ならない
     assert.ok(frame.x >= 0 && frame.y >= 0, c.label + ' frame 左上');
     assert.ok(frame.x + frame.w <= c.w && frame.y + frame.h <= c.h, c.label + ' frame 右下: ' + JSON.stringify(frame));
     assert.equal(hit(frame, position), false, c.label + ' frame と現在位置');
     assert.equal(hit(frame, jump), false, c.label + ' frame と導線');
-
-    // 見出しは frame の上（帯の中）に置け、ノードにもフローティングにも重ならない
-    const width = Math.min(340, Math.max(160, c.w - 24));
-    const x = Math.min(Math.max(frame.x + 8, 4), c.w - 4 - width);
-    const caption = { x: x, y: frame.y - CAPTION_H - 6, w: width, h: CAPTION_H };
-    assert.ok(caption.y >= 4, c.label + ' 見出しの上端: ' + caption.y);
-    assert.ok(caption.x + caption.w <= c.w - 4, c.label + ' 見出しの右端');
-    assert.ok(caption.y + caption.h <= frame.y, c.label + ' 見出しは外枠の上');
-    nodes.forEach((n) => assert.equal(hit(caption, n), false, c.label + ' 見出しとノード'));
-    assert.equal(hit(caption, position), false, c.label + ' 見出しと現在位置');
-    assert.equal(hit(caption, jump), false, c.label + ' 見出しと導線');
+    assert.ok(heading.x >= frame.x && heading.y >= frame.y, c.label + ' 見出しは枠内');
+    assert.ok(heading.x + heading.w <= frame.x + frame.w, c.label + ' 見出しの右');
+    assert.ok(heading.y + heading.h <= frame.y + frame.h, c.label + ' 見出しの下');
+    nodes.forEach((n) => assert.equal(hit(heading, n), false, c.label + ' 見出しとノード'));
+    assert.equal(hit(heading, position), false, c.label + ' 見出しと現在位置');
+    assert.equal(hit(heading, jump), false, c.label + ' 見出しと導線');
   });
 });
 
-test('[static] 一般図の見出しはノードに重ねず、置けなければ題名だけ／出さない', () => {
+test('[static] 一般図のfitは見出しの画面帯を予約せず、枠内world見出しと右下フローティングだけを避ける', () => {
   const app = read('app.js');
   const css = read('app.css');
-  assert.ok(app.includes('function classMapCaptionSlot'), 'スクリーン座標で位置を選ぶ');
-  assert.ok(app.includes('classMapCaptionSlot(frameScreen, size, box, blockers)'));
-  assert.ok(app.includes('function captionBlockers'), '障害物をまとめて集める');
-  assert.ok(app.includes('D.compounds.forEach(function (c) {'), '具体図の全物質も障害物にする');
-  assert.ok(app.includes('function ensureReactionLabelBoxes'), '表示中の反応ラベルも障害物にする');
-  assert.ok(app.includes('Core.detailLevel(view.scale) > 0'), '低倍率で隠れているラベルは測らない');
-  assert.ok(app.includes("heading.classList.add('is-title-only')"), '入らなければ題名だけにする');
-  assert.ok(app.includes("heading.style.display = 'none';"), 'それでも入らなければ出さない');
-  assert.ok(app.includes('positionBox.w && positionBox.h'), '現在位置を予約に入れる');
-  assert.ok(app.includes('jumpBox.w && jumpBox.h'), '「一般図へ」も予約に入れる');
-  assert.match(css, /\.rp-overlay__classmap\.is-title-only\s*\{/, '題名だけの見出しのCSS');
-  assert.equal(/titlePoint/.test(app), false, 'world基準の固定位置を残さない');
+  assert.ok(app.includes('var innerH = Math.max(140, viewSize.h - bottom);'), '下帯だけを予約する');
+  assert.equal(app.includes('reserveTop'), false, '上帯（見出し）の予約を残さない');
+  assert.ok(app.includes('Core.fitRect(classMapData.area, viewSize.w, innerH, 14, 0, 1.2)'),
+    '倍率下限なしのfitを維持');
+  assert.ok(app.includes('var jumpH = jumpBox.h || 0;'), '右下の導線の実寸を使う');
+  assert.ok(app.includes('var posH = positionBox.h || 48;'), '現在位置の実寸を予約に入れる');
+  assert.ok(app.includes('var jumpH = jumpBox.h || 0;'), '「一般図へ」も予約に入れる');
+  assert.match(css, /\.rp-classmap__caption\s*\{/);
+  assert.match(css, /\.rp-classmap__caption-title\s*\{/);
+  assert.match(css, /\.rp-classmap__caption-note\s*\{/);
+  assert.equal(/\.rp-overlay__classmap/.test(css), false, '画面追従の見出しCSSを残さない');
+  assert.equal(/titlePoint/.test(app), false, '旧world基準の位置定数を残さない');
   assert.ok(app.includes('classMapData.title') && app.includes('classMapData.note'), 'タイトルと注記は同じ文言');
 });
 
@@ -578,10 +603,10 @@ test('[static] 既存の entity 処理を壊さず、分類ノードをキーボ
   assert.ok(js.includes('updateClassEdgeHighlight'), '分類選択時の変換線の強調');
   assert.ok(js.includes('focusClassMap'), '導線の移動処理');
   assert.ok(js.includes('Core.fitRect(classMapData.area, viewSize.w, innerH, 14, 0, 1.2)'),
-    '狭い画面でも切らないfit（倍率下限なし・上帯/下帯の予約込み）');
-  assert.ok(js.includes('var reserveTop = (captionMetrics.h >= 20 ? captionMetrics.h : 40) + 12;'),
-    '上は見出し、下は現在位置と導線の帯を予約する');
-  assert.ok(js.includes('box.y += reserveTop;'), '予約した帯の下へfitをずらす');
+    '狭い画面でも切らないfit（倍率下限なし・下帯の予約込み）');
+  assert.ok(js.includes('var innerH = Math.max(140, viewSize.h - bottom);'),
+    '下は現在位置と導線の帯だけを予約する');
+  assert.equal(js.includes('reserveTop'), false, '上帯（見出し）の予約を残さない');
   assert.ok(js.includes('var jumpH = jumpBox.h || 0;'), '右下の導線の実寸を使う');
   assert.equal(js.includes('28, 0.55, 1.2'), false, '旧fit下限を残さない');
   assert.ok(js.includes("document.getElementById('rp-classmap-jump')"), '導線の配線');
@@ -724,7 +749,7 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
       'Core', 'viewSize', 'classMapData', 'D', 'animateTo', 'classNodeIndex',
       'classNodeById', 'view', 'activeRegion', 'clearRegionSelection', 'clearSelection',
       'compoundById', 'findReaction', 'nodeW', 'nodeH', 'document',
-      'captionMetrics', 'positionBox', 'jumpBox',
+      'positionBox', 'jumpBox',
       'var programmaticFocusTarget = null;\n' + focusSrc + '\n' + focusInSrc +
       '\nreturn { focusClassMap: focusClassMap, onFocusIn: onFocusIn };'
     );
@@ -742,17 +767,16 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
       function () {},
       {}, function () { return null; }, function () { return 150; }, function () { return 40; },
       documentStub,
-      { h: 28 },
       { w: 300, h: 50 },
       { w: 0, h: 0 }
     );
-    // 上帯（見出し28+12）と下帯（12+現在位置50）を予約した高さでfitし、上帯の分だけ下げる。
-    const expected = { scale: fit.scale, x: fit.x, y: fit.y + 40 };
+    // 下帯（12+現在位置50）だけを予約した高さでfitし、上帯の分はずらさない。
+    const expected = { scale: fit.scale, x: fit.x, y: fit.y };
     focusHandler = function (el) { api.onFocusIn({ target: el }); };
 
     api.focusClassMap(true);
     assert.equal(calls.length, 1, (reduce ? 'reduce' : 'animate') + ': 全体fit以外へviewを書き換えない');
-    assert.deepEqual(calls[0], expected, (reduce ? 'reduce' : 'animate') + ': fit先（上帯の予約分だけ下）');
+    assert.deepEqual(calls[0], expected, (reduce ? 'reduce' : 'animate') + ': fit先（上帯の予約なし）');
     assert.equal(activeEl, first, (reduce ? 'reduce' : 'animate') + ': 先頭nodeへfocusする');
     if (reduce) {
       assert.deepEqual(view, expected, 'reduceではfitが即時反映される');
@@ -783,6 +807,8 @@ test('[static] LOD は低倍率で見出し、局所拡大で分類名・反応�
   assert.equal(/text-anchor\s*:/.test(edgeLabelRule), false, 'CSSで正本のtext-anchorを上書きしない');
   assert.equal(/\.rp-overlay__classmap\s+span\s*\{\s*display:\s*none/.test(css), false,
     '注記をモバイルで消さない');
+  assert.equal(/\.rp-classmap__caption[^{]*\{[^}]*display:\s*none/.test(css), false,
+    '枠内見出しをCSSで消さない');
   assert.match(css, /\.rp-map\[data-level="0"\] \.rp-classmap__node-label[\s\S]*?display:\s*none/);
   assert.match(css, /\.rp-map\[data-level="0"\] \.rp-classmap__label[\s\S]*?display:\s*none/);
   assert.match(css, /\.rp-map\[data-level="1"\] \.rp-classmap__label\s*\{\s*opacity:/);
@@ -800,5 +826,4 @@ test('[static] LOD は低倍率で見出し、局所拡大で分類名・反応�
   assert.match(css, /\.rp-classmap-jump\s*\{[^}]*max-width:\s*calc\(100% - 20px\)/);
   const mobile = css.split('@media (max-width: 760px)')[1].split('@media (max-width: 430px)')[0];
   assert.match(mobile, /\.rp-classmap-jump\s*\{/);
-  assert.match(mobile, /\.rp-overlay__classmap\s*\{/);
 });

@@ -399,7 +399,8 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   cursor: grab;
 }
 .rp-map.is-panning { cursor: grabbing; }
-.rp-svg { display: block; width: 100%; height: 100%; }
+/* 描画層の文字はパン中に選択しない（カード・現在位置・popover の選択/コピーは保つ）。 */
+.rp-svg { display: block; width: 100%; height: 100%; -webkit-user-select: none; user-select: none; }
 .rp-svg text { font-family: inherit; }
 
 /* ---------- svg: regions ---------- */
@@ -515,6 +516,17 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   stroke-width: 1.3;
   stroke-dasharray: 8 6;
 }
+/* 見出しは枠内の world 座標（frame + 28, +24）に固定する。パン・ズームで図と一緒に動き、
+   画面の空き場所を探して動かさない。 */
+.rp-classmap__caption { pointer-events: none; }
+.rp-classmap__caption-box {
+  fill: var(--rp-panel);
+  fill-opacity: .84;
+  stroke: var(--rp-region-line);
+  stroke-width: 1;
+}
+.rp-classmap__caption-title { fill: var(--rp-ink); font-size: 13px; font-weight: 700; }
+.rp-classmap__caption-note { fill: var(--rp-muted); font-size: 10.5px; }
 .rp-classmap__edge {
   fill: none;
   stroke: var(--rp-accent);
@@ -583,7 +595,8 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-map[data-level="2"] .rp-classmap__label { opacity: 1; }
 
 /* ---------- html overlay (readable at any zoom) ---------- */
-.rp-overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+/* 描画層の文字はパン中に選択しない。カード・現在位置・popover の全文選択/コピーは妨げない。 */
+.rp-overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; -webkit-user-select: none; user-select: none; }
 .rp-overlay__region {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -622,23 +635,6 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   pointer-events: none;
 }
 .rp-overlay__reaction--secondary { border: 1px dotted var(--rp-secondary); opacity: .92; }
-.rp-overlay__classmap {
-  position: absolute;
-  display: grid;
-  gap: 1px;
-  max-width: min(340px, 70vw);
-  padding: 3px 8px 4px;
-  border-left: 3px solid var(--rp-accent);
-  border-radius: 0 8px 8px 0;
-  background: color-mix(in srgb, var(--rp-panel) 88%, transparent);
-  color: var(--rp-ink);
-  font-size: 11px;
-  line-height: 1.35;
-}
-.rp-overlay__classmap strong { font-size: 13px; white-space: nowrap; }
-.rp-overlay__classmap span { color: var(--rp-muted); font-size: 10.5px; white-space: normal; }
-/* 全2行を置ける余白が無いときは題名だけの小さな見出しにする（副説明はデータ欄・カード）。 */
-.rp-overlay__classmap.is-title-only { padding: 2px 8px 3px; }
 
 .rp-classmap-jump {
   position: absolute;
@@ -873,7 +869,6 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   /* 地図内の右下フローティングなので、モバイルでも幅は地図に合わせる。 */
   .rp-position { font-size: 11.5px; }
   .rp-classmap-jump { right: 8px; font-size: 11px; }
-  .rp-overlay__classmap { max-width: calc(100vw - 32px); }
   .rp-list { padding: 14px 12px 18px; }
   .rp-list__items { grid-template-columns: 1fr; }
   .rp-card {
