@@ -81,6 +81,7 @@
   var classNodeById = {};
   var classEdgeById = {};
   var classLayer = null;
+  var reactionConnectors = {};
   var classMapData = D.classMap || null;
   if (classMapData) {
     classMapData.nodes.forEach(function (n) { classNodeById[n.id] = n; });
@@ -131,50 +132,57 @@
     return { x: c.x + nodeW(c) / 2, y: c.y + nodeH(c) / 2 };
   }
 
-  function ensureArrowDefs() {
-    if (svg.querySelector('#rp-arrow-primary')) return;
-    var defs = el('defs');
-    [['rp-arrow-primary', 'rp-primary', 7], ['rp-arrow-secondary', 'rp-secondary', 5.5], ['rp-arrow-class', 'rp-accent', 6]].forEach(function (spec) {
-      var marker = el('marker', {
-        id: spec[0],
-        viewBox: '0 0 8 8',
-        refX: '7.2',
-        refY: '4',
-        markerWidth: String(spec[2]),
-        markerHeight: String(spec[2]),
-        markerUnits: 'userSpaceOnUse',
-        orient: 'auto'
+  // 矢印は marker-end ではなく、shaft と分離した triangle を描く。
+  var ARROW_TIER = { primary: 'primary', secondary: 'secondary' };
+  function arrowHeadAttrs(c, extraClass) {
+    return {
+      'class': 'rp-arrowhead rp-arrowhead--' + (extraClass || ARROW_TIER[c.tier] || 'primary'),
+      d: Core.arrowHeadPath(c.arrowHead)
+    };
+  }
+
+  function buildConnectors() {
+    var all = [];
+    D.reactions.forEach(function (r) {
+      var list = Core.reactionConnectors(r, {
+        compoundById: compoundById,
+        nodeW: NODE_W,
+        nodeH: NODE_H
       });
-      marker.appendChild(el('path', { d: 'M0,0 L8,4 L0,8 z', style: 'fill:var(--' + spec[1] + ')' }));
-      defs.appendChild(marker);
+      list.forEach(function (c) { c.rid = r.id; });
+      reactionConnectors[r.id] = list;
+      all = all.concat(list);
     });
-    svg.insertBefore(defs, svg.firstChild);
+    // 同じ物質の同じ端点に集まる別反応の線だけ、描画端点を辺に沿って分ける。
+    Core.separateSharedPorts(all);
   }
 
   function buildReactions() {
-    ensureArrowDefs();
     var secondaryLayer = el('g', { 'class': 'rp-edges rp-edges--secondary' });
     var primaryLayer = el('g', { 'class': 'rp-edges rp-edges--primary' });
     var markerLayer = el('g', { 'class': 'rp-reactions' });
     D.reactions.forEach(function (r) {
       var tier = r.tier === 'primary' ? 'primary' : 'secondary';
-      (r.edges || []).forEach(function (e) {
-        var key = r.id + '|' + e.dir + '|' + e.id;
-        var edgeTier = e.tier === 'primary' ? 'primary' : 'secondary';
-        var points = e.dir === 'out' ? e.points.slice().reverse() : e.points;
-        var path = el('path', {
+      (reactionConnectors[r.id] || []).forEach(function (c) {
+        var edgeTier = c.tier === 'primary' ? 'primary' : 'secondary';
+        var attrs = {
           'class': 'rp-edge rp-edge--' + edgeTier,
-          'data-from': e.dir === 'in' ? e.id : r.id,
-          'data-to': e.dir === 'in' ? r.id : e.id,
-          'data-edge': key,
+          'data-from': c.dir === 'in' ? c.edgeId : r.id,
+          'data-to': c.dir === 'in' ? r.id : c.edgeId,
+          'data-edge': c.edgeKeys[0],
+          'data-edges': c.edgeKeys.join(','),
           'data-reaction': r.id,
-          'data-compound': e.id,
+          'data-compound': c.compounds[0],
+          // ID 自体にカンマが入るため JSON 配列で厳密に保持する。
+          'data-compounds': JSON.stringify(c.compounds),
           'data-tier': edgeTier,
-          'marker-end': 'url(#rp-arrow-' + edgeTier + ')',
-          d: Core.routePath(points, e.gaps, e.bridges)
-        });
-        (edgeTier === 'primary' ? primaryLayer : secondaryLayer).appendChild(path);
-        edgeIndex[key] = path;
+          d: Core.routePath(c.shaft || c.points, c.gaps, c.bridges)
+        };
+        var path = el('path', attrs);
+        var targetLayer = edgeTier === 'primary' ? primaryLayer : secondaryLayer;
+        targetLayer.appendChild(path);
+        if (c.arrowHead) targetLayer.appendChild(el('path', arrowHeadAttrs(c)));
+        c.edgeKeys.forEach(function (key) { edgeIndex[key] = path; });
       });
       var g = el('g', {
         'class': 'rp-reaction rp-reaction--' + tier + (r.state === 'confirmed' ? '' : ' is-pending'),
@@ -286,7 +294,9 @@
     // 同じ変換のラベルを1つのグループにまとめる。ノードより先に置き、重なった場合はノードを優先する。
     var edgeLayer = el('g', { 'class': 'rp-classmap__edges' });
     classMapData.edges.forEach(function (e) {
-      var d = Core.routePath(e.points, [], []);
+      // 一般図も同じ端点規則（角丸枠・butt cap・分離した triangle）で描く。座標・配置は変えない。
+      var cc = Core.classConnector(e, { nodeById: classNodeById });
+      var d = Core.routePath(cc.shaft || cc.points, [], []);
       var group = el('g', {
         'class': 'rp-classmap__edge-group',
         'data-kind': 'class-edge',
@@ -304,10 +314,13 @@
         'data-class-edge': e.id,
         'data-from': e.from,
         'data-to': e.to,
-        'marker-end': 'url(#rp-arrow-class)',
         d: d
       });
       group.appendChild(path);
+      if (cc.arrowHead) group.appendChild(el('path', {
+        'class': 'rp-classmap__arrowhead',
+        d: Core.arrowHeadPath(cc.arrowHead)
+      }));
       var pos = e.labelPos;
       var label = el('text', {
         'class': 'rp-classmap__label',
@@ -1016,7 +1029,8 @@
       var active = false;
       if (selected) {
         active = selected.kind === 'compound'
-          ? path.getAttribute('data-compound') === selected.id
+          ? Core.compoundList(path.getAttribute('data-compounds'), path.getAttribute('data-compound'))
+            .indexOf(selected.id) !== -1
           : selected.kind === 'reaction' && path.getAttribute('data-reaction') === selected.id;
       }
       if (active) path.classList.add('is-active');
@@ -1052,15 +1066,14 @@
     var layer = ensureActiveLayer();
     while (layer.firstChild) layer.removeChild(layer.firstChild);
     if (!r) return;
-    (r.edges || []).forEach(function (e) {
-      var points = e.dir === 'out' ? e.points.slice().reverse() : e.points;
-      var tier = e.tier === 'primary' ? 'primary' : 'secondary';
+    // 通常表示と同じ connector を使う。選択・プレビューで端点や矢印の向きを変えない。
+    (reactionConnectors[r.id] || []).forEach(function (c) {
       layer.appendChild(el('path', {
         'class': 'rp-edge-active',
         'data-reaction': r.id,
-        'marker-end': 'url(#rp-arrow-' + tier + ')',
-        d: Core.routePath(points, [], [])
+        d: Core.routePath(c.shaft || c.points, c.gaps, c.bridges)
       }));
+      if (c.arrowHead) layer.appendChild(el('path', arrowHeadAttrs(c, 'active')));
     });
   }
 
@@ -1826,6 +1839,7 @@
 
   function init() {
     measure();
+    buildConnectors();
     buildReactions();
     buildNodes();
     buildClassMap();

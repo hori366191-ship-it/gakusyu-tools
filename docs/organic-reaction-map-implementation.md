@@ -307,3 +307,54 @@ node scripts/app11/metrics.cjs --baseline       # v1 の計測
   表示と分離し、パン・ズームが落ち着いてから500ms後に1回だけ通知する。
 - 回帰: `node --test --test-name-pattern="\[(static|core|state)\]" scripts/tests/app11-reaction-map.test.cjs`。
   実操作（長短名・3種の説明・popover・390px幅）は `test` サブエージェントが確認する。
+
+## connector 接続規則（2026-11-15 追加・未公開）
+
+保存データを変えず、描画だけを「反応の丸」から「物質枠 → 線 → 物質枠」へ揃えた記録。
+正本は `site/app11/map-core.js` の `CONNECTOR` / `reactionConnectors` / `classConnector`。
+
+### 不変条件
+- 207 辺 / 86 反応 / 一般図 16 変換、`data.js` の保存点列は変更しない。
+- 主要は太線、補助は点線。PP（primary-primary）交差 0 を維持する。
+- 一般図の座標・配置・16 タップ対象は変えない。
+
+### 幾何
+1. 保存点列の半径10（反応ハブ）は描画に使わず、ハブ中心で連続させる。
+2. 物質側は rx=9 の角丸外周へ置く。角丸に入るポートは円弧上の点にする。
+3. 1入力1出力で同一 tier はハブ中心を通る1本の連続 path。それ以外は分枝し、
+   入力は矢印なし、出力だけ生成物向きの triangle を付ける。
+4. 線端は butt。丸 cap の stroke/2 が枠や tip へはみ出さない。
+5. 矢印は marker-end ではなく、shaft と分離した triangle を別 path で描く。
+   shaft は triangle の底まで trim。triangle は primary 7 / secondary 5.5 / class 6、
+   最終線分が短い場合は `min(nominal, max(4, full - 1.5))`。向きは最終線分の tangent。
+6. `EDGE_GAP = 0.75`。ノード境界 stroke は concrete 1.2 / hub 1.6 / class 1.4 で
+   **全 state 一定**にし、選択・hover・focus は stroke 色と drop-shadow halo で示す。
+   これにより tip と source butt 端の実 gap は concrete/hub/class すべて 0.75。\n   path の 0.1 world 丸めを含めても拡大3倍で誤差 <= 0.15 CSS px（目標 <= 0.2）。
+   edge stroke の primary 3 / active 4.4 / secondary 破線は従来どおり。
+   数値確認は `endpointOffsets()` と `connectorMetadata()`。
+
+### 近接ポート
+`separateSharedPorts()` が保存点列を変えず、描画端点だけを分ける。
+- `PORT_CLUSTER = 12` 以内を同じ cluster にし、出て行く向き（隣接点）順に
+  `PORT_SPACING = 7` で角丸輪郭上へ置く。
+- 同一反応内の合流（反応ハブ）は対象外。
+- 受入ラスタで重なりが確認された次の2組を解消:
+  acetic-acid-glycerol-esterification × tripalmitin-saponification、
+  glycerol-oleic-esterification × glycerol-stearic-esterification。
+
+### 選択・プレビュー
+`buildConnectors()` の connector を通常・選択・プレビューで共有する。
+`showReactionStroke()` は同じ `shaft` / `arrowHead` を active レイヤーへ描くだけで、
+保存点列から別 geometry を作らない。
+
+### カンマ入りID
+`data-compounds` は JSON 配列。`Core.compoundList()` で復元し、`split(',')` は使わない
+（例: `1,2-dibromoethane`）。`connectorMatchesCompound()` で全 427 ID の highlight を検証する。
+
+### 検査
+`node --test scripts/tests/app11-connectors.test.cjs`
+- 207/86/16 不変、角丸・斜め・short stub・multi・reactant only・選択共通化
+- 実描画 path sampling の PP0、node/label 貫通 0（stroke halo + arrow 外形）、
+  別反応の近接 paint 重なり 0（同一物質の近接portのみ限定免除）
+- 一般図16、カンマID、全427 ID の highlight 往復、短い最終線分の triangle
+- 3テーマ/mobile/エラー表示は test サブエージェントで最終確認

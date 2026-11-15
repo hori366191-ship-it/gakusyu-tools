@@ -1,0 +1,484 @@
+/*
+ * app11 反応マップ — connector（描画用の接続）回帰テスト
+ *
+ * 保存データ（207 辺・86 反応・一般図16変換）は変えない。
+ * 描画時に「反応の丸を消し、frame→arrow→frame に揃える」ための純関数を検証する。
+ * 単なる保存点列の metrics ではなく、実際に routePath が返す path をサンプリングして
+ * 交差・貫通・共有区間・端点誤差を見る。
+ */
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+
+const ROOT = path.resolve(__dirname, '..', '..');
+const APP = path.join(ROOT, 'site', 'app11');
+const D = require(path.join(APP, 'data.js'));
+const Core = require(path.join(APP, 'map-core.js'));
+
+const NODE_W = D.meta.nodeW;
+const NODE_H = D.meta.nodeH;
+const byId = {};
+D.compounds.forEach((c) => { byId[c.id] = c; });
+
+function connectorsForAll() {
+  const all = [];
+  D.reactions.forEach((r) => {
+    const list = Core.reactionConnectors(r, {
+      compoundById: byId,
+      nodeW: NODE_W,
+      nodeH: NODE_H
+    });
+    list.forEach((c) => { c.rid = r.id; c.reaction = r; });
+    all.push(...list);
+  });
+  Core.separateSharedPorts(all);
+  return all;
+}
+
+function segments(points) {
+  const out = [];
+  for (let i = 0; i < points.length - 1; i++) out.push([points[i], points[i + 1]]);
+  return out;
+}
+
+function samples(connector) {
+  // 実際に描く shaft（triangle の底で trim 済み）をサンプリングする。
+  return Core.samplePath(Core.routePath(connector.shaft || connector.points, [], []), 2.5).flat();
+}
+
+function arrowSamples(connector) {
+  const h = connector.arrowHead;
+  if (!h) return [];
+  const out = [];
+  const cs = [h.tip, h.left, h.right, h.tip];
+  for (let i = 0; i < cs.length - 1; i++) {
+    for (let t = 0; t <= 1; t += 0.2) {
+      out.push({ x: cs[i].x + (cs[i + 1].x - cs[i].x) * t, y: cs[i].y + (cs[i + 1].y - cs[i].y) * t });
+    }
+  }
+  return out;
+}
+
+function haloWidth(c) {
+  // 選択・active を含む保守的な実paint幅（primary 4.4 / secondary 2.4）。
+  return c.tier === 'primary' ? 4.4 : 2.4;
+}
+
+function intersect(a, b, c, d) {
+  const d1 = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+  const d2 = (b.x - a.x) * (d.y - a.y) - (b.y - a.y) * (d.x - a.x);
+  const d3 = (d.x - c.x) * (a.y - c.y) - (d.y - c.y) * (a.x - c.x);
+  const d4 = (d.x - c.x) * (b.y - c.y) - (d.y - c.y) * (b.x - c.x);
+  return ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
+    ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0));
+}
+
+function pointSegDistance(p, a, b) {
+  const vx = b.x - a.x;
+  const vy = b.y - a.y;
+  const len2 = vx * vx + vy * vy || 1;
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * vx + (p.y - a.y) * vy) / len2));
+  return Math.hypot(p.x - a.x - t * vx, p.y - a.y - t * vy);
+}
+
+function segParallel(a, b, c, d) {
+  const l1 = Math.hypot(b.x - a.x, b.y - a.y);
+  const l2 = Math.hypot(d.x - c.x, d.y - c.y);
+  if (!l1 || !l2) return 0;
+  return Math.abs((b.x - a.x) * (d.y - c.y) - (b.y - a.y) * (d.x - c.x)) / (l1 * l2);
+}
+
+function overlapLength(a, b, c, d) {
+  const ux = b.x - a.x;
+  const uy = b.y - a.y;
+  const l = Math.hypot(ux, uy);
+  const vx = d.x - c.x;
+  const vy = d.y - c.y;
+  const l2 = Math.hypot(vx, vy);
+  if (l < 1e-9 || l2 < 1e-9) return 0;
+  if (Math.abs((ux * vy - uy * vx) / (l * l2)) > 0.01) return 0;
+  const nx = -uy / l;
+  const ny = ux / l;
+  if (Math.abs((c.x - a.x) * nx + (c.y - a.y) * ny) > 0.6) return 0;
+  if (Math.abs((d.x - a.x) * nx + (d.y - a.y) * ny) > 0.6) return 0;
+  const proj = (p) => ((p.x - a.x) * ux + (p.y - a.y) * uy) / l;
+  const t = [proj(c), proj(d)].sort((x, y) => x - y);
+  return Math.max(0, Math.min(l, t[1]) - Math.max(0, t[0]));
+}
+
+test('[fixture] 角丸枠の角付近でも端点は実際の輪郭上に乗る', () => {
+  const rect = { x: 100, y: 100, w: 136, h: 34 };
+  const points = [{ x: 60, y: 70 }, { x: 104, y: 100 }]; // 左上の角丸にかかる保存端点
+  const off = Core.endpointOffsets(3, 3, 0.75).arrow;
+  const snapped = Core.snapEndpoint(points, 1, rect, 9, off);
+  const p = snapped[1];
+  assert.equal(Core.pointInRoundRect(p, Core.inflateRoundRect(rect, 9, off + 0.05)), true);
+  assert.equal(Core.pointInRoundRect(p, Core.inflateRoundRect(rect, 9, off - 0.5)), false);
+  // 軸矩形の角をそのまま使わない（見かけのズレを作らない）
+  assert.notEqual(p.x, 104);
+});
+
+test('[fixture] 角丸に入る共有portも輪郭上で、指定した辺座標を保つ', () => {
+  const rect = { x: 100, y: 100, w: 136, h: 34 };
+  const off = Core.endpointOffsets(0, 1.2, 0.75, 'butt').cap;
+  ['L', 'R', 'T', 'B'].forEach((side) => {
+    const along = side === 'L' || side === 'R' ? 103 : 103;
+    const p = Core.portPointOnOutline(side, rect, along, 9, off);
+    assert.equal(Core.pointInRoundRect(p, Core.inflateRoundRect(rect, 9, off + 0.02)), true, side);
+    assert.equal(Core.pointInRoundRect(p, Core.inflateRoundRect(rect, 9, off - 0.5)), false, side);
+    const kept = side === 'L' || side === 'R' ? p.y : p.x;
+    assert.ok(Math.abs(kept - along) < 1e-9, side + ' の辺座標');
+  });
+});
+
+test('[fixture] 斜めの曲線でも最終線分と角丸輪郭の交点に寄せる', () => {
+  const rect = { x: 300, y: 300, w: 136, h: 34 };
+  const points = [{ x: 420, y: 420 }, { x: 360, y: 350 }, { x: 310, y: 316 }];
+  const off = Core.endpointOffsets(1.1, 3, 0.75).cap;
+  const snapped = Core.snapEndpoint(points, 2, rect, 9, off);
+  const p = snapped[2];
+  assert.equal(Core.pointInRoundRect(p, Core.inflateRoundRect(rect, 9, off + 0.05)), true);
+  assert.equal(Core.pointInRoundRect(p, Core.inflateRoundRect(rect, 9, off - 0.5)), false);
+  // 直前の点との向きは保存点列の最終線分とほぼ同じ
+  const before = Math.atan2(316 - 350, 310 - 360);
+  const after = Math.atan2(p.y - 350, p.x - 360);
+  assert.ok(Math.abs(before - after) < 0.12, '最終線分の向きを変えない');
+});
+
+test('[fixture] gap 0.75 / 1 / 1.5・butt cap・tip の数値規則が一意', () => {
+  for (const gap of [0.75, 1, 1.5]) {
+    const o = Core.endpointOffsets(3, 3, gap);
+    assert.equal(o.arrow, 1.5 + gap);
+    assert.equal(o.cap, 1.5 + gap + 1.5, 'round cap の互換計算');
+    const butt = Core.endpointOffsets(3, 3, gap, 'butt');
+    assert.equal(butt.cap, butt.arrow, 'butt は path 終点で止まる');
+    assert.equal(Core.CONNECTOR.ARROW_REF_X, 8, 'tip を path 終点に置く');
+  }
+  const meta = Core.connectorMetadata([0.75, 1, 1.5]);
+  assert.equal(meta.nodeRx, 9);
+  assert.deepEqual(meta.variants.map((v) => v.gap), [0.75, 1, 1.5]);
+  assert.equal(meta.variants[0].node.arrow, 0.6 + 0.75);
+  assert.equal(meta.variants[0].hub.arrow, 0.8 + 0.75);
+  assert.equal(meta.variants[2].class.arrow, 0.7 + 1.5);
+  assert.equal(meta.variants[0].node.cap, meta.variants[0].node.arrow);
+  assert.equal(meta.variants[0].capMode, 'butt');
+  assert.deepEqual(meta.variants[0].actualGap, { node: 0.75, hub: 0.75, class: 0.75 });
+});
+
+test('[data] 207 辺・86 反応・一般図16変換の保存値は変えない', () => {
+  let edges = 0;
+  D.reactions.forEach((r) => { edges += r.edges.length; });
+  assert.equal(edges, 207);
+  assert.equal(D.reactions.length, 86);
+  assert.equal(D.classMap.edges.length, 16);
+  D.reactions.forEach((r) => r.edges.forEach((e) => {
+    assert.ok(Array.isArray(e.points) && e.points.length >= 2);
+    assert.deepEqual(e.gaps, []);
+    assert.deepEqual(e.bridges, []);
+  }));
+});
+
+test('[short stub] sucrose→glucose は shaft を triangle 底で止め、丸棒が tip を追い越さない', () => {
+  const r = D.reactions.find((x) => x.id === 'sucrose-hydrolysis');
+  const list = Core.reactionConnectors(r, { compoundById: byId, nodeW: NODE_W, nodeH: NODE_H });
+  const glucose = list.find((c) => c.edgeId === 'glucose');
+  assert.equal(glucose.arrow, true);
+  assert.ok(glucose.arrowHead, 'triangle を別 path で持つ');
+  assert.equal(glucose.arrowHead.headLength, 7);
+  assert.ok(glucose.length > 8, 'connector 長 ' + glucose.length);
+  glucose.ends.forEach((e) => {
+    assert.ok(Math.abs((e.offset - e.nodeStroke / 2) - 0.75) <= 0.02, 'source butt / dest tip gap');
+  });
+  const g = byId.glucose;
+  const tip = glucose.points[glucose.points.length - 1];
+  const dx = Math.max(g.x - tip.x, 0, tip.x - (g.x + (g.w || NODE_W)));
+  assert.ok(dx >= 1.4 && dx <= 1.7, '矢印先端は glucose の枠外 ' + dx + 'px');
+  // shaft の終点＝triangle の底。active 4.4 の butt 端でも tip まで届かない。
+  const shaftEnd = glucose.shaft[glucose.shaft.length - 1];
+  assert.ok(Math.hypot(tip.x - shaftEnd.x, tip.y - shaftEnd.y) >= 6.9, 'triangle 長を確保');
+  const tipGapFromShaft = Math.hypot(tip.x - shaftEnd.x, tip.y - shaftEnd.y) - haloWidth(glucose) / 2;
+  assert.ok(tipGapFromShaft > 0, 'shaft 端が tip を追い越さない');
+});
+
+test('[multi] 入力の矢印を消し、出力だけ生成物向きの矢印にする', () => {
+  const r = D.reactions.find((x) => x.id === 'sucrose-hydrolysis'); // 1入力2出力
+  const list = Core.reactionConnectors(r, { compoundById: byId, nodeW: NODE_W, nodeH: NODE_H });
+  const ins = list.filter((c) => c.dir === 'in');
+  const outs = list.filter((c) => c.dir === 'out');
+  assert.equal(ins.length, 1);
+  assert.equal(outs.length, 2);
+  assert.equal(ins[0].arrow, false);
+  outs.forEach((c) => {
+    assert.equal(c.arrow, true);
+    const last = c.points[c.points.length - 1];
+    const target = byId[c.edgeId];
+    const first = c.points[0];
+    const dLast = Math.hypot(last.x - (target.x + (target.w || NODE_W) / 2), last.y - (target.y + (target.h || NODE_H) / 2));
+    const dFirst = Math.hypot(first.x - (target.x + (target.w || NODE_W) / 2), first.y - (target.y + (target.h || NODE_H) / 2));
+    assert.ok(dLast < dFirst, '矢印側が生成物に近い: ' + c.edgeId);
+  });
+  // 全対全（入力×出力の複製）を作らない
+  assert.equal(list.length, 3);
+});
+
+test('[reactant only] 生成物が無い反応は入力線だけを残し、矢印を付けない', () => {
+  const r = D.reactions.find((x) => x.id === 'protein-hydrolysis');
+  assert.ok(r, 'protein-hydrolysis');
+  const list = Core.reactionConnectors(r, { compoundById: byId, nodeW: NODE_W, nodeH: NODE_H });
+  assert.equal(list.length, r.edges.filter((e) => e.dir === 'in').length);
+  assert.equal(list.every((c) => c.arrow === false), true);
+});
+
+test('[1in1out] 同一 tier はハブ中心を通る1本の連続 path にする', () => {
+  const r = D.reactions.find((x) => {
+    const ins = x.edges.filter((e) => e.dir === 'in');
+    const outs = x.edges.filter((e) => e.dir === 'out');
+    return ins.length === 1 && outs.length === 1 && ins[0].tier === outs[0].tier;
+  });
+  const list = Core.reactionConnectors(r, { compoundById: byId, nodeW: NODE_W, nodeH: NODE_H });
+  assert.equal(list.length, 1);
+  const c = list[0];
+  assert.equal(c.edgeKeys.length, 2);
+  const hubPoint = c.points.find((p) => Math.hypot(p.x - r.x, p.y - r.y) < 0.01);
+  assert.ok(hubPoint, 'ハブ中心を通る（半径10の穴を作らない）');
+  const d = Core.routePath(c.points, [], []);
+  assert.equal((d.match(/M/g) || []).length, 1, '連続した1本');
+});
+
+test('[selection] 通常・選択・プレビューで同じ connector を使う', () => {
+  const js = require('node:fs').readFileSync(path.join(APP, 'app.js'), 'utf8');
+  assert.ok(js.includes('buildConnectors()'));
+  assert.ok(js.includes('reactionConnectors[r.id] || []'));
+  assert.ok(js.includes('通常表示と同じ connector を使う'));
+  assert.ok(!/showReactionStroke[\s\S]{0,400}e\.points\.slice\(\)\.reverse\(\)/.test(js),
+    '選択時だけ保存点列から別 geometry を作らない');
+});
+
+test('[actual] 描画 path を sampling して主系列どうしの交差 0・node/label 貫通 0・共有区間 0', () => {
+  const all = connectorsForAll();
+  const primary = all.filter((c) => c.tier === 'primary');
+  // PP（主系列どうし）交差。同一反応内は反応ハブの合流として免除する。
+  let pp = 0;
+  for (let i = 0; i < primary.length; i++) {
+    for (let j = i + 1; j < primary.length; j++) {
+      const A = primary[i];
+      const B = primary[j];
+      if (A.rid === B.rid) continue;
+      let hit = false;
+      for (const x of segments(samples(A))) {
+        for (const y of segments(samples(B))) {
+          if (intersect(x[0], x[1], y[0], y[1])) { hit = true; break; }
+        }
+        if (hit) break;
+      }
+      if (hit) pp++;
+    }
+  }
+  assert.equal(pp, 0, '主系列-主系列の交差');
+
+  // 実ノード境界 stroke の外周から、全node/hubで同じ gap 0.75。
+  all.forEach((c) => c.ends.forEach((e) => {
+    const actual = e.offset - e.nodeStroke / 2;
+    assert.ok(Math.abs(actual - Core.CONNECTOR.EDGE_GAP) <= 0.02,
+      c.rid + ' ' + e.compoundId + ' gap=' + actual);
+  }));
+
+  // node 貫通: centerline だけでなく実 stroke halo と arrowhead 外形も見る。
+  const nodeHits = [];
+  for (const c of all) {
+    const margin = haloWidth(c) / 2;
+    const probe = samples(c).concat(arrowSamples(c));
+    for (const cp of D.compounds) {
+      if (c.compounds.includes(cp.id)) continue;
+      const x = cp.x - margin;
+      const y = cp.y - margin;
+      const w = (cp.w || NODE_W) + margin * 2;
+      const h = (cp.h || NODE_H) + margin * 2;
+      for (const s of probe) {
+        if (s.x > x && s.x < x + w && s.y > y && s.y < y + h) {
+          nodeHits.push([c.rid, c.edgeId, cp.id]);
+          break;
+        }
+      }
+    }
+  }
+  assert.deepEqual(nodeHits.slice(0, 5), [], 'node 貫通（halo+arrowhead）');
+
+  // 反応ラベルの箱の貫通（halo を含む。自分以外の反応ラベル）
+  const labelHits = [];
+  for (const c of all) {
+    const margin = haloWidth(c) / 2;
+    const probe = samples(c).concat(arrowSamples(c));
+    for (const r of D.reactions) {
+      if (!r.label || r.id === c.rid) continue;
+      const b = r.label.box;
+      for (const s of probe) {
+        if (s.x > b.x - margin && s.x < b.x + b.w + margin &&
+          s.y > b.y - margin && s.y < b.y + b.h + margin) {
+          labelHits.push([c.rid, c.edgeId, r.id]);
+          break;
+        }
+      }
+    }
+  }
+  assert.deepEqual(labelHits.slice(0, 5), [], 'label 貫通（halo）');
+
+  // 別反応の近接平行の paint 重なり（centerline 距離 < 実幅の和/2）。
+  // 同一物質の近接port（PORT_CLUSTER 内）は、port spacing で意図的に分けた区間だけ免除する。
+  function pairOverlap(A, B) {
+    const limit = (haloWidth(A.c) + haloWidth(B.c)) / 2 - 0.05;
+    let best = { near: Infinity, point: null };
+    for (const x of segments(A.pts)) {
+      for (const y of segments(B.pts)) {
+        if (segParallel(x[0], x[1], y[0], y[1]) > 0.08) continue;
+        const candidates = [
+          [pointSegDistance(x[0], y[0], y[1]), x[0]],
+          [pointSegDistance(x[1], y[0], y[1]), x[1]],
+          [pointSegDistance(y[0], x[0], x[1]), y[0]],
+          [pointSegDistance(y[1], x[0], x[1]), y[1]]
+        ];
+        for (const cand of candidates) {
+          if (cand[0] < best.near) best = { near: cand[0], point: cand[1] };
+        }
+      }
+    }
+    return { near: best.near, point: best.point, limit };
+  }
+  function sharedCompounds(A, B) {
+    return A.c.compounds.filter((id) => B.c.compounds.indexOf(id) !== -1);
+  }
+  function nearCompoundPort(point, ids) {
+    if (!point) return false;
+    return ids.some((id) => {
+      const cp = byId[id];
+      if (!cp) return false;
+      const dx = Math.max(cp.x - point.x, 0, point.x - (cp.x + (cp.w || NODE_W)));
+      const dy = Math.max(cp.y - point.y, 0, point.y - (cp.y + (cp.h || NODE_H)));
+      return Math.hypot(dx, dy) <= CONNECTOR_PORT_EXEMPT;
+    });
+  }
+  const CONNECTOR_PORT_EXEMPT = 18;
+  const shared = [];
+  const sampled = all.map((c) => ({ c, pts: samples(c).concat(arrowSamples(c)) }));
+  for (let i = 0; i < sampled.length; i++) {
+    for (let j = i + 1; j < sampled.length; j++) {
+      const A = sampled[i];
+      const B = sampled[j];
+      if (A.c.rid === B.c.rid) continue;
+      const result = pairOverlap(A, B);
+      if (result.near >= result.limit) continue;
+      const common = sharedCompounds(A, B);
+      if (common.length && nearCompoundPort(result.point, common)) continue;
+      shared.push([A.c.rid, A.c.edgeId, B.c.rid, B.c.edgeId, result.near, result.limit]);
+    }
+  }
+  assert.deepEqual(shared.slice(0, 5), [], '別反応の近接paint重なり');
+
+  // 受入で実ラスタ重なりが確認された2組は、免除なしで重なり0。
+  const pairById = (rid) => all.filter((c) => c.rid === rid).map((c) => ({ c, pts: samples(c).concat(arrowSamples(c)) }));
+  [
+    ['acetic-acid-glycerol-esterification', 'tripalmitin-saponification'],
+    ['glycerol-oleic-esterification', 'glycerol-stearic-esterification']
+  ].forEach((pair) => {
+    const ra = pairById(pair[0]);
+    const rb = pairById(pair[1]);
+    ra.forEach((A) => rb.forEach((B) => {
+      const result = pairOverlap(A, B);
+      assert.ok(result.near >= result.limit - 1e-9, pair.join(' x ') + ' near=' + result.near + ' limit=' + result.limit);
+    }));
+  });
+
+  // 共有portの代表2組は PORT_SPACING 以上離す。
+  const portDist = (ridA, ridB) => {
+    const a = all.find((c) => c.rid === ridA && c.compounds.includes('glycerol'));
+    const b = all.find((c) => c.rid === ridB && c.compounds.includes('glycerol'));
+    const pa = a.points[a.dir === 'in' ? 0 : a.points.length - 1];
+    const pb = b.points[b.dir === 'in' ? 0 : b.points.length - 1];
+    return Math.hypot(pa.x - pb.x, pa.y - pb.y);
+  };
+  assert.ok(portDist('acetic-acid-glycerol-esterification', 'tripalmitin-saponification') >= Core.CONNECTOR.PORT_SPACING - 0.1);
+  assert.ok(portDist('glycerol-oleic-esterification', 'glycerol-stearic-esterification') >= Core.CONNECTOR.PORT_SPACING - 0.1);
+});
+
+test('[classmap] 一般図16変換も同じ端点規則で、配置は変えない', () => {
+  const nodes = {};
+  D.classMap.nodes.forEach((n) => { nodes[n.id] = n; });
+  const off = {
+    arrow: Core.endpointOffsets(0, Core.CONNECTOR.CLASS_STROKE, 0.75, 'butt').arrow,
+    cap: Core.endpointOffsets(0, Core.CONNECTOR.CLASS_STROKE, 0.75, 'butt').cap
+  };
+  assert.ok(Math.abs((off.cap - Core.CONNECTOR.CLASS_STROKE / 2) - Core.CONNECTOR.EDGE_GAP) <= 0.02);
+  assert.ok(Math.abs((off.arrow - Core.CONNECTOR.CLASS_STROKE / 2) - Core.CONNECTOR.EDGE_GAP) <= 0.02);
+  D.classMap.edges.forEach((e) => {
+    const c = Core.classConnector(e, { nodeById: nodes });
+    assert.ok(c.points.length >= 2);
+    assert.equal(c.arrow, true);
+    assert.ok(c.arrowHead && c.shaft, '一般図も shaft と triangle を分離');
+    assert.ok(c.arrowHead.headLength >= 4);
+    const from = nodes[e.from];
+    const to = nodes[e.to];
+    const a = c.points[0];
+    const b = c.points[c.points.length - 1];
+    assert.equal(Core.pointInRoundRect(a, Core.inflateRoundRect(from, 9, off.cap + 0.05)), true);
+    assert.equal(Core.pointInRoundRect(a, Core.inflateRoundRect(from, 9, off.cap - 0.5)), false);
+    assert.equal(Core.pointInRoundRect(b, Core.inflateRoundRect(to, 9, off.arrow + 0.05)), true);
+    assert.equal(Core.pointInRoundRect(b, Core.inflateRoundRect(to, 9, off.arrow - 0.5)), false);
+    // 元の点列の折れ線（配置）は維持し、両端だけを寄せる
+    assert.equal(c.points.length, e.points.length);
+    assert.deepEqual(
+      c.points.slice(1, -1).map((p) => [p.x, p.y]),
+      e.points.slice(1, -1).map((p) => [p[0], p[1]])
+    );
+  });
+});
+
+test('[ids] 全427物質IDで選択→highlight往復。カンマ入りIDも split しない', () => {
+  const all = connectorsForAll();
+  let matched = 0;
+  D.compounds.forEach((c) => {
+    const expected = all.filter((conn) => conn.compounds.includes(c.id));
+    const actual = all.filter((conn) => Core.connectorMatchesCompound(conn, c.id));
+    assert.equal(actual.length, expected.length, c.id + ' の一致数');
+    // DOM 属性を JSON で往復しても ID を厳密に保つ
+    const raw = JSON.stringify(c.id === 'ethene' ? ['ethene', '1,2-dibromoethane'] : [c.id]);
+    assert.deepEqual(Core.compoundList(raw, null), JSON.parse(raw));
+    if (c.incoming + c.outgoing > 0) {
+      assert.ok(actual.length > 0, c.id + ' は接続辺を持つ');
+      matched++;
+    } else {
+      assert.equal(actual.length, 0, c.id + ' は孤立');
+    }
+  });
+  assert.ok(matched > 0);
+  const comma = all.filter((conn) => Core.connectorMatchesCompound(conn, '1,2-dibromoethane'));
+  assert.ok(comma.length > 0, 'カンマ入りIDでも active edge が見つかる');
+  // data-compounds の実文字列（JSON配列）を split(',') すると壊れることの回帰
+  const serialized = JSON.stringify(comma[0].compounds);
+  assert.equal(serialized.split(',').length > 2, true);
+  assert.deepEqual(Core.compoundList(serialized, comma[0].compounds[0]), comma[0].compounds);
+});
+
+test('[arrow] 短い最終線分でも triangle の向き・長さを確保し、shaft は底で止まる', () => {
+  const c = Core.attachArrow({
+    points: [{ x: 0, y: 0 }, { x: 8, y: 0 }],
+    arrow: true,
+    tier: 'primary'
+  });
+  assert.equal(c.arrowHead.headLength, 6.5, '短い場合は full-1.5 に縮める');
+  assert.ok(c.arrowHead.headLength >= 4);
+  assert.ok(Math.abs(c.arrowHead.angle) < 1e-9, '最終線分の tangent を使う');
+  assert.deepEqual(c.shaft[c.shaft.length - 1], c.arrowHead.base);
+  assert.ok(c.shaft[c.shaft.length - 1].x < c.points[c.points.length - 1].x);
+});
+
+test('[static] 反応の丸は DOM を残したまま非表示、説明文は矢印基準に直す', () => {
+  const fs = require('node:fs');
+  const css = fs.readFileSync(path.join(APP, 'app.css'), 'utf8');
+  const html = fs.readFileSync(path.join(APP, 'index.html'), 'utf8');
+  assert.match(css, /\.rp-reaction__dot\s*\{[^}]*display:\s*none/);
+  assert.ok(css.includes('.rp-reaction__hit'));
+  assert.ok(html.includes('生成物へ向かう矢印'));
+  assert.equal(html.includes('反応の丸から出る線'), false);
+});

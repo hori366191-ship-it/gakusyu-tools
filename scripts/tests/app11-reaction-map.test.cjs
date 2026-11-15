@@ -926,7 +926,7 @@ test('[static] 選択した物質・反応の辺を強調する（読解補助�
   assert.ok(js.includes('viewSize.w, viewSize.h, activeRegion)'), '現在位置に明示選択を渡す');
   assert.ok(css.includes('.rp-node__band'), 'ノードの分野色帯');
   assert.ok(css.includes('.rp-edges-active'), '上層レイヤ');
-  assert.ok(js.includes('Core.routePath(points, e.gaps, e.bridges)'), '保存済み橋を使う');
+  assert.ok(js.includes('Core.routePath(c.points, c.gaps, c.bridges)'), '保存済み橋を connector 経由で使う');
 });
 
 test('[priority] 公開86反応に tier があり、主要50・補助36を無断で減らさない', () => {
@@ -1017,8 +1017,8 @@ test('[static] 主要は太い実線・補助は細い点線で、LOD が主要�
   assert.ok(js.includes('rp-reaction--'));
   assert.ok(js.includes('nodeW(c)') && js.includes('nodeH(c)'), '物質ごとの寸法を使う');
   assert.ok(js.includes('主要経路（太い実線）') && js.includes('補助経路（細い点線）'));
-  assert.ok(js.includes('rp-arrow-primary') && js.includes('rp-arrow-secondary'), '矢印マーカー');
-  assert.ok(js.includes("'marker-end': 'url(#rp-arrow-'"), '矢印を線端に付ける');
+  assert.ok(js.includes('rp-arrowhead') && js.includes('Core.arrowHeadPath'), '矢印triangleをshaftと分離');
+  assert.ok(js.includes('c.shaft || c.points'), 'shaftはtriangle底でtrim');
   assert.ok(js.includes('rp-overlay__reaction--secondary'), '補助ラベルの高倍率オーバーレイ');
 });
 

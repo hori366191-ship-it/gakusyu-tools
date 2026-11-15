@@ -16,6 +16,35 @@
   var SCALE_MAX = 3;
   var LABEL_HIDE_LEVEL = 0;
 
+  /*
+   * 接続（connector）の描画規則。データの保存点列は動かさず、描画時だけ端点を
+   * 実際の角丸枠・stroke・arrow tip に合わせる。通常・選択・プレビュー・一般図で同じ値を使う。
+   *
+   * - 反応ハブの半径10の点は描画では使わず、内部モデルとしてハブ中心で連続させる。
+   * - 物質側の端点は rx=9 の角丸輪郭から EDGE_GAP 離す。
+   * - 矢印は marker-end ではなく、shaft と分離した triangle を別 path で描く。
+   *   shaft は triangle の底まで trim するため、太い stroke の端が tip を追い越さない。
+   * - 線端は butt（丸 cap の飛び出しなし）。source の実 gap は stroke 幅に依存しない。
+   * - tip の基準 stroke は通常表示の実測（node 1.2/1.6, class 1.4）に合わせ、
+   *   node 選択時（3 / 2.8）でも tip が枠に食い込まない値にする。
+   */
+  var CONNECTOR = {
+    NODE_RX: 9,
+    // ノード境界の stroke は全 state で一定。選択/フォーカスは色と halo で示す。
+    // したがって gap は「実ストローク外周から」で全 state 同じ値になる。
+    NODE_STROKE: 1.2,
+    HUB_STROKE: 1.6,
+    CLASS_STROKE: 1.4,
+    EDGE_GAP: 0.75,
+    // refX=8 は旧markerの名残。triangle tip を path 終点に置く考え方は維持する。
+    ARROW_REF_X: 8,
+    ARROW_SIZE: { primary: 7, secondary: 5.5, class: 6 },
+    TIER_STROKE: { primary: 3, secondary: 1.1, class: 1.6 },
+    CAP_STROKE: { primary: 3, secondary: 1.1, class: 1.6 },
+    PORT_SPACING: 7, // 別反応の近接port間隔（最大stroke4.4 + gap + 余裕）
+    PORT_CLUSTER: 12 // この距離以内のportを同じclusterとして分離
+  };
+
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
   }
@@ -333,6 +362,527 @@
     return Math.round(n * 10) / 10;
   }
 
+  /* ---------------- connector geometry (pure) ---------------- */
+
+  function inflateRoundRect(rect, rx, offset) {
+    var off = Math.max(0, offset || 0);
+    var r = Math.max(0, rx || 0) + off;
+    return {
+      x: rect.x - off,
+      y: rect.y - off,
+      w: rect.w + off * 2,
+      h: rect.h + off * 2,
+      rx: Math.min(r, Math.min(rect.w, rect.h) / 2 + off)
+    };
+  }
+
+  // 角丸矩形の内側判定。境界は含む。
+  function pointInRoundRect(p, r) {
+    var rx = Math.max(0, Math.min(r.rx || 0, Math.min(r.w, r.h) / 2));
+    var x = r.x;
+    var y = r.y;
+    var w = r.w;
+    var h = r.h;
+    if (p.x < x || p.x > x + w || p.y < y || p.y > y + h) return false;
+    if (rx <= 0) return true;
+    var cx = p.x < x + rx ? x + rx : p.x > x + w - rx ? x + w - rx : p.x;
+    var cy = p.y < y + rx ? y + rx : p.y > y + h - rx ? y + h - rx : p.y;
+    if (cx === p.x && cy === p.y) return true;
+    return Math.hypot(p.x - cx, p.y - cy) <= rx + 1e-9;
+  }
+
+  // 枠の外側から枠の内側へ向かう線分が、角丸の外周と交わる点を返す。
+  // 端点は保存点列（軸矩形の辺上）なので、同じ向きに数 px だけ延ばして内側点を作る。
+  function roundRectCrossing(outside, borderPoint, rect, rx, offset) {
+    var inflated = inflateRoundRect(rect, rx, offset);
+    var dx = borderPoint.x - outside.x;
+    var dy = borderPoint.y - outside.y;
+    var len = Math.hypot(dx, dy);
+    if (!(len > 1e-9)) return borderPoint;
+    var ux = dx / len;
+    var uy = dy / len;
+    var inner = { x: borderPoint.x + ux * 6, y: borderPoint.y + uy * 6 };
+    if (!pointInRoundRect(inner, inflated)) {
+      // 角の外側を通る場合の保険。枠中心へ向かう内側点で必ず内側を作る。
+      var c = { x: rect.x + rect.w / 2, y: rect.y + rect.h / 2 };
+      var cdx = c.x - borderPoint.x;
+      var cdy = c.y - borderPoint.y;
+      var clen = Math.hypot(cdx, cdy) || 1;
+      inner = { x: borderPoint.x + (cdx / clen) * Math.min(6, rect.h / 2), y: borderPoint.y + (cdy / clen) * Math.min(6, rect.h / 2) };
+    }
+    var lo = 0;
+    var hi = 1;
+    var a = outside;
+    for (var i = 0; i < 32; i++) {
+      var t = (lo + hi) / 2;
+      var p = { x: a.x + (inner.x - a.x) * t, y: a.y + (inner.y - a.y) * t };
+      if (pointInRoundRect(p, inflated)) hi = t;
+      else lo = t;
+    }
+    return { x: a.x + (inner.x - a.x) * hi, y: a.y + (inner.y - a.y) * hi };
+  }
+
+  // 端点（index 0 または末尾）を、相手側の点から見た角丸枠の外周へ寄せる。
+  function snapEndpoint(points, index, rect, rx, offset) {
+    if (!rect || points.length < 2) return points;
+    var i = index === 0 ? 0 : points.length - 1;
+    var neighbor = index === 0 ? points[1] : points[points.length - 2];
+    var border = points[i];
+    var hit = roundRectCrossing(neighbor, border, rect, rx, offset);
+    var out = points.slice();
+    out[i] = hit;
+    return out;
+  }
+
+  function edgeLength(points) {
+    var total = 0;
+    for (var i = 0; i < points.length - 1; i++) {
+      total += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+    }
+    return total;
+  }
+
+  function toPoint(p) {
+    return Array.isArray(p) ? { x: p[0], y: p[1] } : { x: p.x, y: p.y };
+  }
+
+  function normalizePoints(points) {
+    return (points || []).map(toPoint);
+  }
+
+  function nodeRect(compound, nodeW, nodeH, stroke) {
+    if (!compound) return null;
+    return {
+      x: compound.x,
+      y: compound.y,
+      w: compound.w || nodeW,
+      h: compound.h || nodeH,
+      stroke: typeof stroke === 'number' ? stroke : (compound.hub ? CONNECTOR.HUB_STROKE : CONNECTOR.NODE_STROKE)
+    };
+  }
+
+  /*
+   * gap は「枠の外側から矢印tip/線端まで」の距離。
+   * capMode='butt' では線端が path 終点で止まる（round cap の stroke/2 はみ出しなし）。
+   */
+  function endpointOffsets(strokeWidth, nodeStrokeRef, gap, capMode) {
+    var g = typeof gap === 'number' ? gap : CONNECTOR.EDGE_GAP;
+    var ref = typeof nodeStrokeRef === 'number' ? nodeStrokeRef : CONNECTOR.NODE_STROKE;
+    var maxHalf = ref / 2;
+    var roundCap = capMode !== 'butt';
+    var arrow = maxHalf + g;
+    return {
+      arrow: arrow,
+      cap: arrow + (roundCap ? (strokeWidth || 0) / 2 : 0),
+      tipFromOutline: arrow,
+      capEdgeFromOutline: maxHalf + g
+    };
+  }
+
+  // 矢印tipの直前の線分から、triangle と trim した shaft を作る。
+  function attachArrow(connector) {
+    var pts = connector.points || [];
+    if (!connector.arrow || pts.length < 2) {
+      connector.shaft = pts;
+      connector.arrowHead = null;
+      return connector;
+    }
+    var tip = pts[pts.length - 1];
+    var prev = pts[pts.length - 2];
+    var dx = tip.x - prev.x;
+    var dy = tip.y - prev.y;
+    var seg = Math.hypot(dx, dy);
+    if (!(seg > 1e-9)) {
+      connector.shaft = pts;
+      connector.arrowHead = null;
+      return connector;
+    }
+    var ux = dx / seg;
+    var uy = dy / seg;
+    var tier = connector.tier || 'primary';
+    var full = edgeLength(pts);
+    var nominal = CONNECTOR.ARROW_SIZE[tier] || 7;
+    // 線が短い場合も head を潰さず、かつ shaft を残す。反応ごとの個別補正はしない。
+    var headLength = Math.min(nominal, Math.max(4, full - 1.5));
+    if (!(headLength > 0)) headLength = Math.max(1, full * 0.5);
+    var half = headLength / 2;
+    var base = { x: tip.x - ux * headLength, y: tip.y - uy * headLength };
+    var px = -uy;
+    var py = ux;
+    connector.shaft = pts.slice();
+    connector.shaft[connector.shaft.length - 1] = base;
+    connector.arrowHead = {
+      tip: { x: tip.x, y: tip.y },
+      base: base,
+      left: { x: base.x + px * half, y: base.y + py * half },
+      right: { x: base.x - px * half, y: base.y - py * half },
+      headLength: headLength,
+      halfWidth: half,
+      angle: Math.atan2(uy, ux)
+    };
+    connector.headLength = headLength;
+    return connector;
+  }
+
+  function arrowHeadPath(head) {
+    if (!head) return '';
+    return 'M' + round(head.tip.x) + ' ' + round(head.tip.y) +
+      'L' + round(head.left.x) + ' ' + round(head.left.y) +
+      'L' + round(head.right.x) + ' ' + round(head.right.y) + 'Z';
+  }
+
+  // 画面差の検証用 metadata。gap 候補ごとに矢印先端・cap 端の枠からの距離を出す。
+  function connectorMetadata(gaps) {
+    var list = (gaps && gaps.length ? gaps : [CONNECTOR.EDGE_GAP, 1, 1.5]).map(function (g) {
+      return {
+        gap: g,
+        node: endpointOffsets(0, CONNECTOR.NODE_STROKE, g, 'butt'),
+        hub: endpointOffsets(0, CONNECTOR.HUB_STROKE, g, 'butt'),
+        class: endpointOffsets(0, CONNECTOR.CLASS_STROKE, g, 'butt'),
+        capMode: 'butt',
+        // 外周 stroke からの実 gap。geometry の値そのもの。
+        actualGap: {
+          node: g,
+          hub: g,
+          class: g
+        }
+      };
+    });
+    return {
+      nodeRx: CONNECTOR.NODE_RX,
+      nodeStroke: CONNECTOR.NODE_STROKE,
+      hubStroke: CONNECTOR.HUB_STROKE,
+      classStroke: CONNECTOR.CLASS_STROKE,
+      arrowRefX: CONNECTOR.ARROW_REF_X,
+      edgeGap: CONNECTOR.EDGE_GAP,
+      portSpacing: CONNECTOR.PORT_SPACING,
+      arrowSize: CONNECTOR.ARROW_SIZE,
+      variants: list
+    };
+  }
+
+  /*
+   * 反応1件の描画用 connector を作る。
+   * 1入力1出力で同じ tier のときは、ハブ中心を経由する1本の連続 path にする。
+   * それ以外はハブ中心で合流する分枝（入力は矢印なし、出力だけ矢印）にする。
+   */
+  function reactionConnectors(reaction, opts) {
+    var o = opts || {};
+    var byId = o.compoundById || {};
+    var nw = o.nodeW || 136;
+    var nh = o.nodeH || 34;
+    var rx = typeof o.rx === 'number' ? o.rx : CONNECTOR.NODE_RX;
+    var gap = typeof o.gap === 'number' ? o.gap : CONNECTOR.EDGE_GAP;
+    var hub = { x: reaction.x, y: reaction.y };
+    var ins = [];
+    var outs = [];
+    (reaction.edges || []).forEach(function (e) {
+      if (e.dir === 'in') ins.push(e);
+      else outs.push(e);
+    });
+
+    function prepare(e) {
+      var pts = normalizePoints(e.points);
+      if (pts.length < 2) return null;
+      // 保存点列は常に物質→ハブ。描画は入力=物質→ハブ、出力=ハブ→物質。
+      if (e.dir !== 'in') pts.reverse();
+      if (e.dir === 'in') pts[pts.length - 1] = { x: hub.x, y: hub.y };
+      else pts[0] = { x: hub.x, y: hub.y };
+      return pts;
+    }
+
+    function snapFor(pts, e, arrow) {
+      var rect = nodeRect(byId[e.id], nw, nh);
+      var o = endpointOffsets(0, rect.stroke, gap, 'butt');
+      var off = arrow ? o.arrow : o.cap;
+      var index = e.dir === 'in' ? 0 : pts.length - 1;
+      return { points: snapEndpoint(pts, index, rect, rx, off), offset: off, index: index, rect: rect };
+    }
+
+    function endInfo(edgeId, index, border, rect, offset) {
+      return {
+        compoundId: edgeId,
+        index: index,
+        border: { x: border.x, y: border.y },
+        rect: rect,
+        nodeStroke: rect.stroke,
+        offset: offset
+      };
+    }
+
+    var tierMatch = ins.length === 1 && outs.length === 1 && (ins[0].tier === outs[0].tier);
+    if (tierMatch) {
+      var a = prepare(ins[0]);
+      var b = prepare(outs[0]);
+      if (a && b) {
+        var joined = a.concat(b.slice(1)); // ハブ中心の重複を除く
+        var tier = ins[0].tier === 'primary' ? 'primary' : 'secondary';
+        var rectIn = nodeRect(byId[ins[0].id], nw, nh);
+        var rectOut = nodeRect(byId[outs[0].id], nw, nh);
+        var offs = {
+          arrow: endpointOffsets(0, rectOut.stroke, gap, 'butt').arrow,
+          cap: endpointOffsets(0, rectIn.stroke, gap, 'butt').cap
+        };
+        var borderIn = joined[0];
+        var borderOut = joined[joined.length - 1];
+        var p0 = snapEndpoint(joined, 0, rectIn, rx, offs.cap);
+        var p1 = snapEndpoint(p0, p0.length - 1, rectOut, rx, offs.arrow);
+        var merged = {
+          points: p1,
+          ends: [
+            endInfo(ins[0].id, 0, borderIn, rectIn, offs.cap),
+            endInfo(outs[0].id, p1.length - 1, borderOut, rectOut, offs.arrow)
+          ],
+          tier: tier,
+          arrow: true,
+          dir: 'out',
+          edgeId: outs[0].id,
+          edgeKeys: [reaction.id + '|in|' + ins[0].id, reaction.id + '|out|' + outs[0].id],
+          compounds: [ins[0].id, outs[0].id],
+          gaps: (ins[0].gaps || []).concat(outs[0].gaps || []),
+          bridges: (ins[0].bridges || []).concat(outs[0].bridges || []),
+          length: edgeLength(p1)
+        };
+        attachArrow(merged);
+        return [merged];
+      }
+    }
+
+    var list = [];
+    ins.forEach(function (e) {
+      var pts = prepare(e);
+      if (!pts) return;
+      var snapped = snapFor(pts, e, false);
+      list.push({
+        points: snapped.points,
+        ends: [endInfo(e.id, snapped.index, pts[snapped.index], snapped.rect, snapped.offset)],
+        tier: e.tier === 'primary' ? 'primary' : 'secondary',
+        arrow: false,
+        dir: 'in',
+        edgeId: e.id,
+        edgeKeys: [reaction.id + '|in|' + e.id],
+        compounds: [e.id],
+        gaps: e.gaps || [],
+        bridges: e.bridges || [],
+        length: edgeLength(snapped.points)
+      });
+    });
+    outs.forEach(function (e) {
+      var pts = prepare(e);
+      if (!pts) return;
+      var snapped = snapFor(pts, e, true);
+      list.push({
+        points: snapped.points,
+        ends: [endInfo(e.id, snapped.index, pts[snapped.index], snapped.rect, snapped.offset)],
+        tier: e.tier === 'primary' ? 'primary' : 'secondary',
+        arrow: true,
+        dir: 'out',
+        edgeId: e.id,
+        edgeKeys: [reaction.id + '|out|' + e.id],
+        compounds: [e.id],
+        gaps: e.gaps || [],
+        bridges: e.bridges || [],
+        length: edgeLength(snapped.points)
+      });
+    });
+    list.forEach(attachArrow);
+    return list;
+  }
+
+  // 一般図の変換1本。from 側は cap、to 側は矢印の先端を角丸枠に合わせる。
+  function classConnector(edge, opts) {
+    var o = opts || {};
+    var byId = o.nodeById || {};
+    var rx = typeof o.rx === 'number' ? o.rx : CONNECTOR.NODE_RX;
+    var gap = typeof o.gap === 'number' ? o.gap : CONNECTOR.EDGE_GAP;
+    var pts = normalizePoints(edge.points);
+    if (pts.length < 2) return { points: pts, arrow: true, length: 0 };
+    var from = byId[edge.from];
+    var to = byId[edge.to];
+    var rectFrom = nodeRect(from, 150, 40, CONNECTOR.CLASS_STROKE);
+    var rectTo = nodeRect(to, 150, 40, CONNECTOR.CLASS_STROKE);
+    var offs = {
+      arrow: endpointOffsets(0, rectTo.stroke, gap, 'butt').arrow,
+      cap: endpointOffsets(0, rectFrom.stroke, gap, 'butt').cap
+    };
+    var a = snapEndpoint(pts, 0, rectFrom, rx, offs.cap);
+    var b = snapEndpoint(a, a.length - 1, rectTo, rx, offs.arrow);
+    return attachArrow({ points: b, arrow: true, tier: 'class', length: edgeLength(b) });
+  }
+
+  function shiftBorderAlongSide(border, rect, delta, rx) {
+    var eps = 0.6;
+    var r = Math.max(0, rx || 0);
+    if (Math.abs(border.x - rect.x) <= eps || Math.abs(border.x - (rect.x + rect.w)) <= eps) {
+      return { x: border.x, y: clamp(border.y + delta, rect.y + r, rect.y + rect.h - r) };
+    }
+    return { x: clamp(border.x + delta, rect.x + r, rect.x + rect.w - r), y: border.y };
+  }
+
+  // 膨張した角丸輪郭上の、指定した辺座標に対応する点。
+  // 角丸に入る位置でも半径方向へ正しく置き、同じ y へ潰れないようにする。
+  function portPointOnOutline(sideId, rect, along, rx, offset) {
+    var r = Math.max(0, rx || 0);
+    var off = Math.max(0, offset || 0);
+    var radius = r + off;
+    if (sideId === 'L' || sideId === 'R') {
+      var y = clamp(along, rect.y, rect.y + rect.h);
+      var cx = sideId === 'L' ? rect.x + r : rect.x + rect.w - r;
+      var dx;
+      if (y <= rect.y + r) {
+        var dt = rect.y + r - y;
+        dx = Math.sqrt(Math.max(0, radius * radius - dt * dt));
+      } else if (y >= rect.y + rect.h - r) {
+        var db = y - (rect.y + rect.h - r);
+        dx = Math.sqrt(Math.max(0, radius * radius - db * db));
+      } else {
+        dx = radius; // 直線部分
+      }
+      return { x: sideId === 'L' ? cx - dx : cx + dx, y: y };
+    }
+    var x = clamp(along, rect.x, rect.x + rect.w);
+    var dy;
+    if (x <= rect.x + r) {
+      var dl = rect.x + r - x;
+      dy = Math.sqrt(Math.max(0, radius * radius - dl * dl));
+    } else if (x >= rect.x + rect.w - r) {
+      var dr = x - (rect.x + rect.w - r);
+      dy = Math.sqrt(Math.max(0, radius * radius - dr * dr));
+    } else {
+      dy = radius;
+    }
+    var cy = sideId === 'T' ? rect.y + r : rect.y + rect.h - r;
+    return { x: x, y: sideId === 'T' ? cy - dy : cy + dy };
+  }
+
+  function portSide(border, rect) {
+    var eps = 0.6;
+    if (Math.abs(border.x - rect.x) <= eps) return { id: 'L', along: border.y };
+    if (Math.abs(border.x - (rect.x + rect.w)) <= eps) return { id: 'R', along: border.y };
+    if (Math.abs(border.y - rect.y) <= eps) return { id: 'T', along: border.x };
+    return { id: 'B', along: border.x };
+  }
+
+  /*
+   * 同じ物質の近接portに複数の反応線が集まると、向きが揃った区間が重なって
+   * 1本に見えることがある。保存点列は変えず、描画端点だけを枠の辺に沿って
+   * PORT_SPACING 間隔に分ける。同一反応内の合流（反応ハブ）は対象外。
+   */
+  function separateSharedPorts(connectors, separation) {
+    var spacing = typeof separation === 'number' ? separation : CONNECTOR.PORT_SPACING;
+    var groups = {};
+    var order = [];
+    (connectors || []).forEach(function (c) {
+      (c.ends || []).forEach(function (end) {
+        var side = portSide(end.border, end.rect);
+        var key = end.compoundId + '@' + side.id;
+        if (!groups[key]) {
+          groups[key] = [];
+          order.push(key);
+        }
+        var neighbor = end.index === 0 ? c.points[1] : c.points[c.points.length - 2];
+        var tangent = neighbor
+          ? (side.id === 'L' || side.id === 'R' ? neighbor.y : neighbor.x)
+          : side.along;
+        groups[key].push({ connector: c, end: end, along: side.along, sideId: side.id, tangent: tangent });
+      });
+    });
+    order.forEach(function (key) {
+      var group = groups[key].filter(function (item) { return item.end.rect; });
+      if (group.length < 2) return;
+      group.sort(function (a, b) { return a.along - b.along; });
+      // 近接しているportだけをクラスタ化する（離れたportは動かさない）。
+      var clusters = [];
+      var current = [group[0]];
+      for (var gi = 1; gi < group.length; gi++) {
+        if (group[gi].along - current[current.length - 1].along <= CONNECTOR.PORT_CLUSTER) {
+          current.push(group[gi]);
+        } else {
+          clusters.push(current);
+          current = [group[gi]];
+        }
+      }
+      clusters.push(current);
+      clusters.forEach(function (cluster) {
+        var reactions = {};
+        cluster.forEach(function (item) { reactions[item.connector.rid || ''] = true; });
+        if (cluster.length < 2 || Object.keys(reactions).length < 2) return;
+        var center = cluster.reduce(function (sum, item) { return sum + item.along; }, 0) / cluster.length;
+        var first = center - (spacing * (cluster.length - 1)) / 2;
+        // 辺に沿った順ではなく、出て行く向き（隣接点）の順に lane を割り当てる。
+        // これを逆にすると、近接portの線がノード直後で交差する。
+        cluster.sort(function (a, b) {
+          if (a.tangent !== b.tangent) return a.tangent - b.tangent;
+          return a.along - b.along;
+        });
+        cluster.forEach(function (item, i) {
+          var target = first + spacing * i;
+          var c = item.connector;
+          var end = item.end;
+          // 目標位置に正確に置く（roundRectCrossing の投影誤差を残さない）。
+          c.points[end.index] = portPointOnOutline(item.sideId, end.rect, target, CONNECTOR.NODE_RX, end.offset);
+          c.length = edgeLength(c.points);
+          attachArrow(c);
+        });
+      });
+    });
+    return connectors;
+  }
+
+  // 描画文字列（M/L/Q）を一定間隔でサンプリングする。実際に描かれる線の検査用。
+  function samplePath(d, step) {
+    var commands = String(d || '').match(/[MLQ][^MLQ]*/g) || [];
+    var subpaths = [];
+    var current = [];
+    var i;
+    function nums(text) {
+      var found = String(text).match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi) || [];
+      return found.map(Number);
+    }
+    for (i = 0; i < commands.length; i++) {
+      var cmd = commands[i].charAt(0);
+      var v = nums(commands[i].slice(1));
+      if (cmd === 'M') {
+        if (current.length > 1) subpaths.push(current);
+        current = [{ x: v[0], y: v[1] }];
+      } else if (cmd === 'L' && current.length) {
+        current.push({ x: v[0], y: v[1] });
+      } else if (cmd === 'Q' && current.length) {
+        var p0 = current[current.length - 1];
+        var c = { x: v[0], y: v[1] };
+        var p1 = { x: v[2], y: v[3] };
+        var seg = Math.hypot(c.x - p0.x, c.y - p0.y) + Math.hypot(p1.x - c.x, p1.y - c.y);
+        var n = Math.max(2, Math.ceil(seg / (step || 4)));
+        for (var k = 1; k <= n; k++) {
+          var t = k / n;
+          var mt = 1 - t;
+          current.push({
+            x: mt * mt * p0.x + 2 * mt * t * c.x + t * t * p1.x,
+            y: mt * mt * p0.y + 2 * mt * t * c.y + t * t * p1.y
+          });
+        }
+      }
+    }
+    if (current.length > 1) subpaths.push(current);
+    return subpaths;
+  }
+
+  // data-* の compound 一覧を厳密に復元する。ID 自体にカンマが入るため split(',') は使わない。
+  function compoundList(rawList, rawSingle) {
+    if (rawList) {
+      try {
+        var parsed = JSON.parse(rawList);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) { /* legacy attribute */ }
+    }
+    if (rawSingle != null && rawSingle !== '') return [rawSingle];
+    return [];
+  }
+
+  function connectorMatchesCompound(connector, id) {
+    return !!(connector && connector.compounds && connector.compounds.indexOf(id) !== -1);
+  }
+
   function normalize(text) {
     var s = String(text == null ? '' : text);
     if (s.normalize) s = s.normalize('NFKC');
@@ -449,6 +999,23 @@
 
   return {
     DETAIL_THRESHOLDS: DETAIL_THRESHOLDS,
+    CONNECTOR: CONNECTOR,
+    inflateRoundRect: inflateRoundRect,
+    pointInRoundRect: pointInRoundRect,
+    roundRectCrossing: roundRectCrossing,
+    snapEndpoint: snapEndpoint,
+    endpointOffsets: endpointOffsets,
+    attachArrow: attachArrow,
+    arrowHeadPath: arrowHeadPath,
+    compoundList: compoundList,
+    connectorMatchesCompound: connectorMatchesCompound,
+    connectorMetadata: connectorMetadata,
+    reactionConnectors: reactionConnectors,
+    classConnector: classConnector,
+    shiftBorderAlongSide: shiftBorderAlongSide,
+    portPointOnOutline: portPointOnOutline,
+    separateSharedPorts: separateSharedPorts,
+    samplePath: samplePath,
     SCALE_MIN: SCALE_MIN,
     SCALE_MAX: SCALE_MAX,
     LABEL_HIDE_LEVEL: LABEL_HIDE_LEVEL,

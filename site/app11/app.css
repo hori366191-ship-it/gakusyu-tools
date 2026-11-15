@@ -396,7 +396,9 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-region__band { fill: var(--rp-region-line); opacity: .5; }
 
 /* ---------- svg: edges ---------- */
-.rp-edge { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+/* 線端は butt。丸 cap が矢印tipや物質枠へはみ出さないようにする。
+   矢印は shaft と分離した triangle（.rp-arrowhead）で描く。 */
+.rp-edge { fill: none; stroke-linecap: butt; stroke-linejoin: round; }
 .rp-edge--primary {
   stroke: var(--rp-primary);
   stroke-width: 3;
@@ -415,10 +417,14 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   fill: none;
   stroke: var(--rp-accent-2);
   stroke-width: 4.4;
-  stroke-linecap: round;
+  stroke-linecap: butt;
   stroke-linejoin: round;
   opacity: 1;
 }
+.rp-arrowhead { stroke: none; }
+.rp-arrowhead--primary { fill: var(--rp-primary); }
+.rp-arrowhead--secondary { fill: var(--rp-secondary); }
+.rp-arrowhead--active { fill: var(--rp-accent-2); }
 .rp-edge.is-pending { opacity: .5; }
 /* 主要線は LOD で消さない。補助線は俯瞰で薄く残し、詳細で濃くする。 */
 .rp-map[data-level="0"] .rp-edge--secondary { opacity: .16; }
@@ -450,21 +456,23 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-c7 { background: var(--rp-c7); fill: var(--rp-c7); }
 .rp-c8 { background: var(--rp-c8); fill: var(--rp-c8); }
 .rp-c9 { background: var(--rp-c9); fill: var(--rp-c9); }
-.rp-node:hover .rp-node__box { stroke: var(--rp-accent); stroke-width: 2.2; }
+.rp-node:hover .rp-node__box { stroke: var(--rp-accent); filter: drop-shadow(0 0 1.6px var(--rp-accent)); }
 .rp-node:focus { outline: none; }
-.rp-node:focus-visible .rp-node__box { stroke: var(--rp-focus); stroke-width: 3; }
-.rp-node.is-selected .rp-node__box { stroke: var(--rp-accent-2); stroke-width: 2.6; }
-.rp-node.is-region .rp-node__box { stroke: var(--rp-accent); stroke-width: 2.2; }
-.rp-node.is-match .rp-node__box { stroke: var(--rp-accent); stroke-width: 2.4; }
+.rp-node:focus-visible .rp-node__box { stroke: var(--rp-focus); filter: drop-shadow(0 0 2.2px var(--rp-focus)); }
+.rp-node.is-selected .rp-node__box { stroke: var(--rp-accent-2); filter: drop-shadow(0 0 2px var(--rp-accent-2)); }
+.rp-node.is-region .rp-node__box { stroke: var(--rp-accent); filter: drop-shadow(0 0 1.6px var(--rp-accent)); }
+.rp-node.is-match .rp-node__box { stroke: var(--rp-accent); filter: drop-shadow(0 0 1.8px var(--rp-accent)); }
 .rp-node[data-path-state="unverified"] .rp-node__box { stroke-dasharray: 5 3; }
 .rp-node[data-path-state="out-of-scope"] .rp-node__box { stroke-dasharray: 2 4; }
 .rp-map[data-level="0"] .rp-node__label { display: none; }
-.rp-map[data-level="0"] .rp-node:not(.is-hub) .rp-node__box { opacity: .85; stroke-width: 1; }
+.rp-map[data-level="0"] .rp-node:not(.is-hub) .rp-node__box { opacity: .85; }
 .rp-map[data-level="0"] .rp-node__badge { display: none; }
 
 /* ---------- svg: reactions ---------- */
 .rp-reaction { cursor: pointer; }
-.rp-reaction__dot { fill: var(--rp-panel); stroke: var(--rp-secondary); stroke-width: 1.8; }
+/* 反応は「丸」ではなく線の合流点として示す。DOM は残し、semantic zoom の r 更新と
+   透明な当たり判定（.rp-reaction__hit）・キーボード操作はそのまま使う。 */
+.rp-reaction__dot { display: none; fill: var(--rp-panel); stroke: var(--rp-secondary); stroke-width: 1.8; }
 .rp-reaction--primary .rp-reaction__dot { stroke: var(--rp-primary); stroke-width: 2.4; fill: var(--rp-primary); }
 .rp-reaction__hit { fill: transparent; }
 .rp-reaction__label { fill: var(--rp-muted); font-size: 10px; text-anchor: middle; dominant-baseline: middle; paint-order: stroke; stroke: var(--rp-panel); stroke-width: 3px; stroke-linejoin: round; }
@@ -494,10 +502,15 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   fill: none;
   stroke: var(--rp-accent);
   stroke-width: 1.6;
-  stroke-linecap: round;
+  stroke-linecap: butt;
   stroke-linejoin: round;
   opacity: .88;
 }
+.rp-classmap__arrowhead { fill: var(--rp-accent); stroke: none; }
+.rp-classmap__edge-group:hover .rp-classmap__arrowhead,
+.rp-classmap__edge-group:focus-visible .rp-classmap__arrowhead,
+.rp-classmap__edge-group.is-selected .rp-classmap__arrowhead { fill: var(--rp-accent-2); }
+.rp-classmap__edge.is-active + .rp-classmap__arrowhead { fill: var(--rp-focus); }
 /* 変換線の当たり判定。見た目の線は動かさず、画面ピクセルで一定の太さを確保する。
    ノードより先に描くため、重なった場合はノードのタップが優先される。 */
 .rp-classmap__edge-hit {
@@ -537,10 +550,10 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   stroke-width: 2.6px;
   stroke-linejoin: round;
 }
-.rp-classmap__node:hover .rp-classmap__node-box { stroke: var(--rp-accent); stroke-width: 2.2; }
+.rp-classmap__node:hover .rp-classmap__node-box { stroke: var(--rp-accent); filter: drop-shadow(0 0 1.6px var(--rp-accent)); }
 .rp-classmap__node:focus { outline: none; }
-.rp-classmap__node:focus-visible .rp-classmap__node-box { stroke: var(--rp-focus); stroke-width: 3; }
-.rp-classmap__node.is-selected .rp-classmap__node-box { stroke: var(--rp-accent-2); stroke-width: 2.8; }
+.rp-classmap__node:focus-visible .rp-classmap__node-box { stroke: var(--rp-focus); filter: drop-shadow(0 0 2.2px var(--rp-focus)); }
+.rp-classmap__node.is-selected .rp-classmap__node-box { stroke: var(--rp-accent-2); filter: drop-shadow(0 0 2px var(--rp-accent-2)); }
 /* 低倍率では見出しだけ。局所拡大で分類名・矢印・反応名を出す。 */
 .rp-map[data-level="0"] .rp-classmap__node-label,
 .rp-map[data-level="0"] .rp-classmap__label { display: none; }
