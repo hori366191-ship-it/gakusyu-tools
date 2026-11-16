@@ -5,6 +5,8 @@
  *   node scripts/app11/build-map-data.cjs            # site/app11/data.js を更新
  *   node scripts/app11/build-map-data.cjs --check    # 生成物が最新かを確認（差分があれば exit 1）
  *
+ * - site/app11/coverage-ids.js は、site/app10 の物質カードから深いリンクできる ID の
+ *   小さな一覧（manifest）。data.js とは別に生成し、app10 はこれだけを読み込む。
  * - 物質の名称・示性式・分類・ID と、ビルダーの focus 経路（catalog.js の routeFor）だけを
  *   site/app10 からオフラインで抽出する。反応メモなどの自由文は取り込まない。
  * - 反応は site-src/app11/reactions.json（本ツール独自のデータ）だけを根拠にする。
@@ -24,6 +26,9 @@ const F = require('./layout-format.cjs');
 
 const OUT_DIR = path.join(S.ROOT, 'site', 'app11');
 const OUT_DATA = path.join(OUT_DIR, 'data.js');
+// 有機化学ビルダー（site/app10）から深いリンクできる物質IDの一覧。
+// app10 のカードはこの小さな manifest だけを読み、反応経路マップの data.js は読み込まない。
+const OUT_COVERED_IDS = path.join(OUT_DIR, 'coverage-ids.js');
 const LAYOUT_PATH = path.join(S.SRC, 'layout.json');
 const ROUTES_PATH = path.join(S.SRC, 'routes.json');
 const CLASS_MAP_PATH = path.join(S.SRC, 'class-map.json');
@@ -610,15 +615,48 @@ function renderData(data) {
   return lines.join('\n');
 }
 
+/*
+ * app10 からの深いリンク用 manifest。data.compounds（= 反応経路マップに収録した全物質）の ID を
+ * true で持つだけの小さな UMD。app10 はこれを読み、未収録 ID にはリンクを出さない（fail-closed）。
+ */
+function renderCoverageIds(compounds) {
+  const ids = {};
+  compounds.forEach((c) => { ids[c.id] = true; });
+  const lines = [];
+  lines.push('/*');
+  lines.push(' * 有機反応マップ（試験版）— 反応経路マップで表示できる物質IDの一覧');
+  lines.push(' *');
+  lines.push(' * このファイルは scripts/app11/build-map-data.cjs が生成する。直接編集しない。');
+  lines.push(' * site/app10 の各物質カードは、この一覧にある ID だけを「反応経路マップで表示」への');
+  lines.push(' * リンクにする。実行時に app10 が app11 の data.js を読み込むことはない。');
+  lines.push(' */');
+  lines.push('(function (root, factory) {');
+  lines.push("  if (typeof module === 'object' && module.exports) module.exports = factory();");
+  lines.push('  else root.RP_COVERED_COMPOUND_IDS = factory();');
+  lines.push("})(typeof globalThis !== 'undefined' ? globalThis : this, function () {");
+  lines.push("  'use strict';");
+  lines.push('  var IDS = ' + JSON.stringify(ids) + ';');
+  lines.push('  return IDS;');
+  lines.push('});');
+  lines.push('');
+  return lines.join('\n');
+}
+
 function main() {
   const check = process.argv.includes('--check');
   const data = build();
   const output = renderData(data);
+  const coverageOutput = renderCoverageIds(data.compounds);
 
   if (check) {
     const current = fs.existsSync(OUT_DATA) ? fs.readFileSync(OUT_DATA, 'utf8') : '';
     if (current !== output) {
       console.error('data.js が最新ではありません: node scripts/app11/build-map-data.cjs を実行してください。');
+      process.exit(1);
+    }
+    const currentIds = fs.existsSync(OUT_COVERED_IDS) ? fs.readFileSync(OUT_COVERED_IDS, 'utf8') : '';
+    if (currentIds !== coverageOutput) {
+      console.error('coverage-ids.js が最新ではありません: node scripts/app11/build-map-data.cjs を実行してください。');
       process.exit(1);
     }
     const layout = readJson(LAYOUT_PATH);
@@ -631,17 +669,18 @@ function main() {
       console.error('routes.json の並びが正規形と違います: node scripts/app11/optimize-layout.cjs を実行してください。');
       process.exit(1);
     }
-    console.log('app11 data.js / layout.json / routes.json は最新です（物質 ' + data.meta.compoundCount +
+    console.log('app11 data.js / coverage-ids.js / layout.json / routes.json は最新です（物質 ' + data.meta.compoundCount +
       '、必須 ' + data.meta.requiredCount + '、反応 ' + data.meta.reactionCount + '）。');
     return;
   }
 
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(OUT_DATA, output, 'utf8');
-  console.log('生成: site/app11/data.js（物質 ' + data.meta.compoundCount +
+  fs.writeFileSync(OUT_COVERED_IDS, coverageOutput, 'utf8');
+  console.log('生成: site/app11/data.js / coverage-ids.js（物質 ' + data.meta.compoundCount +
     '、必須 ' + data.meta.requiredCount + '、反応 ' + data.meta.reactionCount + '）');
 }
 
 if (require.main === module) main();
 
-module.exports = { build, renderData };
+module.exports = { build, renderData, renderCoverageIds };

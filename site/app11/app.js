@@ -2489,6 +2489,45 @@
     });
   }
 
+  /* ---------------- 初期フォーカス（有機化学ビルダーからの深いリンク） ---------------- */
+
+  // ?focus=ID は、ビルダーのカードから「反応経路マップで表示」で来たときだけ使う。
+  // 壊れた値・長すぎる値は無視し、現在の俯瞰表示を維持する（fail-closed）。
+  var FOCUS_PARAM_MAX = 256;
+
+  function readFocusParam(search) {
+    var raw = String(search == null ? '' : search);
+    var focus;
+    try {
+      focus = new URLSearchParams(raw.charAt(0) === '?' ? raw.slice(1) : raw).get('focus');
+    } catch (err) {
+      return null;
+    }
+    if (focus == null) return null;
+    if (!focus.length || focus.length > FOCUS_PARAM_MAX) return null;
+    return focus;
+  }
+
+  // 反応経路マップに収録済みの物質IDだけを受け付ける（__proto__ / constructor 等を除外）。
+  function ownsCompoundId(id) {
+    return typeof id === 'string' &&
+      Object.prototype.hasOwnProperty.call(compoundById, id);
+  }
+
+  // 初期表示の同期は、gotoEntity を使わない。scrollIntoView・アニメーション・起点への
+  // フォーカス復帰を起こさず、表示位置を直接決めてカードを開く（起点の trigger は無い）。
+  function applyInitialFocus() {
+    var id = readFocusParam(window.location ? window.location.search : '');
+    if (!id || !ownsCompoundId(id)) return false;
+    var c = compoundById[id];
+    var scale = Math.max(view.scale, 0.92);
+    setView(entityTarget({ x: c.x, y: c.y }, { w: nodeW(c), h: nodeH(c) }, scale), true);
+    selectNode('compound', id);
+    returnFocus = null;
+    openCard('compound', id);
+    return true;
+  }
+
   function init() {
     measure();
     buildConnectors();
@@ -2691,6 +2730,9 @@
     }
     syncToolbarInset();
     syncPositionInset();
+    // 寸法の実測が終わった後で、?focus= の物質へ1回だけ同期する。
+    // 以後の ResizeObserver は現在の view を保持する（fit へ巻き戻さない）。
+    applyInitialFocus();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

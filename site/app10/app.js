@@ -85,6 +85,55 @@
     });
   }
 
+  /* ------------------------------------------------------------------
+   * 反応経路マップ（app11）への深いリンク
+   * - 反応経路マップに収録した物質IDだけをリンクにする（未収録はリンクなし）。
+   * - 収録IDの一覧は app11 が生成する小さな manifest（coverage-ids.js）を読み、
+   *   実行時に app11 の data.js は読み込まない。manifest が無ければリンクを出さない。
+   * - リンク先の基準は manifest の script src から求める。design-lab のように同じ
+   *   app.js を別の深さから配信しても、site/app11 を指す。
+   * ------------------------------------------------------------------ */
+  var COVERED_IDS = (window.RP_COVERED_COMPOUND_IDS && typeof window.RP_COVERED_COMPOUND_IDS === 'object')
+    ? window.RP_COVERED_COMPOUND_IDS : null;
+
+  // app11-coverage-link-start
+  var mapLinkBaseCache = null;
+
+  function coveredCompound(id) {
+    return !!COVERED_IDS &&
+      Object.prototype.hasOwnProperty.call(COVERED_IDS, id) &&
+      COVERED_IDS[id] === true;
+  }
+
+  function mapLinkBase(doc) {
+    if (mapLinkBaseCache !== null) return mapLinkBaseCache;
+    mapLinkBaseCache = '';
+    var scripts = doc && doc.getElementsByTagName ? doc.getElementsByTagName('script') : [];
+    for (var i = 0; i < scripts.length; i++) {
+      var src = scripts[i] && scripts[i].getAttribute ? scripts[i].getAttribute('src') : '';
+      if (src && /(^|\/)coverage-ids\.js(?:\?.*)?$/.test(src)) {
+        mapLinkBaseCache = src.replace(/[^/]*$/, '');
+        break;
+      }
+    }
+    return mapLinkBaseCache;
+  }
+
+  function mapLinkHref(id, doc) {
+    if (!coveredCompound(id)) return '';
+    var base = mapLinkBase(doc);
+    if (!base) return '';
+    return base + '?focus=' + encodeURIComponent(id);
+  }
+
+  function mapLinkHtml(id, doc) {
+    var href = mapLinkHref(id, doc);
+    if (!href) return '';
+    return '<a class="oc-map-link" href="' + esc(href) + '" target="_blank" rel="noopener">' +
+      '反応経路マップで表示 →</a>';
+  }
+  // app11-coverage-link-end
+
   function compoundName(id) {
     var c = D.COMPOUNDS[id];
     return c ? c.name : id;
@@ -964,6 +1013,7 @@
       '</div>' +
       (note ? '<p class="oc-card__note">' + esc(note) + '</p>' : '') +
       '<div class="oc-card__foot"><span class="oc-verify">検証: ' + esc(verificationShort) + '</span>' + pubchem +
+        mapLinkHtml(c.id, document) +
         '<a href="./ledger.html#c-' + encodeURIComponent(c.id) + '">収録台帳で見る →</a></div>' +
       '</article>';
   }
