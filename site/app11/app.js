@@ -1775,116 +1775,19 @@
     return found;
   }
 
-  function equationSpeciesSvg(item) {
-    var svg = SD.renderStructure(item.structure, '一般構造');
-    var geo = SD.svgGeometry(svg);
-    if (!geo) throw new Error('一般構造の寸法を読めません');
-    var inner = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
-    return { geo: geo, inner: inner };
+  // 反応物・生成物の custom spec を1枚の SVG に並べ、係数・＋・矢印を付ける。
+  // 並べ方・寸法・矢印の上下の条件は structure-draw.js の共通実装
+  // （renderEquation）を使い、一般図の16変換と同じ描画にそろえる。
+  function buildEquationSvg(eq, ariaLabel) {
+    return SD.renderEquation(eq, ariaLabel);
   }
 
-  // 反応物・生成物の custom spec を1枚の SVG に並べ、係数・＋・矢印を付ける。
-  // 各構造は既存 renderStructure の出力（viewBox と内容）を平行移動・縮小して使う。
-  function buildEquationSvg(eq, ariaLabel) {
-    var ROW = 120;
-    var PAD = 16;
-    var itemGap = 10;
-    var plusGap = 26;
-    var arrowW = 64;
-    var sides = [eq.left || [], eq.right || []];
-    var prepared = sides.map(function (items) {
-      return items.map(function (item) {
-        var drawn = equationSpeciesSvg(item);
-        var scale = Math.min(1.2, ROW / Math.max(1, drawn.geo.height));
-        var width = drawn.geo.width * scale;
-        if (width > 250) {
-          scale *= 250 / width;
-          width = 250;
-        }
-        return {
-          coef: item.coef,
-          inner: drawn.inner,
-          geo: drawn.geo,
-          scale: scale,
-          width: width
-        };
-      });
-    });
+  // 反応カード用。具体物質は一般図の骨格より背が高いため、行の高さを広げ、
+  // 縮小率に下限を置いて文字を潰さない（横は自然幅＋横スクロール）。
+  var REACTION_EQUATION_OPTS = { row: 200, maxWidth: 300, minScale: 0.55 };
 
-    var cursor = PAD;
-    var placed = [];
-    var ops = [];
-    prepared.forEach(function (items, sideIndex) {
-      var sidePlaced = [];
-      items.forEach(function (item, i) {
-        if (i > 0) {
-          ops.push({ type: 'plus', x: cursor + plusGap / 2 });
-          cursor += plusGap;
-        }
-        var coefW = item.coef > 1 ? 18 : 0;
-        var x = cursor;
-        var sx = x + coefW;
-        var top = (ROW - item.geo.height * item.scale) / 2 + PAD;
-        placed.push({ item: item, x: sx, y: top });
-        sidePlaced.push({ item: item, x: sx, coefX: x + coefW / 2 });
-        cursor += coefW + item.width + itemGap;
-      });
-      prepared[sideIndex] = sidePlaced;
-      if (sideIndex === 0) {
-        ops.push({ type: 'arrow', x: cursor + arrowW / 2, arrow: eq.arrow });
-        cursor += arrowW;
-      }
-    });
-    var width = Math.max(180, cursor - itemGap + PAD);
-    var height = ROW + PAD * 2;
-    var out = '<svg class="rp-struct-svg rp-eq-svg" viewBox="0 0 ' + width.toFixed(1) + ' ' + height.toFixed(1) +
-      '" role="img" aria-label="' + esc(ariaLabel) + '" preserveAspectRatio="xMidYMid meet">';
-    out += '<g class="rp-eq-species">';
-    placed.forEach(function (p) {
-      var item = p.item;
-      out += '<g transform="translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ') scale(' +
-        item.scale.toFixed(4) + ') translate(' + (-item.geo.x).toFixed(1) + ' ' + (-item.geo.y).toFixed(1) + ')">' +
-        item.inner + '</g>';
-    });
-    out += '</g>';
-    prepared.forEach(function (items) {
-      items.forEach(function (p) {
-        if (p.item.coef > 1) {
-          out += '<text x="' + (p.coefX || p.x).toFixed(1) + '" y="' + (height / 2 + 7).toFixed(1) +
-            '" text-anchor="middle" class="rp-eq-coef">' + esc(p.item.coef) + '</text>';
-        }
-      });
-    });
-    var midY = height / 2;
-    ops.forEach(function (op) {
-      if (op.type === 'plus') {
-        out += '<text x="' + op.x.toFixed(1) + '" y="' + midY.toFixed(1) +
-          '" text-anchor="middle" dominant-baseline="middle" class="rp-eq-op">＋</text>';
-        return;
-      }
-      if (op.arrow === 'equilibrium') {
-        out += '<g class="rp-eq-arrow"><path class="rp-eq-arrow-line" d="M' + (op.x - 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
-          ' L' + (op.x + 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
-          ' M' + (op.x + 22).toFixed(1) + ',' + (midY + 4).toFixed(1) +
-          ' L' + (op.x - 22).toFixed(1) + ',' + (midY + 4).toFixed(1) + '"/>' +
-          '<path class="rp-eq-arrow-line" d="M' + (op.x + 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
-          ' L' + (op.x + 14).toFixed(1) + ',' + (midY - 9).toFixed(1) +
-          ' M' + (op.x + 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
-          ' L' + (op.x + 14).toFixed(1) + ',' + (midY + 1).toFixed(1) +
-          ' M' + (op.x - 22).toFixed(1) + ',' + (midY + 4).toFixed(1) +
-          ' L' + (op.x - 14).toFixed(1) + ',' + (midY - 1).toFixed(1) +
-          ' M' + (op.x - 22).toFixed(1) + ',' + (midY + 4).toFixed(1) +
-          ' L' + (op.x - 14).toFixed(1) + ',' + (midY + 9).toFixed(1) + '"/></g>';
-        return;
-      }
-      out += '<g class="rp-eq-arrow"><path class="rp-eq-arrow-line" d="M' + (op.x - 24).toFixed(1) + ',' + midY.toFixed(1) +
-        ' L' + (op.x + 20).toFixed(1) + ',' + midY.toFixed(1) + '"/>' +
-        '<path class="rp-eq-arrow-head" d="M' + (op.x + 24).toFixed(1) + ',' + midY.toFixed(1) +
-        ' L' + (op.x + 14).toFixed(1) + ',' + (midY - 7).toFixed(1) +
-        ' L' + (op.x + 14).toFixed(1) + ',' + (midY + 7).toFixed(1) + ' Z"/></g>';
-    });
-    out += '</svg>';
-    return out;
+  function buildReactionEquationSvg(eq, ariaLabel) {
+    return SD.renderEquation(eq, ariaLabel, REACTION_EQUATION_OPTS);
   }
 
   function equationFigure(edge) {
@@ -1974,6 +1877,143 @@
     return r.typeLabel + ': ' + subs.join(' ＋ ') + ' → ' + prods.join(' ＋ ');
   }
 
+  // ---- 反応カードの反応式（構造式） ----
+  // B=完全な反応式 / N=正味の総括式 / T=構造変換図 / P=重合反応の模式式。
+  // 反応式が未収録の反応は係数を推測せず、反応物と主生成物の構造だけを描く。
+  var EQUATION_MODE_NOTES = {
+    B: '係数・副生成物まで含む反応式です。元素収支は本ツールで計算しています。',
+    N: '元素収支は合うが、塩の生成・中和・後処理などを省略した総括式です。',
+    T: '反応物と生成物の構造だけを示す変換図です。試薬由来の生成物・プロトン源・保護基の脱着などは省略しており、完全な反応式ではありません。',
+    P: '繰り返し単位 n で示す重合の模式式です。末端を省略しており、有限の鎖の完全な反応式ではありません。'
+  };
+
+  function compoundEquationItem(id, coef) {
+    var c = compoundById[id];
+    if (!c) return { coef: coef, name: id, structure: null, fallback: true };
+    var spec = c.structure || null;
+    var fallback = !spec;
+    try {
+      var view = SD.structureView(c);
+      var fig = view && view.figures && view.figures[0];
+      if (fig && fig.structure) spec = fig.structure;
+      if (view && (view.kind === 'fallback' || view.kind === 'missing')) fallback = true;
+    } catch (err) {
+      // 構造ビューを作れない場合は登録specのまま描き、示性式の断りを付ける。
+    }
+    return { coef: coef, name: c.label || c.name || id, structure: spec, fallback: fallback };
+  }
+
+  function equationItemOf(item) {
+    if (item.kind === 'species') {
+      var sp = D.species && D.species[item.id];
+      if (!sp) return { coef: item.coef, name: item.id, structure: null, fallback: true };
+      return { coef: item.coef, name: sp.name || item.id, structure: sp.structure || null, fallback: !sp.structure };
+    }
+    if (item.kind === 'text') return { coef: item.coef, name: item.text, structure: null, fallback: true };
+    return compoundEquationItem(item.id, item.coef);
+  }
+
+  function equationItems(list) {
+    return (list || []).map(equationItemOf);
+  }
+
+  function derivedReactionEquation(r) {
+    var left = r.substrates.map(function (id) { return compoundEquationItem(id, 1); });
+    var right = r.products.length
+      ? r.products.map(function (id) { return compoundEquationItem(id, 1); })
+      : [{ coef: 1, name: r.productNote || '生成物の記載なし', structure: null, fallback: true }];
+    return { arrow: 'to', above: '', below: '', left: left, right: right };
+  }
+
+  function itemsHaveFallback(items) {
+    return (items || []).some(function (item) { return item.fallback; });
+  }
+
+  function reactionEquationPlan(r) {
+    var eq = r.equation;
+    if (!eq) {
+      return {
+        caption: '主な物質の変換（係数・副生成物省略）',
+        note: '係数・副生成物を省略し、反応物と主生成物の構造だけを示します。完全な反応式ではありません。',
+        sources: [],
+        equations: [{ label: '', eq: derivedReactionEquation(r) }]
+      };
+    }
+    var caption = eq.title || (eq.mode === 'N' ? '正味の反応式（総括）'
+      : eq.mode === 'B' ? '反応式（構造式）'
+        : eq.mode === 'P' ? '重合反応の模式式' : '構造変換図');
+    var note = [eq.explanation, EQUATION_MODE_NOTES[eq.mode]].filter(Boolean).join(' ');
+    var equations;
+    if (eq.variants && eq.variants.length) {
+      equations = eq.variants.map(function (variant) {
+        return {
+          label: variant.label,
+          eq: {
+            arrow: variant.arrow,
+            above: eq.above,
+            below: eq.below,
+            left: equationItems(variant.left),
+            right: equationItems(variant.right)
+          }
+        };
+      });
+    } else {
+      equations = [{
+        label: '',
+        eq: {
+          arrow: eq.arrow,
+          above: eq.above,
+          below: eq.below,
+          left: equationItems(eq.left),
+          right: equationItems(eq.right)
+        }
+      }];
+    }
+    return { caption: caption, note: note, sources: (eq.sources && eq.sources.length) ? eq.sources : (r.sources || []), equations: equations };
+  }
+
+  function equationFigureBlock(equation, caption, note, aria) {
+    var svg;
+    try {
+      svg = buildReactionEquationSvg(equation, aria);
+    } catch (err) {
+      svg = '';
+    }
+    if (!svg) {
+      return '<figure class="rp-struct rp-struct--fallback"><figcaption class="rp-struct__caption">' +
+        esc(caption) + '</figcaption><p class="rp-struct__note">反応式を表示できませんでした。' +
+        '根拠のない式を推定して表示することはありません。</p></figure>';
+    }
+    var vb = /viewBox="([^"]+)"/.exec(svg);
+    var width = vb ? parseFloat(String(vb[1]).trim().split(/\s+/)[2]) : 0;
+    var wide = width > 460;
+    var style = wide ? ' style="--rp-struct-width:' + Math.ceil(width) + 'px"' : '';
+    return '<figure class="rp-struct' + (wide ? ' rp-struct--wide' : '') + '">' +
+      '<figcaption class="rp-struct__caption">' + esc(caption) + '</figcaption>' +
+      '<div class="rp-struct__canvas"' + style + '>' + svg + '</div>' +
+      (note ? '<p class="rp-struct__note">' + esc(note) + '</p>' : '') +
+      '</figure>';
+  }
+
+  function reactionEquationFigure(r) {
+    if (!SD || !SD.renderEquation) {
+      return '<p class="rp-struct-missing">構造データを読み込めないため、反応式を表示していません。</p>';
+    }
+    var plan = reactionEquationPlan(r);
+    var note = plan.note;
+    var anyFallback = plan.equations.some(function (entry) {
+      return itemsHaveFallback(entry.eq.left) || itemsHaveFallback(entry.eq.right);
+    });
+    if (anyFallback) note += ' 示性式・名称で表示している項目があります（構造式ではありません）。';
+    if (plan.sources && plan.sources.length) note += ' 式の根拠: ' + plan.sources.join('／');
+    var ariaBase = '反応式（構造式）。' + r.substrates.map(compoundName).join('と') + 'から' +
+      (r.products.length ? r.products.map(compoundName).join('と') : (r.productNote || '生成物')) + 'へ。';
+    return plan.equations.map(function (entry) {
+      var caption = entry.label ? plan.caption + '（' + entry.label + '）' : plan.caption;
+      return equationFigureBlock(entry.eq, caption, note, ariaBase + (entry.label || ''));
+    }).join('');
+  }
+
   function reactionCard(id) {
     var r = null;
     for (var i = 0; i < D.reactions.length; i++) if (D.reactions[i].id === id) r = D.reactions[i];
@@ -1996,6 +2036,7 @@
     html += typeCommon(type);
 
     html += '<h3>この反応の個別情報</h3>';
+    html += reactionEquationFigure(r);
     html += '<dl class="rp-dl">';
     html += '<div><dt>基質</dt><dd>' + subs + '</dd></div>';
     html += '<div><dt>試薬</dt><dd>' + (r.reagents.length ? esc(r.reagents.join('・')) : '個別の記載なし') + '</dd></div>';

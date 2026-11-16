@@ -82,6 +82,13 @@
   stroke-linejoin: round;
 }
 .rp-eq-svg .rp-eq-arrow-head { fill: var(--rp-node-ink); stroke: none; }
+/* 矢印の上下（触媒・温度など）。図を縮小しても読めるよう、広い式は自然幅で横スクロールにする。 */
+.rp-eq-svg .rp-eq-cond {
+  fill: var(--rp-accent-2);
+  font-family: 'Zen Kaku Gothic New', 'Arial', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
 .rp-rdefs { margin: 4px 0 8px; }
 .rp-struct-missing {
   margin: 8px 0 10px;

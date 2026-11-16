@@ -425,6 +425,11 @@ function build() {
     const t = source.types[key];
     types[key] = { label: t.label, summary: t.summary, schematic: t.schematic, count: t.count };
   }
+  // 反応式にだけ使う無機species（427物質には加えない）。
+  const species = {};
+  for (const [id, s] of source.species) {
+    species[id] = { name: s.name, formula: s.formula, charge: s.charge, structure: s.structure };
+  }
   // 一般図の変換が参照する共通説明は、既存の確認済み反応が0件でも残す。
   const classTypeKeys = new Set(classMap.edges.map((e) => e.type));
   classTypeKeys.forEach((key) => {
@@ -474,7 +479,8 @@ function build() {
       y: marker.y,
       label: marker.label,
       cross: r.cross,
-      edges
+      edges,
+      equation: r.equation || null
     });
   }
 
@@ -560,6 +566,7 @@ function build() {
     types,
     compounds,
     reactions,
+    species,
     classMap
   };
 
@@ -575,6 +582,7 @@ function renderData(data) {
   lines.push(' * 物質名・示性式・分類・ID とビルダーの focus 経路は site/app10 からオフラインで抽出した値で、');
   lines.push(' * 実行時に app10 の実装を読み込むことはない。反応の内容は site-src/app11/reactions.json が正本。');
   lines.push(' * 12分類の一般図は site-src/app11/class-map.json が正本で、classMap キーに独立して出力する。');
+  lines.push(' * 反応式（reactions.json の equation）が参照する無機speciesは site-src/app11/species.json が正本で、species キーに出力する。');
   lines.push(' * 座標・反応マーカー・経路の全点列は site-src/app11/layout.json / routes.json に固定されている。');
   lines.push(' */');
   lines.push('(function (root, factory) {');
@@ -588,6 +596,7 @@ function renderData(data) {
   data.regions.forEach((r) => lines.push('    ' + JSON.stringify(r) + ','));
   lines.push('  ];');
   lines.push('  var TYPES = ' + JSON.stringify(data.types) + ';');
+  lines.push('  var SPECIES = ' + JSON.stringify(data.species) + ';');
   lines.push('  var COMPOUNDS = [');
   data.compounds.forEach((c) => lines.push('    ' + JSON.stringify(c) + ','));
   lines.push('  ];');
@@ -595,7 +604,7 @@ function renderData(data) {
   data.reactions.forEach((r) => lines.push('    ' + JSON.stringify(r) + ','));
   lines.push('  ];');
   lines.push('  var CLASS_MAP = ' + JSON.stringify(data.classMap) + ';');
-  lines.push('  return { meta: META, states: STATES, regions: REGIONS, types: TYPES, compounds: COMPOUNDS, reactions: REACTIONS, classMap: CLASS_MAP };');
+  lines.push('  return { meta: META, states: STATES, regions: REGIONS, types: TYPES, species: SPECIES, compounds: COMPOUNDS, reactions: REACTIONS, classMap: CLASS_MAP };');
   lines.push('});');
   lines.push('');
   return lines.join('\n');

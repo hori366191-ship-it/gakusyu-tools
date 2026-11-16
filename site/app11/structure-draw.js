@@ -3050,6 +3050,223 @@
   }
 
   /* ------------------------------------------------------------------
+   * 反応式（複数の構造を1枚に並べる）
+   * ------------------------------------------------------------------ */
+
+  // 矢印の上下に置く条件は、区切り（／ ・ / ・ 、・空白）で折り返して1行220px以内に収める。
+  function equationNoteLines(text) {
+    var raw = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
+    if (!raw) return [];
+    var parts = raw.split(/\s*[／\/]\s*|\s*、\s*|\s*・\s*/).filter(function (part) { return part; });
+    var lines = [];
+    parts.forEach(function (part) {
+      if (estimateWidth(part, 12) <= 220) {
+        lines.push(part);
+        return;
+      }
+      var buf = '';
+      for (var i = 0; i < part.length; i++) {
+        if (buf && estimateWidth(buf + part[i], 12) > 220) {
+          lines.push(buf);
+          buf = '';
+        }
+        buf += part[i];
+      }
+      if (buf) lines.push(buf);
+    });
+    return lines;
+  }
+
+  // 構造specを持たない項目（反応式の表示用テキスト）は、示性式と偽らず文字の箱で描く。
+  function equationItemSvg(item) {
+    var name = item.name || item.label || item.text || '';
+    var svg = '';
+    if (item.structure) {
+      try {
+        svg = renderStructure(item.structure, name || '構造式');
+      } catch (err) {
+        svg = '';
+      }
+    }
+    if (!svg || svg.indexOf('data-error="1"') !== -1) {
+      var text = name || '構造データ未登録';
+      var lines = equationNoteLines(text);
+      if (!lines.length) lines = [text];
+      var boxW = 0;
+      lines.forEach(function (line) { boxW = Math.max(boxW, estimateWidth(line, 18)); });
+      boxW = Math.max(60, boxW + 24);
+      var boxH = Math.max(48, lines.length * 24 + 16);
+      var inner = '';
+      lines.forEach(function (line, index) {
+        inner += textEl(boxW / 2, boxH / 2 + (index - (lines.length - 1) / 2) * 24, line,
+          'rp-struct-schematic-text', 18, 'data-eq-text="1"');
+      });
+      svg = '<svg class="rp-struct-svg" viewBox="0 0 ' + boxW.toFixed(1) + ' ' + boxH.toFixed(1) +
+        '" role="img" aria-label="' + esc(text) + '" data-eq-text="1">' + inner + '</svg>';
+    }
+    var geo = svgGeometry(svg);
+    if (!geo) return null;
+    var content = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+    return { geo: geo, inner: content };
+  }
+
+  function coefTextOf(coef) {
+    if (coef == null || coef === '' || coef === 1) return '';
+    return String(coef);
+  }
+
+  // 反応物・生成物の構造を1枚の SVG に並べ、係数・＋・矢印を付ける。
+  // above / below は矢印の列の上下（触媒・温度など）に置く。未指定なら従来の一般反応式と同じ出力。
+  // opts は反応カード用の拡大指定（一般図は既定値のまま）。
+  function renderEquation(eq, label, opts) {
+    eq = eq || {};
+    opts = opts || {};
+    var ROW = opts.row || 120;
+    var MAX_ITEM_WIDTH = opts.maxWidth || 250;
+    var MIN_SCALE = opts.minScale || 0;
+    var PAD = 16;
+    var itemGap = 10;
+    var plusGap = 26;
+    var arrowW = 64;
+    var aboveLines = equationNoteLines(eq.above);
+    var belowLines = equationNoteLines(eq.below);
+    var bandW = 0;
+    aboveLines.concat(belowLines).forEach(function (line) {
+      bandW = Math.max(bandW, estimateWidth(line, 12));
+    });
+    if (bandW) arrowW = Math.max(arrowW, bandW + 24);
+    var aboveH = aboveLines.length ? 6 + aboveLines.length * 17 : 0;
+    var belowH = belowLines.length ? 6 + belowLines.length * 17 : 0;
+    var sides = [eq.left || [], eq.right || []];
+    var prepared = sides.map(function (items) {
+      return items.map(function (item) {
+        var drawn = equationItemSvg(item);
+        if (!drawn) return null;
+        var scale = Math.min(1.2, ROW / Math.max(1, drawn.geo.height));
+        var width = drawn.geo.width * scale;
+        if (width > MAX_ITEM_WIDTH) {
+          scale *= MAX_ITEM_WIDTH / width;
+          width = MAX_ITEM_WIDTH;
+        }
+        // 反応カードでは、大きい分子をここで潰さず、行の高さを広げて文字を読める大きさに保つ。
+        if (scale < MIN_SCALE) {
+          scale = MIN_SCALE;
+          width = drawn.geo.width * scale;
+        }
+        return {
+          coef: item.coef == null ? 1 : item.coef,
+          coefText: coefTextOf(item.coef),
+          inner: drawn.inner,
+          geo: drawn.geo,
+          scale: scale,
+          width: width
+        };
+      }).filter(function (item) { return !!item; });
+    });
+    var rowH = ROW;
+    prepared.forEach(function (items) {
+      items.forEach(function (item) {
+        rowH = Math.max(rowH, item.geo.height * item.scale);
+      });
+    });
+
+    var cursor = PAD;
+    var placed = [];
+    var ops = [];
+    var arrowX = null;
+    prepared.forEach(function (items, sideIndex) {
+      var sidePlaced = [];
+      items.forEach(function (item, i) {
+        if (i > 0) {
+          ops.push({ type: 'plus', x: cursor + plusGap / 2 });
+          cursor += plusGap;
+        }
+        var coefW = item.coefText ? 18 : 0;
+        if (item.coefText && typeof item.coef === 'string') {
+          coefW = Math.max(18, estimateWidth(item.coefText, 18) + 6);
+        }
+        var x = cursor;
+        var sx = x + coefW;
+        var top = (rowH - item.geo.height * item.scale) / 2 + PAD + aboveH;
+        placed.push({ item: item, x: sx, y: top });
+        sidePlaced.push({ item: item, x: sx, coefX: x + coefW / 2 });
+        cursor += coefW + item.width + itemGap;
+      });
+      prepared[sideIndex] = sidePlaced;
+      if (sideIndex === 0) {
+        arrowX = cursor + arrowW / 2;
+        ops.push({ type: 'arrow', x: arrowX, arrow: eq.arrow });
+        cursor += arrowW;
+      }
+    });
+    var width = Math.max(180, cursor - itemGap + PAD);
+    var height = rowH + PAD * 2 + aboveH + belowH;
+    var midY = PAD + aboveH + rowH / 2;
+    var out = '<svg class="rp-struct-svg rp-eq-svg" viewBox="0 0 ' + width.toFixed(1) + ' ' + height.toFixed(1) +
+      '" role="img" aria-label="' + esc(label || '反応式') + '" preserveAspectRatio="xMidYMid meet">';
+    out += '<g class="rp-eq-species">';    placed.forEach(function (p) {
+      var item = p.item;
+      out += '<g transform="translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ') scale(' +
+        item.scale.toFixed(4) + ') translate(' + (-item.geo.x).toFixed(1) + ' ' + (-item.geo.y).toFixed(1) + ')">' +
+        item.inner + '</g>';
+    });
+    out += '</g>';
+    prepared.forEach(function (items) {
+      items.forEach(function (p) {
+        if (p.item.coefText) {
+          out += '<text x="' + (p.coefX || p.x).toFixed(1) + '" y="' + (midY + 7).toFixed(1) +
+            '" text-anchor="middle" class="rp-eq-coef">' + esc(p.item.coefText) + '</text>';
+        }
+      });
+    });
+    ops.forEach(function (op) {
+      if (op.type === 'plus') {
+        out += '<text x="' + op.x.toFixed(1) + '" y="' + midY.toFixed(1) +
+          '" text-anchor="middle" dominant-baseline="middle" class="rp-eq-op">＋</text>';
+        return;
+      }
+      if (op.arrow === 'equilibrium') {
+        out += '<g class="rp-eq-arrow"><path class="rp-eq-arrow-line" d="M' + (op.x - 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
+          ' L' + (op.x + 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
+          ' M' + (op.x + 22).toFixed(1) + ',' + (midY + 4).toFixed(1) +
+          ' L' + (op.x - 22).toFixed(1) + ',' + (midY + 4).toFixed(1) + '"/>' +
+          '<path class="rp-eq-arrow-line" d="M' + (op.x + 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
+          ' L' + (op.x + 14).toFixed(1) + ',' + (midY - 9).toFixed(1) +
+          ' M' + (op.x + 22).toFixed(1) + ',' + (midY - 4).toFixed(1) +
+          ' L' + (op.x + 14).toFixed(1) + ',' + (midY + 1).toFixed(1) +
+          ' M' + (op.x - 22).toFixed(1) + ',' + (midY + 4).toFixed(1) +
+          ' L' + (op.x - 14).toFixed(1) + ',' + (midY - 1).toFixed(1) +
+          ' M' + (op.x - 22).toFixed(1) + ',' + (midY + 4).toFixed(1) +
+          ' L' + (op.x - 14).toFixed(1) + ',' + (midY + 9).toFixed(1) + '"/></g>';
+        return;
+      }
+      out += '<g class="rp-eq-arrow"><path class="rp-eq-arrow-line" d="M' + (op.x - 24).toFixed(1) + ',' + midY.toFixed(1) +
+        ' L' + (op.x + 20).toFixed(1) + ',' + midY.toFixed(1) + '"/>' +
+        '<path class="rp-eq-arrow-head" d="M' + (op.x + 24).toFixed(1) + ',' + midY.toFixed(1) +
+        ' L' + (op.x + 14).toFixed(1) + ',' + (midY - 7).toFixed(1) +
+        ' L' + (op.x + 14).toFixed(1) + ',' + (midY + 7).toFixed(1) + ' Z"/></g>';
+    });
+    if (arrowX != null && aboveLines.length) {
+      out += '<g class="rp-eq-conditions">';
+      aboveLines.forEach(function (line, index) {
+        out += '<text x="' + arrowX.toFixed(1) + '" y="' + (PAD + 13 + index * 17).toFixed(1) +
+          '" text-anchor="middle" class="rp-eq-cond">' + esc(line) + '</text>';
+      });
+      out += '</g>';
+    }
+    if (arrowX != null && belowLines.length) {
+      out += '<g class="rp-eq-conditions">';
+      belowLines.forEach(function (line, index) {
+        out += '<text x="' + arrowX.toFixed(1) + '" y="' + (PAD + aboveH + rowH + 13 + index * 17).toFixed(1) +
+          '" text-anchor="middle" class="rp-eq-cond">' + esc(line) + '</text>';
+      });
+      out += '</g>';
+    }
+    out += '</svg>';
+    return out;
+  }
+
+  /* ------------------------------------------------------------------
    * 公開レンダリング
    * ------------------------------------------------------------------ */
 
@@ -3414,6 +3631,7 @@
     validate: validate,
     validateAll: validateAll,
     renderStructure: renderStructure,
+    renderEquation: renderEquation,
     renderCompound: renderCompound,
     figurePlan: figurePlan,
     structureView: structureView,

@@ -180,7 +180,30 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/10-2-preparing-alkyl-halides-from-alkanes-radical-halogenation",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "塩素 Cl₂",
+        "below": "紫外線",
+        "left": [
+          {
+            "compound": "methane"
+          },
+          {
+            "species": "Cl2"
+          }
+        ],
+        "right": [
+          {
+            "compound": "chloromethane"
+          },
+          {
+            "species": "HCl"
+          }
+        ],
+        "explanation": "一置換段階の式。実際はジ・トリ・テトラ塩化物の混合物になる（個別の注記を参照）。"
+      }
     },
     {
       "id": "chloromethane-chlorination",
@@ -246,7 +269,27 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/8-2-halogenation-of-alkenes-addition-of-x2",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "臭素 Br₂",
+        "below": "",
+        "left": [
+          {
+            "compound": "ethene"
+          },
+          {
+            "species": "Br2"
+          }
+        ],
+        "right": [
+          {
+            "compound": "1,2-dibromoethane"
+          }
+        ],
+        "explanation": "臭素水を用いると水が共存する（既存の注記を保持）。"
+      }
     },
     {
       "id": "ethene-hydrogen-bromide",
@@ -267,7 +310,26 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/7-7-electrophilic-addition-reactions-of-alkenes",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "HBr",
+        "below": "",
+        "left": [
+          {
+            "compound": "ethene"
+          },
+          {
+            "species": "HBr"
+          }
+        ],
+        "right": [
+          {
+            "compound": "bromoethane"
+          }
+        ]
+      }
     },
     {
       "id": "ethene-hydrogenation",
@@ -288,7 +350,26 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/8-6-reduction-of-alkenes-hydrogenation",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "Pd／Pt 触媒",
+        "below": "H₂ 付加",
+        "left": [
+          {
+            "compound": "ethene"
+          },
+          {
+            "species": "H2"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethane"
+          }
+        ]
+      }
     },
     {
       "id": "ethene-hydration",
@@ -309,7 +390,26 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/7-7-electrophilic-addition-reactions-of-alkenes",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "強酸触媒",
+        "below": "H₂O",
+        "left": [
+          {
+            "compound": "ethene"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethanol"
+          }
+        ]
+      }
     },
     {
       "id": "propene-hydrogenation",
@@ -330,7 +430,26 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/8-6-reduction-of-alkenes-hydrogenation",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "Pd／Pt 触媒",
+        "below": "H₂ 付加",
+        "left": [
+          {
+            "compound": "propene"
+          },
+          {
+            "species": "H2"
+          }
+        ],
+        "right": [
+          {
+            "compound": "propane"
+          }
+        ]
+      }
     },
     {
       "id": "propene-hydration",
@@ -359,7 +478,27 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/7-8-orientation-of-electrophilic-additions-markovnikovs-rule",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "強酸触媒",
+        "below": "H₂O",
+        "left": [
+          {
+            "compound": "propene"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "propan-2-ol"
+          }
+        ],
+        "explanation": "マルコフニコフ則により2位にOHが付く（既存の説明を参照）。"
+      }
     },
     {
       "id": "ethyne-partial-hydrogenation",
@@ -467,7 +606,27 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/18-2-preparing-ethers",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "硫酸触媒",
+        "below": "脱水縮合",
+        "left": [
+          {
+            "compound": "ethanol",
+            "coef": 2
+          }
+        ],
+        "right": [
+          {
+            "compound": "diethyl-ether"
+          },
+          {
+            "species": "H2O"
+          }
+        ]
+      }
     },
     {
       "id": "methanol-dehydration-ether",
@@ -559,7 +718,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "Dess–Martin 試薬",
+        "below": "",
+        "left": [
+          {
+            "compound": "methanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "formaldehyde"
+          }
+        ]
+      }
     },
     {
       "id": "formaldehyde-oxidation-formic",
@@ -580,7 +755,32 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "塩基性過マンガン酸カリウム／熱い硝酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "formaldehyde"
+          }
+        ],
+        "right": [
+          {
+            "compound": "formic-acid"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "17.7",
+            "title": "Oxidation of Alcohols",
+            "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "ethanol-oxidation-ethanal",
@@ -601,7 +801,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "Dess–Martin 試薬",
+        "below": "",
+        "left": [
+          {
+            "compound": "ethanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethanal"
+          }
+        ]
+      }
     },
     {
       "id": "ethanal-oxidation-acetic",
@@ -622,7 +838,32 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "塩基性過マンガン酸カリウム／熱い硝酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "ethanal"
+          }
+        ],
+        "right": [
+          {
+            "compound": "acetic-acid"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "17.7",
+            "title": "Oxidation of Alcohols",
+            "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "ethanol-oxidation-acetic",
@@ -644,7 +885,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "KMnO₄（塩基性水溶液）",
+        "below": "加熱 → 酸性化",
+        "left": [
+          {
+            "compound": "ethanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "acetic-acid"
+          }
+        ]
+      }
     },
     {
       "id": "propan-1-ol-oxidation",
@@ -665,7 +922,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "Dess–Martin 試薬",
+        "below": "",
+        "left": [
+          {
+            "compound": "propan-1-ol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "propanal"
+          }
+        ]
+      }
     },
     {
       "id": "propan-2-ol-oxidation",
@@ -687,7 +960,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "Dess–Martin 試薬",
+        "below": "",
+        "left": [
+          {
+            "compound": "propan-2-ol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "acetone"
+          }
+        ]
+      }
     },
     {
       "id": "butan-1-ol-oxidation",
@@ -708,7 +997,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "Dess–Martin 試薬",
+        "below": "",
+        "left": [
+          {
+            "compound": "butan-1-ol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "butanal"
+          }
+        ]
+      }
     },
     {
       "id": "propanal-oxidation",
@@ -729,7 +1034,32 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "塩基性過マンガン酸カリウム／熱い硝酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "propanal"
+          }
+        ],
+        "right": [
+          {
+            "compound": "propionic-acid"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "17.7",
+            "title": "Oxidation of Alcohols",
+            "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "benzyl-alcohol-oxidation",
@@ -750,7 +1080,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "Dess–Martin 試薬",
+        "below": "",
+        "left": [
+          {
+            "compound": "benzyl-alcohol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "benzaldehyde"
+          }
+        ]
+      }
     },
     {
       "id": "benzaldehyde-oxidation",
@@ -771,7 +1117,32 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "塩基性過マンガン酸カリウム／熱い硝酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "benzaldehyde"
+          }
+        ],
+        "right": [
+          {
+            "compound": "benzoic-acid"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "17.7",
+            "title": "Oxidation of Alcohols",
+            "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "ethanal-reduction",
@@ -792,7 +1163,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-4-alcohols-from-carbonyl-compounds-reduction",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "NaBH₄",
+        "below": "",
+        "left": [
+          {
+            "compound": "ethanal"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethanol"
+          }
+        ]
+      }
     },
     {
       "id": "acetone-reduction",
@@ -813,7 +1200,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-4-alcohols-from-carbonyl-compounds-reduction",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "NaBH₄",
+        "below": "",
+        "left": [
+          {
+            "compound": "acetone"
+          }
+        ],
+        "right": [
+          {
+            "compound": "propan-2-ol"
+          }
+        ]
+      }
     },
     {
       "id": "propanal-reduction",
@@ -834,7 +1237,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-4-alcohols-from-carbonyl-compounds-reduction",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "NaBH₄",
+        "below": "",
+        "left": [
+          {
+            "compound": "propanal"
+          }
+        ],
+        "right": [
+          {
+            "compound": "propan-1-ol"
+          }
+        ]
+      }
     },
     {
       "id": "butanal-reduction",
@@ -855,7 +1274,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-4-alcohols-from-carbonyl-compounds-reduction",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "NaBH₄",
+        "below": "",
+        "left": [
+          {
+            "compound": "butanal"
+          }
+        ],
+        "right": [
+          {
+            "compound": "butan-1-ol"
+          }
+        ]
+      }
     },
     {
       "id": "ethanol-bromination",
@@ -935,7 +1370,38 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "acetic-acid"
+          },
+          {
+            "compound": "ethanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethyl-acetate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "acetic-acid-methanol-esterification",
@@ -957,7 +1423,38 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "acetic-acid"
+          },
+          {
+            "compound": "methanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "methyl-acetate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "acetic-acid-butanol-esterification",
@@ -979,7 +1476,38 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "acetic-acid"
+          },
+          {
+            "compound": "butan-1-ol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "butyl-acetate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "acetic-acid-isoamyl-esterification",
@@ -1002,7 +1530,38 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "acetic-acid"
+          },
+          {
+            "compound": "3-methylbutan-1-ol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "isoamyl-acetate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "acetic-acid-glycerol-esterification",
@@ -1024,7 +1583,41 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "acetic-acid",
+            "coef": 3
+          },
+          {
+            "compound": "glycerol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "triacetin"
+          },
+          {
+            "species": "H2O",
+            "coef": 3
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ],
+        "explanation": "3:1 の総括化学量論。部分エステルや選択性は保証しない。"
+      }
     },
     {
       "id": "formic-acid-methanol-esterification",
@@ -1046,7 +1639,38 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "formic-acid"
+          },
+          {
+            "compound": "methanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "methyl-formate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "formic-acid-ethanol-esterification",
@@ -1068,7 +1692,38 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "formic-acid"
+          },
+          {
+            "compound": "ethanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethyl-formate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "propionic-acid-methanol-esterification",
@@ -1090,7 +1745,38 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "propionic-acid"
+          },
+          {
+            "compound": "methanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "methyl-propionate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "propionic-acid-ethanol-esterification",
@@ -1112,7 +1798,38 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "propionic-acid"
+          },
+          {
+            "compound": "ethanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethyl-propionate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "butanoic-acid-ethanol-esterification",
@@ -1134,7 +1851,38 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "butanoic-acid"
+          },
+          {
+            "compound": "ethanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethyl-butyrate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "oxalic-acid-methanol-esterification",
@@ -1156,7 +1904,40 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "oxalic-acid"
+          },
+          {
+            "compound": "methanol",
+            "coef": 2
+          }
+        ],
+        "right": [
+          {
+            "compound": "dimethyl-oxalate"
+          },
+          {
+            "species": "H2O",
+            "coef": 2
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "oxalic-acid-phenol-esterification",
@@ -1207,7 +1988,39 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "salicylic-acid"
+          },
+          {
+            "compound": "methanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "methyl-salicylate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ],
+        "explanation": "サリチル酸のカルボキシ基のエステル化。フェノール性OHはそのまま残る。"
+      }
     },
     {
       "id": "salicylic-acid-acetylation",
@@ -1230,7 +2043,29 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/21-5-chemistry-of-acid-anhydrides",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "無水酢酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "salicylic-acid"
+          },
+          {
+            "compound": "acetic-anhydride"
+          }
+        ],
+        "right": [
+          {
+            "compound": "aspirin"
+          },
+          {
+            "compound": "acetic-acid"
+          }
+        ]
+      }
     },
     {
       "id": "aspirin-hydrolysis",
@@ -1252,7 +2087,30 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "NaOH 水溶液 → 酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "aspirin"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "salicylic-acid"
+          },
+          {
+            "compound": "acetic-acid"
+          }
+        ],
+        "explanation": "塩の生成・中和は省略した総括式。"
+      }
     },
     {
       "id": "methyl-salicylate-hydrolysis",
@@ -1274,7 +2132,29 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "NaOH 水溶液 → 酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "methyl-salicylate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "salicylic-acid"
+          },
+          {
+            "compound": "methanol"
+          }
+        ]
+      }
     },
     {
       "id": "ethyl-acetate-hydrolysis",
@@ -1296,7 +2176,29 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "NaOH 水溶液 → 酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "ethyl-acetate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "acetic-acid"
+          },
+          {
+            "compound": "ethanol"
+          }
+        ]
+      }
     },
     {
       "id": "acetic-acid-neutralization",
@@ -1382,7 +2284,41 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "glycerol"
+          },
+          {
+            "compound": "stearic-acid",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "tristearin"
+          },
+          {
+            "species": "H2O",
+            "coef": 3
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ],
+        "explanation": "3:1 の総括化学量論。部分エステルや選択性は保証しない。"
+      }
     },
     {
       "id": "glycerol-palmitic-esterification",
@@ -1404,7 +2340,41 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "glycerol"
+          },
+          {
+            "compound": "palmitic-acid",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "tripalmitin"
+          },
+          {
+            "species": "H2O",
+            "coef": 3
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ],
+        "explanation": "3:1 の総括化学量論。部分エステルや選択性は保証しない。"
+      }
     },
     {
       "id": "glycerol-oleic-esterification",
@@ -1426,7 +2396,41 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "glycerol"
+          },
+          {
+            "compound": "oleic-acid",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "triolein"
+          },
+          {
+            "species": "H2O",
+            "coef": 3
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ],
+        "explanation": "3:1 の総括化学量論。部分エステルや選択性は保証しない。"
+      }
     },
     {
       "id": "glycerol-linoleic-esterification",
@@ -1448,7 +2452,41 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "強酸触媒（Fischer エステル化）",
+        "below": "",
+        "left": [
+          {
+            "compound": "glycerol"
+          },
+          {
+            "compound": "linoleic-acid",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "trilinolein"
+          },
+          {
+            "species": "H2O",
+            "coef": 3
+          }
+        ],
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "21.6",
+            "title": "Chemistry of Esters",
+            "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+            "date": "2026-11-16"
+          }
+        ],
+        "explanation": "3:1 の総括化学量論。部分エステルや選択性は保証しない。"
+      }
     },
     {
       "id": "tristearin-saponification",
@@ -1473,7 +2511,31 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/27-2-soap",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "NaOH 水溶液",
+        "below": "加熱",
+        "left": [
+          {
+            "compound": "tristearin"
+          },
+          {
+            "species": "NaOH",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-stearate",
+            "coef": 3
+          },
+          {
+            "compound": "glycerol"
+          }
+        ]
+      }
     },
     {
       "id": "tripalmitin-saponification",
@@ -1498,7 +2560,31 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/27-2-soap",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "NaOH 水溶液",
+        "below": "加熱",
+        "left": [
+          {
+            "compound": "tripalmitin"
+          },
+          {
+            "species": "NaOH",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-palmitate",
+            "coef": 3
+          },
+          {
+            "compound": "glycerol"
+          }
+        ]
+      }
     },
     {
       "id": "triolein-saponification",
@@ -1523,7 +2609,31 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/27-2-soap",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "NaOH 水溶液",
+        "below": "加熱",
+        "left": [
+          {
+            "compound": "triolein"
+          },
+          {
+            "species": "NaOH",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-oleate",
+            "coef": 3
+          },
+          {
+            "compound": "glycerol"
+          }
+        ]
+      }
     },
     {
       "id": "tristearin-hydrolysis",
@@ -1545,7 +2655,32 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "NaOH 水溶液 → 酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "tristearin"
+          },
+          {
+            "species": "H2O",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "stearic-acid",
+            "coef": 3
+          },
+          {
+            "compound": "glycerol"
+          }
+        ],
+        "explanation": "塩の生成・中和は省略した総括式。"
+      }
     },
     {
       "id": "triolein-hydrogenation",
@@ -1567,7 +2702,28 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/8-6-reduction-of-alkenes-hydrogenation",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "Pd などの触媒",
+        "below": "H₂ 付加（完全水素化）",
+        "left": [
+          {
+            "compound": "triolein"
+          },
+          {
+            "species": "H2",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "tristearin"
+          }
+        ],
+        "explanation": "完全水素化の式。部分水素化では二重結合が残る（既存の注記を参照）。"
+      }
     },
     {
       "id": "oleic-acid-elaidic",
@@ -1697,7 +2853,29 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/16-2-other-aromatic-substitutions",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "濃 HNO₃／濃 H₂SO₄",
+        "below": "",
+        "left": [
+          {
+            "compound": "benzene"
+          },
+          {
+            "species": "HNO3"
+          }
+        ],
+        "right": [
+          {
+            "compound": "nitrobenzene"
+          },
+          {
+            "species": "H2O"
+          }
+        ]
+      }
     },
     {
       "id": "benzene-sulfonation",
@@ -1718,7 +2896,26 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/16-2-other-aromatic-substitutions",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "equilibrium",
+        "above": "発煙硫酸（SO₃）",
+        "below": "",
+        "left": [
+          {
+            "compound": "benzene"
+          },
+          {
+            "species": "SO3"
+          }
+        ],
+        "right": [
+          {
+            "compound": "benzenesulfonic-acid"
+          }
+        ]
+      }
     },
     {
       "id": "benzene-chlorination",
@@ -1739,7 +2936,29 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/16-2-other-aromatic-substitutions",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "Cl₂／FeCl₃ 触媒",
+        "below": "",
+        "left": [
+          {
+            "compound": "benzene"
+          },
+          {
+            "species": "Cl2"
+          }
+        ],
+        "right": [
+          {
+            "compound": "chlorobenzene"
+          },
+          {
+            "species": "HCl"
+          }
+        ]
+      }
     },
     {
       "id": "nitrobenzene-reduction",
@@ -1760,7 +2979,24 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/16-2-other-aromatic-substitutions",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "Sn／Fe などの還元剤",
+        "below": "酸塩基の状態は省略",
+        "left": [
+          {
+            "compound": "nitrobenzene"
+          }
+        ],
+        "right": [
+          {
+            "compound": "aniline"
+          }
+        ],
+        "explanation": "酸性条件でアニリン塩になった後の中和工程は省略。"
+      }
     },
     {
       "id": "aniline-hydrochloride",
@@ -1888,7 +3124,38 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/24-8-reactions-of-arylamines",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "NaNO₂ と酸（HCl）",
+        "below": "",
+        "left": [
+          {
+            "compound": "aniline"
+          },
+          {
+            "species": "NaNO2"
+          },
+          {
+            "species": "HCl",
+            "coef": 2
+          }
+        ],
+        "right": [
+          {
+            "compound": "benzenediazonium-chloride"
+          },
+          {
+            "species": "NaCl"
+          },
+          {
+            "species": "H2O",
+            "coef": 2
+          }
+        ],
+        "explanation": "ジアゾニウム塩は塩化物として示す。"
+      }
     },
     {
       "id": "diazonium-phenol-coupling",
@@ -1911,7 +3178,33 @@
           "date": "2026-11-10"
         }
       ],
-      "note": "アゾ基を介して2つの環がつながる。"
+      "note": "アゾ基を介して2つの環がつながる。",
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "フェノール",
+        "below": "",
+        "left": [
+          {
+            "compound": "benzenediazonium-chloride"
+          },
+          {
+            "compound": "phenol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "p-hydroxyazobenzene"
+          },
+          {
+            "species": "H+"
+          },
+          {
+            "species": "Cl-"
+          }
+        ],
+        "explanation": "H⁺ と Cl⁻ は対イオンの正味。塩基・中和塩の工程は省略した総括式。"
+      }
     },
     {
       "id": "aniline-sulfonation",
@@ -1963,7 +3256,29 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/24-8-reactions-of-arylamines",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "無水酢酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "aniline"
+          },
+          {
+            "compound": "acetic-anhydride"
+          }
+        ],
+        "right": [
+          {
+            "compound": "acetanilide"
+          },
+          {
+            "compound": "acetic-acid"
+          }
+        ]
+      }
     },
     {
       "id": "cumene-oxidation",
@@ -1984,7 +3299,26 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-9-phenols-and-their-uses",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "空気（O₂）",
+        "below": "高温",
+        "left": [
+          {
+            "compound": "cumene"
+          },
+          {
+            "species": "O2"
+          }
+        ],
+        "right": [
+          {
+            "compound": "cumene-hydroperoxide"
+          }
+        ]
+      }
     },
     {
       "id": "cumene-hydroperoxide-decomposition",
@@ -2007,7 +3341,27 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-9-phenols-and-their-uses",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "cumene-hydroperoxide"
+          }
+        ],
+        "right": [
+          {
+            "compound": "phenol"
+          },
+          {
+            "compound": "acetone"
+          }
+        ],
+        "explanation": "反応物1分子からフェノール1分子とアセトン1分子が生じ、副生成物を生じない。"
+      }
     },
     {
       "id": "phenol-acid-neutralization",
@@ -2031,7 +3385,29 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-2-properties-of-alcohols-and-phenols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "NaOH 水溶液",
+        "below": "",
+        "left": [
+          {
+            "compound": "phenol"
+          },
+          {
+            "species": "NaOH"
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-phenoxide"
+          },
+          {
+            "species": "H2O"
+          }
+        ]
+      }
     },
     {
       "id": "sodium-phenoxide-carboxylation",
@@ -2081,7 +3457,30 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/25-8-disaccharides",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "酸／インベルターゼ",
+        "below": "",
+        "left": [
+          {
+            "compound": "sucrose"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "glucose"
+          },
+          {
+            "compound": "fructose"
+          }
+        ],
+        "explanation": "スクロース1分子からグルコースとフルクトースが1分子ずつ生じる。"
+      }
     },
     {
       "id": "maltose-hydrolysis",
@@ -2145,7 +3544,33 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/25-8-disaccharides",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "酵素",
+        "below": "",
+        "left": [
+          {
+            "compound": "starch"
+          }
+        ],
+        "right": [
+          {
+            "compound": "maltose"
+          }
+        ],
+        "explanation": "部分加水分解で鎖長は一定しないため、マルトースを代表として示す。",
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "25.9",
+            "title": "Polysaccharides and Their Synthesis",
+            "url": "https://openstax.org/books/organic-chemistry/pages/25-9-polysaccharides-and-their-synthesis",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "starch-hydrolysis-glucose",
@@ -2166,7 +3591,24 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/25-9-polysaccharides-and-their-synthesis",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "α-グリコシダーゼ",
+        "below": "",
+        "left": [
+          {
+            "compound": "starch"
+          }
+        ],
+        "right": [
+          {
+            "compound": "glucose"
+          }
+        ],
+        "explanation": "完全加水分解の図。鎖長と末端は省略。"
+      }
     },
     {
       "id": "dextrin-hydrolysis",
@@ -2229,7 +3671,23 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/25-6-reactions-of-monosaccharides",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "NaBH₄",
+        "below": "",
+        "left": [
+          {
+            "compound": "glucose"
+          }
+        ],
+        "right": [
+          {
+            "compound": "sorbitol"
+          }
+        ]
+      }
     },
     {
       "id": "glucose-fermentation",
@@ -2303,7 +3761,27 @@
           "date": "2026-11-10"
         }
       ],
-      "note": "ペプチド結合（アミド結合）の形成。"
+      "note": "ペプチド結合（アミド結合）の形成。",
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "保護基・DCC/EDC",
+        "below": "保護脱保護は省略",
+        "left": [
+          {
+            "compound": "glycine"
+          },
+          {
+            "compound": "alanine"
+          }
+        ],
+        "right": [
+          {
+            "compound": "glycylalanine"
+          }
+        ],
+        "explanation": "保護基の脱着と縮合剤由来の尿素誘導体などは省略。"
+      }
     },
     {
       "id": "glycine-glycine-peptide",
@@ -2332,7 +3810,24 @@
           "date": "2026-11-10"
         }
       ],
-      "note": "ペプチド結合（アミド結合）の形成。"
+      "note": "ペプチド結合（アミド結合）の形成。",
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "保護基・DCC/EDC",
+        "below": "保護脱保護は省略",
+        "left": [
+          {
+            "compound": "glycine",
+            "coef": 2
+          }
+        ],
+        "right": [
+          {
+            "compound": "glycylglycine"
+          }
+        ]
+      }
     },
     {
       "id": "alanine-glycine-peptide",
@@ -2362,7 +3857,26 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/26-7-peptide-synthesis",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "保護基・DCC/EDC",
+        "below": "保護脱保護は省略",
+        "left": [
+          {
+            "compound": "alanine"
+          },
+          {
+            "compound": "glycine"
+          }
+        ],
+        "right": [
+          {
+            "compound": "alanylglycine"
+          }
+        ]
+      }
     },
     {
       "id": "cysteine-oxidation",
@@ -2384,7 +3898,24 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/26-4-peptides-and-proteins",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "穏やかな酸化",
+        "below": "酸化剤は未指定",
+        "left": [
+          {
+            "compound": "cysteine",
+            "coef": 2
+          }
+        ],
+        "right": [
+          {
+            "compound": "cystine"
+          }
+        ]
+      }
     },
     {
       "id": "protein-hydrolysis",
@@ -2404,7 +3935,33 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/26-5-amino-acid-analysis-of-peptides",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "above": "酸・塩基／酵素",
+        "below": "",
+        "left": [
+          {
+            "compound": "protein"
+          }
+        ],
+        "right": [
+          {
+            "text": "アミノ酸類"
+          }
+        ],
+        "explanation": "タンパク質は配列と重合度で組成が変わるため、生成物はアミノ酸類として示す。",
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "26.4",
+            "title": "Peptides and Proteins",
+            "url": "https://openstax.org/books/organic-chemistry/pages/26-4-peptides-and-proteins",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "glycylalanine-hydrolysis",
@@ -2426,7 +3983,39 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/26-5-amino-acid-analysis-of-peptides",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "酸・塩基／酵素",
+        "below": "",
+        "left": [
+          {
+            "compound": "glycylalanine"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "glycine"
+          },
+          {
+            "compound": "alanine"
+          }
+        ],
+        "explanation": "酸・塩基の状態は省略した総括式。",
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "26.4",
+            "title": "Peptides and Proteins",
+            "url": "https://openstax.org/books/organic-chemistry/pages/26-4-peptides-and-proteins",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "glycylglycine-hydrolysis",
@@ -2447,7 +4036,37 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/26-5-amino-acid-analysis-of-peptides",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "酸・塩基／酵素",
+        "below": "",
+        "left": [
+          {
+            "compound": "glycylglycine"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "glycine",
+            "coef": 2
+          }
+        ],
+        "explanation": "酸・塩基の状態は省略した総括式。",
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "26.4",
+            "title": "Peptides and Proteins",
+            "url": "https://openstax.org/books/organic-chemistry/pages/26-4-peptides-and-proteins",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "alanylglycine-hydrolysis",
@@ -2469,7 +4088,39 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/26-5-amino-acid-analysis-of-peptides",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "酸・塩基／酵素",
+        "below": "",
+        "left": [
+          {
+            "compound": "alanylglycine"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "alanine"
+          },
+          {
+            "compound": "glycine"
+          }
+        ],
+        "explanation": "酸・塩基の状態は省略した総括式。",
+        "verification": [
+          {
+            "source": "OpenStax Organic Chemistry (McMurry)",
+            "section": "26.4",
+            "title": "Peptides and Proteins",
+            "url": "https://openstax.org/books/organic-chemistry/pages/26-4-peptides-and-proteins",
+            "date": "2026-11-16"
+          }
+        ]
+      }
     },
     {
       "id": "aspartame-hydrolysis",
@@ -2505,7 +4156,25 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "above": "ラジカル開始剤（過酸化ベンゾイルなど）",
+        "below": "",
+        "left": [
+          {
+            "compound": "ethene",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "polyethylene"
+          }
+        ],
+        "explanation": "n は重合度。末端構造は省略。"
+      }
     },
     {
       "id": "propene-polymerization",
@@ -2526,7 +4195,25 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "above": "開始剤",
+        "below": "",
+        "left": [
+          {
+            "compound": "propene",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "polypropylene"
+          }
+        ],
+        "explanation": "n は重合度。末端構造は省略。"
+      }
     },
     {
       "id": "styrene-polymerization",
@@ -2554,7 +4241,25 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/31-1-chain-growth-polymers",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "above": "ラジカル開始剤／ブチルリチウム",
+        "below": "",
+        "left": [
+          {
+            "compound": "styrene",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "polystyrene"
+          }
+        ],
+        "explanation": "n は重合度。末端構造は省略。"
+      }
     },
     {
       "id": "vinyl-chloride-polymerization",
@@ -2575,7 +4280,25 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "above": "開始剤",
+        "below": "",
+        "left": [
+          {
+            "compound": "vinyl-chloride",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "pvc"
+          }
+        ],
+        "explanation": "n は重合度。末端構造は省略。"
+      }
     },
     {
       "id": "vinylidene-chloride-polymerization",
@@ -2798,7 +4521,25 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/31-4-step-growth-polymers",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "above": "少量の水",
+        "below": "加熱",
+        "left": [
+          {
+            "compound": "caprolactam",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "nylon6"
+          }
+        ],
+        "explanation": "開環重合。水由来の末端は省略。"
+      }
     },
     {
       "id": "nylon66-condensation",
@@ -2820,7 +4561,33 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/31-4-step-growth-polymers",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "above": "脱水縮合",
+        "below": "",
+        "left": [
+          {
+            "compound": "adipic-acid",
+            "coef": "n"
+          },
+          {
+            "compound": "hexamethylenediamine",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "nylon66"
+          },
+          {
+            "species": "H2O",
+            "coef": "2n"
+          }
+        ],
+        "explanation": "2種のモノマーの重縮合。n は繰り返し単位の数、水は 2n 分子。"
+      }
     },
     {
       "id": "pet-condensation",
@@ -2842,7 +4609,33 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/31-4-step-growth-polymers",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "above": "脱水縮合",
+        "below": "",
+        "left": [
+          {
+            "compound": "terephthalic-acid",
+            "coef": "n"
+          },
+          {
+            "compound": "ethylene-glycol",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "pet"
+          },
+          {
+            "species": "H2O",
+            "coef": "2n"
+          }
+        ],
+        "explanation": "2種のモノマーの重縮合。n は繰り返し単位の数、水は 2n 分子。"
+      }
     },
     {
       "id": "pla-polymerization",
@@ -3089,7 +4882,26 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/7-8-orientation-of-electrophilic-additions-markovnikovs-rule",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "HCl",
+        "below": "",
+        "left": [
+          {
+            "compound": "isobutene"
+          },
+          {
+            "species": "HCl"
+          }
+        ],
+        "right": [
+          {
+            "compound": "2-chloro-2-methylpropane"
+          }
+        ]
+      }
     },
     {
       "id": "propyne-hydration",
@@ -3111,7 +4923,27 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/9-4-hydration-of-alkynes",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "HgSO₄／H₂SO₄",
+        "below": "H₂O",
+        "left": [
+          {
+            "compound": "propyne"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "acetone"
+          }
+        ],
+        "explanation": "エノールを経てケト形（アセトン）になる。"
+      }
     },
     {
       "id": "2-methylpropan-2-ol-hydrogen-chloride",
@@ -3133,7 +4965,29 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "HCl",
+        "below": "0℃",
+        "left": [
+          {
+            "compound": "2-methylpropan-2-ol"
+          },
+          {
+            "species": "HCl"
+          }
+        ],
+        "right": [
+          {
+            "compound": "2-chloro-2-methylpropane"
+          },
+          {
+            "species": "H2O"
+          }
+        ]
+      }
     },
     {
       "id": "2-methylpropan-2-ol-dehydration",
@@ -3155,7 +5009,26 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "H₂SO₄ 水溶液",
+        "below": "加温",
+        "left": [
+          {
+            "compound": "2-methylpropan-2-ol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "isobutene"
+          },
+          {
+            "species": "H2O"
+          }
+        ]
+      }
     },
     {
       "id": "p-xylene-oxidation",
@@ -3177,7 +5050,32 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/16-8-oxidation-of-aromatic-compounds",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "空気（O₂）／Co(III) 触媒",
+        "below": "",
+        "left": [
+          {
+            "compound": "p-xylene"
+          },
+          {
+            "species": "O2",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "terephthalic-acid"
+          },
+          {
+            "species": "H2O",
+            "coef": 2
+          }
+        ],
+        "explanation": "メチル基2つがカルボキシ基になる総括式。"
+      }
     },
     {
       "id": "chlorobenzene-dow-phenol",
@@ -3206,7 +5104,33 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-2-properties-of-alcohols-and-phenols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "NaOH",
+        "below": "高温・高圧",
+        "left": [
+          {
+            "compound": "chlorobenzene"
+          },
+          {
+            "species": "NaOH",
+            "coef": 2
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-phenoxide"
+          },
+          {
+            "species": "NaCl"
+          },
+          {
+            "species": "H2O"
+          }
+        ]
+      }
     },
     {
       "id": "sodium-phenoxide-acidification",
@@ -3228,7 +5152,30 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/17-2-properties-of-alcohols-and-phenols",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "強酸",
+        "below": "対イオンは省略",
+        "left": [
+          {
+            "compound": "sodium-phenoxide"
+          },
+          {
+            "species": "H+"
+          }
+        ],
+        "right": [
+          {
+            "compound": "phenol"
+          },
+          {
+            "species": "Na+"
+          }
+        ],
+        "explanation": "強酸の対イオン（Cl⁻ など）は省略した正味の式。"
+      }
     },
     {
       "id": "ethyl-propionate-saponification",
@@ -3251,7 +5198,30 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "NaOH 水溶液 → 酸",
+        "below": "",
+        "left": [
+          {
+            "compound": "ethyl-propionate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "propionic-acid"
+          },
+          {
+            "compound": "ethanol"
+          }
+        ],
+        "explanation": "塩の生成・中和は省略した総括式。"
+      }
     },
     {
       "id": "fructose-base-isomerization",
@@ -3274,7 +5244,45 @@
           "url": "https://openstax.org/books/organic-chemistry/pages/25-6-reactions-of-monosaccharides",
           "date": "2026-11-10"
         }
-      ]
+      ],
+      "equation": {
+        "mode": "T",
+        "title": "構造変換の代替経路（平衡）",
+        "arrow": "equilibrium",
+        "above": "塩基性水溶液",
+        "below": "",
+        "explanation": "ケト-エノール中間体を経てグルコースとマンノースの混合物になる。1分子から2分子は生じないため、2つの平衡として示す。",
+        "variants": [
+          {
+            "label": "グルコースへの異性化",
+            "arrow": "equilibrium",
+            "left": [
+              {
+                "compound": "fructose"
+              }
+            ],
+            "right": [
+              {
+                "compound": "glucose"
+              }
+            ]
+          },
+          {
+            "label": "マンノースへの異性化",
+            "arrow": "equilibrium",
+            "left": [
+              {
+                "compound": "fructose"
+              }
+            ],
+            "right": [
+              {
+                "compound": "mannose"
+              }
+            ]
+          }
+        ]
+      }
     }
   ],
   "verifiedAt": "2026-11-10",

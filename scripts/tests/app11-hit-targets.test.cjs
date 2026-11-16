@@ -26,9 +26,12 @@ const HIT_RADIUS = HIT_WIDTH / 2;
 const HIT_SAMPLE_STEP = 2;
 // 具体図（427物質・86反応・分野・型・状態）の投影と、一般図12分類16変換の配置の固定ハッシュ。
 // data.js 全文のハッシュは一般図の座標を詰めるたびに変わるため、投影ごとに分けて守る。
+// 反応カードの反応式（equation）は意味factsではないため concrete から外し、専用の
+// EQUATION_SHA256 で別に固定する（式を足しても物質・反応・分野・型・状態は変えない）。
 const CONCRETE_SHA256 = 'e227216f0a72f0f75003ff424e1ef61052e6c246b70dd486906cfc6ffa9b69a4';
 const CLASS_GEOMETRY_SHA256 = '7f413639125c3a6ea6795c2bc2f54bcc49ac7e27c23cb5120896b17cef5ec224';
 const NOTICE_SHA256 = '0839382096a9683caeb9c7ead3999e95299bc38e7808edfb9577d5ec29ceb8ef';
+const EQUATION_SHA256 = '99ea3f933d0590d629cbcad13dd637b2bf8c058ba024db1b2a445ae4a05271bd';
 
 function concreteFingerprint() {
   const meta = Object.assign({}, D.meta);
@@ -36,11 +39,22 @@ function concreteFingerprint() {
     .forEach((key) => { delete meta[key]; });
   return crypto.createHash('sha256').update(JSON.stringify({
     compounds: D.compounds,
-    reactions: D.reactions,
+    reactions: D.reactions.map((r) => {
+      const copy = Object.assign({}, r);
+      delete copy.equation;
+      return copy;
+    }),
     regions: D.regions,
     types: D.types,
     states: D.states,
     meta: meta
+  })).digest('hex');
+}
+
+function equationFingerprint() {
+  return crypto.createHash('sha256').update(JSON.stringify({
+    reactions: D.reactions.map((r) => r.equation || null),
+    species: D.species
   })).digest('hex');
 }
 
@@ -552,6 +566,8 @@ test('[static] 反応線の見た目（幅・色・端点）と data は変え�
   assert.match(css, /\.rp-edge--secondary\s*\{[^}]*stroke-dasharray:\s*6 5/, '補助線は点線');
   assert.equal(concreteFingerprint(), CONCRETE_SHA256,
     '具体図（427物質・86反応・分野・型・状態）の投影を変えない');
+  assert.equal(equationFingerprint(), EQUATION_SHA256,
+    '反応カードの反応式（86件のmode・係数・無機species）を式だけの投影として固定する');
   assert.equal(classGeometryFingerprint(), CLASS_GEOMETRY_SHA256,
     '一般図の配置（12分類・16変換の座標・経路・area/frame）は意図した詰め方だけ');
   assert.equal(D.meta.compoundCount, 427);
