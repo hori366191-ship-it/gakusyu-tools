@@ -60,6 +60,43 @@
   color: var(--rp-muted);
   overflow-wrap: anywhere;
 }
+/* 反応式（カード内）。式は横スクロールにせず、図全体をカード幅へ縮小する。
+   段組みは structure-draw.js 側で決め、ここでは縦にclipしない。 */
+.rp-eq-fig .rp-eq-open {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: zoom-in;
+  touch-action: manipulation;
+}
+.rp-eq-fig .rp-eq-open:hover {
+  border-color: var(--rp-line);
+  background: var(--rp-panel);
+}
+.rp-eq-fig .rp-eq-open:focus-visible {
+  outline: 3px solid var(--rp-focus);
+  outline-offset: 2px;
+}
+.rp-eq-fig .rp-struct__canvas {
+  display: block;
+  overflow: hidden;
+}
+.rp-eq-fig .rp-struct__canvas svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
 /* 一般反応式（複数の構造を1枚に並べた図） */
 .rp-struct__canvas .rp-eq-svg { display: block; width: 100%; height: auto; max-height: 320px; overflow: visible; }
 .rp-struct--wide .rp-struct__canvas .rp-eq-svg { width: var(--rp-struct-width, 100%); max-width: none; max-height: none; }

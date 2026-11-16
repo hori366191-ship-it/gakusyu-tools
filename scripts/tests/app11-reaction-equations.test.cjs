@@ -544,7 +544,7 @@ test('[svg] 構造specを持たない項目は示性式と偽らず文字の箱�
 test('[svg] 反応カードは大きい分子を潰さず、行の高さを広げて文字サイズを保つ', () => {
   assert.match(APP_JS, /var REACTION_EQUATION_OPTS = \{ row: 200, maxWidth: 300, minScale: 0\.55 \};/);
   assert.match(APP_JS, /function buildReactionEquationSvg\(eq, ariaLabel\) \{\n    return SD\.renderEquation\(eq, ariaLabel, REACTION_EQUATION_OPTS\);/);
-  assert.match(APP_JS, /function equationFigureBlock[\s\S]{0,200}buildReactionEquationSvg\(equation, aria\)/);
+  assert.match(APP_JS, /function equationFigureBlock[\s\S]{0,200}buildCardEquationSvg\(equation, aria\)/);
   const svg = renderStoredEquation(D.reactions.find((r) => r.id === 'glycerol-stearic-esterification'));
   const vb = /viewBox="0 0 ([0-9.]+) ([0-9.]+)"/.exec(svg);
   assert.ok(Number(vb[2]) >= 250, '条件の行を含めて高さを確保する: ' + vb[2]);
@@ -587,11 +587,12 @@ test('[card] 個別情報の直前に反応式を出し、既存の説明（基�
   assert.ok(APP_JS.includes('view.kind === \'fallback\''), '示性式fallbackの区別を保つ');
 });
 
-test('[css] 反応式は既存の natural幅＋横スクロールを使い、条件の文字色をテーマ変数で持つ', () => {
-  assert.match(CSS, /\.rp-struct__canvas\s*\{[^}]*overflow-x:\s*auto/);
-  assert.match(CSS, /\.rp-struct--wide \.rp-struct__canvas \.rp-eq-svg\s*\{[^}]*width:\s*var\(--rp-struct-width/);
+test('[css] 反応式はカード内で横スクロールせず全体を縮小し、条件の文字色をテーマ変数で持つ', () => {
+  assert.match(CSS, /\.rp-eq-fig \.rp-struct__canvas\s*\{[^}]*overflow:\s*hidden/);
+  assert.match(CSS, /\.rp-eq-fig \.rp-struct__canvas svg\s*\{[^}]*width:\s*100%[^}]*max-height:\s*none/);
+  assert.match(CSS, /\.rp-eq-fig \.rp-eq-open\s*\{[^}]*display:\s*block[^}]*width:\s*100%/);
+  assert.match(CSS, /\.rp-eq-fig \.rp-eq-open:focus-visible\s*\{[^}]*outline:\s*3px solid var\(--rp-focus\)/);
   assert.match(CSS, /\.rp-eq-svg \.rp-eq-cond\s*\{[^}]*fill:\s*var\(--rp-accent-2\)/);
-  assert.match(CSS, /@media \(max-width: 430px\)[\s\S]*\.rp-struct--wide \.rp-struct__canvas \.rp-struct-svg\s*\{[^}]*max-height:\s*none/);
 });
 
 test('[data] data.js は生成物と一致し、反応式は反応ごとに equation キーへ投影される', () => {

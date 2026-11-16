@@ -871,6 +871,70 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-about__body .rp-info { margin-top: 16px; }
 .rp-about__body .rp-footer { margin-top: 18px; }
 
+/* ---------- equation zoom dialog ---------- */
+/* カードの反応式を、カードを閉じずに読める大きさで表示する。
+   dialog は内容の自然幅に合わせ、狭い画面では本文を横・縦にスクロールする。 */
+.rp-eq-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  width: fit-content;
+  min-width: min(320px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--rp-line);
+  border-radius: var(--rp-radius);
+  background: var(--rp-panel);
+  color: var(--rp-ink);
+  box-shadow: 0 24px 60px rgba(12, 28, 44, .34);
+  overflow: hidden;
+}
+.rp-eq-dialog[open] { display: flex; flex-direction: column; }
+.rp-eq-dialog::backdrop { background: rgba(10, 22, 32, .5); }
+.rp-eq-dialog__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 10px 16px;
+  background: var(--rp-panel-2);
+  border-bottom: 1px solid var(--rp-line);
+}
+.rp-eq-dialog__title { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.rp-eq-dialog__close {
+  flex: 0 0 auto;
+  border: 1px solid var(--rp-line);
+  background: var(--rp-panel);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.rp-eq-dialog__close:hover { border-color: var(--rp-accent); }
+.rp-eq-dialog__close:focus-visible { outline: 3px solid var(--rp-focus); outline-offset: 1px; }
+.rp-eq-dialog__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 14px 16px 18px;
+  -webkit-overflow-scrolling: touch;
+  user-select: text;
+}
+/* 自然幅で表示する。dialog が狭いときだけ横スクロールし、短い式を引き伸ばさない。 */
+.rp-eq-dialog__body > svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+}
+
 /* ---------- floating card ---------- */
 /* カードは右下の現在位置に重ねず、その上に置く（現在位置ボタンを操作不能にしない）。 */
 .rp-card {
@@ -1001,6 +1065,12 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   .rp-info { grid-template-columns: 1fr; }
   .rp-about { width: calc(100vw - 12px); max-height: 88dvh; }
   .rp-about__body { padding: 12px 12px 16px; }
+  .rp-eq-dialog { width: calc(100vw - 12px); max-width: none; max-height: 88dvh; }
+  .rp-eq-dialog__bar { padding: 8px 12px; }
+  .rp-eq-dialog__body {
+    padding: 10px 12px 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 @media (max-width: 430px) {
@@ -1021,5 +1091,5 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; }
-  .rp-map, .rp-card, .rp-btn, .rp-item, .rp-link, .rp-about { transition: none !important; animation: none !important; }
+  .rp-map, .rp-card, .rp-btn, .rp-item, .rp-link, .rp-about, .rp-eq-dialog { transition: none !important; animation: none !important; }
 }

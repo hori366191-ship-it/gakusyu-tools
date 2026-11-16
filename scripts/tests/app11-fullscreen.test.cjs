@@ -141,7 +141,7 @@ function loadAbout() {
   const searchStatus = { textContent: '' };
   const api = new Function(
     'aboutEl', 'aboutButton', 'searchInput', 'searchStatus', 'Core', 'D',
-    'closeCard', 'closePositionPopover', 'gotoEntity',
+    'closeCard', 'closePositionPopover', 'closeEquationDialog', 'gotoEntity',
     src + '\nreturn {' +
       ' openAbout: openAbout, closeAbout: closeAbout, activateListEntity: activateListEntity,' +
       ' focusFirstResult: focusFirstResult, status: function () { return searchStatus.textContent; } };'
@@ -149,6 +149,7 @@ function loadAbout() {
     aboutEl, aboutButton, searchInput, searchStatus, Core, D,
     function () { calls.push('close-card'); },
     function () { calls.push('close-popover'); },
+    function () { calls.push('close-eq-dialog'); },
     function (kind, id, trigger) { calls.push('goto:' + kind + ':' + id + ':' + (trigger && trigger.id)); }
   );
   return { api, dialog, calls, searchInput, aboutButton };
@@ -157,7 +158,7 @@ function loadAbout() {
 test('[dialog] 開く前にカードと現在位置の全文を閉じ、閉じたら起点はヘッダーのボタン', () => {
   const { api, dialog, calls, aboutButton } = loadAbout();
   api.openAbout();
-  assert.deepEqual(calls.slice(0, 2), ['close-card', 'close-popover'], 'カードとpopoverを先に閉じる');
+  assert.deepEqual(calls.slice(0, 3), ['close-eq-dialog', 'close-card', 'close-popover'], '式の拡大・カード・popoverを先に閉じる');
   assert.equal(dialog.show, 1, 'showModal で開く');
   assert.equal(dialog.open, true);
 

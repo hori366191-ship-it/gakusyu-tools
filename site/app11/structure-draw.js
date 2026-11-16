@@ -3115,6 +3115,126 @@
     return String(coef);
   }
 
+  function equationCoefWidth(item) {
+    if (!item.coefText) return 0;
+    if (typeof item.coef === 'string') return Math.max(18, estimateWidth(item.coefText, 18) + 6);
+    return 18;
+  }
+
+  function equationRowWidth(items, plusGap, itemGap) {
+    var width = 0;
+    items.forEach(function (item, i) {
+      if (i > 0) width += plusGap + itemGap;
+      width += equationCoefWidth(item) + item.width;
+    });
+    return width;
+  }
+
+  // 反応物（上段）→ 縦矢印と条件（中央）→ 生成物（下段）。
+  // 段の高さは実寸から取り、係数・＋・物質の順序は1段の式と変えない。
+  function renderEquationStack(prepared, aboveLines, belowLines, arrow, label, geom) {
+    var PAD = geom.pad;
+    var rowH = geom.rowH;
+    var plusGap = geom.plusGap;
+    var itemGap = geom.itemGap;
+    var rowWidths = prepared.map(function (items) { return equationRowWidth(items, plusGap, itemGap); });
+    var rowWidth = Math.max(rowWidths[0] || 0, rowWidths[1] || 0);
+    var condW = 0;
+    aboveLines.concat(belowLines).forEach(function (line) {
+      condW = Math.max(condW, estimateWidth(line, 12));
+    });
+    var bandW = condW ? 22 + condW : 28;
+    var width = Math.max(180, rowWidth, bandW) + PAD * 2;
+    var leftTop = PAD;
+    var bandTop = leftTop + rowH + 12;
+    var lineCount = aboveLines.length + belowLines.length;
+    var bandH = Math.max(52, 20 + lineCount * 17);
+    var rightTop = bandTop + bandH + 12;
+    var height = rightTop + rowH + PAD;
+    var bandLeft = (width - bandW) / 2;
+    var arrowX = condW ? bandLeft + 7 : width / 2;
+    var condX = bandLeft + 22;
+
+    var placed = [];
+    var pluses = [];
+    var coefs = [];
+    function layRow(items, top) {
+      var cursor = (width - equationRowWidth(items, plusGap, itemGap)) / 2;
+      var midY = top + rowH / 2;
+      items.forEach(function (item, i) {
+        if (i > 0) {
+          pluses.push({ x: cursor + plusGap / 2, y: midY });
+          cursor += plusGap;
+        }
+        var coefW = equationCoefWidth(item);
+        var y = top + (rowH - item.geo.height * item.scale) / 2;
+        placed.push({ item: item, x: cursor + coefW, y: y });
+        if (item.coefText) coefs.push({ text: item.coefText, x: cursor + coefW / 2, y: midY + 7 });
+        cursor += coefW + item.width + itemGap;
+      });
+    }
+    layRow(prepared[0] || [], leftTop);
+    layRow(prepared[1] || [], rightTop);
+
+    var out = '<svg class="rp-struct-svg rp-eq-svg rp-eq-svg--stack" viewBox="0 0 ' +
+      width.toFixed(1) + ' ' + height.toFixed(1) + '" role="img" aria-label="' +
+      esc(label || '反応式') + '" preserveAspectRatio="xMidYMid meet">';
+    out += '<g class="rp-eq-species">';
+    placed.forEach(function (p) {
+      out += '<g transform="translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ') scale(' +
+        p.item.scale.toFixed(4) + ') translate(' + (-p.item.geo.x).toFixed(1) + ' ' +
+        (-p.item.geo.y).toFixed(1) + ')">' + p.item.inner + '</g>';
+    });
+    out += '</g>';
+    coefs.forEach(function (c) {
+      out += '<text x="' + c.x.toFixed(1) + '" y="' + c.y.toFixed(1) +
+        '" text-anchor="middle" class="rp-eq-coef">' + esc(c.text) + '</text>';
+    });
+    pluses.forEach(function (p) {
+      out += '<text x="' + p.x.toFixed(1) + '" y="' + p.y.toFixed(1) +
+        '" text-anchor="middle" dominant-baseline="middle" class="rp-eq-op">＋</text>';
+    });
+    var topY = bandTop + 8;
+    var bottomY = bandTop + bandH - 8;
+    if (arrow === 'equilibrium') {
+      // 上下の段に対応する縦の往復矢印。左が上向き、右が下向き。
+      var upX = arrowX - 5;
+      var downX = arrowX + 5;
+      out += '<g class="rp-eq-arrow">' +
+        '<path class="rp-eq-arrow-line" d="M' + upX.toFixed(1) + ',' + bottomY.toFixed(1) +
+        ' L' + upX.toFixed(1) + ',' + topY.toFixed(1) + '"/>' +
+        '<path class="rp-eq-arrow-head" d="M' + upX.toFixed(1) + ',' + (topY - 2).toFixed(1) +
+        ' L' + (upX - 6).toFixed(1) + ',' + (topY + 9).toFixed(1) +
+        ' L' + (upX + 6).toFixed(1) + ',' + (topY + 9).toFixed(1) + ' Z"/>' +
+        '<path class="rp-eq-arrow-line" d="M' + downX.toFixed(1) + ',' + topY.toFixed(1) +
+        ' L' + downX.toFixed(1) + ',' + bottomY.toFixed(1) + '"/>' +
+        '<path class="rp-eq-arrow-head" d="M' + downX.toFixed(1) + ',' + (bottomY + 2).toFixed(1) +
+        ' L' + (downX - 6).toFixed(1) + ',' + (bottomY - 9).toFixed(1) +
+        ' L' + (downX + 6).toFixed(1) + ',' + (bottomY - 9).toFixed(1) + ' Z"/></g>';
+    } else {
+      out += '<g class="rp-eq-arrow"><path class="rp-eq-arrow-line" d="M' + arrowX.toFixed(1) + ',' +
+        topY.toFixed(1) + ' L' + arrowX.toFixed(1) + ',' + bottomY.toFixed(1) + '"/>' +
+        '<path class="rp-eq-arrow-head" d="M' + arrowX.toFixed(1) + ',' + (bottomY + 2).toFixed(1) +
+        ' L' + (arrowX - 6).toFixed(1) + ',' + (bottomY - 9).toFixed(1) +
+        ' L' + (arrowX + 6).toFixed(1) + ',' + (bottomY - 9).toFixed(1) + ' Z"/></g>';
+    }
+    if (condW) {
+      out += '<g class="rp-eq-conditions">';
+      aboveLines.forEach(function (line, index) {
+        out += '<text x="' + condX.toFixed(1) + '" y="' + (bandTop + 14 + index * 17).toFixed(1) +
+          '" class="rp-eq-cond">' + esc(line) + '</text>';
+      });
+      belowLines.forEach(function (line, index) {
+        out += '<text x="' + condX.toFixed(1) + '" y="' +
+          (bandTop + bandH - 8 - (belowLines.length - 1 - index) * 17).toFixed(1) +
+          '" class="rp-eq-cond">' + esc(line) + '</text>';
+      });
+      out += '</g>';
+    }
+    out += '</svg>';
+    return out;
+  }
+
   // 反応物・生成物の構造を1枚の SVG に並べ、係数・＋・矢印を付ける。
   // above / below は矢印の列の上下（触媒・温度など）に置く。未指定なら従来の一般反応式と同じ出力。
   // opts は反応カード用の拡大指定（一般図は既定値のまま）。
@@ -3169,6 +3289,17 @@
         rowH = Math.max(rowH, item.geo.height * item.scale);
       });
     });
+
+    // 反応カードで1段に収まらない式は、反応物を上段・矢印と条件を中央・生成物を下段に
+    // 積む（opts.stack）。既定（一般図）は従来どおり1段のままにする。
+    if (opts.stack) {
+      return renderEquationStack(prepared, aboveLines, belowLines, eq.arrow, label, {
+        pad: PAD,
+        rowH: rowH,
+        itemGap: itemGap,
+        plusGap: plusGap
+      });
+    }
 
     var cursor = PAD;
     var placed = [];

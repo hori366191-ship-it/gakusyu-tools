@@ -44,6 +44,10 @@
   var aboutEl = document.getElementById('rp-about');
   var aboutButton = document.getElementById('rp-about-open');
   var aboutClose = document.getElementById('rp-about-close');
+  var eqDialogEl = document.getElementById('rp-eq-dialog');
+  var eqDialogTitle = document.getElementById('rp-eq-dialog-title');
+  var eqDialogBody = document.getElementById('rp-eq-dialog-body');
+  var eqDialogClose = document.getElementById('rp-eq-dialog-close');
   var searchStatus = document.getElementById('rp-search-status');
   var listAll = document.getElementById('rp-list-all');
   var listResults = document.getElementById('rp-list-results');
@@ -107,6 +111,7 @@
   var selected = null;
   var activeRegion = null;
   var returnFocus = null;
+  var eqDialogOpener = null;
   var programmaticFocusTarget = null;
   var restoreAfterPointer = null;
   var suppressCompatFocus = false;
@@ -1557,6 +1562,8 @@
   /* ---------------- card ---------------- */
 
   function openCard(kind, id) {
+    // 別の実体へ移るときは、前の式の拡大ダイアログを残さない。
+    closeEquationDialog(false);
     var html;
     if (kind === 'compound') html = compoundCard(id);
     else if (kind === 'class') html = classCard(id);
@@ -1579,6 +1586,7 @@
 
   function closeCard(restore) {
     if (card.hidden) return;
+    closeEquationDialog(false);
     card.hidden = true;
     previewReaction = null;
     cardDetail.innerHTML = '';
@@ -1783,11 +1791,51 @@
   }
 
   // 反応カード用。具体物質は一般図の骨格より背が高いため、行の高さを広げ、
-  // 縮小率に下限を置いて文字を潰さない（横は自然幅＋横スクロール）。
+  // 縮小率に下限を置いて文字を潰さない（1段に収まらない式は buildCardEquationSvg で2段に積む）。
   var REACTION_EQUATION_OPTS = { row: 200, maxWidth: 300, minScale: 0.55 };
+  var REACTION_EQUATION_STACK_OPTS = { row: 200, maxWidth: 300, minScale: 0.55, stack: true };
+  // 1段の自然幅がこれを超える式は、カード内で反応物・矢印・生成物の2段に積む。
+  var EQUATION_STACK_MIN_WIDTH = 600;
 
   function buildReactionEquationSvg(eq, ariaLabel) {
     return SD.renderEquation(eq, ariaLabel, REACTION_EQUATION_OPTS);
+  }
+
+  function svgViewBoxWidth(svg) {
+    var vb = /viewBox="([^"]+)"/.exec(svg);
+    if (!vb) return 0;
+    var parts = String(vb[1]).trim().split(/\s+/);
+    var width = parseFloat(parts[2]);
+    return isFinite(width) ? width : 0;
+  }
+
+  // カード内の式は1段に収まる短い式だけを1段で見せ、長い式は2段に積む。
+  // 拡大ダイアログには、ここで選んだSVGをそのまま複製して渡す（段組みを戻さない）。
+  function buildCardEquationSvg(eq, ariaLabel) {
+    var svg = buildReactionEquationSvg(eq, ariaLabel);
+    if (svgViewBoxWidth(svg) > EQUATION_STACK_MIN_WIDTH) {
+      svg = SD.renderEquation(eq, ariaLabel, REACTION_EQUATION_STACK_OPTS);
+    }
+    return svg;
+  }
+
+  function buildGeneralEquationSvg(eq, ariaLabel) {
+    var svg = buildEquationSvg(eq, ariaLabel);
+    if (svgViewBoxWidth(svg) > EQUATION_STACK_MIN_WIDTH) {
+      svg = SD.renderEquation(eq, ariaLabel, { stack: true });
+    }
+    return svg;
+  }
+
+  // 図の説明は figcaption と note に残し、図そのものはボタンにして
+  // tap / Enter / Space で拡大ダイアログを開く。
+  function equationFigureMarkup(svg, caption, note, openLabel) {
+    return '<figure class="rp-struct rp-eq-fig">' +
+      (caption ? '<figcaption class="rp-struct__caption">' + esc(caption) + '</figcaption>' : '') +
+      '<button type="button" class="rp-eq-open" data-eq-open="1" aria-haspopup="dialog" aria-label="' +
+      esc(openLabel) + '"><span class="rp-struct__canvas">' + svg + '</span></button>' +
+      (note ? '<p class="rp-struct__note">' + esc(note) + '</p>' : '') +
+      '</figure>';
   }
 
   function equationFigure(edge) {
@@ -1800,20 +1848,14 @@
       (to ? to.name : edge.to) + 'への' + edge.label;
     var svg;
     try {
-      svg = buildEquationSvg(edge.equation, aria);
+      svg = buildGeneralEquationSvg(edge.equation, aria);
     } catch (err) {
       return '<figure class="rp-struct rp-struct--fallback"><figcaption class="rp-struct__caption">一般反応式（構造式）</figcaption>' +
         '<p class="rp-struct__note">一般反応式を表示できませんでした。</p></figure>';
     }
-    var vb = /viewBox="([^"]+)"/.exec(svg);
-    var width = vb ? parseFloat(String(vb[1]).trim().split(/\s+/)[2]) : 0;
-    var wide = width > 460;
-    var style = wide ? ' style="--rp-struct-width:' + Math.ceil(width) + 'px"' : '';
-    return '<figure class="rp-struct' + (wide ? ' rp-struct--wide' : '') + '">' +
-      '<figcaption class="rp-struct__caption">一般反応式（構造式）</figcaption>' +
-      '<div class="rp-struct__canvas"' + style + '>' + svg + '</div>' +
-      '<p class="rp-struct__note">係数・副生成物・矢印を含む一般化した反応式です。具体物質の反応条件を示すものではありません。</p>' +
-      '</figure>';
+    return equationFigureMarkup(svg, '一般反応式（構造式）',
+      '係数・副生成物・矢印を含む一般化した反応式です。具体物質の反応条件を示すものではありません。',
+      '一般反応式を拡大');
   }
 
   function typeCommon(type) {
@@ -1975,7 +2017,7 @@
   function equationFigureBlock(equation, caption, note, aria) {
     var svg;
     try {
-      svg = buildReactionEquationSvg(equation, aria);
+      svg = buildCardEquationSvg(equation, aria);
     } catch (err) {
       svg = '';
     }
@@ -1984,15 +2026,7 @@
         esc(caption) + '</figcaption><p class="rp-struct__note">反応式を表示できませんでした。' +
         '根拠のない式を推定して表示することはありません。</p></figure>';
     }
-    var vb = /viewBox="([^"]+)"/.exec(svg);
-    var width = vb ? parseFloat(String(vb[1]).trim().split(/\s+/)[2]) : 0;
-    var wide = width > 460;
-    var style = wide ? ' style="--rp-struct-width:' + Math.ceil(width) + 'px"' : '';
-    return '<figure class="rp-struct' + (wide ? ' rp-struct--wide' : '') + '">' +
-      '<figcaption class="rp-struct__caption">' + esc(caption) + '</figcaption>' +
-      '<div class="rp-struct__canvas"' + style + '>' + svg + '</div>' +
-      (note ? '<p class="rp-struct__note">' + esc(note) + '</p>' : '') +
-      '</figure>';
+    return equationFigureMarkup(svg, caption, note, '反応式を拡大');
   }
 
   function reactionEquationFigure(r) {
@@ -2231,9 +2265,83 @@
     openCard(kind, id);
   }
 
+  /* ---------------- 反応式の拡大ダイアログ ---------------- */
+
+  function clearEquationDialogBody() {
+    if (!eqDialogBody) return;
+    while (eqDialogBody.firstChild) eqDialogBody.removeChild(eqDialogBody.firstChild);
+  }
+
+  // カード内の図は自前の描画器が生成したSVG。同じDOMを複製し、idの重複だけを除く。
+  function prepareEquationDialogSvg(source) {
+    var clone = source.cloneNode(true);
+    if (clone.removeAttribute) clone.removeAttribute('id');
+    var withId = clone.querySelectorAll ? clone.querySelectorAll('[id]') : [];
+    Array.prototype.forEach.call(withId, function (node) { node.removeAttribute('id'); });
+    var vb = clone.getAttribute ? clone.getAttribute('viewBox') : '';
+    var parts = vb ? String(vb).trim().split(/[\s,]+/) : [];
+    var width = parseFloat(parts[2]);
+    var height = parseFloat(parts[3]);
+    if (isFinite(width) && isFinite(height) && width > 0 && height > 0) {
+      clone.setAttribute('width', String(Math.ceil(width)));
+      clone.setAttribute('height', String(Math.ceil(height)));
+      // viewBox の自然寸法を固定し、dialog 側の width:auto が 300px へ落ちないようにする。
+      if (clone.style) {
+        clone.style.width = Math.ceil(width) + 'px';
+        clone.style.height = Math.ceil(height) + 'px';
+      }
+    }
+    return clone;
+  }
+
+  function equationFigureCaption(trigger) {
+    var fig = trigger && trigger.closest ? trigger.closest('.rp-eq-fig') : null;
+    var cap = fig && fig.querySelector ? fig.querySelector('.rp-struct__caption') : null;
+    var text = cap && cap.textContent ? String(cap.textContent).trim() : '';
+    return text || '反応式';
+  }
+
+  function openEquationDialog(trigger) {
+    if (!eqDialogEl || !eqDialogBody || !trigger) return;
+    var source = trigger.querySelector ? trigger.querySelector('.rp-struct__canvas svg') : null;
+    if (!source) return;
+    clearEquationDialogBody();
+    eqDialogBody.appendChild(prepareEquationDialogSvg(source));
+    if (eqDialogTitle) eqDialogTitle.textContent = equationFigureCaption(trigger);
+    eqDialogOpener = trigger;
+    // カードは残したまま、全文popoverだけを閉じる。
+    closePositionPopover(false);
+    if (typeof eqDialogEl.showModal === 'function') eqDialogEl.showModal();
+    else eqDialogEl.setAttribute('open', '');
+    if (eqDialogClose) eqDialogClose.focus();
+  }
+
+  // restoreFocus=false はカードを閉じる経路から呼ぶ。閉じたカード内の起点へは戻さない。
+  function closeEquationDialog(restoreFocus) {
+    var opener = eqDialogOpener;
+    eqDialogOpener = null;
+    if (eqDialogEl) {
+      if (eqDialogEl.open && typeof eqDialogEl.close === 'function') eqDialogEl.close();
+      else if (eqDialogEl.open) eqDialogEl.removeAttribute('open');
+    }
+    clearEquationDialogBody();
+    if (restoreFocus !== false && opener && !card.hidden && document.contains(opener) && opener.focus) {
+      opener.focus();
+    }
+  }
+
+  // Esc・nativeの閉じ処理は close イベントで後始末し、起点へフォーカスを戻す。
+  function onEquationDialogClose() {
+    var opener = eqDialogOpener;
+    eqDialogOpener = null;
+    clearEquationDialogBody();
+    if (opener && !card.hidden && document.contains(opener) && opener.focus) opener.focus();
+  }
+
   // 「このアプリについて」はモーダルの dialog。開く前にカードと現在位置の全文を閉じる。
   function openAbout() {
     if (!aboutEl) return;
+    closeEquationDialog(false);
     closeCard(false);
     closePositionPopover(false);
     if (typeof aboutEl.showModal === 'function') aboutEl.showModal();
@@ -2429,12 +2537,25 @@
     if (aboutButton && aboutEl) aboutButton.addEventListener('click', openAbout);
     if (aboutClose && aboutEl) aboutClose.addEventListener('click', function () { closeAbout(); });
     cardClose.addEventListener('click', function () { closeCard(true); });
+    if (eqDialogEl) {
+      eqDialogEl.addEventListener('close', onEquationDialogClose);
+      if (eqDialogClose) {
+        eqDialogClose.addEventListener('click', function () { closeEquationDialog(true); });
+      }
+    }
     positionTrigger.addEventListener('click', function () {
       if (positionPopover.hidden) openPositionPopover();
       else closePositionPopover(true);
     });
 
     cardDetail.addEventListener('click', function (e) {
+      // 式の拡大は、カード内の他の操作（反応・物質リンク）より先に処理する。
+      var eqTrigger = e.target.closest ? e.target.closest('[data-eq-open]') : null;
+      if (eqTrigger) {
+        e.preventDefault();
+        openEquationDialog(eqTrigger);
+        return;
+      }
       var action = e.target.closest ? e.target.closest('button[data-action="fit-reaction"]') : null;
       if (action) {
         e.preventDefault();
@@ -2471,6 +2592,8 @@
     document.addEventListener('pointerdown', function () { suppressCompatFocus = false; }, true);
     document.addEventListener('pointerdown', function (e) {
       if (card.hidden) return;
+      // 拡大ダイアログはモーダル。背景のカードを外側クリックで閉じない。
+      if (eqDialogEl && eqDialogEl.open) return;
       if (card.contains(e.target)) return;
       // クリック自体でフォーカスが動くため、復帰は pointerup の後に行う
       restoreAfterPointer = returnFocus;
@@ -2516,6 +2639,7 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         // ダイアログの Escape は native の閉じ処理に任せる（フォーカスも native が戻す）。
+        if (eqDialogEl && eqDialogEl.open) return;
         if (aboutEl && aboutEl.open) return;
         if (!positionPopover.hidden) {
           e.preventDefault();
@@ -2542,6 +2666,8 @@
     });
 
     window.addEventListener('resize', function () {
+      // 画面幅が変わったら、古い寸法の拡大表示は閉じる（次のtapで開き直す）。
+      if (eqDialogEl && eqDialogEl.open) closeEquationDialog(false);
       measure();
       syncToolbarInset();
       syncPositionInset();
