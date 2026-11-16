@@ -51,7 +51,7 @@ function fingerprintClassGeometry() {
 }
 
 test('[normal] 通常データの4つの固定ハッシュと件数は不変', () => {
-  assert.equal(fingerprintConcrete(), 'e227216f0a72f0f75003ff424e1ef61052e6c246b70dd486906cfc6ffa9b69a4');
+  assert.equal(fingerprintConcrete(), '9981909cc0b5dae965a3e5ec9d000157065cd3588e4eb81a9fd7fed305a11390');
   assert.equal(fingerprintEquation(), '99ea3f933d0590d629cbcad13dd637b2bf8c058ba024db1b2a445ae4a05271bd');
   assert.equal(fingerprintClassGeometry(), '7f413639125c3a6ea6795c2bc2f54bcc49ac7e27c23cb5120896b17cef5ec224');
   const html = read('index.html');
@@ -67,6 +67,24 @@ test('[normal] 通常データの4つの固定ハッシュと件数は不変', (
   assert.equal(D.reactions.reduce((n, r) => n + r.edges.length, 0), 207);
   assert.equal(D.compounds.filter((c) => c.incoming + c.outgoing === 0).length, 326);
   assert.equal(D.compounds.filter((c) => c.incoming + c.outgoing > 0).length, 101);
+});
+
+test('[normal] 構造SVGが変わるのはマレイン酸/フマル酸の2物質だけ', () => {
+  const S = require(path.join(APP, 'structure-draw.js'));
+  const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts', 'tests', 'fixtures',
+    'app11-structure-baseline.json'), 'utf8'));
+  const changed = [];
+  D.compounds.forEach((c) => {
+    const view = S.structureView(c);
+    const current = {
+      kind: view.kind,
+      svgs: (view.figures || []).map((f) => crypto.createHash('sha256')
+        .update(String(S.renderStructure(f.structure, c.name))).digest('hex'))
+    };
+    if (JSON.stringify(current) !== JSON.stringify(baseline[c.id])) changed.push(c.id);
+  });
+  assert.deepEqual(changed.sort(), ['fumaric-acid', 'maleic-acid'],
+    '今回の明示構造2件以外は構造SVG完全同値');
 });
 
 test('[base] アカデミックは通常データと整合し、compounds 配列を持たない overlay', () => {
@@ -169,7 +187,7 @@ test('[equation] 学術の B/N/T は通常の収支検証を再利用し、P は
       assert.ok(all.some((i) => typeof i.coef === 'string'), r.id + ' に繰り返し係数がない');
       all.forEach((i) => {
         if (typeof i.coef === 'number') assert.ok(Number.isInteger(i.coef) && i.coef >= 1 && i.coef <= 99);
-        else assert.ok(['n', 'm', 'p', 'd', '2n', '3n'].includes(i.coef), r.id + ' の係数 ' + i.coef);
+        else assert.ok(['n', 'm', 'p', 'd', 'dn', '2n', '3n'].includes(i.coef), r.id + ' の係数 ' + i.coef);
       });
     } else {
       // 通常の projectEquation と同じ検証を通る（B は収支、T は text のみ許可）。
@@ -349,7 +367,7 @@ test('[chemistry] 重合の外側係数・不定組成・variants・出典・条
   assert.equal(epoxy.equation.right.some((i) => i.id === 'HCl'), false, 'HCl 係数を固定しない');
   ['academic-cellulose-acetate', 'academic-cellulose-nitrate'].forEach((id) => {
     const r = A.reactions.find((x) => x.id === id);
-    assert.equal(r.equation.left[1].coef, 'd', id + ' は置換度 d');
+    assert.equal(r.equation.left[1].coef, 'dn', id + ' は置換度 d×繰返し n');
   });
   // variants は混合生成物3件だけ。graph の products は2件のまま。
   const variantIds = A.reactions.filter((r) => r.equation && r.equation.variants && r.equation.variants.length)

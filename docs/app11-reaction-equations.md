@@ -7,7 +7,7 @@
 - 正本: `site-src/app11/reactions.json` の各反応の `equation`
 - 無機・イオンの構造: `site-src/app11/species.json`（反応式専用。427物質には加えない）
 - 公開データ: `site/app11/data.js` の `reactions[].equation` と `species`
-- 描画: `site/app11/structure-draw.js` の `renderEquation`（一般図16変換と共通）
+- 描画: `site/shared/organic-structure.js` の `renderEquation`（`site/app11/structure-draw.js` が再エクスポート。一般図16変換と共通）
 - 検証: `node --test scripts/tests/app11-reaction-equations.test.cjs`
 
 ## mode

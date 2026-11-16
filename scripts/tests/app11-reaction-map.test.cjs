@@ -747,6 +747,7 @@ test('[static] app10 は右上の収録台帳と同じ領域に試験版への�
   const normalized = lab
     .split('../../site/themes/').join('../themes/')
     .split('../../site/app11/').join('../app11/')
+    .split('../../site/shared/').join('../shared/')
     .split('../../site/credits.html').join('../credits.html');
   assert.equal(normalized, prod, 'design-lab/app10-next/index.html が本番と一致する');
   assert.ok(lab.includes('href="../../site/app11/"'), 'design-lab 側の相対パス');

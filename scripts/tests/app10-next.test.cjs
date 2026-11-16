@@ -51,6 +51,7 @@ function normalizeToProduction(html) {
   return html
     .split('../../site/themes/').join('../themes/')
     .split('../../site/app11/').join('../app11/')
+    .split('../../site/shared/').join('../shared/')
     .split('../../site/credits.html').join('../credits.html');
 }
 
@@ -66,7 +67,11 @@ function structureSignature(spec) {
     }).sort();
     return atoms.join('|') + '#' + bonds.join('|');
   }
-  if (['skeleton', 'sub', 'multi', 'custom'].includes(spec.type)) return 'graph:' + graphSignature(spec);
+  if (['skeleton', 'sub', 'multi', 'custom'].includes(spec.type)) {
+    const stereo = spec.stereo ? JSON.stringify(spec.stereo) : '';
+    const geom = spec.geometry || spec.ez || '';
+    return 'graph:' + graphSignature(spec) + '#' + stereo + '#' + geom;
+  }
   if (spec.type === 'ring-sub') return 'ring:' + (spec.subs || []).map((s) => s.at + ':' + s.label).sort().join('|');
   if (spec.type === 'condensed') return 'condensed:' + (spec.lines || []).join('|');
   if (spec.type === 'projection') return 'projection:' + spec.kind + ':' + spec.sugar + ':' + (spec.anomer || '');
@@ -1479,9 +1484,9 @@ test('[chain] 157件すべてが検証済みexact graphからデスクリプタ�
     assert.equal(route.shape, d.descriptorId, id + ': routeのshape');
     assert.ok(C.chainDescriptorById(route.shape), id + ': routeのshapeが実在');
   }
-  assert.deepEqual(sources, { build: 83, condensed: 71, manual: 3 });
-  assert.equal(X.exactGraphFor(D.COMPOUNDS['maleic-acid']).source, 'manual');
-  assert.equal(X.exactGraphFor(D.COMPOUNDS['fumaric-acid']).source, 'manual');
+  assert.deepEqual(sources, { build: 85, condensed: 71, manual: 1 });
+  assert.equal(X.exactGraphFor(D.COMPOUNDS['maleic-acid']).source, 'build');
+  assert.equal(X.exactGraphFor(D.COMPOUNDS['fumaric-acid']).source, 'build');
   assert.equal(X.exactGraphFor(D.COMPOUNDS.eicosane).source, 'manual');
   const reached = new Set();
   for (const d of C.CHAIN_DESCRIPTOR_LIST) d.compoundIds.forEach((id) => reached.add(id));
@@ -2358,8 +2363,9 @@ test('[ui] 登録データ検証エラーと構造式の失敗表示は残す', 
   assert.ok(card.includes('登録データの検証に失敗しました'), '検証エラーの見出しを残す');
   assert.ok(card.includes('check.errors'), '具体的なerrorsを残す');
   assert.ok(card.includes('表示を停止しています'), '停止理由を残す');
-  const draw = read('draw.js');
+  const draw = fs.readFileSync(path.join(ROOT, 'site', 'shared', 'organic-structure.js'), 'utf8');
   assert.ok(draw.includes('構造式を表示できません'), '図の失敗表示を残す');
+  assert.equal(read('draw.js').includes('function renderStructure'), false, '薄いアダプタに描画ロジックを置かない');
 });
 
 test('[url] 通知を出さずにURL復元と選択解除だけを維持する', () => {

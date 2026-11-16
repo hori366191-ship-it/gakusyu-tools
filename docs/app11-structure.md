@@ -1,23 +1,29 @@
 # app11 物質カードの構造図 — 実装・coverage記録
 
 - 日付: 2026-11-14
-- 対象: `site/app11/structure-draw.js`（新規・凍結コピー）、`site/app11/structure.css`（新規）、
-  `site/app11/app.js`、`site/app11/index.html`、`site/app11/data.js`（生成物）、
+- 対象: `site/shared/organic-structure.js`（共有canonical・新規）、`site/app11/structure-draw.js`（薄いアダプタ）、
+  `site/app11/structure.css`（新規）、`site/app11/app.js`、`site/app11/index.html`、`site/app11/data.js`（生成物）、
   `scripts/app11/source-data.cjs`、`scripts/app11/build-map-data.cjs`、
   `scripts/tests/app11-structure.test.cjs`（新規）、既存 app11 テストの script 順更新
 - 目的: 物質名タップの詳細カード冒頭にあった formula だけの行を、登録済み構造データによる
   構造図へ置き換える。式を構造式と偽装せず、一般分類カードには具体構造を入れない。
 
-## コピー元と独立性
+## 共有モジュールと独立性
 
-- `site/app11/structure-draw.js` は `site/app10/draw.js` の凍結コピー。
-  - コピー元 commit: `9ef5e0999a73022ed0351303ad2d4944b80df16f`
-  - コピー元 SHA256: `861e0fd9fed7593ed07e2adf0a9812168d9dda1130428b91fdd052ab3eeaf11d`
-  - 変更: UMD 名前空間 `OCDraw` → `RPStructure`、CSS class `oc-` → `rp-struct-`。
-  - 外部化学描画ライブラリへの依存なし。元ファイルに外部由来のライセンス表記はない
-    （元の著作権・方針コメントは保持）。
-- `index.html` の読み込み順は `data.js` → `map-core.js` → `structure-draw.js` → `app.js`。
+- 描画・検証・表示計画の正本は `site/shared/organic-structure.js`（UMD:
+  `window.GakusyuOrganicStructure`）。`site/app10/draw.js` と `site/app11/structure-draw.js` は
+  名前空間（`OCDraw` / `RPStructure`）とCSSクラス接頭辞（`oc-` / `rp-struct-`・`rp-eq-`）だけを
+  決める薄いアダプタで、描画ロジックを複製しない。
+- 共有モジュール内部のクラス名は `oc-` / `oc-eq-` を正準とし、`createRenderer({ structurePrefix,
+  equationPrefix })` が返り値の文字列だけをアプリ別の接頭辞へ変換する。そのため既存CSS
+  （`oc-*` / `rp-struct-*` / `rp-eq-*`）は変更しない。
+- 共有モジュールは DOM・ネットワーク・各アプリの `data.js` に依存しない（純粋な文字列生成）。
+  Node からは `require`、ブラウザからは `GakusyuOrganicStructure` で使う。
+- 外部化学描画ライブラリへの依存なし。元ファイルに外部由来のライセンス表記はない。
+- `index.html` の読み込み順は `data.js` → `academic-data.js` → `map-core.js` →
+  `../shared/organic-structure.js` → `structure-draw.js` → `app.js`。
   実行時に `site/app10/draw.js` や app10 の JS を読み込まない。
+- app10 も同じ共有モジュールを `./draw.js` の直前に読み込む（`../shared/organic-structure.js`）。
 - 構造specは `source-data.cjs` で app10 の `COMPOUNDS` から次の項目だけを深いコピーで抽出する:
   `structure`, `figures`, `formulaVariable`, `formulaDisplay`, `formulaReference`。
   `precursors` / `reactions` / `nature` などの自由文は取り込まない。
@@ -28,13 +34,13 @@
 
 | 区分 | 件数 | カードの見出し | 表示 |
 |---|---:|---|---|
-| dual | 298 | 構造式 | `plan.full` のSVG |
+| dual | 300 | 構造式 | `plan.full` のSVG |
 | atom-limit | 17 | 骨格式（水素原子省略） | 正本specから作った炭素骨格graph（H省略）。graphを作れない場合だけ「示性式（結合図未対応）」 |
 | projection / multi | 6 | 投影式（multiは全図） | 投影式。multi は `plan.figures` をすべて表示 |
 | triglyceride | 4 | 油脂の簡略図 | グリセリン骨格＋脂肪酸鎖の簡略図 |
 | schematic | 58 | 模式図 | 模式図 |
 | polymer | 39 | 繰り返し単位 | 繰り返し単位と重合度表記 |
-| stereo + complex | 5 | 示性式（詳細構造なし） | `condensed` spec の示性式のみ。構造式と呼ばない |
+| stereo + complex | 3 | 示性式（詳細構造なし） | `condensed` spec の示性式のみ。構造式と呼ばない |
 | 合計 | 427 | — | — |
 
 - 表示メタデータは `RPStructure.structureView(c)` が返す実際のspec種別で決める。
@@ -51,8 +57,12 @@
   （以前は +2001.7 / -2001.7 の反対側）で、transを示唆しない。
 - 元graph3（carminic-acid / carthamin / heme）は検証済みの描画座標をそのまま保持し、
   新しい正規化を適用しない。環のC=Cも変更しない。明示stereo/投影も対象外。
-- 5件の詳細構造なしfallbackは「示性式（詳細構造なし）」、graphを作れない
-  atom-limitだけ「示性式（結合図未対応）」と明記する。既存5件と同じ fallback 区分に統合する。
+- 3件の詳細構造なしfallbackは「示性式（詳細構造なし）」、graphを作れない
+  atom-limitだけ「示性式（結合図未対応）」と明記する。既存3件と同じ fallback 区分に統合する。
+- マレイン酸（シス）とフマル酸（トランス）は示性式だけでは区別できないため、12原子
+  C4O4H4 の明示結合グラフ（C=C 両炭素のH、各COOHの C=O と O-H）を正本specに持ち、
+  両アプリと同じ共有モジュールから描く。`stereo:{doubleBond:'C=C',geometry:'cis'|'trans'}`、
+  `geometry`、`ez`（Z/E）を保持する。
 - `structure` が無い場合は formula を構造式として描画せず、「構造データが未整備です」と表示する。
 - 一般分類（classMap）のカードには構造図を入れない。物質の構造は compoundCard だけに置く。
 - 材料・family は単一固定分子として描画しない。polymer / schematic / triglyceride は
@@ -85,7 +95,7 @@ node --test scripts/tests/app11-reaction-map.test.cjs
 - `app11-structure.test.cjs`: 15/15 pass
 - app11 の構造・一般図・既存回帰の合計: 67/67 pass
   - 427物質の構造spec、既存 427/294/86 不変
-  - figurePlan 区分と実表示区分 298/17/6/4/58/39/5、合計427
+  - figurePlan 区分と実表示区分 300/17/6/4/58/39/3、合計427
   - 骨格式17件が `data-kind=graph` の結合線を持ち、condensedへ落ちない
   - 17骨格の全辺長>epsilon、実SVG line長>0、座標一意、主成分接続、原子価、
     枝交差/非接続辺重なり/非接続原子-辺/ラベル衝突0
@@ -93,9 +103,11 @@ node --test scripts/tests/app11-reaction-map.test.cjs
   - `structureView` / `renderStructure` が入力を変更せず、2回で同一（ringCenterもdeep copy）
   - 非環状C=Cは両側置換基の外積が反対符号にならず、E/transを示唆しない
   - 全427物質の `structureView` / `renderStructure` がSVGを返し、エラーSVGなし
-  - 5件の fallback が condensed 示性式で、構造式と呼ばない
+  - 3件の fallback が condensed 示性式で、構造式と呼ばない
+  - 共有モジュール単体がDOM/ネットワーク/data.js非依存で、両アプリの薄いアダプタが
+    同じcanonicalを使い、接頭辞正規化後に同一SVGを返す
   - タッチ外tap後の互換mousedownで起点focusを守る（操作要素は除外）
-  - `RPStructure` 名前空間、app10 JS 非依存、script 順
+  - `RPStructure` 名前空間、app10 JS 非依存、共有モジュールの script 順
   - compoundCard の formula 行削除、classCard に構造なし
   - structure.css がテーマ変数だけを使い、横スクロールをカード内に閉じる
 - `app11-class-map.test.cjs`: 13/13 pass（一般図12分類16変換、390px fit、anchor含む）

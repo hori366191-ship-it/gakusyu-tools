@@ -8,8 +8,8 @@
  * 手順:
  *   1. data.js の構造（skeleton/sub/multi/custom は buildStructure、
  *      condensed は condensedGraphFor）から原子グラフを得る。
- *      簡略式でグラフ化できない maleic-acid / fumaric-acid / eicosane は
- *      このファイル内の検証済み manual graph を使う。
+ *      簡略式でグラフ化できない eicosane だけ、このファイル内の検証済み
+ *      manual graph を使う（maleic-acid / fumaric-acid は明示結合グラフが正本）。
  *   2. カルボニル C（C=O）とニトリル C（C≡N）を functional core として除外する。
  *      OH をもつ炭素は炭化水素部分に残す。
  *   3. O/N/ハロゲンなどの官能基原子を除いた炭素グラフの連結成分を、
@@ -85,8 +85,8 @@
   };
 
   /* ------------------------------------------------------------------
-   * 検証済み manual graph（簡略式のままだと原子数上限・cis/trans 表記で
-   * condensedGraphFor が graph を返さない3件だけ）
+   * 検証済み manual graph（簡略式のままだと原子数上限で
+   * condensedGraphFor が graph を返さない1件だけ）
    * ------------------------------------------------------------------ */
   function linearAlkaneGraph(n) {
     var atoms = [];
@@ -104,34 +104,7 @@
     return { atoms: atoms, bonds: bonds, mode: 'condensed', width: 88 + (n - 1) * 34, height: 200 };
   }
 
-  function maleicGraph() {
-    // HOOC–CH=CH–COOH。cis/trans は graph では区別しない（デスクリプタは
-    // 親炭化水素の C2 エテンとして扱い、結果カード側で物質を区別する）。
-    return {
-      atoms: [
-        { el: 'C', h: 0, x: 120, y: 100 },
-        { el: 'O', h: 0, x: 120, y: 52 },
-        { el: 'O', h: 1, x: 56, y: 100 },
-        { el: 'C', h: 1, x: 190, y: 100 },
-        { el: 'C', h: 1, x: 260, y: 100 },
-        { el: 'C', h: 0, x: 330, y: 100 },
-        { el: 'O', h: 0, x: 330, y: 52 },
-        { el: 'O', h: 1, x: 394, y: 100 }
-      ],
-      bonds: [
-        { a: 0, b: 1, order: 2 }, { a: 0, b: 2, order: 1 }, { a: 0, b: 3, order: 1 },
-        { a: 3, b: 4, order: 2 }, { a: 4, b: 5, order: 1 },
-        { a: 5, b: 6, order: 2 }, { a: 5, b: 7, order: 1 }
-      ],
-      mode: 'condensed',
-      width: 450,
-      height: 200
-    };
-  }
-
   var MANUAL_GRAPHS = {
-    'maleic-acid': maleicGraph(),
-    'fumaric-acid': maleicGraph(),
     eicosane: linearAlkaneGraph(20)
   };
 
@@ -579,7 +552,15 @@
     atoms.forEach(function (a, i) {
       if (a.el === 'C') {
         var ns = adj[i].map(function (n) {
-          return { el: atoms[n.atom].el, order: n.order, atom: n.atom, h: atoms[n.atom].h || 0 };
+          return {
+            el: atoms[n.atom].el,
+            order: n.order,
+            atom: n.atom,
+            h: atoms[n.atom].h || 0,
+            hasH: (atoms[n.atom].h || 0) > 0 || adj[n.atom].some(function (x) {
+              return atoms[x.atom].el === 'H';
+            })
+          };
         });
         var isCarbonyl = ns.some(function (n) { return n.el === 'O' && n.order === 2; });
         var isNitrile = ns.some(function (n) { return n.el === 'N' && n.order === 3; });
@@ -591,7 +572,7 @@
         var hasH = (a.h || 0) > 0 || ns.some(function (n) { return n.el === 'H'; });
         if (cl.length) { acidChloride++; return; }
         if (singleO.length) {
-          var isCarboxyl = singleO.some(function (n) { return n.h > 0; });
+          var isCarboxyl = singleO.some(function (n) { return n.hasH; });
           var isAnhydride = singleO.some(function (n) {
             return adj[n.atom].some(function (x) {
               if (x.atom === i) return false;
@@ -691,7 +672,15 @@
     coreIndices.forEach(function (i) {
       var a = graph.atoms[i];
       var ns = adj[i].map(function (n) {
-        return { el: graph.atoms[n.atom].el, order: n.order, atom: n.atom, h: graph.atoms[n.atom].h || 0 };
+        return {
+          el: graph.atoms[n.atom].el,
+          order: n.order,
+          atom: n.atom,
+          h: graph.atoms[n.atom].h || 0,
+          hasH: (graph.atoms[n.atom].h || 0) > 0 || adj[n.atom].some(function (x) {
+            return graph.atoms[x.atom].el === 'H';
+          })
+        };
       });
       var explicitH = ns.filter(function (n) { return n.el === 'H'; }).length;
       var hCount = (a.h || 0) + explicitH;
@@ -710,7 +699,7 @@
           });
         });
       });
-      var isCarboxyl = singleO.some(function (n) { return n.h > 0; });
+      var isCarboxyl = singleO.some(function (n) { return n.hasH; });
       var isEster = singleO.some(function (n) {
         return adj[n.atom].some(function (x) {
           return x.atom !== i && graph.atoms[x.atom].el === 'C';

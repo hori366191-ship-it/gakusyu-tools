@@ -1885,15 +1885,52 @@
     hazards: '腐食性・可燃性。', precursors: 'アセトンとシアン化水素から。',
     reactions: '付加重合でポリメタクリル酸メチル。', dataStatus: 'class'
   });
+  // マレイン酸（シス）とフマル酸（トランス）は示性式だけでは区別できないため、
+  // 二重結合まわりの配置が分かる明示結合グラフを正本に持つ（12原子 C4O4H4）。
+  // 両COOH は C=O と O-H の実結合を見せ、C=C の両炭素のHも明示する。
+  var MALEIC_FUMARIC_ATOMS = [
+    ['C', 140, 90], ['O', 100, 40], ['O', 80, 120], ['H', 50, 150],
+    ['C', 200, 160], ['H', 200, 230], ['C', 280, 160],
+    ['H', 280, 230], ['C', 340, 90], ['O', 380, 40], ['O', 400, 120], ['H', 430, 150]
+  ];
+  var MALEIC_FUMARIC_BONDS = [
+    [0, 1, 2], [0, 2, 1], [2, 3, 1], [0, 4, 1], [4, 6, 2], [4, 5, 1],
+    [6, 8, 1], [6, 7, 1], [8, 9, 2], [8, 10, 1], [10, 11, 1]
+  ];
+  function stereoGraph(geometry) {
+    var trans = geometry === 'trans';
+    var atoms = MALEIC_FUMARIC_ATOMS.map(function (a) { return { el: a[0], x: a[1], y: a[2], h: 0 }; });
+    if (trans) {
+      atoms[7] = { el: 'H', x: 280, y: 90, h: 0 };
+      atoms[8] = { el: 'C', x: 340, y: 230, h: 0 };
+      atoms[9] = { el: 'O', x: 380, y: 280, h: 0 };
+      atoms[10] = { el: 'O', x: 400, y: 200, h: 0 };
+      atoms[11] = { el: 'H', x: 430, y: 170, h: 0 };
+    }
+    return {
+      type: 'custom',
+      mode: 'expanded',
+      skeletal: false,
+      width: 460,
+      height: 340,
+      atoms: atoms,
+      bonds: MALEIC_FUMARIC_BONDS.map(function (b) { return { a: b[0], b: b[1], order: b[2] }; }),
+      stereo: { doubleBond: 'C=C', geometry: geometry },
+      geometry: geometry,
+      ez: trans ? 'E' : 'Z'
+    };
+  }
   cond('maleic-acid', 'マレイン酸（シス-ブテン二酸）', 'C4H4O4', 'carboxylic', ['HOOC—CH=CH—COOH（シス形）'], {
     properties: '白色の結晶。水に溶ける。', uses: '不飽和ポリエステル樹脂原料。', nature: '工業的に合成。',
     hazards: '刺激性。', notes: 'シス形。加熱で無水マレイン酸になる。',
-    precursors: 'ベンゼンまたはブタンの酸化。', reactions: '異性化でフマル酸、付加で無水マレイン酸。', dataStatus: 'class'
+    precursors: 'ベンゼンまたはブタンの酸化。', reactions: '異性化でフマル酸、付加で無水マレイン酸。',
+    structureExtra: stereoGraph('cis'), dataStatus: 'class'
   });
   cond('fumaric-acid', 'フマル酸（トランス-ブテン二酸）', 'C4H4O4', 'carboxylic', ['HOOC—CH=CH—COOH（トランス形）'], {
     properties: '白色の結晶。水に溶けにくい。', uses: '食品添加物、不飽和ポリエステル原料。', nature: '植物・カビに存在。',
     hazards: '刺激性。', notes: 'トランス形。マレイン酸の幾何異性体。',
-    precursors: 'マレイン酸の異性化。', reactions: '付加重合・エステル化。', dataStatus: 'class'
+    precursors: 'マレイン酸の異性化。', reactions: '付加重合・エステル化。',
+    structureExtra: stereoGraph('trans'), dataStatus: 'class'
   });
   cond('malonic-acid', 'マロン酸（プロパン二酸）', 'C3H4O4', 'carboxylic', ['HOOC—CH₂—COOH'], {
     properties: '白色の結晶。水に溶ける。', uses: '医薬・香料原料。', nature: '一部の植物に存在。',

@@ -433,7 +433,7 @@ function build(opts) {
 
 // 通常の projectEquation は P の係数を n/2n に限定する。通常データは変えず、
 // アカデミックの高分子・共重合・可変置換だけ、係数トークンを厳密なホワイトリストで許可する。
-const ACADEMIC_P_COEFS = ['n', 'm', 'p', 'd', '2n', '3n'];
+const ACADEMIC_P_COEFS = ['n', 'm', 'p', 'd', 'dn', '2n', '3n'];
 
 function projectAcademicEquation(raw, reaction, ctx) {
   const owner = 'アカデミック反応 ' + reaction.id + ' の反応式';

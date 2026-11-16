@@ -28,7 +28,7 @@ const HIT_SAMPLE_STEP = 2;
 // data.js 全文のハッシュは一般図の座標を詰めるたびに変わるため、投影ごとに分けて守る。
 // 反応カードの反応式（equation）は意味factsではないため concrete から外し、専用の
 // EQUATION_SHA256 で別に固定する（式を足しても物質・反応・分野・型・状態は変えない）。
-const CONCRETE_SHA256 = 'e227216f0a72f0f75003ff424e1ef61052e6c246b70dd486906cfc6ffa9b69a4';
+const CONCRETE_SHA256 = '9981909cc0b5dae965a3e5ec9d000157065cd3588e4eb81a9fd7fed305a11390';
 const CLASS_GEOMETRY_SHA256 = '7f413639125c3a6ea6795c2bc2f54bcc49ac7e27c23cb5120896b17cef5ec224';
 const NOTICE_SHA256 = '0839382096a9683caeb9c7ead3999e95299bc38e7808edfb9577d5ec29ceb8ef';
 const EQUATION_SHA256 = '99ea3f933d0590d629cbcad13dd637b2bf8c058ba024db1b2a445ae4a05271bd';

@@ -1299,20 +1299,11 @@
       "stepKind": "direct",
       "note": "スチレン−ブタジエンゴム（SBR）。組成比・配列は不定。",
       "substrates": [
-        {
-          "id": "styrene",
-          "coef": "m"
-        },
-        {
-          "id": "butadiene",
-          "coef": "n"
-        }
+        "butadiene",
+        "styrene"
       ],
       "products": [
-        {
-          "id": "sbr",
-          "coef": 1
-        }
+        "sbr"
       ],
       "equation": {
         "mode": "P",
@@ -1321,11 +1312,11 @@
         "explanation": "共重合の組成比・配列は一定でないため、繰り返し単位の比を固定せず模式的に示す。",
         "left": [
           {
-            "compound": "styrene",
+            "compound": "butadiene",
             "coef": "m"
           },
           {
-            "compound": "butadiene",
+            "compound": "styrene",
             "coef": "n"
           }
         ],
@@ -1349,20 +1340,11 @@
       "stepKind": "direct",
       "note": "ニトリルゴム（NBR）。組成比・配列は不定。",
       "substrates": [
-        {
-          "id": "acrylonitrile",
-          "coef": "m"
-        },
-        {
-          "id": "butadiene",
-          "coef": "n"
-        }
+        "butadiene",
+        "acrylonitrile"
       ],
       "products": [
-        {
-          "id": "nbr",
-          "coef": 1
-        }
+        "nbr"
       ],
       "equation": {
         "mode": "P",
@@ -1371,11 +1353,11 @@
         "explanation": "共重合の組成比・配列は一定でないため、繰り返し単位の比を固定せず模式的に示す。",
         "left": [
           {
-            "compound": "acrylonitrile",
+            "compound": "butadiene",
             "coef": "m"
           },
           {
-            "compound": "butadiene",
+            "compound": "acrylonitrile",
             "coef": "n"
           }
         ],
@@ -1990,8 +1972,7 @@
       "id": "academic-bisphenol-a",
       "type": "condensation",
       "sourceIds": [
-        "PF",
-        "PE"
+        "PF"
       ],
       "conditions": "アセトンとフェノールの酸触媒縮合。",
       "scope": "ビスフェノール A の生成の総括。o/p 異性体の副生がないことは保証しない。",
@@ -2297,7 +2278,7 @@
         "left": [
           {
             "compound": "cellulose",
-            "coef": "n"
+            "coef": 1
           },
           {
             "species": "H2O",
@@ -2353,7 +2334,7 @@
         "left": [
           {
             "compound": "glycogen",
-            "coef": "n"
+            "coef": 1
           },
           {
             "species": "H2O",
@@ -2407,11 +2388,11 @@
         "left": [
           {
             "compound": "cellulose",
-            "coef": "n"
+            "coef": 1
           },
           {
             "compound": "acetic-anhydride",
-            "coef": "d"
+            "coef": "dn"
           }
         ],
         "right": [
@@ -2421,7 +2402,7 @@
           },
           {
             "compound": "acetic-acid",
-            "coef": "d"
+            "coef": "dn"
           }
         ]
       }
@@ -2465,11 +2446,11 @@
         "left": [
           {
             "compound": "cellulose",
-            "coef": "n"
+            "coef": 1
           },
           {
             "species": "HNO3",
-            "coef": "d"
+            "coef": "dn"
           }
         ],
         "right": [
@@ -2479,7 +2460,7 @@
           },
           {
             "species": "H2O",
-            "coef": "d"
+            "coef": "dn"
           }
         ]
       }

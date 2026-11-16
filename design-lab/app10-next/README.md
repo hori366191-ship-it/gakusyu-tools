@@ -100,13 +100,13 @@ node --test scripts/tests/app10-next.test.cjs      # 本番site/app10 NEXT版の
 
 本番 `site/app10` は16ファイルのみで、design-labとのHTML正規化後一致・非HTML byte一致・相対dependency実在・機密ローカルパス0を確認します。docs/OCR raw json/backupは配信しません。
 
-新版テストでは、鎖式157件のexact graph（build 83 / condensed 71 / manual 3）・分子式・部分C数の独立照合・34件の代表mapping・4組の結合位置異性体の分離・全edge orderを含む完全canonicalの原子順序不変性・−CHO固定Hとギ酸/ギ酸エステルR=Hの分離・C0のH/直結shape分離・多官能28件のrole・全157件の①到達・全427件のroute/shape/partialC・旧totalC URL/旧shape URLの移行・①変更時の②解除・ring「追加なし」1件・置換基プリセットと位置異性体・選択カードと①プレビューの分離（全47shape）・エタン/メタン/プロパン/ネオヘキサン/ブタ-2-インの明示H構造式・四級炭素・C6異性体5種の別shape/label・②の官能基カードと実二重結合線・環式置換基カード・SVG viewBoxの内容bbox一致・カード内横スクロールなし・モード3列CSS・②カードの最低2列CSS・C0 full-row・二重表示の原子数/分子式一致・例外理由・派生graph32件の構造signature・14件の結合線-原子交差・小分子塩の電荷分離・フェノキシドイオンのNa非含有graphと専用preset・別名18件（今回の7物質）と既存3件（英語invertaseを含む）・リン脂質3 familyの固定式なし・OCR二pass/51 empty/動画未確認metadata・独立PubChem確認7物質のCID/分子式/電荷0/接続/立体metadata（diester・amine-1-2を一価/二級だけに丸めない）・未知schematic kindの多糖3環fallback禁止・ADPのP2/電荷0とATP P3/4-の維持・簡略構造式の文字併記・ダイアログ・全結果を通した2カラムCSS・3テーマ相対パス・shape複数fragmentの等分トラック（子SVG width100%）と化学単位だけの折返し（全47shapeの文字欠落なし）・長い組成式のカード内折返し・伸縮アニメーションのfake DOM/WAAPI（1回描画・連打継続・cancel時のstyle解除・reduced/未対応の即時反映・hidden・初回・モード切替・oc-help開閉）を確認します。ブラウザでのクリック操作・表示確認・実カードrectの2列確認は `test` サブエージェントの担当です。このREADMEの数値は静的な Node 検証時点のものです。
+新版テストでは、鎖式157件のexact graph（build 85 / condensed 71 / manual 1）・分子式・部分C数の独立照合・34件の代表mapping・4組の結合位置異性体の分離・全edge orderを含む完全canonicalの原子順序不変性・−CHO固定Hとギ酸/ギ酸エステルR=Hの分離・C0のH/直結shape分離・多官能28件のrole・全157件の①到達・全427件のroute/shape/partialC・旧totalC URL/旧shape URLの移行・①変更時の②解除・ring「追加なし」1件・置換基プリセットと位置異性体・選択カードと①プレビューの分離（全47shape）・エタン/メタン/プロパン/ネオヘキサン/ブタ-2-インの明示H構造式・四級炭素・C6異性体5種の別shape/label・②の官能基カードと実二重結合線・環式置換基カード・SVG viewBoxの内容bbox一致・カード内横スクロールなし・モード3列CSS・②カードの最低2列CSS・C0 full-row・二重表示の原子数/分子式一致・例外理由・派生graph32件の構造signature・14件の結合線-原子交差・小分子塩の電荷分離・フェノキシドイオンのNa非含有graphと専用preset・別名18件（今回の7物質）と既存3件（英語invertaseを含む）・リン脂質3 familyの固定式なし・OCR二pass/51 empty/動画未確認metadata・独立PubChem確認7物質のCID/分子式/電荷0/接続/立体metadata（diester・amine-1-2を一価/二級だけに丸めない）・未知schematic kindの多糖3環fallback禁止・ADPのP2/電荷0とATP P3/4-の維持・簡略構造式の文字併記・ダイアログ・全結果を通した2カラムCSS・3テーマ相対パス・shape複数fragmentの等分トラック（子SVG width100%）と化学単位だけの折返し（全47shapeの文字欠落なし）・長い組成式のカード内折返し・伸縮アニメーションのfake DOM/WAAPI（1回描画・連打継続・cancel時のstyle解除・reduced/未対応の即時反映・hidden・初回・モード切替・oc-help開閉）を確認します。ブラウザでのクリック操作・表示確認・実カードrectの2列確認は `test` サブエージェントの担当です。このREADMEの数値は静的な Node 検証時点のものです。
 
 ## 表示件数（図）
 
-- 二重表示（構造式＋簡略構造式）: **298件**
+- 二重表示（構造式＋簡略構造式）: **300件**
 - 複数投影式: **2件**（グルコース・フルクトースのα/β/鎖状）
-- 単一図の簡略表示: **127件**（原子数閾値17・投影式4・重合体39・模式図58・油脂4・シス/トランス3・複合芳香族/複合塩2）
+- 単一図の簡略表示: **125件**（原子数閾値17・投影式4・重合体39・模式図58・油脂4・シス/トランス1・複合芳香族/複合塩2）
 - 簡略式から検証済み構造式を組んだcondensed: **131件**（分岐・環・電荷・原子価を検証）
 - ring-subから構造式を組んだ件数: **33件**
 

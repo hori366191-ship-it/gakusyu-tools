@@ -65,7 +65,9 @@ function graphSignature(spec) {
 function structureSignature(spec) {
   if (!spec) return null;
   if (['skeleton', 'sub', 'multi', 'custom'].includes(spec.type)) {
-    return 'graph:' + graphSignature(spec);
+    const stereo = spec.stereo ? JSON.stringify(spec.stereo) : '';
+    const geom = spec.geometry || spec.ez || '';
+    return 'graph:' + graphSignature(spec) + '#' + stereo + '#' + geom;
   }
   if (spec.type === 'ring-sub') {
     return 'ring:' + (spec.subs || []).map((s) => s.at + ':' + s.label).sort().join('|');

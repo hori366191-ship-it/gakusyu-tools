@@ -3,8 +3,9 @@
  *
  * 実行: node --test scripts/tests/app11-structure.test.cjs
  *
- * app10 の構造specをオフラインで抽出した data.js と、app11 に凍結コピーした
- * structure-draw.js だけを使う。app10 の実行時読み込みは行わない。
+ * app10 の構造specをオフラインで抽出した data.js と、共有canonical
+ * （site/shared/organic-structure.js）を再エクスポートする薄いアダプタだけを使う。
+ * app10 の実行時読み込みは行わない。
  */
 'use strict';
 
@@ -80,29 +81,29 @@ test('[data] 427物質に構造specが入り、既存の反応・必須数は変
   assert.ok(withFigures.every((c) => c.figures.length > 1));
 });
 
-test('[coverage] figurePlan の区分が 298/17/6/4/58/39/5 に一致する', () => {
+test('[coverage] figurePlan の区分が 300/17/6/4/58/39/3 に一致する', () => {
   const counts = {};
   D.compounds.forEach((c) => {
     const cat = category(S.figurePlan(c));
     counts[cat] = (counts[cat] || 0) + 1;
   });
   assert.deepEqual(counts, {
-    structure: 298,
+    structure: 300,
     'atom-limit': 17,
     projection: 6,
     triglyceride: 4,
     schematic: 58,
     polymer: 39,
-    fallback: 5
+    fallback: 3
   });
   assert.equal(Object.values(counts).reduce((a, b) => a + b, 0), 427);
   const audit = S.figureAudit(Object.fromEntries(D.compounds.map((c) => [c.id, c])));
-  assert.equal(audit.dual, 298);
+  assert.equal(audit.dual, 300);
   assert.equal(audit.multi, 2);
   assert.deepEqual(audit.byType, {
     'atom-limit': 17,
     schematic: 58,
-    stereo: 3,
+    stereo: 1,
     complex: 2,
     triglyceride: 4,
     projection: 6,
@@ -127,7 +128,7 @@ test('[coverage] 全427物質が renderStructure でSVGを返し、エラーSVG�
   assert.equal(failures.length, 0);
 });
 
-test('[coverage] structureView の実表示区分が 298/17/6/4/58/39/5 に一致する', () => {
+test('[coverage] structureView の実表示区分が 300/17/6/4/58/39/3 に一致する', () => {
   const counts = {};
   const empty = [];
   D.compounds.forEach((c) => {
@@ -136,13 +137,13 @@ test('[coverage] structureView の実表示区分が 298/17/6/4/58/39/5 に一�
     if (!view.figures || !view.figures.length) empty.push(c.id + ':' + view.kind);
   });
   assert.deepEqual(counts, {
-    structure: 298,
+    structure: 300,
     skeletal: 17,
     projection: 6,
     triglyceride: 4,
     schematic: 58,
     polymer: 39,
-    fallback: 5
+    fallback: 3
   });
   assert.equal(Object.values(counts).reduce((a, b) => a + b, 0), 427);
   assert.deepEqual(empty, []);
@@ -458,9 +459,9 @@ test('[clone] graph specのringCenterを浅く共有しない', () => {
   assert.equal(out.bonds[0].ringCenter.x, 123, '入力側の変更が出力へ波及しない');
 });
 
-test('[fallback] stereo/complex の5件は詳細構造なし・condensed示性式で、構造式と呼ばない', () => {
+test('[fallback] stereo/complex の3件は詳細構造なし・condensed示性式で、構造式と呼ばない', () => {
   const fallback = D.compounds.filter((c) => S.structureView(c).kind === 'fallback');
-  assert.equal(fallback.length, 5);
+  assert.equal(fallback.length, 3);
   fallback.forEach((c) => {
     const view = S.structureView(c);
     assert.equal(view.kind, 'fallback', c.id);
@@ -478,16 +479,32 @@ test('[fallback] stereo/complex の5件は詳細構造なし・condensed示性�
   assert.equal(empty.exception.type, 'missing');
 });
 
-test('[draw] 凍結コピーは RPStructure 名前空間で、app10 の実行時読み込みをしない', () => {
+test('[draw] 薄いアダプタは RPStructure 名前空間で、共有canonicalを再実装しない', () => {
   const code = read('structure-draw.js');
-  assert.ok(code.includes('root.RPStructure = factory();'));
+  assert.ok(code.includes('root.RPStructure = factory(root.GakusyuOrganicStructure)'));
   assert.equal(code.includes('root.OCDraw'), false);
-  assert.ok(code.includes('コピー元 commit: 9ef5e0999a73022ed0351303ad2d4944b80df16f'));
-  assert.ok(code.includes('コピー元 SHA256: 861e0fd9fed7593ed07e2adf0a9812168d9dda1130428b91fdd052ab3eeaf11d'));
-  assert.equal(/class="oc-/.test(code), false, 'oc- クラスを残さない');
+  assert.ok(code.includes("require('../shared/organic-structure.js')"), '共有モジュールをrequireする');
+  assert.equal(code.includes('function renderStructure'), false, '描画ロジックを複製しない');
+  assert.equal(code.includes('function figurePlan'), false, '表示計画ロジックを複製しない');
+  assert.equal(/class="rp-struct-/.test(code), false, 'SVGを組み立てない');
+  const sharedPath = path.join(ROOT, 'site', 'shared', 'organic-structure.js');
+  const shared = fs.readFileSync(sharedPath, 'utf8');
+  assert.ok(shared.includes('root.GakusyuOrganicStructure = factory();'));
+  assert.ok(shared.includes("var CANONICAL_STRUCTURE_PREFIX = 'oc-';"));
+  assert.ok(shared.includes('function createRenderer(options)'));
+  assert.ok(shared.includes('function renderEquation('), '共有側に反応式を含む');
+  assert.ok(shared.includes('function structureView('), '共有側にstructureViewを含む');
+  assert.equal(shared.includes('9ef5e0999a73022ed0351303ad2d4944b80df16f'), false, '凍結コピー宣言を残さない');
+  assert.equal(shared.includes('861e0fd9fed7593ed07e2adf0a9812168d9dda1130428b91fdd052ab3eeaf11d'), false);
+  const app10Draw = fs.readFileSync(path.join(ROOT, 'site', 'app10', 'draw.js'), 'utf8');
+  assert.ok(app10Draw.includes("require('../shared/organic-structure.js')"), 'app10も同じcanonicalを使う');
+  assert.equal(app10Draw.includes('function renderStructure'), false, 'app10側にも重複実装なし');
   const html = read('index.html');
   const scripts = [...html.matchAll(/<script src="\.\/([^"]+)"><\/script>/g)].map((m) => m[1]);
   assert.deepEqual(scripts, ['data.js', 'academic-data.js', 'map-core.js', 'structure-draw.js', 'app.js']);
+  assert.ok(html.indexOf('../shared/organic-structure.js') !== -1, '共有モジュールを読み込む');
+  assert.ok(html.indexOf('../shared/organic-structure.js') < html.indexOf('./structure-draw.js'),
+    '共有モジュールをstructure-draw.jsより先に読み込む');
   assert.equal(html.includes('../app10/draw.js'), false, 'app10描画器を読み込まない');
   const app = read('app.js');
   assert.ok(app.includes('window.RPStructure'));
@@ -505,10 +522,10 @@ test('[card] compoundCard は formula 行を構造図へ置換し、classCard �
   assert.equal(structureBlock.includes('c.formula'), false, 'formula fieldを構造図に使わない');
   assert.ok(structureBlock.includes('SD.structureView(c)'), '実表示メタデータで見出しを決める');
   assert.ok(structureBlock.includes('rp-struct--fallback'), '示性式fallbackの控えめな表示');
-  const draw = read('structure-draw.js');
+  const sharedDraw = fs.readFileSync(path.join(ROOT, 'site', 'shared', 'organic-structure.js'), 'utf8');
   ['構造式', '骨格式（水素原子省略）', '投影式', '油脂の簡略図', '模式図', '繰り返し単位',
     '示性式（詳細構造なし）', '示性式（結合図未対応）']
-    .forEach((caption) => assert.ok(draw.includes(caption), caption + ' の区分'));
+    .forEach((caption) => assert.ok(sharedDraw.includes(caption), caption + ' の区分'));
   const cardStart = app.indexOf('function compoundCard(');
   const cardEnd = app.indexOf('function classCard(');
   const compoundCard = app.slice(cardStart, cardEnd);

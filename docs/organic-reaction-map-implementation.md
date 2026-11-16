@@ -372,7 +372,8 @@ node scripts/app11/metrics.cjs --baseline       # v1 の計測
 
 ### 対象と不変条件
 - 対象は `site/app11/app.js` / `app.css` / `index.html` / `map-core.js` と `scripts/tests/app11-*.cjs`、`docs/` のみ。
-- `structure-draw.js`、`data.js`（427物質・294必須・86反応・保留81・一般図12分類16変換）は変更しない。
+- 当時は `structure-draw.js`、`data.js`（427物質・294必須・86反応・保留81・一般図12分類16変換）を変更対象外とした
+  （後に両者は共有モジュール化とマレイン酸/フマル酸の明示構造で更新）。
   端点半径・paint 形状・`enforcePaintClearance` など既存の geometry 計算も変えない。
 - 可視線（`.rp-edge`）の幅・色・点線・端点、一般図の座標・配置・16タブは変更前と同一。
 
