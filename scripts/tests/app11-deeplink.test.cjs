@@ -194,7 +194,7 @@ function loadApp11Focus(search, options) {
   };
   const windowStub = opts.noLocation ? {} : { location: { search } };
   const factory = new Function(
-    'Core', 'window', 'viewSize', 'mapTopInset', 'compoundById', 'view', 'nodeW', 'nodeH', 'state',
+    'Core', 'window', 'viewSize', 'mapTopInset', 'compoundById', 'compoundAt', 'view', 'nodeW', 'nodeH', 'state',
     [
       'var FOCUS_PARAM_MAX = 256;',
       'var returnFocus = state.initialReturnFocus;',
@@ -213,7 +213,7 @@ function loadApp11Focus(search, options) {
   if (opts.rawSource) return { app: app, source: source };
   const api = factory(
     Core, windowStub, opts.viewSize || { w: 900, h: 600 }, opts.top == null ? 80 : opts.top,
-    compoundById, state.view,
+    compoundById, (id) => compoundById[id] || null, state.view,
     (c) => c.w || D11.meta.nodeW,
     (c) => c.h || D11.meta.nodeH,
     state

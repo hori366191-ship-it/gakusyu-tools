@@ -1100,6 +1100,12 @@ html[data-theme="pop"] { --rp-academic: #7a3fd0; --rp-academic-bg: #f4ecff; }
 html[data-theme="forest"] { --rp-academic: #4f6b2f; --rp-academic-bg: #eef5e4; }
 .rp-academic { display: none; }
 .rp-svg[data-mode="academic"] .rp-academic { display: inline; }
+/* 学術表示は 264 反応ぶんの専用配置だけを出し、通常配置の線・当たり判定・マーカーは隠す。 */
+.rp-svg[data-mode="academic"] .rp-layout-normal { display: none; }
+/* 学術表示のラベルは密度が高いため、俯瞰では隠し、拡大に応じて通常 primary だけ → 全部と段階表示する。 */
+.rp-map[data-mode="academic"] .rp-academic-all .rp-reaction__label { display: none; }
+.rp-map[data-mode="academic"][data-level="1"] .rp-academic-all .rp-reaction--primary .rp-reaction__label { display: inline; }
+.rp-map[data-mode="academic"][data-level="2"] .rp-academic-all .rp-reaction__label { display: inline; }
 .rp-mode { display: flex; gap: 4px; align-items: center; }
 .rp-mode__btn { border: 1px solid var(--rp-line); background: var(--rp-panel); color: var(--rp-ink);
   border-radius: 999px; padding: 4px 11px; font: inherit; font-size: 12.5px; line-height: 1.2; cursor: pointer; }

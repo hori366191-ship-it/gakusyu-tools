@@ -51,7 +51,7 @@ function fingerprintClassGeometry() {
 }
 
 test('[normal] 通常データの4つの固定ハッシュと件数は不変', () => {
-  assert.equal(fingerprintConcrete(), '9981909cc0b5dae965a3e5ec9d000157065cd3588e4eb81a9fd7fed305a11390');
+  assert.equal(fingerprintConcrete(), '403524da89a06383997425311867ddb08e38a58c04e7b70ead35d96872badf62');
   assert.equal(fingerprintEquation(), '99ea3f933d0590d629cbcad13dd637b2bf8c058ba024db1b2a445ae4a05271bd');
   assert.equal(fingerprintClassGeometry(), '7f413639125c3a6ea6795c2bc2f54bcc49ac7e27c23cb5120896b17cef5ec224');
   const html = read('index.html');
@@ -211,7 +211,11 @@ test('[equation] 学術の B/N/T は通常の収支検証を再利用し、P は
 });
 
 test('[layout] マーカー・経路は通常ノードを貫通せず、全反応が地図から到達できる', () => {
-  const nodes = new Map(D.compounds.map((c) => [c.id, c]));
+  const positions = A.layout.positions;
+  const nodes = new Map(Object.keys(positions).map((id) => [id, positions[id]]));
+  assert.equal(Object.keys(positions).length, 427, '全427物質の専用座標');
+  assert.equal(Object.keys(A.layout.normalMarkers).length, 86, '通常86反応のマーカー');
+  assert.equal(Object.keys(A.layout.normalRoutes).length, 207, '通常207辺の経路');
   const markerIds = Object.keys(A.layout.markers);
   assert.equal(markerIds.length, A.reactions.length);
   const cardOnlyIds = new Set(A.meta.warnings
@@ -233,7 +237,7 @@ test('[layout] マーカー・経路は通常ノードを貫通せず、全反�
   const isolated = D.compounds.filter((c) => c.incoming + c.outgoing === 0);
   const newly = isolated.filter((c) => A.reactions.some((r) => r.substrates.concat(r.products).indexOf(c.id) !== -1));
   assert.equal(newly.filter((c) => !drawn.has(c.id)).length, 0, '新規接続136物質すべてに可視辺');
-  // ラベルは計画 box とアンカーが一致し、実テキスト幅でもノード・主要ラベル・一般図・他学術ラベルと重ならない。
+  // ラベルは計画 box とアンカーが一致し、実テキスト幅でもノード・主要ラベル・一般図・他ラベルと重ならない。
   const boxes = [];
   A.reactions.forEach((r) => {
     const m = A.layout.markers[r.id];
@@ -244,14 +248,18 @@ test('[layout] マーカー・経路は通常ノードを貫通せず、全反�
     else assert.equal(Math.round(m.label.type.x - 11), Math.round(box.x + box.w), r.id + ' Wアンカー');
     boxes.push({ id: r.id, box: box });
   });
+  Object.keys(A.layout.normalMarkers).forEach((id) => {
+    const m = A.layout.normalMarkers[id];
+    const box = m.label.box;
+    if (m.label.side === 'E') assert.equal(Math.round(m.label.type.x + 11), Math.round(box.x), id + ' Eアンカー');
+    else assert.equal(Math.round(m.label.type.x - 11), Math.round(box.x + box.w), id + ' Wアンカー');
+    boxes.push({ id: id, box: box });
+  });
   const overlap = (a, b) => !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
   boxes.forEach((L) => {
-    D.compounds.forEach((c) => {
-      assert.equal(overlap(L.box, { x: c.x, y: c.y, w: c.w || D.meta.nodeW, h: c.h || D.meta.nodeH }), false,
-        L.id + ' のラベルがノードと重なる: ' + c.id);
-    });
-    D.reactions.forEach((n) => {
-      if (n.label && n.label.box) assert.equal(overlap(L.box, n.label.box), false, L.id + ' が通常主要ラベルと重なる');
+    nodes.forEach((c, id) => {
+      assert.equal(overlap(L.box, { x: c.x, y: c.y, w: c.w, h: c.h }), false,
+        L.id + ' のラベルがノードと重なる: ' + id);
     });
     D.classMap.nodes.forEach((n) => {
       assert.equal(overlap(L.box, n), false, L.id + ' が一般図ノードと重なる');
@@ -259,22 +267,21 @@ test('[layout] マーカー・経路は通常ノードを貫通せず、全反�
   });
   for (let i = 0; i < boxes.length; i++) {
     for (let j = i + 1; j < boxes.length; j++) {
-      assert.equal(overlap(boxes[i].box, boxes[j].box), false, boxes[i].id + ' / ' + boxes[j].id + ' の学術ラベル重複');
+      assert.equal(overlap(boxes[i].box, boxes[j].box), false, boxes[i].id + ' / ' + boxes[j].id + ' のラベル重複');
     }
   }
   A.reactions.forEach((r) => {
     const m = A.layout.markers[r.id];
-    D.compounds.forEach((c) => {
-      const inside = m.x >= c.x && m.x <= c.x + (c.w || D.meta.nodeW) &&
-        m.y >= c.y && m.y <= c.y + (c.h || D.meta.nodeH);
-      assert.equal(inside, false, r.id + ' のマーカーがノード内: ' + c.id);
+    nodes.forEach((c, id) => {
+      const inside = m.x >= c.x && m.x <= c.x + c.w && m.y >= c.y && m.y <= c.y + c.h;
+      assert.equal(inside, false, r.id + ' のマーカーがノード内: ' + id);
     });
     r.edges.forEach((e) => {
       const pts = e.points.map((p) => ({ x: p[0], y: p[1] }));
       for (let i = 0; i < pts.length - 1; i++) {
         nodes.forEach((c, id) => {
           if (id === e.id && i === 0) return; // 端点ノードの境界から出る最初の区間だけ許す
-          assert.equal(G.segmentRect(pts[i], pts[i + 1], { x: c.x, y: c.y, w: c.w || D.meta.nodeW, h: c.h || D.meta.nodeH }), false,
+          assert.equal(G.segmentRect(pts[i], pts[i + 1], { x: c.x, y: c.y, w: c.w, h: c.h }), false,
             e.dir + ':' + e.id + ' の区間がノード ' + id + ' を貫通');
         });
       }
@@ -310,12 +317,12 @@ test('[ui] モード切替は通常を既定にし、隠れた学術を当たり
   assert.ok(js.includes('function activeReactions()'));
   assert.ok(js.includes('function activeIncoming(') && js.includes('function activeOutgoing('));
   assert.ok(js.includes('academicReactionIndex[r.id] = g'));
-  assert.ok(js.includes("'rp-academic'"), 'academic layer を識別できる');
+  assert.ok(js.includes("'rp-academic rp-academic-all'"), 'academic layer を識別できる');
   assert.ok(css.includes('.rp-academic { display: none; }'));
   assert.ok(css.includes('.rp-svg[data-mode="academic"] .rp-academic { display: inline; }'));
   assert.ok(js.includes("svg.setAttribute('data-mode', mode)"));
-  assert.ok(js.includes("academicLayer.setAttribute('aria-hidden'"));
-  assert.ok(js.includes("if (mode === 'academic' && academicDrawnIds[id])"), '描画済みの学術接続ノードだけ class を足す');
+  assert.ok(js.includes('setLayerInteractive(academicLayer, acad)'), '学術レイヤーの aria-hidden を切り替える');
+  assert.ok(js.includes("if (mode === 'academic' && academicNewlyConnectedIds[id])"), '描画済みの学術接続ノードだけ class を足す');
   assert.equal(js.includes('setAttribute(\'data-path-state\''), false, '通常の pathState 属性を書き換えない');
   // ボタンは native button + aria-pressed。既定は通常。
   assert.ok(html.includes('id="rp-mode-normal"') && html.includes('id="rp-mode-academic"'));
@@ -333,8 +340,8 @@ test('[ui] モード切替は通常を既定にし、隠れた学術を当たり
 test('[restore] 通常モードの件数・文言・カードは元のまま', () => {
   assert.equal(D.meta.confirmedReactionCount, 86);
   const js = read('app.js');
-  assert.ok(js.includes("mode === 'academic' ? D.reactions.concat(academicReactions) : D.reactions"));
-  assert.ok(js.includes("mode === 'academic' ? hitCandidates.concat(academicHitCandidates) : hitCandidates"));
+  assert.ok(js.includes("mode === 'academic' ? academicAll : D.reactions"));
+  assert.ok(js.includes("mode === 'academic' ? academicHitCandidates.concat(classHitCandidates) : hitCandidates"));
   assert.equal(js.includes('D.reactions.push'), false, '通常配列を書き換えない');
   assert.equal(js.includes('D.meta.compoundCount ='), false);
   assert.ok(js.includes('function buildCardEquationSvg'));

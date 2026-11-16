@@ -1897,6 +1897,16 @@
     [0, 1, 2], [0, 2, 1], [2, 3, 1], [0, 4, 1], [4, 6, 2], [4, 5, 1],
     [6, 8, 1], [6, 7, 1], [8, 9, 2], [8, 10, 1], [10, 11, 1]
   ];
+  // シス形（マレイン酸）は COOH を下、C=C の H を上に置いて読みやすくする。
+  // トランス形（フマル酸）の座標は動かさないため、cis のときだけ原子の y を
+  // 既存 bbox の範囲内で上下反転する（x・原子数・結合・元素は不変）。
+  // 描画 SVG 全体の scaleY(-1) は元素記号まで逆さになるので使わず、データ座標で鏡映する。
+  function mirrorAtomsVertically(atoms) {
+    var minY = Infinity;
+    var maxY = -Infinity;
+    atoms.forEach(function (a) { if (a.y < minY) minY = a.y; if (a.y > maxY) maxY = a.y; });
+    return atoms.map(function (a) { return { el: a.el, x: a.x, y: minY + maxY - a.y, h: a.h }; });
+  }
   function stereoGraph(geometry) {
     var trans = geometry === 'trans';
     var atoms = MALEIC_FUMARIC_ATOMS.map(function (a) { return { el: a[0], x: a[1], y: a[2], h: 0 }; });
@@ -1906,6 +1916,8 @@
       atoms[9] = { el: 'O', x: 380, y: 280, h: 0 };
       atoms[10] = { el: 'O', x: 400, y: 200, h: 0 };
       atoms[11] = { el: 'H', x: 430, y: 170, h: 0 };
+    } else {
+      atoms = mirrorAtomsVertically(atoms);
     }
     return {
       type: 'custom',

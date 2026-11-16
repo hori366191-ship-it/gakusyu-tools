@@ -24,7 +24,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const S = require('./source-data.cjs');
-const AL = require('./academic-layout.cjs');
+const N = require('./academic-network-layout.cjs');
 
 const ROOT = S.ROOT;
 const SRC = S.SRC;
@@ -297,28 +297,42 @@ function build(opts) {
   });
   reactions.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 
-  // 通常データ（site-src layout.json）の座標を使い、通常側は一切変更しない。
-  const normalForLayout = {
-    canvas: D.meta.canvas,
-    compounds: source.compoundOrder.map((id) => {
-      const c = source.compounds.get(id);
-      const pos = layout.positions[id];
-      if (!pos) throw new Error('layout.json に物質の位置がない: ' + id);
-      return { id: id, x: pos.x, y: pos.y, w: pos.w || layout.nodeW, h: pos.h || layout.nodeH };
-    }),
-    reactionLabels: D.reactions.map((r) => r.label && r.label.box).filter(Boolean),
+  // 専用レイアウト（layout version 2）。通常 427 物質の座標は読むだけで、ここでは
+  // 「アカデミック表示専用」の座標一式を作る。通常データ（site/app11/data.js）は変えない。
+  const normalForLayout = D.compounds.map((c) => ({
+    id: c.id,
+    x: c.x,
+    y: c.y,
+    w: c.w || layout.nodeW,
+    h: c.h || layout.nodeH,
+    region: c.region,
+    regionIndex: c.regionIndex,
+    incoming: c.incoming,
+    outgoing: c.outgoing
+  }));
+  const allReactionInputs = D.reactions.map((r) => ({
+    id: r.id,
+    tier: r.tier,
+    typeLabel: r.typeLabel || r.type,
+    substrates: r.substrates,
+    products: r.products
+  })).concat(reactions.map((r) => ({
+    id: r.id,
+    tier: 'academic',
+    typeLabel: r.typeLabel || r.type,
+    substrates: r.substrates,
+    products: r.products
+  })));
+  const placed = N.buildLayout({
+    compounds: normalForLayout,
+    reactions: allReactionInputs,
     classMap: {
       frame: classMap.frame,
       nodes: classMap.nodes.map((n) => ({ x: n.x, y: n.y, w: n.w, h: n.h }))
-    }
-  };
-  const placed = AL.buildLayout(reactions.map((r) => ({
-    id: r.id,
-    type: r.type,
-    typeLabel: r.typeLabel,
-    substrates: r.substrates,
-    products: r.products
-  })), normalForLayout);
+    },
+    nodeW: layout.nodeW,
+    nodeH: layout.nodeH
+  });
 
   placed.warnings.forEach((w) => warnings.push(w));
   reactions.forEach((r) => {
@@ -350,6 +364,11 @@ function build(opts) {
   const stillIsolated = normalIsolated.length - newlyConnected.length;
   const drawnIds = new Set(Object.keys(placed.routes).map((key) => placed.routes[key].compound));
   const newlyDrawn = newlyConnected.filter((c) => drawnIds.has(c.id)).length;
+  const reactionsWithoutIncoming = reactions.filter((r) => !r.edges.some((e) => e.dir === 'in')).length;
+  const reactionsWithoutOutgoing = reactions.filter((r) => !r.edges.some((e) => e.dir === 'out')).length;
+  const cardOnlyCount = allReactionInputs
+    .filter((r) => r.tier === 'academic')
+    .reduce((n, r) => n + r.substrates.length + r.products.length, 0) - Object.keys(placed.routes).length;
 
   // アカデミック反応だけの弱連結成分（通常ネットワークとは別に数える）。
   const parent = new Map();
@@ -394,12 +413,12 @@ function build(opts) {
     newlyConnectedCount: newlyConnected.length,
     stillIsolatedCount: stillIsolated,
     academicComponents: components,
-    drawnConnectedCount: placed.stats.drawnConnectedCount,
+    drawnConnectedCount: drawnIds.size,
     drawnNewlyConnectedCount: newlyDrawn,
-    drawnRouteCount: placed.stats.routeCount,
-    cardOnlyCount: placed.stats.cardOnlyCount,
-    reactionsWithoutIncoming: placed.stats.reactionsWithoutIncoming,
-    reactionsWithoutOutgoing: placed.stats.reactionsWithoutOutgoing,
+    drawnRouteCount: Object.keys(placed.routes).length,
+    cardOnlyCount: cardOnlyCount,
+    reactionsWithoutIncoming: reactionsWithoutIncoming,
+    reactionsWithoutOutgoing: reactionsWithoutOutgoing,
     warnings: warnings,
     enabled: academicCount > 0,
     normalCounts: {
@@ -423,10 +442,16 @@ function build(opts) {
     types: academicTypes,
     reactions: reactions,
     layout: {
+      version: placed.version,
+      positions: placed.positions,
+      normalMarkers: placed.normalMarkers,
+      normalRoutes: placed.normalRoutes,
       markers: placed.markers,
       routes: placed.routes,
       canvas: placed.canvas,
-      stats: placed.stats
+      regionFocus: placed.regionFocus,
+      stats: placed.stats,
+      warnings: placed.warnings
     }
   };
 }
@@ -583,7 +608,7 @@ function main() {
   fs.writeFileSync(OUT_DATA, output, 'utf8');
   console.log('生成: site/app11/academic-data.js（アカデミック反応 ' + data.meta.academicReactionCount +
     '、種別 ' + data.meta.typeCount + '、経路 ' + Object.keys(data.layout.routes).length +
-    '、card-only ' + data.layout.stats.cardOnlyCount + '）');
+    '、通常 ' + Object.keys(data.layout.normalRoutes).length + '、card-only ' + data.meta.cardOnlyCount + '）');
 }
 
 if (require.main === module) main();

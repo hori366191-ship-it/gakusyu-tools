@@ -1,0 +1,32 @@
+{
+  "note": "旧 overlay 方式（マーカーを通常の右棚へ固定）の実測値。HEAD 32ac0b1 時点。比較用の数値だけを保持し、旧経路の巨大な座標複製は持たない。crossingPairs は build の collisionStats と同じ定義（異なるルートキー同士の線分交差・同一ルート内は除外）。旧 combined 5043 = 旧 normal 50 + 旧 academic 4164 + 通常×学術 829。",
+  "layoutVersion": 1,
+  "combined": {
+    "count": 628,
+    "total": 541480.2,
+    "median": 503.6,
+    "p95": 2518.7,
+    "max": 3457.6,
+    "ge1000": 227,
+    "crossingPairs": 5043
+  },
+  "normal": {
+    "count": 207,
+    "total": 33445.4,
+    "median": 123.0,
+    "p95": 425.9,
+    "max": 1011.7,
+    "ge1000": 1,
+    "crossingPairs": 50
+  },
+  "academic": {
+    "count": 421,
+    "total": 508034.9,
+    "median": 1148.4,
+    "p95": 2764.5,
+    "max": 3457.6,
+    "ge1000": 226,
+    "crossingPairs": 4164
+  },
+  "academicDetourP95": 1.33
+}

@@ -61,19 +61,7 @@
   var regionsById = {};
   D.regions.forEach(function (r) { regionsById[r.id] = r; });
   // 俯瞰で分野ごとに1つだけ物質名を出す。分野の中心に近い主要物質を選ぶ。
-  var regionHub = {};
-  D.compounds.forEach(function (c) {
-    if (!c.hub) return;
-    var region = regionsById[c.region];
-    if (!region) return;
-    var center = region.center || { x: 0, y: 0 };
-    var dx = c.x + nodeW(c) / 2 - center.x;
-    var dy = c.y + nodeH(c) / 2 - center.y;
-    var distance = Math.hypot(dx, dy);
-    if (!regionHub[c.region] || distance < regionHub[c.region].distance) {
-      regionHub[c.region] = { compound: c, distance: distance };
-    }
-  });
+  // 中心は現在モードの分野矩形（学術では regionFocus）から取り、activeRegions() で作る。
 
   var incoming = {};
   var outgoing = {};
@@ -99,6 +87,7 @@
   var classNodeById = {};
   var classEdgeById = {};
   var classLayer = null;
+  var normalMarkerLayer = null;
   var reactionConnectors = {};
   var classMapData = D.classMap || null;
   if (classMapData) {
@@ -106,21 +95,30 @@
     classMapData.edges.forEach(function (e) { classEdgeById[e.id] = e; });
   }
   var activeEdgeLayer = null;
-  // アカデミック（大学レベルの追加反応）は通常データを書き換えない overlay。
-  // 通常モードでは DOM（display:none）・当たり判定・キーボード移動・カードのどれにも混ぜない。
+  // アカデミック（大学レベルの追加反応＋専用配置）は通常データを書き換えない。
+  // 学術表示では、通常 427 の座標を positions で投影した「学術配置」だけを描く。
+  // 通常モードでは学術レイヤーを DOM（display:none）・当たり判定・キーボード移動・
+  // カードのどれにも混ぜない。
   var mode = 'normal';
   var academic = null;
-  var academicReactions = [];
-  var academicReactionIndex = {};
-  var academicEdgeIndex = {};
-  var academicConnectors = {};
-  var academicHitCandidates = [];
-  var academicIncoming = {};
-  var academicOutgoing = {};
+  var academicReactions = [];      // 追加 178（source 由来）
+  var academicAll = [];            // 通常 86 投影 ＋ 追加 178 = 264
+  var academicAllById = {};
+  var academicReactionIndex = {};  // 学術モードの 264 マーカー
+  var academicAllEdgeIndex = {};   // 学術モードの 628 辺
+  var academicConnectors = {};     // 参加 reaction id -> connectors（学術 264）
+  var academicHitCandidates = [];  // 学術 264 の当たり判定
+  var academicIncoming = {};       // 学術 264 の incoming
+  var academicOutgoing = {};       // 学術 264 の outgoing
   var academicEndpointIds = {};
   var academicDrawnIds = {};
+  var academicNewlyConnectedIds = {};
   var academicLayer = null;
   var academicEnabled = false;
+  var academicDisabledReason = '';
+  // 学術座標へ投影した複製（canonical な D.compounds は変更しない）。
+  var projectedCache = null;
+  var classHitCandidates = [];
   var previewReaction = null;
   var view = { scale: 1, x: 0, y: 0 };
   var viewSize = { w: 1, h: 1 };
@@ -173,7 +171,7 @@
     if (window.console && console.warn) console.warn('[app11] ' + text);
   }
 
-  /* ---------------- academic overlay helpers ---------------- */
+  /* ---------------- academic layout helpers (projection) ---------------- */
 
   // build-academic-data.cjs と同じ FNV-1a 32bit。通常ノードの座標・寸法だけで作る。
   function academicBaseHash(compounds) {
@@ -188,24 +186,177 @@
     return ('0000000' + hash.toString(16)).slice(-8);
   }
 
+  // 学術配置データの版。通常 427 の座標は data.js のまま残し、学術表示だけ投影する。
+  var ACADEMIC_LAYOUT_VERSION = 2;
+
+  // 通常の compound を学術座標へ投影した複製。canonical な c は変更しない。
+  function projectCompound(c, pos) {
+    if (!pos || !c) return c;
+    var out = Object.assign({}, c, { x: pos.x, y: pos.y });
+    if (pos.w != null) out.w = pos.w;
+    if (pos.h != null) out.h = pos.h;
+    return out;
+  }
+
+  // 通常の経路を学術配置の折れ線へ置き換える。元の edge は変更しない。
+  function projectNormalRoute(rid, edge, routes) {
+    var key = rid + '|' + edge.dir + '|' + edge.id;
+    var route = routes ? routes[key] : null;
+    return {
+      dir: edge.dir,
+      id: edge.id,
+      tier: (route && route.tier) || edge.tier || 'secondary',
+      points: (route && route.points) || edge.points,
+      gaps: (route && route.gaps) || [],
+      bridges: (route && route.bridges) || []
+    };
+  }
+
+  // 通常 86 の反応を、学術マーカー・学術経路へ投影した複製。
+  // state / tier / sources など化学的な内容は canonical のまま保持する。
+  function projectNormalReaction(r, layout) {
+    var markers = (layout && layout.normalMarkers) || {};
+    var routes = (layout && layout.normalRoutes) || {};
+    var m = markers[r.id];
+    return Object.assign({}, r, {
+      x: m ? m.x : r.x,
+      y: m ? m.y : r.y,
+      tier: (m && m.tier) || r.tier,
+      label: (m && m.label) || r.label,
+      edges: (r.edges || []).map(function (e) { return projectNormalRoute(r.id, e, routes); }),
+      layout: 'academic',
+      normal: true,
+      academic: false
+    });
+  }
+
+  // 学術モードの 1 レイヤー分（通常 86 投影 ＋ 追加 178）。
+  function buildAcademicAll(layout, normalReactions, extraReactions) {
+    var all = normalReactions.map(function (r) { return projectNormalReaction(r, layout); });
+    return all.concat(extraReactions);
+  }
+
+  function academicLayoutProblem(layout, compounds, reactions) {
+    if (!layout || typeof layout !== 'object') return '配置データがありません。';
+    if (layout.version !== ACADEMIC_LAYOUT_VERSION) {
+      return '配置データの版が古いため、アカデミック表示を無効にしました。';
+    }
+    var positions = layout.positions;
+    if (!positions || typeof positions !== 'object') return '位置データがありません。';
+    for (var i = 0; i < compounds.length; i++) {
+      var p = positions[compounds[i].id];
+      if (!p || !isFinite(p.x) || !isFinite(p.y)) {
+        return '位置データが欠けています: ' + compounds[i].id;
+      }
+    }
+    var canvas = layout.canvas;
+    if (!canvas || !isFinite(canvas.x) || !isFinite(canvas.y) || !(canvas.w > 0) || !(canvas.h > 0)) {
+      return '学術表示の範囲がありません。';
+    }
+    var markers = layout.normalMarkers || {};
+    var routes = layout.normalRoutes || {};
+    for (var ri = 0; ri < reactions.length; ri++) {
+      var r = reactions[ri];
+      var m = markers[r.id];
+      if (!m || !isFinite(m.x) || !isFinite(m.y)) return '通常反応のマーカーがありません: ' + r.id;
+      if (!m.label || !m.label.type || !isFinite(m.label.type.x) || !isFinite(m.label.type.y)) {
+        return '通常反応のラベルがありません: ' + r.id;
+      }
+      for (var ei = 0; ei < r.edges.length; ei++) {
+        var e = r.edges[ei];
+        var route = routes[r.id + '|' + e.dir + '|' + e.id];
+        if (!route || !Array.isArray(route.points) || route.points.length < 2) {
+          return '通常反応の経路がありません: ' + r.id + '|' + e.id;
+        }
+      }
+    }
+    return null;
+  }
+
+  // 学術モードでは positions で投影した複製、通常モードでは canonical をそのまま返す。
+  // どちらのモードでも D.compounds 自体は書き換えない。
+  function activeCompoundById() {
+    if (projectedCache && projectedCache.mode === mode) return projectedCache.map;
+    var map = {};
+    var list = [];
+    D.compounds.forEach(function (c) {
+      var projected = mode === 'academic' && academic
+        ? projectCompound(c, academic.positions[c.id])
+        : c;
+      map[c.id] = projected;
+      list.push(projected);
+    });
+    projectedCache = { mode: mode, map: map, list: list, regions: null };
+    return map;
+  }
+
+  function activeCompounds() {
+    activeCompoundById();
+    return projectedCache.list;
+  }
+
+  function compoundAt(id) {
+    return activeCompoundById()[id] || null;
+  }
+
+  // 画面・当たり判定で使う現在モードの位置。
+  function positionOf(id) {
+    var c = compoundAt(id);
+    return c ? { x: c.x, y: c.y, w: nodeW(c), h: nodeH(c) } : null;
+  }
+
+  // 分野の focus 矩形。学術モードでは regionFocus（学術配置）を優先する。
+  function activeRegions() {
+    if (mode !== 'academic' || !academic) return D.regions;
+    if (projectedCache && projectedCache.mode === mode && projectedCache.regions) {
+      return projectedCache.regions;
+    }
+    var list = D.regions.map(function (r) {
+      var box = academic.regionFocus ? academic.regionFocus[r.id] : null;
+      if (!box) return r;
+      var out = Object.assign({}, r);
+      out.focus = box;
+      out.center = { x: box.x + box.w / 2, y: box.y + box.h / 2 };
+      return out;
+    });
+    if (projectedCache && projectedCache.mode === mode) projectedCache.regions = list;
+    return list;
+  }
+
+  function activeRegionById(id) {
+    var list = activeRegions();
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return null;
+  }
+
   function activeReactions() {
-    return mode === 'academic' ? D.reactions.concat(academicReactions) : D.reactions;
+    return mode === 'academic' ? academicAll : D.reactions;
+  }
+
+  function activeReactionIndex() {
+    return mode === 'academic' ? academicReactionIndex : reactionIndex;
+  }
+
+  function activeEdgeIndex() {
+    return mode === 'academic' ? academicAllEdgeIndex : edgeIndex;
+  }
+
+  function activeConnectors() {
+    return mode === 'academic' ? academicConnectors : reactionConnectors;
   }
 
   function activeHitCandidates() {
-    return mode === 'academic' ? hitCandidates.concat(academicHitCandidates) : hitCandidates;
+    return mode === 'academic' ? academicHitCandidates.concat(classHitCandidates) : hitCandidates;
   }
 
   function activeIncoming(id) {
-    var normal = incoming[id] || [];
-    if (mode !== 'academic') return normal;
-    return normal.concat(academicIncoming[id] || []);
+    if (mode === 'academic') return academicIncoming[id] || [];
+    return incoming[id] || [];
   }
 
   function activeOutgoing(id) {
-    var normal = outgoing[id] || [];
-    if (mode !== 'academic') return normal;
-    return normal.concat(academicOutgoing[id] || []);
+    if (mode === 'academic') return academicOutgoing[id] || [];
+    return outgoing[id] || [];
   }
 
   function typeFor(type) {
@@ -214,11 +365,15 @@
     return null;
   }
 
-  /* ---------------- academic overlay build ---------------- */
+  /* ---------------- academic layout build ---------------- */
 
-  // 通常データとの整合が取れない場合は、アカデミックを一切有効化しない（fail-closed）。
+  // 通常データ・学術配置データとの整合が取れない場合は、アカデミックを一切有効化しない
+  // （fail-closed）。古い v1 overlay や positions の無いキャッシュへ黙って落ちない。
   function initAcademicData() {
-    if (!A || !A.meta || A.meta.version !== 1 || !Array.isArray(A.reactions) || !A.reactions.length) return false;
+    if (!A || !A.meta || !Array.isArray(A.reactions) || !A.reactions.length) {
+      academicDisabledReason = 'アカデミックデータを読み込めないため、通常表示だけを使えます。';
+      return false;
+    }
     try {
       var base = A.base || {};
       if (base.normalVersion !== D.meta.version ||
@@ -226,11 +381,19 @@
         base.reactionCount !== D.reactions.length ||
         base.heldReactionCount !== D.meta.heldReactionCount ||
         base.nodeHash !== academicBaseHash(D.compounds)) {
-        errMsg('academic-data.js が通常データと一致しないため、アカデミック表示を無効にします。');
+        academicDisabledReason = 'academic-data.js が通常データと一致しないため、アカデミック表示を無効にしました。';
+        errMsg(academicDisabledReason);
         return false;
       }
-      var markers = (A.layout && A.layout.markers) || {};
-      var routes = (A.layout && A.layout.routes) || {};
+      var L = A.layout;
+      var problem = academicLayoutProblem(L, D.compounds, D.reactions);
+      if (problem) {
+        academicDisabledReason = problem + ' アカデミック表示は使えません（通常表示はそのまま使えます）。';
+        errMsg(problem);
+        return false;
+      }
+      var markers = L.markers || {};
+      var routes = L.routes || {};
       var normalIds = {};
       D.reactions.forEach(function (r) { normalIds[r.id] = true; });
       var seen = {};
@@ -249,6 +412,7 @@
           if (!compoundById[id]) throw new Error('academic の物質IDが未収録: ' + id);
         });
         var edges = [];
+        // 描画できる経路が 1 本も無い反応は、カードだけの反応として扱う（無言の未描画はしない）。
         var push = function (dir, id) {
           var route = routes[raw.id + '|' + dir + '|' + id];
           if (!route || !Array.isArray(route.points) || route.points.length < 2) return;
@@ -256,8 +420,8 @@
         };
         subs.forEach(function (id) { push('in', id); });
         prods.forEach(function (id) { push('out', id); });
-        var regions = {};
-        subs.concat(prods).forEach(function (id) { regions[compoundById[id].region] = true; });
+        var regionSet = {};
+        subs.concat(prods).forEach(function (id) { regionSet[compoundById[id].region] = true; });
         return {
           id: raw.id,
           type: raw.type,
@@ -277,7 +441,7 @@
           conditions: raw.conditions || '',
           note: raw.note || '',
           sources: raw.sources || [],
-          cross: Object.keys(regions).length > 1,
+          cross: Object.keys(regionSet).length > 1,
           x: marker.x,
           y: marker.y,
           label: marker.label,
@@ -285,43 +449,73 @@
           equation: raw.equation || null
         };
       });
+      var all = buildAcademicAll(L, D.reactions, list);
       academic = {
         meta: A.meta,
         types: A.types || {},
         reactions: list,
-        canvas: (A.layout && A.layout.canvas) || modeCanvas()
+        all: all,
+        positions: L.positions,
+        regionFocus: L.regionFocus || {},
+        canvas: L.canvas,
+        stats: L.stats || {},
+        normalMarkers: L.normalMarkers || {},
+        normalRoutes: L.normalRoutes || {},
+        markers: markers,
+        routes: routes
       };
       academicReactions = list;
-      academicReactions.forEach(function (r) {
+      academicAll = all;
+      academicAll.forEach(function (r) {
+        academicAllById[r.id] = r;
+        r.products.forEach(function (id) { (academicIncoming[id] = academicIncoming[id] || []).push(r); });
+        r.substrates.forEach(function (id) { (academicOutgoing[id] = academicOutgoing[id] || []).push(r); });
         r.substrates.concat(r.products).forEach(function (id) { academicEndpointIds[id] = true; });
         r.edges.forEach(function (e) { academicDrawnIds[e.id] = true; });
       });
-      academicReactions.forEach(function (r) {
-        r.products.forEach(function (id) { (academicIncoming[id] = academicIncoming[id] || []).push(r); });
-        r.substrates.forEach(function (id) { (academicOutgoing[id] = academicOutgoing[id] || []).push(r); });
+      // 通常は孤立していたが、学術反応で新たにネットワークへ入る物質だけを別扱いにする。
+      D.compounds.forEach(function (c) {
+        if (c.incoming + c.outgoing !== 0) return;
+        var ins = (academicIncoming[c.id] || []).length;
+        var outs = (academicOutgoing[c.id] || []).length;
+        if (ins + outs > 0) academicNewlyConnectedIds[c.id] = true;
       });
+      var connectedCount = 0;
+      D.compounds.forEach(function (c) {
+        if ((academicIncoming[c.id] || []).length + (academicOutgoing[c.id] || []).length > 0) connectedCount++;
+      });
+      academic.connectedCount = connectedCount;
+      academic.unconnectedCount = D.compounds.length - connectedCount;
+      projectedCache = null;
       academicEnabled = true;
       return true;
     } catch (err) {
       errMsg('academic-data.js を読み込めないため、アカデミック表示を無効にします: ' + (err && err.message));
       academic = null;
       academicReactions = [];
+      academicAll = [];
       academicEnabled = false;
+      academicDisabledReason = 'academic-data.js を読み込めないため、アカデミック表示を無効にしました。';
       return false;
     }
   }
 
   function buildAcademic() {
     if (!academicEnabled || !academicReactions.length) return;
-    academicLayer = el('g', { 'class': 'rp-academic', 'aria-hidden': 'true' });
-    var edgeLayer = el('g', { 'class': 'rp-edges rp-edges--academic' });
-    var hitLayer = el('g', { 'class': 'rp-edge-hits rp-edge-hits--academic', 'aria-hidden': 'true' });
-    var markerLayer = el('g', { 'class': 'rp-reactions rp-reactions--academic' });
+    academicLayer = el('g', { 'class': 'rp-academic rp-academic-all', 'data-layout': 'academic', 'aria-hidden': 'true' });
+    var secondaryLayer = el('g', { 'class': 'rp-edges rp-edges--secondary' });
+    var primaryLayer = el('g', { 'class': 'rp-edges rp-edges--primary' });
+    var hitLayer = el('g', { 'class': 'rp-edge-hits', 'aria-hidden': 'true' });
+    var markerLayer = el('g', { 'class': 'rp-reactions' });
     var hitShapes = {};
+    var hitOrder = {};
+    // 学術配置の 427 物質で connector の当たり判定・端点を解く（canonical は使わない）。
+    var projected = {};
+    D.compounds.forEach(function (c) { projected[c.id] = projectCompound(c, academic.positions[c.id]); });
 
-    academicReactions.forEach(function (r) {
+    academicAll.forEach(function (r) {
       var list = Core.reactionConnectors(r, {
-        compoundById: compoundById,
+        compoundById: projected,
         nodeW: NODE_W,
         nodeH: NODE_H
       });
@@ -335,11 +529,13 @@
     Core.separateSharedPorts(all);
     Core.enforcePaintClearance(all);
 
-    academicReactions.forEach(function (r) {
+    academicAll.forEach(function (r, reactionOrder) {
+      var tier = r.tier === 'primary' ? 'primary' : r.tier === 'secondary' ? 'secondary' : 'academic';
+      var edgeLayer = tier === 'primary' ? primaryLayer : secondaryLayer;
       (academicConnectors[r.id] || []).forEach(function (c) {
         var shaftD = Core.routePath(c.shaft || c.points, c.gaps, c.bridges);
         var shaftPath = el('path', {
-          'class': 'rp-edge rp-edge--academic',
+          'class': 'rp-edge rp-edge--' + tier,
           'data-from': c.dir === 'in' ? c.edgeId : r.id,
           'data-to': c.dir === 'in' ? r.id : c.edgeId,
           'data-edge': c.edgeKeys[0],
@@ -347,30 +543,33 @@
           'data-reaction': r.id,
           'data-compound': c.compounds[0],
           'data-compounds': JSON.stringify(c.compounds),
-          'data-tier': 'academic',
+          'data-tier': tier,
           d: shaftD
         });
         edgeLayer.appendChild(shaftPath);
-        if (c.arrowHead) edgeLayer.appendChild(el('path', arrowHeadAttrs(c, 'academic')));
-        c.edgeKeys.forEach(function (key) { academicEdgeIndex[key] = shaftPath; });
+        if (c.arrowHead) edgeLayer.appendChild(el('path', arrowHeadAttrs(c, tier)));
+        c.edgeKeys.forEach(function (key) { academicAllEdgeIndex[key] = shaftPath; });
         var hitShape = connectorHitShape(c, shaftD);
         hitLayer.appendChild(el('path', {
-          'class': 'rp-edge-hit rp-edge-hit--academic',
+          'class': 'rp-edge-hit',
           'data-kind': 'reaction',
           'data-id': r.id,
           'data-reaction': r.id,
           d: hitShape.d
         }));
-        if (!hitShapes[r.id]) hitShapes[r.id] = { lines: [], fills: [] };
+        if (!hitShapes[r.id]) {
+          hitShapes[r.id] = { lines: [], fills: [] };
+          hitOrder[r.id] = reactionOrder;
+        }
         hitShapes[r.id].lines = hitShapes[r.id].lines.concat(hitShape.lines);
         hitShapes[r.id].fills = hitShapes[r.id].fills.concat(hitShape.fills);
       });
 
       var g = el('g', {
-        'class': 'rp-reaction rp-reaction--academic',
+        'class': 'rp-reaction rp-reaction--' + tier + (r.academic || r.state === 'confirmed' ? '' : ' is-pending'),
         'data-kind': 'reaction',
         'data-id': r.id,
-        'data-tier': 'academic',
+        'data-tier': tier,
         role: 'button',
         tabindex: '0',
         'aria-label': reactionLabel(r)
@@ -378,13 +577,23 @@
       g.appendChild(el('circle', { 'class': 'rp-reaction__dot', cx: r.x, cy: r.y, r: 6 }));
       if (r.label) {
         var label = el('text', {
-          'class': 'rp-reaction__label rp-reaction__label--academic',
+          'class': 'rp-reaction__label' + (r.academic ? ' rp-reaction__label--academic' : ''),
           x: r.label.type.x + (r.label.side === 'E' ? 11 : -11),
           y: r.label.type.y,
           'text-anchor': r.label.side === 'E' ? 'start' : 'end'
         });
         label.textContent = r.typeLabel;
         g.appendChild(label);
+        if (r.conditions && r.label.cond) {
+          var cond = el('text', {
+            'class': 'rp-reaction__label rp-reaction__label--cond',
+            x: r.label.cond.x,
+            y: r.label.cond.y,
+            'text-anchor': 'middle'
+          });
+          cond.textContent = Core.shorten(r.conditions, 16);
+          g.appendChild(cond);
+        }
       }
       markerLayer.appendChild(g);
       academicReactionIndex[r.id] = g;
@@ -392,13 +601,14 @@
 
     Object.keys(hitShapes).forEach(function (id) {
       var shape = hitShapes[id];
-      academicHitCandidates.push(hitCandidate('reaction', id, 0, { lines: shape.lines, fills: shape.fills }));
+      academicHitCandidates.push(hitCandidate('reaction', id, hitOrder[id] || 0, { lines: shape.lines, fills: shape.fills }));
     });
 
-    academicLayer.appendChild(edgeLayer);
+    academicLayer.appendChild(secondaryLayer);
+    academicLayer.appendChild(primaryLayer);
     academicLayer.appendChild(hitLayer);
     academicLayer.appendChild(markerLayer);
-    // 通常の反応ラベル（フォーカス可能な実体）より下、通常の当たり判定より上に置く。
+    // 通常ノード・一般図より下、通常の当たり判定より上に置く（通常時は CSS で非表示）。
     var normalMarkers = viewport.querySelector('.rp-reactions');
     if (normalMarkers) viewport.insertBefore(academicLayer, normalMarkers);
     else viewport.appendChild(academicLayer);
@@ -478,12 +688,12 @@
   }
 
   function buildReactions() {
-    var secondaryLayer = el('g', { 'class': 'rp-edges rp-edges--secondary' });
-    var primaryLayer = el('g', { 'class': 'rp-edges rp-edges--primary' });
+    var secondaryLayer = el('g', { 'class': 'rp-edges rp-edges--secondary rp-layout-normal', 'data-layout': 'normal' });
+    var primaryLayer = el('g', { 'class': 'rp-edges rp-edges--primary rp-layout-normal', 'data-layout': 'normal' });
     // 見えない当たり判定の層は、可視線の上・反応ラベル（marker）の下に置く。
     // 反応ラベルと物質ノードのタップは無条件で優先される（後から描くため）。
-    var hitLayer = el('g', { 'class': 'rp-edge-hits', 'aria-hidden': 'true' });
-    var markerLayer = el('g', { 'class': 'rp-reactions' });
+    var hitLayer = el('g', { 'class': 'rp-edge-hits rp-layout-normal', 'data-layout': 'normal', 'aria-hidden': 'true' });
+    var markerLayer = el('g', { 'class': 'rp-reactions rp-layout-normal', 'data-layout': 'normal' });
     var hitShapes = {};
     var hitOrder = {};
     D.reactions.forEach(function (r, reactionOrder) {
@@ -571,6 +781,7 @@
     viewport.appendChild(primaryLayer);
     viewport.appendChild(hitLayer);
     viewport.appendChild(markerLayer);
+    normalMarkerLayer = markerLayer;
   }
 
   function buildNodes() {
@@ -623,6 +834,79 @@
       nodeIndex[c.id] = g;
     });
     viewport.appendChild(nodeLayer);
+  }
+
+  // 学術表示では、ノードのグループを学術座標へ translate する。rect / band / text / badge は
+  // 子要素のまま一緒に動くため、文字を描き直さない。通常へ戻すときは transform を外し、
+  // 寸法も canonical から作り直すので累積誤差は出ない。
+  function syncNodeProjection() {
+    var acad = mode === 'academic' && academicEnabled && academic;
+    D.compounds.forEach(function (c) {
+      var g = nodeIndex[c.id];
+      if (!g) return;
+      var pos = acad ? academic.positions[c.id] : null;
+      var tx = pos ? pos.x - c.x : 0;
+      var ty = pos ? pos.y - c.y : 0;
+      if (tx || ty) g.setAttribute('transform', 'translate(' + tx + ' ' + ty + ')');
+      else g.removeAttribute('transform');
+      var baseW = nodeW(c);
+      var baseH = nodeH(c);
+      var w = pos && pos.w != null ? pos.w : baseW;
+      var h = pos && pos.h != null ? pos.h : baseH;
+      var box = g.querySelector('.rp-node__box');
+      if (box) {
+        box.setAttribute('width', w);
+        box.setAttribute('height', h);
+      }
+      var band = g.querySelector('.rp-node__band');
+      if (band) band.setAttribute('width', w - 16);
+      var text = g.querySelector('.rp-node__label');
+      if (text) {
+        text.setAttribute('x', c.x + w / 2);
+        text.setAttribute('y', c.y + h / 2 + 1);
+      }
+      var badge = g.querySelector('.rp-node__badge');
+      if (badge) badge.setAttribute('cx', c.x + w - 8);
+    });
+  }
+
+  // 反応マーカー層のキーボード到達性だけを切り替える（見た目は CSS が data-mode で決める）。
+  function setLayerInteractive(group, enabled) {
+    if (!group || !group.querySelectorAll) return;
+    group.setAttribute('aria-hidden', enabled ? 'false' : 'true');
+    var items = group.querySelectorAll('[data-kind][role="button"]');
+    for (var i = 0; i < items.length; i++) {
+      items[i].setAttribute('tabindex', enabled ? '0' : '-1');
+    }
+  }
+
+  function syncModeLayers() {
+    var acad = mode === 'academic' && academicEnabled;
+    if (academicLayer && academicLayer.style) academicLayer.style.display = acad ? '' : 'none';
+    setLayerInteractive(academicLayer, acad);
+    setLayerInteractive(normalMarkerLayer, !acad);
+  }
+
+  // 俯瞰で分野ごとに1つだけ物質名を出す。学術モードでは regionFocus の中心で選び直す。
+  function regionHubs() {
+    if (projectedCache && projectedCache.mode === mode && projectedCache.hubs) return projectedCache.hubs;
+    var hubs = {};
+    var regions = {};
+    activeRegions().forEach(function (r) { regions[r.id] = r; });
+    activeCompounds().forEach(function (c) {
+      if (!c.hub) return;
+      var region = regions[c.region];
+      if (!region) return;
+      var center = region.center || { x: 0, y: 0 };
+      var dx = c.x + nodeW(c) / 2 - center.x;
+      var dy = c.y + nodeH(c) / 2 - center.y;
+      var distance = Math.hypot(dx, dy);
+      if (!hubs[c.region] || distance < hubs[c.region].distance) {
+        hubs[c.region] = { compound: c, distance: distance };
+      }
+    });
+    if (projectedCache && projectedCache.mode === mode) projectedCache.hubs = hubs;
+    return hubs;
   }
 
   // 12分類だけの一般図。既存の物質・反応とは別レイヤーに固定座標で描き、D.compounds / D.reactions には混ぜない。
@@ -761,6 +1045,7 @@
       classNodeIndex[n.id] = g;
     });
     hitCandidates = hitCandidates.concat(classHitPoints);
+    classHitCandidates = classHitCandidates.concat(classHitPoints);
     classLayer.appendChild(edgeLayer);
     classLayer.appendChild(nodeLayer);
     viewport.appendChild(classLayer);
@@ -894,8 +1179,9 @@
 
   function updateMarkers(level) {
     var small = level === 0;
+    var index = activeReactionIndex();
     activeReactions().forEach(function (r) {
-      var g = reactionIndex[r.id] || academicReactionIndex[r.id];
+      var g = index[r.id];
       if (!g) return;
       var dot = g.querySelector('.rp-reaction__dot');
       if (dot) dot.setAttribute('r', small ? '4' : '6');
@@ -919,8 +1205,9 @@
     var box = visibleBox();
     var placed = [];
     if (level === 0 && view.scale >= 0.15) {
-      D.regions.forEach(function (region) {
-        var picked = regionHub[region.id];
+      var hubs = regionHubs();
+      activeRegions().forEach(function (region) {
+        var picked = hubs[region.id];
         if (!picked) return;
         var c = picked.compound;
         var center = nodeCenter(c);
@@ -952,26 +1239,11 @@
       };
       var obstacles = [];
       // 主要 SVG ラベル（種別・条件）の実フォント矩形。text の getBBox ではなく画面実測を使う。
-      D.reactions.forEach(function (r) {
+      // 表示中のモードの反応だけを測る（非表示レイヤーは実寸 0 で自然に除外される）。
+      var labelIndex = activeReactionIndex();
+      activeReactions().forEach(function (r) {
         if (!r.label) return;
-        var g = reactionIndex[r.id];
-        if (!g) return;
-        var texts = g.querySelectorAll('.rp-reaction__label');
-        for (var ti = 0; ti < texts.length; ti++) {
-          var lr = texts[ti].getBoundingClientRect();
-          if (!lr.width || !lr.height) continue;
-          var rect = toLocal(lr);
-          obstacles.push({
-            x: rect.x - LABEL_PAD,
-            y: rect.y - LABEL_PAD,
-            w: rect.w + LABEL_PAD * 2,
-            h: rect.h + LABEL_PAD * 2
-          });
-        }
-      });
-      // アカデミックのマーカー・ラベルも、通常モードでは非表示のため実寸 0 で自然に除外される。
-      academicReactions.forEach(function (r) {
-        var g = academicReactionIndex[r.id];
+        var g = labelIndex[r.id];
         if (!g) return;
         var texts = g.querySelectorAll('.rp-reaction__label');
         for (var ti = 0; ti < texts.length; ti++) {
@@ -987,7 +1259,8 @@
         }
       });
       // ノードは stroke 幅・非 scale・丸めを含む実 DOM 矩形を測り、外側に 5.5px 取る。
-      D.compounds.forEach(function (c) {
+      // 位置は現在モードの投影座標（学術では positions）で判定する。
+      activeCompounds().forEach(function (c) {
         var p = Core.worldToScreen(view, c.x, c.y);
         if (p.x + nodeW(c) * view.scale < box.left - 60 || p.x > box.right + 60) return;
         if (p.y + nodeH(c) * view.scale < box.top - 60 || p.y > box.bottom + 60) return;
@@ -1005,7 +1278,7 @@
           h: nrect.h + NODE_PAD * 2
         });
       });
-      D.reactions.forEach(function (r) {
+      activeReactions().forEach(function (r) {
         if (r.tier !== 'secondary' || r.label) return;
         var screen = Core.worldToScreen(view, r.x, r.y);
         if (screen.x < box.left - 80 || screen.x > box.right + 80) return;
@@ -1088,7 +1361,7 @@
     if (selected && (selected.kind === 'class' || selected.kind === 'class-edge')) {
       text = '官能基変換の一般図 / ' + selected.name + '（' + Math.round(view.scale * 100) + '%）';
     } else {
-      text = Core.positionText(view, D.regions, D.compounds, selectedInfo, modeCanvas(), viewSize.w, viewSize.h, activeRegion);
+      text = Core.positionText(view, activeRegions(), activeCompounds(), selectedInfo, modeCanvas(), viewSize.w, viewSize.h, activeRegion);
       var classText = Core.classMapPosition(view, classMapData, viewSize.w, viewSize.h);
       if (classText) text = classText;
     }
@@ -1316,11 +1589,9 @@
   }
 
   // 反応・一般図の変換・物質のフォーカス可能な実体。透明ヒットは使わない。
+  // 反応は現在モードの索引だけを返す（非表示の通常マーカーを先に返さない）。
   function entityElement(kind, id) {
-    if (kind === 'reaction') {
-      var normalReaction = reactionIndex[id] || null;
-      return normalReaction || academicReactionIndex[id] || null;
-    }
+    if (kind === 'reaction') return activeReactionIndex()[id] || null;
     if (kind === 'class-edge') return classEdgeIndex[id] || null;
     if (kind === 'class') return classNodeIndex[id] || null;
     return nodeIndex[id] || null;
@@ -1669,7 +1940,7 @@
       animateTo(Core.centerOn({ x: lp.x - 40, y: lp.y - 20 }, { w: 80, h: 40 }, view.scale, viewSize.w, viewSize.h));
       return;
     }
-    var c = kind === 'compound' ? compoundById[id] : findReaction(id);
+    var c = kind === 'compound' ? compoundAt(id) : findReaction(id);
     if (!c) return;
     var cx = kind === 'compound' ? c.x + nodeW(c) / 2 : c.x;
     var cy = kind === 'compound' ? c.y + nodeH(c) / 2 : c.y;
@@ -1702,7 +1973,7 @@
     var maxX = r.x + 30;
     var maxY = r.y + 30;
     Object.keys(ids).forEach(function (cid) {
-      var c = compoundById[cid];
+      var c = compoundAt(cid);
       if (!c) return;
       minX = Math.min(minX, c.x);
       minY = Math.min(minY, c.y);
@@ -1754,7 +2025,7 @@
       render();
       return;
     }
-    var elm = kind === 'compound' ? nodeIndex[id] : (reactionIndex[id] || academicReactionIndex[id]);
+    var elm = kind === 'compound' ? nodeIndex[id] : activeReactionIndex()[id];
     if (elm) {
       elm.classList.add('is-selected');
       selected = { kind: kind, id: id, el: elm };
@@ -1778,20 +2049,9 @@
 
   // 選択中の物質・反応につながる辺だけを強調する（読解の補助。位置は変えない）。
   function updateEdgeHighlight() {
-    Object.keys(edgeIndex).forEach(function (key) {
-      var path = edgeIndex[key];
-      var active = false;
-      if (selected) {
-        active = selected.kind === 'compound'
-          ? Core.compoundList(path.getAttribute('data-compounds'), path.getAttribute('data-compound'))
-            .indexOf(selected.id) !== -1
-          : selected.kind === 'reaction' && path.getAttribute('data-reaction') === selected.id;
-      }
-      if (active) path.classList.add('is-active');
-      else path.classList.remove('is-active');
-    });
-    Object.keys(academicEdgeIndex).forEach(function (key) {
-      var path = academicEdgeIndex[key];
+    var index = activeEdgeIndex();
+    Object.keys(index).forEach(function (key) {
+      var path = index[key];
       var active = false;
       if (selected) {
         active = selected.kind === 'compound'
@@ -1833,7 +2093,8 @@
     while (layer.firstChild) layer.removeChild(layer.firstChild);
     if (!r) return;
     // 通常表示と同じ connector を使う。選択・プレビューで端点や矢印の向きを変えない。
-    (academicConnectors[r.id] || reactionConnectors[r.id] || []).forEach(function (c) {
+    // （学術モードでは学術配置で作った同じ規則の connector を使う）
+    (activeConnectors()[r.id] || []).forEach(function (c) {
       layer.appendChild(el('path', {
         'class': 'rp-edge-active',
         'data-reaction': r.id,
@@ -2447,7 +2708,9 @@
       count.textContent = region.count;
       b.appendChild(count);
       b.addEventListener('click', function () {
-        var target = regionTarget(region);
+        // チップの閉包は分野IDだけを持ち、位置はクリック時のモードで引き直す。
+        var active = activeRegionById(region.id) || region;
+        var target = regionTarget(active);
         activeRegion = region.id;
         animateTo(Core.clampPan(target, viewSize.w, viewSize.h, modeCanvas()));
         setChipPressed(region.id);
@@ -2513,7 +2776,7 @@
     rh.textContent = '反応';
     var rcount = document.createElement('span');
     rcount.textContent = mode === 'academic'
-      ? D.reactions.length + ' 件（通常）＋ ' + academicReactions.length + ' 件（アカデミック）'
+      ? academicAll.length + ' 件（通常 ' + D.reactions.length + ' ＋ 大学レベル ' + academicReactions.length + '）'
       : D.reactions.length + ' 件（すべて独立資料で確認済み）';
     rh.appendChild(rcount);
     reactionGroup.appendChild(rh);
@@ -2583,7 +2846,7 @@
 
   function gotoEntity(kind, id, trigger) {
     returnFocus = trigger || returnFocus;
-    var c = kind === 'compound' ? compoundById[id] : null;
+    var c = kind === 'compound' ? compoundAt(id) : null;
     var r = kind === 'reaction' ? findReaction(id) : null;
     var target = c ? { x: c.x, y: c.y } : (r ? { x: r.x, y: r.y } : null);
     if (mapEl.scrollIntoView) {
@@ -2697,9 +2960,10 @@
     if (searchStatus.textContent !== text) searchStatus.textContent = text;
   }
 
+  // 現在モードの反応だけを返す（学術モードでは通常 86 も学術座標へ投影した複製）。
   function findReaction(id) {
+    if (mode === 'academic') return academicAllById[id] || null;
     for (var i = 0; i < D.reactions.length; i++) if (D.reactions[i].id === id) return D.reactions[i];
-    for (var j = 0; j < academicReactions.length; j++) if (academicReactions[j].id === id) return academicReactions[j];
     return null;
   }
 
@@ -2771,17 +3035,20 @@
       acad.setAttribute('aria-pressed', mode === 'academic' ? 'true' : 'false');
       acad.disabled = !academicEnabled;
       acad.setAttribute('aria-disabled', academicEnabled ? 'false' : 'true');
-      acad.title = academicEnabled ? '' : 'アカデミックデータが未収録、または通常データと整合しません。';
+      acad.title = academicEnabled
+        ? '通常 427 物質を学術配置で表示し、大学レベルの追加 178 反応も表示します。'
+        : (academicDisabledReason || 'アカデミックデータが未収録、または通常データと整合しません。');
     }
   }
 
   // 通常の data-path-state 属性は書き換えない。学術で新たに接続したノードだけ class を足す。
+  // 未接続のままの物質（棚）は badge を維持する。
   function applyAcademicNodeStates() {
     Object.keys(nodeIndex).forEach(function (id) {
       var g = nodeIndex[id];
       var c = compoundById[id];
       if (!g || !c) return;
-      if (mode === 'academic' && academicDrawnIds[id]) {
+      if (mode === 'academic' && academicNewlyConnectedIds[id]) {
         g.classList.add('is-academic-linked');
         g.setAttribute('aria-label', c.name + '、' + c.formula + '、アカデミック反応で接続');
       } else {
@@ -2793,24 +3060,34 @@
 
   function academicSummaryText() {
     if (!academic) return '';
-    var evidence = academic.meta.evidenceCount || {};
-    var general = evidence['general-rule-application'] || 0;
-    var illustrated = evidence['source-illustrated-transformation'] || 0;
-    var multi = (academic.meta.stepCount || {})['multi-step'] || 0;
-    return 'アカデミック表示: 大学レベルの追加反応 ' + academicReactions.length + ' 件（一般則の適用 ' +
-      general + ' 件、資料が個別例として示す変換 ' + illustrated + ' 件、多段階 ' + multi +
-      ' 件）。新たに接続した孤立物質 ' + (academic.meta.newlyConnectedCount || 0) + ' 件、未接続 ' +
-      (academic.meta.stillIsolatedCount || 0) + ' 件。通常の物質 ' + D.meta.compoundCount + ' 件・確認済み反応 ' +
-      D.meta.reactionCount + ' 件は変更していません。';
+    var stats = academic.stats || {};
+    var newlyConnected = Object.keys(academicNewlyConnectedIds).length;
+    var connected = stats.connectedCount != null ? stats.connectedCount : academic.connectedCount;
+    var unconnected = stats.unconnectedCount != null ? stats.unconnectedCount : academic.unconnectedCount;
+    return 'アカデミック表示: 通常 ' + D.reactions.length + ' 反応を学術配置へ置き直し、大学レベルの追加反応 ' +
+      academicReactions.length + ' 件を加えた全 ' + academicAll.length + ' 反応を表示します（一般則の適用 ' +
+      (academic.meta.evidenceCount || {})['general-rule-application'] + ' 件、資料が個別例として示す変換 ' +
+      (academic.meta.evidenceCount || {})['source-illustrated-transformation'] + ' 件、多段階 ' +
+      ((academic.meta.stepCount || {})['multi-step'] || 0) + ' 件）。新たに接続した物質 ' + newlyConnected +
+      ' 件を含め、接続 ' + connected + ' 物質・未接続 ' + unconnected +
+      ' 物質（外縁の棚）です。通常の物質 ' + D.meta.compoundCount + ' 件・確認済み反応 ' +
+      D.meta.reactionCount + ' 件の内容は変更していません。';
   }
+
 
   function updateAcademicNotice() {
     var note = document.getElementById('rp-academic-note');
     var scope = document.getElementById('rp-academic-scope');
     if (!note) return;
-    if (mode !== 'academic' || !academicEnabled) {
-      note.hidden = true;
-      note.textContent = '';
+    if (!academicEnabled || mode !== 'academic') {
+      if (!academicEnabled && academicDisabledReason) {
+        // 古いキャッシュ等で学術配置が無い場合は、黙って v1 overlay を使わず理由を示す。
+        note.hidden = false;
+        if (note.textContent !== academicDisabledReason) note.textContent = academicDisabledReason;
+      } else {
+        note.hidden = true;
+        note.textContent = '';
+      }
       if (scope) { scope.hidden = true; scope.textContent = ''; }
       return;
     }
@@ -2820,7 +3097,7 @@
     if (scope) {
       scope.hidden = false;
       var scopeText = 'アカデミック表示では、通常は孤立していた物質のうち学術反応でつながったものを「学術接続」として示します。' +
-        '未接続の物質は ' + (academic.meta.stillIsolatedCount || 0) + ' 件で、これは「生成しない」という意味ではありません。';
+        '未接続の物質は ' + (academic.unconnectedCount == null ? 0 : academic.unconnectedCount) + ' 件で、これは「生成しない」という意味ではありません。';
       if (scope.textContent !== scopeText) scope.textContent = scopeText;
     }
   }
@@ -2831,7 +3108,16 @@
     applySearch(searchInput.value || '');
   }
 
-  // 同じモードのボタンをもう一度押したら通常へ戻す。選択・検索・カードは残さない。
+  // 現在モードに実体があるか（切替後に選択・カードを残せるかの判定）。
+  function modeHasEntity(kind, id) {
+    if (!kind || !id) return false;
+    if (kind === 'compound') return !!compoundById[id];
+    if (kind === 'reaction') return !!activeReactionIndex()[id];
+    return kind === 'class' || kind === 'class-edge';
+  }
+
+  // モード切替。選択・カードの「論理的な対象」は可能な限り保ち、
+  // 実体の座標だけを切替後のモードで引き直す（通常 86 と物質は同じ反応・物質のまま）。
   function setMode(next, opts) {
     var options = opts || {};
     if (next === 'academic' && !academicEnabled) return;
@@ -2839,14 +3125,27 @@
       if (next !== 'academic') return;
       next = 'normal';
     }
+    var logical = selected ? { kind: selected.kind, id: selected.id } : null;
+    var cardOpen = !card.hidden;
+    // 途中のホイール目標・進行中の fit を捨てる（切替後に古い目標へ戻らない）。
+    cancelWheelZoom();
+    animToken += 1;
     closeEquationDialog(false);
-    closeCard(false);
     closePositionPopover(false);
     clearRegionSelection();
     mode = next;
     svg.setAttribute('data-mode', mode);
     mapEl.setAttribute('data-mode', mode);
-    if (academicLayer) academicLayer.setAttribute('aria-hidden', mode === 'academic' ? 'false' : 'true');
+    // 非表示になる層に keyboard focus を残さない（未知の hidden 起点を作らない）。
+    var activeEl = document.activeElement;
+    if (activeEl && activeEl.closest &&
+      (activeEl.closest('.rp-layout-normal') || activeEl.closest('.rp-academic'))) {
+      if (mapEl.focus) {
+        try { mapEl.focus({ preventScroll: true }); } catch (err) { errMsg(err && err.message); }
+      }
+    }
+    syncNodeProjection();
+    syncModeLayers();
     searchInput.value = '';
     applySearch('');
     clearSelection();
@@ -2855,7 +3154,21 @@
     updateModeButtons();
     updateAcademicNotice();
     updateMarkers(Core.detailLevel(view.scale));
+    // 同じ物質・同じ通常反応なら、切替後の座標で選択と詳細を保つ。学術だけの反応は閉じる。
+    var keep = logical && modeHasEntity(logical.kind, logical.id);
+    if (keep) {
+      selectNode(logical.kind, logical.id);
+      if (cardOpen) openCard(logical.kind, logical.id);
+    } else if (cardOpen) {
+      closeCard(false);
+    }
+    if (returnFocus && returnFocus.closest) {
+      var hiddenNormal = !!returnFocus.closest('.rp-layout-normal') && mode === 'academic';
+      var hiddenAcademic = !!returnFocus.closest('.rp-academic') && mode !== 'academic';
+      if (hiddenNormal || hiddenAcademic) returnFocus = null;
+    }
     if (options.fit !== false) animateTo(fitModeCanvasView());
+    else render();
   }
 
   function readModeParam(search) {
@@ -2965,7 +3278,7 @@
   function applyInitialFocus() {
     var id = readFocusParam(window.location ? window.location.search : '');
     if (!id || !ownsCompoundId(id)) return false;
-    var c = compoundById[id];
+    var c = compoundAt(id);
     var scale = Math.max(view.scale, 0.92);
     setView(entityTarget({ x: c.x, y: c.y }, { w: nodeW(c), h: nodeH(c) }, scale), true);
     selectNode('compound', id);
@@ -3002,9 +3315,14 @@
       academicModeButton.addEventListener('click', function () { setMode('academic'); });
     }
     updateModeButtons();
+    updateAcademicNotice();
     if (academicEnabled && readModeParam(window.location ? window.location.search : '') === 'academic') {
+      // ?mode=academic は先にモードを決め、その学術座標で ?focus= を同期する。
       setMode('academic', { fit: false });
       setView(fitModeCanvasView(), false);
+    } else {
+      syncNodeProjection();
+      syncModeLayers();
     }
 
     mapEl.addEventListener('pointerdown', onPointerDown);

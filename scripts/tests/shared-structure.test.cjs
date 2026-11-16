@@ -141,8 +141,9 @@ test('[stereo] マレイン酸（シス）/フマル酸（トランス）は明�
       const rightIdx = right.a === doubleC.b ? right.b : right.a;
       const lc = cross(g.atoms[doubleC.a], g.atoms[doubleC.b], g.atoms[leftIdx]);
       const rc = cross(g.atoms[doubleC.a], g.atoms[doubleC.b], g.atoms[rightIdx]);
-      assert.equal(lc, -5600, id + ' の左COOH外積');
-      assert.equal(rc, geometry === 'cis' ? -5600 : 5600, id + ' の右COOH外積');
+      // シス（マレイン酸）は COOH を下・H を上にする上下鏡映のため、外積の符号がトランスと逆になる。
+      assert.equal(lc, geometry === 'cis' ? 5600 : -5600, id + ' の左COOH外積');
+      assert.equal(rc, 5600, id + ' の右COOH外積');
       assert.equal(lc * rc > 0, geometry === 'cis', id + ' のシス/トランス判定');
 
       // 非接続辺の交差・非接続原子との近接・ラベル衝突がない。
@@ -208,6 +209,48 @@ test('[stereo] マレイン酸（シス）/フマル酸（トランス）は明�
     assert.ok(eq10.includes('oc-eq-species'), 'app10の式クラス');
     assert.ok(eq11.includes('rp-eq-species'), 'app11の式クラス');
   });
+
+test('[stereo] マレイン酸は上下鏡映（COOHが下・C=CのHが上）で、フマル酸の座標は不変', () => {
+  const maleic = compound(D10, 'maleic-acid');
+  const fumaric = compound(D10, 'fumaric-acid');
+  const g = R10.buildStructure(maleic.structure);
+  const doubleC = g.bonds.find((b) => b.order === 2 && g.atoms[b.a].el === 'C' && g.atoms[b.b].el === 'C');
+  const cY = (g.atoms[doubleC.a].y + g.atoms[doubleC.b].y) / 2;
+  const neighboursOf = (idx) => g.bonds
+    .filter((b) => b.a === idx || b.b === idx)
+    .map((b) => (b.a === idx ? b.b : b.a));
+  const coohCarbons = [];
+  const doubleHs = [];
+  [doubleC.a, doubleC.b].forEach((idx) => {
+    neighboursOf(idx).forEach((n) => {
+      if (n === doubleC.a || n === doubleC.b) return;
+      if (g.atoms[n].el === 'C') coohCarbons.push(g.atoms[n]);
+      if (g.atoms[n].el === 'H') doubleHs.push(g.atoms[n]);
+    });
+  });
+  assert.equal(coohCarbons.length, 2, 'C=C の両炭素に COOH 炭素');
+  assert.equal(doubleHs.length, 2, 'C=C の両炭素に H');
+  // 元素記号は正立のまま（SVG の scaleY(-1) は使わずデータ座標で鏡映）、COOH が下・H が上。
+  coohCarbons.forEach((a) => assert.ok(a.y > cY, 'COOH 炭素が C=C より下'));
+  doubleHs.forEach((a) => assert.ok(a.y < cY, 'C=C の H が C=C より上'));
+  assert.equal(R10.formulaOfGraph(g), 'C4H4O4', 'マレイン酸の分子式');
+  assert.equal(g.atoms.length, 12, 'マレイン酸は12原子');
+  // 既存 bbox は維持（上下反転しても高さ・幅は変えない）。
+  const ys = g.atoms.map((a) => a.y);
+  assert.equal(Math.min(...ys), 40, 'マレイン酸の y 上限は据え置き');
+  assert.equal(Math.max(...ys), 230, 'マレイン酸の y 下限は据え置き');
+  // フマル酸（トランス）は座標を一切変えない。
+  const f = R10.buildStructure(fumaric.structure);
+  assert.deepEqual(f.atoms.map((a) => [a.el, a.x, a.y]), [
+    ['C', 140, 90], ['O', 100, 40], ['O', 80, 120], ['H', 50, 150],
+    ['C', 200, 160], ['H', 200, 230], ['C', 280, 160], ['H', 280, 90],
+    ['C', 340, 230], ['O', 380, 280], ['O', 400, 200], ['H', 430, 170]
+  ], 'フマル酸の座標は不変');
+  // 描画以外の立体情報はシスのまま。
+  assert.equal(maleic.structure.geometry, 'cis');
+  assert.equal(maleic.structure.ez, 'Z');
+  assert.equal(maleic.structure.stereo.geometry, 'cis');
+});
 
 test('[baseline] 既存の構造SVGはマレイン酸/フマル酸以外で変化しない', () => {
   const app10Baseline = JSON.parse(read(path.join(ROOT, 'scripts', 'tests', 'fixtures', 'app10-draw-baseline.json')));
