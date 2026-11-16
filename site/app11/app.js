@@ -11,6 +11,7 @@
   'use strict';
 
   var D = window.RPMapData;
+  var A = window.RPMapAcademic || null;
   var Core = window.RPMapCore;
   var SD = window.RPStructure;
   if (!D || !Core) return;
@@ -105,6 +106,21 @@
     classMapData.edges.forEach(function (e) { classEdgeById[e.id] = e; });
   }
   var activeEdgeLayer = null;
+  // アカデミック（大学レベルの追加反応）は通常データを書き換えない overlay。
+  // 通常モードでは DOM（display:none）・当たり判定・キーボード移動・カードのどれにも混ぜない。
+  var mode = 'normal';
+  var academic = null;
+  var academicReactions = [];
+  var academicReactionIndex = {};
+  var academicEdgeIndex = {};
+  var academicConnectors = {};
+  var academicHitCandidates = [];
+  var academicIncoming = {};
+  var academicOutgoing = {};
+  var academicEndpointIds = {};
+  var academicDrawnIds = {};
+  var academicLayer = null;
+  var academicEnabled = false;
   var previewReaction = null;
   var view = { scale: 1, x: 0, y: 0 };
   var viewSize = { w: 1, h: 1 };
@@ -155,6 +171,237 @@
 
   function errMsg(text) {
     if (window.console && console.warn) console.warn('[app11] ' + text);
+  }
+
+  /* ---------------- academic overlay helpers ---------------- */
+
+  // build-academic-data.cjs と同じ FNV-1a 32bit。通常ノードの座標・寸法だけで作る。
+  function academicBaseHash(compounds) {
+    var lines = compounds.map(function (c) {
+      return c.id + ':' + c.x + ',' + c.y + ',' + (c.w == null ? '' : c.w) + ',' + (c.h == null ? '' : c.h);
+    }).sort().join('\n');
+    var hash = 0x811c9dc5;
+    for (var i = 0; i < lines.length; i++) {
+      hash ^= lines.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    return ('0000000' + hash.toString(16)).slice(-8);
+  }
+
+  function activeReactions() {
+    return mode === 'academic' ? D.reactions.concat(academicReactions) : D.reactions;
+  }
+
+  function activeHitCandidates() {
+    return mode === 'academic' ? hitCandidates.concat(academicHitCandidates) : hitCandidates;
+  }
+
+  function activeIncoming(id) {
+    var normal = incoming[id] || [];
+    if (mode !== 'academic') return normal;
+    return normal.concat(academicIncoming[id] || []);
+  }
+
+  function activeOutgoing(id) {
+    var normal = outgoing[id] || [];
+    if (mode !== 'academic') return normal;
+    return normal.concat(academicOutgoing[id] || []);
+  }
+
+  function typeFor(type) {
+    if (D.types[type]) return D.types[type];
+    if (academic && academic.types[type]) return academic.types[type];
+    return null;
+  }
+
+  /* ---------------- academic overlay build ---------------- */
+
+  // 通常データとの整合が取れない場合は、アカデミックを一切有効化しない（fail-closed）。
+  function initAcademicData() {
+    if (!A || !A.meta || A.meta.version !== 1 || !Array.isArray(A.reactions) || !A.reactions.length) return false;
+    try {
+      var base = A.base || {};
+      if (base.normalVersion !== D.meta.version ||
+        base.compoundCount !== D.compounds.length ||
+        base.reactionCount !== D.reactions.length ||
+        base.heldReactionCount !== D.meta.heldReactionCount ||
+        base.nodeHash !== academicBaseHash(D.compounds)) {
+        errMsg('academic-data.js が通常データと一致しないため、アカデミック表示を無効にします。');
+        return false;
+      }
+      var markers = (A.layout && A.layout.markers) || {};
+      var routes = (A.layout && A.layout.routes) || {};
+      var normalIds = {};
+      D.reactions.forEach(function (r) { normalIds[r.id] = true; });
+      var seen = {};
+      var list = A.reactions.map(function (raw) {
+        if (!/^academic-[a-z0-9][a-z0-9-]*$/.test(raw.id)) throw new Error('academic id が不正: ' + raw.id);
+        if (normalIds[raw.id] || seen[raw.id]) throw new Error('academic id が衝突: ' + raw.id);
+        seen[raw.id] = true;
+        var marker = markers[raw.id];
+        if (!marker || !isFinite(marker.x) || !isFinite(marker.y) || !marker.label) {
+          throw new Error('academic marker がない: ' + raw.id);
+        }
+        var subs = raw.substrates || [];
+        var prods = raw.products || [];
+        if (!subs.length) throw new Error('academic 基質がない: ' + raw.id);
+        subs.concat(prods).forEach(function (id) {
+          if (!compoundById[id]) throw new Error('academic の物質IDが未収録: ' + id);
+        });
+        var edges = [];
+        var push = function (dir, id) {
+          var route = routes[raw.id + '|' + dir + '|' + id];
+          if (!route || !Array.isArray(route.points) || route.points.length < 2) return;
+          edges.push({ dir: dir, id: id, tier: 'academic', points: route.points, gaps: route.gaps || [], bridges: route.bridges || [] });
+        };
+        subs.forEach(function (id) { push('in', id); });
+        prods.forEach(function (id) { push('out', id); });
+        var regions = {};
+        subs.concat(prods).forEach(function (id) { regions[compoundById[id].region] = true; });
+        return {
+          id: raw.id,
+          type: raw.type,
+          typeLabel: raw.typeLabel,
+          state: raw.state || 'academic',
+          academic: true,
+          tier: 'academic',
+          evidenceKind: raw.evidenceKind,
+          stepKind: raw.stepKind,
+          steps: raw.steps || [],
+          scope: raw.scope || '',
+          basedOnHeld: raw.basedOnHeld || null,
+          substrates: subs,
+          reagents: raw.reagents || [],
+          products: prods,
+          productNote: raw.productNote || '',
+          conditions: raw.conditions || '',
+          note: raw.note || '',
+          sources: raw.sources || [],
+          cross: Object.keys(regions).length > 1,
+          x: marker.x,
+          y: marker.y,
+          label: marker.label,
+          edges: edges,
+          equation: raw.equation || null
+        };
+      });
+      academic = {
+        meta: A.meta,
+        types: A.types || {},
+        reactions: list,
+        canvas: (A.layout && A.layout.canvas) || modeCanvas()
+      };
+      academicReactions = list;
+      academicReactions.forEach(function (r) {
+        r.substrates.concat(r.products).forEach(function (id) { academicEndpointIds[id] = true; });
+        r.edges.forEach(function (e) { academicDrawnIds[e.id] = true; });
+      });
+      academicReactions.forEach(function (r) {
+        r.products.forEach(function (id) { (academicIncoming[id] = academicIncoming[id] || []).push(r); });
+        r.substrates.forEach(function (id) { (academicOutgoing[id] = academicOutgoing[id] || []).push(r); });
+      });
+      academicEnabled = true;
+      return true;
+    } catch (err) {
+      errMsg('academic-data.js を読み込めないため、アカデミック表示を無効にします: ' + (err && err.message));
+      academic = null;
+      academicReactions = [];
+      academicEnabled = false;
+      return false;
+    }
+  }
+
+  function buildAcademic() {
+    if (!academicEnabled || !academicReactions.length) return;
+    academicLayer = el('g', { 'class': 'rp-academic', 'aria-hidden': 'true' });
+    var edgeLayer = el('g', { 'class': 'rp-edges rp-edges--academic' });
+    var hitLayer = el('g', { 'class': 'rp-edge-hits rp-edge-hits--academic', 'aria-hidden': 'true' });
+    var markerLayer = el('g', { 'class': 'rp-reactions rp-reactions--academic' });
+    var hitShapes = {};
+
+    academicReactions.forEach(function (r) {
+      var list = Core.reactionConnectors(r, {
+        compoundById: compoundById,
+        nodeW: NODE_W,
+        nodeH: NODE_H
+      });
+      list.forEach(function (c) { c.rid = r.id; });
+      academicConnectors[r.id] = list;
+    });
+    var all = [];
+    Object.keys(academicConnectors).forEach(function (id) {
+      all = all.concat(academicConnectors[id]);
+    });
+    Core.separateSharedPorts(all);
+    Core.enforcePaintClearance(all);
+
+    academicReactions.forEach(function (r) {
+      (academicConnectors[r.id] || []).forEach(function (c) {
+        var shaftD = Core.routePath(c.shaft || c.points, c.gaps, c.bridges);
+        var shaftPath = el('path', {
+          'class': 'rp-edge rp-edge--academic',
+          'data-from': c.dir === 'in' ? c.edgeId : r.id,
+          'data-to': c.dir === 'in' ? r.id : c.edgeId,
+          'data-edge': c.edgeKeys[0],
+          'data-edges': c.edgeKeys.join(','),
+          'data-reaction': r.id,
+          'data-compound': c.compounds[0],
+          'data-compounds': JSON.stringify(c.compounds),
+          'data-tier': 'academic',
+          d: shaftD
+        });
+        edgeLayer.appendChild(shaftPath);
+        if (c.arrowHead) edgeLayer.appendChild(el('path', arrowHeadAttrs(c, 'academic')));
+        c.edgeKeys.forEach(function (key) { academicEdgeIndex[key] = shaftPath; });
+        var hitShape = connectorHitShape(c, shaftD);
+        hitLayer.appendChild(el('path', {
+          'class': 'rp-edge-hit rp-edge-hit--academic',
+          'data-kind': 'reaction',
+          'data-id': r.id,
+          'data-reaction': r.id,
+          d: hitShape.d
+        }));
+        if (!hitShapes[r.id]) hitShapes[r.id] = { lines: [], fills: [] };
+        hitShapes[r.id].lines = hitShapes[r.id].lines.concat(hitShape.lines);
+        hitShapes[r.id].fills = hitShapes[r.id].fills.concat(hitShape.fills);
+      });
+
+      var g = el('g', {
+        'class': 'rp-reaction rp-reaction--academic',
+        'data-kind': 'reaction',
+        'data-id': r.id,
+        'data-tier': 'academic',
+        role: 'button',
+        tabindex: '0',
+        'aria-label': reactionLabel(r)
+      });
+      g.appendChild(el('circle', { 'class': 'rp-reaction__dot', cx: r.x, cy: r.y, r: 6 }));
+      if (r.label) {
+        var label = el('text', {
+          'class': 'rp-reaction__label rp-reaction__label--academic',
+          x: r.label.type.x + (r.label.side === 'E' ? 11 : -11),
+          y: r.label.type.y,
+          'text-anchor': r.label.side === 'E' ? 'start' : 'end'
+        });
+        label.textContent = r.typeLabel;
+        g.appendChild(label);
+      }
+      markerLayer.appendChild(g);
+      academicReactionIndex[r.id] = g;
+    });
+
+    Object.keys(hitShapes).forEach(function (id) {
+      var shape = hitShapes[id];
+      academicHitCandidates.push(hitCandidate('reaction', id, 0, { lines: shape.lines, fills: shape.fills }));
+    });
+
+    academicLayer.appendChild(edgeLayer);
+    academicLayer.appendChild(hitLayer);
+    academicLayer.appendChild(markerLayer);
+    // 通常の反応ラベル（フォーカス可能な実体）より下、通常の当たり判定より上に置く。
+    var normalMarkers = viewport.querySelector('.rp-reactions');
+    if (normalMarkers) viewport.insertBefore(academicLayer, normalMarkers);
+    else viewport.appendChild(academicLayer);
   }
 
   /* ---------------- build the canvas ---------------- */
@@ -558,6 +805,11 @@
     viewSize.h = Math.max(1, rect.height || mapEl.clientHeight || 1);
   }
 
+  // 通常は modeCanvas() そのもの。アカデミックだけ専用 canvas（右端の追加分）を返す。
+  function modeCanvas() {
+    return mode === 'academic' && academic ? academic.canvas : D.meta.canvas;
+  }
+
   function fitTopInset() {
     return mapTopInset;
   }
@@ -590,11 +842,20 @@
   function fitCanvasView() {
     var top = fitTopInset();
     var innerH = Math.max(160, viewSize.h - top);
-    var fit = Core.fitTransform(D.meta.canvas, viewSize.w, innerH, 14);
+    var fit = Core.fitTransform(modeCanvas(), viewSize.w, innerH, 14);
     return insetFitView(fit, top);
   }
 
-  // 分野チップの fit。上下の予約は fitCanvasView と同じ考え方。
+  // アカデミックの専用表示範囲は、通常 canvas を含み、はみ出した分だけ広い。
+  // 通常モードの fit / clamp / 座標は一切変えない。
+  function fitModeCanvasView() {
+    if (mode !== 'academic' || !academic) return fitCanvasView();
+    var top = fitTopInset();
+    var innerH = Math.max(160, viewSize.h - top);
+    return insetFitView(Core.fitTransform(academic.canvas, viewSize.w, innerH, 14), top);
+  }
+
+
   function regionTarget(region) {
     var top = fitTopInset();
     var innerH = Math.max(160, viewSize.h - top);
@@ -612,7 +873,7 @@
     // ホイール以外の操作（パン・ピンチ・キー・ボタン・fit・resize）が入ったら、
     // 途中のホイール目標は捨てる。古い目標へ戻る「巻き戻り」を起こさない。
     if (!wheelApplying) cancelWheelZoom();
-    view = clamp ? Core.clampPan(next, viewSize.w, viewSize.h, D.meta.canvas) : next;
+    view = clamp ? Core.clampPan(next, viewSize.w, viewSize.h, modeCanvas()) : next;
     render();
   }
 
@@ -633,8 +894,8 @@
 
   function updateMarkers(level) {
     var small = level === 0;
-    D.reactions.forEach(function (r) {
-      var g = reactionIndex[r.id];
+    activeReactions().forEach(function (r) {
+      var g = reactionIndex[r.id] || academicReactionIndex[r.id];
       if (!g) return;
       var dot = g.querySelector('.rp-reaction__dot');
       if (dot) dot.setAttribute('r', small ? '4' : '6');
@@ -694,6 +955,23 @@
       D.reactions.forEach(function (r) {
         if (!r.label) return;
         var g = reactionIndex[r.id];
+        if (!g) return;
+        var texts = g.querySelectorAll('.rp-reaction__label');
+        for (var ti = 0; ti < texts.length; ti++) {
+          var lr = texts[ti].getBoundingClientRect();
+          if (!lr.width || !lr.height) continue;
+          var rect = toLocal(lr);
+          obstacles.push({
+            x: rect.x - LABEL_PAD,
+            y: rect.y - LABEL_PAD,
+            w: rect.w + LABEL_PAD * 2,
+            h: rect.h + LABEL_PAD * 2
+          });
+        }
+      });
+      // アカデミックのマーカー・ラベルも、通常モードでは非表示のため実寸 0 で自然に除外される。
+      academicReactions.forEach(function (r) {
+        var g = academicReactionIndex[r.id];
         if (!g) return;
         var texts = g.querySelectorAll('.rp-reaction__label');
         for (var ti = 0; ti < texts.length; ti++) {
@@ -810,7 +1088,7 @@
     if (selected && (selected.kind === 'class' || selected.kind === 'class-edge')) {
       text = '官能基変換の一般図 / ' + selected.name + '（' + Math.round(view.scale * 100) + '%）';
     } else {
-      text = Core.positionText(view, D.regions, D.compounds, selectedInfo, D.meta.canvas, viewSize.w, viewSize.h, activeRegion);
+      text = Core.positionText(view, D.regions, D.compounds, selectedInfo, modeCanvas(), viewSize.w, viewSize.h, activeRegion);
       var classText = Core.classMapPosition(view, classMapData, viewSize.w, viewSize.h);
       if (classText) text = classText;
     }
@@ -928,7 +1206,7 @@
   }
 
   function resetView() {
-    var fit = fitCanvasView();
+    var fit = fitModeCanvasView();
     clearRegionSelection();
     clearSelection();
     animateTo(fit);
@@ -947,7 +1225,7 @@
     function fitWithBottom(bottom) {
       var innerH = Math.max(140, viewSize.h - bottom - top);
       var fit = Core.fitRect(classMapData.area, viewSize.w, innerH, 14, 0, 1.2);
-      return Core.clampPan(insetFitView(fit, top), viewSize.w, viewSize.h, D.meta.canvas);
+      return Core.clampPan(insetFitView(fit, top), viewSize.w, viewSize.h, modeCanvas());
     }
     var target = fitWithBottom(12 + posH + (jumpH ? jumpH + 10 : 0));
     // fit 後に詳細度が上がって導線が消える場合は、その分の予約を戻して図を大きく見せる。
@@ -1039,7 +1317,10 @@
 
   // 反応・一般図の変換・物質のフォーカス可能な実体。透明ヒットは使わない。
   function entityElement(kind, id) {
-    if (kind === 'reaction') return reactionIndex[id] || null;
+    if (kind === 'reaction') {
+      var normalReaction = reactionIndex[id] || null;
+      return normalReaction || academicReactionIndex[id] || null;
+    }
     if (kind === 'class-edge') return classEdgeIndex[id] || null;
     if (kind === 'class') return classNodeIndex[id] || null;
     return nodeIndex[id] || null;
@@ -1052,8 +1333,9 @@
     var radius = HIT_RADIUS / scale;
     var world = Core.screenToWorld(view, point.x, point.y);
     var list = [];
-    for (var i = 0; i < hitCandidates.length; i++) {
-      var c = hitCandidates[i];
+    var __cands = activeHitCandidates();
+    for (var i = 0; i < __cands.length; i++) {
+      var c = __cands[i];
       if (c.kind !== kind) continue;
       if (world.x < c.box.minX - radius || world.x > c.box.maxX + radius) continue;
       if (world.y < c.box.minY - radius || world.y > c.box.maxY + radius) continue;
@@ -1174,8 +1456,9 @@
     var radius = HIT_RADIUS / scale;
     var world = Core.screenToWorld(view, point.x, point.y);
     var list = [];
-    for (var i = 0; i < hitCandidates.length; i++) {
-      var c = hitCandidates[i];
+    var __cands = activeHitCandidates();
+    for (var i = 0; i < __cands.length; i++) {
+      var c = __cands[i];
       if (world.x < c.box.minX - radius || world.x > c.box.maxX + radius) continue;
       if (world.y < c.box.minY - radius || world.y > c.box.maxY + radius) continue;
       list.push(c);
@@ -1296,7 +1579,7 @@
       return;
     }
     // カーソル位置を軸にしたまま累積する（連続入力でも飛ばない）。
-    wheelZoom = Core.clampPan(next, viewSize.w, viewSize.h, D.meta.canvas);
+    wheelZoom = Core.clampPan(next, viewSize.w, viewSize.h, modeCanvas());
     if (!wheelRaf) wheelRaf = window.requestAnimationFrame(wheelStep);
   }
 
@@ -1430,7 +1713,7 @@
       { x: minX, y: minY, w: Math.max(1, maxX - minX), h: Math.max(1, maxY - minY) },
       viewSize.w, Math.max(160, viewSize.h - fitTopInset()), 44, 0.08, 1.5
     );
-    animateTo(Core.clampPan(insetFitView(target, fitTopInset()), viewSize.w, viewSize.h, D.meta.canvas));
+    animateTo(Core.clampPan(insetFitView(target, fitTopInset()), viewSize.w, viewSize.h, modeCanvas()));
   }
 
   function selectNode(kind, id) {
@@ -1471,7 +1754,7 @@
       render();
       return;
     }
-    var elm = kind === 'compound' ? nodeIndex[id] : reactionIndex[id];
+    var elm = kind === 'compound' ? nodeIndex[id] : (reactionIndex[id] || academicReactionIndex[id]);
     if (elm) {
       elm.classList.add('is-selected');
       selected = { kind: kind, id: id, el: elm };
@@ -1497,6 +1780,18 @@
   function updateEdgeHighlight() {
     Object.keys(edgeIndex).forEach(function (key) {
       var path = edgeIndex[key];
+      var active = false;
+      if (selected) {
+        active = selected.kind === 'compound'
+          ? Core.compoundList(path.getAttribute('data-compounds'), path.getAttribute('data-compound'))
+            .indexOf(selected.id) !== -1
+          : selected.kind === 'reaction' && path.getAttribute('data-reaction') === selected.id;
+      }
+      if (active) path.classList.add('is-active');
+      else path.classList.remove('is-active');
+    });
+    Object.keys(academicEdgeIndex).forEach(function (key) {
+      var path = academicEdgeIndex[key];
       var active = false;
       if (selected) {
         active = selected.kind === 'compound'
@@ -1538,7 +1833,7 @@
     while (layer.firstChild) layer.removeChild(layer.firstChild);
     if (!r) return;
     // 通常表示と同じ connector を使う。選択・プレビューで端点や矢印の向きを変えない。
-    (reactionConnectors[r.id] || []).forEach(function (c) {
+    (academicConnectors[r.id] || reactionConnectors[r.id] || []).forEach(function (c) {
       layer.appendChild(el('path', {
         'class': 'rp-edge-active',
         'data-reaction': r.id,
@@ -1671,8 +1966,10 @@
   function compoundCard(id) {
     var c = compoundById[id];
     if (!c) return '';
-    var ins = (incoming[id] || []).slice().sort(byTypeThenId);
-    var outs = (outgoing[id] || []).slice().sort(byTypeThenId);
+    var ins = activeIncoming(id).slice().sort(byTypeThenId);
+    var outs = activeOutgoing(id).slice().sort(byTypeThenId);
+    var academicLinked = mode === 'academic' && ins.length + outs.length > 0 &&
+      ins.concat(outs).some(function (r) { return !!r.academic; });
     var region = regionsById[c.region];
     var detail = structureDetailState(c);
     var html = '';
@@ -1707,9 +2004,9 @@
     html += '<h3>この物質からの生成物（' + outs.length + ' 件）</h3>';
     html += outs.length ? '<ul class="rp-card__links">' + outs.map(reactionButton).join('') + '</ul>'
       : '<p class="rp-empty">' + esc(Core.emptyReason(c.pathState, 'out', D.states)) + '</p>';
-    if (c.pathState === 'covered') {
+    if (c.pathState === 'covered' || (academicLinked && c.pathState !== 'out-of-scope')) {
       html += '<p class="rp-verification">反応経路: 製法 ' + ins.length + ' 件・生成先 ' + outs.length +
-        ' 件を、確認済みの反応から表示しています。</p>';
+        ' 件を、確認済みの反応' + (academicLinked ? 'とアカデミック（大学レベル）の経路' : '') + 'から表示しています。</p>';
     } else {
       html += '<p class="rp-verification">反応経路の状態: ' +
         esc(D.states[c.pathState] ? D.states[c.pathState].label : c.pathState) + '。' +
@@ -2049,21 +2346,47 @@
   }
 
   function reactionCard(id) {
-    var r = null;
-    for (var i = 0; i < D.reactions.length; i++) if (D.reactions[i].id === id) r = D.reactions[i];
+    var r = findReaction(id);
     if (!r) return '';
-    var type = D.types[r.type] || { label: r.typeLabel, summary: '', schematic: '' };
+    var type = typeFor(r.type) || { label: r.typeLabel, summary: '', schematic: '' };
     var subText = r.substrates.map(compoundName).join(' ＋ ');
     var prodText = r.products.length ? r.products.map(compoundName).join(' ＋ ') : (r.productNote || '生成物の記載なし');
     var subs = r.substrates.map(compoundInline).join(' ＋ ');
     var prods = r.products.length ? r.products.map(compoundInline).join(' ＋ ') : esc(r.productNote || '生成物の記載なし');
     var html = '';
     html += '<h2 id="rp-card-title">' + esc(type.label) + 'の反応</h2>';
-    html += '<p class="rp-card__tier rp-card__tier--' + (r.tier === 'primary' ? 'primary' : 'secondary') + '">' +
-      (r.tier === 'primary' ? '主要経路（太い実線）' : '補助経路（細い点線）') + '</p>';
+    if (r.academic) {
+      html += '<p class="rp-card__tier rp-card__tier--academic">大学レベル（アカデミック）' +
+        (r.stepKind === 'multi-step' ? '／多段階の総括' : '／一段階（direct）') + '</p>';
+    } else {
+      html += '<p class="rp-card__tier rp-card__tier--' + (r.tier === 'primary' ? 'primary' : 'secondary') + '">' +
+        (r.tier === 'primary' ? '主要経路（太い実線）' : '補助経路（細い点線）') + '</p>';
+    }
     html += '<p class="rp-card__formula">' + esc(subText) + ' → ' + esc(prodText) + '</p>';
-    html += '<p>' + stateBadge(r.state) + ' <span class="rp-card__note">' +
-      '独立資料の本文で確認済み。' + '</span></p>';
+    if (r.academic) {
+      html += '<p><span class="rp-status rp-status--academic">アカデミック</span> <span class="rp-card__note">' +
+        '大学レベルの一般則を既存物質へ適用した経路です。個別の実験で確認済みという意味ではありません。' +
+        '</span></p>';
+    } else {
+      html += '<p>' + stateBadge(r.state) + ' <span class="rp-card__note">' +
+        '独立資料の本文で確認済み。' + '</span></p>';
+    }
+    if (r.academic) {
+      html += '<h3>適用範囲（大学レベルの一般則）</h3><p>' + esc(r.scope) + '</p>';
+      html += '<p class="rp-card__note">根拠の種類: ' +
+        (r.evidenceKind === 'source-illustrated-transformation'
+          ? '資料が個別例として示す変換（一般則の無条件な適用ではない）'
+          : '一般則の適用（個別実験の確認ではない）') + '。</p>';
+      if (r.stepKind === 'multi-step' && r.steps.length) {
+        html += '<h3>段階（総括）</h3><ol class="rp-card__list rp-academic-steps">' +
+          r.steps.map(function (step) { return '<li>' + esc(step) + '</li>'; }).join('') + '</ol>' +
+          '<p class="rp-card__note">地図の線は総括した経路で、中間体は物質として収録していません。</p>';
+      }
+      if (r.basedOnHeld) {
+        html += '<p class="rp-card__note">保留反応 ' + esc(r.basedOnHeld) +
+          ' と同じ組合せを含むが、新しい出典で確認した内容として別に記録している。</p>';
+      }
+    }
     html += '<p class="rp-card__actions"><button type="button" class="rp-btn rp-btn--wide" data-action="fit-reaction" data-id="' +
       esc(r.id) + '">この反応の端点を表示</button></p>';
 
@@ -2126,7 +2449,7 @@
       b.addEventListener('click', function () {
         var target = regionTarget(region);
         activeRegion = region.id;
-        animateTo(Core.clampPan(target, viewSize.w, viewSize.h, D.meta.canvas));
+        animateTo(Core.clampPan(target, viewSize.w, viewSize.h, modeCanvas()));
         setChipPressed(region.id);
         highlightRegion(region.id);
         clearSelection();
@@ -2189,12 +2512,14 @@
     var rh = document.createElement('h3');
     rh.textContent = '反応';
     var rcount = document.createElement('span');
-    rcount.textContent = D.reactions.length + ' 件（すべて独立資料で確認済み）';
+    rcount.textContent = mode === 'academic'
+      ? D.reactions.length + ' 件（通常）＋ ' + academicReactions.length + ' 件（アカデミック）'
+      : D.reactions.length + ' 件（すべて独立資料で確認済み）';
     rh.appendChild(rcount);
     reactionGroup.appendChild(rh);
     var rul = document.createElement('ul');
     rul.className = 'rp-list__items';
-    var sorted = D.reactions.slice().sort(byTypeThenId);
+    var sorted = activeReactions().slice().sort(byTypeThenId);
     sorted.forEach(function (r) {
       var li = document.createElement('li');
       var b = document.createElement('button');
@@ -2232,7 +2557,15 @@
     var name = document.createElement('span');
     name.className = 'rp-item__name';
     name.textContent = c.name;
-    if (c.pathState !== 'covered' && c.pathState !== 'confirmed') {
+    var ins = activeIncoming(c.id).length;
+    var outs = activeOutgoing(c.id).length;
+    var academicLinked = mode === 'academic' && c.incoming + c.outgoing === 0 && ins + outs > 0;
+    if (academicLinked) {
+      var acTag = document.createElement('span');
+      acTag.className = 'rp-item__tag rp-item__tag--academic';
+      acTag.textContent = '学術接続';
+      name.appendChild(acTag);
+    } else if (c.pathState !== 'covered' && c.pathState !== 'confirmed') {
       var tag = document.createElement('span');
       tag.className = 'rp-item__tag rp-item__tag--pending';
       tag.textContent = c.pathState === 'out-of-scope' ? '収録外' : '未確認';
@@ -2240,7 +2573,7 @@
     }
     var meta = document.createElement('span');
     meta.className = 'rp-item__meta';
-    meta.innerHTML = esc(c.formula) + ' ／ 製法 <b>' + c.incoming + '</b> ・ 生成先 <b>' + c.outgoing + '</b>';
+    meta.innerHTML = esc(c.formula) + ' ／ 製法 <b>' + ins + '</b> ・ 生成先 <b>' + outs + '</b>';
     b.appendChild(name);
     b.appendChild(meta);
     b.addEventListener('click', function () { activateListEntity('compound', c.id); });
@@ -2366,6 +2699,7 @@
 
   function findReaction(id) {
     for (var i = 0; i < D.reactions.length; i++) if (D.reactions[i].id === id) return D.reactions[i];
+    for (var j = 0; j < academicReactions.length; j++) if (academicReactions[j].id === id) return academicReactions[j];
     return null;
   }
 
@@ -2421,6 +2755,118 @@
     }
     closeAbout();
     gotoEntity('compound', found[0].id, searchInput);
+  }
+
+  /* ---------------- 表示モード（通常 / アカデミック） ---------------- */
+
+  function modeButton(modeId) {
+    return document.getElementById('rp-mode-' + modeId);
+  }
+
+  function updateModeButtons() {
+    var normal = modeButton('normal');
+    var acad = modeButton('academic');
+    if (normal) normal.setAttribute('aria-pressed', mode === 'normal' ? 'true' : 'false');
+    if (acad) {
+      acad.setAttribute('aria-pressed', mode === 'academic' ? 'true' : 'false');
+      acad.disabled = !academicEnabled;
+      acad.setAttribute('aria-disabled', academicEnabled ? 'false' : 'true');
+      acad.title = academicEnabled ? '' : 'アカデミックデータが未収録、または通常データと整合しません。';
+    }
+  }
+
+  // 通常の data-path-state 属性は書き換えない。学術で新たに接続したノードだけ class を足す。
+  function applyAcademicNodeStates() {
+    Object.keys(nodeIndex).forEach(function (id) {
+      var g = nodeIndex[id];
+      var c = compoundById[id];
+      if (!g || !c) return;
+      if (mode === 'academic' && academicDrawnIds[id]) {
+        g.classList.add('is-academic-linked');
+        g.setAttribute('aria-label', c.name + '、' + c.formula + '、アカデミック反応で接続');
+      } else {
+        g.classList.remove('is-academic-linked');
+        g.setAttribute('aria-label', compoundLabel(c));
+      }
+    });
+  }
+
+  function academicSummaryText() {
+    if (!academic) return '';
+    var evidence = academic.meta.evidenceCount || {};
+    var general = evidence['general-rule-application'] || 0;
+    var illustrated = evidence['source-illustrated-transformation'] || 0;
+    var multi = (academic.meta.stepCount || {})['multi-step'] || 0;
+    return 'アカデミック表示: 大学レベルの追加反応 ' + academicReactions.length + ' 件（一般則の適用 ' +
+      general + ' 件、資料が個別例として示す変換 ' + illustrated + ' 件、多段階 ' + multi +
+      ' 件）。新たに接続した孤立物質 ' + (academic.meta.newlyConnectedCount || 0) + ' 件、未接続 ' +
+      (academic.meta.stillIsolatedCount || 0) + ' 件。通常の物質 ' + D.meta.compoundCount + ' 件・確認済み反応 ' +
+      D.meta.reactionCount + ' 件は変更していません。';
+  }
+
+  function updateAcademicNotice() {
+    var note = document.getElementById('rp-academic-note');
+    var scope = document.getElementById('rp-academic-scope');
+    if (!note) return;
+    if (mode !== 'academic' || !academicEnabled) {
+      note.hidden = true;
+      note.textContent = '';
+      if (scope) { scope.hidden = true; scope.textContent = ''; }
+      return;
+    }
+    note.hidden = false;
+    var text = academicSummaryText();
+    if (note.textContent !== text) note.textContent = text;
+    if (scope) {
+      scope.hidden = false;
+      var scopeText = 'アカデミック表示では、通常は孤立していた物質のうち学術反応でつながったものを「学術接続」として示します。' +
+        '未接続の物質は ' + (academic.meta.stillIsolatedCount || 0) + ' 件で、これは「生成しない」という意味ではありません。';
+      if (scope.textContent !== scopeText) scope.textContent = scopeText;
+    }
+  }
+
+  function refreshLists() {
+    while (listAll.firstChild) listAll.removeChild(listAll.firstChild);
+    buildLists();
+    applySearch(searchInput.value || '');
+  }
+
+  // 同じモードのボタンをもう一度押したら通常へ戻す。選択・検索・カードは残さない。
+  function setMode(next, opts) {
+    var options = opts || {};
+    if (next === 'academic' && !academicEnabled) return;
+    if (next === mode) {
+      if (next !== 'academic') return;
+      next = 'normal';
+    }
+    closeEquationDialog(false);
+    closeCard(false);
+    closePositionPopover(false);
+    clearRegionSelection();
+    mode = next;
+    svg.setAttribute('data-mode', mode);
+    mapEl.setAttribute('data-mode', mode);
+    if (academicLayer) academicLayer.setAttribute('aria-hidden', mode === 'academic' ? 'false' : 'true');
+    searchInput.value = '';
+    applySearch('');
+    clearSelection();
+    refreshLists();
+    applyAcademicNodeStates();
+    updateModeButtons();
+    updateAcademicNotice();
+    updateMarkers(Core.detailLevel(view.scale));
+    if (options.fit !== false) animateTo(fitModeCanvasView());
+  }
+
+  function readModeParam(search) {
+    var raw = String(search == null ? '' : search);
+    var value;
+    try {
+      value = new URLSearchParams(raw.charAt(0) === '?' ? raw.slice(1) : raw).get('mode');
+    } catch (err) {
+      return null;
+    }
+    return value === 'academic' ? 'academic' : null;
   }
 
   /* ---------------- initial render ---------------- */
@@ -2532,6 +2978,8 @@
     measure();
     buildConnectors();
     buildReactions();
+    initAcademicData();
+    buildAcademic();
     buildNodes();
     buildClassMap();
     ensureActiveLayer();
@@ -2543,6 +2991,21 @@
     // チップを並べた後の実際のツールバー高さで、最初の全体表示を合わせる。
     syncToolbarInset();
     setView(fitCanvasView(), false);
+
+    // 表示モード。既定は通常。URL の ?mode=academic は有効な学術データがあるときだけ受け付ける。
+    svg.setAttribute('data-mode', 'normal');
+    mapEl.setAttribute('data-mode', 'normal');
+    var normalModeButton = modeButton('normal');
+    var academicModeButton = modeButton('academic');
+    if (normalModeButton) normalModeButton.addEventListener('click', function () { setMode('normal'); });
+    if (academicModeButton) {
+      academicModeButton.addEventListener('click', function () { setMode('academic'); });
+    }
+    updateModeButtons();
+    if (academicEnabled && readModeParam(window.location ? window.location.search : '') === 'academic') {
+      setMode('academic', { fit: false });
+      setView(fitModeCanvasView(), false);
+    }
 
     mapEl.addEventListener('pointerdown', onPointerDown);
     mapEl.addEventListener('pointermove', onPointerMove);

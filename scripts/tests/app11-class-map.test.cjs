@@ -579,7 +579,7 @@ test('[static] 一般図のfitは見出しの画面帯を予約せず、枠内wo
   assert.ok(app.includes('var posH = positionBox.h || 48;'), '現在位置の実寸を予約に入れる');
   assert.ok(app.includes('var top = fitTopInset();'), '上部ツールバーの実寸を予約に入れる');
   assert.ok(app.includes('y: fit.y + top'), 'top を足して実表示領域の中心へ移す（top/2 では H/2 に戻る）');
-  assert.ok(app.includes('Core.clampPan(insetFitView(fit, top), viewSize.w, viewSize.h, D.meta.canvas)'),
+  assert.ok(app.includes('Core.clampPan(insetFitView(fit, top), viewSize.w, viewSize.h, modeCanvas())'),
     'クランプは中心補正の後に行う');
   assert.match(css, /\.rp-classmap__caption\s*\{/);
   assert.match(css, /\.rp-classmap__caption-title\s*\{/);
@@ -595,7 +595,7 @@ test('[static] 既存の entity 処理を壊さず、分類ノードをキーボ
   assert.ok(html.includes('id="rp-classmap-jump"'), '右下の導線');
   assert.ok(html.includes('id="rp-classmap-note"'), '一般図の説明');
   const scripts = [...html.matchAll(/<script src="\.\/([^"]+)"><\/script>/g)].map((m) => m[1]);
-  assert.deepEqual(scripts, ['data.js', 'map-core.js', 'structure-draw.js', 'app.js'], '読み込み順を固定');
+  assert.deepEqual(scripts, ['data.js', 'academic-data.js', 'map-core.js', 'structure-draw.js', 'app.js'], '読み込み順を固定');
 
   assert.ok(js.includes('D.classMap') && js.includes('buildClassMap'), 'classMap を別レイヤーに描く');
   assert.ok(js.includes("'data-kind': 'class'"), '分類ノードの種別');
@@ -756,7 +756,7 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
       'Core', 'viewSize', 'classMapData', 'D', 'animateTo', 'classNodeIndex',
       'classNodeById', 'view', 'activeRegion', 'clearRegionSelection', 'clearSelection',
       'compoundById', 'findReaction', 'nodeW', 'nodeH', 'document',
-      'positionBox', 'jumpBox', 'fitTopInset',
+      'positionBox', 'jumpBox', 'fitTopInset', 'modeCanvas',
       'var programmaticFocusTarget = null;\n' + insetSrc + '\n' + focusSrc + '\n' + focusInSrc +
       '\nreturn { focusClassMap: focusClassMap, onFocusIn: onFocusIn };'
     );
@@ -776,7 +776,8 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
       documentStub,
       { w: 300, h: 50 },
       { w: 0, h: 0 },
-      function () { return topInset; }
+      function () { return topInset; },
+      function () { return { meta: { canvas: { x: 0, y: 0, w: 6052, h: 2314 } } }.meta.canvas; }
     );
     // 下帯（12+現在位置50）と上の浮遊コントロール分を予約した高さでfitし、上余白 top だけ下げる
     // （fitRect は innerH の中央へ置くため、実表示領域の中心へは top 加算）。

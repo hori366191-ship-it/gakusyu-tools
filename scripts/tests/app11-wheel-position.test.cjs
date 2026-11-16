@@ -118,7 +118,7 @@ function loadWheel(start) {
   };
   const factory = new Function(
     'Core', 'D', 'window', 'PHYSICAL_CONTROL_SELECTOR', 'mapEl', 'viewSize',
-    'activeRegion', 'clearRegionSelection', 'mapPoint', 'state',
+    'activeRegion', 'clearRegionSelection', 'mapPoint', 'state', 'modeCanvas',
     [
       'var view = state.view;',
       'var wheelZoom = null, wheelRaf = 0, wheelApplying = false;',
@@ -126,7 +126,7 @@ function loadWheel(start) {
       'var WHEEL_FOLLOW = 0.4, WHEEL_SETTLE_SCALE = 1e-4, WHEEL_SETTLE_PX = 0.5;',
       'function setView(next, clamp) {',
       '  if (!wheelApplying) cancelWheelZoom();',
-      '  view = clamp ? Core.clampPan(next, viewSize.w, viewSize.h, D.meta.canvas) : next;',
+      '  view = clamp ? Core.clampPan(next, viewSize.w, viewSize.h, modeCanvas()) : next;',
       '  state.view = view;',
       '  state.renders.push({ scale: view.scale, x: view.x, y: view.y });',
       '}',
@@ -148,7 +148,8 @@ function loadWheel(start) {
     { w: 900, h: 600 },
     null, function () {},
     function (e) { return { x: e.clientX - state.mapRect.left, y: e.clientY - state.mapRect.top }; },
-    state
+    state,
+    function () { return D.meta.canvas; }
   );
   return { api: api, state: state };
 }
@@ -235,7 +236,7 @@ test('[static] ホイールは地図の上だけで止め、修飾キー必須�
   assert.ok(app.includes('Core.wheelZoomFactor(e.deltaY, e.deltaMode, mapEl.clientHeight)'));
   assert.ok(app.includes("if (e.target && e.target.closest && e.target.closest(PHYSICAL_CONTROL_SELECTOR)) return;"));
   // 累積目標 + rAF 追従（毎イベント animateTo を再始動しない）
-  assert.ok(app.includes('wheelZoom = Core.clampPan(next, viewSize.w, viewSize.h, D.meta.canvas)'));
+  assert.ok(app.includes('wheelZoom = Core.clampPan(next, viewSize.w, viewSize.h, modeCanvas())'));
   assert.ok(app.includes('wheelRaf = window.requestAnimationFrame(wheelStep)'));
   assert.equal(/onWheel[\s\S]{0,400}animateTo\(/.test(app), false, 'onWheelからanimateToを呼ばない');
   assert.ok(app.includes('if (!wheelApplying) cancelWheelZoom();'), '他の操作で目標を捨てる');

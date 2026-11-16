@@ -198,10 +198,10 @@ function loadFit(top, height) {
   const app = read('app.js');
   const src = ['insetFitView', 'fitCanvasView']
     .map((name) => extractFunctionSource(app, name)).join('\n');
-  const fn = new Function('Core', 'D', 'viewSize', 'fitTopInset',
+  const fn = new Function('Core', 'D', 'viewSize', 'fitTopInset', 'modeCanvas',
     src + '\nreturn fitCanvasView;');
   return fn(Core, D, { w: 1200, h: typeof height === 'number' ? height : 800 },
-    function () { return top; })();
+    function () { return top; }, function () { return D.meta.canvas; })();
 }
 
 test('[fit] 全体表示は実表示領域 [top, H] の中心 (H+top)/2 に置く（top 加算）', () => {
@@ -237,9 +237,9 @@ function loadInsetTargets(top) {
   const app = read('app.js');
   const src = ['insetFitView', 'regionTarget', 'entityTarget']
     .map((name) => extractFunctionSource(app, name)).join('\n');
-  return new Function('Core', 'D', 'viewSize', 'fitTopInset',
+  return new Function('Core', 'D', 'viewSize', 'fitTopInset', 'modeCanvas',
     src + '\nreturn { regionTarget: regionTarget, entityTarget: entityTarget };'
-  )(Core, D, { w: 1200, h: 800 }, function () { return top; });
+  )(Core, D, { w: 1200, h: 800 }, function () { return top; }, function () { return D.meta.canvas; });
 }
 
 test('[fit] 分野と物質の移動も実表示領域 [top, H] の中心へ置く', () => {

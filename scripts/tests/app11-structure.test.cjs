@@ -487,7 +487,7 @@ test('[draw] 凍結コピーは RPStructure 名前空間で、app10 の実行時
   assert.equal(/class="oc-/.test(code), false, 'oc- クラスを残さない');
   const html = read('index.html');
   const scripts = [...html.matchAll(/<script src="\.\/([^"]+)"><\/script>/g)].map((m) => m[1]);
-  assert.deepEqual(scripts, ['data.js', 'map-core.js', 'structure-draw.js', 'app.js']);
+  assert.deepEqual(scripts, ['data.js', 'academic-data.js', 'map-core.js', 'structure-draw.js', 'app.js']);
   assert.equal(html.includes('../app10/draw.js'), false, 'app10描画器を読み込まない');
   const app = read('app.js');
   assert.ok(app.includes('window.RPStructure'));

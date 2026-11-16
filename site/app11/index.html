@@ -61,6 +61,10 @@
           <input class="rp-search__input" id="rp-search" type="search" autocomplete="off" spellcheck="false" placeholder="例: エタノール / C2H6O">
           <span class="rp-search__status" id="rp-search-status" role="status" aria-live="polite"></span>
         </div>
+        <div class="rp-mode" role="group" aria-label="表示モード">
+          <button type="button" class="rp-mode__btn" id="rp-mode-normal" aria-pressed="true">通常</button>
+          <button type="button" class="rp-mode__btn" id="rp-mode-academic" aria-pressed="false" disabled>アカデミック</button>
+        </div>
       </div>
       <div class="rp-chips" id="rp-chips" role="group" aria-label="分野へ移動"></div>
     </div>
@@ -97,6 +101,7 @@
     <p><strong>試験版です。</strong><span id="rp-data-summary">収録データを確認中…</span></p>
     <p class="rp-notice__sub" id="rp-data-note"></p>
   </div>
+  <p class="rp-notice__sub rp-academic-note" id="rp-academic-note" hidden></p>
 
   <section class="rp-list" id="rp-list" aria-labelledby="rp-list-title" tabindex="-1">
     <div class="rp-list__head">
@@ -112,6 +117,7 @@
       <h2>状態の区別</h2>
       <dl class="rp-states" id="rp-states"></dl>
       <p>判断できないものは「未確認」に置き、「不可能」「生成しない」とは表示しません。物質だけを収録した孤立ノードも、未確認として表示します。</p>
+      <p id="rp-academic-scope" hidden></p>
     </div>
     <div class="rp-info__block">
       <h2>データと検証</h2>
@@ -130,6 +136,7 @@
         <li><span class="rp-legend__key rp-legend__key--hub"></span>主要物質</li>
         <li><span class="rp-legend__key rp-legend__key--primary"></span>主要経路（太い実線）</li>
         <li><span class="rp-legend__key rp-legend__key--secondary"></span>補助経路（細い点線）</li>
+        <li><span class="rp-legend__key rp-legend__key--academic"></span>アカデミック（大学レベルの追加経路）</li>
         <li><span class="rp-legend__key rp-legend__key--pending"></span>確認済みの経路がない物質（破線の枠）</li>
       </ul>
       <ul class="rp-region-legend" id="rp-region-legend" aria-label="分野の色"></ul>
@@ -170,6 +177,7 @@
 </noscript>
 
 <script src="./data.js"></script>
+<script src="./academic-data.js"></script>
 <script src="./map-core.js"></script>
 <script src="./structure-draw.js"></script>
 <script src="./app.js"></script>

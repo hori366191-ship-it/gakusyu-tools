@@ -1093,3 +1093,27 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   * { scroll-behavior: auto !important; }
   .rp-map, .rp-card, .rp-btn, .rp-item, .rp-link, .rp-about, .rp-eq-dialog { transition: none !important; animation: none !important; }
 }
+
+/* ---- アカデミック（大学レベルの追加反応） ---- */
+:root { --rp-academic: #6d4bd8; --rp-academic-bg: #f1ecff; }
+html[data-theme="pop"] { --rp-academic: #7a3fd0; --rp-academic-bg: #f4ecff; }
+html[data-theme="forest"] { --rp-academic: #4f6b2f; --rp-academic-bg: #eef5e4; }
+.rp-academic { display: none; }
+.rp-svg[data-mode="academic"] .rp-academic { display: inline; }
+.rp-mode { display: flex; gap: 4px; align-items: center; }
+.rp-mode__btn { border: 1px solid var(--rp-line); background: var(--rp-panel); color: var(--rp-ink);
+  border-radius: 999px; padding: 4px 11px; font: inherit; font-size: 12.5px; line-height: 1.2; cursor: pointer; }
+.rp-mode__btn[aria-pressed="true"] { background: var(--rp-academic); border-color: var(--rp-academic); color: #fff; }
+.rp-mode__btn:disabled { opacity: .45; cursor: not-allowed; }
+.rp-mode__btn:focus-visible { outline: 2px solid var(--rp-focus); outline-offset: 2px; }
+.rp-edge--academic { stroke: var(--rp-academic); stroke-width: 1.6; stroke-dasharray: 2 4; opacity: .9; }
+.rp-arrowhead--academic { fill: var(--rp-academic); }
+.rp-reaction--academic .rp-reaction__dot { fill: var(--rp-academic); stroke: var(--rp-panel); stroke-width: 1; }
+.rp-reaction__label--academic { fill: var(--rp-academic); font-weight: 700; }
+.rp-node.is-academic-linked .rp-node__badge { display: none; }
+.rp-node.is-academic-linked .rp-node__box { stroke: var(--rp-academic); stroke-dasharray: none; }
+.rp-legend__key--academic { background: var(--rp-academic); }
+.rp-status--academic, .rp-item__tag--academic { background: var(--rp-academic-bg); color: var(--rp-academic); }
+.rp-card__tier--academic { color: var(--rp-academic); font-weight: 700; }
+.rp-academic-note { border-left: 3px solid var(--rp-academic); padding-left: 10px; }
+.rp-academic-steps li { margin-bottom: 2px; }
