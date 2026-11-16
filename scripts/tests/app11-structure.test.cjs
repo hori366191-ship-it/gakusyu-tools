@@ -66,10 +66,10 @@ function bondInCycle(graph, bond) {
 test('[data] 427物質に構造specが入り、既存の反応・必須数は変わらない', () => {
   assert.equal(D.meta.compoundCount, 427);
   assert.equal(D.meta.requiredCount, 294);
-  assert.equal(D.meta.confirmedReactionCount, 86);
-  assert.equal(D.meta.reactionCount, 86);
+  assert.equal(D.meta.confirmedReactionCount, D.reactions.length);
+  assert.equal(D.meta.reactionCount, D.reactions.length);
   assert.equal(D.compounds.length, 427);
-  assert.equal(D.reactions.length, 86);
+  assert.equal(D.reactions.length, D.meta.reactionCount);
   D.compounds.forEach((c) => {
     assert.ok(c.structure && c.structure.type, c.id + ' の構造spec');
     assert.equal(Object.prototype.hasOwnProperty.call(c, 'precursors'), false, c.id + ' の自由文');

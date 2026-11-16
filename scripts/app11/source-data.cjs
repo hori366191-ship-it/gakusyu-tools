@@ -43,6 +43,18 @@ const EQUATION_MODE_LABELS = {
   P: '重合反応の模式式'
 };
 
+// 通常 86 反応は従来どおり n / 2n だけを許す（出力・検証とも不変）。
+// 大学レベルの反応を通常モードへ移す場合だけ、academic-reactions.json と同じ
+// 係数記号を明示的に許可する（未知の記号は fail-closed）。
+const DEFAULT_POLYMER_SYMBOLS = ['n', '2n'];
+const ACADEMIC_POLYMER_SYMBOLS = ['n', 'm', 'p', 'd', 'dn', '2n', '3n', 'x', 'y'];
+const POLYMER_VARIANT_KINDS = ['coexistence', 'competition'];
+
+// 通常反応へ追加できる教育メタデータ（既存 86 反応では未指定のまま）。
+const EDUCATION_LEVELS = ['high-school-standard', 'high-school-extension'];
+const EVIDENCE_KINDS = ['source-illustrated-transformation', 'general-rule-application'];
+const STEP_KINDS = ['direct', 'multi-step'];
+
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
@@ -227,11 +239,15 @@ function equationText(value, owner) {
   return text;
 }
 
-function equationCoef(value, mode, owner) {
+function equationCoef(value, mode, owner, options) {
+  const opts = options || {};
   if (mode === 'P') {
-    if (value === 'n' || value === '2n') return value;
-    if (Number.isInteger(value) && value >= 1 && value <= 9) return value;
-    throw new Error(owner + ' の係数が不正（P は n / 2n / 1〜9）: ' + value);
+    const symbols = opts.polymerSymbols || DEFAULT_POLYMER_SYMBOLS;
+    const maxCoef = opts.maxPolymerInteger == null ? 9 : opts.maxPolymerInteger;
+    if (typeof value === 'string' && symbols.indexOf(value) !== -1) return value;
+    if (Number.isInteger(value) && value >= 1 && value <= maxCoef) return value;
+    const allowed = symbols.join(' / ');
+    throw new Error(owner + ' の係数が不正（P は ' + allowed + ' / 1〜' + maxCoef + '）: ' + value);
   }
   if (!Number.isInteger(value) || value < 1 || value > 9) {
     throw new Error(owner + ' の係数が不正（1〜9の整数）: ' + value);
@@ -239,16 +255,17 @@ function equationCoef(value, mode, owner) {
   return value;
 }
 
-function resolveEquationItems(items, side, ctx, mode) {
+function resolveEquationItems(items, side, ctx, mode, options) {
   if (!Array.isArray(items) || !items.length) throw new Error(ctx.owner + ' の式に' + side + 'がない');
   return items.map((item, index) => {
     const at = ctx.owner + ' の' + side + '#' + (index + 1);
     if (!item || typeof item !== 'object') throw new Error(at + ' の項目が不正');
     const keys = ['compound', 'species', 'text'].filter((key) => item[key] != null);
     if (keys.length !== 1) throw new Error(at + ' は compound / species / text のどれか1つだけを持つ');
-    const coef = equationCoef(item.coef == null ? 1 : item.coef, mode, at);
+    const coef = equationCoef(item.coef == null ? 1 : item.coef, mode, at, options);
     if (keys[0] === 'text') {
-      if (mode !== 'T') throw new Error(at + ' の text は構造変換図（T）だけで使う');
+      const textAllowed = mode === 'T' || (mode === 'P' && options && options.allowTextInPolymer);
+      if (!textAllowed) throw new Error(at + ' の text は構造変換図（T）だけで使う');
       const text = equationText(item.text, at + ' の text');
       if (!text) throw new Error(at + ' の text が空');
       return { kind: 'text', text: text, coef: coef };
@@ -303,8 +320,9 @@ function checkEquationBalance(owner, left, right) {
  * B / N は元素と電荷の収支が合わなければビルドを止める（fail-closed）。
  * T / P は収支を主張しない代わりに、mode に対応する表示名を必ず持つ。
  */
-function projectEquation(raw, reaction, ctx) {
+function projectEquation(raw, reaction, ctx, options) {
   if (!raw) return null;
+  const opts = options || {};
   const owner = '反応 ' + reaction.id + ' の反応式';
   const mode = raw.mode;
   if (EQUATION_MODES.indexOf(mode) === -1) throw new Error(owner + ' のmodeが不正: ' + mode);
@@ -315,6 +333,17 @@ function projectEquation(raw, reaction, ctx) {
   const below = equationText(raw.below, owner + ' のbelow');
   const title = equationText(raw.title, owner + ' のtitle');
   const explanation = equationText(raw.explanation, owner + ' のexplanation');
+  if (mode === 'P' && opts.polymerNoteRequired && !explanation) {
+    throw new Error(owner + ' の重合模式式に説明（未定量であることの注記）がない');
+  }
+  if (raw.variantKind != null) {
+    if (POLYMER_VARIANT_KINDS.indexOf(raw.variantKind) === -1) {
+      throw new Error(owner + ' のvariantKindが不正: ' + raw.variantKind);
+    }
+    if (!Array.isArray(raw.variants) || !raw.variants.length) {
+      throw new Error(owner + ' のvariantKindにはvariantsが必要');
+    }
+  }
   const sources = (raw.verification || []).map((entry) => {
     if (!entry || typeof entry !== 'object') throw new Error(owner + ' の資料の形式が不正');
     return publicSource(entry);
@@ -335,8 +364,8 @@ function projectEquation(raw, reaction, ctx) {
       return {
         label: equationText(v.label, vOwner + ' のlabel'),
         arrow: vArrow,
-        left: resolveEquationItems(v.left, '左辺', vCtx, 'T'),
-        right: resolveEquationItems(v.right, '右辺', vCtx, 'T')
+        left: resolveEquationItems(v.left, '左辺', vCtx, 'T', opts),
+        right: resolveEquationItems(v.right, '右辺', vCtx, 'T', opts)
       };
     });
   }
@@ -344,16 +373,25 @@ function projectEquation(raw, reaction, ctx) {
   let left = [];
   let right = [];
   if (!variants.length) {
-    left = resolveEquationItems(raw.left, '左辺', local, mode);
-    right = resolveEquationItems(raw.right, '右辺', local, mode);
+    left = resolveEquationItems(raw.left, '左辺', local, mode, opts);
+    right = resolveEquationItems(raw.right, '右辺', local, mode, opts);
     if (mode === 'B' || mode === 'N') checkEquationBalance(owner, left, right);
     if (mode === 'P') {
       const hasN = left.concat(right).some((item) => typeof item.coef === 'string');
       if (!hasN) throw new Error(owner + ' の重合模式式に n の係数がない');
+      if (opts.polymerUnitCoefOne) {
+        // 繰り返し単位の本体（高分子・単量体）の外側係数は 1。副生成物の species だけ
+        // 2n / dn などの整数倍を許す。
+        left.concat(right).forEach((item) => {
+          if (item.kind !== 'species' && item.kind !== 'text' && Number.isInteger(item.coef) && item.coef !== 1) {
+            throw new Error(owner + ' の重合模式式で反復単位本体の係数が 1 でない: ' + item.id + ' × ' + item.coef);
+          }
+        });
+      }
     }
   }
 
-  return {
+  const projected = {
     mode: mode,
     modeLabel: EQUATION_MODE_LABELS[mode],
     title: title,
@@ -366,6 +404,91 @@ function projectEquation(raw, reaction, ctx) {
     right: right,
     variants: variants
   };
+  // 既存 86 反応の出力を変えないため、指定があるときだけ追加する。
+  if (raw.variantKind != null) projected.variantKind = raw.variantKind;
+  return projected;
+}
+
+// 通常反応へ大学レベルの式を移す場合の検証オプション。legacyAcademicId または
+// educationLevel を持つ（新規に追加した）反応だけ広い係数記号を許し、既存 86 反応は
+// 従来の検証のままにする。
+function equationOptionsFor(reaction) {
+  if (!reaction || (!reaction.legacyAcademicId && !reaction.educationLevel)) return undefined;
+  return {
+    polymerSymbols: ACADEMIC_POLYMER_SYMBOLS,
+    maxPolymerInteger: 99,
+    polymerNoteRequired: true,
+    polymerUnitCoefOne: true,
+    allowTextInPolymer: true
+  };
+}
+
+// 通常反応の教育メタデータ。既存 86 反応は未指定のまま（出力に項目を足さない）。
+function projectEducationFields(raw, owner) {
+  const keys = ['educationLevel', 'evidenceKind', 'scope', 'stepKind', 'steps',
+    'legacyAcademicId', 'coverageIds', 'layoutGroup', 'history'];
+  const present = keys.filter((key) => raw[key] != null);
+  if (!present.length) return null;
+  const out = {};
+  if (raw.educationLevel != null) {
+    if (EDUCATION_LEVELS.indexOf(raw.educationLevel) === -1) {
+      throw new Error(owner + ' のeducationLevelが不正: ' + raw.educationLevel);
+    }
+    out.educationLevel = raw.educationLevel;
+  }
+  if (raw.evidenceKind != null) {
+    if (EVIDENCE_KINDS.indexOf(raw.evidenceKind) === -1) {
+      throw new Error(owner + ' のevidenceKindが不正: ' + raw.evidenceKind);
+    }
+    out.evidenceKind = raw.evidenceKind;
+  }
+  if (raw.scope != null) {
+    const scope = String(raw.scope).trim();
+    if (!scope) throw new Error(owner + ' のscopeが空');
+    out.scope = scope;
+  }
+  if (raw.stepKind != null) {
+    if (STEP_KINDS.indexOf(raw.stepKind) === -1) {
+      throw new Error(owner + ' のstepKindが不正: ' + raw.stepKind);
+    }
+    out.stepKind = raw.stepKind;
+  }
+  if (raw.steps != null) {
+    if (!Array.isArray(raw.steps) || !raw.steps.length || raw.steps.some((s) => !String(s || '').trim())) {
+      throw new Error(owner + ' のstepsが不正');
+    }
+    out.steps = raw.steps.map((s) => String(s).trim());
+  }
+  if (out.stepKind === 'multi-step' && !out.steps) {
+    throw new Error(owner + ' の多段階にstepsがない');
+  }
+  if (raw.legacyAcademicId != null) {
+    const legacy = String(raw.legacyAcademicId);
+    if (!/^academic-[a-z0-9][a-z0-9-]*$/.test(legacy)) {
+      throw new Error(owner + ' のlegacyAcademicIdが不正: ' + legacy);
+    }
+    out.legacyAcademicId = legacy;
+  }
+  if (raw.coverageIds != null) {
+    if (!Array.isArray(raw.coverageIds) || !raw.coverageIds.length ||
+      raw.coverageIds.some((id) => !String(id || '').trim())) {
+      throw new Error(owner + ' のcoverageIdsが不正');
+    }
+    out.coverageIds = raw.coverageIds.map((id) => String(id));
+  }
+  if (raw.layoutGroup != null) {
+    const group = String(raw.layoutGroup).trim();
+    if (!group) throw new Error(owner + ' のlayoutGroupが空');
+    out.layoutGroup = group;
+  }
+  if (raw.history != null) {
+    if (!Array.isArray(raw.history) || !raw.history.length ||
+      raw.history.some((h) => !h || typeof h !== 'object' || !String(h.kind || '').trim())) {
+      throw new Error(owner + ' のhistoryが不正（kindを持つオブジェクトの配列）');
+    }
+    out.history = raw.history.map((h) => Object.assign({}, h));
+  }
+  return out;
 }
 
 function loadSource() {
@@ -431,6 +554,7 @@ function loadSource() {
     if (seenIds.has(r.id)) throw new Error('反応IDが重複: ' + r.id);
     seenIds.add(r.id);
     if (!types[r.type]) throw new Error('未定義の反応種別: ' + r.type + '（反応 ' + r.id + '）');
+    const education = projectEducationFields(r, '反応 ' + r.id);
     const subs = r.substrates || [];
     const prods = r.products || [];
     if (!subs.length) throw new Error('基質がない反応: ' + r.id);
@@ -449,8 +573,8 @@ function loadSource() {
     const subRegions = new Set(subs.map((id) => compounds.get(id).region));
     const prodRegions = new Set(prods.map((id) => compounds.get(id).region));
     const all = new Set([...subRegions, ...prodRegions]);
-    const equation = projectEquation(r.equation, r, { compounds, species });
-    reactions.push({
+    const equation = projectEquation(r.equation, r, { compounds, species }, equationOptionsFor(r));
+    reactions.push(Object.assign({
       id: r.id,
       type: r.type,
       typeLabel: types[r.type].label,
@@ -465,7 +589,7 @@ function loadSource() {
       cross: all.size > 1,
       regions: [...all].sort(),
       equation: equation
-    });
+    }, education || {}));
     types[r.type].count += 1;
     (r.verification || []).forEach((entry) => { if (entry.section) usedSections.add(entry.section); });
   }
@@ -547,6 +671,12 @@ module.exports = {
   LABEL_MAX,
   EQUATION_MODES,
   EQUATION_MODE_LABELS,
+  DEFAULT_POLYMER_SYMBOLS,
+  ACADEMIC_POLYMER_SYMBOLS,
+  POLYMER_VARIANT_KINDS,
+  EDUCATION_LEVELS,
+  EVIDENCE_KINDS,
+  STEP_KINDS,
   readJson,
   shortLabel,
   builderHref,
@@ -556,6 +686,8 @@ module.exports = {
   loadSpecies,
   parseFormula,
   projectEquation,
+  equationOptionsFor,
+  projectEducationFields,
   checkEquationBalance,
   validatePriority,
   digestPriority

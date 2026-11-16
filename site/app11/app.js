@@ -2267,7 +2267,7 @@
       : '<p class="rp-empty">' + esc(Core.emptyReason(c.pathState, 'out', D.states)) + '</p>';
     if (c.pathState === 'covered' || (academicLinked && c.pathState !== 'out-of-scope')) {
       html += '<p class="rp-verification">反応経路: 製法 ' + ins.length + ' 件・生成先 ' + outs.length +
-        ' 件を、確認済みの反応' + (academicLinked ? 'とアカデミック（大学レベル）の経路' : '') + 'から表示しています。</p>';
+        ' 件を、収録した反応' + (academicLinked ? 'とアカデミック（大学レベル）の経路' : '') + 'から表示しています。</p>';
     } else {
       html += '<p class="rp-verification">反応経路の状態: ' +
         esc(D.states[c.pathState] ? D.states[c.pathState].label : c.pathState) + '。' +
@@ -2606,6 +2606,69 @@
     }).join('');
   }
 
+  function reactionEvidenceNote(r) {
+    var note;
+    if (r.evidenceKind === 'general-rule-application') {
+      note = (r.academic ? '大学レベルの' : '高校化学の') +
+        '一般則を既存の物質に適用した経路です。個別の実験で確認したものではありません。';
+    } else if (r.evidenceKind === 'source-illustrated-transformation') {
+      note = '資料が個別例として示す変換です。一般則を無条件に当てはめたものではありません。';
+    } else {
+      note = '独立資料の本文で確認済み。';
+    }
+    if (r.stepKind === 'multi-step') note += ' 多段階の総括として示し、中間体は物質として収録していません。';
+    return note;
+  }
+
+  function reactionEducationLabel(level) {
+    if (level === 'high-school-standard') return '高校標準';
+    if (level === 'high-school-extension') return '高校発展';
+    return '';
+  }
+
+  // 旧 86 は独立資料で確認済み。新 76 の一般則・資料個別例は「確認済」ではなく収録済として示す。
+  // 表示文言はデータ（D.states）を正とし、sourceworker が label を用意すればそれに従う。
+  function reactionStateBadge(r) {
+    if (!r.academic && r.state === 'confirmed' &&
+        (r.evidenceKind === 'general-rule-application' ||
+          r.evidenceKind === 'source-illustrated-transformation')) {
+      var states = D.states || {};
+      var listed = states.listed || states.collected;
+      var label = (listed && listed.label) ||
+        (states.confirmed && states.confirmed.label && states.confirmed.label !== '確認済'
+          ? states.confirmed.label : '') || '収録済';
+      return '<span class="rp-status">' + esc(label) + '</span>';
+    }
+    return stateBadge(r.state);
+  }
+
+  function normalReactionCounts() {
+    var counts = { confirmed: 0, general: 0, illustrated: 0 };
+    D.reactions.forEach(function (r) {
+      if (r.evidenceKind === 'general-rule-application') counts.general++;
+      else if (r.evidenceKind === 'source-illustrated-transformation') counts.illustrated++;
+      else counts.confirmed++;
+    });
+    return counts;
+  }
+
+  // 収録内訳（旧 86 = 資料で確認、新 76 = 資料が示す変換／一般則の適用）。内訳が無ければ空文字。
+  function normalEvidenceBreakdown(sep) {
+    var counts = normalReactionCounts();
+    if (!counts.general && !counts.illustrated) return '';
+    var parts = [];
+    if (counts.confirmed) parts.push('資料で確認 ' + counts.confirmed);
+    if (counts.illustrated) parts.push('資料が示す変換 ' + counts.illustrated);
+    if (counts.general) parts.push('一般則の適用 ' + counts.general);
+    return parts.join(sep || '／');
+  }
+
+  function normalReactionCountLabel() {
+    var breakdown = normalEvidenceBreakdown(' ＋ ');
+    if (!breakdown) return D.reactions.length + ' 件（すべて独立資料で確認済み）';
+    return D.reactions.length + ' 件（' + breakdown + '）';
+  }
+
   function reactionCard(id) {
     var r = findReaction(id);
     if (!r) return '';
@@ -2617,36 +2680,34 @@
     var html = '';
     html += '<h2 id="rp-card-title">' + esc(type.label) + 'の反応</h2>';
     if (r.academic) {
-      html += '<p class="rp-card__tier rp-card__tier--academic">大学レベル（アカデミック）' +
+      html += '<p class="rp-card__tier rp-card__tier--academic">' +
+        (r.educationLevel === 'high-school-standard' ? '高校標準（大学レベルから移行）' : '大学レベル（アカデミック）') +
         (r.stepKind === 'multi-step' ? '／多段階の総括' : '／一段階（direct）') + '</p>';
     } else {
+      var eduLabel = reactionEducationLabel(r.educationLevel);
       html += '<p class="rp-card__tier rp-card__tier--' + (r.tier === 'primary' ? 'primary' : 'secondary') + '">' +
-        (r.tier === 'primary' ? '主要経路（太い実線）' : '補助経路（細い点線）') + '</p>';
+        (r.tier === 'primary' ? '主要経路（太い実線）' : '補助経路（細い点線）') +
+        (eduLabel ? '／' + eduLabel : '') + '</p>';
     }
     html += '<p class="rp-card__formula">' + esc(subText) + ' → ' + esc(prodText) + '</p>';
     if (r.academic) {
       html += '<p><span class="rp-status rp-status--academic">アカデミック</span> <span class="rp-card__note">' +
-        '大学レベルの一般則を既存物質へ適用した経路です。個別の実験で確認済みという意味ではありません。' +
-        '</span></p>';
+        reactionEvidenceNote(r) + '</span></p>';
     } else {
-      html += '<p>' + stateBadge(r.state) + ' <span class="rp-card__note">' +
-        '独立資料の本文で確認済み。' + '</span></p>';
+      html += '<p>' + reactionStateBadge(r) + ' <span class="rp-card__note">' +
+        reactionEvidenceNote(r) + '</span></p>';
     }
-    if (r.academic) {
-      html += '<h3>適用範囲（大学レベルの一般則）</h3><p>' + esc(r.scope) + '</p>';
-      html += '<p class="rp-card__note">根拠の種類: ' +
-        (r.evidenceKind === 'source-illustrated-transformation'
-          ? '資料が個別例として示す変換（一般則の無条件な適用ではない）'
-          : '一般則の適用（個別実験の確認ではない）') + '。</p>';
-      if (r.stepKind === 'multi-step' && r.steps.length) {
-        html += '<h3>段階（総括）</h3><ol class="rp-card__list rp-academic-steps">' +
-          r.steps.map(function (step) { return '<li>' + esc(step) + '</li>'; }).join('') + '</ol>' +
-          '<p class="rp-card__note">地図の線は総括した経路で、中間体は物質として収録していません。</p>';
-      }
-      if (r.basedOnHeld) {
-        html += '<p class="rp-card__note">保留反応 ' + esc(r.basedOnHeld) +
-          ' と同じ組合せを含むが、新しい出典で確認した内容として別に記録している。</p>';
-      }
+    if (r.scope) {
+      html += '<h3>適用範囲</h3><p>' + esc(r.scope) + '</p>';
+    }
+    if (r.stepKind === 'multi-step' && r.steps && r.steps.length) {
+      html += '<h3>段階（総括）</h3><ol class="rp-card__list rp-academic-steps">' +
+        r.steps.map(function (step) { return '<li>' + esc(step) + '</li>'; }).join('') + '</ol>' +
+        '<p class="rp-card__note">地図の線は総括した経路で、中間体は物質として収録していません。</p>';
+    }
+    if (r.academic && r.basedOnHeld) {
+      html += '<p class="rp-card__note">保留反応 ' + esc(r.basedOnHeld) +
+        ' と同じ組合せを含むが、新しい出典で確認した内容として別に記録している。</p>';
     }
     html += '<p class="rp-card__actions"><button type="button" class="rp-btn rp-btn--wide" data-action="fit-reaction" data-id="' +
       esc(r.id) + '">この反応の端点を表示</button></p>';
@@ -2777,7 +2838,7 @@
     var rcount = document.createElement('span');
     rcount.textContent = mode === 'academic'
       ? academicAll.length + ' 件（通常 ' + D.reactions.length + ' ＋ 大学レベル ' + academicReactions.length + '）'
-      : D.reactions.length + ' 件（すべて独立資料で確認済み）';
+      : normalReactionCountLabel();
     rh.appendChild(rcount);
     reactionGroup.appendChild(rh);
     var rul = document.createElement('ul');
@@ -3036,7 +3097,8 @@
       acad.disabled = !academicEnabled;
       acad.setAttribute('aria-disabled', academicEnabled ? 'false' : 'true');
       acad.title = academicEnabled
-        ? '通常 427 物質を学術配置で表示し、大学レベルの追加 178 反応も表示します。'
+        ? '通常 ' + D.meta.compoundCount + ' 物質を学術配置で表示し、大学レベルの追加 ' +
+          academicReactions.length + ' 反応も表示します。'
         : (academicDisabledReason || 'アカデミックデータが未収録、または通常データと整合しません。');
     }
   }
@@ -3070,7 +3132,7 @@
       (academic.meta.evidenceCount || {})['source-illustrated-transformation'] + ' 件、多段階 ' +
       ((academic.meta.stepCount || {})['multi-step'] || 0) + ' 件）。新たに接続した物質 ' + newlyConnected +
       ' 件を含め、接続 ' + connected + ' 物質・未接続 ' + unconnected +
-      ' 物質（外縁の棚）です。通常の物質 ' + D.meta.compoundCount + ' 件・確認済み反応 ' +
+      ' 物質（外縁の棚）です。通常の物質 ' + D.meta.compoundCount + ' 件・収録反応 ' +
       D.meta.reactionCount + ' 件の内容は変更していません。';
   }
 
@@ -3186,8 +3248,9 @@
 
   function buildNotice() {
     var summary = '物質 ' + D.meta.compoundCount + ' 件（うち高校化学の必須 ' + D.meta.requiredCount +
-      ' 件）を収録。反応に関与する ' + D.meta.connectedCount + ' 物質と確認済み反応 ' +
-      D.meta.confirmedReactionCount + ' 件を1つのネットワークとして配置し、残り ' +
+      ' 件）を収録。反応に関与する ' + D.meta.connectedCount + ' 物質と収録反応 ' +
+      D.meta.reactionCount + ' 件' + (normalEvidenceBreakdown() ? '（' + normalEvidenceBreakdown() + '）' : '') +
+      'を1つのネットワークとして配置し、残り ' +
       D.meta.isolatedCount + ' 物質は外縁の棚に表示しています。';
     var note = '確認できなかった反応 ' + D.meta.heldReactionCount +
       ' 件は公開データに含めていません。孤立ノードは、確認済みの経路が見つかっていないことを示し、「生成しない」という意味ではありません。' +
@@ -3199,7 +3262,7 @@
     var status = document.getElementById('rp-data-status');
     if (status) {
       status.textContent = 'データ版 ' + D.meta.version + ' ／ 物質 ' + D.meta.compoundCount +
-        ' 件 ／ 確認済み反応 ' + D.meta.confirmedReactionCount + ' 件（非公開の保留 ' +
+        ' 件 ／ 収録反応 ' + D.meta.reactionCount + ' 件（非公開の保留 ' +
         D.meta.heldReactionCount + ' 件）';
     }
     var scopeEl = document.getElementById('rp-scope-note');
@@ -3211,8 +3274,8 @@
     }
     var dataEl = document.getElementById('rp-data-note-long');
     if (dataEl) {
-      dataEl.textContent = D.meta.dataNote + ' 反応の確認には ' + D.meta.sourceBook +
-        ' の各節本文を用い、節番号と確認日（' + D.meta.verifiedAt + '）を各反応のカードに記録しています。';
+      dataEl.textContent = D.meta.dataNote + ' 反応の根拠は ' + D.meta.sourceBook +
+        ' の各節本文などを用い、資料名と確認日（' + D.meta.verifiedAt + '）を各反応のカードに記録しています。';
     }
   }
 

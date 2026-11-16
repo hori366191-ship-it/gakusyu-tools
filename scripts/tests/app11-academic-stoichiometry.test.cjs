@@ -24,7 +24,11 @@ const POLYMERIC = new Set([
   'phenol-resin', 'urea-resin', 'melamine-resin', 'epoxy-resin',
   'cellulose', 'glycogen', 'cellulose-acetate', 'cellulose-nitrate'
 ]);
-const P_REACTIONS = A.reactions.filter((r) => r.equation && r.equation.mode === 'P');
+const P_REACTIONS = D.reactions.filter((r) => r.equation && r.equation.mode === 'P')
+  .concat(A.reactions.filter((r) => r.equation && r.equation.mode === 'P'));
+const byId = (id) => D.reactions.find((r) => r.id === id) || A.reactions.find((r) => r.id === id);
+const celluloseAcetate = () => byId('cellulose-acetylation');
+const celluloseNitrate = () => byId('cellulose-nitration');
 
 function coefMap(reaction) {
   const map = {};
@@ -35,8 +39,8 @@ function coefMap(reaction) {
   return map;
 }
 
-test('[P] 全25件で高分子 item の外側係数は 1（繰返しは構造側の _n）', () => {
-  assert.equal(P_REACTIONS.length, 25);
+test('[P] 高分子 item の外側係数は 1（繰返しは構造側の _n）', () => {
+  assert.ok(P_REACTIONS.length >= 25, '重合反応の件数: ' + P_REACTIONS.length);
   const bad = [];
   P_REACTIONS.forEach((r) => {
     r.equation.left.concat(r.equation.right).forEach((item) => {
@@ -49,17 +53,17 @@ test('[P] 全25件で高分子 item の外側係数は 1（繰返しは構造側
 });
 
 test('[P] セルロース/グリコーゲン/誘導体の係数を直値で固定する', () => {
-  const co = (id) => coefMap(A.reactions.find((r) => r.id === id));
-  assert.equal(co('academic-cellulose-hydrolysis').cellulose, 1);
+  const co = (id) => coefMap(byId(id));
+  assert.equal(co('cellulose-hydrolysis').cellulose, 1);
   assert.equal(co('academic-glycogen-hydrolysis').glycogen, 1);
-  assert.equal(co('academic-cellulose-acetate').cellulose, 1);
-  assert.equal(co('academic-cellulose-acetate')['acetic-anhydride'], 'dn');
-  assert.equal(co('academic-cellulose-nitrate').cellulose, 1);
-  assert.equal(co('academic-cellulose-nitrate').HNO3, 'dn');
-  const acetate = A.reactions.find((r) => r.id === 'academic-cellulose-acetate');
+  assert.equal(co('cellulose-acetylation').cellulose, 1);
+  assert.equal(co('cellulose-acetylation')['acetic-anhydride'], 'dn');
+  assert.equal(co('cellulose-nitration').cellulose, 1);
+  assert.equal(co('cellulose-nitration').HNO3, 'dn');
+  const acetate = celluloseAcetate();
   assert.equal(acetate.equation.right.find((i) => i.id === 'cellulose-acetate').coef, 1);
   assert.equal(acetate.equation.right.find((i) => i.id === 'acetic-acid').coef, 'dn');
-  const nitrate = A.reactions.find((r) => r.id === 'academic-cellulose-nitrate');
+  const nitrate = celluloseNitrate();
   assert.equal(nitrate.equation.right.find((i) => i.id === 'cellulose-nitrate').coef, 1);
   assert.equal(nitrate.equation.right.find((i) => i.id === 'H2O').coef, 'dn');
   assert.ok(acetate.note.includes('0〜3'), '置換度の範囲を注記');
@@ -67,8 +71,9 @@ test('[P] セルロース/グリコーゲン/誘導体の係数を直値で固�
 });
 
 test('[P] SBR/NBR の単量体係数は既存 polymer 構造の繰返し記号と一致する', () => {
-  const sbr = A.reactions.find((r) => r.id === 'academic-sbr');
-  const nbr = A.reactions.find((r) => r.id === 'academic-nbr');
+  const sbr = byId('academic-sbr') || byId('styrene-butadiene-copolymerization');
+  const nbr = byId('academic-nbr');
+  assert.ok(sbr && nbr);
   assert.deepEqual(coefMap(sbr), { butadiene: 'm', styrene: 'n' });
   assert.deepEqual(coefMap(nbr), { butadiene: 'm', acrylonitrile: 'n' });
   // 通常の構造 unit は変更されていない。独立に記号の順序を確認する。

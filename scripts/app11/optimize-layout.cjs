@@ -26,6 +26,7 @@ const Sec = require('./secondary-layout.cjs');
 const M = require('./metrics.cjs');
 const F = require('./layout-format.cjs');
 const G = require('./geometry.cjs');
+const L = require('./legacy-baseline.cjs');
 
 const LAYOUT_VERSION = 4;
 
@@ -413,9 +414,156 @@ function verifyAllRoutes(scene, source) {
   }
 }
 
+function statsFor(report) {
+  return {
+    edges: report.edges.count,
+    primaryBranches: report.tiers.primary.branches,
+    secondaryBranches: report.tiers.secondary.branches,
+    crossingsPP: report.crossings.PP,
+    crossingsPS: report.crossings.PS,
+    crossingsSS: report.crossings.SS,
+    crossings: report.edges.crossings,
+    acuteCrossings: report.edges.acuteCrossings,
+    bridgedCrossings: report.edges.bridgedCrossings,
+    unbridgedAcute: report.edges.unbridgedAcute,
+    nodePenetrations: report.edges.nodePenetrations,
+    labelPenetrations: report.edges.labelPenetrations,
+    markerPenetrations: report.edges.markerPenetrations,
+    overlapSegments: report.edges.overlapSegments,
+    clearanceViolations: report.edges.clearanceViolations,
+    totalLength: report.edges.totalLength,
+    bends: report.edges.bends,
+    maxBends: report.edges.maxBends,
+    primaryLength: report.tiers.primary.length.total,
+    secondaryLength: report.tiers.secondary.length.total
+  };
+}
+
+/**
+ * 既存レイアウト（legacy-baseline.json）を動かさず、追加分だけを配置する。
+ * 旧 86 反応・旧 101 物質・旧 207 経路は base の値をそのまま出力する。
+ */
+function planExtensionLayout(source, topology, base, addedIds) {
+  const X = require('./extension-layout.cjs');
+  const { scene } = X.extend(source, base);
+  const positions = JSON.parse(JSON.stringify(base.positions));
+  // 新しく接続した棚の物質だけは、拡張配置で動いた座標・tier を採用する。
+  for (const [id, node] of scene.compounds) {
+    const pos = positions[id];
+    if (!pos) {
+      const compound = source.compounds.get(id);
+      positions[id] = {
+        r: compound.region,
+        x: round2(node.x),
+        y: round2(node.y),
+        w: node.w,
+        h: node.h,
+        tier: node.tier
+      };
+      continue;
+    }
+    if (node.x !== pos.x || node.y !== pos.y || node.tier !== pos.tier) {
+      pos.x = round2(node.x);
+      pos.y = round2(node.y);
+      pos.w = node.w;
+      pos.h = node.h;
+      pos.tier = node.tier;
+    }
+  }
+
+  const reactions = {};
+  for (const id of [...scene.reactions.keys()].sort()) {
+    const marker = scene.reactions.get(id);
+    const sourceReaction = source.reactions.find((r) => r.id === id);
+    let label = null;
+    if (marker.labelBoxes) {
+      const box = marker.labelBoxes.type;
+      label = {
+        side: marker.labelSide,
+        type: { x: round2(box.x + box.w / 2), y: round2(box.y + box.h / 2) },
+        cond: null,
+        box: { x: round2(box.x), y: round2(box.y), w: round2(box.w), h: round2(box.h) }
+      };
+    }
+    reactions[id] = {
+      x: round2(marker.x),
+      y: round2(marker.y),
+      tier: marker.tier,
+      label: label,
+      substrates: sourceReaction.substrates,
+      products: sourceReaction.products,
+      typeLabel: sourceReaction.typeLabel,
+      conditions: sourceReaction.conditions,
+      cross: sourceReaction.cross
+    };
+  }
+
+  const edges = {};
+  for (const route of scene.routes.slice().sort((a, b) => (a.key < b.key ? -1 : 1))) {
+    edges[route.key] = {
+      reaction: route.reactionId,
+      dir: route.dir,
+      compound: route.compoundId,
+      tier: route.tier,
+      points: route.points.map((p) => [round2(p.x), round2(p.y)]),
+      gaps: [],
+      bridges: []
+    };
+  }
+
+  // 既存の原点・最小値は動かさない。追加分が右／下へ広がった分だけ canvas を伸ばす。
+  const bounds = computeBounds(scene.compounds, scene.reactions);
+  let maxX = bounds.x + bounds.w;
+  let maxY = bounds.y + bounds.h;
+  for (const route of scene.routes) {
+    for (const p of route.points || []) {
+      maxX = Math.max(maxX, p.x);
+      maxY = Math.max(maxY, p.y);
+    }
+  }
+  const canvas = {
+    x: 0,
+    y: 0,
+    w: Math.max(base.canvas.w, Math.ceil(maxX + 20)),
+    h: Math.max(base.canvas.h, Math.ceil(maxY + 20))
+  };
+
+  const incident = L.incidentCounts(source);
+  const isolated = [...source.compounds.keys()].filter((id) => !(incident.get(id) > 0)).length;
+
+  const layout = {
+    version: LAYOUT_VERSION,
+    seed: 0,
+    priorityHash: source.priorityHash,
+    topologyNetworkx: topology.certificate.meta.networkx,
+    nodeW: base.nodeW,
+    nodeH: base.nodeH,
+    canvas: canvas,
+    shelf: Object.assign({}, base.shelf, { count: isolated }),
+    regions: buildRegions(scene, source, { shiftX: 0, shiftY: 0 }),
+    positions,
+    reactions
+  };
+  const routes = {
+    version: LAYOUT_VERSION,
+    seed: 0,
+    priorityHash: source.priorityHash,
+    edges,
+    stats: {}
+  };
+  const report = M.measure(M.sceneFromLayout(layout, routes));
+  routes.stats = statsFor(report);
+  return { layout, routes, report, source, topology, scene, base, added: addedIds };
+}
+
 function planLayout() {
   const source = S.loadSource();
-  const topology = T.loadTopology(source);
+  const base = L.loadBaseline();
+  const topology = T.loadTopology(source, { legacy: base });
+  const added = L.newReactionIds(source, base);
+  if (base && added.length) {
+    return planExtensionLayout(source, topology, base, added);
+  }
   const scene = buildScene(source, topology);
   Sec.placeSecondary(scene, source);
   verifyAllRoutes(scene, source);
@@ -498,36 +646,45 @@ function planLayout() {
   };
   const sceneOut = M.sceneFromLayout(layout, routes);
   const report = M.measure(sceneOut);
-  routes.stats = {
-    edges: report.edges.count,
-    primaryBranches: report.tiers.primary.branches,
-    secondaryBranches: report.tiers.secondary.branches,
-    crossingsPP: report.crossings.PP,
-    crossingsPS: report.crossings.PS,
-    crossingsSS: report.crossings.SS,
-    crossings: report.edges.crossings,
-    acuteCrossings: report.edges.acuteCrossings,
-    bridgedCrossings: report.edges.bridgedCrossings,
-    unbridgedAcute: report.edges.unbridgedAcute,
-    nodePenetrations: report.edges.nodePenetrations,
-    labelPenetrations: report.edges.labelPenetrations,
-    markerPenetrations: report.edges.markerPenetrations,
-    overlapSegments: report.edges.overlapSegments,
-    clearanceViolations: report.edges.clearanceViolations,
-    totalLength: report.edges.totalLength,
-    bends: report.edges.bends,
-    maxBends: report.edges.maxBends,
-    primaryLength: report.tiers.primary.length.total,
-    secondaryLength: report.tiers.secondary.length.total
-  };
-  return { layout, routes, report, source, topology, scene };
+  routes.stats = statsFor(report);
+  return { layout, routes, report, source, topology, scene, base };
+}
+
+function checkLegacy(layout, routes, source, base) {
+  const problems = [];
+  problems.push(...L.verifySource(source, base).map((p) => Object.assign({ phase: 'source' }, p)));
+  problems.push(...L.verifyLayout(layout, routes, base, source).map((p) => Object.assign({ phase: 'layout' }, p)));
+  return problems;
 }
 
 function main() {
   const check = process.argv.includes('--check');
-  const { layout, routes, report, topology, scene } = planLayout();
+  const acceptChange = process.argv.includes('--accept-legacy-change');
+  const { layout, routes, report, source, topology, scene, base } = planLayout();
   const layoutPath = path.join(S.SRC, 'layout.json');
   const routesPath = path.join(S.SRC, 'routes.json');
+
+  if (base) {
+    const legacyProblems = checkLegacy(layout, routes, source, base);
+    if (legacyProblems.length) {
+      const kinds = [...new Set(legacyProblems.map((p) => p.kind))];
+      console.error('既存レイアウトの凍結基準（site-src/app11/legacy-baseline.json）と一致しません: ' + kinds.join(', '));
+      legacyProblems.slice(0, 6).forEach((p) => {
+        console.error('  - ' + p.phase + '/' + L.describeProblems([p], 1));
+      });
+      if (legacyProblems.some((p) => p.kind === 'added-reactions')) {
+        console.error('通常反応が基準より増えています。既存の配置・経路を動かさずに追加する拡張配置に失敗しています。' +
+          'docs/app11-highschool-layout.md を参照してください。');
+      }
+      if (!acceptChange) {
+        console.error('書き込みを中止しました（--accept-legacy-change を付けた場合だけ、そのまま書き込みます）。');
+        process.exit(2);
+      }
+      console.error('警告: --accept-legacy-change により、凍結基準から変わった出力を書き込みます。' +
+        '意図した変更なら node scripts/app11/make-legacy-baseline.cjs で基準を更新してください。');
+    }
+  }
+
   if (check) {
     const currentLayout = fs.existsSync(layoutPath) ? fs.readFileSync(layoutPath, 'utf8') : '';
     const currentRoutes = fs.existsSync(routesPath) ? fs.readFileSync(routesPath, 'utf8') : '';
@@ -538,6 +695,10 @@ function main() {
     console.log('app11 の配置・経路は最新です（主要 ' + report.tiers.primary.branches +
       ' 枝、PP ' + report.crossings.PP + '、PS ' + report.crossings.PS +
       '、SS ' + report.crossings.SS + '、主要長 ' + report.tiers.primary.length.total + '）。');
+    if (base) {
+      console.log('凍結基準: 反応 ' + base.counts.reactions + ' / 接続物質 ' + base.counts.connected +
+        ' / 経路 ' + base.counts.edges + ' は不変。');
+    }
     return;
   }
   fs.writeFileSync(layoutPath, F.renderLayout(layout), 'utf8');
@@ -547,7 +708,7 @@ function main() {
     '（主要 ' + topology.certificate.meta.primaryReactions + ' 反応 / ' +
     topology.certificate.meta.primaryBranches + ' 枝、成分 ' + topology.certificate.meta.components +
     '、面 ' + topology.certificate.meta.faces + '）');
-  if (scene.primaryProblems.length) {
+  if (scene.primaryProblems && scene.primaryProblems.length) {
     console.warn('主要配線の未解決: ' + JSON.stringify(scene.primaryProblems.slice(0, 8)));
   }
   console.log(M.formatReport(report));
@@ -562,6 +723,7 @@ module.exports = {
   addIsolatedShelf,
   normalize,
   buildRegions,
+  checkLegacy,
   renderLayout: F.renderLayout,
   renderRoutes: F.renderRoutes
 };

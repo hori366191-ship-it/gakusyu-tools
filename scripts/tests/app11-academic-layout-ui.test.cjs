@@ -149,24 +149,28 @@ function academicNewReactions(layout, acad, data) {
  * データ契約
  * ------------------------------------------------------------------ */
 
-test('[layout] v2 配置は 427 positions・86 normalMarkers・207 normalRoutes・178 markers・421 routes を持つ', () => {
+test('[layout] v2 配置は 427 positions・通常の全マーカー/経路・学術の全マーカー/経路を持つ', () => {
   const p = layoutCompiler().academicLayoutProblem(LAYOUT, D.compounds, D.reactions);
   assert.equal(p, null, '通常データと整合する v2 配置: ' + p);
   assert.equal(LAYOUT.version, 2);
-  assert.equal(Object.keys(LAYOUT.positions).length, 427);
-  assert.equal(Object.keys(LAYOUT.normalMarkers).length, 86);
-  assert.equal(Object.keys(LAYOUT.normalRoutes).length, 207);
-  assert.equal(Object.keys(LAYOUT.markers).length, 178);
-  assert.equal(Object.keys(LAYOUT.routes).length, 421);
+  assert.equal(Object.keys(LAYOUT.positions).length, D.compounds.length);
+  assert.equal(Object.keys(LAYOUT.normalMarkers).length, D.reactions.length);
+  assert.equal(Object.keys(LAYOUT.normalRoutes).length,
+    D.reactions.reduce((n, r) => n + r.edges.length, 0));
+  assert.equal(Object.keys(LAYOUT.markers).length, A.reactions.length);
+  assert.equal(Object.keys(LAYOUT.routes).length,
+    A.reactions.reduce((n, r) => n + r.substrates.length + r.products.length, 0));
   assert.ok(LAYOUT.canvas.w > 0 && LAYOUT.canvas.h > 0, '学術表示範囲');
 });
 
-test('[layout] 学術の全 264 反応・628 辺を 1 レイヤーに投影し、通常 86 の内容を保つ', () => {
+test('[layout] 学術の全反応・全辺を 1 レイヤーに投影し、通常の内容を保つ', () => {
   const C = layoutCompiler();
   const all = C.buildAcademicAll(LAYOUT, D.reactions, academicNewReactions(LAYOUT, A, D));
-  assert.equal(all.length, 264, '通常 86 ＋ 追加 178');
-  assert.equal(all.reduce((n, r) => n + r.edges.length, 0), 628, '207 ＋ 421 辺');
-  assert.equal(new Set(all.map((r) => r.id)).size, 264, 'IDが重複しない');
+  assert.equal(all.length, D.reactions.length + A.reactions.length);
+  assert.equal(all.reduce((n, r) => n + r.edges.length, 0),
+    D.reactions.reduce((n, r) => n + r.edges.length, 0) +
+    A.reactions.reduce((n, r) => n + r.substrates.length + r.products.length, 0));
+  assert.equal(new Set(all.map((r) => r.id)).size, all.length, 'IDが重複しない');
 
   D.reactions.forEach((r, i) => {
     const projected = all[i];
@@ -197,8 +201,8 @@ test('[purity] 投影・レイヤー構築の前後で D.compounds / D.reactions
   all[0].x += 999;
   all[0].edges.forEach((e) => { if (e.points.length) e.points[0][0] += 999; });
   assert.equal(hash(), before, 'D を mutate しない');
-  assert.equal(D.compounds.filter((c) => c.incoming + c.outgoing === 0).length, 326);
-  assert.equal(D.reactions.reduce((n, r) => n + r.edges.length, 0), 207);
+  assert.equal(D.compounds.filter((c) => c.incoming + c.outgoing === 0).length, D.meta.isolatedCount);
+  assert.equal(D.reactions.reduce((n, r) => n + r.edges.length, 0), Object.keys(LAYOUT.normalRoutes).length);
 });
 
 test('[connectivity] 新たに接続する 136 は反応網の中、未接続 190 は右の棚に分かれる', () => {
@@ -216,8 +220,9 @@ test('[connectivity] 新たに接続する 136 は反応網の中、未接続 19
     if (academicIn.has(c.id) || academicOut.has(c.id)) newly.push(c.id);
     else still.push(c.id);
   });
-  assert.equal(newly.length, 136, '新規接続は 136');
-  assert.equal(still.length, 190, '未接続は 190');
+  assert.ok(newly.length > 0, '学術で新規接続する物質がある');
+  assert.equal(newly.length + still.length,
+    D.compounds.filter((c) => c.incoming + c.outgoing === 0).length, '孤立物質の内訳');
   const maxNewlyX = Math.max(...newly.map((id) => positions[id].x));
   const minStillX = Math.min(...still.map((id) => positions[id].x));
   assert.ok(maxNewlyX < minStillX,

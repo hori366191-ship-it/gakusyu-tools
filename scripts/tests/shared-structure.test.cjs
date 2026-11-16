@@ -275,17 +275,60 @@ test('[baseline] 既存の構造SVGはマレイン酸/フマル酸以外で変�
     'app11で変わるのは今回の2物質だけ（他はSVG完全同値）');
 
   const eqBaseline = JSON.parse(read(path.join(ROOT, 'scripts', 'tests', 'fixtures', 'app11-equation-baseline.json')));
+  const legacy = JSON.parse(read(path.join(ROOT, 'site-src', 'app11', 'legacy-baseline.json')));
+  const legacyIds = new Set(Object.keys(legacy.reactions));
+  const baselineNormalKeys = Object.keys(eqBaseline).filter((key) => key.startsWith('normal:'));
+  assert.equal(baselineNormalKeys.length, 86, '旧 86 反応の baseline を減らさない');
+  assert.equal(Object.keys(eqBaseline).length, 102, 'baseline（86 反応 + 一般図16）を上書きしない');
+
+  // 既存 86 反応の SVG は baseline と完全一致（既存 hash を更新しない）。
   const changedEq = [];
-  D11.reactions.forEach((r) => {
-    if (!r.equation) return;
-    const key = 'normal:' + r.id;
-    if (sha(R11.renderEquation(r.equation, r.label || '反応式')) !== eqBaseline[key]) changedEq.push(key);
+  baselineNormalKeys.forEach((key) => {
+    const id = key.slice('normal:'.length);
+    const reaction = D11.reactions.find((r) => r.id === id);
+    assert.ok(reaction, 'baseline の反応が通常データにない: ' + id);
+    if (!reaction.equation) {
+      changedEq.push(key);
+      return;
+    }
+    if (sha(R11.renderEquation(reaction.equation, reaction.label || '反応式')) !== eqBaseline[key]) changedEq.push(key);
   });
   (D11.classMap.edges || []).forEach((e) => {
     const key = 'class:' + e.id;
     if (sha(R11.renderEquation(e.equation, e.label || '一般反応式')) !== eqBaseline[key]) changedEq.push(key);
   });
-  assert.deepEqual(changedEq, [], '反応式・一般図のSVGは不変');
+  assert.deepEqual(changedEq, [], '反応式・一般図の既存SVGは不変');
+
+  // 追加分は source の metadata で厳密に特定した 76 件だけ（未説明の増加を許さない）。
+  const source = require(path.join(ROOT, 'scripts', 'app11', 'source-data.cjs')).loadSource();
+  const added = source.reactions.filter((r) => !legacyIds.has(r.id));
+  assert.equal(added.length, 76, '新規通常反応は 76 件');
+  const baselineSet = new Set(baselineNormalKeys);
+  const extraKeys = D11.reactions
+    .filter((r) => r.equation && !baselineSet.has('normal:' + r.id))
+    .map((r) => 'normal:' + r.id)
+    .sort();
+  assert.deepEqual(extraKeys, added.map((r) => 'normal:' + r.id).sort(),
+    '未説明の反応式増加はない（旧86は baseline、追加は source metadata の76件だけ）');
+  added.forEach((r) => {
+    assert.ok(r.educationLevel, r.id + ' に educationLevel がない');
+    assert.ok(r.equation, r.id + ' に式がない');
+  });
+  // 26 件は旧 academic からの移行。legacyAcademicId で由来を追える。
+  const renamed = added.filter((r) => r.legacyAcademicId);
+  assert.equal(renamed.length, 26, '旧 academic からの移行は 26 件');
+  renamed.forEach((r) => {
+    assert.match(r.legacyAcademicId, /^academic-[a-z0-9][a-z0-9-]*$/, r.id + ' の legacyAcademicId');
+  });
+  // 新規 76 式は有効な SVG として描ける（意味の同一性は source/coverage 側で検証）。
+  extraKeys.forEach((key) => {
+    const id = key.slice('normal:'.length);
+    const reaction = D11.reactions.find((r) => r.id === id);
+    const svg = R11.renderEquation(reaction.equation, reaction.label || '反応式');
+    assert.ok(svg.startsWith('<svg'), id + ' の式SVG');
+    assert.ok(svg.includes('rp-eq'), id + ' の式クラス');
+    assert.ok(svg.length > 100, id + ' の式SVGが空でない');
+  });
 });
 
 test('[static] 共有モジュールは全HTMLでアダプタより先に読み込まれる', () => {

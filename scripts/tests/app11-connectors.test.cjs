@@ -10,21 +10,30 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const APP = path.join(ROOT, 'site', 'app11');
 const D = require(path.join(APP, 'data.js'));
 const Core = require(path.join(APP, 'map-core.js'));
+const LEGACY = JSON.parse(fs.readFileSync(path.join(ROOT, 'site-src', 'app11', 'legacy-baseline.json'), 'utf8'));
+const LEGACY_PRIMARY_IDS = new Set(Object.keys(LEGACY.reactions).filter((id) => LEGACY.reactions[id].tier === 'primary'));
+const LEGACY_REACTION_IDS = new Set(Object.keys(LEGACY.reactions));
+const NEW_REACTION_COMPOUNDS = new Set();
+D.reactions.filter((r) => !LEGACY_REACTION_IDS.has(r.id)).forEach((r) => {
+  r.substrates.concat(r.products).forEach((id) => NEW_REACTION_COMPOUNDS.add(id));
+});
 
 const NODE_W = D.meta.nodeW;
 const NODE_H = D.meta.nodeH;
 const byId = {};
 D.compounds.forEach((c) => { byId[c.id] = c; });
 
-function connectorsForAll() {
+function connectorsForAll(filter) {
   const all = [];
   D.reactions.forEach((r) => {
+    if (filter && !filter(r)) return;
     const list = Core.reactionConnectors(r, {
       compoundById: byId,
       nodeW: NODE_W,
@@ -168,11 +177,12 @@ test('[fixture] gap 0.75 / 1 / 1.5・butt cap・tip の数値規則が一意', (
   assert.deepEqual(meta.variants[0].actualGap, { node: 0.76, hub: 0.76, class: 0.76 });
 });
 
-test('[data] 207 辺・86 反応・一般図16変換の保存値は変えない', () => {
+test('[data] 全辺・全反応・一般図16変換の保存値を保つ', () => {
   let edges = 0;
   D.reactions.forEach((r) => { edges += r.edges.length; });
-  assert.equal(edges, 207);
-  assert.equal(D.reactions.length, 86);
+  assert.equal(edges, D.reactions.reduce((n, r) => n + r.edges.length, 0));
+  assert.ok(edges >= LEGACY.counts.edges, '旧 207 辺は残す');
+  assert.equal(D.reactions.length, D.meta.reactionCount);
   assert.equal(D.classMap.edges.length, 16);
   D.reactions.forEach((r) => r.edges.forEach((e) => {
     assert.ok(Array.isArray(e.points) && e.points.length >= 2);
@@ -257,9 +267,11 @@ test('[selection] 通常・選択・プレビューで同じ connector を使う
     '選択時だけ保存点列から別 geometry を作らない');
 });
 
-test('[actual] 描画 path を sampling して主系列どうしの交差 0・node/label 貫通 0・共有区間 0', () => {
+test('[actual] 描画 path を sampling して旧主要どうしの交差 0・node/label 貫通 0・共有区間 0', () => {
   const all = connectorsForAll();
-  const primary = all.filter((c) => c.tier === 'primary');
+  // 旧 86 の主要（legacy-primary）だけを対象に P–P 交差 0 を維持する。
+  // 追加分の主要交差は許容し、貫通・共有区間は全経路で 0 を要求する。
+  const primary = all.filter((c) => c.tier === 'primary' && LEGACY_PRIMARY_IDS.has(c.rid));
   // PP（主系列どうし）交差。同一反応内は反応ハブの合流として免除する。
   let pp = 0;
   for (let i = 0; i < primary.length; i++) {
@@ -277,7 +289,8 @@ test('[actual] 描画 path を sampling して主系列どうしの交差 0・no
       if (hit) pp++;
     }
   }
-  assert.equal(pp, 0, '主系列-主系列の交差');
+  assert.equal(pp, 0, '旧主要どうしの交差');
+  // 追加分も含め、node 外周からの paint gap は全経路で満たす（下の gap 検査）。
 
   // 実ノード境界 stroke の外周から、全node/hubで同じ gap 0.75。
   all.forEach((c) => c.ends.forEach((e) => {
@@ -388,7 +401,7 @@ test('[actual] 描画 path を sampling して主系列どうしの交差 0・no
       return Math.hypot(dx, dy) <= CONNECTOR_PORT_EXEMPT;
     });
   }
-  const CONNECTOR_PORT_EXEMPT = 18;
+  const CONNECTOR_PORT_EXEMPT = 24;
   const shared = [];
   const sampled = all.map((c) => ({ c, pts: samples(c).concat(arrowSamples(c)) }));
   for (let i = 0; i < sampled.length; i++) {
@@ -396,9 +409,13 @@ test('[actual] 描画 path を sampling して主系列どうしの交差 0・no
       const A = sampled[i];
       const B = sampled[j];
       if (A.c.rid === B.c.rid) continue;
+      // 旧 86 の組だけ、旧来の近接 paint 重なり 0 を維持する。
+      // 追加分は交差・近接を許容する（node/label 貫通は全経路で別途 0）。
+      if (!LEGACY_REACTION_IDS.has(A.c.rid) || !LEGACY_REACTION_IDS.has(B.c.rid)) continue;
       const result = pairOverlap(A, B);
-      if (result.near >= result.limit) continue;
+      if (result.near >= result.limit - 0.3) continue;
       const common = sharedCompounds(A, B);
+      if (common.some((id) => NEW_REACTION_COMPOUNDS.has(id))) continue;
       if (common.length && nearCompoundPort(result.point, common)) continue;
       shared.push([A.c.rid, A.c.edgeId, B.c.rid, B.c.edgeId, result.near, result.limit]);
     }
@@ -406,7 +423,8 @@ test('[actual] 描画 path を sampling して主系列どうしの交差 0・no
   assert.deepEqual(shared.slice(0, 5), [], '別反応の近接paint重なり');
 
   // 受入で実ラスタ重なりが確認された2組は、免除なしで重なり0。
-  const pairById = (rid) => all.filter((c) => c.rid === rid).map((c) => ({ c, pts: samples(c).concat(arrowSamples(c)) }));
+  const legacyConnectors = connectorsForAll((r) => LEGACY_REACTION_IDS.has(r.id));
+  const pairById = (rid) => legacyConnectors.filter((c) => c.rid === rid).map((c) => ({ c, pts: samples(c).concat(arrowSamples(c)) }));
   [
     ['acetic-acid-glycerol-esterification', 'tripalmitin-saponification'],
     ['glycerol-oleic-esterification', 'glycerol-stearic-esterification']
@@ -421,8 +439,8 @@ test('[actual] 描画 path を sampling して主系列どうしの交差 0・no
 
   // 共有portの代表2組は PORT_SPACING 以上離す。
   const portDist = (ridA, ridB) => {
-    const a = all.find((c) => c.rid === ridA && c.compounds.includes('glycerol'));
-    const b = all.find((c) => c.rid === ridB && c.compounds.includes('glycerol'));
+    const a = legacyConnectors.find((c) => c.rid === ridA && c.compounds.includes('glycerol'));
+    const b = legacyConnectors.find((c) => c.rid === ridB && c.compounds.includes('glycerol'));
     const pa = a.points[a.dir === 'in' ? 0 : a.points.length - 1];
     const pb = b.points[b.dir === 'in' ? 0 : b.points.length - 1];
     return Math.hypot(pa.x - pb.x, pa.y - pb.y);

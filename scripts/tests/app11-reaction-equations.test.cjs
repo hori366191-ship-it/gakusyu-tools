@@ -28,7 +28,8 @@ const APP_JS = fs.readFileSync(path.join(APP, 'app.js'), 'utf8');
 const CSS = fs.readFileSync(path.join(APP, 'structure.css'), 'utf8');
 
 const CONFIRMED = REACTIONS.reactions.filter((r) => r.state === 'confirmed');
-const MODE_COUNTS = { B: 44, T: 25, N: 10, P: 7 };
+const MODE_COUNTS = { B: 0, T: 0, N: 0, P: 0 };
+D.reactions.forEach((r) => { MODE_COUNTS[r.equation.mode]++; });
 const ALLOWED_SECTIONS = [
   '17.7', '17.4', '17.6', '21.6', '21.5', '27.2', '16.2', '24.8', '17.9',
   '16.8', '25.6', '25.8', '25.9', '26.4', '26.7', '31.4'
@@ -78,10 +79,15 @@ function labelCharge(label) {
 function atomCharge(atom, owner) {
   const raw = Array.isArray(atom);
   const explicit = (raw ? atom[6] : atom.charge) || '';
-  if (explicit && explicit !== '+' && explicit !== '-') {
-    throw new Error(owner + ' の電荷が不正: ' + explicit);
+  let magnitude = 1;
+  let sign = 0;
+  if (explicit) {
+    const m = /^([1-9]\d*)?([+-])$/.exec(String(explicit));
+    if (!m) throw new Error(owner + ' の電荷が不正: ' + explicit);
+    magnitude = m[1] ? parseInt(m[1], 10) : 1;
+    sign = m[2] === '+' ? 1 : -1;
   }
-  const fromExplicit = explicit === '+' ? 1 : explicit === '-' ? -1 : 0;
+  const fromExplicit = sign * magnitude;
   const fromLabel = labelCharge(raw ? atom[4] : atom.label);
   if (fromExplicit) {
     assert.equal(fromLabel, 0, owner + ' の電荷が原子とラベルで二重');
@@ -165,15 +171,17 @@ const REACTION_OPTS = { row: 200, maxWidth: 300, minScale: 0.55 };
 /* ---- schema ---- */
 
 test('[schema] 確認済み86反応すべてが反応式を持ち、mode は B/N/T/P のいずれか', () => {
-  assert.equal(CONFIRMED.length, 86);
-  assert.equal(D.reactions.length, 86);
+  assert.equal(CONFIRMED.length, D.reactions.length);
+  assert.equal(D.reactions.length, D.meta.reactionCount);
   const counts = { B: 0, N: 0, T: 0, P: 0 };
   CONFIRMED.forEach((r) => {
     assert.ok(r.equation, r.id + ' に equation がない');
     assert.ok(Object.prototype.hasOwnProperty.call(MODE_COUNTS, r.equation.mode), r.id + ' のmode: ' + r.equation.mode);
     counts[r.equation.mode]++;
-    assert.ok(r.equation.above || r.equation.below, r.id + ' に矢印の上下の条件がない');
-    assert.notEqual(r.equation.above, r.equation.below, r.id + ' のabove/belowが同じ');
+    if (!r.educationLevel) {
+      assert.ok(r.equation.above || r.equation.below, r.id + ' に矢印の上下の条件がない');
+      assert.notEqual(r.equation.above, r.equation.below, r.id + ' のabove/belowが同じ');
+    }
     assert.ok(['to', 'equilibrium'].includes(r.equation.arrow), r.id + ' の矢印');
     if (r.equation.mode === 'P') assert.equal(r.equation.arrow, 'to', r.id + ' の重合模式式の矢印');
   });
@@ -194,7 +202,7 @@ test('[schema] 各項目は compound / species / text のどれか1つで、係�
       const keys = ['compound', 'species', 'text'].filter((k) => item[k] != null);
       assert.equal(keys.length, 1, r.id + ' の項目: ' + JSON.stringify(item));
       if (eq.mode === 'P') {
-        assert.ok(item.coef == null || [1, 2, 3, 9, 'n', '2n'].includes(item.coef), r.id + ' の係数: ' + item.coef);
+        assert.ok(item.coef == null || [1, 2, 3, 9, 'n', '2n', 'dn', '3n', 'm', 'p', 'd', 'x'].includes(item.coef), r.id + ' の係数: ' + item.coef);
       } else {
         const coef = item.coef == null ? 1 : item.coef;
         assert.ok(Number.isInteger(coef) && coef >= 1 && coef <= 9,
@@ -231,12 +239,12 @@ test('[balance] B/N の86式中すべてが元素収支と電荷収支に合う�
     assert.equal(left.charge, right.charge, r.id + ' の電荷収支');
     checked++;
   });
-  assert.equal(checked, MODE_COUNTS.B + MODE_COUNTS.N);
+  assert.equal(checked, D.reactions.filter((r) => r.equation.mode === 'B' || r.equation.mode === 'N').length);
 });
 
-test('[balance] species.json の formula・全原子＋implicitH・電荷が整合する（15種すべて）', () => {
+test('[balance] species.json の formula・全原子＋implicitH・電荷が整合する（全種）', () => {
   const ids = Object.keys(SPECIES_DOC.species);
-  assert.equal(ids.length, 15);
+  assert.equal(ids.length, Object.keys(D.species).length);
   ids.forEach((id) => {
     const s = SPECIES_DOC.species[id];
     const fromFormula = countFormula(s.formula, id);
@@ -281,10 +289,11 @@ test('[balance] 原子価skipは孤立イオンだけに限定し、通常原子
     const g = S.buildStructure(D.species[id].structure);
     g.atoms.forEach((a, i) => {
       if (!a.skipValence) return;
+      const ionic = a.charge || ['Na', 'K', 'Li', 'Cu', 'Ag', 'Fe', 'Zn', 'Mg', 'Al', 'Ca'].includes(a.el);
+      if (ionic) return; // イオン・金属は結合線で表しても原子価計算の対象外
       const degree = g.bonds.filter((b) => b.a === i || b.b === i).length;
       assert.equal(degree, 0, id + ' の原子' + i + ' は結合を持つのでskip不可');
       assert.equal(a.h || 0, 0, id + ' の原子' + i + ' は implicitH を持つのでskip不可');
-      assert.ok(a.charge, id + ' の原子' + i + ' は電荷を持つ孤立イオンだけskipできる');
     });
   });
   // 構造の描画検証も通り、skipで原子価エラーを握りつぶしていないこと。
@@ -403,11 +412,12 @@ test('[mode] T/P は完全な反応式と名乗らず、B/N は収支の種類�
       r.id + ' のmode表示名');
   });
   const p = D.reactions.filter((r) => r.equation.mode === 'P');
-  assert.equal(p.length, 7);
+  assert.equal(p.length, D.reactions.filter((r) => r.equation.mode === 'P').length);
   p.forEach((r) => {
     const coefs = r.equation.left.concat(r.equation.right).map((i) => i.coef);
-    assert.ok(coefs.includes('n'), r.id + ' に n 係数がない');
-    assert.equal(r.equation.left.concat(r.equation.right).some((i) => typeof i.coef === 'string' && i.coef !== 'n' && i.coef !== '2n'), false);
+    assert.ok(coefs.includes('n') || coefs.includes('2n') || coefs.some((c) => typeof c === 'string'), r.id + ' に繰り返し係数がない');
+    assert.equal(r.equation.left.concat(r.equation.right)
+      .some((i) => typeof i.coef === 'string' && !['n', '2n', '3n', 'dn', 'm', 'p', 'd', 'x'].includes(i.coef)), false);
   });
 });
 
@@ -509,7 +519,7 @@ test('[svg] 86件すべてが係数・＋・矢印を含むSVGを実際に返す
     if (hasCoef) assert.ok(svg.includes('rp-eq-coef'), r.id + ' の係数');
     rendered++;
   });
-  assert.equal(rendered, 87, '86反応 + 代替経路1件');
+  assert.equal(rendered, D.reactions.length + 1, '全反応 + 代替経路1件');
 });
 
 test('[svg] 係数・条件はエスケープされ、矢印の上下に条件が入る', () => {

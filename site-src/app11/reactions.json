@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "反応の共通説明（種別）と個別情報。反応は反応種別ごとの一般則を1か所にまとめ、個別の基質・生成物・条件だけを各反応に持たせる。独立資料での確認が済むまでは state を unverified とし、画面では未確認として表示する。実施を促す試薬量・濃度・具体的な操作手順・装置手順は書かない。",
+  "note": "反応の共通説明（種別）と個別情報。反応は反応種別ごとの一般則を1か所にまとめ、個別の基質・生成物・条件だけを各反応に持たせる。state=confirmed は資料の個別例（source-illustrated-transformation）または一般則（general-rule-application）を根拠に採用した収録済み反応で、個別本文での実験確認を一律に保証しない。適用範囲は各反応の scope に示す。実施を促す試薬量・濃度・具体的な操作手順・装置手順は書かない。",
   "defaultState": "held",
   "types": {
     "radical-substitution": {
@@ -55,7 +55,7 @@
     },
     "saponification": {
       "label": "けん化",
-      "summary": "油脂（エステル）をアルカリで加水分解し、脂肪酸の塩とグリセリンが生じる。生成した塩がセッケンとして働く。",
+      "summary": "エステルをアルカリで加水分解すると、カルボン酸塩とアルコールが生じる。油脂（トリグリセリド）では脂肪酸の塩とグリセリンが生じ、塩はセッケンとして働く。",
       "schematic": "油脂 ＋ 3NaOH → 3 脂肪酸ナトリウム ＋ グリセリン"
     },
     "neutralization": {
@@ -120,7 +120,7 @@
     },
     "condensation-polymerization": {
       "label": "縮重合",
-      "summary": "2種類以上の単量体から水などの小さな分子が取れながら高分子になる。主鎖には結合の変化が残る。",
+      "summary": "多官能性の単量体から、水などの小さな分子が取れながら高分子になる。単一のアミノ酸の自己縮合のような場合も含む。主鎖には結合の変化が残る。",
       "schematic": "n A–B ＋ n C–D → –(A–D)ₙ– ＋ 小分子"
     },
     "copolymerization": {
@@ -509,10 +509,53 @@
       "products": [
         "ethene"
       ],
-      "conditions": "触媒で水素を1段階だけ付加させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "選択的な部分還元触媒で水素を付加させる",
+      "note": "アルケンで停止する保証はない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "アルキンの部分還元。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethyne-partial-hydrogenation"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "触媒で水素を1段階だけ付加させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "9.5",
+          "title": "Reduction of Alkynes",
+          "url": "https://openstax.org/books/organic-chemistry/pages/9-5-reduction-of-alkynes",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethyne"
+          },
+          {
+            "species": "H2"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethene"
+          }
+        ],
+        "above": "選択的部分還元触媒",
+        "explanation": "アルケンで確実に停止する保証はない。"
+      }
     },
     {
       "id": "ethyne-full-hydrogenation",
@@ -523,10 +566,58 @@
       "products": [
         "ethane"
       ],
-      "conditions": "十分な量の水素と触媒",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "触媒で十分な量の水素を付加させる",
+      "note": "アルケンを経てアルカンまで還元される。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "アルキンの完全水素化。",
+      "stepKind": "multi-step",
+      "coverageIds": [
+        "standard-ethyne-full-hydrogenation"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "十分な量の水素と触媒"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "9.5",
+          "title": "Reduction of Alkynes",
+          "url": "https://openstax.org/books/organic-chemistry/pages/9-5-reduction-of-alkynes",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethyne"
+          },
+          {
+            "species": "H2",
+            "coef": 2
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethane"
+          }
+        ],
+        "above": "触媒",
+        "explanation": "アルケンを経てアルカンまで還元される。"
+      },
+      "steps": [
+        "エチン → エテン",
+        "エテン → エタン"
+      ]
     },
     {
       "id": "ethyne-hydrogen-bromide",
@@ -537,10 +628,53 @@
       "products": [
         "bromoethene"
       ],
-      "conditions": "臭化水素を1段階付加させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "臭化水素を1回付加させる",
+      "note": "さらに付加すると 1,1-ジブロモエタンなどになる可能性がある。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "アルキンへの HBr 1 回付加。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethyne-hydrogen-bromide"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "臭化水素を1段階付加させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "9.3",
+          "title": "Reactions of Alkynes: Addition of HX and X2",
+          "url": "https://openstax.org/books/organic-chemistry/pages/9-3-reactions-of-alkynes-addition-of-hx-and-x2",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethyne"
+          },
+          {
+            "species": "HBr"
+          }
+        ],
+        "right": [
+          {
+            "compound": "bromoethene"
+          }
+        ],
+        "above": "HBr",
+        "explanation": "1 回付加の段階。追加付加の可能性は注記を参照。"
+      }
     },
     {
       "id": "ethyne-silver-acetylide",
@@ -551,11 +685,51 @@
       "products": [
         "silver-acetylide"
       ],
-      "conditions": "硝酸銀を加えたアンモニア水溶液に通す",
-      "note": "末端に ≡C–H をもつアルキンだけが反応し、白い沈殿ができる。",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "Ag(I)（硝酸銀のアンモニア水など）を加える",
+      "note": "末端アルキンの H が Ag に置き換わり沈殿する。錯体・対イオンは省略。水素ガスは発生しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "末端アルキンの銀アセチリド生成。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethyne-silver-acetylide"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "硝酸銀を加えたアンモニア水溶液に通す"
+        }
+      ],
+      "verification": [
+        {
+          "source": "LibreTexts (Vollhardt & Schore)",
+          "section": "13.5",
+          "title": "Preparation of Alkynes from Alkynyl Anions",
+          "url": "https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Map%3A_Organic_Chemistry_(Vollhardt_and_Schore)/13%3A_Alkynes%3A_The_Carbon/13-05_Preparation_of__Alkynes_from_Alkynyl_Anions",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethyne"
+          }
+        ],
+        "right": [
+          {
+            "compound": "silver-acetylide"
+          }
+        ],
+        "above": "Ag(I)",
+        "below": "末端 H の置換・沈殿",
+        "explanation": "完全な化学反応式ではなく変換模式式。錯体・対イオンは省略。H2 は生成しない。"
+      }
     },
     {
       "id": "ethyne-copper-acetylide",
@@ -566,10 +740,51 @@
       "products": [
         "copper-i-acetylide"
       ],
-      "conditions": "塩化銅(I)を加えたアンモニア水溶液に通す",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "Cu(I) を加える",
+      "note": "末端アルキンの H が Cu(I) に置き換わり沈殿する。Cu(II) ではない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "末端アルキンの銅(I)アセチリド生成。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethyne-copper-acetylide"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "塩化銅(I)を加えたアンモニア水溶液に通す"
+        }
+      ],
+      "verification": [
+        {
+          "source": "LibreTexts (Vollhardt & Schore)",
+          "section": "13.5",
+          "title": "Preparation of Alkynes from Alkynyl Anions",
+          "url": "https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Map%3A_Organic_Chemistry_(Vollhardt_and_Schore)/13%3A_Alkynes%3A_The_Carbon/13-05_Preparation_of__Alkynes_from_Alkynyl_Anions",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethyne"
+          }
+        ],
+        "right": [
+          {
+            "compound": "copper-i-acetylide"
+          }
+        ],
+        "above": "Cu(I)",
+        "below": "末端 H の置換・沈殿",
+        "explanation": "完全な化学反応式ではなく変換模式式。Cu(II) ではなく Cu(I) の反応。H2 は生成しない。"
+      }
     },
     {
       "id": "ethanol-dehydration-ethene",
@@ -581,10 +796,53 @@
         "ethene"
       ],
       "conditions": "濃硫酸を加えて約170℃に加熱する",
-      "note": "同じ脱水でも温度が低い側ではエーテルが生じる。",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "note": "分子内脱水。低温側ではジエチルエーテルが生じる。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "エタノールの分子内脱水によるエテン生成。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethanol-dehydration-ethene"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "濃硫酸を加えて約170℃に加熱する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Dehydration of ethanol",
+          "title": "Elimination",
+          "url": "https://www.chemguide.co.uk/mechanisms/elim/dhethanol.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethanol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethene"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "濃硫酸",
+        "below": "約170℃",
+        "explanation": "分子内脱水。"
+      }
     },
     {
       "id": "ethanol-dehydration-ether",
@@ -693,11 +951,55 @@
       "products": [
         "hexachlorocyclohexane"
       ],
-      "conditions": "光を当てながら塩素を付加させる",
-      "note": "光の下では環の共役が保たれず、付加体が生じる。",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "光を当てて塩素を付加させる",
+      "note": "異性体混合物。γ体単一を主張しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "ベンゼンへの光付加。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-benzene-chlorine-addition"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "光を当てながら塩素を付加させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Halogenation of arenes",
+          "title": "Arenes",
+          "url": "https://www.chemguide.co.uk/organicprops/arenes/halogenation.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "benzene"
+          },
+          {
+            "species": "Cl2",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "hexachlorocyclohexane"
+          }
+        ],
+        "above": "Cl2",
+        "below": "光",
+        "explanation": "付加体は異性体混合物で、γ体単一ではない。"
+      }
     },
     {
       "id": "methanol-oxidation-formaldehyde",
@@ -1329,11 +1631,59 @@
       "products": [
         "sodium-ethoxide"
       ],
-      "conditions": "金属ナトリウムを加える",
-      "note": "水素が発生する。",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "金属ナトリウムと反応させる",
+      "note": "アルコールの O–H が Na に置き換わり、水素が発生する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "エタノールと金属ナトリウムの反応。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethanol-sodium"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "金属ナトリウムを加える"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Alcohols (14–16)",
+          "title": "Alcohols",
+          "url": "https://www.chemguide.co.uk/14to16/organic/alcohols.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethanol",
+            "coef": 2
+          },
+          {
+            "species": "Na",
+            "coef": 2
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-ethoxide",
+            "coef": 2
+          },
+          {
+            "species": "H2"
+          }
+        ],
+        "above": "Na",
+        "explanation": "2 分子のエタノールから 1 分子の水素が発生する。"
+      }
     },
     {
       "id": "methanol-sodium",
@@ -1344,10 +1694,59 @@
       "products": [
         "sodium-methoxide"
       ],
-      "conditions": "金属ナトリウムを加える",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "金属ナトリウムと反応させる",
+      "note": "アルコールの O–H が Na に置き換わり、水素が発生する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "メタノールと金属ナトリウムの反応。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-methanol-sodium"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "金属ナトリウムを加える"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "17.2",
+          "title": "Properties of Alcohols and Phenols",
+          "url": "https://openstax.org/books/organic-chemistry/pages/17-2-properties-of-alcohols-and-phenols",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "methanol",
+            "coef": 2
+          },
+          {
+            "species": "Na",
+            "coef": 2
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-methoxide",
+            "coef": 2
+          },
+          {
+            "species": "H2"
+          }
+        ],
+        "above": "Na",
+        "explanation": "2 分子のメタノールから 1 分子の水素が発生する。"
+      }
     },
     {
       "id": "acetic-acid-ethanol-esterification",
@@ -1963,10 +2362,54 @@
       "products": [
         "acetic-anhydride"
       ],
-      "conditions": "脱水剤を用いて2分子から水を取る",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "P4O10（脱水剤）で脱水する",
+      "note": "2 分子の酸から無水物と水ができる正味の変化。リン酸種は創作しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "カルボン酸の脱水による酸無水物生成。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-acetic-acid-anhydride"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "脱水剤を用いて2分子から水を取る"
+        }
+      ],
+      "verification": [
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "酢酸",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/acetic_acid.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "acetic-acid",
+            "coef": 2
+          }
+        ],
+        "right": [
+          {
+            "compound": "acetic-anhydride"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "P4O10（脱水剤）",
+        "explanation": "2 分子の酸から無水物と水ができる正味の変化。リン酸種は省略する。"
+      }
     },
     {
       "id": "salicylic-acid-methyl-esterification",
@@ -2206,16 +2649,58 @@
       "substrates": [
         "acetic-acid"
       ],
-      "reagents": [
-        "水酸化ナトリウム"
-      ],
       "products": [
         "sodium-acetate"
       ],
       "conditions": "水酸化ナトリウム水溶液で中和する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "カルボン酸と水酸化ナトリウムの中和。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-acetic-acid-neutralization"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "水酸化ナトリウム水溶液で中和する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Acidity of carboxylic acids",
+          "title": "Carboxylic acids",
+          "url": "https://www.chemguide.co.uk/organicprops/acids/acidity.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "acetic-acid"
+          },
+          {
+            "species": "NaOH"
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-acetate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "NaOH"
+      }
     },
     {
       "id": "acetic-acid-sodium-carbonate",
@@ -2226,11 +2711,59 @@
       "products": [
         "sodium-acetate"
       ],
-      "conditions": "炭酸水素ナトリウムを加える",
-      "note": "二酸化炭素が発生する。",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "炭酸水素ナトリウム（NaHCO3）と反応させる",
+      "note": "旧 ID は carbonate だが、実際の条件は炭酸水素ナトリウム。CO2 が発生する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "カルボン酸と炭酸水素ナトリウムの反応。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-acetic-acid-sodium-carbonate"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "炭酸水素ナトリウムを加える"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Acidity of carboxylic acids",
+          "title": "Carboxylic acids",
+          "url": "https://www.chemguide.co.uk/organicprops/acids/acidity.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "acetic-acid"
+          },
+          {
+            "species": "NaHCO3"
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-acetate"
+          },
+          {
+            "species": "CO2"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "NaHCO3",
+        "explanation": "二酸化炭素が発生する。"
+      }
     },
     {
       "id": "sodium-acetate-decarboxylation",
@@ -2241,11 +2774,56 @@
       "products": [
         "methane"
       ],
-      "conditions": "ソーダ石灰とともに加熱する",
-      "note": "カルボン酸の塩を加熱すると、炭素鎖が1つ短いアルカンが生じる。",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "ソーダ石灰（CaO 補助）とともに加熱する",
+      "note": "メタンが発生する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "酢酸ナトリウムの脱炭酸。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-sodium-acetate-decarboxylation"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "ソーダ石灰とともに加熱する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Decarboxylation",
+          "title": "Decarboxylation",
+          "url": "https://www.chemguide.co.uk/organicprops/acids/decarbox.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "sodium-acetate"
+          },
+          {
+            "species": "NaOH"
+          }
+        ],
+        "right": [
+          {
+            "compound": "methane"
+          },
+          {
+            "species": "Na2CO3"
+          }
+        ],
+        "above": "ソーダ石灰（CaO 補助）",
+        "below": "加熱"
+      }
     },
     {
       "id": "benzoic-acid-neutralization",
@@ -2253,16 +2831,58 @@
       "substrates": [
         "benzoic-acid"
       ],
-      "reagents": [
-        "水酸化ナトリウム"
-      ],
       "products": [
         "sodium-benzoate"
       ],
       "conditions": "水酸化ナトリウム水溶液で中和する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "安息香酸と水酸化ナトリウムの中和。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-benzoic-acid-neutralization"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "水酸化ナトリウム水溶液で中和する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "安息香酸",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/benzoic_acid.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "benzoic-acid"
+          },
+          {
+            "species": "NaOH"
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-benzoate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "NaOH"
+      }
     },
     {
       "id": "glycerol-stearic-esterification",
@@ -2763,11 +3383,53 @@
       "products": [
         "maleic-anhydride"
       ],
-      "conditions": "加熱して分子内で水を取る",
-      "note": "シス体は分子内脱水しやすい。",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "加熱する",
+      "note": "分子内脱水で無水物になる。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "ジカルボン酸の分子内脱水。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-maleic-acid-anhydride"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "加熱して分子内で水を取る"
+        }
+      ],
+      "verification": [
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "無水マレイン酸",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/maleic_acid.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "maleic-acid"
+          }
+        ],
+        "right": [
+          {
+            "compound": "maleic-anhydride"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "加熱",
+        "explanation": "分子内脱水で水がとれる。"
+      }
     },
     {
       "id": "phthalic-acid-anhydride",
@@ -2778,10 +3440,53 @@
       "products": [
         "phthalic-anhydride"
       ],
-      "conditions": "加熱して分子内で水を取る",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "加熱する",
+      "note": "分子内脱水で無水物になる。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "オルト位のジカルボン酸の分子内脱水。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-phthalic-acid-anhydride"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "加熱して分子内で水を取る"
+        }
+      ],
+      "verification": [
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "無水フタル酸",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/phthalic_acid.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "phthalic-acid"
+          }
+        ],
+        "right": [
+          {
+            "compound": "phthalic-anhydride"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "加熱",
+        "explanation": "分子内脱水で水がとれる。"
+      }
     },
     {
       "id": "stearic-acid-neutralization",
@@ -2789,16 +3494,58 @@
       "substrates": [
         "stearic-acid"
       ],
-      "reagents": [
-        "水酸化ナトリウム"
-      ],
       "products": [
         "sodium-stearate"
       ],
       "conditions": "水酸化ナトリウム水溶液で中和する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "高級脂肪酸と水酸化ナトリウムの中和（セッケン化）。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-stearic-acid-neutralization"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "水酸化ナトリウム水溶液で中和する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Acidity of carboxylic acids",
+          "title": "Carboxylic acids",
+          "url": "https://www.chemguide.co.uk/organicprops/acids/acidity.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "stearic-acid"
+          },
+          {
+            "species": "NaOH"
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-stearate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "NaOH"
+      }
     },
     {
       "id": "lauric-acid-neutralization",
@@ -2823,16 +3570,59 @@
       "substrates": [
         "oleic-acid"
       ],
-      "reagents": [
-        "水酸化ナトリウム"
-      ],
       "products": [
         "sodium-oleate"
       ],
       "conditions": "水酸化ナトリウム水溶液で中和する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "note": "C=C は保持される。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "不飽和脂肪酸と水酸化ナトリウムの中和（セッケン化）。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-oleic-acid-neutralization"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "水酸化ナトリウム水溶液で中和する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Acidity of carboxylic acids",
+          "title": "Carboxylic acids",
+          "url": "https://www.chemguide.co.uk/organicprops/acids/acidity.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "oleic-acid"
+          },
+          {
+            "species": "NaOH"
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-oleate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "NaOH",
+        "explanation": "C=C は保持される。"
+      }
     },
     {
       "id": "benzene-nitration",
@@ -3004,16 +3794,63 @@
       "substrates": [
         "aniline"
       ],
-      "reagents": [
-        "塩酸"
-      ],
       "products": [
         "aniline-hydrochloride"
       ],
       "conditions": "塩酸を加える",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "note": "水は生成しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "アニリンと塩酸の塩形成。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-aniline-hydrochloride"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "塩酸を加える"
+        }
+      ],
+      "verification": [
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "アニリン",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/aniline.html",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "Chemguide",
+          "section": "Amines",
+          "title": "Aniline",
+          "url": "https://chemguide.co.uk/organicprops/aniline/amine.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "aniline"
+          },
+          {
+            "species": "HCl"
+          }
+        ],
+        "right": [
+          {
+            "compound": "aniline-hydrochloride"
+          }
+        ],
+        "above": "HCl",
+        "explanation": "水は生成しない。"
+      }
     },
     {
       "id": "phenol-bromination",
@@ -3025,10 +3862,57 @@
         "2,4,6-tribromophenol"
       ],
       "conditions": "臭素水を加える",
-      "note": "フェノールはベンゼンより置換が起こりやすく、複数の位置が置き換わる。",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "note": "2,4,6-位が置換され、白色沈殿が生じる。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "フェノールの臭素水による環置換。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-phenol-bromination"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "臭素水を加える"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Ring reactions of phenol",
+          "title": "Phenol",
+          "url": "https://www.chemguide.co.uk/organicprops/phenol/ring.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "phenol"
+          },
+          {
+            "species": "Br2",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "2,4,6-tribromophenol"
+          },
+          {
+            "species": "HBr",
+            "coef": 3
+          }
+        ],
+        "above": "臭素水",
+        "explanation": "白色沈殿が生じる。"
+      }
     },
     {
       "id": "phenol-nitration",
@@ -3039,10 +3923,53 @@
       "products": [
         "picric-acid"
       ],
-      "conditions": "濃硝酸と濃硫酸で加熱する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "濃硝酸で逐次ニトロ化する",
+      "note": "酸化・タール副生があり、濃硝酸で単一生成物を保証しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "フェノールの逐次ニトロ化によるピクリン酸生成の総括。",
+      "stepKind": "multi-step",
+      "coverageIds": [
+        "standard-phenol-nitration"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "濃硝酸と濃硫酸で加熱する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Ring reactions of phenol",
+          "title": "Phenol",
+          "url": "https://www.chemguide.co.uk/organicprops/phenol/ring.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "phenol"
+          }
+        ],
+        "right": [
+          {
+            "compound": "picric-acid"
+          }
+        ],
+        "above": "濃硝酸",
+        "explanation": "濃硝酸による逐次3ニトロ化の総括。酸化・タール副生があり、単一生成物を保証しない。"
+      },
+      "steps": [
+        "2,4,6-位への逐次ニトロ化（置換順序は固定しない）"
+      ]
     },
     {
       "id": "toluene-nitration",
@@ -3083,11 +4010,57 @@
       "products": [
         "phenolphthalein"
       ],
-      "conditions": "濃硫酸を加えて加熱する",
-      "note": "酸性では無色、塩基性では赤紫色になる。",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "酸触媒で縮合させる",
+      "note": "指示薬の色変化は別の現象。",
+      "state": "confirmed",
+      "educationLevel": "high-school-extension",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "フェノールと無水フタル酸の酸触媒縮合。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-phenol-phthalein"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "濃硫酸を加えて加熱する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "市立札幌山の手支援学校",
+          "section": "該当欄",
+          "title": "化学反応・高分子",
+          "url": "https://www23.sapporo-c.ed.jp/yamanote/index.cfm/1,1261,24,144,html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "phenol",
+            "coef": 2
+          },
+          {
+            "compound": "phthalic-anhydride"
+          }
+        ],
+        "right": [
+          {
+            "compound": "phenolphthalein"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "酸触媒",
+        "explanation": "指示薬の色変化とは別の縮合反応。"
+      }
     },
     {
       "id": "phenol-acetone-bisphenol",
@@ -3418,10 +4391,57 @@
       "products": [
         "sodium-salicylate"
       ],
-      "conditions": "二酸化炭素を加えて加熱する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "二酸化炭素を加圧下でフェノキシドに作用させる（Kolbe–Schmitt）。",
+      "note": "CO2 の炭素が環に加わる。o/p 選択性は条件依存で、単一生成物を保証しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "フェノールのカルボキシル化。主生成物は o-サリチル酸塩だが、単一選択を保証しない。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-sodium-phenoxide-carboxylation"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-kolbe-schmitt",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "二酸化炭素を加えて加熱する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Organic Chemistry Data (Reusch)",
+          "section": "Reusch アルコール反応性",
+          "title": "Reusch アルコール反応性",
+          "url": "https://organicchemistrydata.org/reusch/virtualtext/alcohol-reactivity-2/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "title": "構造変換図",
+        "explanation": "フェノキシドに CO2 が付加してサリチル酸塩になる総括。",
+        "left": [
+          {
+            "compound": "sodium-phenoxide",
+            "coef": 1
+          },
+          {
+            "text": "CO2",
+            "coef": 1
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-salicylate",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "sodium-salicylate-acidification",
@@ -3432,10 +4452,57 @@
       "products": [
         "salicylic-acid"
       ],
-      "conditions": "硫酸などの強酸を加える",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "サリチル酸塩を酸処理して遊離酸にする。",
+      "note": "酸処理で遊離酸にする総括。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "酸塩基の一般則。塩の種類・後処理は省略する。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-sodium-salicylate-acidification"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-salicylic-acid",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "硫酸などの強酸を加える"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Organic Chemistry Data (Reusch)",
+          "section": "Reusch アルコール反応性",
+          "title": "Reusch アルコール反応性",
+          "url": "https://organicchemistrydata.org/reusch/virtualtext/alcohol-reactivity-2/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "title": "構造変換図",
+        "explanation": "サリチル酸塩のプロトン化。",
+        "left": [
+          {
+            "compound": "sodium-salicylate",
+            "coef": 1
+          },
+          {
+            "species": "H+",
+            "coef": 1
+          }
+        ],
+        "right": [
+          {
+            "compound": "salicylic-acid",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "sucrose-hydrolysis",
@@ -3491,10 +4558,57 @@
       "products": [
         "glucose"
       ],
-      "conditions": "酸または酵素で加水分解する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "マルトースの酸または酵素加水分解。",
+      "note": "α-1,4 グリコシド結合の加水分解。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "二糖の完全加水分解。元素収支は二糖 1 分子＋水 1 分子＝単糖 2 分子。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-maltose-hydrolysis"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-maltose-hydrolysis",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "酸または酵素で加水分解する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Organic Chemistry Data (Reusch)",
+          "section": "Reusch 炭水化物",
+          "title": "Reusch 炭水化物",
+          "url": "https://organicchemistrydata.org/reusch/virtualtext/carbohydrates/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "title": "反応式",
+        "explanation": "二糖 1 分子が加水分解して単糖 2 分子になる。",
+        "left": [
+          {
+            "compound": "maltose",
+            "coef": 1
+          },
+          {
+            "species": "H2O",
+            "coef": 1
+          }
+        ],
+        "right": [
+          {
+            "compound": "glucose",
+            "coef": 2
+          }
+        ]
+      }
     },
     {
       "id": "lactose-hydrolysis",
@@ -3506,10 +4620,61 @@
         "glucose",
         "galactose"
       ],
-      "conditions": "酸または酵素で加水分解する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "ラクトースの加水分解。",
+      "note": "β-1,4 ガラクトシド結合の加水分解。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "二糖の完全加水分解。元素収支は二糖 1 分子＋水 1 分子＝単糖 2 分子。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-lactose-hydrolysis"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-lactose-hydrolysis",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "酸または酵素で加水分解する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§25.8",
+          "title": "§25.8",
+          "url": "https://openstax.org/books/organic-chemistry/pages/25-8-disaccharides",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "title": "反応式",
+        "explanation": "二糖 1 分子が加水分解して単糖 2 分子になる。",
+        "left": [
+          {
+            "compound": "lactose",
+            "coef": 1
+          },
+          {
+            "species": "H2O",
+            "coef": 1
+          }
+        ],
+        "right": [
+          {
+            "compound": "glucose",
+            "coef": 1
+          },
+          {
+            "compound": "galactose",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "cellobiose-hydrolysis",
@@ -3633,10 +4798,68 @@
       "products": [
         "glucose"
       ],
-      "conditions": "酸またはセルラーゼで加水分解する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "多糖の完全加水分解。",
+      "note": "β-グリコシド結合の完全加水分解の総括。有限鎖の末端は省略する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "多糖のグリコシド結合を完全に加水分解する総括。単一の酵素ですべての結合を切るとは主張しない。",
+      "stepKind": "multi-step",
+      "coverageIds": [
+        "standard-cellulose-hydrolysis"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-cellulose-hydrolysis",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "酸またはセルラーゼで加水分解する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§25.9",
+          "title": "§25.9",
+          "url": "https://openstax.org/books/organic-chemistry/pages/25-9-polysaccharides-and-their-synthesis",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "Organic Chemistry Data (Reusch)",
+          "section": "Reusch 炭水化物",
+          "title": "Reusch 炭水化物",
+          "url": "https://organicchemistrydata.org/reusch/virtualtext/carbohydrates/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "繰り返し単位ごとに加水分解され、グルコース単位になる模式。",
+        "left": [
+          {
+            "compound": "cellulose",
+            "coef": 1
+          },
+          {
+            "species": "H2O",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "glucose",
+            "coef": "n"
+          }
+        ]
+      },
+      "steps": [
+        "グリコシド結合を順に加水分解する",
+        "単糖（グルコース）まで分解する"
+      ]
     },
     {
       "id": "glycogen-hydrolysis",
@@ -3698,40 +4921,192 @@
       "products": [
         "ethanol"
       ],
-      "conditions": "チマーゼのはたらきで発酵させる",
-      "productNote": "二酸化炭素も生じる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "酵母（酵素系）による発酵",
+      "note": "解糖・脱炭酸・還元の総括。二酸化炭素が副生する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "グルコースからエタノールと二酸化炭素への発酵の総括。",
+      "stepKind": "multi-step",
+      "coverageIds": [
+        "standard-glucose-fermentation"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "チマーゼのはたらきで発酵させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Alcohols (14–16)",
+          "title": "Alcohols",
+          "url": "https://www.chemguide.co.uk/14to16/organic/alcohols.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "glucose"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethanol",
+            "coef": 2
+          },
+          {
+            "species": "CO2",
+            "coef": 2
+          }
+        ],
+        "above": "酵母（酵素系）",
+        "explanation": "発酵の総括。解糖・脱炭酸・還元をまとめて示す。"
+      },
+      "steps": [
+        "解糖",
+        "脱炭酸",
+        "還元（エタノール生成）"
+      ]
     },
     {
       "id": "cellulose-acetylation",
-      "type": "esterification",
+      "type": "substitution",
       "substrates": [
         "cellulose",
         "acetic-anhydride"
       ],
       "products": [
-        "cellulose-acetate"
+        "cellulose-acetate",
+        "acetic-acid"
       ],
-      "conditions": "硫酸などの触媒でエステル化する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "セルロースの酸触媒アセチル化。",
+      "note": "置換度は可変（0〜3）。この模式は代表的な置換を示し、完全三置換の全製品を表さない。 d はセルロース単位あたりの置換度（0≤d≤3）で、完全置換に固定しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "セルロースのアセチル化。置換度 d は 0〜3 の範囲で製品により異なり、完全三置換に固定しない。 置換度 d は 0≤d≤3 の範囲で、固定値ではない。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-cellulose-acetylation"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-cellulose-acetate",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "硫酸などの触媒でエステル化する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Organic Chemistry Data (Reusch)",
+          "section": "Reusch 炭水化物",
+          "title": "Reusch 炭水化物",
+          "url": "https://organicchemistrydata.org/reusch/virtualtext/carbohydrates/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "アンヒドログルコース単位あたりのアセチル化を模式的に示す。",
+        "left": [
+          {
+            "compound": "cellulose",
+            "coef": 1
+          },
+          {
+            "compound": "acetic-anhydride",
+            "coef": "dn"
+          }
+        ],
+        "right": [
+          {
+            "compound": "cellulose-acetate",
+            "coef": 1
+          },
+          {
+            "compound": "acetic-acid",
+            "coef": "dn"
+          }
+        ]
+      }
     },
     {
       "id": "cellulose-nitration",
-      "type": "esterification",
+      "type": "substitution",
       "substrates": [
         "cellulose"
       ],
       "products": [
         "cellulose-nitrate"
       ],
-      "conditions": "硝酸と硫酸の混合物でエステル化する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "セルロースの硝酸エステル化。",
+      "note": "置換度は可変。実験の配合・手順は扱わない。 d はセルロース単位あたりの置換度（0≤d≤3）で、完全置換に固定しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "セルロースの硝酸エステル化。置換度は可変で、完全三置換に固定しない。 置換度 d は 0≤d≤3 の範囲で、固定値ではない。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-cellulose-nitration"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-cellulose-nitrate",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "硝酸と硫酸の混合物でエステル化する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Organic Chemistry Data (Reusch)",
+          "section": "Reusch 炭水化物",
+          "title": "Reusch 炭水化物",
+          "url": "https://organicchemistrydata.org/reusch/virtualtext/carbohydrates/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "水酸基の硝酸エステル化を模式的に示す。",
+        "left": [
+          {
+            "compound": "cellulose",
+            "coef": 1
+          },
+          {
+            "species": "HNO3",
+            "coef": "dn"
+          }
+        ],
+        "right": [
+          {
+            "compound": "cellulose-nitrate",
+            "coef": 1
+          },
+          {
+            "species": "H2O",
+            "coef": "dn"
+          }
+        ]
+      }
     },
     {
       "id": "glycine-alanine-peptide",
@@ -4323,10 +5698,53 @@
       "products": [
         "ptfe"
       ],
-      "conditions": "触媒のもとで重合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "テトラフルオロエチレンの付加重合。",
+      "note": "付加重合の一般則。開始剤・末端は省略する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-tetrafluoroethylene-polymerization"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-ptfe-polymer",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "触媒のもとで重合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§8.10",
+          "title": "§8.10",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "繰り返し単位で示す模式式です。末端・副生成物・開始剤は省略し、有限鎖の完全な反応式ではありません。",
+        "left": [
+          {
+            "compound": "tetrafluoroethylene",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ptfe",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "vinyl-acetate-polymerization",
@@ -4337,10 +5755,53 @@
       "products": [
         "pvac"
       ],
-      "conditions": "触媒のもとで重合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "酢酸ビニルの付加重合。",
+      "note": "付加重合の一般則。開始剤・末端は省略する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-vinyl-acetate-polymerization"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-pvac-polymer",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "触媒のもとで重合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§8.10",
+          "title": "§8.10",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "繰り返し単位で示す模式式です。末端・副生成物・開始剤は省略し、有限鎖の完全な反応式ではありません。",
+        "left": [
+          {
+            "compound": "vinyl-acetate",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "pvac",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "mma-polymerization",
@@ -4351,10 +5812,53 @@
       "products": [
         "pmma"
       ],
-      "conditions": "触媒のもとで重合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "メタクリル酸メチルの付加重合。",
+      "note": "付加重合の一般則。開始剤・末端は省略する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-mma-polymerization"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-pmma-polymer",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "触媒のもとで重合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§8.10",
+          "title": "§8.10",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "繰り返し単位で示す模式式です。末端・副生成物・開始剤は省略し、有限鎖の完全な反応式ではありません。",
+        "left": [
+          {
+            "compound": "methyl-methacrylate",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "pmma",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "acrylonitrile-polymerization",
@@ -4365,10 +5869,53 @@
       "products": [
         "pan"
       ],
-      "conditions": "触媒のもとで重合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "アクリロニトリルのラジカル付加重合。",
+      "note": "付加重合の一般則。開始剤・末端は省略する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-acrylonitrile-polymerization"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-pan-polymer",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "触媒のもとで重合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§8.10",
+          "title": "§8.10",
+          "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "繰り返し単位で示す模式式です。末端・副生成物・開始剤は省略し、有限鎖の完全な反応式ではありません。",
+        "left": [
+          {
+            "compound": "acrylonitrile",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "pan",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "butadiene-polymerization",
@@ -4379,10 +5926,53 @@
       "products": [
         "br"
       ],
-      "conditions": "触媒のもとで重合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "ブタジエンの付加重合。",
+      "note": "1,4 結合を代表として示す。cis/trans/1,2 結合の分布は主張しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-butadiene-polymerization"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-polybutadiene",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "触媒のもとで重合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§14.6",
+          "title": "§14.6",
+          "url": "https://openstax.org/books/organic-chemistry/pages/14-6-diene-polymers-natural-and-synthetic-rubbers",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "繰り返し単位で示す模式式です。末端・副生成物・開始剤は省略し、有限鎖の完全な反応式ではありません。",
+        "left": [
+          {
+            "compound": "butadiene",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "br",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "isoprene-polymerization",
@@ -4408,25 +5998,122 @@
       "products": [
         "chloroprene-rubber"
       ],
-      "conditions": "触媒のもとで重合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "クロロプレンの付加重合。",
+      "note": "1,4 結合を代表として示す。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-chloroprene-polymerization"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-chloroprene-rubber-polymer",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "触媒のもとで重合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§14.6",
+          "title": "§14.6",
+          "url": "https://openstax.org/books/organic-chemistry/pages/14-6-diene-polymers-natural-and-synthetic-rubbers",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "Organic Chemistry Data (Reusch)",
+          "section": "Reusch 高分子",
+          "title": "Reusch 高分子",
+          "url": "https://organicchemistrydata.org/reusch/virtualtext/polymers/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "繰り返し単位で示す模式式です。末端・副生成物・開始剤は省略し、有限鎖の完全な反応式ではありません。",
+        "left": [
+          {
+            "compound": "chloroprene",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "chloroprene-rubber",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "styrene-butadiene-copolymerization",
-      "type": "copolymerization",
+      "type": "addition-polymerization",
       "substrates": [
-        "styrene",
-        "butadiene"
+        "butadiene",
+        "styrene"
       ],
       "products": [
         "sbr"
       ],
-      "conditions": "共重合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "スチレンとブタジエンの共重合。",
+      "note": "スチレン−ブタジエンゴム（SBR）。組成比・配列は不定。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "共重合の一般則。単量体の組成比・配列（ランダム／ブロック／グラフト）は主張しない。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-styrene-butadiene-copolymerization"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-sbr",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "共重合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§31.3",
+          "title": "§31.3",
+          "url": "https://openstax.org/books/organic-chemistry/pages/31-3-copolymers",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "共重合の組成比・配列は一定でないため、繰り返し単位の比を固定せず模式的に示す。",
+        "left": [
+          {
+            "compound": "butadiene",
+            "coef": "m"
+          },
+          {
+            "compound": "styrene",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "sbr",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "nbr-copolymerization",
@@ -4461,7 +6148,7 @@
     },
     {
       "id": "iir-copolymerization",
-      "type": "copolymerization",
+      "type": "addition-polymerization",
       "substrates": [
         "isobutene",
         "isoprene"
@@ -4469,10 +6156,57 @@
       "products": [
         "iir"
       ],
-      "conditions": "共重合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "イソブテンとイソプレンのカチオン共重合。",
+      "note": "ブチルゴム（IIR）。組成比・配列は不定。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "共重合の一般則。単量体の組成比・配列（ランダム／ブロック／グラフト）は主張しない。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-iir-copolymerization"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-iir",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "共重合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§31.3",
+          "title": "§31.3",
+          "url": "https://openstax.org/books/organic-chemistry/pages/31-3-copolymers",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "共重合の組成比・配列は一定でないため、繰り返し単位の比を固定せず模式的に示す。",
+        "left": [
+          {
+            "compound": "isobutene",
+            "coef": "m"
+          },
+          {
+            "compound": "isoprene",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "iir",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "pvac-hydrolysis",
@@ -4481,12 +6215,75 @@
         "pvac"
       ],
       "products": [
-        "pva"
+        "pva",
+        "acetic-acid"
       ],
-      "conditions": "アルカリでけん化する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "ポリ酢酸ビニルを塩基で加水分解し、酢酸塩を酸処理して酢酸にする（主鎖は PVA のまま）。",
+      "note": "加水分解の段階で主鎖はポリビニルアルコールになっており、酸処理は酢酸塩を酢酸にする操作。N/O の係数は有限鎖の完全式を主張しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "ポリ酢酸ビニルの加水分解の総括。主鎖は保持し、アセテート基が外れる。",
+      "stepKind": "multi-step",
+      "coverageIds": [
+        "standard-pvac-hydrolysis"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-pva",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "アルカリでけん化する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Organic Chemistry Data (Reusch)",
+          "section": "Reusch 問題 PVA",
+          "title": "Reusch 問題 PVA",
+          "url": "https://organicchemistrydata.org/reusch/virtualtext/problems/pset-preparation-of-polyvinyl-alcohol/",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§21.6",
+          "title": "§21.6",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "塩基によるけん化と酸処理の総括を、NaOH・酸・塩を省略した P の模式正味式で示す。有限鎖の完全な反応式ではない。",
+        "left": [
+          {
+            "compound": "pvac",
+            "coef": 1
+          },
+          {
+            "species": "H2O",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "pva",
+            "coef": 1
+          },
+          {
+            "compound": "acetic-acid",
+            "coef": "n"
+          }
+        ]
+      },
+      "steps": [
+        "塩基でアセテート基を加水分解し、ポリビニルアルコールと酢酸塩にする",
+        "酸処理で酢酸塩を酢酸にする"
+      ]
     },
     {
       "id": "pva-formalization",
@@ -4497,10 +6294,65 @@
       "products": [
         "vinylon"
       ],
-      "conditions": "ホルムアルデヒドと反応させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "酸触媒でホルムアルデヒドを作用させる",
+      "note": "部分アセタール化。HCHO と水を各 x、未反応 OH を y、OH 総数を n とすると 2x + y = n。主に同一鎖内の OH 対による環状アセタールで、全鎖間架橋や全 OH の消失を主張しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-extension",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "ポリビニルアルコールの部分アセタール化（ビニロン化）。反応率・架橋密度は固定しない。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-pva-formalization"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "ホルムアルデヒドと反応させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "繊維学会誌",
+          "section": "11(9)",
+          "title": "ビニロンのホルムアルデヒド処理（抄録）",
+          "url": "https://www.jstage.jst.go.jp/article/fiber1944/11/9/11_9_526/_article/-char/en",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "大学入試センター",
+          "section": "化学 問4b",
+          "title": "過去問題（検索抽出）",
+          "url": "https://www.dnc.ac.jp/albums/771/abm00005967.pdf",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "pva"
+          },
+          {
+            "compound": "formaldehyde",
+            "coef": "x"
+          }
+        ],
+        "right": [
+          {
+            "compound": "vinylon"
+          },
+          {
+            "species": "H2O",
+            "coef": "x"
+          }
+        ],
+        "above": "酸触媒",
+        "explanation": "部分アセタール化の模式式。HCHO と水を各 x、未反応 OH を y、OH 総数を n とすると 2x + y = n。主に同一鎖内の OH 対による環状アセタールで、全鎖間架橋や全 OH の消失を主張しない。"
+      }
     },
     {
       "id": "caprolactam-ring-opening",
@@ -4660,10 +6512,57 @@
       "products": [
         "nylon6"
       ],
-      "conditions": "脱水縮合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "6-アミノヘキサン酸の脱水重縮合。",
+      "note": "末端を省略した模式式。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "アミノ酸の重縮合によるポリアミドの一般則。末端は省略する。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-nylon6-from-aminoacid"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-nylon6",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "脱水縮合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§21.9",
+          "title": "§21.9",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-9-polyamides-and-polyesters-step-growth-polymers",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "繰り返し単位で示す模式式です。末端・副生成物・開始剤は省略し、有限鎖の完全な反応式ではありません。",
+        "left": [
+          {
+            "compound": "6-aminohexanoic-acid",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "nylon6",
+            "coef": 1
+          },
+          {
+            "species": "H2O",
+            "coef": "n"
+          }
+        ]
+      }
     },
     {
       "id": "epoxy-resin-condensation",
@@ -4705,10 +6604,57 @@
       "products": [
         "urea-resin"
       ],
-      "conditions": "縮合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "アルデヒドとの付加縮合による熱硬化性樹脂。",
+      "note": "架橋したネットワークの代表模式。固定した H2O 係数や架橋組成は主張しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "フェノール／尿素／メラミンとホルムアルデヒドの付加縮合。触媒・架橋密度・組成は特定しない。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-urea-resin-condensation"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-urea-resin",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "縮合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Organic Chemistry Data (Reusch)",
+          "section": "Reusch 高分子",
+          "title": "Reusch 高分子",
+          "url": "https://organicchemistrydata.org/reusch/virtualtext/polymers/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "繰り返し単位で示す模式式です。末端・副生成物・開始剤は省略し、有限鎖の完全な反応式ではありません。",
+        "left": [
+          {
+            "compound": "urea",
+            "coef": "n"
+          },
+          {
+            "compound": "formaldehyde",
+            "coef": "m"
+          }
+        ],
+        "right": [
+          {
+            "compound": "urea-resin",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "melamine-resin-condensation",
@@ -4720,10 +6666,57 @@
       "products": [
         "melamine-resin"
       ],
-      "conditions": "縮合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "アルデヒドとの付加縮合による熱硬化性樹脂。",
+      "note": "架橋したネットワークの代表模式。固定した H2O 係数や架橋組成は主張しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "フェノール／尿素／メラミンとホルムアルデヒドの付加縮合。触媒・架橋密度・組成は特定しない。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-melamine-resin-condensation"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-melamine-resin",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "縮合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Organic Chemistry Data (Reusch)",
+          "section": "Reusch 高分子",
+          "title": "Reusch 高分子",
+          "url": "https://organicchemistrydata.org/reusch/virtualtext/polymers/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "繰り返し単位で示す模式式です。末端・副生成物・開始剤は省略し、有限鎖の完全な反応式ではありません。",
+        "left": [
+          {
+            "compound": "melamine",
+            "coef": "n"
+          },
+          {
+            "compound": "formaldehyde",
+            "coef": "m"
+          }
+        ],
+        "right": [
+          {
+            "compound": "melamine-resin",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "phenol-resin-condensation",
@@ -4735,10 +6728,57 @@
       "products": [
         "phenol-resin"
       ],
-      "conditions": "酸または塩基触媒で縮合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "アルデヒドとの付加縮合による熱硬化性樹脂。",
+      "note": "架橋したネットワークの代表模式。固定した H2O 係数や架橋組成は主張しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "フェノール／尿素／メラミンとホルムアルデヒドの付加縮合。触媒・架橋密度・組成は特定しない。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-phenol-resin-condensation"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-phenol-resin",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "酸または塩基触媒で縮合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Organic Chemistry Data (Reusch)",
+          "section": "Reusch 高分子",
+          "title": "Reusch 高分子",
+          "url": "https://organicchemistrydata.org/reusch/virtualtext/polymers/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "title": "重合反応の模式式",
+        "explanation": "繰り返し単位で示す模式式です。末端・副生成物・開始剤は省略し、有限鎖の完全な反応式ではありません。",
+        "left": [
+          {
+            "compound": "phenol",
+            "coef": "n"
+          },
+          {
+            "compound": "formaldehyde",
+            "coef": "m"
+          }
+        ],
+        "right": [
+          {
+            "compound": "phenol-resin",
+            "coef": 1
+          }
+        ]
+      }
     },
     {
       "id": "unsaturated-polyester-condensation",
@@ -4821,10 +6861,51 @@
       "products": [
         "polyacetylene"
       ],
-      "conditions": "触媒のもとで重合させる",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "conditions": "触媒重合させる",
+      "note": "導電性はドーピングによる別の現象。",
+      "state": "confirmed",
+      "educationLevel": "high-school-extension",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "アセチレンの触媒重合。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-polyacetylene-polymerization"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "触媒のもとで重合させる"
+        }
+      ],
+      "verification": [
+        {
+          "source": "Nobel Prize",
+          "section": "Chemistry 2000",
+          "title": "Popular information",
+          "url": "https://www.nobelprize.org/prizes/chemistry/2000/popular-information/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethyne",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "polyacetylene"
+          }
+        ],
+        "above": "触媒重合",
+        "explanation": "導電化は別途のドーピングによる。"
+      }
     },
     {
       "id": "vinyl-acetate-from-ethene",
@@ -4851,9 +6932,52 @@
         "styrene"
       ],
       "conditions": "触媒とともに加熱して脱水素する",
-      "state": "held",
-      "verification": [],
-      "holdReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。"
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "エチルベンゼンの脱水素によるスチレン生成。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethylbenzene-dehydrogenation"
+      ],
+      "layoutGroup": "high-school",
+      "history": [
+        {
+          "kind": "held-correction",
+          "date": "2026-11-17",
+          "previousHoldReason": "この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。",
+          "previousConditions": "触媒とともに加熱して脱水素する"
+        }
+      ],
+      "verification": [
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "スチレン",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/styrene.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethylbenzene"
+          }
+        ],
+        "right": [
+          {
+            "compound": "styrene"
+          },
+          {
+            "species": "H2"
+          }
+        ],
+        "above": "触媒",
+        "below": "加熱"
+      }
     },
     {
       "id": "isobutene-hydrogen-chloride",
@@ -5283,12 +7407,1639 @@
           }
         ]
       }
+    },
+    {
+      "id": "methanol-cuo-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "methanol"
+      ],
+      "products": [
+        "formaldehyde"
+      ],
+      "conditions": "酸化銅(II)を加えて加熱する",
+      "note": "CuO は酸化剤（触媒ではない）。CuO 自身は Cu に還元され、水が副生する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "高校化学のアルコール酸化。メタノールからホルムアルデヒドまでの一段階。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-methanol-cuo-oxidation"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "埼玉県立松山高等学校 公開記事",
+          "section": "2011-06-30",
+          "title": "アルコールの酸化",
+          "url": "https://matsuyama-h.spec.ed.jp/blogs/blog_entries/year_month/254/year_month:2011-06?frame_id=371",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "Royal Society of Chemistry (Education)",
+          "section": "Oxidation of ethanol",
+          "title": "Oxidation of ethanol",
+          "url": "https://edu.rsc.org/experiments/oxidation-of-ethanol/1757.article",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "CuO",
+        "below": "加熱",
+        "explanation": "CuO は酸化剤で、自身は Cu に還元される。触媒ではない。",
+        "left": [
+          {
+            "compound": "methanol"
+          },
+          {
+            "species": "CuO"
+          }
+        ],
+        "right": [
+          {
+            "compound": "formaldehyde"
+          },
+          {
+            "species": "Cu"
+          },
+          {
+            "species": "H2O"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ethanol-cuo-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "ethanol"
+      ],
+      "products": [
+        "ethanal"
+      ],
+      "conditions": "酸化銅(II)を加えて加熱する",
+      "note": "CuO は酸化剤（触媒ではない）。CuO 自身は Cu に還元され、水が副生する。第一級アルコールの一般則。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "第一級アルコールを穏やかに酸化してアルデヒドで止める高校化学の一般則。過剰酸化や条件による生成物の変化は保証しない。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethanol-cuo-oxidation"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "Royal Society of Chemistry (Education)",
+          "section": "Oxidation of ethanol",
+          "title": "Oxidation of ethanol",
+          "url": "https://edu.rsc.org/experiments/oxidation-of-ethanol/1757.article",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "CuO",
+        "below": "加熱",
+        "explanation": "CuO は酸化剤で、自身は Cu に還元される。第一級アルコールはアルデヒドまで酸化される一般則として示す。",
+        "left": [
+          {
+            "compound": "ethanol"
+          },
+          {
+            "species": "CuO"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethanal"
+          },
+          {
+            "species": "Cu"
+          },
+          {
+            "species": "H2O"
+          }
+        ]
+      }
+    },
+    {
+      "id": "propan-2-ol-cuo-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "propan-2-ol"
+      ],
+      "products": [
+        "acetone"
+      ],
+      "conditions": "酸化銅(II)を加えて加熱する",
+      "note": "CuO は酸化剤（触媒ではない）。第二級アルコールはケトンになる。CuO 自身は Cu に還元され、水が副生する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "第二級アルコールを酸化してケトンにする高校化学の一般則。カルボン酸までの過剰酸化は起こらないものとして示す。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-propan-2-ol-cuo-oxidation"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "Royal Society of Chemistry (Education)",
+          "section": "Oxidation of ethanol",
+          "title": "Oxidation of ethanol",
+          "url": "https://edu.rsc.org/experiments/oxidation-of-ethanol/1757.article",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "above": "CuO",
+        "below": "加熱",
+        "explanation": "CuO は酸化剤で、自身は Cu に還元される。第二級アルコールはケトンになる一般則として示す。",
+        "left": [
+          {
+            "compound": "propan-2-ol"
+          },
+          {
+            "species": "CuO"
+          }
+        ],
+        "right": [
+          {
+            "compound": "acetone"
+          },
+          {
+            "species": "Cu"
+          },
+          {
+            "species": "H2O"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ethanol-dichromate-oxidation-ethanal",
+      "type": "oxidation",
+      "substrates": [
+        "ethanol"
+      ],
+      "products": [
+        "ethanal"
+      ],
+      "conditions": "酸性二クロム酸塩（Na₂Cr₂O₇）を加えて加熱する",
+      "note": "酸性二クロム酸塩は酸化剤（触媒ではない）。第一段階の総括。反応がアルデヒドで確実に止まる保証はない。[O] は酸素1原子分の形式当量で、実在する孤立酸素原子ではない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "酸性二クロム酸塩によるエタノールの第一段階の酸化。Cr を含む完全な反応式は省略し、[O] を酸素当量として数える総括式で示す。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethanol-dichromate-oxidation-ethanal"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "Royal Society of Chemistry (Education)",
+          "section": "Oxidation of ethanol",
+          "title": "Oxidation of ethanol",
+          "url": "https://edu.rsc.org/experiments/oxidation-of-ethanol/1757.article",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "酸性二クロム酸塩（Na₂Cr₂O₇）",
+        "below": "加熱",
+        "explanation": "酸性二クロム酸塩による第一段階。単一生成物で止まることは保証しない。Cr を含む完全な反応式は省略し、[O] は酸素1原子分の形式当量（実在する孤立酸素原子ではない）として数える総括式。",
+        "left": [
+          {
+            "compound": "ethanol"
+          },
+          {
+            "species": "O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethanal"
+          },
+          {
+            "species": "H2O"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ethanol-dichromate-oxidation-acetic-acid",
+      "type": "oxidation",
+      "substrates": [
+        "ethanol"
+      ],
+      "products": [
+        "acetic-acid"
+      ],
+      "conditions": "酸性二クロム酸塩（Na₂Cr₂O₇）を加えて加熱する",
+      "note": "酸性二クロム酸塩は酸化剤（触媒ではない）。エタノール→エタナール→酢酸の多段階の総括。2[O] は酸素2原子分の形式当量で、実在する孤立酸素原子ではない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "酸性二クロム酸塩によるエタノールの完全酸化。Cr を含む完全な反応式は省略し、[O] を酸素当量として数える総括式で示す。",
+      "stepKind": "multi-step",
+      "steps": [
+        "エタノール → エタナール",
+        "エタナール → 酢酸"
+      ],
+      "coverageIds": [
+        "standard-ethanol-dichromate-oxidation-acetic-acid"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "Royal Society of Chemistry (Education)",
+          "section": "Oxidation of ethanol",
+          "title": "Oxidation of ethanol",
+          "url": "https://edu.rsc.org/experiments/oxidation-of-ethanol/1757.article",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "above": "酸性二クロム酸塩（Na₂Cr₂O₇）",
+        "below": "加熱",
+        "explanation": "エタノール→エタナール→酢酸の多段階の総括。Cr を含む完全な反応式は省略し、[O] は酸素1原子分の形式当量（実在する孤立酸素原子ではない）として数える。",
+        "left": [
+          {
+            "compound": "ethanol"
+          },
+          {
+            "species": "O",
+            "coef": 2
+          }
+        ],
+        "right": [
+          {
+            "compound": "acetic-acid"
+          },
+          {
+            "species": "H2O"
+          }
+        ]
+      }
+    },
+    {
+      "id": "alkyne-hydration-ethyne-ethanal",
+      "type": "hydration",
+      "substrates": [
+        "ethyne"
+      ],
+      "products": [
+        "ethanal"
+      ],
+      "conditions": "水銀(II)触媒によるアルキンの水和。エノールを経て互変異性化する。",
+      "note": "多段階の総括経路。エノール中間体は物質として収録していない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "アルキンからカルボニルへの総括。",
+      "stepKind": "multi-step",
+      "coverageIds": [
+        "standard-alkyne-hydration-ethyne-ethanal"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-alkyne-hydration-ethyne-ethanal",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§9.4",
+          "title": "§9.4",
+          "url": "https://openstax.org/books/organic-chemistry/pages/9-4-hydration-of-alkynes",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethyne"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethanal"
+          }
+        ],
+        "above": "Hg²⁺ 触媒",
+        "below": "H₂O",
+        "explanation": "エノールを経て互変異性化する。"
+      },
+      "steps": [
+        "水銀(II)触媒で水が付加してエノールになる",
+        "エノールが互変異性化してアルデヒドまたはケトンになる"
+      ]
+    },
+    {
+      "id": "diazonium-substitution-benzenediazonium-chloride-phenol",
+      "type": "substitution",
+      "substrates": [
+        "benzenediazonium-chloride"
+      ],
+      "products": [
+        "phenol"
+      ],
+      "conditions": "ジアゾニウム塩を水系で加熱する。",
+      "note": "ジアゾニウム塩は低温で扱う反応性の高い中間体。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "芳香族ジアゾニウム塩からの置換。水系のフェノール化で、Sandmeyer 反応とは呼ばない。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-diazonium-substitution-benzenediazonium-chloride-phenol"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-diazonium-substitution-benzenediazonium-chloride-phenol",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§24.8",
+          "title": "§24.8",
+          "url": "https://openstax.org/books/organic-chemistry/pages/24-8-reactions-of-arylamines",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "benzenediazonium-chloride"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "phenol"
+          }
+        ],
+        "above": "水系",
+        "below": "N₂ 脱離",
+        "explanation": "水系の置換。Sandmeyer 反応ではない。"
+      }
+    },
+    {
+      "id": "arene-hydrogenation-benzene-cyclohexane",
+      "type": "hydrogenation",
+      "substrates": [
+        "benzene"
+      ],
+      "products": [
+        "cyclohexane"
+      ],
+      "conditions": "ベンゼン環を H2（Rh などの強い条件）で接触水素化する。",
+      "note": "芳香環全体の水素化を、係数を省略した構造変換として示す。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "芳香環の完全水素化。アルケンより厳しい条件が必要で、3 当量相当の水素を要する。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-arene-hydrogenation-benzene-cyclohexane"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-arene-hydrogenation-benzene-cyclohexane",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§16.9",
+          "title": "§16.9",
+          "url": "https://openstax.org/books/organic-chemistry/pages/16-9-reduction-of-aromatic-compounds",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "benzene"
+          }
+        ],
+        "right": [
+          {
+            "compound": "cyclohexane"
+          }
+        ],
+        "above": "H₂ / Rh など",
+        "explanation": "3 当量相当の水素を要する完全水素化。"
+      }
+    },
+    {
+      "id": "aromatic-side-chain-oxidation-o-xylene-phthalic-acid",
+      "type": "oxidation",
+      "substrates": [
+        "o-xylene"
+      ],
+      "products": [
+        "phthalic-acid"
+      ],
+      "conditions": "KMnO4 などの強い酸化で、芳香環の側鎖のメチル基をカルボキシ基にする。",
+      "note": "o-キシレンの両方のメチル基が酸化された生成物を示す。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "芳香環に直接ついたメチル基の酸化。2つのメチル基がともにある場合は両方が酸化される。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-aromatic-side-chain-oxidation-o-xylene-phthalic-acid"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-aromatic-side-chain-oxidation-o-xylene-phthalic-acid",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§16.8",
+          "title": "§16.8",
+          "url": "https://openstax.org/books/organic-chemistry/pages/16-8-oxidation-of-aromatic-compounds",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "o-xylene"
+          }
+        ],
+        "right": [
+          {
+            "compound": "phthalic-acid"
+          }
+        ],
+        "above": "KMnO4",
+        "explanation": "2つの側鎖メチル基がカルボキシ基になる。workup は省略する。"
+      }
+    },
+    {
+      "id": "triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid",
+      "type": "hydrolysis",
+      "substrates": [
+        "tripalmitin"
+      ],
+      "products": [
+        "glycerol",
+        "palmitic-acid"
+      ],
+      "conditions": "トリアシルグリセロールを完全加水分解してグリセリンと脂肪酸にする。",
+      "note": "3つのエステル結合が加水分解される。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "油脂の完全加水分解の総括。3 分子の脂肪酸が生じる。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§21.6",
+          "title": "§21.6",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "tripalmitin"
+          }
+        ],
+        "right": [
+          {
+            "compound": "glycerol"
+          },
+          {
+            "compound": "palmitic-acid",
+            "coef": 3
+          }
+        ],
+        "above": "加水分解",
+        "explanation": "3 分子の脂肪酸が生じる。"
+      }
+    },
+    {
+      "id": "triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid",
+      "type": "hydrolysis",
+      "substrates": [
+        "trilinolein"
+      ],
+      "products": [
+        "glycerol",
+        "linoleic-acid"
+      ],
+      "conditions": "トリアシルグリセロールを完全加水分解してグリセリンと脂肪酸にする。",
+      "note": "3つのエステル結合が加水分解される。C=C は保持される。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "油脂の完全加水分解の総括。3 分子の脂肪酸が生じる。C=C は保持される。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid"
+      ],
+      "layoutGroup": "high-school",
+      "legacyAcademicId": "academic-triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "§21.6",
+          "title": "§21.6",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "trilinolein"
+          }
+        ],
+        "right": [
+          {
+            "compound": "glycerol"
+          },
+          {
+            "compound": "linoleic-acid",
+            "coef": 3
+          }
+        ],
+        "above": "加水分解",
+        "explanation": "3 分子の脂肪酸が生じる。C=C は保持される。"
+      }
+    },
+    {
+      "id": "toluene-oxidation-benzoic-acid",
+      "type": "oxidation",
+      "substrates": [
+        "toluene"
+      ],
+      "products": [
+        "benzoic-acid"
+      ],
+      "conditions": "KMnO4 で酸化したのち酸処理する",
+      "note": "塩・workup は省略。[O] は酸素1原子分の形式当量。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "トルエンの側鎖酸化による安息香酸生成。",
+      "stepKind": "multi-step",
+      "coverageIds": [
+        "standard-toluene-oxidation-benzoic-acid"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "トルエン",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/toluene.html",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "安息香酸",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/benzoic_acid.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "N",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "toluene"
+          },
+          {
+            "species": "O",
+            "coef": 3
+          }
+        ],
+        "right": [
+          {
+            "compound": "benzoic-acid"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "KMnO4 → 酸処理",
+        "explanation": "塩の生成・中和は省略。[O] は酸素1原子分の形式当量で、実在する孤立酸素原子ではない。"
+      },
+      "steps": [
+        "メチル基の酸化",
+        "安息香酸塩の生成",
+        "酸処理で遊離酸"
+      ]
+    },
+    {
+      "id": "benzene-propene-cumene",
+      "type": "aromatic-substitution",
+      "substrates": [
+        "benzene",
+        "propene"
+      ],
+      "products": [
+        "cumene"
+      ],
+      "conditions": "酸触媒でプロペンを付加（アルキル化）させる",
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "ベンゼンのフリーデル–クラフツ型アルキル化。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-benzene-propene-cumene"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "フェノール",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/phenol.html",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "Chemistry Steps",
+          "section": "Reactions of Phenols",
+          "title": "Reactions of Phenols",
+          "url": "https://www.chemistrysteps.com/reactions-of-phenols/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "benzene"
+          },
+          {
+            "compound": "propene"
+          }
+        ],
+        "right": [
+          {
+            "compound": "cumene"
+          }
+        ],
+        "above": "酸触媒",
+        "explanation": "アルキル化。"
+      }
+    },
+    {
+      "id": "benzenesulfonic-acid-neutralization",
+      "type": "neutralization",
+      "substrates": [
+        "benzenesulfonic-acid"
+      ],
+      "products": [
+        "sodium-benzenesulfonate"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で中和する",
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "スルホン酸と水酸化ナトリウムの中和。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-benzenesulfonic-acid-neutralization"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "Chemistry Steps",
+          "section": "Reactions of Phenols",
+          "title": "Reactions of Phenols",
+          "url": "https://www.chemistrysteps.com/reactions-of-phenols/",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "benzenesulfonic-acid"
+          },
+          {
+            "species": "NaOH"
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-benzenesulfonate"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "NaOH"
+      }
+    },
+    {
+      "id": "sodium-benzenesulfonate-alkali-fusion",
+      "type": "substitution",
+      "substrates": [
+        "sodium-benzenesulfonate"
+      ],
+      "products": [
+        "sodium-phenoxide"
+      ],
+      "conditions": "水酸化ナトリウムと融解する",
+      "note": "正味では +2NaOH → +Na2SO3 + H2O。Na2SO3・水は T のため図に書かない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "スルホン酸ナトリウムのアルカリ融解によるフェノキシド生成。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-sodium-benzenesulfonate-alkali-fusion"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "Chemistry Steps",
+          "section": "Reactions of Phenols",
+          "title": "Reactions of Phenols",
+          "url": "https://www.chemistrysteps.com/reactions-of-phenols/",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "UMass Amherst",
+          "section": "Chapter 21",
+          "title": "Lecture overheads（検索抽出）",
+          "url": "https://alpha.chem.umb.edu/chemistry/ch252/files/Overheads/Lecture_Chapter_21.pdf",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "T",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "sodium-benzenesulfonate"
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-phenoxide"
+          }
+        ],
+        "above": "NaOH 融解",
+        "explanation": "正味では 2NaOH が加わり Na2SO3 と水が副生するが、T のため図示しない。"
+      }
+    },
+    {
+      "id": "ethyl-acetate-saponification",
+      "type": "saponification",
+      "substrates": [
+        "ethyl-acetate"
+      ],
+      "products": [
+        "sodium-acetate",
+        "ethanol"
+      ],
+      "conditions": "水酸化ナトリウム水溶液で加水分解する",
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "エステルの塩基加水分解（けん化）。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethyl-acetate-saponification"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "酢酸エチル",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/ethylacetate.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethyl-acetate"
+          },
+          {
+            "species": "NaOH"
+          }
+        ],
+        "right": [
+          {
+            "compound": "sodium-acetate"
+          },
+          {
+            "compound": "ethanol"
+          }
+        ],
+        "above": "NaOH 水溶液"
+      }
+    },
+    {
+      "id": "ethyne-hydrogen-chloride",
+      "type": "addition",
+      "substrates": [
+        "ethyne"
+      ],
+      "products": [
+        "vinyl-chloride"
+      ],
+      "conditions": "塩化水素を1回付加させる",
+      "note": "追加付加の可能性はある。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "アセチレンへの HCl 1 回付加。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethyne-hydrogen-chloride"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "9.3",
+          "title": "Reactions of Alkynes: Addition of HX and X2",
+          "url": "https://openstax.org/books/organic-chemistry/pages/9-3-reactions-of-alkynes-addition-of-hx-and-x2",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "香川高等専門学校 紀要",
+          "section": "7",
+          "title": "化学教育資料（検索抽出）",
+          "url": "https://www.kagawa-nct.ac.jp/libraryI/kagawakiyou/7/7-59.pdf",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethyne"
+          },
+          {
+            "species": "HCl"
+          }
+        ],
+        "right": [
+          {
+            "compound": "vinyl-chloride"
+          }
+        ],
+        "above": "HCl",
+        "explanation": "1 回付加の段階。"
+      }
+    },
+    {
+      "id": "ethyne-acetic-acid-vinyl-acetate",
+      "type": "addition",
+      "substrates": [
+        "ethyne",
+        "acetic-acid"
+      ],
+      "products": [
+        "vinyl-acetate"
+      ],
+      "conditions": "教育用の歴史的経路（触媒・温度の詳細は未確認）",
+      "note": "触媒・温度の詳細は創作しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "アセチレンと酢酸からの酢酸ビニル生成（教育用の歴史的経路）。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethyne-acetic-acid-vinyl-acetate"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "大学入試センター",
+          "section": "化学 問4b",
+          "title": "過去問題（検索抽出）",
+          "url": "https://www.dnc.ac.jp/albums/771/abm00005967.pdf",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "香川高等専門学校 紀要",
+          "section": "7",
+          "title": "化学教育資料（検索抽出）",
+          "url": "https://www.kagawa-nct.ac.jp/libraryI/kagawakiyou/7/7-59.pdf",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethyne"
+          },
+          {
+            "compound": "acetic-acid"
+          }
+        ],
+        "right": [
+          {
+            "compound": "vinyl-acetate"
+          }
+        ],
+        "explanation": "教育用の歴史的経路。触媒・温度の詳細は未確認のため主張しない。"
+      }
+    },
+    {
+      "id": "ethene-wacker-oxidation",
+      "type": "oxidation",
+      "substrates": [
+        "ethene"
+      ],
+      "products": [
+        "ethanal"
+      ],
+      "conditions": "触媒酸化（Wacker 酸化）",
+      "note": "触媒の具体組成は断定しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-extension",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "エテンの触媒酸化によるエタナール生成。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethene-wacker-oxidation"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "アセトアルデヒド",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/acetaldehyde.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethene",
+            "coef": 2
+          },
+          {
+            "species": "O2"
+          }
+        ],
+        "right": [
+          {
+            "compound": "ethanal",
+            "coef": 2
+          }
+        ],
+        "above": "触媒酸化",
+        "explanation": "触媒の具体組成は断定しない。"
+      }
+    },
+    {
+      "id": "nylon66-acid-chloride-condensation",
+      "type": "condensation-polymerization",
+      "substrates": [
+        "adipoyl-chloride",
+        "hexamethylenediamine"
+      ],
+      "products": [
+        "nylon66"
+      ],
+      "conditions": "二酸塩化物とジアミンの重縮合",
+      "note": "末端・塩は省略。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "酸塩化物とジアミンによるナイロン-6,6 の重縮合。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-nylon66-acid-chloride-condensation"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "市立札幌山の手支援学校",
+          "section": "該当欄",
+          "title": "化学反応・高分子",
+          "url": "https://www23.sapporo-c.ed.jp/yamanote/index.cfm/1,1261,24,144,html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "P",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "adipoyl-chloride",
+            "coef": "n"
+          },
+          {
+            "compound": "hexamethylenediamine",
+            "coef": "n"
+          }
+        ],
+        "right": [
+          {
+            "compound": "nylon66"
+          },
+          {
+            "species": "HCl",
+            "coef": "2n"
+          }
+        ],
+        "explanation": "重縮合の模式式。末端・塩は省略する。"
+      }
+    },
+    {
+      "id": "acetic-anhydride-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "acetic-anhydride"
+      ],
+      "products": [
+        "acetic-acid"
+      ],
+      "conditions": "水と反応させる",
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "酸無水物の加水分解。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-acetic-anhydride-hydrolysis"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "21.5",
+          "title": "Chemistry of Acid Anhydrides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-5-chemistry-of-acid-anhydrides",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "acetic-anhydride"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "acetic-acid",
+            "coef": 2
+          }
+        ],
+        "above": "H₂O"
+      }
+    },
+    {
+      "id": "maleic-anhydride-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "maleic-anhydride"
+      ],
+      "products": [
+        "maleic-acid"
+      ],
+      "conditions": "水と反応させる",
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "酸無水物の加水分解。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-maleic-anhydride-hydrolysis"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "21.5",
+          "title": "Chemistry of Acid Anhydrides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-5-chemistry-of-acid-anhydrides",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "maleic-anhydride"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "maleic-acid"
+          }
+        ],
+        "above": "H₂O"
+      }
+    },
+    {
+      "id": "phthalic-anhydride-hydrolysis",
+      "type": "hydrolysis",
+      "substrates": [
+        "phthalic-anhydride"
+      ],
+      "products": [
+        "phthalic-acid"
+      ],
+      "conditions": "水と反応させる",
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "酸無水物の加水分解。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-phthalic-anhydride-hydrolysis"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "21.5",
+          "title": "Chemistry of Acid Anhydrides",
+          "url": "https://openstax.org/books/organic-chemistry/pages/21-5-chemistry-of-acid-anhydrides",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "phthalic-anhydride"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "right": [
+          {
+            "compound": "phthalic-acid"
+          }
+        ],
+        "above": "H₂O"
+      }
+    },
+    {
+      "id": "phenol-acetylation",
+      "type": "acetylation",
+      "substrates": [
+        "phenol"
+      ],
+      "products": [
+        "phenyl-acetate"
+      ],
+      "conditions": "無水酢酸でアセチル化する",
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "フェノールの O-アセチル化。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-phenol-acetylation"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Other reactions of phenol",
+          "title": "Phenol",
+          "url": "https://www.chemguide.co.uk/organicprops/phenol/other.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "phenol"
+          },
+          {
+            "compound": "acetic-anhydride"
+          }
+        ],
+        "right": [
+          {
+            "compound": "phenyl-acetate"
+          },
+          {
+            "compound": "acetic-acid"
+          }
+        ],
+        "above": "無水酢酸"
+      }
+    },
+    {
+      "id": "acetone-iodoform",
+      "type": "oxidation",
+      "substrates": [
+        "acetone"
+      ],
+      "products": [
+        "iodoform"
+      ],
+      "conditions": "ヨウ素と水酸化ナトリウムを加える",
+      "note": "α位のヨウ素化ののち開裂する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "アセトンのヨードホルム反応。",
+      "stepKind": "multi-step",
+      "coverageIds": [
+        "standard-acetone-iodoform"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Iodoform reaction (carbonyls)",
+          "title": "Iodoform",
+          "url": "https://www.chemguide.co.uk/organicprops/carbonyls/iodoform.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "acetone"
+          },
+          {
+            "species": "I2",
+            "coef": 3
+          },
+          {
+            "species": "NaOH",
+            "coef": 4
+          }
+        ],
+        "right": [
+          {
+            "compound": "iodoform"
+          },
+          {
+            "compound": "sodium-acetate"
+          },
+          {
+            "species": "NaI",
+            "coef": 3
+          },
+          {
+            "species": "H2O",
+            "coef": 3
+          }
+        ],
+        "above": "I₂ / NaOH",
+        "explanation": "α位のヨウ素化ののち開裂する。"
+      },
+      "steps": [
+        "α位のヨウ素化",
+        "開裂してヨードホルム生成"
+      ]
+    },
+    {
+      "id": "propan-2-ol-iodoform",
+      "type": "oxidation",
+      "substrates": [
+        "propan-2-ol"
+      ],
+      "products": [
+        "iodoform"
+      ],
+      "conditions": "ヨウ素と水酸化ナトリウムを加える",
+      "note": "酸化でアセトンになったのちヨードホルム反応する。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "2-プロパノールのヨードホルム反応（酸化を経る）。",
+      "stepKind": "multi-step",
+      "coverageIds": [
+        "standard-propan-2-ol-iodoform"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Iodoform reaction (alcohols)",
+          "title": "Iodoform",
+          "url": "https://www.chemguide.co.uk/organicprops/alcohols/iodoform.html",
+          "date": "2026-11-17"
+        },
+        {
+          "source": "Chemguide",
+          "section": "Iodoform reaction (carbonyls)",
+          "title": "Iodoform",
+          "url": "https://www.chemguide.co.uk/organicprops/carbonyls/iodoform.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "propan-2-ol"
+          },
+          {
+            "species": "I2",
+            "coef": 4
+          },
+          {
+            "species": "NaOH",
+            "coef": 6
+          }
+        ],
+        "right": [
+          {
+            "compound": "iodoform"
+          },
+          {
+            "compound": "sodium-acetate"
+          },
+          {
+            "species": "NaI",
+            "coef": 5
+          },
+          {
+            "species": "H2O",
+            "coef": 5
+          }
+        ],
+        "above": "I₂ / NaOH",
+        "explanation": "酸化でアセトンになったのちヨードホルム反応する。"
+      },
+      "steps": [
+        "酸化してアセトン",
+        "α位のヨウ素化",
+        "開裂してヨードホルム生成"
+      ]
+    },
+    {
+      "id": "aniline-hydrochloride-basification",
+      "type": "neutralization",
+      "substrates": [
+        "aniline-hydrochloride"
+      ],
+      "products": [
+        "aniline"
+      ],
+      "conditions": "水酸化ナトリウム水溶液を加える",
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "source-illustrated-transformation",
+      "scope": "アニリン塩酸塩の塩基処理によるアニリン遊離。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-aniline-hydrochloride-basification"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "Chemguide",
+          "section": "Amines",
+          "title": "Aniline",
+          "url": "https://chemguide.co.uk/organicprops/aniline/amine.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "aniline-hydrochloride"
+          },
+          {
+            "species": "NaOH"
+          }
+        ],
+        "right": [
+          {
+            "compound": "aniline"
+          },
+          {
+            "species": "NaCl"
+          },
+          {
+            "species": "H2O"
+          }
+        ],
+        "above": "NaOH"
+      }
+    },
+    {
+      "id": "sodium-benzoate-acidification",
+      "type": "neutralization",
+      "substrates": [
+        "sodium-benzoate"
+      ],
+      "products": [
+        "benzoic-acid"
+      ],
+      "conditions": "塩酸を加える",
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "安息香酸ナトリウムの酸処理による遊離。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-sodium-benzoate-acidification"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "実教出版 Web理科教材（化学）",
+          "section": "安息香酸",
+          "title": "特徴",
+          "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/benzoic_acid.html",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "sodium-benzoate"
+          },
+          {
+            "species": "HCl"
+          }
+        ],
+        "right": [
+          {
+            "compound": "benzoic-acid"
+          },
+          {
+            "species": "NaCl"
+          }
+        ],
+        "above": "HCl"
+      }
+    },
+    {
+      "id": "ethyne-bromine-addition",
+      "type": "addition",
+      "substrates": [
+        "ethyne"
+      ],
+      "products": [
+        "1,2-dibromoethene"
+      ],
+      "conditions": "臭素を1回付加させる",
+      "note": "E/Z 単一を保証しない。",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "アセチレンへの臭素1回付加。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-ethyne-bromine-addition"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "9.3",
+          "title": "Reactions of Alkynes: Addition of HX and X2",
+          "url": "https://openstax.org/books/organic-chemistry/pages/9-3-reactions-of-alkynes-addition-of-hx-and-x2",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "ethyne"
+          },
+          {
+            "species": "Br2"
+          }
+        ],
+        "right": [
+          {
+            "compound": "1,2-dibromoethene"
+          }
+        ],
+        "above": "Br₂",
+        "explanation": "E/Z 異性体の単一生成を保証しない。"
+      }
+    },
+    {
+      "id": "dibromoethene-bromine-addition",
+      "type": "addition",
+      "substrates": [
+        "1,2-dibromoethene"
+      ],
+      "products": [
+        "1,1,2,2-tetrabromoethane"
+      ],
+      "conditions": "臭素をさらに付加させる",
+      "note": "",
+      "state": "confirmed",
+      "educationLevel": "high-school-standard",
+      "evidenceKind": "general-rule-application",
+      "scope": "ジブロモエテンへの臭素付加。",
+      "stepKind": "direct",
+      "coverageIds": [
+        "standard-dibromoethene-bromine-addition"
+      ],
+      "layoutGroup": "high-school",
+      "verification": [
+        {
+          "source": "OpenStax Organic Chemistry (McMurry)",
+          "section": "9.3",
+          "title": "Reactions of Alkynes: Addition of HX and X2",
+          "url": "https://openstax.org/books/organic-chemistry/pages/9-3-reactions-of-alkynes-addition-of-hx-and-x2",
+          "date": "2026-11-17"
+        }
+      ],
+      "equation": {
+        "mode": "B",
+        "arrow": "to",
+        "left": [
+          {
+            "compound": "1,2-dibromoethene"
+          },
+          {
+            "species": "Br2"
+          }
+        ],
+        "right": [
+          {
+            "compound": "1,1,2,2-tetrabromoethane"
+          }
+        ],
+        "above": "Br₂"
+      }
     }
   ],
   "verifiedAt": "2026-11-10",
   "source": {
     "book": "OpenStax Organic Chemistry (McMurry)",
-    "note": "各節の本文で確認した反応だけを confirmed とし、節番号・確認日を verification に記録する。URL は内部記録用で、公開データには含めない。",
+    "note": "各反応は資料の個別例または一般則を根拠に confirmed として収録し、節番号・確認日を verification に記録する。個別本文での実験確認を一律に保証せず、一般則の適用（general-rule-application）は独立実験の確認とは区別する。URL は内部記録用で、公開データには含めない。",
     "sections": {
       "7.7": {
         "title": "Electrophilic Addition Reactions of Alkenes",

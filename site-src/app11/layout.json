@@ -1,7 +1,7 @@
 {
  "version": 4,
  "seed": 0,
- "priorityHash": "a3c90d6744811642eba35586b872973c40a6dd4d3c69db1fffd6b299c1422fe2",
+ "priorityHash": "b48d8a4ee53360a1476683e0a4bac5ed9b3070685c928bf5d9815d31428ff222",
  "topologyNetworkx": "3.6.1",
  "nodeW": 136,
  "nodeH": 34,
@@ -9,14 +9,14 @@
   "x": 0,
   "y": 0,
   "w": 6052,
-  "h": 2314
+  "h": 3422
  },
  "shelf": {
   "x": 4223.499556174887,
   "y": 20,
   "cols": 12,
   "rows": 28,
-  "count": 326,
+  "count": 269,
   "side": "right"
  },
  "regions": [
@@ -29,12 +29,12 @@
    "focus": {
     "x": 5.5,
     "y": -10,
-    "w": 3428,
-    "h": 1236.59
+    "w": 3496.78,
+    "h": 1251.3
    },
    "center": {
-    "x": 1464.19,
-    "y": 378.87
+    "x": 1432.9,
+    "y": 614.27
    },
    "members": [
     "1,1,2,2-tetrabromoethane",
@@ -123,8 +123,8 @@
     "h": 1884
    },
    "center": {
-    "x": 2857,
-    "y": 1226.34
+    "x": 3183.57,
+    "y": 988.98
    },
    "members": [
     "anthracene",
@@ -154,8 +154,8 @@
     "h": 1973.44
    },
    "center": {
-    "x": 1513.22,
-    "y": 899.4
+    "x": 1427.3,
+    "y": 891.07
    },
    "members": [
     "1-methoxypropane",
@@ -194,14 +194,14 @@
    "count": 48,
    "colorIndex": 3,
    "focus": {
-    "x": 477.5,
+    "x": 370,
     "y": 332.59,
-    "w": 3706,
-    "h": 1694
+    "w": 3813.5,
+    "h": 2650.99
    },
    "center": {
-    "x": 1767.9,
-    "y": 897.4
+    "x": 1858.18,
+    "y": 1135.73
    },
    "members": [
     "2,2-dimethylpropanal",
@@ -263,12 +263,12 @@
    "focus": {
     "x": 120.63,
     "y": 342.33,
-    "w": 1612.87,
-    "h": 1834.25
+    "w": 2866.95,
+    "h": 1834.26
    },
    "center": {
-    "x": 984.82,
-    "y": 1231.38
+    "x": 1064.18,
+    "y": 1199.34
    },
    "members": [
     "arachidonic-acid",
@@ -322,8 +322,8 @@
     "h": 1924
    },
    "center": {
-    "x": 2646.79,
-    "y": 844.73
+    "x": 2712.71,
+    "y": 807.54
    },
    "members": [
     "1-naphthol",
@@ -389,14 +389,14 @@
    "count": 25,
    "colorIndex": 6,
    "focus": {
-    "x": 2048.5,
-    "y": 719.59,
-    "w": 196,
-    "h": 94
+    "x": 2042.71,
+    "y": 560.92,
+    "w": 201.79,
+    "h": 252.67
    },
    "center": {
-    "x": 2146.5,
-    "y": 766.59
+    "x": 2143.6,
+    "y": 687.26
    },
    "members": [
     "2-methylpropan-1-amine",
@@ -433,14 +433,14 @@
    "count": 23,
    "colorIndex": 7,
    "focus": {
-    "x": 2037.5,
-    "y": 1376.85,
-    "w": 696,
-    "h": 520.44
+    "x": 1234.96,
+    "y": 1036.95,
+    "w": 1498.54,
+    "h": 860.34
    },
    "center": {
-    "x": 2412.36,
-    "y": 1603.15
+    "x": 2174.57,
+    "y": 1516.11
    },
    "members": [
     "amylopectin",
@@ -477,12 +477,12 @@
    "focus": {
     "x": -10,
     "y": 512.97,
-    "w": 3763.5,
-    "h": 1313.62
+    "w": 3985.22,
+    "h": 1798.61
    },
    "center": {
-    "x": 2137.64,
-    "y": 1319.18
+    "x": 2330.93,
+    "y": 1424.23
    },
    "members": [
     "6-aminohexanoic-acid",
@@ -560,14 +560,14 @@
    "count": 65,
    "colorIndex": 9,
    "focus": {
-    "x": 1457.5,
-    "y": 382.59,
-    "w": 2676,
-    "h": 1824
+    "x": 162.16,
+    "y": 3.08,
+    "w": 3971.34,
+    "h": 3428.51
    },
    "center": {
-    "x": 3447.5,
-    "y": 1726.59
+    "x": 1779.39,
+    "y": 1702.05
    },
    "members": [
     "abs",
@@ -641,11 +641,11 @@
  "positions": {
   "1,1,2,2-tetrabromoethane": {
    "r": "hydrocarbon",
-   "x": 4223.5,
-   "y": 20,
+   "x": 374.3,
+   "y": 596.26,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "1,2-dibromoethane": {
    "r": "hydrocarbon",
@@ -657,11 +657,11 @@
   },
   "1,2-dibromoethene": {
    "r": "hydrocarbon",
-   "x": 4375.5,
-   "y": 20,
+   "x": 578.3,
+   "y": 621.25,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "1,3-dibromopropane": {
    "r": "hydrocarbon",
@@ -769,11 +769,11 @@
   },
   "2,4,6-tribromophenol": {
    "r": "phenol-aromatic",
-   "x": 4527.5,
-   "y": 614,
+   "x": 2973,
+   "y": 741.09,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "2-bromopropane": {
    "r": "hydrocarbon",
@@ -977,11 +977,11 @@
   },
   "6-aminohexanoic-acid": {
    "r": "amino",
-   "x": 5591.5,
-   "y": 938,
+   "x": 3809.22,
+   "y": 2247.58,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "abs": {
    "r": "polymer",
@@ -1057,11 +1057,11 @@
   },
   "acrylonitrile": {
    "r": "polymer",
-   "x": 5439.5,
-   "y": 1208,
+   "x": 400,
+   "y": 2417.58,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "adenine": {
    "r": "polymer",
@@ -1089,11 +1089,11 @@
   },
   "adipoyl-chloride": {
    "r": "carbonyl",
-   "x": 5743.5,
-   "y": 398,
+   "x": 3240.28,
+   "y": 2085.63,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "adp": {
    "r": "polymer",
@@ -1185,11 +1185,11 @@
   },
   "aniline-hydrochloride": {
    "r": "nitrogen",
-   "x": 5439.5,
-   "y": 776,
+   "x": 2072.71,
+   "y": 590.92,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "anion-exchange-resin": {
    "r": "polymer",
@@ -1353,11 +1353,11 @@
   },
   "br": {
    "r": "polymer",
-   "x": 4983.5,
-   "y": 1262,
+   "x": 3743.37,
+   "y": 1784.87,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "bromoethane": {
    "r": "hydrocarbon",
@@ -1369,11 +1369,11 @@
   },
   "bromoethene": {
    "r": "hydrocarbon",
-   "x": 5287.5,
-   "y": 74,
+   "x": 820.33,
+   "y": 1177.3,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "but-1-ene": {
    "r": "hydrocarbon",
@@ -1417,11 +1417,11 @@
   },
   "butadiene": {
    "r": "polymer",
-   "x": 5135.5,
-   "y": 1262,
+   "x": 3812.54,
+   "y": 1658.6,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "butan-1-amine": {
    "r": "nitrogen",
@@ -1601,27 +1601,27 @@
   },
   "cellulose": {
    "r": "sugar",
-   "x": 5287.5,
-   "y": 884,
+   "x": 1264.96,
+   "y": 1270.09,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "cellulose-acetate": {
    "r": "sugar",
-   "x": 5439.5,
-   "y": 884,
+   "x": 1551.93,
+   "y": 1066.95,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "cellulose-nitrate": {
    "r": "sugar",
-   "x": 5591.5,
-   "y": 884,
+   "x": 1287.73,
+   "y": 1393.13,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "chitin": {
    "r": "sugar",
@@ -1673,19 +1673,19 @@
   },
   "chloroprene": {
    "r": "polymer",
-   "x": 5439.5,
-   "y": 1262,
+   "x": 400,
+   "y": 2641.58,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "chloroprene-rubber": {
    "r": "polymer",
-   "x": 5591.5,
-   "y": 1262,
+   "x": 400,
+   "y": 2695.58,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "choline": {
    "r": "amino",
@@ -1713,11 +1713,11 @@
   },
   "copper-i-acetylide": {
    "r": "hydrocarbon",
-   "x": 5135.5,
-   "y": 128,
+   "x": 624.99,
+   "y": 949.29,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "crotonic-acid": {
    "r": "hydrocarbon",
@@ -1753,11 +1753,11 @@
   },
   "cyclohexane": {
    "r": "hydrocarbon",
-   "x": 5591.5,
-   "y": 128,
+   "x": 2387.85,
+   "y": 1123.89,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "cyclohexene": {
    "r": "hydrocarbon",
@@ -2073,11 +2073,11 @@
   },
   "ethylbenzene": {
    "r": "aromatic",
-   "x": 4375.5,
-   "y": 290,
+   "x": 3806.71,
+   "y": 1537.97,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "ethylene-glycol": {
    "r": "alcohol-ether",
@@ -2097,11 +2097,11 @@
   },
   "ethyne": {
    "r": "hydrocarbon",
-   "x": 4983.5,
-   "y": 182,
+   "x": 676.8,
+   "y": 783.71,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "fibroin": {
    "r": "amino",
@@ -2145,11 +2145,11 @@
   },
   "galactose": {
    "r": "sugar",
-   "x": 4375.5,
-   "y": 938,
+   "x": 2312.29,
+   "y": 1691.29,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "gelatin": {
    "r": "amino",
@@ -2337,11 +2337,11 @@
   },
   "hexachlorocyclohexane": {
    "r": "hydrocarbon",
-   "x": 5287.5,
-   "y": 182,
+   "x": 2617.47,
+   "y": 1117.63,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "hexamethylenediamine": {
    "r": "polymer",
@@ -2401,11 +2401,11 @@
   },
   "iir": {
    "r": "polymer",
-   "x": 4831.5,
-   "y": 1316,
+   "x": 261.72,
+   "y": 80.67,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "indigo": {
    "r": "phenol-aromatic",
@@ -2441,11 +2441,11 @@
   },
   "iodoform": {
    "r": "hydrocarbon",
-   "x": 5743.5,
-   "y": 182,
+   "x": 3336.28,
+   "y": 702.6,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "isoamyl-acetate": {
    "r": "ester-lipid",
@@ -2505,11 +2505,11 @@
   },
   "isoprene": {
    "r": "polymer",
-   "x": 4983.5,
-   "y": 1316,
+   "x": 260.04,
+   "y": 33.08,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "isopropylamine": {
    "r": "nitrogen",
@@ -2545,11 +2545,11 @@
   },
   "lactose": {
    "r": "sugar",
-   "x": 4983.5,
-   "y": 938,
+   "x": 2451.37,
+   "y": 1464.72,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "las": {
    "r": "ester-lipid",
@@ -2649,19 +2649,19 @@
   },
   "maleic-acid": {
    "r": "carbonyl",
-   "x": 5439.5,
-   "y": 452,
+   "x": 400,
+   "y": 2865.58,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "maleic-anhydride": {
    "r": "carbonyl",
-   "x": 5591.5,
-   "y": 452,
+   "x": 400,
+   "y": 2919.58,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "malic-acid": {
    "r": "carbonyl",
@@ -2705,19 +2705,19 @@
   },
   "melamine": {
    "r": "polymer",
-   "x": 5135.5,
-   "y": 1316,
+   "x": 344.71,
+   "y": 973.16,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "melamine-resin": {
    "r": "polymer",
-   "x": 5287.5,
-   "y": 1316,
+   "x": 418.77,
+   "y": 1036.57,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "methacrylic-acid": {
    "r": "carbonyl",
@@ -2777,11 +2777,11 @@
   },
   "methyl-methacrylate": {
    "r": "polymer",
-   "x": 5439.5,
-   "y": 1316,
+   "x": 400,
+   "y": 3089.58,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "methyl-orange": {
    "r": "phenol-aromatic",
@@ -2969,11 +2969,11 @@
   },
   "o-xylene": {
    "r": "aromatic",
-   "x": 4831.5,
-   "y": 290,
+   "x": 3055.45,
+   "y": 228.36,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "octane": {
    "r": "hydrocarbon",
@@ -3089,11 +3089,11 @@
   },
   "pan": {
    "r": "polymer",
-   "x": 5895.5,
-   "y": 1316,
+   "x": 400,
+   "y": 2471.58,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "pent-1-ene": {
    "r": "hydrocarbon",
@@ -3209,19 +3209,19 @@
   },
   "phenol-resin": {
    "r": "polymer",
-   "x": 4223.5,
-   "y": 1370,
+   "x": 1914.32,
+   "y": 774.08,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "phenolphthalein": {
    "r": "phenol-aromatic",
-   "x": 4983.5,
-   "y": 722,
+   "x": 2839.28,
+   "y": 316.05,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "phenoxide-ion": {
    "r": "phenol-aromatic",
@@ -3233,11 +3233,11 @@
   },
   "phenyl-acetate": {
    "r": "ester-lipid",
-   "x": 5591.5,
-   "y": 560,
+   "x": 2821.58,
+   "y": 445.62,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "phenylalanine": {
    "r": "amino",
@@ -3257,27 +3257,27 @@
   },
   "phthalic-acid": {
    "r": "phenol-aromatic",
-   "x": 5287.5,
-   "y": 722,
+   "x": 3018.72,
+   "y": 340.7,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "phthalic-anhydride": {
    "r": "carbonyl",
-   "x": 4983.5,
-   "y": 506,
+   "x": 2828.72,
+   "y": 389.48,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "picric-acid": {
    "r": "phenol-aromatic",
-   "x": 5439.5,
-   "y": 722,
+   "x": 2666.33,
+   "y": 657.46,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "pla": {
    "r": "polymer",
@@ -3289,19 +3289,19 @@
   },
   "pmma": {
    "r": "polymer",
-   "x": 4679.5,
-   "y": 1370,
+   "x": 400,
+   "y": 3143.58,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "polyacetylene": {
    "r": "polymer",
-   "x": 4831.5,
-   "y": 1370,
+   "x": 336.38,
+   "y": 720.66,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "polyaniline": {
    "r": "polymer",
@@ -3489,27 +3489,27 @@
   },
   "ptfe": {
    "r": "polymer",
-   "x": 5439.5,
-   "y": 1370,
+   "x": 400,
+   "y": 3367.58,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "pva": {
    "r": "polymer",
-   "x": 5591.5,
-   "y": 1370,
+   "x": 954.4,
+   "y": 1288.37,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "pvac": {
    "r": "polymer",
-   "x": 5743.5,
-   "y": 1370,
+   "x": 1144.84,
+   "y": 1337.61,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "pvc": {
    "r": "polymer",
@@ -3593,11 +3593,11 @@
   },
   "sbr": {
    "r": "polymer",
-   "x": 4375.5,
-   "y": 1424,
+   "x": 3798.6,
+   "y": 1613.06,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "sds": {
    "r": "ester-lipid",
@@ -3633,19 +3633,19 @@
   },
   "silver-acetylide": {
    "r": "hydrocarbon",
-   "x": 5895.5,
-   "y": 236,
+   "x": 523.62,
+   "y": 892.91,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "sodium-acetate": {
    "r": "carbonyl",
-   "x": 5287.5,
-   "y": 506,
+   "x": 1236.25,
+   "y": 1064.02,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "sodium-alginate": {
    "r": "polymer",
@@ -3657,27 +3657,27 @@
   },
   "sodium-benzenesulfonate": {
    "r": "phenol-aromatic",
-   "x": 4223.5,
-   "y": 776,
+   "x": 2133.53,
+   "y": 1364.55,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "sodium-benzoate": {
    "r": "carbonyl",
-   "x": 5439.5,
-   "y": 506,
+   "x": 3809.59,
+   "y": 486.37,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "sodium-ethoxide": {
    "r": "alcohol-ether",
-   "x": 5895.5,
-   "y": 344,
+   "x": 1067.52,
+   "y": 360.99,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "sodium-laurate": {
    "r": "ester-lipid",
@@ -3689,11 +3689,11 @@
   },
   "sodium-methoxide": {
    "r": "alcohol-ether",
-   "x": 4223.5,
-   "y": 398,
+   "x": 791.83,
+   "y": 1303.76,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "sodium-oleate": {
    "r": "ester-lipid",
@@ -3729,11 +3729,11 @@
   },
   "sodium-salicylate": {
    "r": "phenol-aromatic",
-   "x": 4375.5,
-   "y": 776,
+   "x": 3160.28,
+   "y": 802.63,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "sodium-stearate": {
    "r": "ester-lipid",
@@ -3841,11 +3841,11 @@
   },
   "tetrafluoroethylene": {
    "r": "polymer",
-   "x": 4983.5,
-   "y": 1424,
+   "x": 400,
+   "y": 3313.58,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "threonine": {
    "r": "amino",
@@ -3873,11 +3873,11 @@
   },
   "toluene": {
    "r": "aromatic",
-   "x": 5287.5,
-   "y": 290,
+   "x": 3790.82,
+   "y": 200.15,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "trehalose": {
    "r": "sugar",
@@ -3985,19 +3985,19 @@
   },
   "urea": {
    "r": "polymer",
-   "x": 5591.5,
-   "y": 1424,
+   "x": 192.16,
+   "y": 756.52,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "urea-resin": {
    "r": "polymer",
-   "x": 5743.5,
-   "y": 1424,
+   "x": 340.71,
+   "y": 651.37,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "urease": {
    "r": "amino",
@@ -4017,11 +4017,11 @@
   },
   "vinyl-acetate": {
    "r": "polymer",
-   "x": 5895.5,
-   "y": 1424,
+   "x": 902.95,
+   "y": 1219.51,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "secondary"
   },
   "vinyl-chloride": {
    "r": "polymer",
@@ -4041,11 +4041,11 @@
   },
   "vinylon": {
    "r": "polymer",
-   "x": 4375.5,
-   "y": 1478,
+   "x": 1055.47,
+   "y": 1442.01,
    "w": 136,
    "h": 34,
-   "tier": "isolated"
+   "tier": "primary"
   },
   "zymase": {
    "r": "amino",
@@ -4086,6 +4086,34 @@
    "typeLabel": "置換",
    "conditions": "塩酸と0℃で反応させる",
    "cross": true
+  },
+  "acetic-acid-anhydride": {
+   "x": 1542.3,
+   "y": 1206.85,
+   "tier": "primary",
+   "label": {
+    "side": "E",
+    "type": {
+     "x": 1613.9,
+     "y": 1200.85
+    },
+    "cond": null,
+    "box": {
+     "x": 1595.9,
+     "y": 1192.85,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "acetic-acid"
+   ],
+   "products": [
+    "acetic-anhydride"
+   ],
+   "typeLabel": "縮合",
+   "conditions": "P4O10（脱水剤）で脱水する",
+   "cross": false
   },
   "acetic-acid-butanol-esterification": {
    "x": 1346.37,
@@ -4180,6 +4208,92 @@
    "conditions": "強酸触媒を用いる（Fischer エステル化）",
    "cross": true
   },
+  "acetic-acid-neutralization": {
+   "x": 1277.33,
+   "y": 993.04,
+   "tier": "primary",
+   "label": {
+    "side": "S",
+    "type": {
+     "x": 1277.33,
+     "y": 1020.04
+    },
+    "cond": null,
+    "box": {
+     "x": 1259.33,
+     "y": 1012.04,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "acetic-acid"
+   ],
+   "products": [
+    "sodium-acetate"
+   ],
+   "typeLabel": "中和",
+   "conditions": "水酸化ナトリウム水溶液で中和する",
+   "cross": false
+  },
+  "acetic-acid-sodium-carbonate": {
+   "x": 1537.77,
+   "y": 1012.87,
+   "tier": "primary",
+   "label": {
+    "side": "E",
+    "type": {
+     "x": 1613.87,
+     "y": 1006.87
+    },
+    "cond": null,
+    "box": {
+     "x": 1595.87,
+     "y": 998.87,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "acetic-acid"
+   ],
+   "products": [
+    "sodium-acetate"
+   ],
+   "typeLabel": "中和",
+   "conditions": "炭酸水素ナトリウム（NaHCO3）と反応させる",
+   "cross": false
+  },
+  "acetic-anhydride-hydrolysis": {
+   "x": 1333.44,
+   "y": 1017.39,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "acetic-anhydride"
+   ],
+   "products": [
+    "acetic-acid"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "水と反応させる",
+   "cross": false
+  },
+  "acetone-iodoform": {
+   "x": 3355.5,
+   "y": 641.59,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "acetone"
+   ],
+   "products": [
+    "iodoform"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "ヨウ素と水酸化ナトリウムを加える",
+   "cross": true
+  },
   "acetone-reduction": {
    "x": 3665.5,
    "y": 829.59,
@@ -4194,6 +4308,21 @@
    "typeLabel": "還元",
    "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
    "cross": true
+  },
+  "acrylonitrile-polymerization": {
+   "x": 280,
+   "y": 2461.58,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "acrylonitrile"
+   ],
+   "products": [
+    "pan"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "アクリロニトリルのラジカル付加重合。",
+   "cross": false
   },
   "alanine-glycine-peptide": {
    "x": 3474.77,
@@ -4226,6 +4355,21 @@
    "typeLabel": "加水分解",
    "conditions": "酸・塩基または酵素で加水分解する",
    "cross": false
+  },
+  "alkyne-hydration-ethyne-ethanal": {
+   "x": 915.5,
+   "y": 737.59,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "ethyne"
+   ],
+   "products": [
+    "ethanal"
+   ],
+   "typeLabel": "水和",
+   "conditions": "水銀(II)触媒によるアルキンの水和。エノールを経て互変異性化する。",
+   "cross": true
   },
   "aniline-acetic-anhydride": {
    "x": 1985.5,
@@ -4282,6 +4426,79 @@
    ],
    "typeLabel": "ジアゾ化",
    "conditions": "亜硝酸（亜硝酸ナトリウムと酸）を作用させてジアゾニウム塩にする",
+   "cross": true
+  },
+  "aniline-hydrochloride": {
+   "x": 2172.5,
+   "y": 721.56,
+   "tier": "primary",
+   "label": {
+    "side": "N",
+    "type": {
+     "x": 2172.5,
+     "y": 695.56
+    },
+    "cond": null,
+    "box": {
+     "x": 2154.5,
+     "y": 687.56,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "aniline"
+   ],
+   "products": [
+    "aniline-hydrochloride"
+   ],
+   "typeLabel": "中和",
+   "conditions": "塩酸を加える",
+   "cross": false
+  },
+  "aniline-hydrochloride-basification": {
+   "x": 2166.71,
+   "y": 652.95,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "aniline-hydrochloride"
+   ],
+   "products": [
+    "aniline"
+   ],
+   "typeLabel": "中和",
+   "conditions": "水酸化ナトリウム水溶液を加える",
+   "cross": false
+  },
+  "arene-hydrogenation-benzene-cyclohexane": {
+   "x": 2545.5,
+   "y": 1161.56,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "benzene"
+   ],
+   "products": [
+    "cyclohexane"
+   ],
+   "typeLabel": "水素付加",
+   "conditions": "ベンゼン環を H2（Rh などの強い条件）で接触水素化する。",
+   "cross": true
+  },
+  "aromatic-side-chain-oxidation-o-xylene-phthalic-acid": {
+   "x": 3060.72,
+   "y": 312.67,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "o-xylene"
+   ],
+   "products": [
+    "phthalic-acid"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "KMnO4 などの強い酸化で、芳香環の側鎖のメチル基をカルボキシ基にする。",
    "cross": true
   },
   "aspirin-hydrolysis": {
@@ -4369,6 +4586,34 @@
    "conditions": "塩化鉄(III)触媒のもとで塩素と反応させる",
    "cross": true
   },
+  "benzene-chlorine-addition": {
+   "x": 2597.5,
+   "y": 1161.56,
+   "tier": "primary",
+   "label": {
+    "side": "N",
+    "type": {
+     "x": 2597.5,
+     "y": 1095.56
+    },
+    "cond": null,
+    "box": {
+     "x": 2579.5,
+     "y": 1087.56,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "benzene"
+   ],
+   "products": [
+    "hexachlorocyclohexane"
+   ],
+   "typeLabel": "付加",
+   "conditions": "光を当てて塩素を付加させる",
+   "cross": true
+  },
   "benzene-nitration": {
    "x": 2353.05,
    "y": 1156.66,
@@ -4395,6 +4640,22 @@
    ],
    "typeLabel": "ニトロ化",
    "conditions": "濃硝酸と濃硫酸の混合物でニトロ化する",
+   "cross": true
+  },
+  "benzene-propene-cumene": {
+   "x": 2926.16,
+   "y": 902.31,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "benzene",
+    "propene"
+   ],
+   "products": [
+    "cumene"
+   ],
+   "typeLabel": "芳香族置換",
+   "conditions": "酸触媒でプロペンを付加（アルキル化）させる",
    "cross": true
   },
   "benzene-sulfonation": {
@@ -4425,6 +4686,49 @@
    "conditions": "発煙硫酸でスルホン化する",
    "cross": true
   },
+  "benzenesulfonic-acid-neutralization": {
+   "x": 2289.5,
+   "y": 1354.62,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "benzenesulfonic-acid"
+   ],
+   "products": [
+    "sodium-benzenesulfonate"
+   ],
+   "typeLabel": "中和",
+   "conditions": "水酸化ナトリウム水溶液で中和する",
+   "cross": false
+  },
+  "benzoic-acid-neutralization": {
+   "x": 3955.6,
+   "y": 454.59,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 3869.6,
+     "y": 448.59
+    },
+    "cond": null,
+    "box": {
+     "x": 3851.6,
+     "y": 440.59,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "benzoic-acid"
+   ],
+   "products": [
+    "sodium-benzoate"
+   ],
+   "typeLabel": "中和",
+   "conditions": "水酸化ナトリウム水溶液で中和する",
+   "cross": false
+  },
   "benzyl-alcohol-oxidation": {
    "x": 3785.5,
    "y": 259.59,
@@ -4451,6 +4755,21 @@
    ],
    "typeLabel": "酸化",
    "conditions": "Dess–Martin 試薬で酸化する",
+   "cross": false
+  },
+  "butadiene-polymerization": {
+   "x": 3854.54,
+   "y": 1720.63,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "butadiene"
+   ],
+   "products": [
+    "br"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "ブタジエンの付加重合。",
    "cross": false
   },
   "butan-1-ol-oxidation": {
@@ -4527,6 +4846,53 @@
    "conditions": "少量の水を加えて加熱し、開環重合させる",
    "cross": false
   },
+  "cellulose-acetylation": {
+   "x": 1449.23,
+   "y": 1147.07,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "cellulose",
+    "acetic-anhydride"
+   ],
+   "products": [
+    "cellulose-acetate",
+    "acetic-acid"
+   ],
+   "typeLabel": "置換",
+   "conditions": "セルロースの酸触媒アセチル化。",
+   "cross": true
+  },
+  "cellulose-hydrolysis": {
+   "x": 1976.89,
+   "y": 1490.24,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "cellulose"
+   ],
+   "products": [
+    "glucose"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "多糖の完全加水分解。",
+   "cross": false
+  },
+  "cellulose-nitration": {
+   "x": 1306.96,
+   "y": 1332.12,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "cellulose"
+   ],
+   "products": [
+    "cellulose-nitrate"
+   ],
+   "typeLabel": "置換",
+   "conditions": "セルロースの硝酸エステル化。",
+   "cross": false
+  },
   "chlorobenzene-dow-phenol": {
    "x": 3124.14,
    "y": 992.46,
@@ -4553,6 +4919,21 @@
    ],
    "typeLabel": "置換",
    "conditions": "水酸化ナトリウムと高温・高圧で反応させる",
+   "cross": false
+  },
+  "chloroprene-polymerization": {
+   "x": 280,
+   "y": 2685.58,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "chloroprene"
+   ],
+   "products": [
+    "chloroprene-rubber"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "クロロプレンの付加重合。",
    "cross": false
   },
   "cumene-hydroperoxide-decomposition": {
@@ -4656,6 +5037,36 @@
    "conditions": "フェノールとカップリングさせる",
    "cross": false
   },
+  "diazonium-substitution-benzenediazonium-chloride-phenol": {
+   "x": 2770.42,
+   "y": 551.55,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "benzenediazonium-chloride"
+   ],
+   "products": [
+    "phenol"
+   ],
+   "typeLabel": "置換",
+   "conditions": "ジアゾニウム塩を水系で加熱する。",
+   "cross": false
+  },
+  "dibromoethene-bromine-addition": {
+   "x": 566.03,
+   "y": 694.47,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "1,2-dibromoethene"
+   ],
+   "products": [
+    "1,1,2,2-tetrabromoethane"
+   ],
+   "typeLabel": "付加",
+   "conditions": "臭素をさらに付加させる",
+   "cross": false
+  },
   "ethanal-oxidation-acetic": {
    "x": 975.5,
    "y": 869.59,
@@ -4699,6 +5110,62 @@
    "conditions": "水素化ホウ素ナトリウム（NaBH4）で還元する",
    "cross": true
   },
+  "ethanol-cuo-oxidation": {
+   "x": 1166.22,
+   "y": 669.59,
+   "tier": "primary",
+   "label": {
+    "side": "E",
+    "type": {
+     "x": 1239.8,
+     "y": 663.59
+    },
+    "cond": null,
+    "box": {
+     "x": 1221.8,
+     "y": 655.59,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "ethanol"
+   ],
+   "products": [
+    "ethanal"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "酸化銅(II)を加えて加熱する",
+   "cross": true
+  },
+  "ethanol-dehydration-ethene": {
+   "x": 1258.02,
+   "y": 428.32,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 1159.94,
+     "y": 422.32
+    },
+    "cond": null,
+    "box": {
+     "x": 1141.94,
+     "y": 414.32,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "ethanol"
+   ],
+   "products": [
+    "ethene"
+   ],
+   "typeLabel": "脱離",
+   "conditions": "濃硫酸を加えて約170℃に加熱する",
+   "cross": true
+  },
   "ethanol-dehydration-ether": {
    "x": 1115.5,
    "y": 549.59,
@@ -4726,6 +5193,49 @@
    "typeLabel": "縮合",
    "conditions": "硫酸触媒で脱水縮合させる",
    "cross": false
+  },
+  "ethanol-dichromate-oxidation-acetic-acid": {
+   "x": 1304.78,
+   "y": 669.59,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "ethanol"
+   ],
+   "products": [
+    "acetic-acid"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "酸性二クロム酸塩（Na₂Cr₂O₇）を加えて加熱する",
+   "cross": true
+  },
+  "ethanol-dichromate-oxidation-ethanal": {
+   "x": 1042.07,
+   "y": 590.18,
+   "tier": "primary",
+   "label": {
+    "side": "N",
+    "type": {
+     "x": 1042.07,
+     "y": 564.18
+    },
+    "cond": null,
+    "box": {
+     "x": 1024.07,
+     "y": 556.18,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "ethanol"
+   ],
+   "products": [
+    "ethanal"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "酸性二クロム酸塩（Na₂Cr₂O₇）を加えて加熱する",
+   "cross": true
   },
   "ethanol-oxidation-acetic": {
    "x": 1424.88,
@@ -4769,6 +5279,34 @@
    "typeLabel": "酸化",
    "conditions": "Dess–Martin 試薬で酸化する",
    "cross": true
+  },
+  "ethanol-sodium": {
+   "x": 1202.07,
+   "y": 510.18,
+   "tier": "primary",
+   "label": {
+    "side": "E",
+    "type": {
+     "x": 1314.57,
+     "y": 504.18
+    },
+    "cond": null,
+    "box": {
+     "x": 1268.57,
+     "y": 496.18,
+     "w": 92,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "ethanol"
+   ],
+   "products": [
+    "sodium-ethoxide"
+   ],
+   "typeLabel": "金属との反応",
+   "conditions": "金属ナトリウムと反応させる",
+   "cross": false
   },
   "ethene-bromine-addition": {
    "x": 1355.5,
@@ -4910,6 +5448,21 @@
    "conditions": "ラジカル開始剤（過酸化ベンゾイルなど）を用いて重合させる",
    "cross": true
   },
+  "ethene-wacker-oxidation": {
+   "x": 1107.4,
+   "y": 466.93,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "ethene"
+   ],
+   "products": [
+    "ethanal"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "触媒酸化（Wacker 酸化）",
+   "cross": true
+  },
   "ethyl-acetate-hydrolysis": {
    "x": 1395.5,
    "y": 789.59,
@@ -4939,6 +5492,22 @@
    "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
    "cross": true
   },
+  "ethyl-acetate-saponification": {
+   "x": 1166.22,
+   "y": 589.59,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "ethyl-acetate"
+   ],
+   "products": [
+    "sodium-acetate",
+    "ethanol"
+   ],
+   "typeLabel": "けん化",
+   "conditions": "水酸化ナトリウム水溶液で加水分解する",
+   "cross": true
+  },
   "ethyl-propionate-saponification": {
    "x": 1320.35,
    "y": 714.44,
@@ -4954,6 +5523,220 @@
    "typeLabel": "けん化",
    "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
    "cross": true
+  },
+  "ethylbenzene-dehydrogenation": {
+   "x": 3957.23,
+   "y": 1470.62,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 3813.73,
+     "y": 1464.62
+    },
+    "cond": null,
+    "box": {
+     "x": 3795.73,
+     "y": 1456.62,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "ethylbenzene"
+   ],
+   "products": [
+    "styrene"
+   ],
+   "typeLabel": "脱離",
+   "conditions": "触媒とともに加熱して脱水素する",
+   "cross": false
+  },
+  "ethyne-acetic-acid-vinyl-acetate": {
+   "x": 1066.07,
+   "y": 868.61,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "ethyne",
+    "acetic-acid"
+   ],
+   "products": [
+    "vinyl-acetate"
+   ],
+   "typeLabel": "付加",
+   "conditions": "教育用の歴史的経路（触媒・温度の詳細は未確認）",
+   "cross": true
+  },
+  "ethyne-bromine-addition": {
+   "x": 744.8,
+   "y": 748.71,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "ethyne"
+   ],
+   "products": [
+    "1,2-dibromoethene"
+   ],
+   "typeLabel": "付加",
+   "conditions": "臭素を1回付加させる",
+   "cross": false
+  },
+  "ethyne-copper-acetylide": {
+   "x": 722.28,
+   "y": 851.99,
+   "tier": "primary",
+   "label": {
+    "side": "E",
+    "type": {
+     "x": 768.45,
+     "y": 845.99
+    },
+    "cond": null,
+    "box": {
+     "x": 736.45,
+     "y": 837.99,
+     "w": 64,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "ethyne"
+   ],
+   "products": [
+    "copper-i-acetylide"
+   ],
+   "typeLabel": "沈殿生成",
+   "conditions": "Cu(I) を加える",
+   "cross": false
+  },
+  "ethyne-full-hydrogenation": {
+   "x": 1209.5,
+   "y": 134.62,
+   "tier": "primary",
+   "label": {
+    "side": "E",
+    "type": {
+     "x": 1335.5,
+     "y": 128.62
+    },
+    "cond": null,
+    "box": {
+     "x": 1303.5,
+     "y": 120.62,
+     "w": 64,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "ethyne"
+   ],
+   "products": [
+    "ethane"
+   ],
+   "typeLabel": "水素付加",
+   "conditions": "触媒で十分な量の水素を付加させる",
+   "cross": false
+  },
+  "ethyne-hydrogen-bromide": {
+   "x": 842.03,
+   "y": 877.67,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 776.01,
+     "y": 871.67
+    },
+    "cond": null,
+    "box": {
+     "x": 758.01,
+     "y": 863.67,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "ethyne"
+   ],
+   "products": [
+    "bromoethene"
+   ],
+   "typeLabel": "付加",
+   "conditions": "臭化水素を1回付加させる",
+   "cross": false
+  },
+  "ethyne-hydrogen-chloride": {
+   "x": 874.7,
+   "y": 875.71,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "ethyne"
+   ],
+   "products": [
+    "vinyl-chloride"
+   ],
+   "typeLabel": "付加",
+   "conditions": "塩化水素を1回付加させる",
+   "cross": true
+  },
+  "ethyne-partial-hydrogenation": {
+   "x": 839.13,
+   "y": 595.31,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 691.13,
+     "y": 589.31
+    },
+    "cond": null,
+    "box": {
+     "x": 659.13,
+     "y": 581.31,
+     "w": 64,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "ethyne"
+   ],
+   "products": [
+    "ethene"
+   ],
+   "typeLabel": "水素付加",
+   "conditions": "選択的な部分還元触媒で水素を付加させる",
+   "cross": false
+  },
+  "ethyne-silver-acetylide": {
+   "x": 620.9,
+   "y": 795.61,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 544.8,
+     "y": 789.61
+    },
+    "cond": null,
+    "box": {
+     "x": 512.8,
+     "y": 781.61,
+     "w": 64,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "ethyne"
+   ],
+   "products": [
+    "silver-acetylide"
+   ],
+   "typeLabel": "沈殿生成",
+   "conditions": "Ag(I)（硝酸銀のアンモニア水など）を加える",
+   "cross": false
   },
   "formaldehyde-oxidation-formic": {
    "x": 655.5,
@@ -5030,6 +5813,34 @@
    "typeLabel": "異性化",
    "conditions": "塩基性水溶液で異性化させる",
    "cross": false
+  },
+  "glucose-fermentation": {
+   "x": 1884,
+   "y": 948,
+   "tier": "primary",
+   "label": {
+    "side": "E",
+    "type": {
+     "x": 1952,
+     "y": 942
+    },
+    "cond": null,
+    "box": {
+     "x": 1934,
+     "y": 934,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "glucose"
+   ],
+   "products": [
+    "ethanol"
+   ],
+   "typeLabel": "発酵",
+   "conditions": "酵母（酵素系）による発酵",
+   "cross": true
   },
   "glucose-reduction": {
    "x": 2324.63,
@@ -5211,6 +6022,22 @@
    "conditions": "酸・塩基または酵素で加水分解する",
    "cross": false
   },
+  "iir-copolymerization": {
+   "x": 240.07,
+   "y": 77,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "isobutene",
+    "isoprene"
+   ],
+   "products": [
+    "iir"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "イソブテンとイソプレンのカチオン共重合。",
+   "cross": true
+  },
   "isobutene-hydrogen-chloride": {
    "x": 222.4,
    "y": 403.28,
@@ -5225,6 +6052,96 @@
    "typeLabel": "付加",
    "conditions": "塩化水素を付加させる",
    "cross": false
+  },
+  "lactose-hydrolysis": {
+   "x": 2461.5,
+   "y": 1584.56,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "lactose"
+   ],
+   "products": [
+    "glucose",
+    "galactose"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "ラクトースの加水分解。",
+   "cross": false
+  },
+  "maleic-acid-anhydride": {
+   "x": 280,
+   "y": 2909.58,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 248,
+     "y": 2903.58
+    },
+    "cond": null,
+    "box": {
+     "x": 230,
+     "y": 2895.58,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "maleic-acid"
+   ],
+   "products": [
+    "maleic-anhydride"
+   ],
+   "typeLabel": "縮合",
+   "conditions": "加熱する",
+   "cross": false
+  },
+  "maleic-anhydride-hydrolysis": {
+   "x": 800,
+   "y": 2909.58,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "maleic-anhydride"
+   ],
+   "products": [
+    "maleic-acid"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "水と反応させる",
+   "cross": false
+  },
+  "maltose-hydrolysis": {
+   "x": 2366.22,
+   "y": 1589.59,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "maltose"
+   ],
+   "products": [
+    "glucose"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "マルトースの酸または酵素加水分解。",
+   "cross": false
+  },
+  "melamine-resin-condensation": {
+   "x": 495.23,
+   "y": 905.81,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "melamine",
+    "formaldehyde"
+   ],
+   "products": [
+    "melamine-resin"
+   ],
+   "typeLabel": "縮重合",
+   "conditions": "アルデヒドとの付加縮合による熱硬化性樹脂。",
+   "cross": true
   },
   "methane-chlorination": {
    "x": 735.5,
@@ -5254,6 +6171,34 @@
    "conditions": "塩素と混合して紫外線を当てる",
    "cross": false
   },
+  "methanol-cuo-oxidation": {
+   "x": 446.67,
+   "y": 893.18,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 333.09,
+     "y": 887.18
+    },
+    "cond": null,
+    "box": {
+     "x": 315.09,
+     "y": 879.18,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "methanol"
+   ],
+   "products": [
+    "formaldehyde"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "酸化銅(II)を加えて加熱する",
+   "cross": true
+  },
   "methanol-oxidation-formaldehyde": {
    "x": 835.5,
    "y": 979.59,
@@ -5281,6 +6226,34 @@
    "typeLabel": "酸化",
    "conditions": "Dess–Martin 試薬で酸化する",
    "cross": true
+  },
+  "methanol-sodium": {
+   "x": 811.05,
+   "y": 1242.76,
+   "tier": "primary",
+   "label": {
+    "side": "S",
+    "type": {
+     "x": 811.05,
+     "y": 1269.76
+    },
+    "cond": null,
+    "box": {
+     "x": 765.05,
+     "y": 1261.76,
+     "w": 92,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "methanol"
+   ],
+   "products": [
+    "sodium-methoxide"
+   ],
+   "typeLabel": "金属との反応",
+   "conditions": "金属ナトリウムと反応させる",
+   "cross": false
   },
   "methyl-salicylate-hydrolysis": {
    "x": 1115.5,
@@ -5311,6 +6284,21 @@
    "conditions": "水酸化ナトリウム水溶液で加水分解したのち酸を加える",
    "cross": true
   },
+  "mma-polymerization": {
+   "x": 280,
+   "y": 3133.58,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "methyl-methacrylate"
+   ],
+   "products": [
+    "pmma"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "メタクリル酸メチルの付加重合。",
+   "cross": false
+  },
   "nitrobenzene-reduction": {
    "x": 2118.07,
    "y": 912.36,
@@ -5337,6 +6325,37 @@
    ],
    "typeLabel": "還元",
    "conditions": "スズや鉄などの還元剤で還元する",
+   "cross": true
+  },
+  "nylon6-from-aminoacid": {
+   "x": 3955.23,
+   "y": 2215.81,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "6-aminohexanoic-acid"
+   ],
+   "products": [
+    "nylon6"
+   ],
+   "typeLabel": "縮重合",
+   "conditions": "6-アミノヘキサン酸の脱水重縮合。",
+   "cross": true
+  },
+  "nylon66-acid-chloride-condensation": {
+   "x": 3259.5,
+   "y": 2024.62,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "adipoyl-chloride",
+    "hexamethylenediamine"
+   ],
+   "products": [
+    "nylon66"
+   ],
+   "typeLabel": "縮重合",
+   "conditions": "二酸塩化物とジアミンの重縮合",
    "cross": true
   },
   "nylon66-condensation": {
@@ -5367,6 +6386,34 @@
    "typeLabel": "縮重合",
    "conditions": "脱水縮合させる",
    "cross": true
+  },
+  "oleic-acid-neutralization": {
+   "x": 1404.9,
+   "y": 1933.82,
+   "tier": "primary",
+   "label": {
+    "side": "S",
+    "type": {
+     "x": 1404.9,
+     "y": 2026.82
+    },
+    "cond": null,
+    "box": {
+     "x": 1386.9,
+     "y": 2018.82,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "oleic-acid"
+   ],
+   "products": [
+    "sodium-oleate"
+   ],
+   "typeLabel": "中和",
+   "conditions": "水酸化ナトリウム水溶液で中和する",
+   "cross": false
   },
   "oxalic-acid-methanol-esterification": {
    "x": 795.5,
@@ -5441,6 +6488,21 @@
    "conditions": "脱水縮合させる",
    "cross": true
   },
+  "phenol-acetylation": {
+   "x": 2916.5,
+   "y": 550.59,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "phenol"
+   ],
+   "products": [
+    "phenyl-acetate"
+   ],
+   "typeLabel": "アセチル化",
+   "conditions": "無水酢酸でアセチル化する",
+   "cross": true
+  },
   "phenol-acid-neutralization": {
    "x": 2885.5,
    "y": 729.59,
@@ -5469,6 +6531,178 @@
    "conditions": "水酸化ナトリウム水溶液に溶かす",
    "cross": false
   },
+  "phenol-bromination": {
+   "x": 2942.5,
+   "y": 647.62,
+   "tier": "primary",
+   "label": {
+    "side": "E",
+    "type": {
+     "x": 2993.5,
+     "y": 641.62
+    },
+    "cond": null,
+    "box": {
+     "x": 2954.5,
+     "y": 633.62,
+     "w": 78,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "phenol"
+   ],
+   "products": [
+    "2,4,6-tribromophenol"
+   ],
+   "typeLabel": "芳香族置換",
+   "conditions": "臭素水を加える",
+   "cross": false
+  },
+  "phenol-nitration": {
+   "x": 2879.24,
+   "y": 644.39,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 2749.24,
+     "y": 638.39
+    },
+    "cond": null,
+    "box": {
+     "x": 2717.24,
+     "y": 630.39,
+     "w": 64,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "phenol"
+   ],
+   "products": [
+    "picric-acid"
+   ],
+   "typeLabel": "ニトロ化",
+   "conditions": "濃硝酸で逐次ニトロ化する",
+   "cross": false
+  },
+  "phenol-phthalein": {
+   "x": 2888.26,
+   "y": 554.23,
+   "tier": "primary",
+   "label": {
+    "side": "E",
+    "type": {
+     "x": 2982.76,
+     "y": 548.23
+    },
+    "cond": null,
+    "box": {
+     "x": 2964.76,
+     "y": 540.23,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "phenol",
+    "phthalic-anhydride"
+   ],
+   "products": [
+    "phenolphthalein"
+   ],
+   "typeLabel": "縮合",
+   "conditions": "酸触媒で縮合させる",
+   "cross": true
+  },
+  "phenol-resin-condensation": {
+   "x": 1933.55,
+   "y": 713.08,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "phenol",
+    "formaldehyde"
+   ],
+   "products": [
+    "phenol-resin"
+   ],
+   "typeLabel": "縮重合",
+   "conditions": "アルデヒドとの付加縮合による熱硬化性樹脂。",
+   "cross": true
+  },
+  "phthalic-acid-anhydride": {
+   "x": 3008.72,
+   "y": 406.48,
+   "tier": "primary",
+   "label": {
+    "side": "E",
+    "type": {
+     "x": 3040.72,
+     "y": 400.48
+    },
+    "cond": null,
+    "box": {
+     "x": 3022.72,
+     "y": 392.48,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "phthalic-acid"
+   ],
+   "products": [
+    "phthalic-anhydride"
+   ],
+   "typeLabel": "縮合",
+   "conditions": "加熱する",
+   "cross": true
+  },
+  "phthalic-anhydride-hydrolysis": {
+   "x": 3003.64,
+   "y": 436.81,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "phthalic-anhydride"
+   ],
+   "products": [
+    "phthalic-acid"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "水と反応させる",
+   "cross": true
+  },
+  "polyacetylene-polymerization": {
+   "x": 492.36,
+   "y": 710.73,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 446.86,
+     "y": 704.73
+    },
+    "cond": null,
+    "box": {
+     "x": 428.86,
+     "y": 696.73,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "ethyne"
+   ],
+   "products": [
+    "polyacetylene"
+   ],
+   "typeLabel": "重合",
+   "conditions": "触媒重合させる",
+   "cross": true
+  },
   "propan-1-ol-oxidation": {
    "x": 1959.37,
    "y": 737.47,
@@ -5482,6 +6716,49 @@
    ],
    "typeLabel": "酸化",
    "conditions": "Dess–Martin 試薬で酸化する",
+   "cross": true
+  },
+  "propan-2-ol-cuo-oxidation": {
+   "x": 3424.78,
+   "y": 629.59,
+   "tier": "primary",
+   "label": {
+    "side": "E",
+    "type": {
+     "x": 3584.36,
+     "y": 623.59
+    },
+    "cond": null,
+    "box": {
+     "x": 3566.36,
+     "y": 615.59,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "propan-2-ol"
+   ],
+   "products": [
+    "acetone"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "酸化銅(II)を加えて加熱する",
+   "cross": true
+  },
+  "propan-2-ol-iodoform": {
+   "x": 3502.22,
+   "y": 742.7,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "propan-2-ol"
+   ],
+   "products": [
+    "iodoform"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "ヨウ素と水酸化ナトリウムを加える",
    "cross": true
   },
   "propan-2-ol-oxidation": {
@@ -5686,6 +6963,50 @@
    "conditions": "酸・塩基または酵素で加水分解する",
    "cross": false
   },
+  "pva-formalization": {
+   "x": 1091.68,
+   "y": 1345.37,
+   "tier": "primary",
+   "label": {
+    "side": "S",
+    "type": {
+     "x": 1091.68,
+     "y": 1414.37
+    },
+    "cond": null,
+    "box": {
+     "x": 1073.68,
+     "y": 1406.37,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "pva"
+   ],
+   "products": [
+    "vinylon"
+   ],
+   "typeLabel": "縮合",
+   "conditions": "酸触媒でホルムアルデヒドを作用させる",
+   "cross": false
+  },
+  "pvac-hydrolysis": {
+   "x": 1209.5,
+   "y": 974.62,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "pvac"
+   ],
+   "products": [
+    "pva",
+    "acetic-acid"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "ポリ酢酸ビニルを塩基で加水分解し、酢酸塩を酸処理して酢酸にする（主鎖は PVA のまま）。",
+   "cross": true
+  },
   "salicylic-acid-acetylation": {
    "x": 1465.5,
    "y": 1259.59,
@@ -5744,6 +7065,64 @@
    "conditions": "強酸触媒を用いる（Fischer エステル化）",
    "cross": true
   },
+  "sodium-acetate-decarboxylation": {
+   "x": 761.5,
+   "y": 284.56,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 644.37,
+     "y": 278.56
+    },
+    "cond": null,
+    "box": {
+     "x": 626.37,
+     "y": 270.56,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "sodium-acetate"
+   ],
+   "products": [
+    "methane"
+   ],
+   "typeLabel": "分解",
+   "conditions": "ソーダ石灰（CaO 補助）とともに加熱する",
+   "cross": true
+  },
+  "sodium-benzenesulfonate-alkali-fusion": {
+   "x": 2757.79,
+   "y": 982.85,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "sodium-benzenesulfonate"
+   ],
+   "products": [
+    "sodium-phenoxide"
+   ],
+   "typeLabel": "置換",
+   "conditions": "水酸化ナトリウムと融解する",
+   "cross": false
+  },
+  "sodium-benzoate-acidification": {
+   "x": 3926.83,
+   "y": 453.4,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "sodium-benzoate"
+   ],
+   "products": [
+    "benzoic-acid"
+   ],
+   "typeLabel": "中和",
+   "conditions": "塩酸を加える",
+   "cross": false
+  },
   "sodium-phenoxide-acidification": {
    "x": 3185.5,
    "y": 649.59,
@@ -5770,6 +7149,36 @@
    ],
    "typeLabel": "中和",
    "conditions": "強酸を加える",
+   "cross": false
+  },
+  "sodium-phenoxide-carboxylation": {
+   "x": 3179.5,
+   "y": 741.62,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "sodium-phenoxide"
+   ],
+   "products": [
+    "sodium-salicylate"
+   ],
+   "typeLabel": "カルボキシ化",
+   "conditions": "二酸化炭素を加圧下でフェノキシドに作用させる（Kolbe–Schmitt）。",
+   "cross": false
+  },
+  "sodium-salicylate-acidification": {
+   "x": 2217.17,
+   "y": 986.53,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "sodium-salicylate"
+   ],
+   "products": [
+    "salicylic-acid"
+   ],
+   "typeLabel": "中和",
+   "conditions": "サリチル酸塩を酸処理して遊離酸にする。",
    "cross": false
   },
   "starch-hydrolysis-glucose": {
@@ -5828,6 +7237,50 @@
    "conditions": "酵素で加水分解する",
    "cross": false
   },
+  "stearic-acid-neutralization": {
+   "x": 1272.36,
+   "y": 2005.84,
+   "tier": "primary",
+   "label": {
+    "side": "W",
+    "type": {
+     "x": 1186.36,
+     "y": 1999.84
+    },
+    "cond": null,
+    "box": {
+     "x": 1168.36,
+     "y": 1991.84,
+     "w": 36,
+     "h": 16
+    }
+   },
+   "substrates": [
+    "stearic-acid"
+   ],
+   "products": [
+    "sodium-stearate"
+   ],
+   "typeLabel": "中和",
+   "conditions": "水酸化ナトリウム水溶液で中和する",
+   "cross": false
+  },
+  "styrene-butadiene-copolymerization": {
+   "x": 3958.54,
+   "y": 1626.82,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "butadiene",
+    "styrene"
+   ],
+   "products": [
+    "sbr"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "スチレンとブタジエンの共重合。",
+   "cross": true
+  },
   "styrene-polymerization": {
    "x": 3915.5,
    "y": 1469.59,
@@ -5884,6 +7337,68 @@
    "typeLabel": "加水分解",
    "conditions": "酸または酵素（インベルターゼ）で加水分解する",
    "cross": false
+  },
+  "tetrafluoroethylene-polymerization": {
+   "x": 280,
+   "y": 3357.58,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "tetrafluoroethylene"
+   ],
+   "products": [
+    "ptfe"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "テトラフルオロエチレンの付加重合。",
+   "cross": false
+  },
+  "toluene-oxidation-benzoic-acid": {
+   "x": 3926.12,
+   "y": 279.88,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "toluene"
+   ],
+   "products": [
+    "benzoic-acid"
+   ],
+   "typeLabel": "酸化",
+   "conditions": "KMnO4 で酸化したのち酸処理する",
+   "cross": true
+  },
+  "triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid": {
+   "x": 616,
+   "y": 1572.57,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "trilinolein"
+   ],
+   "products": [
+    "glycerol",
+    "linoleic-acid"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "トリアシルグリセロールを完全加水分解してグリセリンと脂肪酸にする。",
+   "cross": true
+  },
+  "triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid": {
+   "x": 673.81,
+   "y": 1473.92,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "tripalmitin"
+   ],
+   "products": [
+    "glycerol",
+    "palmitic-acid"
+   ],
+   "typeLabel": "加水分解",
+   "conditions": "トリアシルグリセロールを完全加水分解してグリセリンと脂肪酸にする。",
+   "cross": true
   },
   "triolein-hydrogenation": {
    "x": 1535.5,
@@ -6002,6 +7517,37 @@
    "typeLabel": "けん化",
    "conditions": "水酸化ナトリウム水溶液と加熱する（けん化）",
    "cross": true
+  },
+  "urea-resin-condensation": {
+   "x": 425.5,
+   "y": 849.59,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "urea",
+    "formaldehyde"
+   ],
+   "products": [
+    "urea-resin"
+   ],
+   "typeLabel": "縮重合",
+   "conditions": "アルデヒドとの付加縮合による熱硬化性樹脂。",
+   "cross": true
+  },
+  "vinyl-acetate-polymerization": {
+   "x": 1143.56,
+   "y": 1314.61,
+   "tier": "secondary",
+   "label": null,
+   "substrates": [
+    "vinyl-acetate"
+   ],
+   "products": [
+    "pvac"
+   ],
+   "typeLabel": "付加重合",
+   "conditions": "酢酸ビニルの付加重合。",
+   "cross": false
   },
   "vinyl-chloride-polymerization": {
    "x": 3915.5,

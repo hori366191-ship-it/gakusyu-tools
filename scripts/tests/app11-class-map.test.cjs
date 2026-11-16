@@ -138,13 +138,15 @@ test('[data] classMap は独立キーで12分類16変換を持ち、既存の物
   assert.equal(CM.nodes.length, 12);
   assert.equal(CM.edges.length, 16);
   assert.equal(D.compounds.length, 427, '既存の物質を混ぜない');
-  assert.equal(D.reactions.length, 86, '既存の反応を混ぜない');
+  assert.equal(D.reactions.length, D.meta.reactionCount, '既存の反応を混ぜない');
   assert.equal(D.meta.compoundCount, 427);
-  assert.equal(D.meta.confirmedReactionCount, 86);
-  assert.equal(D.meta.reactionCount, 86);
+  assert.equal(D.meta.confirmedReactionCount, D.reactions.length);
+  assert.equal(D.meta.reactionCount, D.reactions.length);
   assert.equal(D.meta.classMapNodeCount, 12);
   assert.equal(D.meta.classMapEdgeCount, 16);
-  assert.deepEqual(D.meta.canvas, { x: 0, y: 0, w: 6052, h: 2314 }, 'canvas を拡大しない');
+  assert.equal(D.meta.canvas.x, 0, 'canvas の原点を変えない');
+  assert.equal(D.meta.canvas.y, 0, 'canvas の原点を変えない');
+  assert.ok(D.meta.canvas.w >= 6052 && D.meta.canvas.h >= 2314, 'canvas は縮めない');
 
   const compoundIds = new Set(D.compounds.map((c) => c.id));
   const reactionIds = new Set(D.reactions.map((r) => r.id));
@@ -323,9 +325,9 @@ test('[equation] R記号は式ごとに定義され、両辺で同じ意味に�
   });
 });
 
-test('[data] 一般図の確認は既存86反応へ加算せず、未検証の別データとも書かない', () => {
-  assert.equal(D.meta.confirmedReactionCount, 86);
-  assert.equal(D.meta.reactionCount, 86);
+test('[data] 一般図の確認は既存反応へ加算せず、未検証の別データとも書かない', () => {
+  assert.equal(D.meta.confirmedReactionCount, D.reactions.length);
+  assert.equal(D.meta.reactionCount, D.reactions.length);
   assert.equal(D.meta.classMapEdgeCount, 16);
   assert.match(D.meta.classMapNote, /加算しない/);
   assert.match(D.meta.classMapNote, /未検証の別データではない/);
@@ -455,7 +457,9 @@ test('[geometry] frameは詰めても余白を均し、面積25%以上・辺長�
   assert.ok(frame.y - 1512 >= 60, '棚との間隔: ' + (frame.y - 1512));
   // canvas は広げない
   const canvas = D.meta.canvas;
-  assert.deepEqual(canvas, { x: 0, y: 0, w: 6052, h: 2314 });
+  assert.equal(canvas.x, 0);
+  assert.equal(canvas.y, 0);
+  assert.ok(canvas.w >= 6052 && canvas.h >= 2314);
   assert.ok(frame.x >= canvas.x && frame.y >= canvas.y &&
     frame.x + frame.w <= canvas.x + canvas.w && frame.y + frame.h <= canvas.y + canvas.h);
   assert.ok(area.x >= canvas.x && area.y >= canvas.y &&

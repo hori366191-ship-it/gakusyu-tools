@@ -89,7 +89,7 @@ test('[layout] 短い式は1段のままで、既定のSVGは従来どおり', (
   const stored = storedEquations();
   const inlineWidths = stored.map(({ eq }) => viewBox(S.renderEquation(eq, 'x', OPTS)).w);
   const shortCount = inlineWidths.filter((w) => w <= THRESHOLD).length;
-  assert.equal(shortCount, 6, 'カード1段のままにする短い式の数');
+  assert.equal(shortCount, 7, 'カード1段のままにする短い式の数');
   assert.ok(Math.min.apply(null, inlineWidths) > 500, '最短でも501px程度');
 });
 
@@ -107,7 +107,7 @@ test('[layout] 長い式は反応物→矢印→生成物の2段で幅が縮む�
       assert.ok(viewBox(stack).w < viewBox(inline).w, id + ' の段組みで幅が縮む');
     }
   });
-  assert.equal(stacked, 81, '600px超の式は81（代替経路1件を含む）');
+  assert.equal(stacked, 156, '600px超の式は156（代替経路を含む）');
   assert.equal(APP_JS.includes('var EQUATION_STACK_MIN_WIDTH = 600;'), true, 'カード側のthreshold');
   assert.equal(APP_JS.includes('if (svgViewBoxWidth(svg) > EQUATION_STACK_MIN_WIDTH)'), true);
 });
@@ -166,7 +166,7 @@ test('[layout] 全103図（87反応式 + 一般16）が1段または段組みで
   D.classMap.edges.forEach((edge) => {
     figures.push({ id: 'class:' + edge.id, eq: edge.equation, opts: undefined });
   });
-  assert.equal(figures.length, 103);
+  assert.equal(figures.length, 179);
   let stackCount = 0;
   figures.forEach((fig) => {
     const single = S.renderEquation(fig.eq, fig.id, fig.opts);
@@ -177,7 +177,7 @@ test('[layout] 全103図（87反応式 + 一般16）が1段または段組みで
     assert.equal(svg.includes('data-error="1"'), false, fig.id);
     if (useStack) stackCount++;
   });
-  assert.equal(stackCount, figures.length - 6, '600px以下の6式以外は段組み');
+  assert.equal(stackCount, figures.length - 7, '600px以下の7式以外は段組み');
 });
 
 test('[layout] 段組みの物質groupは左右PAD内に収まり、3〜4項の行が右端で切れない', () => {
@@ -221,7 +221,7 @@ test('[layout] 段組みの物質groupは左右PAD内に収まり、3〜4項の�
       checkedGroups++;
     });
   });
-  assert.equal(figures.length, 103);
+  assert.equal(figures.length, 179);
   assert.ok(wideRowGroups >= 3, '3項以上の行を含む式がある: ' + wideRowGroups);
   const diazo = storedEquations().find((e) => e.id === 'aniline-diazotization');
   assert.ok(diazo.eq.left.length >= 3 && diazo.eq.right.length >= 3, '両辺3項の回帰対象');

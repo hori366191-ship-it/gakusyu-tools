@@ -28,10 +28,10 @@ const HIT_SAMPLE_STEP = 2;
 // data.js 全文のハッシュは一般図の座標を詰めるたびに変わるため、投影ごとに分けて守る。
 // 反応カードの反応式（equation）は意味factsではないため concrete から外し、専用の
 // EQUATION_SHA256 で別に固定する（式を足しても物質・反応・分野・型・状態は変えない）。
-const CONCRETE_SHA256 = '403524da89a06383997425311867ddb08e38a58c04e7b70ead35d96872badf62';
+const CONCRETE_SHA256 = 'ae27680be36950cd30ba9bfe5a49e5ee7513095e759fcd29ba6f65d3550d54ec';
 const CLASS_GEOMETRY_SHA256 = '7f413639125c3a6ea6795c2bc2f54bcc49ac7e27c23cb5120896b17cef5ec224';
 const NOTICE_SHA256 = '0839382096a9683caeb9c7ead3999e95299bc38e7808edfb9577d5ec29ceb8ef';
-const EQUATION_SHA256 = '99ea3f933d0590d629cbcad13dd637b2bf8c058ba024db1b2a445ae4a05271bd';
+const EQUATION_SHA256 = '39020fc69016b28c7d1aeb3a4f894138673f3fbcafcefa0156849c5acd8c3f33';
 
 function concreteFingerprint() {
   const meta = Object.assign({}, D.meta);
@@ -577,11 +577,12 @@ test('[static] 反応線の見た目（幅・色・端点）と data は変え�
     '一般図の配置（12分類・16変換の座標・経路・area/frame）は意図した詰め方だけ');
   assert.equal(D.meta.compoundCount, 427);
   assert.equal(D.meta.requiredCount, 294);
-  assert.equal(D.meta.reactionCount, 86);
-  assert.equal(D.meta.heldReactionCount, 81);
+  assert.equal(D.meta.reactionCount, D.reactions.length);
+  assert.equal(D.meta.heldReactionCount, require(path.join(ROOT, 'scripts', 'app11', 'source-data.cjs')).loadSource().heldReactions.length);
   assert.equal(D.classMap.nodes.length, 12);
   assert.equal(D.classMap.edges.length, 16);
-  assert.equal(D.reactions.filter((r) => !r.label).length, 36, 'ラベルの無い反応は線ヒットで開く');
+  assert.equal(D.reactions.filter((r) => !r.label).length,
+    D.reactions.filter((r) => r.tier !== 'primary').length, 'ラベルの無い反応は線ヒットで開く');
 });
 
 test('[static] 注意枠・一覧・説明・フッターは「このアプリについて」ダイアログへ移し、文言は移動前と同一', () => {

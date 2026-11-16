@@ -1,7 +1,7 @@
 {
  "version": 4,
  "seed": 0,
- "priorityHash": "a3c90d6744811642eba35586b872973c40a6dd4d3c69db1fffd6b299c1422fe2",
+ "priorityHash": "b48d8a4ee53360a1476683e0a4bac5ed9b3070685c928bf5d9815d31428ff222",
  "edges": {
   "2-methylpropan-2-ol-dehydration|in|2-methylpropan-2-ol": {
    "reaction": "2-methylpropan-2-ol-dehydration",
@@ -70,6 +70,50 @@
     [
      214.77,
      275.15
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-anhydride|in|acetic-acid": {
+   "reaction": "acetic-acid-anhydride",
+   "dir": "in",
+   "compound": "acetic-acid",
+   "tier": "primary",
+   "points": [
+    [
+     1341.5,
+     929.59
+    ],
+    [
+     1367.5,
+     929.59
+    ],
+    [
+     1350,
+     930
+    ],
+    [
+     1536.37,
+     1201.49
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-anhydride|out|acetic-anhydride": {
+   "reaction": "acetic-acid-anhydride",
+   "dir": "out",
+   "compound": "acetic-anhydride",
+   "tier": "primary",
+   "points": [
+    [
+     1697.5,
+     1409.59
+    ],
+    [
+     1548.23,
+     1212.23
     ]
    ],
    "gaps": [],
@@ -377,6 +421,222 @@
    "gaps": [],
    "bridges": []
   },
+  "acetic-acid-neutralization|in|acetic-acid": {
+   "reaction": "acetic-acid-neutralization",
+   "dir": "in",
+   "compound": "acetic-acid",
+   "tier": "primary",
+   "points": [
+    [
+     1235.5,
+     946.59
+    ],
+    [
+     1272.92,
+     986.37
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-neutralization|out|sodium-acetate": {
+   "reaction": "acetic-acid-neutralization",
+   "dir": "out",
+   "compound": "sodium-acetate",
+   "tier": "primary",
+   "points": [
+    [
+     1304.25,
+     1064.02
+    ],
+    [
+     1304.25,
+     1000.69
+    ],
+    [
+     1279.67,
+     1000.69
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-sodium-carbonate|in|acetic-acid": {
+   "reaction": "acetic-acid-sodium-carbonate",
+   "dir": "in",
+   "compound": "acetic-acid",
+   "tier": "primary",
+   "points": [
+    [
+     1341.5,
+     929.59
+    ],
+    [
+     1355.5,
+     929.59
+    ],
+    [
+     1410,
+     980
+    ],
+    [
+     1490,
+     990
+    ],
+    [
+     1530.06,
+     1010.75
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-acid-sodium-carbonate|out|sodium-acetate": {
+   "reaction": "acetic-acid-sodium-carbonate",
+   "dir": "out",
+   "compound": "sodium-acetate",
+   "tier": "primary",
+   "points": [
+    [
+     1372.25,
+     1081.02
+    ],
+    [
+     1398.25,
+     1081.02
+    ],
+    [
+     1380,
+     1080
+    ],
+    [
+     1530.09,
+     1015.11
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-anhydride-hydrolysis|in|acetic-anhydride": {
+   "reaction": "acetic-anhydride-hydrolysis",
+   "dir": "in",
+   "compound": "acetic-anhydride",
+   "tier": "secondary",
+   "points": [
+    [
+     1697.5,
+     1409.59
+    ],
+    [
+     1671.5,
+     1409.59
+    ],
+    [
+     1690,
+     1410
+    ],
+    [
+     1510,
+     1270
+    ],
+    [
+     1460,
+     1270
+    ],
+    [
+     1240,
+     1210
+    ],
+    [
+     1210,
+     1130
+    ],
+    [
+     1230,
+     1040
+    ],
+    [
+     1270,
+     970
+    ],
+    [
+     1339.36,
+     1022.76
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetic-anhydride-hydrolysis|out|acetic-acid": {
+   "reaction": "acetic-anhydride-hydrolysis",
+   "dir": "out",
+   "compound": "acetic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     1341.5,
+     929.59
+    ],
+    [
+     1367.5,
+     929.59
+    ],
+    [
+     1350,
+     940
+    ],
+    [
+     1350,
+     960
+    ],
+    [
+     1330,
+     970
+    ],
+    [
+     1327.48,
+     1012.05
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetone-iodoform|in|acetone": {
+   "reaction": "acetone-iodoform",
+   "dir": "in",
+   "compound": "acetone",
+   "tier": "secondary",
+   "points": [
+    [
+     3355.5,
+     606.59
+    ],
+    [
+     3355.5,
+     633.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acetone-iodoform|out|iodoform": {
+   "reaction": "acetone-iodoform",
+   "dir": "out",
+   "compound": "iodoform",
+   "tier": "secondary",
+   "points": [
+    [
+     3404.28,
+     702.6
+    ],
+    [
+     3359.74,
+     648.37
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "acetone-reduction|in|acetone": {
    "reaction": "acetone-reduction",
    "dir": "in",
@@ -408,6 +668,42 @@
     [
      3675.5,
      829.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acrylonitrile-polymerization|in|acrylonitrile": {
+   "reaction": "acrylonitrile-polymerization",
+   "dir": "in",
+   "compound": "acrylonitrile",
+   "tier": "secondary",
+   "points": [
+    [
+     400,
+     2434.58
+    ],
+    [
+     287.92,
+     2460.45
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "acrylonitrile-polymerization|out|pan": {
+   "reaction": "acrylonitrile-polymerization",
+   "dir": "out",
+   "compound": "pan",
+   "tier": "secondary",
+   "points": [
+    [
+     400,
+     2488.58
+    ],
+    [
+     287.92,
+     2462.72
     ]
    ],
    "gaps": [],
@@ -521,6 +817,54 @@
    "gaps": [],
    "bridges": []
   },
+  "alkyne-hydration-ethyne-ethanal|in|ethyne": {
+   "reaction": "alkyne-hydration-ethyne-ethanal",
+   "dir": "in",
+   "compound": "ethyne",
+   "tier": "secondary",
+   "points": [
+    [
+     812.8,
+     800.71
+    ],
+    [
+     838.8,
+     800.71
+    ],
+    [
+     820,
+     800
+    ],
+    [
+     860,
+     720
+    ],
+    [
+     908,
+     740.36
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "alkyne-hydration-ethyne-ethanal|out|ethanal": {
+   "reaction": "alkyne-hydration-ethyne-ethanal",
+   "dir": "out",
+   "compound": "ethanal",
+   "tier": "secondary",
+   "points": [
+    [
+     915.5,
+     772.59
+    ],
+    [
+     915.5,
+     745.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "aniline-acetic-anhydride|in|acetic-anhydride": {
    "reaction": "aniline-acetic-anhydride",
    "dir": "in",
@@ -606,6 +950,186 @@
     [
      2280.33,
      637.42
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aniline-hydrochloride-basification|in|aniline-hydrochloride": {
+   "reaction": "aniline-hydrochloride-basification",
+   "dir": "in",
+   "compound": "aniline-hydrochloride",
+   "tier": "secondary",
+   "points": [
+    [
+     2140.71,
+     624.92
+    ],
+    [
+     2162.71,
+     646.03
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aniline-hydrochloride-basification|out|aniline": {
+   "reaction": "aniline-hydrochloride-basification",
+   "dir": "out",
+   "compound": "aniline",
+   "tier": "secondary",
+   "points": [
+    [
+     2146.5,
+     749.59
+    ],
+    [
+     2146.5,
+     723.59
+    ],
+    [
+     2150,
+     740
+    ],
+    [
+     2190,
+     730
+    ],
+    [
+     2200,
+     710
+    ],
+    [
+     2200,
+     670
+    ],
+    [
+     2165.31,
+     660.83
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aniline-hydrochloride|in|aniline": {
+   "reaction": "aniline-hydrochloride",
+   "dir": "in",
+   "compound": "aniline",
+   "tier": "primary",
+   "points": [
+    [
+     2146.5,
+     749.59
+    ],
+    [
+     2168.5,
+     728.48
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aniline-hydrochloride|out|aniline-hydrochloride": {
+   "reaction": "aniline-hydrochloride",
+   "dir": "out",
+   "compound": "aniline-hydrochloride",
+   "tier": "primary",
+   "points": [
+    [
+     2140.71,
+     624.92
+    ],
+    [
+     2140.71,
+     713.85
+    ],
+    [
+     2170.34,
+     713.85
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "arene-hydrogenation-benzene-cyclohexane|in|benzene": {
+   "reaction": "arene-hydrogenation-benzene-cyclohexane",
+   "dir": "in",
+   "compound": "benzene",
+   "tier": "secondary",
+   "points": [
+    [
+     2571.5,
+     1189.59
+    ],
+    [
+     2549.5,
+     1168.48
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "arene-hydrogenation-benzene-cyclohexane|out|cyclohexane": {
+   "reaction": "arene-hydrogenation-benzene-cyclohexane",
+   "dir": "out",
+   "compound": "cyclohexane",
+   "tier": "secondary",
+   "points": [
+    [
+     2523.85,
+     1140.89
+    ],
+    [
+     2549.85,
+     1140.89
+    ],
+    [
+     2537.7,
+     1159.76
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aromatic-side-chain-oxidation-o-xylene-phthalic-acid|in|o-xylene": {
+   "reaction": "aromatic-side-chain-oxidation-o-xylene-phthalic-acid",
+   "dir": "in",
+   "compound": "o-xylene",
+   "tier": "secondary",
+   "points": [
+    [
+     3123.45,
+     262.36
+    ],
+    [
+     3123.45,
+     288.36
+    ],
+    [
+     3120,
+     270
+    ],
+    [
+     3066.18,
+     306.82
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "aromatic-side-chain-oxidation-o-xylene-phthalic-acid|out|phthalic-acid": {
+   "reaction": "aromatic-side-chain-oxidation-o-xylene-phthalic-acid",
+   "dir": "out",
+   "compound": "phthalic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     3086.72,
+     340.7
+    ],
+    [
+     3064.72,
+     319.6
     ]
    ],
    "gaps": [],
@@ -737,6 +1261,46 @@
    "gaps": [],
    "bridges": []
   },
+  "benzene-chlorine-addition|in|benzene": {
+   "reaction": "benzene-chlorine-addition",
+   "dir": "in",
+   "compound": "benzene",
+   "tier": "primary",
+   "points": [
+    [
+     2571.5,
+     1189.59
+    ],
+    [
+     2593.5,
+     1168.48
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzene-chlorine-addition|out|hexachlorocyclohexane": {
+   "reaction": "benzene-chlorine-addition",
+   "dir": "out",
+   "compound": "hexachlorocyclohexane",
+   "tier": "primary",
+   "points": [
+    [
+     2617.47,
+     1134.63
+    ],
+    [
+     2591.47,
+     1134.63
+    ],
+    [
+     2605.15,
+     1159.22
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "benzene-nitration|in|benzene": {
    "reaction": "benzene-nitration",
    "dir": "in",
@@ -768,6 +1332,92 @@
     [
      2354.54,
      1146.78
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzene-propene-cumene|in|benzene": {
+   "reaction": "benzene-propene-cumene",
+   "dir": "in",
+   "compound": "benzene",
+   "tier": "secondary",
+   "points": [
+    [
+     2639.5,
+     1206.59
+    ],
+    [
+     2665.5,
+     1206.59
+    ],
+    [
+     2650,
+     1200
+    ],
+    [
+     2770,
+     1160
+    ],
+    [
+     2920.09,
+     907.51
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzene-propene-cumene|in|propene": {
+   "reaction": "benzene-propene-cumene",
+   "dir": "in",
+   "compound": "propene",
+   "tier": "secondary",
+   "points": [
+    [
+     3267.5,
+     1029.59
+    ],
+    [
+     3250,
+     1020
+    ],
+    [
+     3190,
+     970
+    ],
+    [
+     2933.8,
+     904.68
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzene-propene-cumene|out|cumene": {
+   "reaction": "benzene-propene-cumene",
+   "dir": "out",
+   "compound": "cumene",
+   "tier": "secondary",
+   "points": [
+    [
+     2785.5,
+     206.59
+    ],
+    [
+     2785.5,
+     232.59
+    ],
+    [
+     2790,
+     220
+    ],
+    [
+     2820,
+     680
+    ],
+    [
+     2924.61,
+     894.46
     ]
    ],
    "gaps": [],
@@ -809,6 +1459,86 @@
    "gaps": [],
    "bridges": []
   },
+  "benzenesulfonic-acid-neutralization|in|benzenesulfonic-acid": {
+   "reaction": "benzenesulfonic-acid-neutralization",
+   "dir": "in",
+   "compound": "benzenesulfonic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     2315.5,
+     1326.59
+    ],
+    [
+     2293.5,
+     1347.7
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzenesulfonic-acid-neutralization|out|sodium-benzenesulfonate": {
+   "reaction": "benzenesulfonic-acid-neutralization",
+   "dir": "out",
+   "compound": "sodium-benzenesulfonate",
+   "tier": "secondary",
+   "points": [
+    [
+     2269.53,
+     1381.55
+    ],
+    [
+     2295.53,
+     1381.55
+    ],
+    [
+     2281.85,
+     1356.96
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzoic-acid-neutralization|in|benzoic-acid": {
+   "reaction": "benzoic-acid-neutralization",
+   "dir": "in",
+   "compound": "benzoic-acid",
+   "tier": "primary",
+   "points": [
+    [
+     4017.5,
+     379.59
+    ],
+    [
+     3962.52,
+     450.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "benzoic-acid-neutralization|out|sodium-benzoate": {
+   "reaction": "benzoic-acid-neutralization",
+   "dir": "out",
+   "compound": "sodium-benzoate",
+   "tier": "primary",
+   "points": [
+    [
+     3945.59,
+     503.37
+    ],
+    [
+     3971.59,
+     503.37
+    ],
+    [
+     3948.81,
+     458.83
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "benzyl-alcohol-oxidation|in|benzyl-alcohol": {
    "reaction": "benzyl-alcohol-oxidation",
    "dir": "in",
@@ -840,6 +1570,42 @@
     [
      3791.9,
      267.27
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "butadiene-polymerization|in|butadiene": {
+   "reaction": "butadiene-polymerization",
+   "dir": "in",
+   "compound": "butadiene",
+   "tier": "secondary",
+   "points": [
+    [
+     3880.54,
+     1692.6
+    ],
+    [
+     3858.54,
+     1713.7
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "butadiene-polymerization|out|br": {
+   "reaction": "butadiene-polymerization",
+   "dir": "out",
+   "compound": "br",
+   "tier": "secondary",
+   "points": [
+    [
+     3811.37,
+     1784.87
+    ],
+    [
+     3850.78,
+     1727.69
     ]
    ],
    "gaps": [],
@@ -1007,6 +1773,214 @@
    "gaps": [],
    "bridges": []
   },
+  "cellulose-acetylation|in|acetic-anhydride": {
+   "reaction": "cellulose-acetylation",
+   "dir": "in",
+   "compound": "acetic-anhydride",
+   "tier": "secondary",
+   "points": [
+    [
+     1697.5,
+     1409.59
+    ],
+    [
+     1683.5,
+     1409.59
+    ],
+    [
+     1455.38,
+     1152.18
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cellulose-acetylation|in|cellulose": {
+   "reaction": "cellulose-acetylation",
+   "dir": "in",
+   "compound": "cellulose",
+   "tier": "secondary",
+   "points": [
+    [
+     1332.96,
+     1270.09
+    ],
+    [
+     1332.96,
+     1244.09
+    ],
+    [
+     1340,
+     1260
+    ],
+    [
+     1430,
+     1180
+    ],
+    [
+     1444.12,
+     1153.23
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cellulose-acetylation|out|acetic-acid": {
+   "reaction": "cellulose-acetylation",
+   "dir": "out",
+   "compound": "acetic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     1235.5,
+     946.59
+    ],
+    [
+     1235.5,
+     972.59
+    ],
+    [
+     1240,
+     960
+    ],
+    [
+     1410,
+     1040
+    ],
+    [
+     1443.62,
+     1141.36
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cellulose-acetylation|out|cellulose-acetate": {
+   "reaction": "cellulose-acetylation",
+   "dir": "out",
+   "compound": "cellulose-acetate",
+   "tier": "secondary",
+   "points": [
+    [
+     1551.93,
+     1083.95
+    ],
+    [
+     1525.93,
+     1083.95
+    ],
+    [
+     1540,
+     1090
+    ],
+    [
+     1456.73,
+     1144.3
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cellulose-hydrolysis|in|cellulose": {
+   "reaction": "cellulose-hydrolysis",
+   "dir": "in",
+   "compound": "cellulose",
+   "tier": "secondary",
+   "points": [
+    [
+     1400.96,
+     1287.09
+    ],
+    [
+     1426.96,
+     1287.09
+    ],
+    [
+     1410,
+     1290
+    ],
+    [
+     1420,
+     1320
+    ],
+    [
+     1670,
+     1420
+    ],
+    [
+     1700,
+     1440
+    ],
+    [
+     1969.26,
+     1487.83
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cellulose-hydrolysis|out|glucose": {
+   "reaction": "cellulose-hydrolysis",
+   "dir": "out",
+   "compound": "glucose",
+   "tier": "secondary",
+   "points": [
+    [
+     2347.5,
+     1629.59
+    ],
+    [
+     2330,
+     1620
+    ],
+    [
+     2060,
+     1610
+    ],
+    [
+     1984.55,
+     1492.56
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cellulose-nitration|in|cellulose": {
+   "reaction": "cellulose-nitration",
+   "dir": "in",
+   "compound": "cellulose",
+   "tier": "secondary",
+   "points": [
+    [
+     1332.96,
+     1304.09
+    ],
+    [
+     1310.96,
+     1325.19
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "cellulose-nitration|out|cellulose-nitrate": {
+   "reaction": "cellulose-nitration",
+   "dir": "out",
+   "compound": "cellulose-nitrate",
+   "tier": "secondary",
+   "points": [
+    [
+     1355.73,
+     1393.13
+    ],
+    [
+     1311.2,
+     1338.91
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "chlorobenzene-dow-phenol|in|chlorobenzene": {
    "reaction": "chlorobenzene-dow-phenol",
    "dir": "in",
@@ -1038,6 +2012,42 @@
     [
      3133.92,
      994.52
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "chloroprene-polymerization|in|chloroprene": {
+   "reaction": "chloroprene-polymerization",
+   "dir": "in",
+   "compound": "chloroprene",
+   "tier": "secondary",
+   "points": [
+    [
+     400,
+     2658.58
+    ],
+    [
+     287.92,
+     2684.45
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "chloroprene-polymerization|out|chloroprene-rubber": {
+   "reaction": "chloroprene-polymerization",
+   "dir": "out",
+   "compound": "chloroprene-rubber",
+   "tier": "secondary",
+   "points": [
+    [
+     400,
+     2712.58
+    ],
+    [
+     287.92,
+     2686.72
     ]
    ],
    "gaps": [],
@@ -1223,6 +2233,110 @@
    "gaps": [],
    "bridges": []
   },
+  "diazonium-substitution-benzenediazonium-chloride-phenol|in|benzenediazonium-chloride": {
+   "reaction": "diazonium-substitution-benzenediazonium-chloride-phenol",
+   "dir": "in",
+   "compound": "benzenediazonium-chloride",
+   "tier": "secondary",
+   "points": [
+    [
+     2540.5,
+     493.59
+    ],
+    [
+     2566.5,
+     493.59
+    ],
+    [
+     2550,
+     490
+    ],
+    [
+     2762.57,
+     550.02
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "diazonium-substitution-benzenediazonium-chloride-phenol|out|phenol": {
+   "reaction": "diazonium-substitution-benzenediazonium-chloride-phenol",
+   "dir": "out",
+   "compound": "phenol",
+   "tier": "secondary",
+   "points": [
+    [
+     2828.5,
+     602.59
+    ],
+    [
+     2802.5,
+     602.59
+    ],
+    [
+     2820,
+     600
+    ],
+    [
+     2777.97,
+     554.19
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "dibromoethene-bromine-addition|in|1,2-dibromoethene": {
+   "reaction": "dibromoethene-bromine-addition",
+   "dir": "in",
+   "compound": "1,2-dibromoethene",
+   "tier": "secondary",
+   "points": [
+    [
+     578.3,
+     638.25
+    ],
+    [
+     552.3,
+     638.25
+    ],
+    [
+     570,
+     650
+    ],
+    [
+     572.58,
+     689.88
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "dibromoethene-bromine-addition|out|1,1,2,2-tetrabromoethane": {
+   "reaction": "dibromoethene-bromine-addition",
+   "dir": "out",
+   "compound": "1,1,2,2-tetrabromoethane",
+   "tier": "secondary",
+   "points": [
+    [
+     510.3,
+     613.26
+    ],
+    [
+     536.3,
+     613.26
+    ],
+    [
+     520,
+     620
+    ],
+    [
+     559.34,
+     690.08
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "ethanal-oxidation-acetic|in|ethanal": {
    "reaction": "ethanal-oxidation-acetic",
    "dir": "in",
@@ -1295,6 +2409,110 @@
    "gaps": [],
    "bridges": []
   },
+  "ethanol-cuo-oxidation|in|ethanol": {
+   "reaction": "ethanol-cuo-oxidation",
+   "dir": "in",
+   "compound": "ethanol",
+   "tier": "primary",
+   "points": [
+    [
+     1129.5,
+     629.59
+    ],
+    [
+     1103.5,
+     629.59
+    ],
+    [
+     1120,
+     630
+    ],
+    [
+     1120,
+     660
+    ],
+    [
+     1173.15,
+     665.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-cuo-oxidation|out|ethanal": {
+   "reaction": "ethanol-cuo-oxidation",
+   "dir": "out",
+   "compound": "ethanal",
+   "tier": "primary",
+   "points": [
+    [
+     983.5,
+     789.59
+    ],
+    [
+     1009.5,
+     789.59
+    ],
+    [
+     990,
+     790
+    ],
+    [
+     1159,
+     673.04
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-dehydration-ethene|in|ethanol": {
+   "reaction": "ethanol-dehydration-ethene",
+   "dir": "in",
+   "compound": "ethanol",
+   "tier": "primary",
+   "points": [
+    [
+     1235.5,
+     612.59
+    ],
+    [
+     1235.5,
+     586.59
+    ],
+    [
+     1240,
+     600
+    ],
+    [
+     1250,
+     450
+    ],
+    [
+     1257.13,
+     436.27
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-dehydration-ethene|out|ethene": {
+   "reaction": "ethanol-dehydration-ethene",
+   "dir": "out",
+   "compound": "ethene",
+   "tier": "primary",
+   "points": [
+    [
+     1235.5,
+     346.59
+    ],
+    [
+     1256.24,
+     420.52
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "ethanol-dehydration-ether|in|ethanol": {
    "reaction": "ethanol-dehydration-ether",
    "dir": "in",
@@ -1326,6 +2544,134 @@
     [
      1106.31,
      545.65
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-dichromate-oxidation-acetic-acid|in|ethanol": {
+   "reaction": "ethanol-dichromate-oxidation-acetic-acid",
+   "dir": "in",
+   "compound": "ethanol",
+   "tier": "secondary",
+   "points": [
+    [
+     1341.5,
+     629.59
+    ],
+    [
+     1367.5,
+     629.59
+    ],
+    [
+     1350,
+     630
+    ],
+    [
+     1350,
+     660
+    ],
+    [
+     1297.85,
+     665.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-dichromate-oxidation-acetic-acid|out|acetic-acid": {
+   "reaction": "ethanol-dichromate-oxidation-acetic-acid",
+   "dir": "out",
+   "compound": "acetic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     1235.5,
+     912.59
+    ],
+    [
+     1235.5,
+     890.59
+    ],
+    [
+     1230,
+     900
+    ],
+    [
+     1150,
+     900
+    ],
+    [
+     1120,
+     800
+    ],
+    [
+     1140,
+     700
+    ],
+    [
+     1302.72,
+     677.32
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-dichromate-oxidation-ethanal|in|ethanol": {
+   "reaction": "ethanol-dichromate-oxidation-ethanal",
+   "dir": "in",
+   "compound": "ethanol",
+   "tier": "primary",
+   "points": [
+    [
+     1129.5,
+     629.59
+    ],
+    [
+     1049.91,
+     591.78
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-dichromate-oxidation-ethanal|out|ethanal": {
+   "reaction": "ethanol-dichromate-oxidation-ethanal",
+   "dir": "out",
+   "compound": "ethanal",
+   "tier": "primary",
+   "points": [
+    [
+     915.5,
+     772.59
+    ],
+    [
+     915.5,
+     746.59
+    ],
+    [
+     920,
+     760
+    ],
+    [
+     930,
+     730
+    ],
+    [
+     880,
+     680
+    ],
+    [
+     880,
+     610
+    ],
+    [
+     920,
+     590
+    ],
+    [
+     1037.79,
+     596.93
     ]
    ],
    "gaps": [],
@@ -1398,6 +2744,62 @@
     [
      966.17,
      713.18
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-sodium|in|ethanol": {
+   "reaction": "ethanol-sodium",
+   "dir": "in",
+   "compound": "ethanol",
+   "tier": "primary",
+   "points": [
+    [
+     1235.5,
+     612.59
+    ],
+    [
+     1235.5,
+     590.59
+    ],
+    [
+     1240,
+     600
+    ],
+    [
+     1204.23,
+     517.88
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethanol-sodium|out|sodium-ethoxide": {
+   "reaction": "ethanol-sodium",
+   "dir": "out",
+   "compound": "sodium-ethoxide",
+   "tier": "primary",
+   "points": [
+    [
+     1135.52,
+     394.99
+    ],
+    [
+     1135.52,
+     420.99
+    ],
+    [
+     1130,
+     410
+    ],
+    [
+     1130,
+     440
+    ],
+    [
+     1198.47,
+     503.04
     ]
    ],
    "gaps": [],
@@ -1583,6 +2985,86 @@
    "gaps": [],
    "bridges": []
   },
+  "ethene-wacker-oxidation|in|ethene": {
+   "reaction": "ethene-wacker-oxidation",
+   "dir": "in",
+   "compound": "ethene",
+   "tier": "secondary",
+   "points": [
+    [
+     1235.5,
+     346.59
+    ],
+    [
+     1235.5,
+     372.59
+    ],
+    [
+     1230,
+     360
+    ],
+    [
+     1330,
+     360
+    ],
+    [
+     1330,
+     300
+    ],
+    [
+     1140,
+     300
+    ],
+    [
+     1060,
+     350
+    ],
+    [
+     1060,
+     410
+    ],
+    [
+     1112.85,
+     461.08
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethene-wacker-oxidation|out|ethanal": {
+   "reaction": "ethene-wacker-oxidation",
+   "dir": "out",
+   "compound": "ethanal",
+   "tier": "secondary",
+   "points": [
+    [
+     915.5,
+     772.59
+    ],
+    [
+     915.5,
+     746.59
+    ],
+    [
+     915.5,
+     758.59
+    ],
+    [
+     630,
+     420
+    ],
+    [
+     1090,
+     460
+    ],
+    [
+     1103.31,
+     473.8
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "ethyl-acetate-hydrolysis|in|ethyl-acetate": {
    "reaction": "ethyl-acetate-hydrolysis",
    "dir": "in",
@@ -1632,6 +3114,120 @@
     [
      1388.43,
      782.52
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyl-acetate-saponification|in|ethyl-acetate": {
+   "reaction": "ethyl-acetate-saponification",
+   "dir": "in",
+   "compound": "ethyl-acetate",
+   "tier": "secondary",
+   "points": [
+    [
+     1235.5,
+     772.59
+    ],
+    [
+     1235.5,
+     750.59
+    ],
+    [
+     1240,
+     760
+    ],
+    [
+     1290,
+     760
+    ],
+    [
+     1580,
+     660
+    ],
+    [
+     1580,
+     600
+    ],
+    [
+     1168.84,
+     597.15
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyl-acetate-saponification|out|ethanol": {
+   "reaction": "ethyl-acetate-saponification",
+   "dir": "out",
+   "compound": "ethanol",
+   "tier": "secondary",
+   "points": [
+    [
+     1129.5,
+     629.59
+    ],
+    [
+     1103.5,
+     629.59
+    ],
+    [
+     1129.5,
+     593.59
+    ],
+    [
+     1173.15,
+     593.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyl-acetate-saponification|out|sodium-acetate": {
+   "reaction": "ethyl-acetate-saponification",
+   "dir": "out",
+   "compound": "sodium-acetate",
+   "tier": "secondary",
+   "points": [
+    [
+     1304.25,
+     1064.02
+    ],
+    [
+     1304.25,
+     1038.02
+    ],
+    [
+     1300,
+     1050
+    ],
+    [
+     1700,
+     1020
+    ],
+    [
+     1850,
+     950
+    ],
+    [
+     1850,
+     890
+    ],
+    [
+     1540,
+     500
+    ],
+    [
+     1380,
+     510
+    ],
+    [
+     1360,
+     530
+    ],
+    [
+     1168.38,
+     597.29
     ]
    ],
    "gaps": [],
@@ -1690,6 +3286,540 @@
     [
      1330.32,
      715.29
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethylbenzene-dehydrogenation|in|ethylbenzene": {
+   "reaction": "ethylbenzene-dehydrogenation",
+   "dir": "in",
+   "compound": "ethylbenzene",
+   "tier": "primary",
+   "points": [
+    [
+     3874.71,
+     1537.97
+    ],
+    [
+     3874.71,
+     1519.97
+    ],
+    [
+     3870,
+     1530
+    ],
+    [
+     3950,
+     1530
+    ],
+    [
+     3951.63,
+     1476.34
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethylbenzene-dehydrogenation|out|styrene": {
+   "reaction": "ethylbenzene-dehydrogenation",
+   "dir": "out",
+   "compound": "styrene",
+   "tier": "primary",
+   "points": [
+    [
+     3967.5,
+     1529.59
+    ],
+    [
+     3941.5,
+     1529.59
+    ],
+    [
+     3963.62,
+     1475.43
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-acetic-acid-vinyl-acetate|in|acetic-acid": {
+   "reaction": "ethyne-acetic-acid-vinyl-acetate",
+   "dir": "in",
+   "compound": "acetic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     1129.5,
+     929.59
+    ],
+    [
+     1073.6,
+     871.32
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-acetic-acid-vinyl-acetate|in|ethyne": {
+   "reaction": "ethyne-acetic-acid-vinyl-acetate",
+   "dir": "in",
+   "compound": "ethyne",
+   "tier": "secondary",
+   "points": [
+    [
+     812.8,
+     800.71
+    ],
+    [
+     838.8,
+     800.71
+    ],
+    [
+     826.8,
+     800.71
+    ],
+    [
+     860,
+     840
+    ],
+    [
+     1050,
+     850
+    ],
+    [
+     1058.24,
+     866.96
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-acetic-acid-vinyl-acetate|out|vinyl-acetate": {
+   "reaction": "ethyne-acetic-acid-vinyl-acetate",
+   "dir": "out",
+   "compound": "vinyl-acetate",
+   "tier": "secondary",
+   "points": [
+    [
+     970.95,
+     1219.51
+    ],
+    [
+     970,
+     1200
+    ],
+    [
+     1020,
+     1160
+    ],
+    [
+     1040,
+     950
+    ],
+    [
+     1070,
+     900
+    ],
+    [
+     1064.07,
+     876.36
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-bromine-addition|in|ethyne": {
+   "reaction": "ethyne-bromine-addition",
+   "dir": "in",
+   "compound": "ethyne",
+   "tier": "secondary",
+   "points": [
+    [
+     744.8,
+     783.71
+    ],
+    [
+     744.8,
+     756.71
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-bromine-addition|out|1,2-dibromoethene": {
+   "reaction": "ethyne-bromine-addition",
+   "dir": "out",
+   "compound": "1,2-dibromoethene",
+   "tier": "secondary",
+   "points": [
+    [
+     646.3,
+     655.25
+    ],
+    [
+     646.3,
+     681.25
+    ],
+    [
+     650,
+     670
+    ],
+    [
+     660,
+     710
+    ],
+    [
+     739.47,
+     742.74
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-copper-acetylide|in|ethyne": {
+   "reaction": "ethyne-copper-acetylide",
+   "dir": "in",
+   "compound": "ethyne",
+   "tier": "primary",
+   "points": [
+    [
+     744.8,
+     817.71
+    ],
+    [
+     725.5,
+     844.66
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-copper-acetylide|out|copper-i-acetylide": {
+   "reaction": "ethyne-copper-acetylide",
+   "dir": "out",
+   "compound": "copper-i-acetylide",
+   "tier": "primary",
+   "points": [
+    [
+     692.99,
+     949.29
+    ],
+    [
+     680,
+     930
+    ],
+    [
+     720.29,
+     859.74
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-full-hydrogenation|in|ethyne": {
+   "reaction": "ethyne-full-hydrogenation",
+   "dir": "in",
+   "compound": "ethyne",
+   "tier": "primary",
+   "points": [
+    [
+     744.8,
+     783.71
+    ],
+    [
+     730,
+     760
+    ],
+    [
+     710,
+     740
+    ],
+    [
+     570,
+     670
+    ],
+    [
+     570,
+     610
+    ],
+    [
+     1160,
+     140
+    ],
+    [
+     1204.92,
+     141.18
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-full-hydrogenation|out|ethane": {
+   "reaction": "ethyne-full-hydrogenation",
+   "dir": "out",
+   "compound": "ethane",
+   "tier": "primary",
+   "points": [
+    [
+     1235.5,
+     106.59
+    ],
+    [
+     1213.5,
+     127.7
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-hydrogen-bromide|in|ethyne": {
+   "reaction": "ethyne-hydrogen-bromide",
+   "dir": "in",
+   "compound": "ethyne",
+   "tier": "primary",
+   "points": [
+    [
+     812.8,
+     800.71
+    ],
+    [
+     838.8,
+     800.71
+    ],
+    [
+     835.76,
+     872.7
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-hydrogen-bromide|out|bromoethene": {
+   "reaction": "ethyne-hydrogen-bromide",
+   "dir": "out",
+   "compound": "bromoethene",
+   "tier": "primary",
+   "points": [
+    [
+     888.33,
+     1177.3
+    ],
+    [
+     870,
+     1160
+    ],
+    [
+     590,
+     1160
+    ],
+    [
+     590,
+     1000
+    ],
+    [
+     780,
+     990
+    ],
+    [
+     843.19,
+     885.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-hydrogen-chloride|in|ethyne": {
+   "reaction": "ethyne-hydrogen-chloride",
+   "dir": "in",
+   "compound": "ethyne",
+   "tier": "secondary",
+   "points": [
+    [
+     812.8,
+     800.71
+    ],
+    [
+     867.77,
+     871.71
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-hydrogen-chloride|out|vinyl-chloride": {
+   "reaction": "ethyne-hydrogen-chloride",
+   "dir": "out",
+   "compound": "vinyl-chloride",
+   "tier": "secondary",
+   "points": [
+    [
+     3967.5,
+     1759.59
+    ],
+    [
+     3941.5,
+     1759.59
+    ],
+    [
+     3950,
+     1760
+    ],
+    [
+     2180,
+     1670
+    ],
+    [
+     1380,
+     1440
+    ],
+    [
+     1280,
+     1440
+    ],
+    [
+     940,
+     1330
+    ],
+    [
+     940,
+     1290
+    ],
+    [
+     810,
+     1220
+    ],
+    [
+     810,
+     980
+    ],
+    [
+     830,
+     910
+    ],
+    [
+     882.41,
+     877.87
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-partial-hydrogenation|in|ethyne": {
+   "reaction": "ethyne-partial-hydrogenation",
+   "dir": "in",
+   "compound": "ethyne",
+   "tier": "primary",
+   "points": [
+    [
+     744.8,
+     783.71
+    ],
+    [
+     744.8,
+     757.71
+    ],
+    [
+     750,
+     770
+    ],
+    [
+     820,
+     700
+    ],
+    [
+     835.79,
+     602.58
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-partial-hydrogenation|out|ethene": {
+   "reaction": "ethyne-partial-hydrogenation",
+   "dir": "out",
+   "compound": "ethene",
+   "tier": "primary",
+   "points": [
+    [
+     1147.5,
+     329.59
+    ],
+    [
+     1121.5,
+     329.59
+    ],
+    [
+     1130,
+     330
+    ],
+    [
+     670,
+     480
+    ],
+    [
+     750,
+     570
+    ],
+    [
+     845.78,
+     590.86
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-silver-acetylide|in|ethyne": {
+   "reaction": "ethyne-silver-acetylide",
+   "dir": "in",
+   "compound": "ethyne",
+   "tier": "primary",
+   "points": [
+    [
+     676.8,
+     800.71
+    ],
+    [
+     660,
+     790
+    ],
+    [
+     628.9,
+     795.94
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "ethyne-silver-acetylide|out|silver-acetylide": {
+   "reaction": "ethyne-silver-acetylide",
+   "dir": "out",
+   "compound": "silver-acetylide",
+   "tier": "primary",
+   "points": [
+    [
+     591.62,
+     892.91
+    ],
+    [
+     591.62,
+     870.91
+    ],
+    [
+     590,
+     880
+    ],
+    [
+     500,
+     880
+    ],
+    [
+     500,
+     820
+    ],
+    [
+     618.92,
+     803.36
     ]
    ],
    "gaps": [],
@@ -1896,6 +4026,70 @@
     [
      2511.79,
      1738.87
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glucose-fermentation|in|glucose": {
+   "reaction": "glucose-fermentation",
+   "dir": "in",
+   "compound": "glucose",
+   "tier": "primary",
+   "points": [
+    [
+     2435.5,
+     1612.59
+    ],
+    [
+     2435.5,
+     1586.59
+    ],
+    [
+     2430,
+     1600
+    ],
+    [
+     2060,
+     1390
+    ],
+    [
+     1900,
+     1020
+    ],
+    [
+     1889.03,
+     954.22
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "glucose-fermentation|out|ethanol": {
+   "reaction": "glucose-fermentation",
+   "dir": "out",
+   "compound": "ethanol",
+   "tier": "primary",
+   "points": [
+    [
+     1341.5,
+     629.59
+    ],
+    [
+     1355.5,
+     629.59
+    ],
+    [
+     1500,
+     770
+    ],
+    [
+     1860,
+     900
+    ],
+    [
+     1876.82,
+     944.47
     ]
    ],
    "gaps": [],
@@ -2341,6 +4535,72 @@
    "gaps": [],
    "bridges": []
   },
+  "iir-copolymerization|in|isobutene": {
+   "reaction": "iir-copolymerization",
+   "dir": "in",
+   "compound": "isobutene",
+   "tier": "secondary",
+   "points": [
+    [
+     238.79,
+     37
+    ],
+    [
+     256.79,
+     37
+    ],
+    [
+     233.14,
+     73
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "iir-copolymerization|in|isoprene": {
+   "reaction": "iir-copolymerization",
+   "dir": "in",
+   "compound": "isoprene",
+   "tier": "secondary",
+   "points": [
+    [
+     260.04,
+     50.08
+    ],
+    [
+     242.04,
+     50.08
+    ],
+    [
+     247.72,
+     74.66
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "iir-copolymerization|out|iir": {
+   "reaction": "iir-copolymerization",
+   "dir": "out",
+   "compound": "iir",
+   "tier": "secondary",
+   "points": [
+    [
+     261.72,
+     97.67
+    ],
+    [
+     235.72,
+     97.67
+    ],
+    [
+     247.87,
+     78.8
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "isobutene-hydrogen-chloride|in|isobutene": {
    "reaction": "isobutene-hydrogen-chloride",
    "dir": "in",
@@ -2376,6 +4636,274 @@
     [
      216.74,
      395.04
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "lactose-hydrolysis|in|lactose": {
+   "reaction": "lactose-hydrolysis",
+   "dir": "in",
+   "compound": "lactose",
+   "tier": "secondary",
+   "points": [
+    [
+     2519.37,
+     1498.72
+    ],
+    [
+     2465.42,
+     1577.58
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "lactose-hydrolysis|out|galactose": {
+   "reaction": "lactose-hydrolysis",
+   "dir": "out",
+   "compound": "galactose",
+   "tier": "secondary",
+   "points": [
+    [
+     2380.29,
+     1691.29
+    ],
+    [
+     2380.29,
+     1665.29
+    ],
+    [
+     2380,
+     1680
+    ],
+    [
+     2720,
+     1680
+    ],
+    [
+     2450,
+     1570
+    ],
+    [
+     2457.11,
+     1591.24
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "lactose-hydrolysis|out|glucose": {
+   "reaction": "lactose-hydrolysis",
+   "dir": "out",
+   "compound": "glucose",
+   "tier": "secondary",
+   "points": [
+    [
+     2435.5,
+     1612.59
+    ],
+    [
+     2457.5,
+     1591.48
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "maleic-acid-anhydride|in|maleic-acid": {
+   "reaction": "maleic-acid-anhydride",
+   "dir": "in",
+   "compound": "maleic-acid",
+   "tier": "primary",
+   "points": [
+    [
+     400,
+     2882.58
+    ],
+    [
+     287.92,
+     2908.45
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "maleic-acid-anhydride|out|maleic-anhydride": {
+   "reaction": "maleic-acid-anhydride",
+   "dir": "out",
+   "compound": "maleic-anhydride",
+   "tier": "primary",
+   "points": [
+    [
+     400,
+     2936.58
+    ],
+    [
+     287.92,
+     2910.72
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "maleic-anhydride-hydrolysis|in|maleic-anhydride": {
+   "reaction": "maleic-anhydride-hydrolysis",
+   "dir": "in",
+   "compound": "maleic-anhydride",
+   "tier": "secondary",
+   "points": [
+    [
+     536,
+     2936.58
+    ],
+    [
+     792.03,
+     2910.23
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "maleic-anhydride-hydrolysis|out|maleic-acid": {
+   "reaction": "maleic-anhydride-hydrolysis",
+   "dir": "out",
+   "compound": "maleic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     536,
+     2882.58
+    ],
+    [
+     792.03,
+     2908.93
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "maltose-hydrolysis|in|maltose": {
+   "reaction": "maltose-hydrolysis",
+   "dir": "in",
+   "compound": "maltose",
+   "tier": "secondary",
+   "points": [
+    [
+     2335.5,
+     1496.59
+    ],
+    [
+     2335.5,
+     1522.59
+    ],
+    [
+     2340,
+     1510
+    ],
+    [
+     2364.07,
+     1581.88
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "maltose-hydrolysis|out|glucose": {
+   "reaction": "maltose-hydrolysis",
+   "dir": "out",
+   "compound": "glucose",
+   "tier": "secondary",
+   "points": [
+    [
+     2347.5,
+     1629.59
+    ],
+    [
+     2321.5,
+     1629.59
+    ],
+    [
+     2373.15,
+     1593.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "melamine-resin-condensation|in|formaldehyde": {
+   "reaction": "melamine-resin-condensation",
+   "dir": "in",
+   "compound": "formaldehyde",
+   "tier": "secondary",
+   "points": [
+    [
+     507.5,
+     849.59
+    ],
+    [
+     481.5,
+     849.59
+    ],
+    [
+     500,
+     860
+    ],
+    [
+     501.78,
+     901.22
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "melamine-resin-condensation|in|melamine": {
+   "reaction": "melamine-resin-condensation",
+   "dir": "in",
+   "compound": "melamine",
+   "tier": "secondary",
+   "points": [
+    [
+     412.71,
+     973.16
+    ],
+    [
+     412.71,
+     947.16
+    ],
+    [
+     420,
+     960
+    ],
+    [
+     489.63,
+     911.53
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "melamine-resin-condensation|out|melamine-resin": {
+   "reaction": "melamine-resin-condensation",
+   "dir": "out",
+   "compound": "melamine-resin",
+   "tier": "secondary",
+   "points": [
+    [
+     486.77,
+     1036.57
+    ],
+    [
+     486.77,
+     1010.57
+    ],
+    [
+     490,
+     1020
+    ],
+    [
+     494.77,
+     913.79
     ]
    ],
    "gaps": [],
@@ -2417,6 +4945,66 @@
    "gaps": [],
    "bridges": []
   },
+  "methanol-cuo-oxidation|in|methanol": {
+   "reaction": "methanol-cuo-oxidation",
+   "dir": "in",
+   "compound": "methanol",
+   "tier": "primary",
+   "points": [
+    [
+     818.5,
+     1129.59
+    ],
+    [
+     810,
+     1110
+    ],
+    [
+     410,
+     1080
+    ],
+    [
+     330,
+     1010
+    ],
+    [
+     340,
+     950
+    ],
+    [
+     453.81,
+     896.78
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "methanol-cuo-oxidation|out|formaldehyde": {
+   "reaction": "methanol-cuo-oxidation",
+   "dir": "out",
+   "compound": "formaldehyde",
+   "tier": "primary",
+   "points": [
+    [
+     507.5,
+     849.59
+    ],
+    [
+     481.5,
+     849.59
+    ],
+    [
+     490,
+     850
+    ],
+    [
+     454.25,
+     890.61
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "methanol-oxidation-formaldehyde|in|methanol": {
    "reaction": "methanol-oxidation-formaldehyde",
    "dir": "in",
@@ -2448,6 +5036,70 @@
     [
      826.56,
      975.12
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "methanol-sodium|in|methanol": {
+   "reaction": "methanol-sodium",
+   "dir": "in",
+   "compound": "methanol",
+   "tier": "primary",
+   "points": [
+    [
+     915.5,
+     1146.59
+    ],
+    [
+     915.5,
+     1172.59
+    ],
+    [
+     910,
+     1160
+    ],
+    [
+     1020,
+     1180
+    ],
+    [
+     1050,
+     1210
+    ],
+    [
+     1050,
+     1270
+    ],
+    [
+     870,
+     1260
+    ],
+    [
+     816.48,
+     1236.88
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "methanol-sodium|out|sodium-methoxide": {
+   "reaction": "methanol-sodium",
+   "dir": "out",
+   "compound": "sodium-methoxide",
+   "tier": "primary",
+   "points": [
+    [
+     859.83,
+     1303.76
+    ],
+    [
+     883.56,
+     1257.03
+    ],
+    [
+     815.29,
+     1249.54
     ]
    ],
    "gaps": [],
@@ -2507,6 +5159,42 @@
    "gaps": [],
    "bridges": []
   },
+  "mma-polymerization|in|methyl-methacrylate": {
+   "reaction": "mma-polymerization",
+   "dir": "in",
+   "compound": "methyl-methacrylate",
+   "tier": "secondary",
+   "points": [
+    [
+     400,
+     3106.58
+    ],
+    [
+     287.92,
+     3132.45
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "mma-polymerization|out|pmma": {
+   "reaction": "mma-polymerization",
+   "dir": "out",
+   "compound": "pmma",
+   "tier": "secondary",
+   "points": [
+    [
+     400,
+     3160.58
+    ],
+    [
+     287.92,
+     3134.72
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "nitrobenzene-reduction|in|nitrobenzene": {
    "reaction": "nitrobenzene-reduction",
    "dir": "in",
@@ -2538,6 +5226,120 @@
     [
      2119.98,
      902.55
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "nylon6-from-aminoacid|in|6-aminohexanoic-acid": {
+   "reaction": "nylon6-from-aminoacid",
+   "dir": "in",
+   "compound": "6-aminohexanoic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     3945.22,
+     2264.58
+    ],
+    [
+     3971.22,
+     2264.58
+    ],
+    [
+     3948.45,
+     2220.05
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "nylon6-from-aminoacid|out|nylon6": {
+   "reaction": "nylon6-from-aminoacid",
+   "dir": "out",
+   "compound": "nylon6",
+   "tier": "secondary",
+   "points": [
+    [
+     3967.5,
+     2159.59
+    ],
+    [
+     3941.5,
+     2159.59
+    ],
+    [
+     3960,
+     2160
+    ],
+    [
+     3890,
+     2160
+    ],
+    [
+     3890,
+     2200
+    ],
+    [
+     3961.78,
+     2211.22
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "nylon66-acid-chloride-condensation|in|adipoyl-chloride": {
+   "reaction": "nylon66-acid-chloride-condensation",
+   "dir": "in",
+   "compound": "adipoyl-chloride",
+   "tier": "secondary",
+   "points": [
+    [
+     3308.28,
+     2085.63
+    ],
+    [
+     3263.74,
+     2031.41
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "nylon66-acid-chloride-condensation|in|hexamethylenediamine": {
+   "reaction": "nylon66-acid-chloride-condensation",
+   "dir": "in",
+   "compound": "hexamethylenediamine",
+   "tier": "secondary",
+   "points": [
+    [
+     3285.5,
+     1996.59
+    ],
+    [
+     3263.5,
+     2017.7
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "nylon66-acid-chloride-condensation|out|nylon66": {
+   "reaction": "nylon66-acid-chloride-condensation",
+   "dir": "out",
+   "compound": "nylon66",
+   "tier": "secondary",
+   "points": [
+    [
+     3203.5,
+     2129.59
+    ],
+    [
+     3221.5,
+     2129.59
+    ],
+    [
+     3253.39,
+     2029.79
     ]
    ],
    "gaps": [],
@@ -2592,6 +5394,62 @@
     [
      3126.88,
      1914.65
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "oleic-acid-neutralization|in|oleic-acid": {
+   "reaction": "oleic-acid-neutralization",
+   "dir": "in",
+   "compound": "oleic-acid",
+   "tier": "primary",
+   "points": [
+    [
+     1539.96,
+     1439.4
+    ],
+    [
+     1539.96,
+     1465.4
+    ],
+    [
+     1540,
+     1450
+    ],
+    [
+     1550,
+     1930
+    ],
+    [
+     1406.94,
+     1926.08
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "oleic-acid-neutralization|out|sodium-oleate": {
+   "reaction": "oleic-acid-neutralization",
+   "dir": "out",
+   "compound": "sodium-oleate",
+   "tier": "primary",
+   "points": [
+    [
+     1360.99,
+     2063.45
+    ],
+    [
+     1360.99,
+     2037.45
+    ],
+    [
+     1449.19,
+     2052.69
+    ],
+    [
+     1402.6,
+     1941.48
     ]
    ],
    "gaps": [],
@@ -2741,6 +5599,42 @@
    "gaps": [],
    "bridges": []
   },
+  "phenol-acetylation|in|phenol": {
+   "reaction": "phenol-acetylation",
+   "dir": "in",
+   "compound": "phenol",
+   "tier": "secondary",
+   "points": [
+    [
+     2916.5,
+     585.59
+    ],
+    [
+     2916.5,
+     558.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-acetylation|out|phenyl-acetate": {
+   "reaction": "phenol-acetylation",
+   "dir": "out",
+   "compound": "phenyl-acetate",
+   "tier": "secondary",
+   "points": [
+    [
+     2889.58,
+     479.62
+    ],
+    [
+     2914.16,
+     542.94
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "phenol-acid-neutralization|in|phenol": {
    "reaction": "phenol-acid-neutralization",
    "dir": "in",
@@ -2777,6 +5671,478 @@
    "gaps": [],
    "bridges": []
   },
+  "phenol-bromination|in|phenol": {
+   "reaction": "phenol-bromination",
+   "dir": "in",
+   "compound": "phenol",
+   "tier": "primary",
+   "points": [
+    [
+     2916.5,
+     619.59
+    ],
+    [
+     2938.5,
+     640.7
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-bromination|out|2,4,6-tribromophenol": {
+   "reaction": "phenol-bromination",
+   "dir": "out",
+   "compound": "2,4,6-tribromophenol",
+   "tier": "primary",
+   "points": [
+    [
+     3041,
+     741.09
+    ],
+    [
+     3041,
+     715.09
+    ],
+    [
+     3040,
+     730
+    ],
+    [
+     2947.82,
+     653.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-nitration|in|phenol": {
+   "reaction": "phenol-nitration",
+   "dir": "in",
+   "compound": "phenol",
+   "tier": "primary",
+   "points": [
+    [
+     2916.5,
+     619.59
+    ],
+    [
+     2916.5,
+     645.59
+    ],
+    [
+     2884.56,
+     638.42
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-nitration|out|picric-acid": {
+   "reaction": "phenol-nitration",
+   "dir": "out",
+   "compound": "picric-acid",
+   "tier": "primary",
+   "points": [
+    [
+     2802.33,
+     674.46
+    ],
+    [
+     2828.33,
+     674.46
+    ],
+    [
+     2810,
+     670
+    ],
+    [
+     2871.41,
+     646.02
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-phthalein|in|phenol": {
+   "reaction": "phenol-phthalein",
+   "dir": "in",
+   "compound": "phenol",
+   "tier": "primary",
+   "points": [
+    [
+     2916.5,
+     585.59
+    ],
+    [
+     2892.29,
+     561.14
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-phthalein|in|phthalic-anhydride": {
+   "reaction": "phenol-phthalein",
+   "dir": "in",
+   "compound": "phthalic-anhydride",
+   "tier": "primary",
+   "points": [
+    [
+     2896.72,
+     423.48
+    ],
+    [
+     2896.72,
+     441.48
+    ],
+    [
+     2900,
+     430
+    ],
+    [
+     2970,
+     430
+    ],
+    [
+     2970,
+     490
+    ],
+    [
+     2888.71,
+     546.25
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-phthalein|out|phenolphthalein": {
+   "reaction": "phenol-phthalein",
+   "dir": "out",
+   "compound": "phenolphthalein",
+   "tier": "primary",
+   "points": [
+    [
+     2907.28,
+     350.05
+    ],
+    [
+     2907.28,
+     376.05
+    ],
+    [
+     2910,
+     360
+    ],
+    [
+     2980,
+     380
+    ],
+    [
+     2970,
+     490
+    ],
+    [
+     2888.94,
+     546.26
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-resin-condensation|in|formaldehyde": {
+   "reaction": "phenol-resin-condensation",
+   "dir": "in",
+   "compound": "formaldehyde",
+   "tier": "secondary",
+   "points": [
+    [
+     643.5,
+     849.59
+    ],
+    [
+     669.5,
+     849.59
+    ],
+    [
+     650,
+     850
+    ],
+    [
+     670,
+     890
+    ],
+    [
+     670,
+     940
+    ],
+    [
+     510,
+     940
+    ],
+    [
+     510,
+     890
+    ],
+    [
+     490,
+     850
+    ],
+    [
+     510,
+     740
+    ],
+    [
+     630,
+     360
+    ],
+    [
+     820,
+     360
+    ],
+    [
+     900,
+     160
+    ],
+    [
+     1580,
+     160
+    ],
+    [
+     1925.59,
+     713.88
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-resin-condensation|in|phenol": {
+   "reaction": "phenol-resin-condensation",
+   "dir": "in",
+   "compound": "phenol",
+   "tier": "secondary",
+   "points": [
+    [
+     2828.5,
+     602.59
+    ],
+    [
+     2810,
+     590
+    ],
+    [
+     2770,
+     570
+    ],
+    [
+     2060,
+     580
+    ],
+    [
+     1960,
+     640
+    ],
+    [
+     1941.5,
+     712.18
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phenol-resin-condensation|out|phenol-resin": {
+   "reaction": "phenol-resin-condensation",
+   "dir": "out",
+   "compound": "phenol-resin",
+   "tier": "secondary",
+   "points": [
+    [
+     1982.32,
+     774.08
+    ],
+    [
+     1982.32,
+     748.08
+    ],
+    [
+     1980,
+     760
+    ],
+    [
+     1970,
+     720
+    ],
+    [
+     1937.79,
+     719.86
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phthalic-acid-anhydride|in|phthalic-acid": {
+   "reaction": "phthalic-acid-anhydride",
+   "dir": "in",
+   "compound": "phthalic-acid",
+   "tier": "primary",
+   "points": [
+    [
+     3018.72,
+     357.7
+    ],
+    [
+     2992.72,
+     357.7
+    ],
+    [
+     3015.5,
+     402.24
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phthalic-acid-anhydride|out|phthalic-anhydride": {
+   "reaction": "phthalic-acid-anhydride",
+   "dir": "out",
+   "compound": "phthalic-anhydride",
+   "tier": "primary",
+   "points": [
+    [
+     2964.72,
+     406.48
+    ],
+    [
+     2990.72,
+     406.48
+    ],
+    [
+     2980,
+     400
+    ],
+    [
+     3000.72,
+     406.48
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phthalic-anhydride-hydrolysis|in|phthalic-anhydride": {
+   "reaction": "phthalic-anhydride-hydrolysis",
+   "dir": "in",
+   "compound": "phthalic-anhydride",
+   "tier": "secondary",
+   "points": [
+    [
+     2964.72,
+     406.48
+    ],
+    [
+     2990.72,
+     406.48
+    ],
+    [
+     2970,
+     410
+    ],
+    [
+     2995.94,
+     434.62
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "phthalic-anhydride-hydrolysis|out|phthalic-acid": {
+   "reaction": "phthalic-anhydride-hydrolysis",
+   "dir": "out",
+   "compound": "phthalic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     3018.72,
+     357.7
+    ],
+    [
+     2992.72,
+     357.7
+    ],
+    [
+     3004.72,
+     357.7
+    ],
+    [
+     2978.72,
+     357.7
+    ],
+    [
+     3010,
+     380
+    ],
+    [
+     3070,
+     380
+    ],
+    [
+     3070,
+     420
+    ],
+    [
+     3009.43,
+     431.29
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "polyacetylene-polymerization|in|ethyne": {
+   "reaction": "polyacetylene-polymerization",
+   "dir": "in",
+   "compound": "ethyne",
+   "tier": "primary",
+   "points": [
+    [
+     676.8,
+     800.71
+    ],
+    [
+     660,
+     780
+    ],
+    [
+     650,
+     780
+    ],
+    [
+     499.89,
+     713.42
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "polyacetylene-polymerization|out|polyacetylene": {
+   "reaction": "polyacetylene-polymerization",
+   "dir": "out",
+   "compound": "polyacetylene",
+   "tier": "primary",
+   "points": [
+    [
+     472.38,
+     737.66
+    ],
+    [
+     498.38,
+     737.66
+    ],
+    [
+     484.71,
+     713.07
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "propan-1-ol-oxidation|in|propan-1-ol": {
    "reaction": "propan-1-ol-oxidation",
    "dir": "in",
@@ -2808,6 +6174,90 @@
     [
      1949.37,
      737.47
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propan-2-ol-cuo-oxidation|in|propan-2-ol": {
+   "reaction": "propan-2-ol-cuo-oxidation",
+   "dir": "in",
+   "compound": "propan-2-ol",
+   "tier": "primary",
+   "points": [
+    [
+     3717.5,
+     829.59
+    ],
+    [
+     3700,
+     820
+    ],
+    [
+     3431.78,
+     633.47
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propan-2-ol-cuo-oxidation|out|acetone": {
+   "reaction": "propan-2-ol-cuo-oxidation",
+   "dir": "out",
+   "compound": "acetone",
+   "tier": "primary",
+   "points": [
+    [
+     3443.5,
+     589.59
+    ],
+    [
+     3469.5,
+     589.59
+    ],
+    [
+     3417.85,
+     625.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propan-2-ol-iodoform|in|propan-2-ol": {
+   "reaction": "propan-2-ol-iodoform",
+   "dir": "in",
+   "compound": "propan-2-ol",
+   "tier": "secondary",
+   "points": [
+    [
+     3717.5,
+     829.59
+    ],
+    [
+     3700,
+     820
+    ],
+    [
+     3509.87,
+     745.04
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "propan-2-ol-iodoform|out|iodoform": {
+   "reaction": "propan-2-ol-iodoform",
+   "dir": "out",
+   "compound": "iodoform",
+   "tier": "secondary",
+   "points": [
+    [
+     3472.28,
+     719.6
+    ],
+    [
+     3494.44,
+     740.86
     ]
    ],
    "gaps": [],
@@ -3223,6 +6673,124 @@
    "gaps": [],
    "bridges": []
   },
+  "pva-formalization|in|pva": {
+   "reaction": "pva-formalization",
+   "dir": "in",
+   "compound": "pva",
+   "tier": "primary",
+   "points": [
+    [
+     1090.4,
+     1305.37
+    ],
+    [
+     1116.4,
+     1305.37
+    ],
+    [
+     1084.75,
+     1341.37
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "pva-formalization|out|vinylon": {
+   "reaction": "pva-formalization",
+   "dir": "out",
+   "compound": "vinylon",
+   "tier": "primary",
+   "points": [
+    [
+     1123.47,
+     1442.01
+    ],
+    [
+     1123.47,
+     1416.01
+    ],
+    [
+     1123.47,
+     1428.01
+    ],
+    [
+     1093.84,
+     1353.07
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "pvac-hydrolysis|in|pvac": {
+   "reaction": "pvac-hydrolysis",
+   "dir": "in",
+   "compound": "pvac",
+   "tier": "secondary",
+   "points": [
+    [
+     1212.84,
+     1337.61
+    ],
+    [
+     1200,
+     1320
+    ],
+    [
+     1209.57,
+     982.62
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "pvac-hydrolysis|out|acetic-acid": {
+   "reaction": "pvac-hydrolysis",
+   "dir": "out",
+   "compound": "acetic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     1235.5,
+     946.59
+    ],
+    [
+     1213.5,
+     967.7
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "pvac-hydrolysis|out|pva": {
+   "reaction": "pvac-hydrolysis",
+   "dir": "out",
+   "compound": "pva",
+   "tier": "secondary",
+   "points": [
+    [
+     1022.4,
+     1288.37
+    ],
+    [
+     1022.4,
+     1262.37
+    ],
+    [
+     1020,
+     1280
+    ],
+    [
+     1200,
+     1150
+    ],
+    [
+     1205.56,
+     981.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "salicylic-acid-acetylation|in|acetic-anhydride": {
    "reaction": "salicylic-acid-acetylation",
    "dir": "in",
@@ -3331,6 +6899,202 @@
    "gaps": [],
    "bridges": []
   },
+  "sodium-acetate-decarboxylation|in|sodium-acetate": {
+   "reaction": "sodium-acetate-decarboxylation",
+   "dir": "in",
+   "compound": "sodium-acetate",
+   "tier": "primary",
+   "points": [
+    [
+     1304.25,
+     1064.02
+    ],
+    [
+     1304.25,
+     1038.02
+    ],
+    [
+     1304.25,
+     1050.02
+    ],
+    [
+     1304.25,
+     1028.02
+    ],
+    [
+     1700,
+     1020
+    ],
+    [
+     2030,
+     850
+    ],
+    [
+     2060,
+     820
+    ],
+    [
+     2060,
+     760
+    ],
+    [
+     1780,
+     460
+    ],
+    [
+     1560,
+     150
+    ],
+    [
+     890,
+     160
+    ],
+    [
+     840,
+     260
+    ],
+    [
+     766.01,
+     291.17
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sodium-acetate-decarboxylation|out|methane": {
+   "reaction": "sodium-acetate-decarboxylation",
+   "dir": "out",
+   "compound": "methane",
+   "tier": "primary",
+   "points": [
+    [
+     735.5,
+     312.59
+    ],
+    [
+     757.5,
+     291.48
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sodium-benzenesulfonate-alkali-fusion|in|sodium-benzenesulfonate": {
+   "reaction": "sodium-benzenesulfonate-alkali-fusion",
+   "dir": "in",
+   "compound": "sodium-benzenesulfonate",
+   "tier": "secondary",
+   "points": [
+    [
+     2269.53,
+     1381.55
+    ],
+    [
+     2295.53,
+     1381.55
+    ],
+    [
+     2280,
+     1380
+    ],
+    [
+     2760,
+     1190
+    ],
+    [
+     2770,
+     1030
+    ],
+    [
+     2751.28,
+     987.51
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sodium-benzenesulfonate-alkali-fusion|out|sodium-phenoxide": {
+   "reaction": "sodium-benzenesulfonate-alkali-fusion",
+   "dir": "out",
+   "compound": "sodium-phenoxide",
+   "tier": "secondary",
+   "points": [
+    [
+     3085.5,
+     696.59
+    ],
+    [
+     3059.5,
+     696.59
+    ],
+    [
+     3080,
+     700
+    ],
+    [
+     3080,
+     720
+    ],
+    [
+     3120,
+     730
+    ],
+    [
+     3120,
+     790
+    ],
+    [
+     2760,
+     960
+    ],
+    [
+     2764.27,
+     978.16
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sodium-benzoate-acidification|in|sodium-benzoate": {
+   "reaction": "sodium-benzoate-acidification",
+   "dir": "in",
+   "compound": "sodium-benzoate",
+   "tier": "secondary",
+   "points": [
+    [
+     3877.59,
+     486.37
+    ],
+    [
+     3877.59,
+     460.37
+    ],
+    [
+     3921.21,
+     459.09
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sodium-benzoate-acidification|out|benzoic-acid": {
+   "reaction": "sodium-benzoate-acidification",
+   "dir": "out",
+   "compound": "benzoic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     4017.5,
+     379.59
+    ],
+    [
+     3934.08,
+     450.02
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "sodium-phenoxide-acidification|in|sodium-phenoxide": {
    "reaction": "sodium-phenoxide-acidification",
    "dir": "in",
@@ -3362,6 +7126,98 @@
     [
      3175.65,
      647.87
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sodium-phenoxide-carboxylation|in|sodium-phenoxide": {
+   "reaction": "sodium-phenoxide-carboxylation",
+   "dir": "in",
+   "compound": "sodium-phenoxide",
+   "tier": "secondary",
+   "points": [
+    [
+     3153.5,
+     713.59
+    ],
+    [
+     3175.5,
+     734.7
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sodium-phenoxide-carboxylation|out|sodium-salicylate": {
+   "reaction": "sodium-phenoxide-carboxylation",
+   "dir": "out",
+   "compound": "sodium-salicylate",
+   "tier": "secondary",
+   "points": [
+    [
+     3228.28,
+     802.63
+    ],
+    [
+     3183.74,
+     748.41
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sodium-salicylate-acidification|in|sodium-salicylate": {
+   "reaction": "sodium-salicylate-acidification",
+   "dir": "in",
+   "compound": "sodium-salicylate",
+   "tier": "secondary",
+   "points": [
+    [
+     3160.28,
+     819.63
+    ],
+    [
+     3140,
+     810
+    ],
+    [
+     2225.06,
+     985.23
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "sodium-salicylate-acidification|out|salicylic-acid": {
+   "reaction": "sodium-salicylate-acidification",
+   "dir": "out",
+   "compound": "salicylic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     1403.5,
+     1129.59
+    ],
+    [
+     1429.5,
+     1129.59
+    ],
+    [
+     1410,
+     1130
+    ],
+    [
+     1560,
+     1050
+    ],
+    [
+     2010,
+     970
+    ],
+    [
+     2209.27,
+     987.78
     ]
    ],
    "gaps": [],
@@ -3434,6 +7290,116 @@
     [
      2244.44,
      1525.12
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "stearic-acid-neutralization|in|stearic-acid": {
+   "reaction": "stearic-acid-neutralization",
+   "dir": "in",
+   "compound": "stearic-acid",
+   "tier": "primary",
+   "points": [
+    [
+     1395.5,
+     1666.59
+    ],
+    [
+     1395.5,
+     1692.59
+    ],
+    [
+     1400,
+     1680
+    ],
+    [
+     1310,
+     1780
+    ],
+    [
+     1274.97,
+     1998.28
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "stearic-acid-neutralization|out|sodium-stearate": {
+   "reaction": "stearic-acid-neutralization",
+   "dir": "out",
+   "compound": "sodium-stearate",
+   "tier": "primary",
+   "points": [
+    [
+     1235.5,
+     2112.59
+    ],
+    [
+     1270.07,
+     2013.51
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "styrene-butadiene-copolymerization|in|butadiene": {
+   "reaction": "styrene-butadiene-copolymerization",
+   "dir": "in",
+   "compound": "butadiene",
+   "tier": "secondary",
+   "points": [
+    [
+     3948.54,
+     1675.6
+    ],
+    [
+     3974.54,
+     1675.6
+    ],
+    [
+     3951.76,
+     1631.06
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "styrene-butadiene-copolymerization|in|styrene": {
+   "reaction": "styrene-butadiene-copolymerization",
+   "dir": "in",
+   "compound": "styrene",
+   "tier": "secondary",
+   "points": [
+    [
+     4035.5,
+     1546.59
+    ],
+    [
+     3963.51,
+     1620.55
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "styrene-butadiene-copolymerization|out|sbr": {
+   "reaction": "styrene-butadiene-copolymerization",
+   "dir": "out",
+   "compound": "sbr",
+   "tier": "secondary",
+   "points": [
+    [
+     3934.6,
+     1630.06
+    ],
+    [
+     3960.6,
+     1630.06
+    ],
+    [
+     3950.55,
+     1627.1
     ]
    ],
    "gaps": [],
@@ -3524,6 +7490,226 @@
     [
      2525.57,
      1628.42
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "tetrafluoroethylene-polymerization|in|tetrafluoroethylene": {
+   "reaction": "tetrafluoroethylene-polymerization",
+   "dir": "in",
+   "compound": "tetrafluoroethylene",
+   "tier": "secondary",
+   "points": [
+    [
+     400,
+     3330.58
+    ],
+    [
+     287.92,
+     3356.45
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "tetrafluoroethylene-polymerization|out|ptfe": {
+   "reaction": "tetrafluoroethylene-polymerization",
+   "dir": "out",
+   "compound": "ptfe",
+   "tier": "secondary",
+   "points": [
+    [
+     400,
+     3384.58
+    ],
+    [
+     287.92,
+     3358.72
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "toluene-oxidation-benzoic-acid|in|toluene": {
+   "reaction": "toluene-oxidation-benzoic-acid",
+   "dir": "in",
+   "compound": "toluene",
+   "tier": "secondary",
+   "points": [
+    [
+     3926.82,
+     217.15
+    ],
+    [
+     3952.82,
+     217.15
+    ],
+    [
+     3920.27,
+     274.42
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "toluene-oxidation-benzoic-acid|out|benzoic-acid": {
+   "reaction": "toluene-oxidation-benzoic-acid",
+   "dir": "out",
+   "compound": "benzoic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     4017.5,
+     379.59
+    ],
+    [
+     3991.5,
+     379.59
+    ],
+    [
+     4010,
+     380
+    ],
+    [
+     3932.9,
+     284.12
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid|in|trilinolein": {
+   "reaction": "triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid",
+   "dir": "in",
+   "compound": "trilinolein",
+   "tier": "secondary",
+   "points": [
+    [
+     572.13,
+     1544.11
+    ],
+    [
+     572.13,
+     1570.11
+    ],
+    [
+     610.45,
+     1566.82
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid|out|glycerol": {
+   "reaction": "triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid",
+   "dir": "out",
+   "compound": "glycerol",
+   "tier": "secondary",
+   "points": [
+    [
+     729.5,
+     1529.59
+    ],
+    [
+     710,
+     1520
+    ],
+    [
+     623.85,
+     1571.03
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid|out|linoleic-acid": {
+   "reaction": "triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid",
+   "dir": "out",
+   "compound": "linoleic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     604.53,
+     1608.26
+    ],
+    [
+     614.3,
+     1580.39
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid|in|tripalmitin": {
+   "reaction": "triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid",
+   "dir": "in",
+   "compound": "tripalmitin",
+   "tier": "secondary",
+   "points": [
+    [
+     651.02,
+     1358.61
+    ],
+    [
+     651.02,
+     1384.61
+    ],
+    [
+     650,
+     1370
+    ],
+    [
+     520,
+     1410
+    ],
+    [
+     520,
+     1460
+    ],
+    [
+     672.45,
+     1466.04
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid|out|glycerol": {
+   "reaction": "triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid",
+   "dir": "out",
+   "compound": "glycerol",
+   "tier": "secondary",
+   "points": [
+    [
+     729.5,
+     1529.59
+    ],
+    [
+     681.38,
+     1476.52
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid|out|palmitic-acid": {
+   "reaction": "triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid",
+   "dir": "out",
+   "compound": "palmitic-acid",
+   "tier": "secondary",
+   "points": [
+    [
+     672.53,
+     1433.92
+    ],
+    [
+     698.53,
+     1433.92
+    ],
+    [
+     666.88,
+     1469.92
     ]
    ],
    "gaps": [],
@@ -3797,6 +7983,156 @@
    "gaps": [],
    "bridges": []
   },
+  "urea-resin-condensation|in|formaldehyde": {
+   "reaction": "urea-resin-condensation",
+   "dir": "in",
+   "compound": "formaldehyde",
+   "tier": "secondary",
+   "points": [
+    [
+     507.5,
+     849.59
+    ],
+    [
+     490,
+     840
+    ],
+    [
+     433.5,
+     849.59
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "urea-resin-condensation|in|urea": {
+   "reaction": "urea-resin-condensation",
+   "dir": "in",
+   "compound": "urea",
+   "tier": "secondary",
+   "points": [
+    [
+     328.16,
+     773.52
+    ],
+    [
+     354.16,
+     773.52
+    ],
+    [
+     340,
+     780
+    ],
+    [
+     418.23,
+     846.25
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "urea-resin-condensation|out|urea-resin": {
+   "reaction": "urea-resin-condensation",
+   "dir": "out",
+   "compound": "urea-resin",
+   "tier": "secondary",
+   "points": [
+    [
+     408.71,
+     685.37
+    ],
+    [
+     408.71,
+     711.37
+    ],
+    [
+     410,
+     700
+    ],
+    [
+     320,
+     710
+    ],
+    [
+     180,
+     750
+    ],
+    [
+     140,
+     800
+    ],
+    [
+     140,
+     850
+    ],
+    [
+     370,
+     860
+    ],
+    [
+     424.76,
+     841.62
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "vinyl-acetate-polymerization|in|vinyl-acetate": {
+   "reaction": "vinyl-acetate-polymerization",
+   "dir": "in",
+   "compound": "vinyl-acetate",
+   "tier": "secondary",
+   "points": [
+    [
+     1038.95,
+     1236.51
+    ],
+    [
+     1064.95,
+     1236.51
+    ],
+    [
+     1050,
+     1240
+    ],
+    [
+     1100,
+     1280
+    ],
+    [
+     1100,
+     1310
+    ],
+    [
+     1136.27,
+     1311.31
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
+  "vinyl-acetate-polymerization|out|pvac": {
+   "reaction": "vinyl-acetate-polymerization",
+   "dir": "out",
+   "compound": "pvac",
+   "tier": "secondary",
+   "points": [
+    [
+     1144.84,
+     1354.61
+    ],
+    [
+     1118.84,
+     1354.61
+    ],
+    [
+     1150.49,
+     1318.61
+    ]
+   ],
+   "gaps": [],
+   "bridges": []
+  },
   "vinyl-chloride-polymerization|in|vinyl-chloride": {
    "reaction": "vinyl-chloride-polymerization",
    "dir": "in",
@@ -3835,25 +8171,25 @@
   }
  },
  "stats": {
-  "acuteCrossings": 4,
-  "bends": 21,
+  "acuteCrossings": 39,
+  "bends": 338,
   "bridgedCrossings": 0,
-  "clearanceViolations": 3,
-  "crossings": 38,
-  "crossingsPP": 0,
-  "crossingsPS": 18,
-  "crossingsSS": 20,
-  "edges": 207,
+  "clearanceViolations": 68,
+  "crossings": 346,
+  "crossingsPP": 47,
+  "crossingsPS": 189,
+  "crossingsSS": 110,
+  "edges": 375,
   "labelPenetrations": 0,
   "markerPenetrations": 0,
-  "maxBends": 6,
+  "maxBends": 11,
   "nodePenetrations": 0,
-  "overlapSegments": 0,
-  "primaryBranches": 117,
-  "primaryLength": 17266.88,
-  "secondaryBranches": 90,
-  "secondaryLength": 16178.45,
-  "totalLength": 33445,
-  "unbridgedAcute": 4
+  "overlapSegments": 1,
+  "primaryBranches": 178,
+  "primaryLength": 33186.6,
+  "secondaryBranches": 197,
+  "secondaryLength": 46457.59,
+  "totalLength": 79644,
+  "unbridgedAcute": 39
  }
 }

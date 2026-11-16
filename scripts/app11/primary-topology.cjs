@@ -25,8 +25,10 @@ function loadJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
-function buildPrimaryGraph(source) {
-  const primaries = source.reactions.filter((r) => source.priority.entries.get(r.id).tier === 'primary');
+function buildPrimaryGraph(source, legacyIds) {
+  const filter = legacyIds ? new Set(legacyIds) : null;
+  const primaries = source.reactions.filter((r) =>
+    source.priority.entries.get(r.id).tier === 'primary' && (!filter || filter.has(r.id)));
   const nodes = new Map();
   const edges = [];
   for (const reaction of primaries) {
@@ -184,7 +186,9 @@ function assertPlanarCertificate(certificate, graph, rotation) {
   return verifyCertificate(graph, rotation);
 }
 
-function loadTopology(source) {
+function loadTopology(source, opts) {
+  const options = opts || {};
+  const legacy = options.legacy || null;
   if (!fs.existsSync(TOPOLOGY_PATH)) {
     if (fs.existsSync(NONPLANAR_PATH)) {
       const report = loadJson(NONPLANAR_PATH);
@@ -194,11 +198,16 @@ function loadTopology(source) {
       'scripts/app11/planarity/requirements.txt の環境で embed-primary.py を実行してください。');
   }
   const certificate = loadJson(TOPOLOGY_PATH);
-  if (certificate.meta.inputHash !== source.priorityHash) {
+  // 証明書は従来の主要（既存が凍結した 50 反応）だけを対象にする。
+  // 高校標準として後から追加する主要反応は平面性の証明対象外（交差許容）とし、
+  // 追加のたびに証明書を作り直さない。
+  const legacyIds = legacy ? Object.keys(legacy.reactions).sort() : null;
+  const expectedHash = legacyIds ? legacyDigest(source, legacyIds) : source.priorityHash;
+  if (certificate.meta.inputHash !== expectedHash) {
     throw new Error('primary-topology.json が priority/reactions と不一致（入力hash）。' +
       'embed-primary.py を再実行してください。');
   }
-  const graph = buildPrimaryGraph(source);
+  const graph = buildPrimaryGraph(source, legacyIds);
   if (graph.nodes.size !== certificate.meta.nodes || graph.edges.length !== certificate.meta.edges) {
     throw new Error('primary-topology.json の頂点数/辺数が現データと一致しない。embed-primary.py を再実行してください。');
   }
@@ -217,8 +226,20 @@ function loadTopology(source) {
     blocks: certificate.blocks || [],
     articulations: certificate.articulations || [],
     secondary: certificate.secondary || [],
-    nodeFaces: certificate.nodeFaces || {}
+    nodeFaces: certificate.nodeFaces || {},
+    legacyScoped: !!legacyIds
   };
+}
+
+/**
+ * 凍結した既存反応だけの priority hash。embed-primary.py と同じ行形式。
+ * 追加反応では変化しないため、既存の平面性証明書をそのまま使い続けられる。
+ */
+function legacyDigest(source, legacyIds) {
+  const ids = new Set(legacyIds);
+  const reactions = source.reactions.filter((r) => ids.has(r.id));
+  const entries = new Map([...source.priority.entries].filter(([id]) => ids.has(id)));
+  return S.digestPriority(reactions, entries);
 }
 
 /**
@@ -239,6 +260,7 @@ module.exports = {
   TOPOLOGY_PATH,
   NONPLANAR_PATH,
   buildPrimaryGraph,
+  legacyDigest,
   components,
   traverseFaces,
   verifyCertificate,

@@ -1,0 +1,4707 @@
+{
+  "version": 1,
+  "title": "app11 高校化学カバレッジ台帳",
+  "note": "教育項目の正本。level=standard は通常モードで公開済みの反応だけ、advanced は通常またはアカデミックで公開済み、held は根拠待ち、missing-material は427物質に未収録、card-only は既存カード/注記または未対応UIを示す。全高校範囲の完全網羅を主張しない。",
+  "updated": "2026-11-17",
+  "importantReview": {
+    "status": "confirmed",
+    "expectedCount": 47,
+    "note": "高校重要47項目: 新A26 + 昇格B20 + TNT保留1。",
+    "items": [
+      {
+        "id": "standard-maleic-acid-anhydride",
+        "level": "standard"
+      },
+      {
+        "id": "standard-phthalic-acid-anhydride",
+        "level": "standard"
+      },
+      {
+        "id": "standard-ethanol-dehydration-ethene",
+        "level": "standard"
+      },
+      {
+        "id": "standard-ethanol-sodium",
+        "level": "standard"
+      },
+      {
+        "id": "standard-methanol-sodium",
+        "level": "standard"
+      },
+      {
+        "id": "standard-glucose-fermentation",
+        "level": "standard"
+      },
+      {
+        "id": "standard-pva-formalization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-acetic-acid-neutralization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-acetic-acid-sodium-carbonate",
+        "level": "standard"
+      },
+      {
+        "id": "standard-benzoic-acid-neutralization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-stearic-acid-neutralization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-oleic-acid-neutralization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-aniline-hydrochloride",
+        "level": "standard"
+      },
+      {
+        "id": "standard-phenol-bromination",
+        "level": "standard"
+      },
+      {
+        "id": "standard-ethyne-partial-hydrogenation",
+        "level": "standard"
+      },
+      {
+        "id": "standard-ethyne-full-hydrogenation",
+        "level": "standard"
+      },
+      {
+        "id": "standard-ethyne-hydrogen-bromide",
+        "level": "standard"
+      },
+      {
+        "id": "standard-ethyne-silver-acetylide",
+        "level": "standard"
+      },
+      {
+        "id": "standard-ethyne-copper-acetylide",
+        "level": "standard"
+      },
+      {
+        "id": "standard-sodium-acetate-decarboxylation",
+        "level": "standard"
+      },
+      {
+        "id": "standard-acetic-acid-anhydride",
+        "level": "standard"
+      },
+      {
+        "id": "standard-benzene-chlorine-addition",
+        "level": "standard"
+      },
+      {
+        "id": "standard-phenol-nitration",
+        "level": "standard"
+      },
+      {
+        "id": "standard-phenol-phthalein",
+        "level": "standard"
+      },
+      {
+        "id": "standard-polyacetylene-polymerization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-ethylbenzene-dehydrogenation",
+        "level": "standard"
+      },
+      {
+        "id": "standard-sodium-phenoxide-carboxylation",
+        "level": "standard"
+      },
+      {
+        "id": "standard-sodium-salicylate-acidification",
+        "level": "standard"
+      },
+      {
+        "id": "standard-maltose-hydrolysis",
+        "level": "standard"
+      },
+      {
+        "id": "standard-lactose-hydrolysis",
+        "level": "standard"
+      },
+      {
+        "id": "standard-cellulose-hydrolysis",
+        "level": "standard"
+      },
+      {
+        "id": "standard-cellulose-acetylation",
+        "level": "standard"
+      },
+      {
+        "id": "standard-cellulose-nitration",
+        "level": "standard"
+      },
+      {
+        "id": "standard-tetrafluoroethylene-polymerization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-vinyl-acetate-polymerization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-mma-polymerization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-acrylonitrile-polymerization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-butadiene-polymerization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-chloroprene-polymerization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-styrene-butadiene-copolymerization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-iir-copolymerization",
+        "level": "standard"
+      },
+      {
+        "id": "standard-pvac-hydrolysis",
+        "level": "standard"
+      },
+      {
+        "id": "standard-nylon6-from-aminoacid",
+        "level": "standard"
+      },
+      {
+        "id": "standard-urea-resin-condensation",
+        "level": "standard"
+      },
+      {
+        "id": "standard-melamine-resin-condensation",
+        "level": "standard"
+      },
+      {
+        "id": "standard-phenol-resin-condensation",
+        "level": "standard"
+      },
+      {
+        "id": "held-toluene-trinitration",
+        "level": "held"
+      }
+    ]
+  },
+  "levels": {
+    "standard": "通常モードの確認済み反応として公開済み。academic-only では standard を満たさない。",
+    "advanced": "通常モードまたはアカデミックモードで公開済み。大学レベルの一般則を含む。",
+    "held": "具体的な根拠（教材の節・URL）を確認するまで保留。",
+    "missing-material": "427物質に存在しない物質・材料。IDを明示し、収録済みと偽らない。",
+    "card-only": "専用ノード/式を持たず、既存カード・注記で扱うか、UI未対応として保留。"
+  },
+  "sources": [
+    {
+      "id": "N-7.7",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "7.7",
+      "title": "Electrophilic Addition Reactions of Alkenes",
+      "url": "https://openstax.org/books/organic-chemistry/pages/7-7-electrophilic-addition-reactions-of-alkenes",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-8.2",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "8.2",
+      "title": "Halogenation of Alkenes: Addition of X2",
+      "url": "https://openstax.org/books/organic-chemistry/pages/8-2-halogenation-of-alkenes-addition-of-x2",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-8.6",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "8.6",
+      "title": "Reduction of Alkenes: Hydrogenation",
+      "url": "https://openstax.org/books/organic-chemistry/pages/8-6-reduction-of-alkenes-hydrogenation",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-8.10",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "8.10",
+      "title": "Radical Additions to Alkenes: Chain-Growth Polymers",
+      "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-9.4",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "9.4",
+      "title": "Hydration of Alkynes",
+      "url": "https://openstax.org/books/organic-chemistry/pages/9-4-hydration-of-alkynes",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-10.2",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "10.2",
+      "title": "Preparing Alkyl Halides from Alkanes: Radical Halogenation",
+      "url": "https://openstax.org/books/organic-chemistry/pages/10-2-preparing-alkyl-halides-from-alkanes-radical-halogenation",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-16.2",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "16.2",
+      "title": "Other Aromatic Substitutions",
+      "url": "https://openstax.org/books/organic-chemistry/pages/16-2-other-aromatic-substitutions",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-16.8",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "16.8",
+      "title": "Oxidation of Aromatic Compounds",
+      "url": "https://openstax.org/books/organic-chemistry/pages/16-8-oxidation-of-aromatic-compounds",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-17.2",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "17.2",
+      "title": "Properties of Alcohols and Phenols",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-2-properties-of-alcohols-and-phenols",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-17.4",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "17.4",
+      "title": "Alcohols from Carbonyl Compounds: Reduction",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-4-alcohols-from-carbonyl-compounds-reduction",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-17.6",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "17.6",
+      "title": "Reactions of Alcohols",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-6-reactions-of-alcohols",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-17.7",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "17.7",
+      "title": "Oxidation of Alcohols",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-17.9",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "17.9",
+      "title": "Phenols and Their Uses",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-9-phenols-and-their-uses",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-18.2",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "18.2",
+      "title": "Preparing Ethers",
+      "url": "https://openstax.org/books/organic-chemistry/pages/18-2-preparing-ethers",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-19.3",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "19.3",
+      "title": "Oxidation of Aldehydes and Ketones",
+      "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-21.5",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "21.5",
+      "title": "Chemistry of Acid Anhydrides",
+      "url": "https://openstax.org/books/organic-chemistry/pages/21-5-chemistry-of-acid-anhydrides",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-21.6",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "21.6",
+      "title": "Chemistry of Esters",
+      "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-24.8",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "24.8",
+      "title": "Reactions of Arylamines",
+      "url": "https://openstax.org/books/organic-chemistry/pages/24-8-reactions-of-arylamines",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-25.6",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "25.6",
+      "title": "Reactions of Monosaccharides",
+      "url": "https://openstax.org/books/organic-chemistry/pages/25-6-reactions-of-monosaccharides",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-25.8",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "25.8",
+      "title": "Disaccharides",
+      "url": "https://openstax.org/books/organic-chemistry/pages/25-8-disaccharides",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-25.9",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "25.9",
+      "title": "Polysaccharides and Their Synthesis",
+      "url": "https://openstax.org/books/organic-chemistry/pages/25-9-polysaccharides-and-their-synthesis",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-26.4",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "26.4",
+      "title": "Peptides and Proteins",
+      "url": "https://openstax.org/books/organic-chemistry/pages/26-4-peptides-and-proteins",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-26.5",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "26.5",
+      "title": "Amino Acid Analysis of Peptides",
+      "url": "https://openstax.org/books/organic-chemistry/pages/26-5-amino-acid-analysis-of-peptides",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-26.7",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "26.7",
+      "title": "Peptide Synthesis",
+      "url": "https://openstax.org/books/organic-chemistry/pages/26-7-peptide-synthesis",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-27.2",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "27.2",
+      "title": "Soap",
+      "url": "https://openstax.org/books/organic-chemistry/pages/27-2-soap",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-31.1",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "31.1",
+      "title": "Chain-Growth Polymers",
+      "url": "https://openstax.org/books/organic-chemistry/pages/31-1-chain-growth-polymers",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-31.4",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "31.4",
+      "title": "Step-Growth Polymers",
+      "url": "https://openstax.org/books/organic-chemistry/pages/31-4-step-growth-polymers",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "N-7.8",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "7.8",
+      "title": "Orientation of Electrophilic Additions: Markovnikov's Rule",
+      "url": "https://openstax.org/books/organic-chemistry/pages/7-8-orientation-of-electrophilic-additions-markovnikovs-rule",
+      "checkedAt": "2026-11-10"
+    },
+    {
+      "id": "S11-3",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§11.3",
+      "url": "https://openstax.org/books/organic-chemistry/pages/11-3-characteristics-of-the-sn2-reaction",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S11-summary",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§11 まとめ",
+      "url": "https://openstax.org/books/organic-chemistry/pages/11-summary-of-reactions",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S20-7",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§20.7",
+      "url": "https://openstax.org/books/organic-chemistry/pages/20-7-chemistry-of-nitriles",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S18-2",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§18.2",
+      "url": "https://openstax.org/books/organic-chemistry/pages/18-2-preparing-ethers",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S9-5",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§9.5",
+      "url": "https://openstax.org/books/organic-chemistry/pages/9-summary-of-reactions",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S8-6",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§8.6",
+      "url": "https://openstax.org/books/organic-chemistry/pages/8-6-reduction-of-alkenes-hydrogenation",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S9-4",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§9.4",
+      "url": "https://openstax.org/books/organic-chemistry/pages/9-4-hydration-of-alkynes",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S8-4",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§8.4",
+      "url": "https://openstax.org/books/organic-chemistry/pages/8-4-hydration-of-alkenes-addition-of-h2o-by-oxymercuration",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S17-7",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§17.7",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-7-oxidation-of-alcohols",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S19-3",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§19.3",
+      "url": "https://openstax.org/books/organic-chemistry/pages/19-3-oxidation-of-aldehydes-and-ketones",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S17-5",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§17.5",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-5-alcohols-from-carbonyl-compounds-grignard-reaction",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S19-9",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§19.9",
+      "url": "https://openstax.org/books/organic-chemistry/pages/19-9-nucleophilic-addition-of-hydrazine-the-wolff-kishner-reaction",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S21-6",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§21.6",
+      "url": "https://openstax.org/books/organic-chemistry/pages/21-6-chemistry-of-esters",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S16-8",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§16.8",
+      "url": "https://openstax.org/books/organic-chemistry/pages/16-8-oxidation-of-aromatic-compounds",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S24-8",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§24.8",
+      "url": "https://openstax.org/books/organic-chemistry/pages/24-8-reactions-of-arylamines",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S19-12",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§19.12",
+      "url": "https://openstax.org/books/organic-chemistry/pages/19-12-biological-reductions",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S21-summary",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§21 まとめ",
+      "url": "https://openstax.org/books/organic-chemistry/pages/21-summary-of-reactions",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S21-7",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§21.7",
+      "url": "https://openstax.org/books/organic-chemistry/pages/21-7-chemistry-of-amides",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S25-9",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§25.9",
+      "url": "https://openstax.org/books/organic-chemistry/pages/25-9-polysaccharides-and-their-synthesis",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S18-7",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§18.7",
+      "url": "https://openstax.org/books/organic-chemistry/pages/18-7-thiols-and-sulfides",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S24-6",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§24.6",
+      "url": "https://openstax.org/books/organic-chemistry/pages/24-6-synthesis-of-amines",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S20-5",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§20.5",
+      "url": "https://openstax.org/books/organic-chemistry/pages/20-5-preparing-carboxylic-acids",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S26-3",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§26.3",
+      "url": "https://openstax.org/books/organic-chemistry/pages/26-3-synthesis-of-amino-acids",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S16-9",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§16.9",
+      "url": "https://openstax.org/books/organic-chemistry/pages/16-9-reduction-of-aromatic-compounds",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "S16-3",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§16.3",
+      "url": "https://openstax.org/books/organic-chemistry/pages/16-3-alkylation-and-acylation-of-aromatic-rings-the-friedel-crafts-reaction",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "PA",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§8.10",
+      "url": "https://openstax.org/books/organic-chemistry/pages/8-10-radical-additions-to-alkenes-chain-growth-polymers",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "PB",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§14.6",
+      "url": "https://openstax.org/books/organic-chemistry/pages/14-6-diene-polymers-natural-and-synthetic-rubbers",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "PC",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§31.3",
+      "url": "https://openstax.org/books/organic-chemistry/pages/31-3-copolymers",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "PD",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§21.9",
+      "url": "https://openstax.org/books/organic-chemistry/pages/21-9-polyamides-and-polyesters-step-growth-polymers",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "PE",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§31.4",
+      "url": "https://openstax.org/books/organic-chemistry/pages/31-4-step-growth-polymers",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "PF",
+      "book": "Organic Chemistry Data (Reusch)",
+      "section": "Reusch 高分子",
+      "url": "https://organicchemistrydata.org/reusch/virtualtext/polymers/",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "PG",
+      "book": "Organic Chemistry Data (Reusch)",
+      "section": "Reusch 問題 PVA",
+      "url": "https://organicchemistrydata.org/reusch/virtualtext/problems/pset-preparation-of-polyvinyl-alcohol/",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "PI",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "§25.8",
+      "url": "https://openstax.org/books/organic-chemistry/pages/25-8-disaccharides",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "PK",
+      "book": "Organic Chemistry Data (Reusch)",
+      "section": "Reusch 炭水化物",
+      "url": "https://organicchemistrydata.org/reusch/virtualtext/carbohydrates/",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "PL",
+      "book": "Organic Chemistry Data (Reusch)",
+      "section": "Reusch アルコール反応性",
+      "url": "https://organicchemistrydata.org/reusch/virtualtext/alcohol-reactivity-2/",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "PM",
+      "book": "Nature Communications",
+      "section": "Epoxide apparent exchange",
+      "url": "https://doi.org/10.1038/s41467-026-72564-9",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "RSC-ETHANOL-OXIDATION",
+      "book": "Royal Society of Chemistry (Education)",
+      "section": "Oxidation of ethanol",
+      "title": "Oxidation of ethanol",
+      "url": "https://edu.rsc.org/experiments/oxidation-of-ethanol/1757.article",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "MATSUYAMA-CUO",
+      "book": "埼玉県立松山高等学校 公開記事",
+      "section": "2011-06-30",
+      "title": "アルコールの酸化",
+      "url": "https://matsuyama-h.spec.ed.jp/blogs/blog_entries/year_month/254/year_month:2011-06?frame_id=371",
+      "checkedAt": "2026-11-17",
+      "note": "公開記事。生徒氏名など個人情報は転記しない。"
+    },
+    {
+      "id": "KOISHIKAWA-ALCOHOL-OXIDATION",
+      "book": "東京都立小石川中等教育学校",
+      "section": "アルコールの酸化",
+      "title": "アルコールの酸化（PDF）",
+      "url": "https://www.metro.ed.jp/koishikawa-s/l_pdf/04_アルコールの酸化1.pdf",
+      "checkedAt": "2026-11-17",
+      "note": "検索抽出のみで全文確認はしていない。採用の直接根拠には使わず、補助資料として残す。"
+    },
+    {
+      "id": "J-M",
+      "book": "実教出版 Web理科教材（化学）",
+      "section": "無水マレイン酸",
+      "title": "特徴",
+      "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/maleic_acid.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "J-P",
+      "book": "実教出版 Web理科教材（化学）",
+      "section": "無水フタル酸",
+      "title": "特徴",
+      "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/phthalic_acid.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "J-C",
+      "book": "実教出版 Web理科教材（化学）",
+      "section": "酢酸",
+      "title": "特徴",
+      "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/acetic_acid.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "J-T",
+      "book": "実教出版 Web理科教材（化学）",
+      "section": "トルエン",
+      "title": "特徴",
+      "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/toluene.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "J-B",
+      "book": "実教出版 Web理科教材（化学）",
+      "section": "安息香酸",
+      "title": "特徴",
+      "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/benzoic_acid.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "J-S",
+      "book": "実教出版 Web理科教材（化学）",
+      "section": "スチレン",
+      "title": "特徴",
+      "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/styrene.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "J-W",
+      "book": "実教出版 Web理科教材（化学）",
+      "section": "アセトアルデヒド",
+      "title": "特徴",
+      "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/acetaldehyde.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "J-E",
+      "book": "実教出版 Web理科教材（化学）",
+      "section": "酢酸エチル",
+      "title": "特徴",
+      "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/ethylacetate.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "J-A",
+      "book": "実教出版 Web理科教材（化学）",
+      "section": "アニリン",
+      "title": "特徴",
+      "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/aniline.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "J-F",
+      "book": "実教出版 Web理科教材（化学）",
+      "section": "フェノール",
+      "title": "特徴",
+      "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/phenol.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "J-K",
+      "book": "実教出版 Web理科教材（化学）",
+      "section": "サリチル酸",
+      "title": "特徴",
+      "url": "https://www.jikkyo.co.jp/web_ni_link/science2/jmol/salicylic_acid.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "C-A",
+      "book": "Chemguide",
+      "section": "Alcohols (14–16)",
+      "title": "Alcohols",
+      "url": "https://www.chemguide.co.uk/14to16/organic/alcohols.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "C-D",
+      "book": "Chemguide",
+      "section": "Dehydration of ethanol",
+      "title": "Elimination",
+      "url": "https://www.chemguide.co.uk/mechanisms/elim/dhethanol.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "C-C",
+      "book": "Chemguide",
+      "section": "Acidity of carboxylic acids",
+      "title": "Carboxylic acids",
+      "url": "https://www.chemguide.co.uk/organicprops/acids/acidity.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "C-S",
+      "book": "Chemguide",
+      "section": "Decarboxylation",
+      "title": "Decarboxylation",
+      "url": "https://www.chemguide.co.uk/organicprops/acids/decarbox.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "C-N",
+      "book": "Chemguide",
+      "section": "Amines",
+      "title": "Aniline",
+      "url": "https://chemguide.co.uk/organicprops/aniline/amine.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "C-R",
+      "book": "Chemguide",
+      "section": "Ring reactions of phenol",
+      "title": "Phenol",
+      "url": "https://www.chemguide.co.uk/organicprops/phenol/ring.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "C-H",
+      "book": "Chemguide",
+      "section": "Halogenation of arenes",
+      "title": "Arenes",
+      "url": "https://www.chemguide.co.uk/organicprops/arenes/halogenation.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "C-P",
+      "book": "Chemguide",
+      "section": "Other reactions of phenol",
+      "title": "Phenol",
+      "url": "https://www.chemguide.co.uk/organicprops/phenol/other.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "C-I",
+      "book": "Chemguide",
+      "section": "Iodoform reaction (carbonyls)",
+      "title": "Iodoform",
+      "url": "https://www.chemguide.co.uk/organicprops/carbonyls/iodoform.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "C-IA",
+      "book": "Chemguide",
+      "section": "Iodoform reaction (alcohols)",
+      "title": "Iodoform",
+      "url": "https://www.chemguide.co.uk/organicprops/alcohols/iodoform.html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "O-17",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "17.2",
+      "title": "Properties of Alcohols and Phenols",
+      "url": "https://openstax.org/books/organic-chemistry/pages/17-2-properties-of-alcohols-and-phenols",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "O-95",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "9.5",
+      "title": "Reduction of Alkynes",
+      "url": "https://openstax.org/books/organic-chemistry/pages/9-5-reduction-of-alkynes",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "O-93",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "9.3",
+      "title": "Reactions of Alkynes: Addition of HX and X2",
+      "url": "https://openstax.org/books/organic-chemistry/pages/9-3-reactions-of-alkynes-addition-of-hx-and-x2",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "O-215",
+      "book": "OpenStax Organic Chemistry (McMurry)",
+      "section": "21.5",
+      "title": "Chemistry of Acid Anhydrides",
+      "url": "https://openstax.org/books/organic-chemistry/pages/21-5-chemistry-of-acid-anhydrides",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "L-13",
+      "book": "LibreTexts (Vollhardt & Schore)",
+      "section": "13.5",
+      "title": "Preparation of Alkynes from Alkynyl Anions",
+      "url": "https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Map%3A_Organic_Chemistry_(Vollhardt_and_Schore)/13%3A_Alkynes%3A_The_Carbon/13-05_Preparation_of__Alkynes_from_Alkynyl_Anions",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "CS-P",
+      "book": "Chemistry Steps",
+      "section": "Reactions of Phenols",
+      "title": "Reactions of Phenols",
+      "url": "https://www.chemistrysteps.com/reactions-of-phenols/",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "SAPP",
+      "book": "市立札幌山の手支援学校",
+      "section": "該当欄",
+      "title": "化学反応・高分子",
+      "url": "https://www23.sapporo-c.ed.jp/yamanote/index.cfm/1,1261,24,144,html",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "NOBEL",
+      "book": "Nobel Prize",
+      "section": "Chemistry 2000",
+      "title": "Popular information",
+      "url": "https://www.nobelprize.org/prizes/chemistry/2000/popular-information/",
+      "checkedAt": "2026-11-17",
+      "access": "full-text"
+    },
+    {
+      "id": "V-ABSTRACT",
+      "book": "繊維学会誌",
+      "section": "11(9)",
+      "title": "ビニロンのホルムアルデヒド処理（抄録）",
+      "url": "https://www.jstage.jst.go.jp/article/fiber1944/11/9/11_9_526/_article/-char/en",
+      "checkedAt": "2026-11-17",
+      "access": "abstract"
+    },
+    {
+      "id": "DNC",
+      "book": "大学入試センター",
+      "section": "化学 問4b",
+      "title": "過去問題（検索抽出）",
+      "url": "https://www.dnc.ac.jp/albums/771/abm00005967.pdf",
+      "checkedAt": "2026-11-17",
+      "access": "search-snippet"
+    },
+    {
+      "id": "KAGAWA",
+      "book": "香川高等専門学校 紀要",
+      "section": "7",
+      "title": "化学教育資料（検索抽出）",
+      "url": "https://www.kagawa-nct.ac.jp/libraryI/kagawakiyou/7/7-59.pdf",
+      "checkedAt": "2026-11-17",
+      "access": "search-snippet"
+    },
+    {
+      "id": "UMASS",
+      "book": "UMass Amherst",
+      "section": "Chapter 21",
+      "title": "Lecture overheads（検索抽出）",
+      "url": "https://alpha.chem.umb.edu/chemistry/ch252/files/Overheads/Lecture_Chapter_21.pdf",
+      "checkedAt": "2026-11-17",
+      "access": "search-snippet"
+    }
+  ],
+  "items": [
+    {
+      "id": "standard-methane-chlorination",
+      "label": "ラジカル置換: メタン → クロロメタン（塩化メチル）",
+      "level": "standard",
+      "reactionIds": [
+        "methane-chlorination"
+      ],
+      "sources": [
+        "N-10.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethene-bromine-addition",
+      "label": "付加: エテン（エチレン） → 1,2-ジブロモエタン（二臭化エチレン）",
+      "level": "standard",
+      "reactionIds": [
+        "ethene-bromine-addition"
+      ],
+      "sources": [
+        "N-8.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethene-hydrogen-bromide",
+      "label": "付加: エテン（エチレン） → ブロモエタン（臭化エチル）",
+      "level": "standard",
+      "reactionIds": [
+        "ethene-hydrogen-bromide"
+      ],
+      "sources": [
+        "N-7.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethene-hydrogenation",
+      "label": "水素付加: エテン（エチレン） → エタン",
+      "level": "standard",
+      "reactionIds": [
+        "ethene-hydrogenation"
+      ],
+      "sources": [
+        "N-8.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethene-hydration",
+      "label": "水和: エテン（エチレン） → エタノール",
+      "level": "standard",
+      "reactionIds": [
+        "ethene-hydration"
+      ],
+      "sources": [
+        "N-7.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-propene-hydrogenation",
+      "label": "水素付加: プロペン（プロピレン） → プロパン",
+      "level": "standard",
+      "reactionIds": [
+        "propene-hydrogenation"
+      ],
+      "sources": [
+        "N-8.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-propene-hydration",
+      "label": "水和: プロペン（プロピレン） → プロパン-2-オール（2-プロパノール）",
+      "level": "standard",
+      "reactionIds": [
+        "propene-hydration"
+      ],
+      "sources": [
+        "N-7.7",
+        "N-7.8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethanol-dehydration-ether",
+      "label": "縮合: エタノール → ジエチルエーテル（エトキシエタン）",
+      "level": "standard",
+      "reactionIds": [
+        "ethanol-dehydration-ether"
+      ],
+      "sources": [
+        "N-18.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-methanol-oxidation-formaldehyde",
+      "label": "酸化: メタノール → ホルムアルデヒド（メタナール）",
+      "level": "standard",
+      "reactionIds": [
+        "methanol-oxidation-formaldehyde"
+      ],
+      "sources": [
+        "N-17.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-formaldehyde-oxidation-formic",
+      "label": "酸化: ホルムアルデヒド（メタナール） → ギ酸（メタン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "formaldehyde-oxidation-formic"
+      ],
+      "sources": [
+        "N-19.3"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethanol-oxidation-ethanal",
+      "label": "酸化: エタノール → エタナール（アセトアルデヒド）",
+      "level": "standard",
+      "reactionIds": [
+        "ethanol-oxidation-ethanal"
+      ],
+      "sources": [
+        "N-17.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethanal-oxidation-acetic",
+      "label": "酸化: エタナール（アセトアルデヒド） → 酢酸（エタン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "ethanal-oxidation-acetic"
+      ],
+      "sources": [
+        "N-19.3"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethanol-oxidation-acetic",
+      "label": "酸化: エタノール → 酢酸（エタン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "ethanol-oxidation-acetic"
+      ],
+      "sources": [
+        "N-17.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-propan-1-ol-oxidation",
+      "label": "酸化: プロパン-1-オール（1-プロパノール） → プロパナール（プロピオンアルデヒド）",
+      "level": "standard",
+      "reactionIds": [
+        "propan-1-ol-oxidation"
+      ],
+      "sources": [
+        "N-17.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-propan-2-ol-oxidation",
+      "label": "酸化: プロパン-2-オール（2-プロパノール） → アセトン（プロパン-2-オン）",
+      "level": "standard",
+      "reactionIds": [
+        "propan-2-ol-oxidation"
+      ],
+      "sources": [
+        "N-17.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-butan-1-ol-oxidation",
+      "label": "酸化: ブタン-1-オール（1-ブタノール） → ブタナール（酪酸アルデヒド）",
+      "level": "standard",
+      "reactionIds": [
+        "butan-1-ol-oxidation"
+      ],
+      "sources": [
+        "N-17.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-propanal-oxidation",
+      "label": "酸化: プロパナール（プロピオンアルデヒド） → プロピオン酸（プロパン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "propanal-oxidation"
+      ],
+      "sources": [
+        "N-19.3"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-benzyl-alcohol-oxidation",
+      "label": "酸化: ベンジルアルコール（ベンゼンメタノール） → ベンズアルデヒド（安息香アルデヒド）",
+      "level": "standard",
+      "reactionIds": [
+        "benzyl-alcohol-oxidation"
+      ],
+      "sources": [
+        "N-17.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-benzaldehyde-oxidation",
+      "label": "酸化: ベンズアルデヒド（安息香アルデヒド） → 安息香酸（ベンゼンカルボン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "benzaldehyde-oxidation"
+      ],
+      "sources": [
+        "N-19.3"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethanal-reduction",
+      "label": "還元: エタナール（アセトアルデヒド） → エタノール",
+      "level": "standard",
+      "reactionIds": [
+        "ethanal-reduction"
+      ],
+      "sources": [
+        "N-17.4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-acetone-reduction",
+      "label": "還元: アセトン（プロパン-2-オン） → プロパン-2-オール（2-プロパノール）",
+      "level": "standard",
+      "reactionIds": [
+        "acetone-reduction"
+      ],
+      "sources": [
+        "N-17.4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-propanal-reduction",
+      "label": "還元: プロパナール（プロピオンアルデヒド） → プロパン-1-オール（1-プロパノール）",
+      "level": "standard",
+      "reactionIds": [
+        "propanal-reduction"
+      ],
+      "sources": [
+        "N-17.4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-butanal-reduction",
+      "label": "還元: ブタナール（酪酸アルデヒド） → ブタン-1-オール（1-ブタノール）",
+      "level": "standard",
+      "reactionIds": [
+        "butanal-reduction"
+      ],
+      "sources": [
+        "N-17.4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-acetic-acid-ethanol-esterification",
+      "label": "エステル化: 酢酸（エタン酸） + エタノール → 酢酸エチル",
+      "level": "standard",
+      "reactionIds": [
+        "acetic-acid-ethanol-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-acetic-acid-methanol-esterification",
+      "label": "エステル化: 酢酸（エタン酸） + メタノール → 酢酸メチル",
+      "level": "standard",
+      "reactionIds": [
+        "acetic-acid-methanol-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-acetic-acid-butanol-esterification",
+      "label": "エステル化: 酢酸（エタン酸） + ブタン-1-オール（1-ブタノール） → 酢酸ブチル",
+      "level": "standard",
+      "reactionIds": [
+        "acetic-acid-butanol-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-acetic-acid-isoamyl-esterification",
+      "label": "エステル化: 酢酸（エタン酸） + 3-メチルブタン-1-オール（イソアミルアルコール） → 酢酸イソアミル",
+      "level": "standard",
+      "reactionIds": [
+        "acetic-acid-isoamyl-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-acetic-acid-glycerol-esterification",
+      "label": "エステル化: 酢酸（エタン酸） + グリセリン（プロパン-1,2,3-トリオール） → トリアセチン（グリセリン三酢酸エステル）",
+      "level": "standard",
+      "reactionIds": [
+        "acetic-acid-glycerol-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-formic-acid-methanol-esterification",
+      "label": "エステル化: ギ酸（メタン酸） + メタノール → ギ酸メチル（メタン酸メチル）",
+      "level": "standard",
+      "reactionIds": [
+        "formic-acid-methanol-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-formic-acid-ethanol-esterification",
+      "label": "エステル化: ギ酸（メタン酸） + エタノール → ギ酸エチル（メタン酸エチル）",
+      "level": "standard",
+      "reactionIds": [
+        "formic-acid-ethanol-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-propionic-acid-methanol-esterification",
+      "label": "エステル化: プロピオン酸（プロパン酸） + メタノール → プロピオン酸メチル（プロパン酸メチル）",
+      "level": "standard",
+      "reactionIds": [
+        "propionic-acid-methanol-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-propionic-acid-ethanol-esterification",
+      "label": "エステル化: プロピオン酸（プロパン酸） + エタノール → プロピオン酸エチル（プロパン酸エチル）",
+      "level": "standard",
+      "reactionIds": [
+        "propionic-acid-ethanol-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-butanoic-acid-ethanol-esterification",
+      "label": "エステル化: 酪酸（ブタン酸） + エタノール → 酪酸エチル（ブタン酸エチル）",
+      "level": "standard",
+      "reactionIds": [
+        "butanoic-acid-ethanol-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-oxalic-acid-methanol-esterification",
+      "label": "エステル化: シュウ酸（エタン二酸） + メタノール → シュウ酸ジメチル（ジメチルオキサラート）",
+      "level": "standard",
+      "reactionIds": [
+        "oxalic-acid-methanol-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-salicylic-acid-methyl-esterification",
+      "label": "エステル化: サリチル酸（2-ヒドロキシ安息香酸） + メタノール → サリチル酸メチル（2-ヒドロキシ安息香酸メチル）",
+      "level": "standard",
+      "reactionIds": [
+        "salicylic-acid-methyl-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-salicylic-acid-acetylation",
+      "label": "アセチル化: サリチル酸（2-ヒドロキシ安息香酸） + 無水酢酸 → アセチルサリチル酸（アスピリン）",
+      "level": "standard",
+      "reactionIds": [
+        "salicylic-acid-acetylation"
+      ],
+      "sources": [
+        "N-21.5"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-aspirin-hydrolysis",
+      "label": "加水分解: アセチルサリチル酸（アスピリン） → サリチル酸（2-ヒドロキシ安息香酸） + 酢酸（エタン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "aspirin-hydrolysis"
+      ],
+      "sources": [
+        "N-21.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-methyl-salicylate-hydrolysis",
+      "label": "加水分解: サリチル酸メチル（2-ヒドロキシ安息香酸メチル） → サリチル酸（2-ヒドロキシ安息香酸） + メタノール",
+      "level": "standard",
+      "reactionIds": [
+        "methyl-salicylate-hydrolysis"
+      ],
+      "sources": [
+        "N-21.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethyl-acetate-hydrolysis",
+      "label": "加水分解: 酢酸エチル → 酢酸（エタン酸） + エタノール",
+      "level": "standard",
+      "reactionIds": [
+        "ethyl-acetate-hydrolysis"
+      ],
+      "sources": [
+        "N-21.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-glycerol-stearic-esterification",
+      "label": "エステル化: グリセリン（プロパン-1,2,3-トリオール） + ステアリン酸（オクタデカン酸） → トリステアリン（ステアリン酸グリセリド）",
+      "level": "standard",
+      "reactionIds": [
+        "glycerol-stearic-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-glycerol-palmitic-esterification",
+      "label": "エステル化: グリセリン（プロパン-1,2,3-トリオール） + パルミチン酸（ヘキサデカン酸） → トリパルミチン（パルミチン酸グリセリド）",
+      "level": "standard",
+      "reactionIds": [
+        "glycerol-palmitic-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-glycerol-oleic-esterification",
+      "label": "エステル化: グリセリン（プロパン-1,2,3-トリオール） + オレイン酸（シス-9-オクタデセン酸） → トリオレイン（オレイン酸グリセリド）",
+      "level": "standard",
+      "reactionIds": [
+        "glycerol-oleic-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-glycerol-linoleic-esterification",
+      "label": "エステル化: グリセリン（プロパン-1,2,3-トリオール） + リノール酸（シス,シス-9,12-オクタデカジエン酸） → トリリノレイン（リノール酸グリセリド）",
+      "level": "standard",
+      "reactionIds": [
+        "glycerol-linoleic-esterification"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-tristearin-saponification",
+      "label": "けん化: トリステアリン（ステアリン酸グリセリド） → ステアリン酸ナトリウム + グリセリン（プロパン-1,2,3-トリオール）",
+      "level": "standard",
+      "reactionIds": [
+        "tristearin-saponification"
+      ],
+      "sources": [
+        "N-27.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-tripalmitin-saponification",
+      "label": "けん化: トリパルミチン（パルミチン酸グリセリド） → パルミチン酸ナトリウム + グリセリン（プロパン-1,2,3-トリオール）",
+      "level": "standard",
+      "reactionIds": [
+        "tripalmitin-saponification"
+      ],
+      "sources": [
+        "N-27.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-triolein-saponification",
+      "label": "けん化: トリオレイン（オレイン酸グリセリド） → オレイン酸ナトリウム + グリセリン（プロパン-1,2,3-トリオール）",
+      "level": "standard",
+      "reactionIds": [
+        "triolein-saponification"
+      ],
+      "sources": [
+        "N-27.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-tristearin-hydrolysis",
+      "label": "加水分解: トリステアリン（ステアリン酸グリセリド） → ステアリン酸（オクタデカン酸） + グリセリン（プロパン-1,2,3-トリオール）",
+      "level": "standard",
+      "reactionIds": [
+        "tristearin-hydrolysis"
+      ],
+      "sources": [
+        "N-21.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-triolein-hydrogenation",
+      "label": "水素付加: トリオレイン（オレイン酸グリセリド） → トリステアリン（ステアリン酸グリセリド）",
+      "level": "standard",
+      "reactionIds": [
+        "triolein-hydrogenation"
+      ],
+      "sources": [
+        "N-8.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-benzene-nitration",
+      "label": "ニトロ化: ベンゼン → ニトロベンゼン",
+      "level": "standard",
+      "reactionIds": [
+        "benzene-nitration"
+      ],
+      "sources": [
+        "N-16.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-benzene-sulfonation",
+      "label": "スルホン化: ベンゼン → ベンゼンスルホン酸",
+      "level": "standard",
+      "reactionIds": [
+        "benzene-sulfonation"
+      ],
+      "sources": [
+        "N-16.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-benzene-chlorination",
+      "label": "芳香族置換: ベンゼン → クロロベンゼン",
+      "level": "standard",
+      "reactionIds": [
+        "benzene-chlorination"
+      ],
+      "sources": [
+        "N-16.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-nitrobenzene-reduction",
+      "label": "還元: ニトロベンゼン → アニリン（アミノベンゼン）",
+      "level": "standard",
+      "reactionIds": [
+        "nitrobenzene-reduction"
+      ],
+      "sources": [
+        "N-16.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-aniline-diazotization",
+      "label": "ジアゾ化: アニリン（アミノベンゼン） → 塩化ベンゼンジアゾニウム",
+      "level": "standard",
+      "reactionIds": [
+        "aniline-diazotization"
+      ],
+      "sources": [
+        "N-24.8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-diazonium-phenol-coupling",
+      "label": "カップリング: 塩化ベンゼンジアゾニウム + フェノール → p-ヒドロキシアゾベンゼン（p-フェニルアゾフェノール）",
+      "level": "standard",
+      "reactionIds": [
+        "diazonium-phenol-coupling"
+      ],
+      "sources": [
+        "N-24.8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-aniline-acetic-anhydride",
+      "label": "アセチル化: アニリン（アミノベンゼン） + 無水酢酸 → アセトアニリド",
+      "level": "standard",
+      "reactionIds": [
+        "aniline-acetic-anhydride"
+      ],
+      "sources": [
+        "N-24.8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-cumene-oxidation",
+      "label": "酸化: クメン（イソプロピルベンゼン） → クメンヒドロペルオキシド（クミルヒドロペルオキシド）",
+      "level": "standard",
+      "reactionIds": [
+        "cumene-oxidation"
+      ],
+      "sources": [
+        "N-17.9"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-cumene-hydroperoxide-decomposition",
+      "label": "分解: クメンヒドロペルオキシド（クミルヒドロペルオキシド） → フェノール + アセトン（プロパン-2-オン）",
+      "level": "standard",
+      "reactionIds": [
+        "cumene-hydroperoxide-decomposition"
+      ],
+      "sources": [
+        "N-17.9"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-phenol-acid-neutralization",
+      "label": "中和: フェノール → ナトリウムフェノキシド（フェノキシドナトリウム）",
+      "level": "standard",
+      "reactionIds": [
+        "phenol-acid-neutralization"
+      ],
+      "sources": [
+        "N-17.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-sucrose-hydrolysis",
+      "label": "加水分解: スクロース（ショ糖） → グルコース（ブドウ糖） + フルクトース（果糖）",
+      "level": "standard",
+      "reactionIds": [
+        "sucrose-hydrolysis"
+      ],
+      "sources": [
+        "N-25.8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-starch-hydrolysis-maltose",
+      "label": "加水分解: デンプン（アミロース） → マルトース（麦芽糖）",
+      "level": "standard",
+      "reactionIds": [
+        "starch-hydrolysis-maltose"
+      ],
+      "sources": [
+        "N-25.8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-starch-hydrolysis-glucose",
+      "label": "加水分解: デンプン（アミロース） → グルコース（ブドウ糖）",
+      "level": "standard",
+      "reactionIds": [
+        "starch-hydrolysis-glucose"
+      ],
+      "sources": [
+        "N-25.9"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-glucose-reduction",
+      "label": "還元: グルコース（ブドウ糖） → ソルビトール（グルシトール）",
+      "level": "standard",
+      "reactionIds": [
+        "glucose-reduction"
+      ],
+      "sources": [
+        "N-25.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-glycine-alanine-peptide",
+      "label": "ペプチド結合: グリシン + アラニン → グリシルアラニン",
+      "level": "standard",
+      "reactionIds": [
+        "glycine-alanine-peptide"
+      ],
+      "sources": [
+        "N-26.4",
+        "N-26.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-glycine-glycine-peptide",
+      "label": "ペプチド結合: グリシン → グリシルグリシン",
+      "level": "standard",
+      "reactionIds": [
+        "glycine-glycine-peptide"
+      ],
+      "sources": [
+        "N-26.4",
+        "N-26.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-alanine-glycine-peptide",
+      "label": "ペプチド結合: アラニン + グリシン → アラニルグリシン",
+      "level": "standard",
+      "reactionIds": [
+        "alanine-glycine-peptide"
+      ],
+      "sources": [
+        "N-26.4",
+        "N-26.7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-cysteine-oxidation",
+      "label": "酸化: システイン → シスチン",
+      "level": "standard",
+      "reactionIds": [
+        "cysteine-oxidation"
+      ],
+      "sources": [
+        "N-26.4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-protein-hydrolysis",
+      "label": "加水分解: タンパク質（ポリペプチド） → アミノ酸の混合物（種類と割合はタンパク質によって異なる）",
+      "level": "standard",
+      "reactionIds": [
+        "protein-hydrolysis"
+      ],
+      "sources": [
+        "N-26.5"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-glycylalanine-hydrolysis",
+      "label": "加水分解: グリシルアラニン → グリシン + アラニン",
+      "level": "standard",
+      "reactionIds": [
+        "glycylalanine-hydrolysis"
+      ],
+      "sources": [
+        "N-26.5"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-glycylglycine-hydrolysis",
+      "label": "加水分解: グリシルグリシン → グリシン",
+      "level": "standard",
+      "reactionIds": [
+        "glycylglycine-hydrolysis"
+      ],
+      "sources": [
+        "N-26.5"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-alanylglycine-hydrolysis",
+      "label": "加水分解: アラニルグリシン → アラニン + グリシン",
+      "level": "standard",
+      "reactionIds": [
+        "alanylglycine-hydrolysis"
+      ],
+      "sources": [
+        "N-26.5"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethene-polymerization",
+      "label": "付加重合: エテン（エチレン） → ポリエチレン",
+      "level": "standard",
+      "reactionIds": [
+        "ethene-polymerization"
+      ],
+      "sources": [
+        "N-8.10"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-propene-polymerization",
+      "label": "付加重合: プロペン（プロピレン） → ポリプロピレン",
+      "level": "standard",
+      "reactionIds": [
+        "propene-polymerization"
+      ],
+      "sources": [
+        "N-8.10"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-styrene-polymerization",
+      "label": "付加重合: スチレン（ビニルベンゼン） → ポリスチレン",
+      "level": "standard",
+      "reactionIds": [
+        "styrene-polymerization"
+      ],
+      "sources": [
+        "N-8.10",
+        "N-31.1"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-vinyl-chloride-polymerization",
+      "label": "付加重合: 塩化ビニル（クロロエテン） → ポリ塩化ビニル（PVC）",
+      "level": "standard",
+      "reactionIds": [
+        "vinyl-chloride-polymerization"
+      ],
+      "sources": [
+        "N-8.10"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-caprolactam-ring-opening",
+      "label": "開環重合: ε-カプロラクタム → ナイロン-6",
+      "level": "standard",
+      "reactionIds": [
+        "caprolactam-ring-opening"
+      ],
+      "sources": [
+        "N-31.4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-nylon66-condensation",
+      "label": "縮重合: アジピン酸（ヘキサン二酸） + ヘキサメチレンジアミン → ナイロン-6,6",
+      "level": "standard",
+      "reactionIds": [
+        "nylon66-condensation"
+      ],
+      "sources": [
+        "N-31.4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-pet-condensation",
+      "label": "縮重合: テレフタル酸（ベンゼン-1,4-ジカルボン酸） + エチレングリコール（エタン-1,2-ジオール） → ポリエチレンテレフタラート（PET）",
+      "level": "standard",
+      "reactionIds": [
+        "pet-condensation"
+      ],
+      "sources": [
+        "N-31.4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-isobutene-hydrogen-chloride",
+      "label": "付加: 2-メチルプロペン（イソブテン） → 2-クロロ-2-メチルプロパン（tert-ブチルクロリド）",
+      "level": "standard",
+      "reactionIds": [
+        "isobutene-hydrogen-chloride"
+      ],
+      "sources": [
+        "N-7.7",
+        "N-7.8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-propyne-hydration",
+      "label": "水和: プロピン（メチルアセチレン） → アセトン（プロパン-2-オン）",
+      "level": "standard",
+      "reactionIds": [
+        "propyne-hydration"
+      ],
+      "sources": [
+        "N-9.4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-2-methylpropan-2-ol-hydrogen-chloride",
+      "label": "置換: 2-メチルプロパン-2-オール（tert-ブタノール） → 2-クロロ-2-メチルプロパン（tert-ブチルクロリド）",
+      "level": "standard",
+      "reactionIds": [
+        "2-methylpropan-2-ol-hydrogen-chloride"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-2-methylpropan-2-ol-dehydration",
+      "label": "脱離: 2-メチルプロパン-2-オール（tert-ブタノール） → 2-メチルプロペン（イソブテン）",
+      "level": "standard",
+      "reactionIds": [
+        "2-methylpropan-2-ol-dehydration"
+      ],
+      "sources": [
+        "N-17.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-p-xylene-oxidation",
+      "label": "酸化: p-キシレン（1,4-ジメチルベンゼン） → テレフタル酸（ベンゼン-1,4-ジカルボン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "p-xylene-oxidation"
+      ],
+      "sources": [
+        "N-16.8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-chlorobenzene-dow-phenol",
+      "label": "置換: クロロベンゼン → ナトリウムフェノキシド（フェノキシドナトリウム）",
+      "level": "standard",
+      "reactionIds": [
+        "chlorobenzene-dow-phenol"
+      ],
+      "sources": [
+        "N-17.9",
+        "N-17.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-sodium-phenoxide-acidification",
+      "label": "中和: ナトリウムフェノキシド（フェノキシドナトリウム） → フェノール",
+      "level": "standard",
+      "reactionIds": [
+        "sodium-phenoxide-acidification"
+      ],
+      "sources": [
+        "N-17.2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-ethyl-propionate-saponification",
+      "label": "けん化: プロピオン酸エチル（プロパン酸エチル） → プロピオン酸（プロパン酸） + エタノール",
+      "level": "standard",
+      "reactionIds": [
+        "ethyl-propionate-saponification"
+      ],
+      "sources": [
+        "N-21.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "standard-fructose-base-isomerization",
+      "label": "異性化: フルクトース（果糖） → グルコース（ブドウ糖） + マンノース",
+      "level": "standard",
+      "reactionIds": [
+        "fructose-base-isomerization"
+      ],
+      "sources": [
+        "N-25.6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "通常モードで公開済みの確認済み反応"
+    },
+    {
+      "id": "held-chloromethane-chlorination",
+      "label": "ラジカル置換: クロロメタン（塩化メチル） → ジクロロメタン（塩化メチレン）",
+      "level": "held",
+      "reactionIds": [
+        "chloromethane-chlorination"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-ethane-chlorination",
+      "label": "ラジカル置換: エタン → クロロエタン（塩化エチル）",
+      "level": "held",
+      "reactionIds": [
+        "ethane-chlorination"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-propane-chlorination",
+      "label": "ラジカル置換: プロパン → 1-クロロプロパン",
+      "level": "held",
+      "reactionIds": [
+        "propane-chlorination"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-methanol-dehydration-ether",
+      "label": "縮合: メタノール → ジメチルエーテル（メトキシメタン）",
+      "level": "held",
+      "reactionIds": [
+        "methanol-dehydration-ether"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-propan-2-ol-dehydration",
+      "label": "脱離: プロパン-2-オール（2-プロパノール） → プロペン（プロピレン）",
+      "level": "held",
+      "reactionIds": [
+        "propan-2-ol-dehydration"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-cyclohexane-chlorination",
+      "label": "ラジカル置換: シクロヘキサン → クロロシクロヘキサン",
+      "level": "held",
+      "reactionIds": [
+        "cyclohexane-chlorination"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-chlorocyclohexane-elimination",
+      "label": "脱離: クロロシクロヘキサン → シクロヘキセン",
+      "level": "held",
+      "reactionIds": [
+        "chlorocyclohexane-elimination"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-ethanol-bromination",
+      "label": "置換: エタノール → ブロモエタン（臭化エチル）",
+      "level": "held",
+      "reactionIds": [
+        "ethanol-bromination"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-propan-2-ol-bromination",
+      "label": "置換: プロパン-2-オール（2-プロパノール） → 2-ブロモプロパン（イソプロピルブロミド）",
+      "level": "held",
+      "reactionIds": [
+        "propan-2-ol-bromination"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-oxalic-acid-phenol-esterification",
+      "label": "エステル化: シュウ酸（エタン二酸） + フェノール → シュウ酸ジフェニル（ジフェニルオキサラート）",
+      "level": "held",
+      "reactionIds": [
+        "oxalic-acid-phenol-esterification"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-oleic-acid-elaidic",
+      "label": "異性化: オレイン酸（シス-9-オクタデセン酸） → エライジン酸（トランス-9-オクタデセン酸）",
+      "level": "held",
+      "reactionIds": [
+        "oleic-acid-elaidic"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-maleic-acid-fumaric",
+      "label": "異性化: マレイン酸（シス-ブテン二酸） → フマル酸（トランス-ブテン二酸）",
+      "level": "held",
+      "reactionIds": [
+        "maleic-acid-fumaric"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-lauric-acid-neutralization",
+      "label": "中和: ラウリン酸（ドデカン酸） → ラウリン酸ナトリウム",
+      "level": "held",
+      "reactionIds": [
+        "lauric-acid-neutralization"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-toluene-nitration",
+      "label": "ニトロ化: トルエン（メチルベンゼン） → o-ニトロトルエン（2-ニトロトルエン）",
+      "level": "held",
+      "reactionIds": [
+        "toluene-nitration"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-toluene-trinitration",
+      "label": "ニトロ化: トルエン（メチルベンゼン） → 2,4,6-トリニトロトルエン（TNT）",
+      "level": "held",
+      "reactionIds": [
+        "toluene-trinitration"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-phenol-acetone-bisphenol",
+      "label": "縮合: フェノール + アセトン（プロパン-2-オン） → ビスフェノールA（BPA）",
+      "level": "held",
+      "reactionIds": [
+        "phenol-acetone-bisphenol"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-aniline-sulfonation",
+      "label": "スルホン化: アニリン（アミノベンゼン） → スルファニル酸（p-アミノベンゼンスルホン酸）",
+      "level": "held",
+      "reactionIds": [
+        "aniline-sulfonation"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-sulfanilic-acid-methyl-orange",
+      "label": "カップリング: スルファニル酸（p-アミノベンゼンスルホン酸） + N,N-ジメチルアニリン → メチルオレンジ（アゾ染料）",
+      "level": "held",
+      "reactionIds": [
+        "sulfanilic-acid-methyl-orange"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-cellobiose-hydrolysis",
+      "label": "加水分解: セロビオース → グルコース（ブドウ糖）",
+      "level": "held",
+      "reactionIds": [
+        "cellobiose-hydrolysis"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-dextrin-hydrolysis",
+      "label": "加水分解: デキストリン → グルコース（ブドウ糖）",
+      "level": "held",
+      "reactionIds": [
+        "dextrin-hydrolysis"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-glycogen-hydrolysis",
+      "label": "加水分解: グリコーゲン → グルコース（ブドウ糖）",
+      "level": "held",
+      "reactionIds": [
+        "glycogen-hydrolysis"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-aspartame-hydrolysis",
+      "label": "加水分解: アスパルテーム → アスパラギン酸 + フェニルアラニン",
+      "level": "held",
+      "reactionIds": [
+        "aspartame-hydrolysis"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-vinylidene-chloride-polymerization",
+      "label": "付加重合: 塩化ビニリデン（1,1-ジクロロエテン） → ポリ塩化ビニリデン（PVDC）",
+      "level": "held",
+      "reactionIds": [
+        "vinylidene-chloride-polymerization"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-isoprene-polymerization",
+      "label": "付加重合: イソプレン（2-メチル-1,3-ブタジエン） → 天然ゴム（シス-1,4-ポリイソプレン）",
+      "level": "held",
+      "reactionIds": [
+        "isoprene-polymerization"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-nbr-copolymerization",
+      "label": "共重合: アクリロニトリル + 1,3-ブタジエン → ニトリルゴム（NBR、アクリロニトリル-ブタジエン共重合体）",
+      "level": "held",
+      "reactionIds": [
+        "nbr-copolymerization"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-abs-copolymerization",
+      "label": "共重合: アクリロニトリル + 1,3-ブタジエン + スチレン（ビニルベンゼン） → ABS樹脂（アクリロニトリル-ブタジエン-スチレン共重合体）",
+      "level": "held",
+      "reactionIds": [
+        "abs-copolymerization"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-pla-polymerization",
+      "label": "縮重合: 乳酸（2-ヒドロキシプロパン酸） → ポリ乳酸（PLA）",
+      "level": "held",
+      "reactionIds": [
+        "pla-polymerization"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-epoxy-resin-condensation",
+      "label": "縮重合: ビスフェノールA（BPA） + エピクロロヒドリン → エポキシ樹脂",
+      "level": "held",
+      "reactionIds": [
+        "epoxy-resin-condensation"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-polycarbonate-condensation",
+      "label": "縮重合: ホスゲン（塩化カルボニル） + ビスフェノールA（BPA） → ポリカーボネート（PC）",
+      "level": "held",
+      "reactionIds": [
+        "polycarbonate-condensation"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-unsaturated-polyester-condensation",
+      "label": "縮重合: エチレングリコール（エタン-1,2-ジオール） + 無水マレイン酸 → 不飽和ポリエステル樹脂",
+      "level": "held",
+      "reactionIds": [
+        "unsaturated-polyester-condensation"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-sodium-polyacrylate-polymerization",
+      "label": "重合: アクリル酸（プロペン酸） → ポリアクリル酸ナトリウム",
+      "level": "held",
+      "reactionIds": [
+        "sodium-polyacrylate-polymerization"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-aramid-condensation",
+      "label": "縮重合: テレフタル酸ジクロリド + p-フェニレンジアミン（ベンゼン-1,4-ジアミン） → アラミド繊維（ケブラー）",
+      "level": "held",
+      "reactionIds": [
+        "aramid-condensation"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-silicone-condensation",
+      "label": "縮重合: ジメチルジクロロシラン → シリコーン（ポリジメチルシロキサン）",
+      "level": "held",
+      "reactionIds": [
+        "silicone-condensation"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-polyaniline-oxidation",
+      "label": "重合: アニリン（アミノベンゼン） → ポリアニリン（導電性高分子）",
+      "level": "held",
+      "reactionIds": [
+        "polyaniline-oxidation"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "held-vinyl-acetate-from-ethene",
+      "label": "付加: エテン（エチレン） + 酢酸（エタン酸） → 酢酸ビニル",
+      "level": "held",
+      "reactionIds": [
+        "vinyl-acetate-from-ethene"
+      ],
+      "sources": [],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "独立した根拠を確認できていない保留反応（旧理由: この資料の節では、データにある個別の基質・生成物の組合せを確認できなかったため保留。）",
+      "legacyState": "held"
+    },
+    {
+      "id": "advanced-group-sn2-hydrolysis",
+      "label": "sn2-hydrolysis",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-sn2-hydrolysis-1-bromopropane-propan-1-ol",
+        "academic-sn2-hydrolysis-1-chlorobutane-butan-1-ol",
+        "academic-sn2-hydrolysis-1-chloro-2-methylpropane-2-methylpropan-1-ol",
+        "academic-sn2-hydrolysis-2-bromopropane-propan-2-ol",
+        "academic-sn2-hydrolysis-2-chloropropane-propan-2-ol",
+        "academic-sn2-hydrolysis-2-chlorobutane-butan-2-ol",
+        "academic-sn2-hydrolysis-3-chloropropene-allyl-alcohol",
+        "academic-sn2-hydrolysis-iodoethane-ethanol"
+      ],
+      "sources": [
+        "S11-3"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "sn2-hydrolysis",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-e2-elimination",
+      "label": "e2-elimination",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-e2-elimination-1-bromopropane-propene",
+        "academic-e2-elimination-1-chloropropane-propene",
+        "academic-e2-elimination-2-bromopropane-propene",
+        "academic-e2-elimination-2-chloropropane-propene",
+        "academic-e2-elimination-1-chlorobutane-but-1-ene",
+        "academic-e2-elimination-2-chlorobutane-but-2-ene-but-1-ene",
+        "academic-e2-elimination-1-chloro-2-methylpropane-isobutene"
+      ],
+      "sources": [
+        "S11-summary"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "e2-elimination",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-nitrile-sn2",
+      "label": "nitrile-sn2",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-nitrile-sn2-chloromethane-acetonitrile",
+        "academic-nitrile-sn2-bromoethane-propanenitrile",
+        "academic-nitrile-sn2-1-bromopropane-butanenitrile"
+      ],
+      "sources": [
+        "S20-7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "nitrile-sn2",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-nitrile-hydrolysis",
+      "label": "nitrile-hydrolysis",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-nitrile-hydrolysis-acetonitrile-acetic-acid",
+        "academic-nitrile-hydrolysis-propanenitrile-propionic-acid",
+        "academic-nitrile-hydrolysis-butanenitrile-butanoic-acid",
+        "academic-nitrile-hydrolysis-benzonitrile-benzoic-acid"
+      ],
+      "sources": [
+        "S20-7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "nitrile-hydrolysis",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-nitrile-reduction",
+      "label": "nitrile-reduction",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-nitrile-reduction-acetonitrile-ethylamine",
+        "academic-nitrile-reduction-propanenitrile-propylamine",
+        "academic-nitrile-reduction-butanenitrile-butan-1-amine"
+      ],
+      "sources": [
+        "S20-7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "nitrile-reduction",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-williamson-ether",
+      "label": "williamson-ether",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-williamson-ether-sodium-methoxide-chloromethane-dimethyl-ether",
+        "academic-williamson-ether-sodium-methoxide-chloroethane-methoxyethane",
+        "academic-williamson-ether-sodium-methoxide-1-chloropropane-1-methoxypropane",
+        "academic-williamson-ether-sodium-ethoxide-bromoethane-diethyl-ether",
+        "academic-williamson-ether-sodium-phenoxide-chloromethane-anisole"
+      ],
+      "sources": [
+        "S18-2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "williamson-ether",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-alkoxymercuration-ether",
+      "label": "alkoxymercuration-ether",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-alkoxymercuration-ether-methanol-propene-2-methoxypropane"
+      ],
+      "sources": [
+        "S18-2"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "alkoxymercuration-ether",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-alkyne-partial-hydrogenation",
+      "label": "alkyne-partial-hydrogenation",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-alkyne-partial-hydrogenation-but-1-yne-but-1-ene",
+        "academic-alkyne-partial-hydrogenation-but-2-yne-but-2-ene",
+        "academic-alkyne-partial-hydrogenation-pent-1-yne-pent-1-ene",
+        "academic-alkyne-partial-hydrogenation-pent-2-yne-pent-2-ene",
+        "academic-alkyne-partial-hydrogenation-propyne-propene"
+      ],
+      "sources": [
+        "S9-5"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "alkyne-partial-hydrogenation",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-alkene-hydrogenation",
+      "label": "alkene-hydrogenation",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-alkene-hydrogenation-but-1-ene-butane",
+        "academic-alkene-hydrogenation-but-2-ene-butane",
+        "academic-alkene-hydrogenation-pent-1-ene-pentane",
+        "academic-alkene-hydrogenation-pent-2-ene-pentane",
+        "academic-alkene-hydrogenation-cyclohexene-cyclohexane",
+        "academic-alkene-hydrogenation-isobutene-isobutane",
+        "academic-alkene-hydrogenation-styrene-ethylbenzene",
+        "academic-alkene-hydrogenation-allyl-alcohol-propan-1-ol"
+      ],
+      "sources": [
+        "S8-6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "alkene-hydrogenation",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-alkyne-hydration",
+      "label": "alkyne-hydration",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-alkyne-hydration-but-1-yne-butanone",
+        "academic-alkyne-hydration-but-2-yne-butanone"
+      ],
+      "sources": [
+        "S9-4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "alkyne-hydration",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-alkyne-hydroboration",
+      "label": "alkyne-hydroboration",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-alkyne-hydroboration-pent-1-yne-pentanal",
+        "academic-alkyne-hydroboration-propyne-propanal"
+      ],
+      "sources": [
+        "S9-4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "alkyne-hydroboration",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-alkene-hydration",
+      "label": "alkene-hydration",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-alkene-hydration-but-1-ene-butan-2-ol",
+        "academic-alkene-hydration-but-2-ene-butan-2-ol",
+        "academic-alkene-hydration-pent-1-ene-pentan-2-ol",
+        "academic-alkene-hydration-pent-2-ene-pentan-2-ol-pentan-3-ol"
+      ],
+      "sources": [
+        "S8-4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "alkene-hydration",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-alcohol-oxidation",
+      "label": "alcohol-oxidation",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-alcohol-oxidation-2-methylpropan-1-ol-2-methylpropanal",
+        "academic-alcohol-oxidation-2-methylbutan-1-ol-2-methylbutanal",
+        "academic-alcohol-oxidation-3-methylbutan-1-ol-3-methylbutanal",
+        "academic-alcohol-oxidation-2-2-dimethylpropan-1-ol-2-2-dimethylpropanal",
+        "academic-alcohol-oxidation-pentan-1-ol-pentanal",
+        "academic-alcohol-oxidation-butan-2-ol-butanone",
+        "academic-alcohol-oxidation-pentan-3-ol-pentan-3-one",
+        "academic-alcohol-oxidation-allyl-alcohol-acrolein"
+      ],
+      "sources": [
+        "S17-7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "alcohol-oxidation",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-aldehyde-oxidation",
+      "label": "aldehyde-oxidation",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-aldehyde-oxidation-2-methylpropanal-2-methylpropanoic-acid",
+        "academic-aldehyde-oxidation-2-methylbutanal-2-methylbutanoic-acid",
+        "academic-aldehyde-oxidation-3-methylbutanal-3-methylbutanoic-acid",
+        "academic-aldehyde-oxidation-2-2-dimethylpropanal-2-2-dimethylpropanoic-acid",
+        "academic-aldehyde-oxidation-pentanal-pentanoic-acid",
+        "academic-aldehyde-oxidation-butanal-butanoic-acid"
+      ],
+      "sources": [
+        "S19-3"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "aldehyde-oxidation",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-grignard-addition",
+      "label": "grignard-addition",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-grignard-addition-chloromethane-formaldehyde-ethanol",
+        "academic-grignard-addition-bromoethane-formaldehyde-propan-1-ol",
+        "academic-grignard-addition-1-bromopropane-formaldehyde-butan-1-ol",
+        "academic-grignard-addition-1-chlorobutane-formaldehyde-pentan-1-ol",
+        "academic-grignard-addition-2-bromopropane-formaldehyde-2-methylpropan-1-ol",
+        "academic-grignard-addition-chloromethane-ethanal-propan-2-ol",
+        "academic-grignard-addition-bromoethane-ethanal-butan-2-ol",
+        "academic-grignard-addition-1-bromopropane-ethanal-pentan-2-ol",
+        "academic-grignard-addition-2-bromopropane-ethanal-3-methylbutan-2-ol",
+        "academic-grignard-addition-bromoethane-propanal-pentan-3-ol",
+        "academic-grignard-addition-chloromethane-acetone-2-methylpropan-2-ol",
+        "academic-grignard-addition-bromoethane-acetone-2-methylbutan-2-ol",
+        "academic-grignard-addition-chloromethane-butanone-2-methylbutan-2-ol",
+        "academic-grignard-addition-bromoethane-acetonitrile-butanone",
+        "academic-grignard-addition-bromoethane-propanenitrile-pentan-3-one"
+      ],
+      "sources": [
+        "S17-5",
+        "S20-7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "grignard-addition",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-wolff-kishner",
+      "label": "wolff-kishner",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-wolff-kishner-ethanal-ethane",
+        "academic-wolff-kishner-propanal-propane",
+        "academic-wolff-kishner-butanal-butane",
+        "academic-wolff-kishner-pentanal-pentane",
+        "academic-wolff-kishner-butanone-butane",
+        "academic-wolff-kishner-2-methylpropanal-isobutane",
+        "academic-wolff-kishner-2-methylbutanal-isopentane",
+        "academic-wolff-kishner-3-methylbutanal-isopentane",
+        "academic-wolff-kishner-2-2-dimethylpropanal-neopentane",
+        "academic-wolff-kishner-benzaldehyde-toluene"
+      ],
+      "sources": [
+        "S19-9"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "wolff-kishner",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-ester-hydrolysis",
+      "label": "ester-hydrolysis",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-ester-hydrolysis-methyl-acetate-acetic-acid-methanol",
+        "academic-ester-hydrolysis-butyl-acetate-acetic-acid-butan-1-ol",
+        "academic-ester-hydrolysis-isoamyl-acetate-acetic-acid-3-methylbutan-1-ol",
+        "academic-ester-hydrolysis-methyl-formate-formic-acid-methanol",
+        "academic-ester-hydrolysis-ethyl-formate-formic-acid-ethanol",
+        "academic-ester-hydrolysis-propyl-formate-formic-acid-propan-1-ol",
+        "academic-ester-hydrolysis-methyl-propionate-propionic-acid-methanol",
+        "academic-ester-hydrolysis-ethyl-butyrate-butanoic-acid-ethanol",
+        "academic-ester-hydrolysis-dimethyl-oxalate-oxalic-acid-methanol",
+        "academic-ester-hydrolysis-diphenyl-oxalate-oxalic-acid-phenol",
+        "academic-ester-hydrolysis-phenyl-acetate-acetic-acid-phenol"
+      ],
+      "sources": [
+        "S21-6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "ester-hydrolysis",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-aromatic-side-chain-oxidation",
+      "label": "aromatic-side-chain-oxidation",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-aromatic-side-chain-oxidation-m-xylene-isophthalic-acid"
+      ],
+      "sources": [
+        "S16-8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "aromatic-side-chain-oxidation",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-diazonium-substitution",
+      "label": "diazonium-substitution",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-diazonium-substitution-benzenediazonium-chloride-chlorobenzene",
+        "academic-diazonium-substitution-benzenediazonium-chloride-benzonitrile",
+        "academic-diazonium-substitution-benzenediazonium-chloride-benzene"
+      ],
+      "sources": [
+        "S24-8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "diazonium-substitution",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-cannizzaro",
+      "label": "不均化: cannizzaro",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-cannizzaro-benzaldehyde-benzyl-alcohol-sodium-benzoate"
+      ],
+      "sources": [
+        "S19-12"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "cannizzaro",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-acid-chloride",
+      "label": "acid-chloride",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-acid-chloride-adipic-acid-adipoyl-chloride",
+        "academic-acid-chloride-terephthalic-acid-terephthaloyl-chloride",
+        "academic-acid-chloride-adipoyl-chloride-adipic-acid",
+        "academic-acid-chloride-terephthaloyl-chloride-terephthalic-acid"
+      ],
+      "sources": [
+        "S21-summary",
+        "S21-6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "acid-chloride",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-amide-hydrolysis",
+      "label": "amide-hydrolysis",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-amide-hydrolysis-acetanilide-aniline-acetic-acid"
+      ],
+      "sources": [
+        "S21-7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "amide-hydrolysis",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-sulfanilamide",
+      "label": "sulfanilamide",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-sulfanilamide-acetanilide-sulfanilamide"
+      ],
+      "sources": [
+        "S24-8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "sulfanilamide",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-polysaccharide-hydrolysis",
+      "label": "polysaccharide-hydrolysis",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-polysaccharide-hydrolysis-amylopectin-glucose"
+      ],
+      "sources": [
+        "S25-9"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "polysaccharide-hydrolysis",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-lactam-hydrolysis",
+      "label": "lactam-hydrolysis",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-lactam-hydrolysis-caprolactam-6-aminohexanoic-acid"
+      ],
+      "sources": [
+        "S21-7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "lactam-hydrolysis",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-disulfide-reduction",
+      "label": "disulfide-reduction",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-disulfide-reduction-cystine-cysteine"
+      ],
+      "sources": [
+        "S18-7"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "disulfide-reduction",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-reductive-amination",
+      "label": "還元的アミノ化: reductive-amination",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-reductive-amination-formaldehyde-methylamine",
+        "academic-reductive-amination-ethanal-ethylamine",
+        "academic-reductive-amination-propanal-propylamine",
+        "academic-reductive-amination-butanal-butan-1-amine",
+        "academic-reductive-amination-acetone-isopropylamine",
+        "academic-reductive-amination-butanone-butan-2-amine",
+        "academic-reductive-amination-2-methylpropanal-2-methylpropan-1-amine",
+        "academic-reductive-amination-formaldehyde-methylamine-dimethylamine",
+        "academic-reductive-amination-formaldehyde-dimethylamine-trimethylamine",
+        "academic-reductive-amination-formaldehyde-ethylamine-ethylmethylamine",
+        "academic-reductive-amination-formaldehyde-ethylmethylamine-n-n-dimethylethanamine",
+        "academic-reductive-amination-formaldehyde-propylamine-n-methylpropan-1-amine",
+        "academic-reductive-amination-formaldehyde-isopropylamine-n-methylpropan-2-amine",
+        "academic-reductive-amination-ethanal-ethylamine-diethylamine",
+        "academic-reductive-amination-ethanal-diethylamine-triethylamine"
+      ],
+      "sources": [
+        "S24-6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "reductive-amination",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-carboxylation",
+      "label": "カルボキシル化: carboxylation",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-carboxylation-chloromethane-acetic-acid",
+        "academic-carboxylation-bromoethane-propionic-acid",
+        "academic-carboxylation-1-bromopropane-butanoic-acid",
+        "academic-carboxylation-2-bromopropane-2-methylpropanoic-acid",
+        "academic-carboxylation-2-chloro-2-methylpropane-2-2-dimethylpropanoic-acid"
+      ],
+      "sources": [
+        "S20-5"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "carboxylation",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-hvz-amino-acid",
+      "label": "アミノ酸合成: hvz-amino-acid",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-hvz-amino-acid-acetic-acid-glycine"
+      ],
+      "sources": [
+        "S26-3"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "hvz-amino-acid",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-pyruvate-reduction",
+      "label": "pyruvate-reduction",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-pyruvate-reduction-pyruvic-acid-lactic-acid"
+      ],
+      "sources": [
+        "S19-12"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "pyruvate-reduction",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-group-friedel-crafts-alkylation",
+      "label": "friedel-crafts-alkylation",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-friedel-crafts-alkylation-toluene-chloromethane-o-xylene-p-xylene"
+      ],
+      "sources": [
+        "S16-3"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "academicGroupKey": "friedel-crafts-alkylation",
+      "reason": "大学レベルの一般則または資料例としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-pvdc-polymer",
+      "label": "academic-pvdc-polymer",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-pvdc-polymer"
+      ],
+      "sources": [
+        "PF"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-polyisoprene",
+      "label": "academic-polyisoprene",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-polyisoprene"
+      ],
+      "sources": [
+        "PB",
+        "PF"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-nbr",
+      "label": "academic-nbr",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-nbr"
+      ],
+      "sources": [
+        "PC"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-abs",
+      "label": "academic-abs",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-abs"
+      ],
+      "sources": [
+        "PC",
+        "PF"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-pla",
+      "label": "academic-pla",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-pla"
+      ],
+      "sources": [
+        "PD"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-aramid",
+      "label": "academic-aramid",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-aramid"
+      ],
+      "sources": [
+        "PD"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-polycarbonate",
+      "label": "academic-polycarbonate",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-polycarbonate"
+      ],
+      "sources": [
+        "PF"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-epoxy-resin",
+      "label": "academic-epoxy-resin",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-epoxy-resin"
+      ],
+      "sources": [
+        "PM"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-bisphenol-a",
+      "label": "academic-bisphenol-a",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-bisphenol-a"
+      ],
+      "sources": [
+        "PF"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-cellobiose-hydrolysis",
+      "label": "academic-cellobiose-hydrolysis",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-cellobiose-hydrolysis"
+      ],
+      "sources": [
+        "PK"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-trehalose-hydrolysis",
+      "label": "academic-trehalose-hydrolysis",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-trehalose-hydrolysis"
+      ],
+      "sources": [
+        "PK"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-glycogen-hydrolysis",
+      "label": "academic-glycogen-hydrolysis",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-glycogen-hydrolysis"
+      ],
+      "sources": [
+        "S25-9",
+        "PK"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "advanced-polymer-mma-hydrolysis",
+      "label": "academic-mma-hydrolysis",
+      "level": "advanced",
+      "reactionIds": [
+        "academic-mma-hydrolysis"
+      ],
+      "sources": [
+        "S21-6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "大学レベルの重合・高分子反応としてアカデミックモードで公開済み（通常モード未公開）"
+    },
+    {
+      "id": "missing-ethylene-oxide",
+      "label": "エチレンオキシド（酸化エチレン）",
+      "level": "missing-material",
+      "reactionIds": [],
+      "compoundIds": [
+        "ethylene-oxide"
+      ],
+      "sources": [],
+      "requiresEquation": false,
+      "requiresDrawing": false,
+      "pendingKind": "compound-addition",
+      "reason": "427物質に未収録。高校化学で扱う開環付加（エチレンオキシドの水和・アルコール付加）の教材項目だが、物質IDと根拠が未確定のため追加しない。"
+    },
+    {
+      "id": "missing-1-2-dichloroethane",
+      "label": "1,2-ジクロロエタン",
+      "level": "missing-material",
+      "reactionIds": [],
+      "compoundIds": [
+        "1,2-dichloroethane"
+      ],
+      "sources": [],
+      "requiresEquation": false,
+      "requiresDrawing": false,
+      "pendingKind": "compound-addition",
+      "reason": "427物質に未収録（1,2-ジブロモエタンは収録済み）。塩化ビニルの原料として高校教材に出るが、独立した物質・反応の根拠が未確定のため追加しない。"
+    },
+    {
+      "id": "missing-vulcanized-rubber",
+      "label": "加硫ゴム",
+      "level": "missing-material",
+      "reactionIds": [],
+      "compoundIds": [
+        "vulcanized-rubber"
+      ],
+      "sources": [],
+      "requiresEquation": false,
+      "requiresDrawing": false,
+      "pendingKind": "compound-addition",
+      "reason": "427物質に未収録（天然ゴム・SBR等のゴムは収録済み）。硫黄による架橋（加硫）は高校教材だが、架橋密度を固定できないため物質・反応として追加しない。"
+    },
+    {
+      "id": "card-only-detection-silver-mirror",
+      "label": "銀鏡反応",
+      "level": "card-only",
+      "reactionIds": [],
+      "compoundIds": [
+        "ethanal",
+        "glucose"
+      ],
+      "sources": [],
+      "requiresEquation": false,
+      "requiresDrawing": false,
+      "pendingKind": "detection-ui",
+      "reason": "検出反応専用の表示UIは未実装。ネットワーク優先のため今回はカード化していない（カード済みとは扱わない）。"
+    },
+    {
+      "id": "card-only-detection-fehling",
+      "label": "フェーリング液の還元",
+      "level": "card-only",
+      "reactionIds": [],
+      "compoundIds": [
+        "ethanal",
+        "glucose"
+      ],
+      "sources": [],
+      "requiresEquation": false,
+      "requiresDrawing": false,
+      "pendingKind": "detection-ui",
+      "reason": "検出反応専用の表示UIは未実装。ネットワーク優先のため今回はカード化していない（カード済みとは扱わない）。"
+    },
+    {
+      "id": "card-only-protein-hydrolysis-mixture",
+      "label": "タンパク質の加水分解でアミノ酸の混合物が生じる",
+      "level": "card-only",
+      "reactionIds": [
+        "protein-hydrolysis"
+      ],
+      "compoundIds": [
+        "protein"
+      ],
+      "sources": [
+        "N-26.4",
+        "N-26.5"
+      ],
+      "requiresEquation": false,
+      "requiresDrawing": false,
+      "pendingKind": "existing-card-note",
+      "cardRef": "protein-hydrolysis.productNote",
+      "reason": "既存カード protein-hydrolysis の productNote が「アミノ酸の混合物」と明記している。独立した反応ノード・式は追加しない。"
+    },
+    {
+      "id": "standard-methanol-cuo-oxidation",
+      "label": "酸化: メタノール + CuO → ホルムアルデヒド + Cu + 水",
+      "level": "standard",
+      "reactionIds": [
+        "methanol-cuo-oxidation"
+      ],
+      "compoundIds": [
+        "methanol",
+        "formaldehyde"
+      ],
+      "sources": [
+        "MATSUYAMA-CUO",
+        "RSC-ETHANOL-OXIDATION"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "CuO を酸化剤とする高校代表条件。既存の DMP 酸化・NaBH4 還元とは別経路で、旧86の条件は変えない。"
+    },
+    {
+      "id": "standard-ethanol-cuo-oxidation",
+      "label": "酸化: エタノール + CuO → エタナール + Cu + 水",
+      "level": "standard",
+      "reactionIds": [
+        "ethanol-cuo-oxidation"
+      ],
+      "compoundIds": [
+        "ethanol",
+        "ethanal"
+      ],
+      "sources": [
+        "RSC-ETHANOL-OXIDATION"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "第一級アルコールの CuO 酸化（一般則）。既存の DMP 酸化とは酸化剤が異なる高校代表条件。"
+    },
+    {
+      "id": "standard-propan-2-ol-cuo-oxidation",
+      "label": "酸化: プロパン-2-オール + CuO → アセトン + Cu + 水",
+      "level": "standard",
+      "reactionIds": [
+        "propan-2-ol-cuo-oxidation"
+      ],
+      "compoundIds": [
+        "propan-2-ol",
+        "acetone"
+      ],
+      "sources": [
+        "RSC-ETHANOL-OXIDATION"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "第二級アルコールの CuO 酸化（一般則）。ケトン生成の高校代表条件。"
+    },
+    {
+      "id": "standard-ethanol-dichromate-oxidation-ethanal",
+      "label": "酸化: エタノール + [O] → エタナール + 水（酸性二クロム酸塩）",
+      "level": "standard",
+      "reactionIds": [
+        "ethanol-dichromate-oxidation-ethanal"
+      ],
+      "compoundIds": [
+        "ethanol",
+        "ethanal"
+      ],
+      "sources": [
+        "RSC-ETHANOL-OXIDATION"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "酸性二クロム酸塩による第一段階。Cr を含む完全式ではなく [O] の形式当量で示す総括（N）。"
+    },
+    {
+      "id": "standard-ethanol-dichromate-oxidation-acetic-acid",
+      "label": "酸化: エタノール + 2[O] → 酢酸 + 水（酸性二クロム酸塩）",
+      "level": "standard",
+      "reactionIds": [
+        "ethanol-dichromate-oxidation-acetic-acid"
+      ],
+      "compoundIds": [
+        "ethanol",
+        "acetic-acid"
+      ],
+      "sources": [
+        "RSC-ETHANOL-OXIDATION"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "酸性二クロム酸塩による完全酸化の多段階総括。[O] は形式当量で、実在する孤立酸素原子ではない。"
+    },
+    {
+      "id": "standard-maleic-acid-anhydride",
+      "label": "縮合: マレイン酸（シス-ブテン二酸） → 無水マレイン酸",
+      "level": "standard",
+      "reactionIds": [
+        "maleic-acid-anhydride"
+      ],
+      "sources": [
+        "J-M"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。ジカルボン酸の分子内脱水。"
+    },
+    {
+      "id": "standard-phthalic-acid-anhydride",
+      "label": "縮合: フタル酸（ベンゼン-1,2-ジカルボン酸） → 無水フタル酸",
+      "level": "standard",
+      "reactionIds": [
+        "phthalic-acid-anhydride"
+      ],
+      "sources": [
+        "J-P"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。オルト位のジカルボン酸の分子内脱水。"
+    },
+    {
+      "id": "standard-ethanol-dehydration-ethene",
+      "label": "脱離: エタノール → エテン（エチレン）",
+      "level": "standard",
+      "reactionIds": [
+        "ethanol-dehydration-ethene"
+      ],
+      "sources": [
+        "C-D"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。エタノールの分子内脱水によるエテン生成。"
+    },
+    {
+      "id": "standard-ethanol-sodium",
+      "label": "金属との反応: エタノール → ナトリウムエトキシド（エトキシドナトリウム）",
+      "level": "standard",
+      "reactionIds": [
+        "ethanol-sodium"
+      ],
+      "sources": [
+        "C-A"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。エタノールと金属ナトリウムの反応。"
+    },
+    {
+      "id": "standard-methanol-sodium",
+      "label": "金属との反応: メタノール → ナトリウムメトキシド（メトキシドナトリウム）",
+      "level": "standard",
+      "reactionIds": [
+        "methanol-sodium"
+      ],
+      "sources": [
+        "O-17"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。メタノールと金属ナトリウムの反応。"
+    },
+    {
+      "id": "standard-glucose-fermentation",
+      "label": "発酵: グルコース（ブドウ糖） → エタノール",
+      "level": "standard",
+      "reactionIds": [
+        "glucose-fermentation"
+      ],
+      "sources": [
+        "C-A"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。グルコースからエタノールと二酸化炭素への発酵の総括。"
+    },
+    {
+      "id": "standard-pva-formalization",
+      "label": "縮合: ポリビニルアルコール（PVA） → ビニロン（部分ホルマール化ポリビニルアルコール）",
+      "level": "standard",
+      "reactionIds": [
+        "pva-formalization"
+      ],
+      "sources": [
+        "V-ABSTRACT",
+        "DNC"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。ポリビニルアルコールの部分アセタール化（ビニロン化）。反応率・架橋密度は固定しない。"
+    },
+    {
+      "id": "standard-acetic-acid-neutralization",
+      "label": "中和: 酢酸（エタン酸） → 酢酸ナトリウム",
+      "level": "standard",
+      "reactionIds": [
+        "acetic-acid-neutralization"
+      ],
+      "sources": [
+        "C-C"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。カルボン酸と水酸化ナトリウムの中和。"
+    },
+    {
+      "id": "standard-acetic-acid-sodium-carbonate",
+      "label": "中和: 酢酸（エタン酸） → 酢酸ナトリウム",
+      "level": "standard",
+      "reactionIds": [
+        "acetic-acid-sodium-carbonate"
+      ],
+      "sources": [
+        "C-C"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。カルボン酸と炭酸水素ナトリウムの反応。"
+    },
+    {
+      "id": "standard-benzoic-acid-neutralization",
+      "label": "中和: 安息香酸（ベンゼンカルボン酸） → 安息香酸ナトリウム",
+      "level": "standard",
+      "reactionIds": [
+        "benzoic-acid-neutralization"
+      ],
+      "sources": [
+        "J-B"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。安息香酸と水酸化ナトリウムの中和。"
+    },
+    {
+      "id": "standard-stearic-acid-neutralization",
+      "label": "中和: ステアリン酸（オクタデカン酸） → ステアリン酸ナトリウム",
+      "level": "standard",
+      "reactionIds": [
+        "stearic-acid-neutralization"
+      ],
+      "sources": [
+        "C-C"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。高級脂肪酸と水酸化ナトリウムの中和（セッケン化）。"
+    },
+    {
+      "id": "standard-oleic-acid-neutralization",
+      "label": "中和: オレイン酸（シス-9-オクタデセン酸） → オレイン酸ナトリウム",
+      "level": "standard",
+      "reactionIds": [
+        "oleic-acid-neutralization"
+      ],
+      "sources": [
+        "C-C"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。不飽和脂肪酸と水酸化ナトリウムの中和（セッケン化）。"
+    },
+    {
+      "id": "standard-aniline-hydrochloride",
+      "label": "中和: アニリン（アミノベンゼン） → アニリン塩酸塩（塩化アニリニウム）",
+      "level": "standard",
+      "reactionIds": [
+        "aniline-hydrochloride"
+      ],
+      "sources": [
+        "J-A",
+        "C-N"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。アニリンと塩酸の塩形成。"
+    },
+    {
+      "id": "standard-phenol-bromination",
+      "label": "芳香族置換: フェノール → 2,4,6-トリブロモフェノール",
+      "level": "standard",
+      "reactionIds": [
+        "phenol-bromination"
+      ],
+      "sources": [
+        "C-R"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。フェノールの臭素水による環置換。"
+    },
+    {
+      "id": "standard-ethyne-partial-hydrogenation",
+      "label": "水素付加: エチン（アセチレン） → エテン（エチレン）",
+      "level": "standard",
+      "reactionIds": [
+        "ethyne-partial-hydrogenation"
+      ],
+      "sources": [
+        "O-95"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。アルキンの部分還元。"
+    },
+    {
+      "id": "standard-ethyne-full-hydrogenation",
+      "label": "水素付加: エチン（アセチレン） → エタン",
+      "level": "standard",
+      "reactionIds": [
+        "ethyne-full-hydrogenation"
+      ],
+      "sources": [
+        "O-95"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。アルキンの完全水素化。"
+    },
+    {
+      "id": "standard-ethyne-hydrogen-bromide",
+      "label": "付加: エチン（アセチレン） → ブロモエテン（臭化ビニル）",
+      "level": "standard",
+      "reactionIds": [
+        "ethyne-hydrogen-bromide"
+      ],
+      "sources": [
+        "O-93"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。アルキンへの HBr 1 回付加。"
+    },
+    {
+      "id": "standard-ethyne-silver-acetylide",
+      "label": "沈殿生成: エチン（アセチレン） → 銀アセチリド",
+      "level": "standard",
+      "reactionIds": [
+        "ethyne-silver-acetylide"
+      ],
+      "sources": [
+        "L-13"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。末端アルキンの銀アセチリド生成。"
+    },
+    {
+      "id": "standard-ethyne-copper-acetylide",
+      "label": "沈殿生成: エチン（アセチレン） → 銅(I)アセチリド",
+      "level": "standard",
+      "reactionIds": [
+        "ethyne-copper-acetylide"
+      ],
+      "sources": [
+        "L-13"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。末端アルキンの銅(I)アセチリド生成。"
+    },
+    {
+      "id": "standard-sodium-acetate-decarboxylation",
+      "label": "分解: 酢酸ナトリウム → メタン",
+      "level": "standard",
+      "reactionIds": [
+        "sodium-acetate-decarboxylation"
+      ],
+      "sources": [
+        "C-S"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。酢酸ナトリウムの脱炭酸。"
+    },
+    {
+      "id": "standard-acetic-acid-anhydride",
+      "label": "縮合: 酢酸（エタン酸） → 無水酢酸",
+      "level": "standard",
+      "reactionIds": [
+        "acetic-acid-anhydride"
+      ],
+      "sources": [
+        "J-C"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。カルボン酸の脱水による酸無水物生成。"
+    },
+    {
+      "id": "standard-benzene-chlorine-addition",
+      "label": "付加: ベンゼン → ヘキサクロロシクロヘキサン（BHC）",
+      "level": "standard",
+      "reactionIds": [
+        "benzene-chlorine-addition"
+      ],
+      "sources": [
+        "C-H"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。ベンゼンへの光付加。"
+    },
+    {
+      "id": "standard-phenol-nitration",
+      "label": "ニトロ化: フェノール → ピクリン酸（2,4,6-トリニトロフェノール）",
+      "level": "standard",
+      "reactionIds": [
+        "phenol-nitration"
+      ],
+      "sources": [
+        "C-R"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。フェノールの逐次ニトロ化によるピクリン酸生成の総括。"
+    },
+    {
+      "id": "standard-phenol-phthalein",
+      "label": "縮合: フェノール + 無水フタル酸 → フェノールフタレイン",
+      "level": "standard",
+      "reactionIds": [
+        "phenol-phthalein"
+      ],
+      "sources": [
+        "SAPP"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。フェノールと無水フタル酸の酸触媒縮合。"
+    },
+    {
+      "id": "standard-polyacetylene-polymerization",
+      "label": "重合: エチン（アセチレン） → ポリアセチレン",
+      "level": "standard",
+      "reactionIds": [
+        "polyacetylene-polymerization"
+      ],
+      "sources": [
+        "NOBEL"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。アセチレンの触媒重合。"
+    },
+    {
+      "id": "standard-ethylbenzene-dehydrogenation",
+      "label": "脱離: エチルベンゼン → スチレン（ビニルベンゼン）",
+      "level": "standard",
+      "reactionIds": [
+        "ethylbenzene-dehydrogenation"
+      ],
+      "sources": [
+        "J-S"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "保留から昇格。エチルベンゼンの脱水素によるスチレン生成。"
+    },
+    {
+      "id": "standard-sodium-phenoxide-carboxylation",
+      "label": "ナトリウムフェノキシド（フェノキシドナトリウム） → サリチル酸ナトリウム",
+      "level": "standard",
+      "reactionIds": [
+        "sodium-phenoxide-carboxylation"
+      ],
+      "sources": [
+        "PL"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。フェノールのカルボキシル化。主生成物は o-サリチル酸塩だが、単一選択を保証しない。",
+      "legacyAcademicId": "academic-kolbe-schmitt"
+    },
+    {
+      "id": "standard-sodium-salicylate-acidification",
+      "label": "中和: サリチル酸ナトリウム → サリチル酸（2-ヒドロキシ安息香酸）",
+      "level": "standard",
+      "reactionIds": [
+        "sodium-salicylate-acidification"
+      ],
+      "sources": [
+        "PL"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。酸塩基の一般則。塩の種類・後処理は省略する。",
+      "legacyAcademicId": "academic-salicylic-acid"
+    },
+    {
+      "id": "standard-maltose-hydrolysis",
+      "label": "加水分解: マルトース（麦芽糖） → グルコース（ブドウ糖）",
+      "level": "standard",
+      "reactionIds": [
+        "maltose-hydrolysis"
+      ],
+      "sources": [
+        "PK"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。二糖の完全加水分解。元素収支は二糖 1 分子＋水 1 分子＝単糖 2 分子。",
+      "legacyAcademicId": "academic-maltose-hydrolysis"
+    },
+    {
+      "id": "standard-lactose-hydrolysis",
+      "label": "加水分解: ラクトース（乳糖） → グルコース（ブドウ糖） + ガラクトース",
+      "level": "standard",
+      "reactionIds": [
+        "lactose-hydrolysis"
+      ],
+      "sources": [
+        "PI"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。二糖の完全加水分解。元素収支は二糖 1 分子＋水 1 分子＝単糖 2 分子。",
+      "legacyAcademicId": "academic-lactose-hydrolysis"
+    },
+    {
+      "id": "standard-cellulose-hydrolysis",
+      "label": "加水分解: セルロース → グルコース（ブドウ糖）",
+      "level": "standard",
+      "reactionIds": [
+        "cellulose-hydrolysis"
+      ],
+      "sources": [
+        "S25-9",
+        "PK"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。多糖のグリコシド結合を完全に加水分解する総括。単一の酵素ですべての結合を切るとは主張しない。",
+      "legacyAcademicId": "academic-cellulose-hydrolysis"
+    },
+    {
+      "id": "standard-cellulose-acetylation",
+      "label": "置換: セルロース + 無水酢酸 → セルロースアセテート（酢酸セルロース） + 酢酸（エタン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "cellulose-acetylation"
+      ],
+      "sources": [
+        "PK"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。セルロースのアセチル化。置換度 d は 0〜3 の範囲で製品により異なり、完全三置換に固定しない。",
+      "legacyAcademicId": "academic-cellulose-acetate"
+    },
+    {
+      "id": "standard-cellulose-nitration",
+      "label": "置換: セルロース → セルロースナイトレート（ニトロセルロース）",
+      "level": "standard",
+      "reactionIds": [
+        "cellulose-nitration"
+      ],
+      "sources": [
+        "PK"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。セルロースの硝酸エステル化。置換度は可変で、完全三置換に固定しない。",
+      "legacyAcademicId": "academic-cellulose-nitrate"
+    },
+    {
+      "id": "standard-tetrafluoroethylene-polymerization",
+      "label": "付加重合: テトラフルオロエチレン → ポリテトラフルオロエチレン（PTFE）",
+      "level": "standard",
+      "reactionIds": [
+        "tetrafluoroethylene-polymerization"
+      ],
+      "sources": [
+        "PA"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "legacyAcademicId": "academic-ptfe-polymer"
+    },
+    {
+      "id": "standard-vinyl-acetate-polymerization",
+      "label": "付加重合: 酢酸ビニル → ポリ酢酸ビニル（PVAc）",
+      "level": "standard",
+      "reactionIds": [
+        "vinyl-acetate-polymerization"
+      ],
+      "sources": [
+        "PA"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "legacyAcademicId": "academic-pvac-polymer"
+    },
+    {
+      "id": "standard-mma-polymerization",
+      "label": "付加重合: メタクリル酸メチル（MMA） → ポリメタクリル酸メチル（PMMA）",
+      "level": "standard",
+      "reactionIds": [
+        "mma-polymerization"
+      ],
+      "sources": [
+        "PA"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "legacyAcademicId": "academic-pmma-polymer"
+    },
+    {
+      "id": "standard-acrylonitrile-polymerization",
+      "label": "付加重合: アクリロニトリル → ポリアクリロニトリル（PAN）",
+      "level": "standard",
+      "reactionIds": [
+        "acrylonitrile-polymerization"
+      ],
+      "sources": [
+        "PA"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "legacyAcademicId": "academic-pan-polymer"
+    },
+    {
+      "id": "standard-butadiene-polymerization",
+      "label": "付加重合: 1,3-ブタジエン → ポリブタジエン（BR）",
+      "level": "standard",
+      "reactionIds": [
+        "butadiene-polymerization"
+      ],
+      "sources": [
+        "PB"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "legacyAcademicId": "academic-polybutadiene"
+    },
+    {
+      "id": "standard-chloroprene-polymerization",
+      "label": "付加重合: クロロプレン（2-クロロ-1,3-ブタジエン） → クロロプレンゴム（CR）",
+      "level": "standard",
+      "reactionIds": [
+        "chloroprene-polymerization"
+      ],
+      "sources": [
+        "PB",
+        "PF"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "legacyAcademicId": "academic-chloroprene-rubber-polymer"
+    },
+    {
+      "id": "standard-styrene-butadiene-copolymerization",
+      "label": "付加重合: 1,3-ブタジエン + スチレン（ビニルベンゼン） → スチレン-ブタジエンゴム（SBR）",
+      "level": "standard",
+      "reactionIds": [
+        "styrene-butadiene-copolymerization"
+      ],
+      "sources": [
+        "PC"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。共重合の一般則。単量体の組成比・配列（ランダム／ブロック／グラフト）は主張しない。",
+      "legacyAcademicId": "academic-sbr"
+    },
+    {
+      "id": "standard-iir-copolymerization",
+      "label": "付加重合: 2-メチルプロペン（イソブテン） + イソプレン（2-メチル-1,3-ブタジエン） → ブチルゴム（IIR、イソブチレン-イソプレン共重合体）",
+      "level": "standard",
+      "reactionIds": [
+        "iir-copolymerization"
+      ],
+      "sources": [
+        "PC"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。共重合の一般則。単量体の組成比・配列（ランダム／ブロック／グラフト）は主張しない。",
+      "legacyAcademicId": "academic-iir"
+    },
+    {
+      "id": "standard-pvac-hydrolysis",
+      "label": "加水分解: ポリ酢酸ビニル（PVAc） → ポリビニルアルコール（PVA） + 酢酸（エタン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "pvac-hydrolysis"
+      ],
+      "sources": [
+        "PG",
+        "S21-6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。ポリ酢酸ビニルの加水分解の総括。主鎖は保持し、アセテート基が外れる。",
+      "legacyAcademicId": "academic-pva"
+    },
+    {
+      "id": "standard-nylon6-from-aminoacid",
+      "label": "縮重合: 6-アミノヘキサン酸 → ナイロン-6",
+      "level": "standard",
+      "reactionIds": [
+        "nylon6-from-aminoacid"
+      ],
+      "sources": [
+        "PD"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。アミノ酸の重縮合によるポリアミドの一般則。末端は省略する。",
+      "legacyAcademicId": "academic-nylon6"
+    },
+    {
+      "id": "standard-urea-resin-condensation",
+      "label": "縮重合: 尿素 + ホルムアルデヒド（メタナール） → 尿素樹脂（ユリア樹脂）",
+      "level": "standard",
+      "reactionIds": [
+        "urea-resin-condensation"
+      ],
+      "sources": [
+        "PF"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。フェノール／尿素／メラミンとホルムアルデヒドの付加縮合。触媒・架橋密度・組成は特定しない。",
+      "legacyAcademicId": "academic-urea-resin"
+    },
+    {
+      "id": "standard-melamine-resin-condensation",
+      "label": "縮重合: メラミン + ホルムアルデヒド（メタナール） → メラミン樹脂",
+      "level": "standard",
+      "reactionIds": [
+        "melamine-resin-condensation"
+      ],
+      "sources": [
+        "PF"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。フェノール／尿素／メラミンとホルムアルデヒドの付加縮合。触媒・架橋密度・組成は特定しない。",
+      "legacyAcademicId": "academic-melamine-resin"
+    },
+    {
+      "id": "standard-phenol-resin-condensation",
+      "label": "縮重合: フェノール + ホルムアルデヒド（メタナール） → フェノール樹脂（フェノール-ホルムアルデヒド樹脂）",
+      "level": "standard",
+      "reactionIds": [
+        "phenol-resin-condensation"
+      ],
+      "sources": [
+        "PF"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。フェノール／尿素／メラミンとホルムアルデヒドの付加縮合。触媒・架橋密度・組成は特定しない。",
+      "legacyAcademicId": "academic-phenol-resin"
+    },
+    {
+      "id": "standard-alkyne-hydration-ethyne-ethanal",
+      "label": "水和: エチン（アセチレン） → エタナール（アセトアルデヒド）",
+      "level": "standard",
+      "reactionIds": [
+        "alkyne-hydration-ethyne-ethanal"
+      ],
+      "sources": [
+        "S9-4"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。アルキンからカルボニルへの総括。",
+      "legacyAcademicId": "academic-alkyne-hydration-ethyne-ethanal"
+    },
+    {
+      "id": "standard-diazonium-substitution-benzenediazonium-chloride-phenol",
+      "label": "置換: 塩化ベンゼンジアゾニウム → フェノール",
+      "level": "standard",
+      "reactionIds": [
+        "diazonium-substitution-benzenediazonium-chloride-phenol"
+      ],
+      "sources": [
+        "S24-8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。芳香族ジアゾニウム塩からの置換。水系のフェノール化で、Sandmeyer 反応とは呼ばない。",
+      "legacyAcademicId": "academic-diazonium-substitution-benzenediazonium-chloride-phenol"
+    },
+    {
+      "id": "standard-arene-hydrogenation-benzene-cyclohexane",
+      "label": "水素付加: ベンゼン → シクロヘキサン",
+      "level": "standard",
+      "reactionIds": [
+        "arene-hydrogenation-benzene-cyclohexane"
+      ],
+      "sources": [
+        "S16-9"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。芳香環の完全水素化。アルケンより厳しい条件が必要で、3 当量相当の水素を要する。",
+      "legacyAcademicId": "academic-arene-hydrogenation-benzene-cyclohexane"
+    },
+    {
+      "id": "standard-aromatic-side-chain-oxidation-o-xylene-phthalic-acid",
+      "label": "酸化: o-キシレン（1,2-ジメチルベンゼン） → フタル酸（ベンゼン-1,2-ジカルボン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "aromatic-side-chain-oxidation-o-xylene-phthalic-acid"
+      ],
+      "sources": [
+        "S16-8"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。芳香環に直接ついたメチル基の酸化。2つのメチル基がともにある場合は両方が酸化される。",
+      "legacyAcademicId": "academic-aromatic-side-chain-oxidation-o-xylene-phthalic-acid"
+    },
+    {
+      "id": "standard-triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid",
+      "label": "加水分解: トリパルミチン（パルミチン酸グリセリド） → グリセリン（プロパン-1,2,3-トリオール） + パルミチン酸（ヘキサデカン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid"
+      ],
+      "sources": [
+        "S21-6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。油脂の完全加水分解の総括。3 分子の脂肪酸が生じる。",
+      "legacyAcademicId": "academic-triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid"
+    },
+    {
+      "id": "standard-triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid",
+      "label": "加水分解: トリリノレイン（リノール酸グリセリド） → グリセリン（プロパン-1,2,3-トリオール） + リノール酸（シス,シス-9,12-オクタデカジエン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid"
+      ],
+      "sources": [
+        "S21-6"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "アカデミックから通常へ昇格。油脂の完全加水分解の総括。3 分子の脂肪酸が生じる。C=C は保持される。",
+      "legacyAcademicId": "academic-triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid"
+    },
+    {
+      "id": "standard-toluene-oxidation-benzoic-acid",
+      "label": "酸化: トルエン（メチルベンゼン） → 安息香酸（ベンゼンカルボン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "toluene-oxidation-benzoic-acid"
+      ],
+      "sources": [
+        "J-T",
+        "J-B"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。トルエンの側鎖酸化による安息香酸生成。"
+    },
+    {
+      "id": "standard-benzene-propene-cumene",
+      "label": "芳香族置換: ベンゼン + プロペン（プロピレン） → クメン（イソプロピルベンゼン）",
+      "level": "standard",
+      "reactionIds": [
+        "benzene-propene-cumene"
+      ],
+      "sources": [
+        "J-F",
+        "CS-P"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。ベンゼンのフリーデル–クラフツ型アルキル化。"
+    },
+    {
+      "id": "standard-benzenesulfonic-acid-neutralization",
+      "label": "中和: ベンゼンスルホン酸 → ベンゼンスルホン酸ナトリウム",
+      "level": "standard",
+      "reactionIds": [
+        "benzenesulfonic-acid-neutralization"
+      ],
+      "sources": [
+        "CS-P"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。スルホン酸と水酸化ナトリウムの中和。"
+    },
+    {
+      "id": "standard-sodium-benzenesulfonate-alkali-fusion",
+      "label": "置換: ベンゼンスルホン酸ナトリウム → ナトリウムフェノキシド（フェノキシドナトリウム）",
+      "level": "standard",
+      "reactionIds": [
+        "sodium-benzenesulfonate-alkali-fusion"
+      ],
+      "sources": [
+        "CS-P",
+        "UMASS"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。スルホン酸ナトリウムのアルカリ融解によるフェノキシド生成。"
+    },
+    {
+      "id": "standard-ethyl-acetate-saponification",
+      "label": "けん化: 酢酸エチル → 酢酸ナトリウム + エタノール",
+      "level": "standard",
+      "reactionIds": [
+        "ethyl-acetate-saponification"
+      ],
+      "sources": [
+        "J-E"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。エステルの塩基加水分解（けん化）。"
+    },
+    {
+      "id": "standard-ethyne-hydrogen-chloride",
+      "label": "付加: エチン（アセチレン） → 塩化ビニル（クロロエテン）",
+      "level": "standard",
+      "reactionIds": [
+        "ethyne-hydrogen-chloride"
+      ],
+      "sources": [
+        "O-93",
+        "KAGAWA"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。アセチレンへの HCl 1 回付加。"
+    },
+    {
+      "id": "standard-ethyne-acetic-acid-vinyl-acetate",
+      "label": "付加: エチン（アセチレン） + 酢酸（エタン酸） → 酢酸ビニル",
+      "level": "standard",
+      "reactionIds": [
+        "ethyne-acetic-acid-vinyl-acetate"
+      ],
+      "sources": [
+        "DNC",
+        "KAGAWA"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。アセチレンと酢酸からの酢酸ビニル生成（教育用の歴史的経路）。"
+    },
+    {
+      "id": "standard-ethene-wacker-oxidation",
+      "label": "酸化: エテン（エチレン） → エタナール（アセトアルデヒド）",
+      "level": "standard",
+      "reactionIds": [
+        "ethene-wacker-oxidation"
+      ],
+      "sources": [
+        "J-W"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。エテンの触媒酸化によるエタナール生成。"
+    },
+    {
+      "id": "standard-nylon66-acid-chloride-condensation",
+      "label": "縮重合: アジピン酸ジクロリド + ヘキサメチレンジアミン → ナイロン-6,6",
+      "level": "standard",
+      "reactionIds": [
+        "nylon66-acid-chloride-condensation"
+      ],
+      "sources": [
+        "SAPP"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。酸塩化物とジアミンによるナイロン-6,6 の重縮合。"
+    },
+    {
+      "id": "standard-acetic-anhydride-hydrolysis",
+      "label": "加水分解: 無水酢酸 → 酢酸（エタン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "acetic-anhydride-hydrolysis"
+      ],
+      "sources": [
+        "O-215"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。酸無水物の加水分解。"
+    },
+    {
+      "id": "standard-maleic-anhydride-hydrolysis",
+      "label": "加水分解: 無水マレイン酸 → マレイン酸（シス-ブテン二酸）",
+      "level": "standard",
+      "reactionIds": [
+        "maleic-anhydride-hydrolysis"
+      ],
+      "sources": [
+        "O-215"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。酸無水物の加水分解。"
+    },
+    {
+      "id": "standard-phthalic-anhydride-hydrolysis",
+      "label": "加水分解: 無水フタル酸 → フタル酸（ベンゼン-1,2-ジカルボン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "phthalic-anhydride-hydrolysis"
+      ],
+      "sources": [
+        "O-215"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。酸無水物の加水分解。"
+    },
+    {
+      "id": "standard-phenol-acetylation",
+      "label": "アセチル化: フェノール → 酢酸フェニル（フェニルエタノアート）",
+      "level": "standard",
+      "reactionIds": [
+        "phenol-acetylation"
+      ],
+      "sources": [
+        "C-P"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。フェノールの O-アセチル化。"
+    },
+    {
+      "id": "standard-acetone-iodoform",
+      "label": "酸化: アセトン（プロパン-2-オン） → ヨードホルム（トリヨードメタン）",
+      "level": "standard",
+      "reactionIds": [
+        "acetone-iodoform"
+      ],
+      "sources": [
+        "C-I"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。アセトンのヨードホルム反応。"
+    },
+    {
+      "id": "standard-propan-2-ol-iodoform",
+      "label": "酸化: プロパン-2-オール（2-プロパノール） → ヨードホルム（トリヨードメタン）",
+      "level": "standard",
+      "reactionIds": [
+        "propan-2-ol-iodoform"
+      ],
+      "sources": [
+        "C-IA",
+        "C-I"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。2-プロパノールのヨードホルム反応（酸化を経る）。"
+    },
+    {
+      "id": "standard-aniline-hydrochloride-basification",
+      "label": "中和: アニリン塩酸塩（塩化アニリニウム） → アニリン（アミノベンゼン）",
+      "level": "standard",
+      "reactionIds": [
+        "aniline-hydrochloride-basification"
+      ],
+      "sources": [
+        "C-N"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。アニリン塩酸塩の塩基処理によるアニリン遊離。"
+    },
+    {
+      "id": "standard-sodium-benzoate-acidification",
+      "label": "中和: 安息香酸ナトリウム → 安息香酸（ベンゼンカルボン酸）",
+      "level": "standard",
+      "reactionIds": [
+        "sodium-benzoate-acidification"
+      ],
+      "sources": [
+        "J-B"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。安息香酸ナトリウムの酸処理による遊離。"
+    },
+    {
+      "id": "standard-ethyne-bromine-addition",
+      "label": "付加: エチン（アセチレン） → 1,2-ジブロモエテン（1,2-ジブロモエチレン）",
+      "level": "standard",
+      "reactionIds": [
+        "ethyne-bromine-addition"
+      ],
+      "sources": [
+        "O-93"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。アセチレンへの臭素1回付加。"
+    },
+    {
+      "id": "standard-dibromoethene-bromine-addition",
+      "label": "付加: 1,2-ジブロモエテン（1,2-ジブロモエチレン） → 1,1,2,2-テトラブロモエタン",
+      "level": "standard",
+      "reactionIds": [
+        "dibromoethene-bromine-addition"
+      ],
+      "sources": [
+        "O-93"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "reason": "新規追加。ジブロモエテンへの臭素付加。"
+    },
+    {
+      "id": "held-research-ethyne-cyclotrimerization",
+      "label": "エチンの環化三量化（ベンゼン生成）",
+      "level": "held",
+      "reactionIds": [],
+      "sources": [
+        "KAGAWA"
+      ],
+      "requiresEquation": true,
+      "requiresDrawing": false,
+      "pendingKind": "research-held",
+      "reason": "KAGAWA 紀要の検索抽出のみで全文未確認。今回の通常反応追加からは保守的に保留し、実装しない。"
+    },
+    {
+      "id": "card-only-detection-fecl3",
+      "label": "塩化鉄(III)によるフェノールの呈色",
+      "level": "card-only",
+      "reactionIds": [],
+      "compoundIds": [
+        "phenol"
+      ],
+      "sources": [],
+      "requiresEquation": false,
+      "requiresDrawing": false,
+      "pendingKind": "detection-ui",
+      "reason": "呈色反応専用の表示UIは未実装。ネットワーク優先のため今回はカード化していない（カード済みとは扱わない）。"
+    },
+    {
+      "id": "card-only-detection-ninhydrin",
+      "label": "ニンヒドリン反応（アミノ酸）",
+      "level": "card-only",
+      "reactionIds": [],
+      "compoundIds": [
+        "glycine",
+        "alanine"
+      ],
+      "sources": [],
+      "requiresEquation": false,
+      "requiresDrawing": false,
+      "pendingKind": "detection-ui",
+      "reason": "呈色反応専用の表示UIは未実装。ネットワーク優先のため今回はカード化していない（カード済みとは扱わない）。"
+    },
+    {
+      "id": "card-only-detection-biuret",
+      "label": "ビウレット反応（タンパク質）",
+      "level": "card-only",
+      "reactionIds": [],
+      "compoundIds": [
+        "protein"
+      ],
+      "sources": [],
+      "requiresEquation": false,
+      "requiresDrawing": false,
+      "pendingKind": "detection-ui",
+      "reason": "呈色反応専用の表示UIは未実装。ネットワーク優先のため今回はカード化していない（カード済みとは扱わない）。"
+    }
+  ]
+}

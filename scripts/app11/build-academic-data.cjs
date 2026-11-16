@@ -272,7 +272,7 @@ function build(opts) {
     const regions = new Set();
     raw.substrates.concat(raw.products).forEach((id) => regions.add(compoundById.get(id).region));
 
-    reactions.push({
+    const record = {
       id: raw.id,
       type: raw.type,
       typeLabel: typeLabel,
@@ -293,7 +293,10 @@ function build(opts) {
       sources: verification.map((entry) => publicSourceOf(entry, owner)),
       cross: regions.size > 1,
       equation: equation
-    });
+    };
+    // 高校標準から昇格した行だけが持つ任意メタデータ。既存の学術行の出力は変えない。
+    if (raw.educationLevel) record.educationLevel = raw.educationLevel;
+    reactions.push(record);
   });
   reactions.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 

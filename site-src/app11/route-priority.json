@@ -518,6 +518,538 @@
       "topic": "polymer",
       "reason": "塩化ビニル→ポリ塩化ビニル。付加重合の代表。",
       "importanceStatus": "editorial-candidate"
+    },
+    "methanol-cuo-oxidation": {
+      "tier": "primary",
+      "topic": "high-school-oxidation",
+      "layoutGroup": "high-school",
+      "reason": "高校化学の代表的なアルコール酸化。既存の DMP 酸化・NaBH4 還元とは試薬も条件も異なる別経路。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethanol-cuo-oxidation": {
+      "tier": "primary",
+      "topic": "high-school-oxidation",
+      "layoutGroup": "high-school",
+      "reason": "第一級アルコールの CuO 酸化。既存の DMP 酸化とは酸化剤が異なる高校代表条件。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propan-2-ol-cuo-oxidation": {
+      "tier": "primary",
+      "topic": "high-school-oxidation",
+      "layoutGroup": "high-school",
+      "reason": "第二級アルコールの CuO 酸化。ケトン生成の高校代表条件。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethanol-dichromate-oxidation-ethanal": {
+      "tier": "primary",
+      "topic": "high-school-oxidation",
+      "layoutGroup": "high-school",
+      "reason": "酸性二クロム酸塩による第一段階。既存の DMP 酸化とは試薬が異なる高校代表条件。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethanol-dichromate-oxidation-acetic-acid": {
+      "tier": "secondary",
+      "topic": "high-school-oxidation",
+      "layoutGroup": "high-school",
+      "reason": "酸性二クロム酸塩による完全酸化の多段階総括。一段階目とは別経路として区別する。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "maleic-acid-anhydride": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "ジカルボン酸の分子内脱水。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "phthalic-acid-anhydride": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "オルト位のジカルボン酸の分子内脱水。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethanol-dehydration-ethene": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "エタノールの分子内脱水によるエテン生成。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethanol-sodium": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "エタノールと金属ナトリウムの反応。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "methanol-sodium": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "メタノールと金属ナトリウムの反応。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "glucose-fermentation": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "グルコースからエタノールと二酸化炭素への発酵の総括。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "pva-formalization": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "ポリビニルアルコールの部分アセタール化（ビニロン化）。反応率・架橋密度は固定しない。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acetic-acid-neutralization": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "カルボン酸と水酸化ナトリウムの中和。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acetic-acid-sodium-carbonate": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "カルボン酸と炭酸水素ナトリウムの反応。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "benzoic-acid-neutralization": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "安息香酸と水酸化ナトリウムの中和。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "stearic-acid-neutralization": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "高級脂肪酸と水酸化ナトリウムの中和（セッケン化）。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "oleic-acid-neutralization": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "不飽和脂肪酸と水酸化ナトリウムの中和（セッケン化）。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "aniline-hydrochloride": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "アニリンと塩酸の塩形成。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "phenol-bromination": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "フェノールの臭素水による環置換。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethyne-partial-hydrogenation": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "アルキンの部分還元。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethyne-full-hydrogenation": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "アルキンの完全水素化。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethyne-hydrogen-bromide": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "アルキンへの HBr 1 回付加。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethyne-silver-acetylide": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "末端アルキンの銀アセチリド生成。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethyne-copper-acetylide": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "末端アルキンの銅(I)アセチリド生成。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "sodium-acetate-decarboxylation": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "酢酸ナトリウムの脱炭酸。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acetic-acid-anhydride": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "カルボン酸の脱水による酸無水物生成。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "benzene-chlorine-addition": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "ベンゼンへの光付加。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "phenol-nitration": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "フェノールの逐次ニトロ化によるピクリン酸生成の総括。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "phenol-phthalein": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "フェノールと無水フタル酸の酸触媒縮合。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "polyacetylene-polymerization": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "アセチレンの触媒重合。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethylbenzene-dehydrogenation": {
+      "tier": "primary",
+      "topic": "high-school-standard",
+      "layoutGroup": "high-school",
+      "reason": "エチルベンゼンの脱水素によるスチレン生成。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "sodium-phenoxide-carboxylation": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "フェノールのカルボキシル化。主生成物は o-サリチル酸塩だが、単一選択を保証しない。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "sodium-salicylate-acidification": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "酸塩基の一般則。塩の種類・後処理は省略する。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "maltose-hydrolysis": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "二糖の完全加水分解。元素収支は二糖 1 分子＋水 1 分子＝単糖 2 分子。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "lactose-hydrolysis": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "二糖の完全加水分解。元素収支は二糖 1 分子＋水 1 分子＝単糖 2 分子。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "cellulose-hydrolysis": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "多糖のグリコシド結合を完全に加水分解する総括。単一の酵素ですべての結合を切るとは主張しない。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "cellulose-acetylation": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "セルロースのアセチル化。置換度 d は 0〜3 の範囲で製品により異なり、完全三置換に固定しない。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "cellulose-nitration": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "セルロースの硝酸エステル化。置換度は可変で、完全三置換に固定しない。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "tetrafluoroethylene-polymerization": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "vinyl-acetate-polymerization": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "mma-polymerization": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acrylonitrile-polymerization": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "butadiene-polymerization": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "chloroprene-polymerization": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "付加重合の一般則。開始剤・停止・末端構造は省略する。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "styrene-butadiene-copolymerization": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "共重合の一般則。単量体の組成比・配列（ランダム／ブロック／グラフト）は主張しない。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "iir-copolymerization": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "共重合の一般則。単量体の組成比・配列（ランダム／ブロック／グラフト）は主張しない。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "pvac-hydrolysis": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "ポリ酢酸ビニルの加水分解の総括。主鎖は保持し、アセテート基が外れる。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "nylon6-from-aminoacid": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "アミノ酸の重縮合によるポリアミドの一般則。末端は省略する。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "urea-resin-condensation": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "フェノール／尿素／メラミンとホルムアルデヒドの付加縮合。触媒・架橋密度・組成は特定しない。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "melamine-resin-condensation": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "フェノール／尿素／メラミンとホルムアルデヒドの付加縮合。触媒・架橋密度・組成は特定しない。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "phenol-resin-condensation": {
+      "tier": "secondary",
+      "topic": "high-school-polymer",
+      "layoutGroup": "high-school",
+      "reason": "フェノール／尿素／メラミンとホルムアルデヒドの付加縮合。触媒・架橋密度・組成は特定しない。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "alkyne-hydration-ethyne-ethanal": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "アルキンからカルボニルへの総括。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "diazonium-substitution-benzenediazonium-chloride-phenol": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "芳香族ジアゾニウム塩からの置換。水系のフェノール化で、Sandmeyer 反応とは呼ばない。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "arene-hydrogenation-benzene-cyclohexane": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "芳香環の完全水素化。アルケンより厳しい条件が必要で、3 当量相当の水素を要する。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "aromatic-side-chain-oxidation-o-xylene-phthalic-acid": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "芳香環に直接ついたメチル基の酸化。2つのメチル基がともにある場合は両方が酸化される。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "油脂の完全加水分解の総括。3 分子の脂肪酸が生じる。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "triglyceride-hydrolysis-trilinolein-glycerol-linoleic-acid": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "油脂の完全加水分解の総括。3 分子の脂肪酸が生じる。C=C は保持される。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "toluene-oxidation-benzoic-acid": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "トルエンの側鎖酸化による安息香酸生成。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "benzene-propene-cumene": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "ベンゼンのフリーデル–クラフツ型アルキル化。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "benzenesulfonic-acid-neutralization": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "スルホン酸と水酸化ナトリウムの中和。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "sodium-benzenesulfonate-alkali-fusion": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "スルホン酸ナトリウムのアルカリ融解によるフェノキシド生成。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethyl-acetate-saponification": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "エステルの塩基加水分解（けん化）。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethyne-hydrogen-chloride": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "アセチレンへの HCl 1 回付加。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethyne-acetic-acid-vinyl-acetate": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "アセチレンと酢酸からの酢酸ビニル生成（教育用の歴史的経路）。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethene-wacker-oxidation": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "エテンの触媒酸化によるエタナール生成。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "nylon66-acid-chloride-condensation": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "酸塩化物とジアミンによるナイロン-6,6 の重縮合。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acetic-anhydride-hydrolysis": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "酸無水物の加水分解。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "maleic-anhydride-hydrolysis": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "酸無水物の加水分解。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "phthalic-anhydride-hydrolysis": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "酸無水物の加水分解。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "phenol-acetylation": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "フェノールの O-アセチル化。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "acetone-iodoform": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "アセトンのヨードホルム反応。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "propan-2-ol-iodoform": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "2-プロパノールのヨードホルム反応（酸化を経る）。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "aniline-hydrochloride-basification": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "アニリン塩酸塩の塩基処理によるアニリン遊離。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "sodium-benzoate-acidification": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "安息香酸ナトリウムの酸処理による遊離。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "ethyne-bromine-addition": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "アセチレンへの臭素1回付加。",
+      "importanceStatus": "editorial-candidate"
+    },
+    "dibromoethene-bromine-addition": {
+      "tier": "secondary",
+      "topic": "high-school-reaction",
+      "layoutGroup": "high-school",
+      "reason": "ジブロモエテンへの臭素付加。",
+      "importanceStatus": "editorial-candidate"
     }
   }
 }

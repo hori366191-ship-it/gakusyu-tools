@@ -35,6 +35,29 @@ const CLASS_MAP_PATH = path.join(S.SRC, 'class-map.json');
 const CLASS_NODE_COUNT = 12;
 const CLASS_EDGE_COUNT = 16;
 
+// 高校標準の追加反応で使う任意のメタデータ。旧 86 反応には付かないため、
+// 存在するときだけ data.js へ投影する（旧データの出力は変えない）。
+const OPTIONAL_REACTION_FIELDS = [
+  'educationLevel',
+  'evidenceKind',
+  'scope',
+  'stepKind',
+  'steps',
+  'legacyAcademicId',
+  'coverageIds',
+  'importance',
+  'importanceStatus',
+  'basedOnHeld'
+];
+
+function optionalReactionFields(reaction) {
+  const out = {};
+  for (const key of OPTIONAL_REACTION_FIELDS) {
+    if (reaction[key] !== undefined) out[key] = JSON.parse(JSON.stringify(reaction[key]));
+  }
+  return out;
+}
+
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
@@ -467,7 +490,7 @@ function build() {
     };
     r.substrates.forEach((id) => pushEdge('in', id));
     r.products.forEach((id) => pushEdge('out', id));
-    reactions.push({
+    reactions.push(Object.assign({
       id: r.id,
       type: r.type,
       typeLabel: r.typeLabel,
@@ -486,7 +509,7 @@ function build() {
       cross: r.cross,
       edges,
       equation: r.equation || null
-    });
+    }, optionalReactionFields(r)));
   }
 
   const regions = layout.regions.map((r) => ({
@@ -552,12 +575,13 @@ function build() {
         '高校「化学」の有機化学で扱う物質を広く収録する。物質だけを収録した孤立ノードは、' +
         'この地図に収録した確認済み反応の中に経路が見つかっていないことを示す（「生成しない」という意味ではない）。',
       dataNote:
-        '反応は独立資料の各節で確認できたものだけを表示する。確認できなかった反応は公開データに含めない。' +
+        '反応は、収録した資料が個別例として示す変換、または一般則を既存物質へ適用した経路として表示する。' +
+        '個別の実験で確認したことを一律に保証するものではない。根拠と適用範囲は各反応のカードに示す。' +
         '試薬量・濃度・具体的な操作手順・装置手順は収録しない。'
     },
     regions,
     states: {
-      confirmed: { label: '確認済', note: '独立した資料で確認できた内容。' },
+      confirmed: { label: '確認済', note: '収録の根拠（資料の個別例・一般則の適用）をカードに記録した反応。' },
       unverified: {
         label: '未確認',
         note: '対象だが未検証・情報不足・判断不能。成立しないと確認したわけではない。'
