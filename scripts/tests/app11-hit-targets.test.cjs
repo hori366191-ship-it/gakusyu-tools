@@ -534,7 +534,7 @@ test('[static] 反応線の透明ヒットは枝ごとに data-kind=reaction で
   const hitBlock = js.slice(js.indexOf("'class': 'rp-edge-hit'") - 300, js.indexOf("'class': 'rp-edge-hit'") + 400);
   assert.equal(/tabindex/.test(hitBlock), false, '透明ヒットはタブストップにしない');
   assert.equal(/role:\s*'button'/.test(hitBlock), false, '透明ヒットに role=button を足さない');
-  assert.ok(js.includes("tabindex: '0'") && js.includes('reactionIndex[r.id] = g'),
+  assert.ok(js.includes("tabindex: '0'") && /reactionIndex\[(mid|r\.id)\] = g/.test(js),
     '反応マーカーはフォーカス可能な実体として残す');
   assert.ok(js.includes('Core.resolveHitTarget') && js.includes('activeReactionIndex()[id] || null'),
     '開く対象は現在モードのフォーカス可能な実体へ戻す');

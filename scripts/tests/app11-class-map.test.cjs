@@ -604,6 +604,7 @@ test('[static] 既存の entity 処理を壊さず、分類ノードをキーボ
     'academic-data.js',
     'proposal-contract.js',
     'proposed-layout-data.js',
+    'reaction-groups.js',
     'map-core.js',
     'structure-draw.js',
     'app.js'

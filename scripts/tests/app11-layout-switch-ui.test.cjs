@@ -541,7 +541,7 @@ test('[failclosed] 欠落・破損した配置案では現在の配置のまま�
 
 test('[labels] 反応名の文字は typeLabel のまま。現在の配置の label 有無も変えない', () => {
   const nodeSrc = extractFunctionSource(APP_JS, 'reactionLabelNodes');
-  assert.match(nodeSrc, /label\.textContent = r\.typeLabel/, '反応名は typeLabel を使う');
+  assert.match(nodeSrc, /label\.textContent = text/, '反応名は typeLabel を使う');
   assert.equal(/marker/.test(nodeSrc), false, 'マーカーの文字へ差し替えない');
 
   const { api } = layoutHarness({});
@@ -574,7 +574,7 @@ test('[labels] 反応名の文字は typeLabel のまま。現在の配置の la
 test('[overlay] 高倍率の HTML ラベルは label を持つ反応を重ねない（二重表示しない）', () => {
   const overlay = APP_JS.slice(APP_JS.indexOf('function updateOverlay'), APP_JS.indexOf('function tryPlace'));
   assert.match(overlay, /if \(r\.tier !== 'secondary' \|\| r\.label\) return;/, 'r.label 有りは HTML 重ねをしない');
-  assert.match(overlay, /activeReactions\(\)/, '選択中の配置の反応だけを対象にする');
+  assert.match(overlay, /displayReactions\(\)/, '選択中の配置の代表反応だけを対象にする');
 });
 
 test('[lod] 補助ラベルと導線は LOD0/1 で隠し、LOD2 で表示する（既存規則を保つ）', () => {
@@ -641,13 +641,16 @@ function buildProposedLayer(proposal) {
   const compoundById = {};
   D.compounds.forEach((c) => { compoundById[c.id] = c; });
   const names = ['projectCompound', 'projectNormalRoute', 'projectNormalReaction', 'labelAnchorName',
-    'labelPoint', 'reactionLabelNodes', 'reactionLabel', 'arrowHeadAttrs', 'hitPolylines',
+    'labelPoint', 'reactionLabelNodes', 'reactionLabel', 'reactionAccessibleLabel',
+    'buildReactionGrouping', 'displayReactionList', 'groupOfBuilt',
+    'arrowHeadAttrs', 'hitPolylines',
     'connectorHitShape', 'hitCandidate', 'buildProposed'];
   const code = names.map((name) => extractFunctionSource(APP_JS, name)).join('\n');
-  const factory = new Function('D', 'P', 'Core', 'document', 'viewport', 'normalMarkerLayer',
+  const factory = new Function('D', 'P', 'Core', 'Groups', 'document', 'viewport', 'normalMarkerLayer',
     'LABEL_EDGE_OFFSET', 'compoundById', 'NODE_W', 'NODE_H',
     [
       'var proposed = null, proposedEnabled = false, proposedAll = [], proposedConnectors = {},',
+      '    proposedGrouping = null,',
       '    proposedAllEdgeIndex = {}, proposedHitCandidates = [], proposedReactionIndex = {},',
       '    proposedLayer = null, proposedBuilt = false;',
       'var HIT_SAMPLE_STEP = 2, HIT_WIDTH = Core.HIT_WIDTH;',
@@ -659,6 +662,7 @@ function buildProposedLayer(proposal) {
       code,
       'proposed = { positions: P.positions, regionFocus: P.regionFocus || {}, canvas: P.canvas, normalMarkers: P.markers, normalRoutes: P.routes, markers: P.markers, routes: P.routes };',
       'proposedAll = D.reactions.map(function (r) { return projectNormalReaction(r, proposed, "proposed"); });',
+      'proposedGrouping = buildReactionGrouping(proposedAll);',
       'proposedEnabled = true;',
       'buildProposed();',
       'return {',
@@ -670,8 +674,8 @@ function buildProposedLayer(proposal) {
       '};'
     ].join('\n')
   );
-  const api = factory(D, proposal, Core, documentStub, viewport, normalMarkerLayer, 11,
-    compoundById, D.meta.nodeW, D.meta.nodeH);
+  const api = factory(D, proposal, Core, require(path.join(APP, 'reaction-groups.js')), documentStub, viewport,
+    normalMarkerLayer, 11, compoundById, D.meta.nodeW, D.meta.nodeH);
   return { api: api, viewport: viewport, normalMarkerLayer: normalMarkerLayer };
 }
 
@@ -688,7 +692,7 @@ test('[fakedom] （合成 fixture）配置案レイヤーは 375 辺・162 マ�
   const { api, viewport, normalMarkerLayer } = buildProposedLayer(PROPOSAL);
 
   assert.equal(api.built, true, '初回選択で構築する');
-  assert.deepEqual(api.counters(), { edges: 375, hits: 162, markers: 162 });
+  assert.deepEqual(api.counters(), { edges: 375, hits: 156, markers: 162 });
   assert.equal(api.layer.getAttribute('class'), 'rp-proposed');
   assert.equal(api.layer.getAttribute('data-layout'), 'proposed');
   assert.equal(viewport.children[0], api.layer, '通常の反応マーカーより前に置く');
@@ -796,13 +800,13 @@ test('[real] fakeDOM で 375 辺・162 マーカー・ヒット・ラベル・�
   const { api, viewport, normalMarkerLayer } = buildProposedLayer(P_REAL);
 
   assert.equal(api.built, true);
-  assert.deepEqual(api.counters(), { edges: 375, hits: 162, markers: 162 });
+  assert.deepEqual(api.counters(), { edges: 375, hits: 156, markers: 162 });
   assert.equal(viewport.children[0], api.layer);
   assert.equal(viewport.children[1], normalMarkerLayer);
   assert.equal(api.layer.getAttribute('data-layout'), 'proposed');
 
   const labels = countClasses(api.layer, 'rp-reaction__label');
-  assert.equal(labels, 162, '実 P の 162 ラベルを描く');
+  assert.equal(labels, 156, '実 P の代表 156 ラベルを描く');
   const leaders = countClasses(api.layer, 'rp-reaction__leader');
   const expectedLeaders = Object.keys(P_REAL.markers)
     .filter((id) => Array.isArray(P_REAL.markers[id].label.leader) && P_REAL.markers[id].label.leader.length > 1)
@@ -825,7 +829,7 @@ test('[real] fakeDOM で 375 辺・162 マーカー・ヒット・ラベル・�
 
   // 全 162 のヒット候補から、線上の点で反応を解決できる。
   const hits = api.hits();
-  assert.equal(hits.length, 162);
+  assert.equal(hits.length, 156);
   hits.forEach((c) => {
     assert.ok(groups[c.id], 'ヒット候補の id はマーカー索引にある');
     assert.ok(c.lines.length > 0 && (c.box.maxX > c.box.minX || c.box.maxY > c.box.minY),
@@ -1011,6 +1015,7 @@ test('[order] index.html は data.js → proposal-contract.js → proposed-layou
     'academic-data.js',
     'proposal-contract.js',
     'proposed-layout-data.js',
+    'reaction-groups.js',
     'map-core.js',
     'structure-draw.js',
     'app.js'

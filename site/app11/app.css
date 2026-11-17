@@ -991,6 +991,10 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-card__tier { display: inline-block; margin: 0 0 6px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
 .rp-card__tier--primary { background: var(--rp-accent-bg); color: var(--rp-accent-2); border: 1px solid var(--rp-primary); }
 .rp-card__tier--secondary { background: var(--rp-panel-2); color: var(--rp-muted); border: 1px dashed var(--rp-secondary); }
+.rp-card__tier--group { background: var(--rp-panel-2); color: var(--rp-accent-2); border: 1px solid var(--rp-line); }
+.rp-card__group-member { margin: 14px 0 0; padding: 10px 0 0; border-top: 1px solid var(--rp-line); }
+.rp-card__group-member:first-of-type { border-top: 0; padding-top: 0; }
+.rp-card__group-heading { margin: 0 0 6px; font-size: 13.5px; color: var(--rp-ink); }
 .rp-card__note { margin: 8px 0 0; font-size: 12px; color: var(--rp-muted); }
 .rp-card__actions { margin: 10px 0 0; }
 .rp-card__facts { margin: 10px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }

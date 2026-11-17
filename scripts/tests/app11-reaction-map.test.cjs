@@ -394,6 +394,7 @@ test('[static] index.html は読込順・テーマ・クレジット・一覧の
     'academic-data.js',
     'proposal-contract.js',
     'proposed-layout-data.js',
+    'reaction-groups.js',
     'map-core.js',
     'structure-draw.js',
     'app.js'

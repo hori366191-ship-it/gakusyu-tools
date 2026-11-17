@@ -83,9 +83,9 @@ test('[js] 反応名 text はアンカー classes と label.box 由来の座標�
   assert.match(src, /rp-reaction__label--' \+ place\.anchor/);
   assert.equal(/text-anchor/.test(src.split('--cond')[0]), false,
     '種別ラベルに presentation 属性の text-anchor を使わない（条件ラベルだけ middle）');
-  assert.match(src, /label\.textContent = r\.typeLabel/, '文字は typeLabel のまま');
+  assert.match(src, /label\.textContent = text/, '文字は typeLabel（グループは代表名）を使う');
   assert.match(extractFunctionSource(APP_JS, 'buildAcademic'), /reactionLabelNodes\(r/);
-  assert.match(extractFunctionSource(APP_JS, 'buildProposed'), /reactionLabelNodes\(r\)/);
+  assert.match(extractFunctionSource(APP_JS, 'buildProposed'), /reactionLabelNodes\(r, '', groupLabel\)/);
 });
 
 /* ------------------------------------------------------------------

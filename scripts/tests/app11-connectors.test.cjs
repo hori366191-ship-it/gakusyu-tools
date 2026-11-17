@@ -679,7 +679,7 @@ test('[static] 反応の丸は DOM を残したまま非表示、説明文は矢
   const js = fs.readFileSync(path.join(APP, 'app.js'), 'utf8');
   assert.equal(js.includes('rp-reaction__hit'), false, '円ヒットの DOM を出さない');
   assert.ok(js.includes("'class': 'rp-edge-hit'"), '反応線の透明ヒット');
-  assert.ok(js.includes("tabindex: '0'") && js.includes('reactionIndex[r.id] = g'),
+  assert.ok(js.includes("tabindex: '0'") && /reactionIndex\[(mid|r\.id)\] = g/.test(js),
     'フォーカス可能な反応マーカーは残す');
   assert.ok(html.includes('生成物へ向かう矢印'));
   assert.equal(html.includes('反応の丸から出る線'), false);

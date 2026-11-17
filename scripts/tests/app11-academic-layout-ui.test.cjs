@@ -484,7 +484,7 @@ test('[mode] 当たり判定・強調・カード・移動はすべて現在モ�
     /Core\.positionText\(view, activeRegions\(\), activeCompounds\(\)/, '現在位置へ投影を渡す');
   const overlay = APP_JS.slice(APP_JS.indexOf('function updateOverlay'), APP_JS.indexOf('function tryPlace'));
   assert.match(overlay, /activeCompounds\(\)/, 'node 障害物は active 位置');
-  assert.match(overlay, /activeReactions\(\)/, '反応ラベルも active 索引');
+  assert.match(overlay, /displayReactions\(\)/, '反応ラベルは代表の active 索引');
   assert.match(overlay, /activeReactionIndex\(\)/);
   assert.match(extractFunctionSource(APP_JS, 'buildChips'), /activeRegionById\(region\.id\)/, 'チップは学術 focus へ');
   const lists = APP_JS.slice(APP_JS.indexOf('function buildLists'), APP_JS.indexOf('function compoundListItem'));

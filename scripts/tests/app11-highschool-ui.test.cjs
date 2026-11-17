@@ -44,7 +44,7 @@ function makeHarness(D, reactions) {
   reactions.forEach((r) => { byId[r.id] = r; });
   const code = ['stateBadge', 'reactionEvidenceNote', 'reactionEducationLabel',
     'reactionStateBadge', 'normalReactionCounts', 'normalEvidenceBreakdown',
-    'normalReactionCountLabel', 'reactionCard']
+    'normalReactionCountLabel', 'reactionCard', 'reactionCardOne']
     .map((name) => extractFunctionSource(APP_JS, name)).join('\n');
   const factory = new Function(
     'D', 'findReaction',
@@ -57,7 +57,8 @@ function makeHarness(D, reactions) {
     ' normalReactionCounts: normalReactionCounts,' +
     ' normalEvidenceBreakdown: normalEvidenceBreakdown,' +
     ' normalReactionCountLabel: normalReactionCountLabel,' +
-    ' reactionCard: reactionCard' +
+    ' reactionCard: reactionCard,' +
+    ' reactionCardOne: reactionCardOne' +
     '};'
   );
   const api = factory.apply(null, [D, (id) => byId[id] || null].concat(

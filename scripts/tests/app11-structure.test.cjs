@@ -506,6 +506,7 @@ test('[draw] 薄いアダプタは RPStructure 名前空間で、共有canonical
     'academic-data.js',
     'proposal-contract.js',
     'proposed-layout-data.js',
+    'reaction-groups.js',
     'map-core.js',
     'structure-draw.js',
     'app.js'

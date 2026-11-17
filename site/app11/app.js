@@ -18,6 +18,9 @@
   var P = window.RPMapLayoutProposal || null;
   var Core = window.RPMapCore;
   var SD = window.RPStructure;
+  // 同じ基質集合→生成物集合の反応を表示だけまとめる pure module。
+  // 無い/壊れている場合は全反応をそのまま表示する（新機能が動いたとは扱わない）。
+  var Groups = window.RPReactionGroups || null;
   if (!D || !Core) return;
 
   var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -140,6 +143,10 @@
   var projectedCache = null;
   var classHitCandidates = [];
   var previewReaction = null;
+  // 反応の表示グループ（各モード・各配置で 1 回だけ作る）。null は従来表示へのフォールバック。
+  var normalGrouping = null;
+  var proposedGrouping = null;
+  var academicGrouping = null;
   var view = { scale: 1, x: 0, y: 0 };
   var viewSize = { w: 1, h: 1 };
   var selected = null;
@@ -377,6 +384,61 @@
     return D.reactions;
   }
 
+  /* ---------------- reaction display groups ---------------- */
+
+  // 同じ「基質ID集合 → 生成物ID集合」の反応を 1 表示にまとめる。
+  // 失敗したら null を返し、呼び出し側は元の全反応を表示する（fail-safe）。
+  function buildReactionGrouping(list) {
+    if (typeof Groups === 'undefined' || !Groups || typeof Groups.build !== 'function') return null;
+    if (!Array.isArray(list) || !list.length) return null;
+    try {
+      return Groups.build(list);
+    } catch (err) {
+      errMsg('反応グループを作れないため、従来どおり全反応を表示します: ' + (err && err.message));
+      return null;
+    }
+  }
+
+  // いま表示しているモード・配置のグループ。
+  function activeGrouping() {
+    if (mode === 'academic') return academicGrouping;
+    if (layoutChoice === 'proposed' && proposedEnabled) return proposedGrouping;
+    return normalGrouping;
+  }
+
+  // 代表だけの反応リスト（グループが無ければ全件）。built ごとに 1 回だけ作る。
+  function displayReactionList(list, built) {
+    if (!built) return list;
+    if (!built.__displayReactions) {
+      var byId = {};
+      list.forEach(function (r) { byId[r.id] = r; });
+      built.__displayReactions = built.representatives.map(function (id) { return byId[id]; })
+        .filter(function (r) { return !!r; });
+    }
+    return built.__displayReactions;
+  }
+
+  function displayReactions() {
+    return displayReactionList(activeReactions(), activeGrouping());
+  }
+
+  function displayGroupFor(reactionId) {
+    var built = activeGrouping();
+    if (!built || typeof Groups === 'undefined' || !Groups || typeof Groups.getGroup !== 'function') return null;
+    return Groups.getGroup(built, reactionId);
+  }
+
+  // 元の反応 ID から、描画に使う代表 ID を返す。単独・不明なら元の ID。
+  function displayIdFor(reactionId) {
+    var group = displayGroupFor(reactionId);
+    return group ? group.representativeId : reactionId;
+  }
+
+  function groupOfBuilt(built, reactionId) {
+    if (!built || typeof Groups === 'undefined' || !Groups || typeof Groups.getGroup !== 'function') return null;
+    return Groups.getGroup(built, reactionId);
+  }
+
   function activeReactionIndex() {
     if (mode === 'academic') return academicReactionIndex;
     if (layoutChoice === 'proposed' && proposedEnabled) return proposedReactionIndex;
@@ -520,6 +582,7 @@
       };
       academicReactions = list;
       academicAll = all;
+      if (typeof buildReactionGrouping === 'function') academicGrouping = buildReactionGrouping(academicAll);
       academicAll.forEach(function (r) {
         academicAllById[r.id] = r;
         r.products.forEach(function (id) { (academicIncoming[id] = academicIncoming[id] || []).push(r); });
@@ -548,6 +611,7 @@
       academic = null;
       academicReactions = [];
       academicAll = [];
+      academicGrouping = null;
       academicEnabled = false;
       academicDisabledReason = 'academic-data.js を読み込めないため、アカデミック表示を無効にしました。';
       return false;
@@ -604,9 +668,10 @@
 
   // 反応名（と条件）の text を作る。leader があれば同じ反応グループへ短い折れ線として足す
   // （同じ LOD で出し入れする。反応点の丸は復活させない）。
-  function reactionLabelNodes(r, extraClass) {
+  function reactionLabelNodes(r, extraClass, labelText) {
     var nodes = [];
     if (!r.label || !r.label.type) return nodes;
+    var text = labelText || r.typeLabel;
     var leader = r.label.leader;
     if (Array.isArray(leader)) {
       var points = leader.filter(function (pt) {
@@ -627,7 +692,7 @@
       x: place.x,
       y: place.y
     });
-    label.textContent = r.typeLabel;
+    label.textContent = text;
     nodes.push(label);
     if (r.conditions && r.label.cond) {
       var cond = el('text', {
@@ -671,9 +736,16 @@
     Core.separateSharedPorts(all);
     Core.enforcePaintClearance(all);
 
-    academicAll.forEach(function (r, reactionOrder) {
+    var grouping = (typeof academicGrouping !== 'undefined') ? academicGrouping : null;
+    var reps = (typeof displayReactionList === 'function')
+      ? displayReactionList(academicAll, grouping) : academicAll;
+    reps.forEach(function (r, reactionOrder) {
+      var group = (typeof groupOfBuilt === 'function') ? groupOfBuilt(grouping, r.id) : null;
+      var memberIds = group ? group.memberIds : [r.id];
+      var groupLabel = group ? group.typeLabel : r.typeLabel;
       var tier = r.tier === 'primary' ? 'primary' : r.tier === 'secondary' ? 'secondary' : 'academic';
       var edgeLayer = tier === 'primary' ? primaryLayer : secondaryLayer;
+      var repPathByEndpoint = {};
       (academicConnectors[r.id] || []).forEach(function (c) {
         var shaftD = Core.routePath(c.shaft || c.points, c.gaps, c.bridges);
         var shaftPath = el('path', {
@@ -690,7 +762,10 @@
         });
         edgeLayer.appendChild(shaftPath);
         if (c.arrowHead) edgeLayer.appendChild(el('path', arrowHeadAttrs(c, tier)));
-        c.edgeKeys.forEach(function (key) { academicAllEdgeIndex[key] = shaftPath; });
+        c.edgeKeys.forEach(function (key) {
+          academicAllEdgeIndex[key] = shaftPath;
+          repPathByEndpoint[key.slice(r.id.length + 1)] = shaftPath;
+        });
         var hitShape = connectorHitShape(c, shaftD);
         hitLayer.appendChild(el('path', {
           'class': 'rp-edge-hit',
@@ -706,6 +781,17 @@
         hitShapes[r.id].lines = hitShapes[r.id].lines.concat(hitShape.lines);
         hitShapes[r.id].fills = hitShapes[r.id].fills.concat(hitShape.fills);
       });
+      if (group) {
+        memberIds.forEach(function (mid) {
+          if (mid === r.id) return;
+          (academicConnectors[mid] || []).forEach(function (c) {
+            c.edgeKeys.forEach(function (key) {
+              var alias = repPathByEndpoint[key.slice(mid.length + 1)];
+              if (alias) academicAllEdgeIndex[key] = alias;
+            });
+          });
+        });
+      }
 
       var g = el('g', {
         'class': 'rp-reaction rp-reaction--' + tier + (r.academic || r.state === 'confirmed' ? '' : ' is-pending'),
@@ -714,14 +800,14 @@
         'data-tier': tier,
         role: 'button',
         tabindex: '0',
-        'aria-label': reactionLabel(r)
+        'aria-label': (typeof reactionAccessibleLabel === 'function' ? reactionAccessibleLabel(r, group) : reactionLabel(r))
       });
       g.appendChild(el('circle', { 'class': 'rp-reaction__dot', cx: r.x, cy: r.y, r: 6 }));
-      reactionLabelNodes(r, r.academic ? 'rp-reaction__label--academic' : '').forEach(function (node) {
+      reactionLabelNodes(r, r.academic ? 'rp-reaction__label--academic' : '', groupLabel).forEach(function (node) {
         g.appendChild(node);
       });
       markerLayer.appendChild(g);
-      academicReactionIndex[r.id] = g;
+      memberIds.forEach(function (mid) { academicReactionIndex[mid] = g; });
     });
 
     Object.keys(hitShapes).forEach(function (id) {
@@ -806,6 +892,7 @@
       };
       // 反応の内容（state / type / 式 / 出典）は data.js のまま。座標とラベル・経路だけを投影する。
       proposedAll = D.reactions.map(function (r) { return projectNormalReaction(r, proposed, 'proposed'); });
+      if (typeof buildReactionGrouping === 'function') proposedGrouping = buildReactionGrouping(proposedAll);
       proposedAll.forEach(function (r) {
         proposedAllById[r.id] = r;
         r.products.forEach(function (id) { (proposedIncoming[id] = proposedIncoming[id] || []).push(r); });
@@ -819,6 +906,7 @@
       proposed = null;
       proposedAll = [];
       proposedAllById = {};
+      proposedGrouping = null;
       proposedEnabled = false;
       proposedDisabledReason = '配置案データを読み込めないため、新しい配置案を使えません。';
       return false;
@@ -855,9 +943,16 @@
     Core.separateSharedPorts(all);
     Core.enforcePaintClearance(all);
 
-    proposedAll.forEach(function (r, reactionOrder) {
+    var grouping = (typeof proposedGrouping !== 'undefined') ? proposedGrouping : null;
+    var reps = (typeof displayReactionList === 'function')
+      ? displayReactionList(proposedAll, grouping) : proposedAll;
+    reps.forEach(function (r, reactionOrder) {
+      var group = (typeof groupOfBuilt === 'function') ? groupOfBuilt(grouping, r.id) : null;
+      var memberIds = group ? group.memberIds : [r.id];
+      var groupLabel = group ? group.typeLabel : r.typeLabel;
       var tier = r.tier === 'primary' ? 'primary' : 'secondary';
       var edgeLayer = tier === 'primary' ? primaryLayer : secondaryLayer;
+      var repPathByEndpoint = {};
       (proposedConnectors[r.id] || []).forEach(function (c) {
         var edgeTier = c.tier === 'primary' ? 'primary' : 'secondary';
         var shaftD = Core.routePath(c.shaft || c.points, c.gaps, c.bridges);
@@ -875,7 +970,10 @@
         });
         edgeLayer.appendChild(shaftPath);
         if (c.arrowHead) edgeLayer.appendChild(el('path', arrowHeadAttrs(c, edgeTier)));
-        c.edgeKeys.forEach(function (key) { proposedAllEdgeIndex[key] = shaftPath; });
+        c.edgeKeys.forEach(function (key) {
+          proposedAllEdgeIndex[key] = shaftPath;
+          repPathByEndpoint[key.slice(r.id.length + 1)] = shaftPath;
+        });
         var hitShape = connectorHitShape(c, shaftD);
         hitLayer.appendChild(el('path', {
           'class': 'rp-edge-hit',
@@ -891,6 +989,17 @@
         hitShapes[r.id].lines = hitShapes[r.id].lines.concat(hitShape.lines);
         hitShapes[r.id].fills = hitShapes[r.id].fills.concat(hitShape.fills);
       });
+      if (group) {
+        memberIds.forEach(function (mid) {
+          if (mid === r.id) return;
+          (proposedConnectors[mid] || []).forEach(function (c) {
+            c.edgeKeys.forEach(function (key) {
+              var alias = repPathByEndpoint[key.slice(mid.length + 1)];
+              if (alias) proposedAllEdgeIndex[key] = alias;
+            });
+          });
+        });
+      }
 
       var g = el('g', {
         'class': 'rp-reaction rp-reaction--' + tier + (r.state === 'confirmed' ? '' : ' is-pending'),
@@ -899,12 +1008,12 @@
         'data-tier': tier,
         role: 'button',
         tabindex: '0',
-        'aria-label': reactionLabel(r)
+        'aria-label': (typeof reactionAccessibleLabel === 'function' ? reactionAccessibleLabel(r, group) : reactionLabel(r))
       });
       g.appendChild(el('circle', { 'class': 'rp-reaction__dot', cx: r.x, cy: r.y, r: 6 }));
-      reactionLabelNodes(r).forEach(function (node) { g.appendChild(node); });
+      reactionLabelNodes(r, '', groupLabel).forEach(function (node) { g.appendChild(node); });
       markerLayer.appendChild(g);
-      proposedReactionIndex[r.id] = g;
+      memberIds.forEach(function (mid) { proposedReactionIndex[mid] = g; });
     });
 
     Object.keys(hitShapes).forEach(function (id) {
@@ -972,7 +1081,7 @@
         return;
       }
     } else if (logical && logical.kind === 'reaction') {
-      var r = findReaction(logical.id);
+      var r = findReaction(displayIdFor(logical.id));
       if (r) {
         animateTo(entityTarget({ x: r.x, y: r.y }, { w: 0, h: 0 }, Math.max(view.scale, 0.92)));
         return;
@@ -1122,8 +1231,17 @@
     var markerLayer = el('g', { 'class': 'rp-reactions rp-layout-normal', 'data-layout': 'normal' });
     var hitShapes = {};
     var hitOrder = {};
-    D.reactions.forEach(function (r, reactionOrder) {
+    // 全 facts の connector は buildConnectors が計算済み。ここでは代表の線だけを描き、
+    // 各 member の edge key（選択・強調用）は代表の同じ端点の path へ alias する。
+    var grouping = (typeof normalGrouping !== 'undefined') ? normalGrouping : null;
+    var reps = (typeof displayReactionList === 'function')
+      ? displayReactionList(D.reactions, grouping) : D.reactions;
+    reps.forEach(function (r, reactionOrder) {
+      var group = (typeof groupOfBuilt === 'function') ? groupOfBuilt(grouping, r.id) : null;
+      var memberIds = group ? group.memberIds : [r.id];
+      var groupLabel = group ? group.typeLabel : r.typeLabel;
       var tier = r.tier === 'primary' ? 'primary' : 'secondary';
+      var repPathByEndpoint = {};
       (reactionConnectors[r.id] || []).forEach(function (c) {
         var edgeTier = c.tier === 'primary' ? 'primary' : 'secondary';
         var shaftD = Core.routePath(c.shaft || c.points, c.gaps, c.bridges);
@@ -1144,7 +1262,10 @@
         var targetLayer = edgeTier === 'primary' ? primaryLayer : secondaryLayer;
         targetLayer.appendChild(path);
         if (c.arrowHead) targetLayer.appendChild(el('path', arrowHeadAttrs(c)));
-        c.edgeKeys.forEach(function (key) { edgeIndex[key] = path; });
+        c.edgeKeys.forEach(function (key) {
+          edgeIndex[key] = path;
+          repPathByEndpoint[key.slice(r.id.length + 1)] = path;
+        });
         // 可視線と同じ形状（shaft + triangle）の透明な当たり判定を、枝ごとに1本ずつ置く。
         // 幅は CSS の 18px（画面ピクセル）で、拡大率が変わっても一定。
         var hitShape = connectorHitShape(c, shaftD);
@@ -1161,6 +1282,18 @@
         }
         hitShapes[r.id].push(hitShape);
       });
+      // 非表示 member の edge key も代表の線へ alias する（強調・選択を壊さない）。
+      if (group) {
+        memberIds.forEach(function (mid) {
+          if (mid === r.id) return;
+          (reactionConnectors[mid] || []).forEach(function (c) {
+            c.edgeKeys.forEach(function (key) {
+              var alias = repPathByEndpoint[key.slice(mid.length + 1)];
+              if (alias) edgeIndex[key] = alias;
+            });
+          });
+        });
+      }
       var g = el('g', {
         'class': 'rp-reaction rp-reaction--' + tier + (r.state === 'confirmed' ? '' : ' is-pending'),
         'data-kind': 'reaction',
@@ -1168,12 +1301,13 @@
         'data-tier': tier,
         role: 'button',
         tabindex: '0',
-        'aria-label': reactionLabel(r)
+        'aria-label': (typeof reactionAccessibleLabel === 'function' ? reactionAccessibleLabel(r, group) : reactionLabel(r))
       });
       g.appendChild(el('circle', { 'class': 'rp-reaction__dot', cx: r.x, cy: r.y, r: 6 }));
-      reactionLabelNodes(r).forEach(function (node) { g.appendChild(node); });
+      reactionLabelNodes(r, '', groupLabel).forEach(function (node) { g.appendChild(node); });
       markerLayer.appendChild(g);
-      reactionIndex[r.id] = g;
+      // reactionIndex は member 全 ID から同じ DOM を引けるよう alias を維持する。
+      memberIds.forEach(function (mid) { reactionIndex[mid] = g; });
     });
     Object.keys(hitShapes).forEach(function (id) {
       var lines = [];
@@ -1494,6 +1628,16 @@
     return text;
   }
 
+  // グループ代表の読み上げ名。member ごとの条件はカード側に残す。
+  function reactionAccessibleLabel(r, group) {
+    var text = reactionLabel(r);
+    if (group && group.size > 1) {
+      text = '同じ基質と生成物の反応 ' + group.size + '件をまとめて表示。' +
+        '代表 ' + r.typeLabel + '。' + text;
+    }
+    return text;
+  }
+
   /* ---------------- transform ---------------- */
 
   function measure() {
@@ -1594,7 +1738,7 @@
   function updateMarkers(level) {
     var small = level === 0;
     var index = activeReactionIndex();
-    activeReactions().forEach(function (r) {
+    displayReactions().forEach(function (r) {
       var g = index[r.id];
       if (!g) return;
       var dot = g.querySelector('.rp-reaction__dot');
@@ -1655,7 +1799,7 @@
       // 主要 SVG ラベル（種別・条件）の実フォント矩形。text の getBBox ではなく画面実測を使う。
       // 表示中のモードの反応だけを測る（非表示レイヤーは実寸 0 で自然に除外される）。
       var labelIndex = activeReactionIndex();
-      activeReactions().forEach(function (r) {
+      displayReactions().forEach(function (r) {
         if (!r.label) return;
         var g = labelIndex[r.id];
         if (!g) return;
@@ -1692,7 +1836,7 @@
           h: nrect.h + NODE_PAD * 2
         });
       });
-      activeReactions().forEach(function (r) {
+      displayReactions().forEach(function (r) {
         if (r.tier !== 'secondary' || r.label) return;
         var screen = Core.worldToScreen(view, r.x, r.y);
         if (screen.x < box.left - 80 || screen.x > box.right + 80) return;
@@ -2377,7 +2521,7 @@
   }
 
   function fitReactionEndpoints(id) {
-    var r = findReaction(id);
+    var r = findReaction(displayIdFor(id));
     if (!r) return;
     clearRegionSelection();
     var ids = {};
@@ -2471,7 +2615,7 @@
         active = selected.kind === 'compound'
           ? Core.compoundList(path.getAttribute('data-compounds'), path.getAttribute('data-compound'))
             .indexOf(selected.id) !== -1
-          : selected.kind === 'reaction' && path.getAttribute('data-reaction') === selected.id;
+          : selected.kind === 'reaction' && path.getAttribute('data-reaction') === displayIdFor(selected.id);
       }
       if (active) path.classList.add('is-active');
       else path.classList.remove('is-active');
@@ -2502,12 +2646,13 @@
 
   // 反応の辺を、切れ目・橋のない連続ストロークとして最上層に描く。
   function showReactionStroke(id) {
-    var r = findReaction(id);
+    var displayId = displayIdFor(id);
+    var r = findReaction(displayId);
     var layer = ensureActiveLayer();
     while (layer.firstChild) layer.removeChild(layer.firstChild);
     if (!r) return;
     // 通常表示と同じ connector を使う。選択・プレビューで端点や矢印の向きを変えない。
-    // （学術モードでは学術配置で作った同じ規則の connector を使う）
+    // グループの member を選んでも、描くのは代表の 1 本だけ（元の全件計算の形状）。
     (activeConnectors()[r.id] || []).forEach(function (c) {
       layer.appendChild(el('path', {
         'class': 'rp-edge-active',
@@ -2986,7 +3131,7 @@
     return { caption: caption, note: note, sources: (eq.sources && eq.sources.length) ? eq.sources : (r.sources || []), equations: equations };
   }
 
-  function equationFigureBlock(equation, caption, note, aria) {
+  function equationFigureBlock(equation, caption, note, aria, openLabel) {
     var svg;
     try {
       svg = buildCardEquationSvg(equation, aria);
@@ -2998,10 +3143,10 @@
         esc(caption) + '</figcaption><p class="rp-struct__note">反応式を表示できませんでした。' +
         '根拠のない式を推定して表示することはありません。</p></figure>';
     }
-    return equationFigureMarkup(svg, caption, note, '反応式を拡大');
+    return equationFigureMarkup(svg, caption, note, openLabel || '反応式を拡大');
   }
 
-  function reactionEquationFigure(r) {
+  function reactionEquationFigure(r, ariaExtra) {
     if (!SD || !SD.renderEquation) {
       return '<p class="rp-struct-missing">構造データを読み込めないため、反応式を表示していません。</p>';
     }
@@ -3013,10 +3158,12 @@
     if (anyFallback) note += ' 示性式・名称で表示している項目があります（構造式ではありません）。';
     if (plan.sources && plan.sources.length) note += ' 式の根拠: ' + plan.sources.join('／');
     var ariaBase = '反応式（構造式）。' + r.substrates.map(compoundName).join('と') + 'から' +
-      (r.products.length ? r.products.map(compoundName).join('と') : (r.productNote || '生成物')) + 'へ。';
+      (r.products.length ? r.products.map(compoundName).join('と') : (r.productNote || '生成物')) + 'へ。' +
+      (ariaExtra || '');
     return plan.equations.map(function (entry) {
       var caption = entry.label ? plan.caption + '（' + entry.label + '）' : plan.caption;
-      return equationFigureBlock(entry.eq, caption, note, ariaBase + (entry.label || ''));
+      var openLabel = ariaExtra ? '反応式を拡大。' + ariaBase + (entry.label || '') : '反応式を拡大';
+      return equationFigureBlock(entry.eq, caption, note, ariaBase + (entry.label || ''), openLabel);
     }).join('');
   }
 
@@ -3083,9 +3230,17 @@
     return D.reactions.length + ' 件（' + breakdown + '）';
   }
 
+  // 反応カード。単独は従来の 1 反応カード、複数 member は条件別のグループカード。
   function reactionCard(id) {
-    var r = findReaction(id);
-    if (!r) return '';
+    var group = (typeof displayGroupFor === 'function') ? displayGroupFor(id) : null;
+    if (!group || group.size <= 1) {
+      var one = findReaction(id);
+      return one ? reactionCardOne(one) : '';
+    }
+    return reactionCardGroup(group);
+  }
+
+  function reactionCardOne(r) {
     var type = typeFor(r.type) || { label: r.typeLabel, summary: '', schematic: '' };
     var subText = r.substrates.map(compoundName).join(' ＋ ');
     var prodText = r.products.length ? r.products.map(compoundName).join(' ＋ ') : (r.productNote || '生成物の記載なし');
@@ -3141,6 +3296,85 @@
     html += '</dl>';
     html += '<p class="rp-verification">検証記録: ' +
       (r.sources.length ? esc(r.sources.join('／')) : '記録なし') + '。</p>';
+    html += '<p class="rp-card__note">実験の実施手順・試薬量・濃度・装置の使い方は収録していません。</p>';
+    return html;
+  }
+
+  // 複数 member のグループカード。1 つの h2 の下に、member ごとの式・試薬・条件・注意・
+  // 出典・evidence・scope・教育レベルをすべて残す。共通の端点・型説明は 1 回だけ出す。
+  function reactionMemberHeading(r) {
+    var conditions = r.conditions ? String(r.conditions) : '';
+    if (conditions && conditions.length <= 24) return conditions;
+    if (r.reagents && r.reagents.length) return r.reagents[0];
+    if (conditions) return conditions.slice(0, 22) + '…';
+    return '条件の記載なし';
+  }
+
+  function reactionMemberMeta(r) {
+    var html = '';
+    if (r.academic) {
+      html += '<p class="rp-card__tier rp-card__tier--academic">' +
+        (r.educationLevel === 'high-school-standard' ? '高校標準（大学レベルから移行）' : '大学レベル（アカデミック）') +
+        (r.stepKind === 'multi-step' ? '／多段階の総括' : '／一段階（direct）') + '</p>';
+    } else {
+      var eduLabel = reactionEducationLabel(r.educationLevel);
+      html += '<p class="rp-card__tier rp-card__tier--' + (r.tier === 'primary' ? 'primary' : 'secondary') + '">' +
+        (r.tier === 'primary' ? '主要経路（太い実線）' : '補助経路（細い点線）') +
+        (eduLabel ? '／' + eduLabel : '') + '</p>';
+    }
+    if (r.academic) {
+      html += '<p><span class="rp-status rp-status--academic">アカデミック</span> <span class="rp-card__note">' +
+        reactionEvidenceNote(r) + '</span></p>';
+    } else {
+      html += '<p>' + reactionStateBadge(r) + ' <span class="rp-card__note">' +
+        reactionEvidenceNote(r) + '</span></p>';
+    }
+    return html;
+  }
+
+  function reactionCardGroup(group) {
+    var members = group.members || [];
+    if (!members.length) return '';
+    var rep = findReaction(group.representativeId) || members[0];
+    var commonType = members.every(function (m) { return m.type === members[0].type; })
+      ? (typeFor(members[0].type) || { label: members[0].typeLabel, summary: '', schematic: '' })
+      : null;
+    var subText = rep.substrates.map(compoundName).join(' ＋ ');
+    var prodText = rep.products.length ? rep.products.map(compoundName).join(' ＋ ')
+      : (rep.productNote || '生成物の記載なし');
+    var html = '';
+    html += '<h2 id="rp-card-title">' + esc('条件別の反応 ' + members.length + '件') + '</h2>';
+    html += '<p class="rp-card__tier rp-card__tier--group">' + esc(group.typeLabel) +
+      '／同じ基質と生成物の反応を、条件ごとにまとめています。</p>';
+    html += '<p class="rp-card__formula">' + esc(subText) + ' → ' + esc(prodText) + '</p>';
+    html += '<p class="rp-card__actions"><button type="button" class="rp-btn rp-btn--wide" data-action="fit-reaction" data-id="' +
+      esc(group.representativeId) + '">この反応の端点を表示</button></p>';
+    if (commonType) html += typeCommon(commonType);
+    members.forEach(function (r) {
+      html += '<section class="rp-card__group-member" data-reaction-id="' + esc(r.id) + '">';
+      html += '<h3 class="rp-card__group-heading">' + esc(reactionMemberHeading(r)) + '</h3>';
+      html += reactionMemberMeta(r);
+      if (r.scope) html += '<p class="rp-card__note">適用範囲: ' + esc(r.scope) + '</p>';
+      if (r.stepKind === 'multi-step' && r.steps && r.steps.length) {
+        html += '<ol class="rp-card__list rp-academic-steps">' +
+          r.steps.map(function (step) { return '<li>' + esc(step) + '</li>'; }).join('') + '</ol>';
+      }
+      if (r.academic && r.basedOnHeld) {
+        html += '<p class="rp-card__note">保留反応 ' + esc(r.basedOnHeld) + ' と同じ組合せを含む。</p>';
+      }
+      html += reactionEquationFigure(r, '、条件 ' + reactionMemberHeading(r));
+      html += '<dl class="rp-dl">';
+      html += '<div><dt>試薬</dt><dd>' + (r.reagents.length ? esc(r.reagents.join('・')) : '個別の記載なし') + '</dd></div>';
+      html += '<div><dt>生成物</dt><dd>' + (r.products.length ? r.products.map(compoundInline).join(' ＋ ') : esc(r.productNote || '生成物の記載なし')) +
+        (r.productNote && r.products.length ? '<br><span class="rp-card__note">' + esc(r.productNote) + '</span>' : '') + '</dd></div>';
+      html += '<div><dt>条件</dt><dd>' + (r.conditions ? esc(r.conditions) : '個別の記載なし') + '</dd></div>';
+      html += '<div><dt>例外・注意</dt><dd>' + (r.note ? esc(r.note) : '個別の記載なし') + '</dd></div>';
+      html += '<div><dt>分野</dt><dd>' + esc(regionSpan(r)) + '</dd></div>';
+      html += '</dl>';
+      html += '<p class="rp-verification">検証記録: ' +
+        (r.sources.length ? esc(r.sources.join('／')) : '記録なし') + '。</p>';
+      html += '</section>';
+    });
     html += '<p class="rp-card__note">実験の実施手順・試薬量・濃度・装置の使い方は収録していません。</p>';
     return html;
   }
@@ -3322,7 +3556,7 @@
   function gotoEntity(kind, id, trigger) {
     returnFocus = trigger || returnFocus;
     var c = kind === 'compound' ? compoundAt(id) : null;
-    var r = kind === 'reaction' ? findReaction(id) : null;
+    var r = kind === 'reaction' ? findReaction(displayIdFor(id)) : null;
     var target = c ? { x: c.x, y: c.y } : (r ? { x: r.x, y: r.y } : null);
     if (mapEl.scrollIntoView) {
       try { mapEl.scrollIntoView({ behavior: prefersReduce() ? 'auto' : 'smooth', block: 'center' }); } catch (err) { errMsg(err && err.message); }
@@ -3768,6 +4002,7 @@
   function init() {
     measure();
     buildConnectors();
+    normalGrouping = buildReactionGrouping(D.reactions);
     buildReactions();
     initAcademicData();
     buildAcademic();

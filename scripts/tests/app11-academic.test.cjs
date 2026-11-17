@@ -318,7 +318,7 @@ test('[ui] モード切替は通常を既定にし、隠れた学術を当たり
   assert.equal((js.match(/activeHitCandidates\(\)/g) || []).length >= 2, true);
   assert.ok(js.includes('function activeReactions()'));
   assert.ok(js.includes('function activeIncoming(') && js.includes('function activeOutgoing('));
-  assert.ok(js.includes('academicReactionIndex[r.id] = g'));
+  assert.ok(/academicReactionIndex\[(mid|r\.id)\] = g/.test(js));
   assert.ok(js.includes("'rp-academic rp-academic-all'"), 'academic layer を識別できる');
   assert.ok(css.includes('.rp-academic { display: none; }'));
   assert.ok(css.includes('.rp-svg[data-mode="academic"] .rp-academic { display: inline; }'));

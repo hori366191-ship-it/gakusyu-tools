@@ -254,7 +254,7 @@ test('[layout] 段組みの物質groupは左右PAD内に収まり、3〜4項の�
 
 test('[dialog] カードの式はボタンで拡大でき、dialogはカードの後に置く', () => {
   assert.match(APP_JS, /function equationFigureMarkup[\s\S]*?data-eq-open="1"[\s\S]*?aria-label="'/);
-  assert.match(APP_JS, /function equationFigureBlock[\s\S]*?equationFigureMarkup\(svg, caption, note, '反応式を拡大'\)/);
+  assert.match(APP_JS, /function equationFigureBlock[\s\S]*?equationFigureMarkup\(svg, caption, note, openLabel \|\| '反応式を拡大'\)/);
   assert.match(APP_JS, /function equationFigure[\s\S]*?equationFigureMarkup\(svg, '一般反応式（構造式）'/);
   assert.ok(HTML.indexOf('id="rp-card"') < HTML.indexOf('id="rp-eq-dialog"'), 'dialogは#rp-cardの後');
   assert.match(HTML, /<dialog class="rp-eq-dialog" id="rp-eq-dialog" aria-labelledby="rp-eq-dialog-title">/);
