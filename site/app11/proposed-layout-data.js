@@ -19133,14 +19133,14 @@
   "crossingsInternal": 1281,
   "compare": {
    "current": {
-    "crossings": 346,
-    "crossingsPP": 47,
-    "crossingsPS": 189,
-    "crossingsSS": 110,
-    "totalLength": 79644,
-    "primaryMedianLength": 125.99,
-    "secondaryP95Length": 860.36,
-    "maxLength": 3658.48,
+    "crossings": 297,
+    "crossingsPP": 43,
+    "crossingsPS": 159,
+    "crossingsSS": 95,
+    "totalLength": 77331,
+    "primaryMedianLength": 125.4,
+    "secondaryP95Length": 847.46,
+    "maxLength": 3641.46,
     "nodePenetrations": 0,
     "labelPenetrations": 0,
     "markerPenetrations": 0,
@@ -19157,13 +19157,13 @@
      "labelMarkerCollisions": 0,
      "labelTitleCollisions": 0,
      "nodeOverlaps": 0,
-     "overlapSegments": 1,
-     "overlapSegmentsSameReaction": 2,
-     "crossingsPP": 47,
-     "crossingsPS": 189,
-     "crossingsSS": 110,
-     "clearanceViolations": 68,
-     "protectedCorridorViolations": 33
+     "overlapSegments": 0,
+     "overlapSegmentsSameReaction": 1,
+     "crossingsPP": 43,
+     "crossingsPS": 159,
+     "crossingsSS": 95,
+     "clearanceViolations": 72,
+     "protectedCorridorViolations": 37
     }
    },
    "proposal": {
@@ -19202,9 +19202,9 @@
    },
    "notes": [
     "交差は metrics.cjs の events（異なる反応の枝）で数える。",
-    "総辺長は現行 79644 → 案 116953 に増加。",
-    "最大辺長は現行 3658.48 → 案 1275.5 に短縮。",
-    "交差は現行 346 → 案 1281 に増加（zone 回避の tradeoff）。"
+    "総辺長は現行 77331 → 案 116953 に増加。",
+    "最大辺長は現行 3641.46 → 案 1275.5 に短縮。",
+    "交差は現行 297 → 案 1281 に増加（zone 回避の tradeoff）。"
    ]
   }
  },

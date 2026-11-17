@@ -1126,8 +1126,10 @@ html[data-theme="forest"] { --rp-academic: #4f6b2f; --rp-academic-bg: #eef5e4; }
 .rp-mode__btn[aria-pressed="true"] { background: var(--rp-academic); border-color: var(--rp-academic); color: #fff; }
 .rp-mode__btn:disabled { opacity: .45; cursor: not-allowed; }
 .rp-mode__btn:focus-visible { outline: 2px solid var(--rp-focus); outline-offset: 2px; }
-/* 配置の切替（現在 / 新しい配置案）。表示モードとは別の操作として並べる。 */
+/* 配置の切替（現在 / 新しい配置案）。内部試作のため公開 UI では hidden にしている。
+   .rp-layout の display:flex が UA の [hidden]{display:none} を上書きするので明示する。 */
 .rp-layout { display: flex; gap: 4px; align-items: center; }
+.rp-layout[hidden] { display: none; }
 .rp-layout__btn { border: 1px solid var(--rp-line); background: var(--rp-panel); color: var(--rp-ink);
   border-radius: 999px; padding: 4px 11px; font: inherit; font-size: 12.5px; line-height: 1.2; cursor: pointer; }
 .rp-layout__btn[aria-pressed="true"] { background: var(--rp-primary); border-color: var(--rp-primary); color: #fff; }

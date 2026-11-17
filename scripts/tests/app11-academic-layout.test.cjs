@@ -281,9 +281,12 @@ test('[baseline] 通常データの座標・経路ラベルは不変（専用レ
     id: r.id,
     edges: r.edges.map((e) => ({ dir: e.dir, id: e.id, points: e.points }))
   }))), 'ff5615a05ea79810928942c2f3e82f34fc601fe374a2691336c99513175ff9f2');
+  // ラベルは site-src/app11/legacy-labels.json で凍結。追加反応の経路変更で
+  // 実描画線（shared port 分離後）が数 px 動いた starch-hydrolysis-glucose だけ、
+  // leader 終点を最寄りの自描画線へ再接続している（箱・始点は不変）。
   assert.equal(hash(D.reactions.filter((r) => LEGACY_REACTION_IDS.has(r.id))
     .map((r) => ({ id: r.id, label: r.label }))),
-  '7137f4487b4374cce8a1ad3e770534dfefbb9f4691f72fdcd98b5bbedb763b8a');
+  'e8e54e4fd232fde32ace4268a628003ca0c395801d2f74722d0877b0cc27a7e3');
   assert.equal(A.base.nodeHash, B.academicBaseHash(D.compounds));
   assert.equal(L.stats.after.normal.count, Object.keys(L.normalRoutes).length, '通常の全辺を専用座標で引き直す');
 });

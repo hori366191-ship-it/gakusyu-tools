@@ -419,9 +419,412 @@ function dedupePoints(points) {
   return out;
 }
 
-function routeOne(scene, route, start, end, bounds) {
+// --- 事後正規化（配置確定後） ------------------------------------------------
+//
+// applyStubStart は配置中に「外向き stub」を挿入するが、元の次点が stub より
+// 手前にあると 150〜180° の戻り（stub を追い越してノード側へ戻る折れ）になる。
+// 配置（ノード・マーカー・ラベル）を動かすと連鎖が起きるため、ここでは
+// 「全配置が確定した後」に、その折れを持つ経路の点列だけを引き直す。
+// ラベル・ノード・マーカーの貫通 0、始点 14px、外向 dot は維持する。
+
+const HEAD_STUB_LENS = [26, 22, 18, 14];
+
+function sideNormalOf(side) {
+  if (side === 'left') return { x: -1, y: 0 };
+  if (side === 'right') return { x: 1, y: 0 };
+  if (side === 'top') return { x: 0, y: -1 };
+  return { x: 0, y: 1 };
+}
+
+// ノード中心から target へ向かう線が矩形境界と交わる点（描画側の自然な端口）。
+function portTowards(node, target) {
+  const c = centerOf(node);
+  const dx = target.x - c.x;
+  const dy = target.y - c.y;
+  const sx = dx === 0 ? Infinity : (node.w / 2) / Math.abs(dx);
+  const sy = dy === 0 ? Infinity : (node.h / 2) / Math.abs(dy);
+  if (sx <= sy) {
+    const side = dx >= 0 ? 'right' : 'left';
+    return { side: side, point: { x: c.x + (dx >= 0 ? 1 : -1) * (node.w / 2), y: c.y + dy * sx } };
+  }
+  const side = dy >= 0 ? 'bottom' : 'top';
+  return { side: side, point: { x: c.x + dx * sy, y: c.y + (dy >= 0 ? 1 : -1) * (node.h / 2) } };
+}
+
+function headProblem(scene, route) {
+  const node = scene.compounds.get(route.compoundId);
+  const points = route.points;
+  if (!node || !points || points.length < 2) return null;
+  const p0 = points[0];
+  const p1 = points[1];
+  const len = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+  if (len < 14) return 'short';
+  const normal = boundaryNormal(node, p0);
+  const dot = len ? ((p1.x - p0.x) / len) * normal.x + ((p1.y - p0.y) / len) * normal.y : 0;
+  if (dot < 0.35) return 'dot';
+  if (len <= 30 && dot >= 0.98 && points.length > 2 && stubReversal(p0, p1, points[2], normal)) {
+    return 'fold';
+  }
+  return null;
+}
+
+// stub（p0→p1）の直後が、stub を追い越してノード側へ戻る折れか。
+// 横向きに大きく離れる正当な迂回（例: ノードの反対側へ回る）は折れとみなさない。
+function stubReversal(p0, p1, p2, normal) {
+  const len = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+  if (!len) return false;
+  const reach = (p2.x - p0.x) * normal.x + (p2.y - p0.y) * normal.y;
+  if (reach >= len - 0.5) return false;
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const step = Math.hypot(dx, dy) || 1;
+  const dirDot = ((p1.x - p0.x) / len) * (dx / step) + ((p1.y - p0.y) / len) * (dy / step);
+  return dirDot < -0.35;
+}
+
+// 実描画と同じ当たり判定（metrics.cjs に合わせる: node/label は -0.5、marker は +2）。
+function routeObstacleViolation(scene, route) {
+  const points = route.points;
+  if (!points || points.length < 2) return 'empty';
+  const segments = G.polylineSegments(points);
+  for (const seg of segments) {
+    for (const [id, node] of scene.compounds) {
+      if (id === route.compoundId) continue;
+      if (G.segmentRect(seg.a, seg.b, G.inflate(rectOfNode(node), -0.5))) return 'node:' + id;
+    }
+    for (const [id, marker] of scene.reactions) {
+      if (marker.labelBoxes && G.segmentRect(seg.a, seg.b, G.inflate(marker.labelBoxes.type, -0.5))) {
+        return 'label:' + id;
+      }
+      if (id !== route.reactionId && G.segmentRect(seg.a, seg.b, G.inflate(G.markerBox(marker.x, marker.y), 2))) {
+        return 'marker:' + id;
+      }
+    }
+  }
+  const start = points[0];
+  for (const other of scene.routes) {
+    if (other === route || !other.points || other.points.length < 2) continue;
+    if (other.reactionId === route.reactionId) continue;
+    const shared = other.compoundId === route.compoundId;
+    for (const a of segments) {
+      for (const b of G.polylineSegments(other.points)) {
+        if (G.collinearOverlap(a.a, a.b, b.a, b.b) <= 2) continue;
+        if (shared && (nearPoint(a.a, start, 10) || nearPoint(b.a, other.points[0], 10))) continue;
+        return 'overlap:' + other.key;
+      }
+    }
+  }
+  return null;
+}
+
+// stub を追い越して戻る先頭の点を取り除く（横向きの正当な迂回は残す）。
+function trimBehindStub(tail, p0, stub, normal) {
+  const rest = tail.slice();
+  while (rest.length > 1) {
+    if (!stubReversal(p0, stub, rest[0], normal)) break;
+    rest.shift();
+  }
+  return rest;
+}
+
+function acceptHead(scene, route, points, end, minGap) {
+  const saved = route.points;
+  route.points = dedupePoints(points);
+  if (route.points.length < 2) { route.points = saved; return false; }
+  const last = route.points[route.points.length - 1];
+  if (end && Math.hypot(last.x - end.x, last.y - end.y) > 0.3) { route.points = saved; return false; }
+  const head = headProblem(scene, route);
+  const bad = head || routeObstacleViolation(scene, route) ||
+    (minGap ? routeNodeClearance(scene, route, minGap) : null);
+  if (bad) {
+    route.points = saved;
+    return false;
+  }
+  return true;
+}
+
+// 実描画では node 外周の角丸 + stroke 分も避ける必要があるため、任意の余白で検査する。
+function routeNodeClearance(scene, route, gap) {
+  for (const seg of G.polylineSegments(route.points)) {
+    for (const [id, node] of scene.compounds) {
+      if (id === route.compoundId) continue;
+      if (G.segmentRect(seg.a, seg.b, G.inflate(rectOfNode(node), gap))) return 'node:' + id;
+    }
+  }
+  return null;
+}
+
+/**
+ * 折れた始点を持つ経路を、確定済みの配置のまま引き直す。
+ * 1) 今の端口のまま stub 長を変える / 追い越した点を落とす / 終点へ短絡
+ * 2) マーカー方向の端口へ移し、stub + 直線 / 障害物回避
+ * 3) ノード境界を走査し、14px 外向きで置ける点から直線 / 回避
+ * まずノード角丸 + stroke 分の余白を確保できる候補を探し、無ければ余白 0 で探す。
+ * 戻り値 true のとき route.points が更新される。
+ */
+function repairRouteHead(scene, route, bounds) {
+  const node = scene.compounds.get(route.compoundId);
+  if (!node) return false;
+  const saved = route.points;
+  const end = saved[saved.length - 1];
+  const p0 = saved[0];
+  const normal = boundaryNormal(node, p0);
+  const tail = saved.slice(2);
+
+  const search = (minGap) => {
+    for (const len of HEAD_STUB_LENS) {
+      const stub = { x: p0.x + normal.x * len, y: p0.y + normal.y * len };
+      const trimmed = trimBehindStub(tail, p0, stub, normal);
+      if (acceptHead(scene, route, [p0, stub].concat(trimmed), end, minGap)) return true;
+      if (trimmed.length !== tail.length && acceptHead(scene, route, [p0, stub, end], end, minGap)) return true;
+    }
+
+    const port = portTowards(node, end);
+    const portNormal = sideNormalOf(port.side);
+    const soft = obstaclesFor(scene, route, { segments: true, segPad: SEG_PAD }).segments;
+    const flat = obstaclesFor(scene, route, { segments: false });
+    const gridObstacles = {
+      rects: flat.rects.concat({ kind: 'node', id: route.compoundId, rect: rectOfNode(node) }),
+      discs: flat.discs,
+      segments: []
+    };
+    const routeWithGrid = (from, stub) => {
+      const path = R.gridRoute(stub, end, gridObstacles, bounds, {
+        primary: false,
+        margin: 1400,
+        softSegments: soft,
+        ownCompound: route.compoundId,
+        ownReaction: route.reactionId
+      });
+      if (!path) return false;
+      const simplified = R.simplifyPath(path, gridObstacles, R.SECONDARY_PAD);
+      if (!simplified) return false;
+      return acceptHead(scene, route, [from].concat(simplified), end, minGap);
+    };
+    for (const len of HEAD_STUB_LENS) {
+      const stub = { x: port.point.x + portNormal.x * len, y: port.point.y + portNormal.y * len };
+      if (acceptHead(scene, route, [port.point, stub, end], end, minGap)) return true;
+      if (routeWithGrid(port.point, stub)) return true;
+    }
+
+    const scan = [];
+    const step = 4;
+    for (let x = node.x; x <= node.x + node.w + 0.001; x += step) {
+      scan.push({ p: { x: x, y: node.y }, n: { x: 0, y: -1 } });
+      scan.push({ p: { x: x, y: node.y + node.h }, n: { x: 0, y: 1 } });
+    }
+    for (let y = node.y; y <= node.y + node.h + 0.001; y += step) {
+      scan.push({ p: { x: node.x, y: y }, n: { x: -1, y: 0 } });
+      scan.push({ p: { x: node.x + node.w, y: y }, n: { x: 1, y: 0 } });
+    }
+    scan.sort((a, b) => Math.hypot(a.p.x - end.x, a.p.y - end.y) - Math.hypot(b.p.x - end.x, b.p.y - end.y)
+      || a.p.x - b.p.x || a.p.y - b.p.y);
+    for (const cand of scan) {
+      const distance = Math.hypot(end.x - cand.p.x, end.y - cand.p.y);
+      if (distance < 14) continue;
+      const dot = ((end.x - cand.p.x) * cand.n.x + (end.y - cand.p.y) * cand.n.y) / distance;
+      if (dot < 0.35) continue;
+      if (acceptHead(scene, route, [cand.p, end], end, minGap)) return true;
+      for (const len of [18, 14]) {
+        const stub = { x: cand.p.x + cand.n.x * len, y: cand.p.y + cand.n.y * len };
+        if (routeWithGrid(cand.p, stub)) return true;
+      }
+    }
+    return false;
+  };
+
+  for (const minGap of [1.2, 0]) {
+    if (search(minGap)) return true;
+  }
+  route.points = saved;
+  return false;
+}
+
+/** 確定済み配置のまま、折れた始点だけを直す（座標・マーカー・ラベルは不変）。 */
+function normalizeRouteHeads(scene, bounds) {
+  const changed = [];
+  for (const route of scene.routes) {
+    if (route.legacy) continue;
+    if (!headProblem(scene, route)) continue;
+    if (repairRouteHead(scene, route, bounds)) changed.push(route.key);
+  }
+  return changed;
+}
+
+// --- 同一反応の入出線が交差する場合の局所修理 -------------------------------
+//
+// 自反応ラベルが入出線の通り道を塞ぐと、片側が大きく回り込んで他方と交差する
+// ことがある。ラベル側を E/W/N/S の候補へ置き直し、その反応の経路だけを
+// 引き直して交差が消える組み合わせを採用する（ノード・マーカーは動かさない）。
+
+function orient(a, b, c) {
+  return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+}
+
+function segmentsCross(a, b, c, d) {
+  const d1 = orient(a, b, c);
+  const d2 = orient(a, b, d);
+  const d3 = orient(c, d, a);
+  const d4 = orient(c, d, b);
+  return ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0));
+}
+
+function routeSelfCrossings(points) {
+  let count = 0;
+  for (let i = 0; i < points.length - 2; i++) {
+    for (let j = i + 2; j < points.length - 1; j++) {
+      if (segmentsCross(points[i], points[i + 1], points[j], points[j + 1])) count++;
+    }
+  }
+  return count;
+}
+
+function crossingsBetween(a, b) {
+  let count = 0;
+  for (let i = 0; i < a.length - 1; i++) {
+    for (let j = 0; j < b.length - 1; j++) {
+      if (segmentsCross(a[i], a[i + 1], b[j], b[j + 1])) count++;
+    }
+  }
+  return count;
+}
+
+function reactionCrossings(routes) {
+  let count = 0;
+  for (const route of routes) count += routeSelfCrossings(route.points);
+  for (let i = 0; i < routes.length; i++) {
+    for (let j = i + 1; j < routes.length; j++) count += crossingsBetween(routes[i].points, routes[j].points);
+  }
+  return count;
+}
+
+// 反応の入出線が他反応の線と交差する数（局所修理で外へ悪化させないための比較用）。
+function foreignCrossings(scene, routes) {
+  let count = 0;
+  for (const route of routes) {
+    for (const other of scene.routes) {
+      if (other.reactionId === route.reactionId || !other.points || other.points.length < 2) continue;
+      count += crossingsBetween(route.points, other.points);
+    }
+  }
+  return count;
+}
+
+function routeLength(points) {
+  let total = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    total += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+  }
+  return total;
+}
+
+function labelCrossedByOwn(routes, box) {
+  const rect = G.inflate(box, -0.5);
+  for (const route of routes) {
+    for (const seg of G.polylineSegments(route.points || [])) {
+      if (G.segmentRect(seg.a, seg.b, rect)) return true;
+    }
+  }
+  return false;
+}
+
+function rerouteReaction(scene, routes, bounds) {
+  const marker = scene.reactions.get(routes[0].reactionId);
+  if (!marker) return false;
+  const saved = routes.map((r) => r.points);
+  let ok = true;
+  for (const route of routes) {
+    const compound = scene.compounds.get(route.compoundId);
+    if (!compound) { ok = false; break; }
+    const port = portFor(compound, marker);
+    const target = markerPortFor(marker, compound);
+    let placed = routeOne(scene, route, port.point, target, bounds, { markerCenter: false });
+    if (!placed) {
+      // 事後修理では全経路が既に存在するため、配置時と同じ候補列では通らないことがある。
+      // 端口と終点を固定したまま、stub・端口移動・境界走査で引き直す。
+      route.points = [port.point, target];
+      placed = repairRouteHead(scene, route, bounds);
+    }
+    if (!placed) { ok = false; break; }
+    if (headProblem(scene, route) && !repairRouteHead(scene, route, bounds)) { ok = false; break; }
+  }
+  if (!ok) {
+    routes.forEach((route, index) => { route.points = saved[index]; });
+    return false;
+  }
+  return true;
+}
+
+function rerouteSubset(scene, subset, bounds) {
+  if (!subset.length) return false;
+  const saved = subset.map((route) => route.points);
+  const ok = rerouteReaction(scene, subset, bounds);
+  if (!ok) subset.forEach((route, index) => { route.points = saved[index]; });
+  return ok;
+}
+
+/**
+ * 同一反応の経路が自分自身・兄弟と交差しているとき、ラベル側を E/W 候補へ
+ * 局所再配置し、その反応の経路だけを引き直す。座標・マーカーは不変。
+ */
+function repairOwnCrossings(scene, source, bounds) {
+  const changed = [];
+  const ids = [...scene.reactions.keys()].sort();
+  for (const id of ids) {
+    const routes = scene.routes.filter((route) => route.reactionId === id && route.points && route.points.length > 1);
+    if (routes.length < 2) continue;
+    if (routes.some((route) => route.legacy)) continue;  // 旧 86 反応の経路・ラベルは凍結
+    const before = reactionCrossings(routes);
+    if (!before) continue;
+    const marker = scene.reactions.get(id);
+    const reaction = source.reactions.find((r) => r.id === id);
+    if (!reaction) continue;
+    const savedPoints = routes.map((r) => r.points);
+    const savedLabel = { side: marker.labelSide, boxes: marker.labelBoxes };
+    const savedForeign = foreignCrossings(scene, routes);
+    const options = [{ side: marker.labelSide, boxes: marker.labelBoxes }];
+    const obstacles = obstaclesFor(scene, { compoundId: null, reactionId: id });
+    for (const side of ['E', 'W', 'N', 'S']) {
+      if (marker.labelBoxes && side === marker.labelSide) continue;
+      const placed = placeLabel(marker.x, marker.y, marker.typeLabel, marker.conditions, obstacles, side);
+      if (!placed) continue;
+      options.push({ side: placed.side, boxes: { type: placed.boxes.type, cond: null } });
+    }
+    let accepted = null;
+    const plans = routes.map((_, index) => [routes[index]]);
+    plans.push(routes);
+    const within = (plan, limit) => plan.every((route) => routeLength(route.points) <= limit * 1.35);
+    for (const option of options) {
+      marker.labelSide = option.side;
+      marker.labelBoxes = option.boxes;
+      for (const plan of plans) {
+        const planSaved = plan.map((route) => route.points);
+        const routesOk = rerouteSubset(scene, plan, bounds);
+        const selfCross = reactionCrossings(routes);
+        const labelHit = option.boxes ? labelCrossedByOwn(routes, option.boxes.type) : false;
+        const foreign = foreignCrossings(scene, routes);
+        const lengthOk = within(plan, Math.max(1, plan.reduce((sum, r) => sum + routeLength(planSaved[plan.indexOf(r)]), 0) / plan.length));
+        const cleaner = routesOk && selfCross === 0 && !labelHit && foreign <= savedForeign && lengthOk;
+        if (cleaner) { accepted = option; break; }
+        plan.forEach((route, index) => { route.points = planSaved[index]; });
+      }
+      if (accepted) break;
+    }
+    if (accepted) {
+      changed.push(id);
+      continue;
+    }
+    marker.labelSide = savedLabel.side;
+    marker.labelBoxes = savedLabel.boxes;
+    routes.forEach((route, index) => { route.points = savedPoints[index]; });
+  }
+  return changed;
+}
+
+function routeOne(scene, route, start, end, bounds, opts) {
   // 新規の線は既存の線と交差してよい（新規の主要・補助は平面性証明の対象外）。
   // 既存線は「重ならない」ためのソフトコストとして渡し、直線・折れ線では 5px 離す。
+  const options = opts || {};
   const soft = obstaclesFor(scene, route, { segments: true, segPad: SEG_PAD }).segments;
   const directObstacles = obstaclesFor(scene, route, { segments: true, segPad: SEG_PAD });
   const obstacles = obstaclesFor(scene, route, { segments: false });
@@ -429,7 +832,8 @@ function routeOne(scene, route, start, end, bounds) {
     (route.reactionId === process.env.APP11_EXT_DEBUG_ONE || route.compoundId === process.env.APP11_EXT_DEBUG_ONE);
   const marker = scene.reactions.get(route.reactionId);
   const ends = [end];
-  if (marker) ends.push({ x: marker.x, y: marker.y });
+  // 配置時の従来挙動はマーカー中心への短絡も許す。事後修理では端口へ揃える。
+  if (marker && options.markerCenter !== false) ends.push({ x: marker.x, y: marker.y });
   // ノード境界の始点セルが障害物に覆われる場合に備え、外向きに 14px 出た点からも試す。
   const compound = scene.compounds.get(route.compoundId);
   const starts = [start];
@@ -862,17 +1266,32 @@ function extend(source, base) {
       packComponent(scene, source, comp, tier);
     }
   }
-  return { scene: scene, added: added.map((r) => r.id) };
+  // 配置をすべて確定させた後に、stub 追い越しで折れた経路の点列だけを直す
+  // （ノード・マーカー・ラベルの座標は動かさない）。
+  const headChanges = normalizeRouteHeads(scene, sceneBounds(scene));
+  // 同一反応の入出線が交差する場合は、その反応のラベル側と経路だけを局所修理する。
+  const crossChanges = repairOwnCrossings(scene, source, sceneBounds(scene));
+  if (headChanges.length) scene.routeChanges = headChanges;
+  if (crossChanges.length) scene.crossChanges = crossChanges;
+  return { scene: scene, added: added.map((r) => r.id), routeChanges: headChanges, crossChanges: crossChanges };
 }
 
 module.exports = {
   MARKER_R,
   SEG_PAD,
+  HEAD_STUB_LENS,
   sceneFromBase,
   obstaclesFor,
   placeLabel,
   markerCandidates,
   routeOne,
   routeClear,
+  headProblem,
+  routeObstacleViolation,
+  routeNodeClearance,
+  repairRouteHead,
+  normalizeRouteHeads,
+  reactionCrossings,
+  repairOwnCrossings,
   extend
 };

@@ -52,7 +52,8 @@ function fingerprintClassGeometry() {
 
 test('[normal] 通常データの固定ハッシュと件数は正本と一致する', () => {
   // 追加分を含む全体ハッシュは意図的に更新する。旧 86 の不変性は legacy-baseline で保証する。
-  assert.equal(fingerprintConcrete(), '4f5a8211b3d1cefaa05d91bba84b28dbe7015450116df6deb028d7dd225972f7');
+  // 2026-11 更新: 拡張経路の始点 stub 追い越し（折れ）を事後修理したため、追加反応の辺が変わった。
+  assert.equal(fingerprintConcrete(), 'b96ec153ce0c192eb1181fdbe78ac0606bb4370640b128f3c3928b25dd9f0e87');
   assert.equal(fingerprintEquation(), '39020fc69016b28c7d1aeb3a4f894138673f3fbcafcefa0156849c5acd8c3f33');
   assert.equal(fingerprintClassGeometry(), '7f413639125c3a6ea6795c2bc2f54bcc49ac7e27c23cb5120896b17cef5ec224');
   const html = read('index.html');

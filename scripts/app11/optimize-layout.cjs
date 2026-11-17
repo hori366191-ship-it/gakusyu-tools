@@ -51,6 +51,125 @@ function applyLabelPostprocess(layout, routes, opts) {
   });
 }
 
+/**
+ * 旧 86 反応のラベルは凍結する（site-src/app11/legacy-labels.json = HEAD 時点の値）。
+ * ラベル solver は他反応の実描画線も見るため、追加反応の経路が変わると旧ラベルまで
+ * 動いてしまう。ここで凍結値へ戻し、重なった追加ラベルだけを数 px 逃がす。
+ */
+function freezeLegacyLabels(layout, routes, base) {
+  const freezePath = path.join(S.SRC, 'legacy-labels.json');
+  if (!base || !fs.existsSync(freezePath)) return { restored: 0, nudged: [], reattached: 0 };
+  const freeze = JSON.parse(fs.readFileSync(freezePath, 'utf8'));
+  let restored = 0;
+  for (const id of Object.keys(base.reactions)) {
+    const label = freeze.labels && freeze.labels[id];
+    const entry = layout.reactions[id];
+    if (!label || !entry) continue;
+    if (JSON.stringify(entry.label) === JSON.stringify(label)) continue;
+    entry.label = JSON.parse(JSON.stringify(label));
+    restored++;
+  }
+  if (!restored) return { restored: 0, nudged: [], reattached: 0 };
+  // 経路が変わると実描画線（shared port 分離・paint clearance 後）も数 px 動くため、
+  // 旧 leader の終点だけを最寄りの自描画線へ再接続する（箱・始点は凍結）。
+  const reattached = reattachLegacyLeaders(layout, routes, base);
+  const nudged = nudgeLabelsOffLegacy(layout, base);
+  return { restored, nudged, reattached };
+}
+
+function reattachLegacyLeaders(layout, routes, base) {
+  const geo = Q.buildDrawnLines({
+    positions: layout.positions,
+    markers: layout.reactions,
+    edges: routes.edges,
+    nodeW: layout.nodeW,
+    nodeH: layout.nodeH
+  });
+  let reattached = 0;
+  for (const id of Object.keys(base.reactions)) {
+    const label = layout.reactions[id] && layout.reactions[id].label;
+    if (!label || !Array.isArray(label.leader) || label.leader.length < 2) continue;
+    const polys = geo.lines[id] || [];
+    if (!polys.length) continue;
+    const end = label.leader[label.leader.length - 1];
+    let best = null;
+    for (const poly of polys) {
+      for (let i = 0; i < poly.length - 1; i++) {
+        const a = poly[i];
+        const b = poly[i + 1];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const len2 = dx * dx + dy * dy;
+        const t = len2 > 1e-9
+          ? Math.max(0, Math.min(1, ((end[0] - a.x) * dx + (end[1] - a.y) * dy) / len2))
+          : 0;
+        const point = { x: a.x + dx * t, y: a.y + dy * t };
+        const d = Math.hypot(point.x - end[0], point.y - end[1]);
+        if (!best || d < best.d) best = { d, point };
+      }
+    }
+    if (!best || best.d <= 0.2) continue;
+    const next = label.leader.map((p) => [p[0], p[1]]);
+    next[next.length - 1] = [round2(best.point.x), round2(best.point.y)];
+    label.leader = next;
+    reattached++;
+  }
+  return reattached;
+}
+
+function nudgeLabelsOffLegacy(layout, base) {
+  const legacyIds = new Set(Object.keys(base.reactions));
+  const ids = Object.keys(layout.reactions).sort();
+  const boxOf = (id) => {
+    const label = layout.reactions[id] && layout.reactions[id].label;
+    return label && label.box ? label.box : null;
+  };
+  const collides = (box, self) => {
+    for (const id of ids) {
+      if (id === self) continue;
+      const other = boxOf(id);
+      if (other && G.rectsOverlap(G.inflate(box, 1), G.inflate(other, 1))) return true;
+    }
+    for (const cid of Object.keys(layout.positions)) {
+      const node = layout.positions[cid];
+      if (G.rectsOverlap(G.inflate(box, 1), G.rect(node.x, node.y, node.w, node.h))) return true;
+    }
+    for (const id of ids) {
+      if (id === self) continue;
+      const marker = layout.reactions[id];
+      if (G.rectsOverlap(G.inflate(box, 1), G.markerBox(marker.x, marker.y))) return true;
+    }
+    return false;
+  };
+  const nudged = [];
+  for (const id of ids) {
+    if (legacyIds.has(id)) continue;
+    const label = layout.reactions[id] && layout.reactions[id].label;
+    if (!label || !label.box) continue;
+    if (!collides(label.box, id)) continue;
+    let done = false;
+    for (const step of [2, 3, 4, 6, 8, 10, 14, 18, 24]) {
+      for (const dir of [[0, -1], [0, 1], [-1, 0], [1, 0], [1, -1], [-1, -1], [1, 1], [-1, 1]]) {
+        const dx = dir[0] * step;
+        const dy = dir[1] * step;
+        const candidate = { x: label.box.x + dx, y: label.box.y + dy, w: label.box.w, h: label.box.h };
+        if (candidate.x < 4 || candidate.y < 4) continue;
+        if (collides(candidate, id)) continue;
+        label.box = candidate;
+        label.type = { x: candidate.x + candidate.w / 2, y: candidate.y + candidate.h / 2 };
+        if (Array.isArray(label.leader) && label.leader.length) {
+          label.leader = label.leader.map((p, index) => (index === 0 ? [p[0] + dx, p[1] + dy] : p));
+        }
+        nudged.push(id);
+        done = true;
+        break;
+      }
+      if (done) break;
+    }
+  }
+  return nudged;
+}
+
 function buildScene(source, topology) {
   const placed = B.placePrimaryNodes(source);
   const compounds = new Map();
@@ -574,9 +693,11 @@ function planExtensionLayout(source, topology, base, addedIds) {
   };
   // ラベル後処理: 位置・マーカー・経路は動かさず、ラベル矩形だけを実描画線に沿って改善する。
   const labelReport = applyLabelPostprocess(layout, routes, { source });
+  // 旧 86 反応のラベルは凍結値へ戻す（旧ラベルは動かさない）。
+  const labelFreeze = freezeLegacyLabels(layout, routes, base);
   const report = M.measure(M.sceneFromLayout(layout, routes));
   routes.stats = statsFor(report);
-  return { layout, routes, report, source, topology, scene, base, added: addedIds, labelReport };
+  return { layout, routes, report, source, topology, scene, base, added: addedIds, labelReport, labelFreeze };
 }
 
 function planLayout() {
@@ -752,6 +873,7 @@ module.exports = {
   buildRegions,
   checkLegacy,
   applyLabelPostprocess,
+  freezeLegacyLabels,
   renderLayout: F.renderLayout,
   renderRoutes: F.renderRoutes
 };

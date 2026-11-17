@@ -2,6 +2,8 @@
 
 通常表示の「新しい配置案」用データと generator。**切替は通常表示だけ**を対象にし、
 アカデミック専用配置（`academic-data.js` / layout version 2）には触れない。
+公開 UI には配置切替を出さず（`.rp-layout` は `hidden`）、切替は内部試作・テスト用の API として残る
+（詳細は `docs/app11-layout-switch.md`）。
 
 ## ファイル（B 担当の専有範囲）
 

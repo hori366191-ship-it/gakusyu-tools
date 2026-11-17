@@ -5,9 +5,13 @@
 
 ## 画面
 
-- ツールバーに「表示モード」（通常 / アカデミック）とは別のグループ「反応と物質の配置」を置く。
-  - `#rp-layout-current`「現在の配置」（初期選択）
-  - `#rp-layout-proposed`「新しい配置案」
+- 公開 UI には配置切替を出さない。ツールバーの `<div class="rp-layout" hidden>`
+  （`role="group" aria-label="反応と物質の配置"`）ごと `hidden` にし、`app.css` の
+  `.rp-layout[hidden] { display: none; }` で `.rp-layout { display: flex }` を確実に上書きする
+  （UA の `[hidden]{display:none}` は author の `display:flex` に負けるため）。
+- DOM・ID（`#rp-layout-current` / `#rp-layout-proposed`）・`aria-pressed`・文言・クリックイベント・
+  `setLayoutChoice()` は内部試作として残す。`hidden` の子孫は keyboard tab の対象外・支援技術から不可視。
+  ユーザーが使えるのは表示モード（通常 / アカデミック）だけ。非表示である旨の説明文は画面に出さない。
 - 初期は常に `current`。URL パラメータ・ブラウザ保存は使わない（現行の初期表示保証を変えない）。
 - アカデミック表示は専用配置なので、配置ボタンは両方 `disabled`。理由は `title` と
   `aria-label`（「…（学術表示は専用配置）」）で示す。通常へ戻すと直前の選択を復元する。
@@ -63,7 +67,7 @@ window.RPMapLayoutProposal = {
 
 ### 遅延構築
 
-配置案の SVG は初回に「新しい配置案」を選んだときだけ `buildProposed()` で作る
+配置案の SVG は、内部 API（`setLayoutChoice('proposed')`）で初回に切り替えたときだけ `buildProposed()` で作る
 （学術レイヤーの DOM と常時同時に持たない）。索引はすべて配置案用に分ける:
 `proposedAll` / `proposedReactionIndex` / `proposedAllEdgeIndex` / `proposedConnectors` /
 `proposedHitCandidates` / `proposedIncoming` / `proposedOutgoing`。
@@ -98,6 +102,8 @@ window.RPMapLayoutProposal = {
 - `Contract.verifyProposal(P_REAL, D)` が `{ok:true}`、`P_REAL.base` が `Contract.buildBase(D)` と一致。
   base は facts のみ（id・分野・濃度・反応の種類/基質/生成物/条件）で、座標・ラベル・経路を全部変えても
   変わらない（A/B の再配置で P は陳腐化しない）。facts を変えれば検出する。
+- 初期配置は `current` のまま。公開 UI では `.rp-layout` が `hidden`（CSS でも `display:none`）で、
+  ボタンの ID・`aria-pressed`・イベント・`setLayoutChoice()` は内部試作として残る（keyboard tab 不可）。
 - `initProposedLayout()` が実 P を有効化し、162 反応を実座標へ投影（DOM は作らない）。
 - fake DOM で 375 辺・162 マーカー・162 ヒット・162 ラベル・leader 実数、実座標のラベル位置。
 - current ↔ proposed ↔ academic ↔ normal 復帰で物質位置・反応選択の座標・式/出典（canonical 共有）・
@@ -110,7 +116,7 @@ window.RPMapLayoutProposal = {
   text-anchor の契約一致まで）。目視・スクリーンショットは対象外。
 - `leader` は A の生成点列をそのまま描く（端点が box から数 px 離れる場合も短縮・補間しない）。
   導線の見た目調整は生成側の責務。
-- 回帰は全 761 件で Windows 11 実測 11 分 6 秒。CI（`.github/workflows/tests.yml`）の実行上限は
+- 回帰は全 782 件（親セッションで最終実行、12 分前後）。CI（`.github/workflows/tests.yml`）の実行上限は
   timeout を避けるため 10 → 20 分へ延長した（テスト・assert・Node 版・トリガー・権限は不変、全検証維持）。
 
 

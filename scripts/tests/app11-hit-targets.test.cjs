@@ -28,7 +28,8 @@ const HIT_SAMPLE_STEP = 2;
 // data.js 全文のハッシュは一般図の座標を詰めるたびに変わるため、投影ごとに分けて守る。
 // 反応カードの反応式（equation）は意味factsではないため concrete から外し、専用の
 // EQUATION_SHA256 で別に固定する（式を足しても物質・反応・分野・型・状態は変えない）。
-const CONCRETE_SHA256 = '4f5a8211b3d1cefaa05d91bba84b28dbe7015450116df6deb028d7dd225972f7';
+// 2026-11 更新: 拡張経路の始点 stub 追い越し（折れ）を事後修理したため、追加反応の辺が変わった。
+const CONCRETE_SHA256 = 'b96ec153ce0c192eb1181fdbe78ac0606bb4370640b128f3c3928b25dd9f0e87';
 const CLASS_GEOMETRY_SHA256 = '7f413639125c3a6ea6795c2bc2f54bcc49ac7e27c23cb5120896b17cef5ec224';
 const NOTICE_SHA256 = '0839382096a9683caeb9c7ead3999e95299bc38e7808edfb9577d5ec29ceb8ef';
 const EQUATION_SHA256 = '39020fc69016b28c7d1aeb3a4f894138673f3fbcafcefa0156849c5acd8c3f33';

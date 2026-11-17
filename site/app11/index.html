@@ -65,7 +65,8 @@
           <button type="button" class="rp-mode__btn" id="rp-mode-normal" aria-pressed="true">通常</button>
           <button type="button" class="rp-mode__btn" id="rp-mode-academic" aria-pressed="false" disabled>アカデミック</button>
         </div>
-        <div class="rp-layout" role="group" aria-label="反応と物質の配置">
+        <!-- 配置切替は内部試作。公開 UI では出さず、DOM / ID / イベントは残す。 -->
+        <div class="rp-layout" role="group" aria-label="反応と物質の配置" hidden>
           <button type="button" class="rp-layout__btn" id="rp-layout-current" aria-pressed="true">現在の配置</button>
           <button type="button" class="rp-layout__btn" id="rp-layout-proposed" aria-pressed="false">新しい配置案</button>
         </div>

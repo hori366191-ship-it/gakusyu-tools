@@ -34,6 +34,27 @@
 主要 50 反応の平面性証明は `primary-topology.json` のまま。追加の主要反応は
 `legacyDigest`（旧 86 のみの priority hash）で照合し、証明書を作り直さない。
 
+### 2.1 事後正規化（配置確定後）
+
+`applyStubStart` は境界から外向きの stub を挿入するが、元の次点が stub より手前に
+あると 150〜180° 戻る「折れ」になっていた（例: `ethanol-sodium` in が
+612 → 590 → 600 → marker と戻る）。stub の挿入条件を見直すと配置（ノード・マーカー）
+の候補評価まで変わり連鎖移動するため、`extend()` の最後で
+「全配置を確定させたまま経路の点列だけ」を直す。
+
+- `normalizeRouteHeads`: 折れた先頭（stub 追い越し）を持つ経路だけを引き直す。
+  候補は「stub 長を変える / 追い越した点を落とす / 終点へ短絡 / マーカー方向の端口へ
+  移す / ノード境界を走査して 14px 外向きの点から引く」。始点 14px・外向き dot 0.35・
+  node/label/marker 非貫通・同一直線の重なりなしを維持し、まずノード角丸 + stroke 分
+  （1.2px）の余白を確保できる候補を探す。横向きに大きく離れる正当な迂回
+  （x=500 の formaldehyde 迂回、methanol in の bromoethene / vinyl acetate 迂回など）は
+  「折れ」と判定しない。
+- `repairOwnCrossings`: 同一反応の入出線が自分自身・兄弟と交差する場合に、その反応の
+  ラベル側（E/W/N/S）と経路だけを局所再建する。ノード・マーカーは動かさない。
+- 旧 86 反応の経路・ラベルは対象外（凍結）。ラベルは
+  `site-src/app11/legacy-labels.json` の凍結値へ戻し、追加反応の経路変更で実描画線が
+  数 px 動いた場合だけ leader 終点を最寄りの自描画線へ再接続する。
+
 ## 3. 生成と検証
 
 ```
@@ -41,8 +62,10 @@ node scripts/app11/optimize-layout.cjs            # layout.json / routes.json
 node scripts/app11/optimize-layout.cjs --check    # 出力が最新か（凍結基準も照合）
 node scripts/app11/build-map-data.cjs [--check]   # data.js / coverage-ids.js
 node scripts/app11/build-academic-data.cjs [--check]
+node scripts/app11/build-proposed-layout.cjs [--check]
 node scripts/app11/check-coverage.cjs --check
 node --test scripts/tests/app11-normal-layout.test.cjs
+node --test scripts/tests/app11-route-heads.test.cjs   # 始点 stub 正規化の回帰
 ```
 
 `data.js` の `D.meta.dataNote` と `D.states.confirmed.note` は、旧来の
@@ -58,6 +81,7 @@ node --test scripts/tests/app11-normal-layout.test.cjs
 - 代表: `ethanol-sodium` のマーカーはエタノール中心から 124px、最長辺 161px
 - 新規マーカーで x>=3900 は 6 件（いずれも `shelf.x - 260` より左のネットワーク側）
 - 幾何: node / label / marker 貫通 0、marker 相互衝突 0、旧 primary の P–P 交差 0
+- 始点 stub: 追加 86 経路の折れ（stub 追い越し）0。実描画 paint gap は全 node/hub で 0.75 以上
 - アカデミック: 152 反応、通常 162 マーカー/375 辺を専用座標で引き直し、学術経路 358
 
 ## 5. 残件・注意
@@ -65,4 +89,11 @@ node --test scripts/tests/app11-normal-layout.test.cjs
 - 新 primary / secondary 同士の交差は許容（非平面）。旧 primary の交差 0 だけを不変条件とする。
 - 新規経路の `clearanceViolations` は旧 3 から増える（交差に伴うストローク間隔）。貫通 0 を優先した。
 - 新規の弱連結成分を pack した領域は、地図下の専用帯（棚ではない）。共有物質は最初の配置を保持する。
-- レイアウトを意図的に作り直す場合だけ `make-legacy-baseline.cjs` で基準を更新する。
+- 同一反応の入出線がマーカー直近で同時収束する 3 反応
+  （`ethyl-acetate-saponification` / `triglyceride-hydrolysis-tripalmitin-glycerol-palmitic-acid` /
+  `urea-resin-condensation`）は、stub 折れとは別根因のため未解消（`app11-route-heads.test.cjs` で固定）。
+  解消するには片側の端口・経路を作り直す必要があり、他反応の交差を増やすため保留。
+- 旧 86 反応のラベルは `site-src/app11/legacy-labels.json` で凍結する。ラベル solver は
+  他反応の実描画線も見るため、この凍結が無いと追加反応の経路変更で旧ラベルまで動く。
+- レイアウトを意図的に作り直す場合だけ `make-legacy-baseline.cjs` で基準を更新する
+  （ラベルも凍結し直すなら `legacy-labels.json` を同時に更新する）。

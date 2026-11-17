@@ -8,6 +8,7 @@
  * ここでは検証しない（生成物が無い間も現在の配置だけで動くことを確かめる）。
  *
  * - 初期は「現在の配置」。URL パラメータ・localStorage へは保存しない。
+ * - 配置切替コントロールは内部試作。公開 UI では hidden（ID・イベント・API は残す）。
  * - 新しい配置案は通常表示だけ。学術表示は専用配置なので配置ボタンは disabled。
  * - 投影しても data.js の物質・反応（ID・化学名・出典・反応式）は書き換えない。
  * - 欠落・破損した配置案では何も有効化せず、現在の配置をそのまま使う。
@@ -244,6 +245,39 @@ test('[initial] 配置は既定で「現在の配置」。URL・localStorage へ
   assert.match(INDEX_HTML, /id="rp-layout-current"[^>]*aria-pressed="true"/);
   assert.match(INDEX_HTML, /id="rp-layout-proposed"[^>]*aria-pressed="false"/);
   assert.ok(INDEX_HTML.includes('現在の配置') && INDEX_HTML.includes('新しい配置案'));
+});
+
+test('[hidden] 配置切替コントロールは公開 UI に出さない（初期 current・DOM / イベントは維持）', () => {
+  // 初期配置は従来どおり current（表示だけを変え、初期挙動は変えない）。
+  assert.ok(APP_JS.includes("layoutChoice = 'current';"));
+
+  // グループごと hidden。ボタン DOM / ID / aria-pressed / 文言は残す（内部試作用）。
+  assert.match(INDEX_HTML, /<div class="rp-layout"[^>]*\shidden[ >]/);
+  assert.match(INDEX_HTML, /role="group" aria-label="反応と物質の配置"/);
+  assert.match(INDEX_HTML, /id="rp-layout-current"[^>]*aria-pressed="true">現在の配置</);
+  assert.match(INDEX_HTML, /id="rp-layout-proposed"[^>]*aria-pressed="false">新しい配置案</);
+  const layoutDiv = /<div class="rp-layout"[^>]*>([\s\S]*?)<\/div>/.exec(INDEX_HTML);
+  assert.ok(layoutDiv, '.rp-layout ブロック');
+  assert.match(layoutDiv[1], /rp-layout-current/);
+  assert.match(layoutDiv[1], /rp-layout-proposed/);
+
+  // イベント・切替 API は残す（programmatic な内部テスト用）。
+  assert.match(APP_JS, /layoutButton\('current'\)[\s\S]*?addEventListener\('click'/);
+  assert.match(APP_JS, /layoutButton\('proposed'\)[\s\S]*?addEventListener\('click'/);
+  assert.match(extractFunctionSource(APP_JS, 'setLayoutChoice'), /next === 'proposed'/);
+
+  // .rp-layout の display:flex に負けないよう、hidden を CSS でも明示する。
+  const hiddenRule = /\.rp-layout\[hidden\] \{ display: none; \}/;
+  assert.match(APP_CSS, hiddenRule);
+  assert.ok(APP_CSS.search(/\.rp-layout \{ display: flex;/) !== -1, '.rp-layout の display:flex');
+  assert.ok(APP_CSS.search(/\.rp-layout \{ display: flex;/) < APP_CSS.search(hiddenRule),
+    'hidden の上書きは display:flex より後ろに置く');
+
+  // keyboard / a11y: hidden の子孫は tab 対象外・支援技術から不可視。JS で解除しない。
+  assert.equal(layoutDiv[1].includes('tabindex'), false, 'ボタンに tabindex を与えない');
+  assert.equal(/\.rp-layout[^\n]*removeAttribute\('hidden'\)/.test(APP_JS), false, 'hidden を解除しない');
+  assert.equal(/layoutButton\([^)]*\)\.focus\(/.test(APP_JS), false, '非表示ボタンへ focus しない');
+  assert.equal(INDEX_HTML.includes('非表示'), false, '画面に余計な説明文を出さない');
 });
 
 test('[switch] 通常は現在の配置、配置案を選ぶと投影座標へ切り替わり、canonical は不変', () => {

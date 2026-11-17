@@ -1,0 +1,1003 @@
+{
+ "version": 1,
+ "note": "旧 86 反応ラベルの凍結値（HEAD 時点）。scripts/app11/optimize-layout.cjs の freezeLegacyLabels が読み、追加反応の経路変更で旧ラベルが動かないようにする。",
+ "labels": {
+  "2-methylpropan-2-ol-dehydration": null,
+  "2-methylpropan-2-ol-hydrogen-chloride": null,
+  "acetic-acid-butanol-esterification": null,
+  "acetic-acid-ethanol-esterification": {
+   "side": "W",
+   "type": {
+    "x": 1038.82,
+    "y": 820.14
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 999.82,
+    "y": 812.14,
+    "w": 78,
+    "h": 16
+   },
+   "leader": null
+  },
+  "acetic-acid-glycerol-esterification": null,
+  "acetic-acid-isoamyl-esterification": null,
+  "acetic-acid-methanol-esterification": null,
+  "acetone-reduction": null,
+  "alanine-glycine-peptide": null,
+  "alanylglycine-hydrolysis": null,
+  "aniline-acetic-anhydride": {
+   "side": "W",
+   "type": {
+    "x": 1989.26,
+    "y": 940.5
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1950.26,
+    "y": 932.5,
+    "w": 78,
+    "h": 16
+   },
+   "leader": null
+  },
+  "aniline-diazotization": {
+   "side": "E",
+   "type": {
+    "x": 2299.18,
+    "y": 672.54
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2267.18,
+    "y": 664.54,
+    "w": 64,
+    "h": 16
+   },
+   "leader": null
+  },
+  "aspirin-hydrolysis": {
+   "side": "N",
+   "type": {
+    "x": 1448.42,
+    "y": 961.22
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1416.42,
+    "y": 953.22,
+    "w": 64,
+    "h": 16
+   },
+   "leader": [
+    [
+     1416.42,
+     969.22
+    ],
+    [
+     1415.51,
+     978.87
+    ]
+   ]
+  },
+  "benzaldehyde-oxidation": {
+   "side": "E",
+   "type": {
+    "x": 4027.5,
+    "y": 259.59
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 4009.5,
+    "y": 251.59,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "benzene-chlorination": {
+   "side": "E",
+   "type": {
+    "x": 2835.34,
+    "y": 1217.04
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2796.34,
+    "y": 1209.04,
+    "w": 78,
+    "h": 16
+   },
+   "leader": [
+    [
+     2796.34,
+     1209.04
+    ],
+    [
+     2791.08,
+     1209.04
+    ],
+    [
+     2791.08,
+     1193.05
+    ]
+   ]
+  },
+  "benzene-nitration": {
+   "side": "S",
+   "type": {
+    "x": 2374.05,
+    "y": 1193.04
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2342.05,
+    "y": 1185.04,
+    "w": 64,
+    "h": 16
+   },
+   "leader": null
+  },
+  "benzene-sulfonation": {
+   "side": "E",
+   "type": {
+    "x": 2549.48,
+    "y": 1374.28
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2510.48,
+    "y": 1366.28,
+    "w": 78,
+    "h": 16
+   },
+   "leader": [
+    [
+     2510.48,
+     1366.28
+    ],
+    [
+     2505.51,
+     1366.28
+    ],
+    [
+     2505.51,
+     1346.56
+    ]
+   ]
+  },
+  "benzyl-alcohol-oxidation": {
+   "side": "E",
+   "type": {
+    "x": 3827.5,
+    "y": 259.59
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3809.5,
+    "y": 251.59,
+    "w": 36,
+    "h": 16
+   },
+   "leader": [
+    [
+     3809.5,
+     267.59
+    ],
+    [
+     3797.31,
+     273.29
+    ]
+   ]
+  },
+  "butan-1-ol-oxidation": null,
+  "butanal-reduction": null,
+  "butanoic-acid-ethanol-esterification": null,
+  "caprolactam-ring-opening": {
+   "side": "W",
+   "type": {
+    "x": 3894.41,
+    "y": 2111.96
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3862.41,
+    "y": 2103.96,
+    "w": 64,
+    "h": 16
+   },
+   "leader": null
+  },
+  "chlorobenzene-dow-phenol": {
+   "side": "W",
+   "type": {
+    "x": 3105.68,
+    "y": 911.56
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3087.68,
+    "y": 903.56,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "cumene-hydroperoxide-decomposition": {
+   "side": "E",
+   "type": {
+    "x": 3377.5,
+    "y": 429.59
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3359.5,
+    "y": 421.59,
+    "w": 36,
+    "h": 16
+   },
+   "leader": [
+    [
+     3359.5,
+     437.07
+    ],
+    [
+     3336.55,
+     437.07
+    ]
+   ]
+  },
+  "cumene-oxidation": {
+   "side": "W",
+   "type": {
+    "x": 3020.74,
+    "y": 245.08
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3002.74,
+    "y": 237.08,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "cysteine-oxidation": null,
+  "diazonium-phenol-coupling": {
+   "side": "W",
+   "type": {
+    "x": 2645.41,
+    "y": 472.12
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2599.41,
+    "y": 464.12,
+    "w": 92,
+    "h": 16
+   },
+   "leader": null
+  },
+  "ethanal-oxidation-acetic": {
+   "side": "W",
+   "type": {
+    "x": 1027.69,
+    "y": 871.3
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1009.69,
+    "y": 863.3,
+    "w": 36,
+    "h": 16
+   },
+   "leader": [
+    [
+     1009.69,
+     879.3
+    ],
+    [
+     1006.58,
+     882.52
+    ]
+   ]
+  },
+  "ethanal-reduction": null,
+  "ethanol-dehydration-ether": {
+   "side": "W",
+   "type": {
+    "x": 1052.07,
+    "y": 533.02
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1034.07,
+    "y": 525.02,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "ethanol-oxidation-acetic": null,
+  "ethanol-oxidation-ethanal": {
+   "side": "W",
+   "type": {
+    "x": 946.76,
+    "y": 700.91
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 928.76,
+    "y": 692.91,
+    "w": 36,
+    "h": 16
+   },
+   "leader": [
+    [
+     964.76,
+     708.91
+    ],
+    [
+     969.09,
+     717.57
+    ]
+   ]
+  },
+  "ethene-bromine-addition": {
+   "side": "E",
+   "type": {
+    "x": 1397.5,
+    "y": 249.59
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1379.5,
+    "y": 241.59,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "ethene-hydration": {
+   "side": "W",
+   "type": {
+    "x": 1207.9,
+    "y": 450
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1189.9,
+    "y": 442,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "ethene-hydrogen-bromide": {
+   "side": "W",
+   "type": {
+    "x": 1097.03,
+    "y": 269.85
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1079.03,
+    "y": 261.85,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "ethene-hydrogenation": {
+   "side": "E",
+   "type": {
+    "x": 1275.5,
+    "y": 229.03
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1243.5,
+    "y": 221.03,
+    "w": 64,
+    "h": 16
+   },
+   "leader": null
+  },
+  "ethene-polymerization": {
+   "side": "E",
+   "type": {
+    "x": 1417.33,
+    "y": 371.29
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1385.33,
+    "y": 363.29,
+    "w": 64,
+    "h": 16
+   },
+   "leader": null
+  },
+  "ethyl-acetate-hydrolysis": {
+   "side": "E",
+   "type": {
+    "x": 1428.88,
+    "y": 770.72
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1396.88,
+    "y": 762.72,
+    "w": 64,
+    "h": 16
+   },
+   "leader": [
+    [
+     1396.88,
+     778.72
+    ],
+    [
+     1392.98,
+     782.4
+    ]
+   ]
+  },
+  "ethyl-propionate-saponification": null,
+  "formaldehyde-oxidation-formic": {
+   "side": "E",
+   "type": {
+    "x": 690.47,
+    "y": 765.06
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 672.47,
+    "y": 757.06,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "formic-acid-ethanol-esterification": null,
+  "formic-acid-methanol-esterification": null,
+  "fructose-base-isomerization": null,
+  "glucose-reduction": null,
+  "glycerol-linoleic-esterification": null,
+  "glycerol-oleic-esterification": null,
+  "glycerol-palmitic-esterification": null,
+  "glycerol-stearic-esterification": {
+   "side": "E",
+   "type": {
+    "x": 1669.48,
+    "y": 1554.28
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1630.48,
+    "y": 1546.28,
+    "w": 78,
+    "h": 16
+   },
+   "leader": [
+    [
+     1630.48,
+     1546.28
+    ],
+    [
+     1626.85,
+     1542.76
+    ]
+   ]
+  },
+  "glycine-alanine-peptide": {
+   "side": "W",
+   "type": {
+    "x": 3401.52,
+    "y": 1624.9
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3355.52,
+    "y": 1616.9,
+    "w": 92,
+    "h": 16
+   },
+   "leader": [
+    [
+     3426.03,
+     1632.9
+    ],
+    [
+     3426.03,
+     1661.64
+    ]
+   ]
+  },
+  "glycine-glycine-peptide": null,
+  "glycylalanine-hydrolysis": {
+   "side": "E",
+   "type": {
+    "x": 3469.48,
+    "y": 1934.28
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3437.48,
+    "y": 1926.28,
+    "w": 64,
+    "h": 16
+   },
+   "leader": [
+    [
+     3445.6,
+     1926.28
+    ],
+    [
+     3445.6,
+     1898.04
+    ]
+   ]
+  },
+  "glycylglycine-hydrolysis": null,
+  "isobutene-hydrogen-chloride": null,
+  "methane-chlorination": {
+   "side": "E",
+   "type": {
+    "x": 785.73,
+    "y": 238.59
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 739.73,
+    "y": 230.59,
+    "w": 92,
+    "h": 16
+   },
+   "leader": null
+  },
+  "methanol-oxidation-formaldehyde": {
+   "side": "W",
+   "type": {
+    "x": 850.95,
+    "y": 1057.25
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 832.95,
+    "y": 1049.25,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "methyl-salicylate-hydrolysis": {
+   "side": "E",
+   "type": {
+    "x": 1135.3,
+    "y": 979.79
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1103.3,
+    "y": 971.79,
+    "w": 64,
+    "h": 16
+   },
+   "leader": [
+    [
+     1125.6,
+     987.79
+    ],
+    [
+     1125.6,
+     1011.14
+    ]
+   ]
+  },
+  "nitrobenzene-reduction": {
+   "side": "W",
+   "type": {
+    "x": 2160.16,
+    "y": 894.13
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2142.16,
+    "y": 886.13,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "nylon66-condensation": {
+   "side": "E",
+   "type": {
+    "x": 3168.5,
+    "y": 1989.59
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3143.5,
+    "y": 1981.59,
+    "w": 50,
+    "h": 16
+   },
+   "leader": null
+  },
+  "oxalic-acid-methanol-esterification": null,
+  "p-xylene-oxidation": {
+   "side": "E",
+   "type": {
+    "x": 2202.5,
+    "y": 1909.59
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2184.5,
+    "y": 1901.59,
+    "w": 36,
+    "h": 16
+   },
+   "leader": [
+    [
+     2184.5,
+     1917.59
+    ],
+    [
+     2171.9,
+     1923.55
+    ]
+   ]
+  },
+  "pet-condensation": {
+   "side": "E",
+   "type": {
+    "x": 2477.39,
+    "y": 2089.73
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2452.39,
+    "y": 2081.73,
+    "w": 50,
+    "h": 16
+   },
+   "leader": null
+  },
+  "phenol-acid-neutralization": {
+   "side": "E",
+   "type": {
+    "x": 2923.87,
+    "y": 746.67
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2905.87,
+    "y": 738.67,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "propan-1-ol-oxidation": null,
+  "propan-2-ol-oxidation": {
+   "side": "E",
+   "type": {
+    "x": 3607.5,
+    "y": 699.59
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3589.5,
+    "y": 691.59,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "propanal-oxidation": null,
+  "propanal-reduction": null,
+  "propene-hydration": {
+   "side": "E",
+   "type": {
+    "x": 3597.5,
+    "y": 929.59
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3579.5,
+    "y": 921.59,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "propene-hydrogenation": {
+   "side": "E",
+   "type": {
+    "x": 3189.48,
+    "y": 1134.28
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3157.48,
+    "y": 1126.28,
+    "w": 64,
+    "h": 16
+   },
+   "leader": [
+    [
+     3157.48,
+     1126.28
+    ],
+    [
+     3141.07,
+     1119.49
+    ]
+   ]
+  },
+  "propene-polymerization": {
+   "side": "W",
+   "type": {
+    "x": 3538.95,
+    "y": 1196.32
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3506.95,
+    "y": 1188.32,
+    "w": 64,
+    "h": 16
+   },
+   "leader": null
+  },
+  "propionic-acid-ethanol-esterification": null,
+  "propionic-acid-methanol-esterification": null,
+  "propyne-hydration": null,
+  "protein-hydrolysis": null,
+  "salicylic-acid-acetylation": {
+   "side": "E",
+   "type": {
+    "x": 1581.01,
+    "y": 1158.4
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1542.01,
+    "y": 1150.4,
+    "w": 78,
+    "h": 16
+   },
+   "leader": null
+  },
+  "salicylic-acid-methyl-esterification": {
+   "side": "E",
+   "type": {
+    "x": 1149.48,
+    "y": 1284.28
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1110.48,
+    "y": 1276.28,
+    "w": 78,
+    "h": 16
+   },
+   "leader": [
+    [
+     1125.83,
+     1276.28
+    ],
+    [
+     1125.83,
+     1247.54
+    ]
+   ]
+  },
+  "sodium-phenoxide-acidification": {
+   "side": "W",
+   "type": {
+    "x": 3184.19,
+    "y": 629.5
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3166.19,
+    "y": 621.5,
+    "w": 36,
+    "h": 16
+   },
+   "leader": null
+  },
+  "starch-hydrolysis-glucose": {
+   "side": "E",
+   "type": {
+    "x": 2294.3,
+    "y": 1650.77
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2262.3,
+    "y": 1642.77,
+    "w": 64,
+    "h": 16
+   },
+   "leader": [
+    [
+     2324.57,
+     1642.77
+    ],
+    [
+     2324.57,
+     1634.86
+    ]
+   ]
+  },
+  "starch-hydrolysis-maltose": {
+   "side": "E",
+   "type": {
+    "x": 2261.5,
+    "y": 1559.03
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2229.5,
+    "y": 1551.03,
+    "w": 64,
+    "h": 16
+   },
+   "leader": null
+  },
+  "styrene-polymerization": {
+   "side": "W",
+   "type": {
+    "x": 3918.91,
+    "y": 1414.16
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3886.91,
+    "y": 1406.16,
+    "w": 64,
+    "h": 16
+   },
+   "leader": null
+  },
+  "sucrose-hydrolysis": {
+   "side": "E",
+   "type": {
+    "x": 2596.55,
+    "y": 1572.18
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 2564.55,
+    "y": 1564.18,
+    "w": 64,
+    "h": 16
+   },
+   "leader": null
+  },
+  "triolein-hydrogenation": {
+   "side": "E",
+   "type": {
+    "x": 1593.19,
+    "y": 1857.24
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1561.19,
+    "y": 1849.24,
+    "w": 64,
+    "h": 16
+   },
+   "leader": [
+    [
+     1561.19,
+     1865.24
+    ],
+    [
+     1553.69,
+     1866.34
+    ]
+   ]
+  },
+  "triolein-saponification": null,
+  "tripalmitin-saponification": null,
+  "tristearin-hydrolysis": {
+   "side": "E",
+   "type": {
+    "x": 1440.88,
+    "y": 1729.61
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1408.88,
+    "y": 1721.61,
+    "w": 64,
+    "h": 16
+   },
+   "leader": null
+  },
+  "tristearin-saponification": {
+   "side": "W",
+   "type": {
+    "x": 1332.57,
+    "y": 1941.48
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 1307.57,
+    "y": 1933.48,
+    "w": 50,
+    "h": 16
+   },
+   "leader": null
+  },
+  "vinyl-chloride-polymerization": {
+   "side": "E",
+   "type": {
+    "x": 3959.67,
+    "y": 1824.4
+   },
+   "anchor": "center",
+   "cond": null,
+   "box": {
+    "x": 3927.67,
+    "y": 1816.4,
+    "w": 64,
+    "h": 16
+   },
+   "leader": null
+  }
+ }
+}
