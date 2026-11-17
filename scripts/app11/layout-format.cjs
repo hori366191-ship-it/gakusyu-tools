@@ -34,9 +34,13 @@ function canonicalLayout(layout) {
         ? {
           side: r.label.side,
           type: { x: num(r.label.type.x), y: num(r.label.type.y) },
+          anchor: r.label.anchor || 'center',
           cond: r.label.cond ? { x: num(r.label.cond.x), y: num(r.label.cond.y) } : null,
           box: r.label.box
             ? { x: num(r.label.box.x), y: num(r.label.box.y), w: num(r.label.box.w), h: num(r.label.box.h) }
+            : null,
+          leader: r.label.leader && r.label.leader.length > 1
+            ? r.label.leader.map((p) => [num(p[0]), num(p[1])])
             : null
         }
         : null,

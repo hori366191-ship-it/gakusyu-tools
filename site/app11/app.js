@@ -12,6 +12,10 @@
 
   var D = window.RPMapData;
   var A = window.RPMapAcademic || null;
+  // 通常配置案（normal-proposed）の契約・検証（B/D と共通の pure module）。
+  var Contract = window.RPMapProposalContract || null;
+  // 新しい配置案（通常表示の別配置）。事前生成データで、無い/壊れている場合は現在の配置だけを使う。
+  var P = window.RPMapLayoutProposal || null;
   var Core = window.RPMapCore;
   var SD = window.RPStructure;
   if (!D || !Core) return;
@@ -116,6 +120,22 @@
   var academicLayer = null;
   var academicEnabled = false;
   var academicDisabledReason = '';
+  // 通常表示の配置（現在 / 新しい配置案）。mode とは独立で、学術表示では専用配置を使う。
+  // 切替のたびに projectedCache を作り直し、canonical な D は書き換えない。
+  var layoutChoice = 'current';
+  var proposed = null;             // 検証済みの配置案（academic と同じ positions/markers/routes 形）
+  var proposedEnabled = false;
+  var proposedDisabledReason = '';
+  var proposedAll = [];            // 通常 162 を配置案へ投影した複製
+  var proposedAllById = {};
+  var proposedReactionIndex = {};
+  var proposedAllEdgeIndex = {};
+  var proposedConnectors = {};
+  var proposedHitCandidates = [];
+  var proposedIncoming = {};
+  var proposedOutgoing = {};
+  var proposedLayer = null;
+  var proposedBuilt = false;       // 初回選択時に遅延構築する
   // 学術座標へ投影した複製（canonical な D.compounds は変更しない）。
   var projectedCache = null;
   var classHitCandidates = [];
@@ -214,7 +234,8 @@
 
   // 通常 86 の反応を、学術マーカー・学術経路へ投影した複製。
   // state / tier / sources など化学的な内容は canonical のまま保持する。
-  function projectNormalReaction(r, layout) {
+  // 新しい配置案も同じ投影を使う（layoutName は 'academic' / 'proposed'）。
+  function projectNormalReaction(r, layout, layoutName) {
     var markers = (layout && layout.normalMarkers) || {};
     var routes = (layout && layout.normalRoutes) || {};
     var m = markers[r.id];
@@ -224,7 +245,7 @@
       tier: (m && m.tier) || r.tier,
       label: (m && m.label) || r.label,
       edges: (r.edges || []).map(function (e) { return projectNormalRoute(r.id, e, routes); }),
-      layout: 'academic',
+      layout: layoutName || 'academic',
       normal: true,
       academic: false
     });
@@ -273,20 +294,37 @@
     return null;
   }
 
+  // いま表示している配置。学術表示は専用配置、通常表示は選択中の配置（現在 / 新しい配置案）。
+  // 無い場合は null（= data.js の canonical 座標をそのまま使う）。
+  function activeLayout() {
+    if (mode === 'academic') return academicEnabled ? academic : null;
+    if (layoutChoice === 'proposed' && proposedEnabled) return proposed;
+    return null;
+  }
+
+  function activeLayoutName() {
+    if (mode === 'academic') return 'current';
+    return layoutChoice === 'proposed' && proposedEnabled ? 'proposed' : 'current';
+  }
+
+  function projectionKey() {
+    return mode === 'academic' ? 'academic' : (activeLayoutName());
+  }
+
   // 学術モードでは positions で投影した複製、通常モードでは canonical をそのまま返す。
   // どちらのモードでも D.compounds 自体は書き換えない。
   function activeCompoundById() {
-    if (projectedCache && projectedCache.mode === mode) return projectedCache.map;
+    var key = projectionKey();
+    if (projectedCache && projectedCache.key === key) return projectedCache.map;
+    var layout = activeLayout();
     var map = {};
     var list = [];
     D.compounds.forEach(function (c) {
-      var projected = mode === 'academic' && academic
-        ? projectCompound(c, academic.positions[c.id])
-        : c;
+      var projected = layout ? projectCompound(c, layout.positions[c.id]) : c;
       map[c.id] = projected;
       list.push(projected);
     });
-    projectedCache = { mode: mode, map: map, list: list, regions: null };
+    projectedCache = { key: key, mode: mode, map: map, list: list, regions: null };
     return map;
   }
 
@@ -305,21 +343,25 @@
     return c ? { x: c.x, y: c.y, w: nodeW(c), h: nodeH(c) } : null;
   }
 
-  // 分野の focus 矩形。学術モードでは regionFocus（学術配置）を優先する。
+  // 分野の focus 矩形。学術表示・配置案では regionFocus を優先する。
   function activeRegions() {
-    if (mode !== 'academic' || !academic) return D.regions;
-    if (projectedCache && projectedCache.mode === mode && projectedCache.regions) {
+    var layout = activeLayout();
+    if (!layout) return D.regions;
+    var regionFocus = layout.regionFocus || null;
+    if (!regionFocus || !Object.keys(regionFocus).length) return D.regions;
+    var key = projectionKey();
+    if (projectedCache && projectedCache.key === key && projectedCache.regions) {
       return projectedCache.regions;
     }
     var list = D.regions.map(function (r) {
-      var box = academic.regionFocus ? academic.regionFocus[r.id] : null;
+      var box = regionFocus[r.id];
       if (!box) return r;
       var out = Object.assign({}, r);
       out.focus = box;
       out.center = { x: box.x + box.w / 2, y: box.y + box.h / 2 };
       return out;
     });
-    if (projectedCache && projectedCache.mode === mode) projectedCache.regions = list;
+    if (projectedCache && projectedCache.key === key) projectedCache.regions = list;
     return list;
   }
 
@@ -330,32 +372,44 @@
   }
 
   function activeReactions() {
-    return mode === 'academic' ? academicAll : D.reactions;
+    if (mode === 'academic') return academicAll;
+    if (layoutChoice === 'proposed' && proposedEnabled) return proposedAll;
+    return D.reactions;
   }
 
   function activeReactionIndex() {
-    return mode === 'academic' ? academicReactionIndex : reactionIndex;
+    if (mode === 'academic') return academicReactionIndex;
+    if (layoutChoice === 'proposed' && proposedEnabled) return proposedReactionIndex;
+    return reactionIndex;
   }
 
   function activeEdgeIndex() {
-    return mode === 'academic' ? academicAllEdgeIndex : edgeIndex;
+    if (mode === 'academic') return academicAllEdgeIndex;
+    if (layoutChoice === 'proposed' && proposedEnabled) return proposedAllEdgeIndex;
+    return edgeIndex;
   }
 
   function activeConnectors() {
-    return mode === 'academic' ? academicConnectors : reactionConnectors;
+    if (mode === 'academic') return academicConnectors;
+    if (layoutChoice === 'proposed' && proposedEnabled) return proposedConnectors;
+    return reactionConnectors;
   }
 
   function activeHitCandidates() {
-    return mode === 'academic' ? academicHitCandidates.concat(classHitCandidates) : hitCandidates;
+    if (mode === 'academic') return academicHitCandidates.concat(classHitCandidates);
+    if (layoutChoice === 'proposed' && proposedEnabled) return proposedHitCandidates.concat(classHitCandidates);
+    return hitCandidates;
   }
 
   function activeIncoming(id) {
     if (mode === 'academic') return academicIncoming[id] || [];
+    if (layoutChoice === 'proposed' && proposedEnabled) return proposedIncoming[id] || [];
     return incoming[id] || [];
   }
 
   function activeOutgoing(id) {
     if (mode === 'academic') return academicOutgoing[id] || [];
+    if (layoutChoice === 'proposed' && proposedEnabled) return proposedOutgoing[id] || [];
     return outgoing[id] || [];
   }
 
@@ -500,6 +554,94 @@
     }
   }
 
+  /* ---------------- reaction label placement ---------------- */
+
+  // CSS `.rp-reaction__label { text-anchor: middle }` は SVG の presentation 属性より優先される。
+  // そのためアンカーは classes（--start / --end / --middle）で与え、文字位置は label.box の
+  // 対応する辺へ置く（アンカーと bbox を必ず一致させる）。box の中心が label.type と一致する
+  // 現在の通常配置は middle のまま（従来の見た目を変えない）。
+  var LABEL_EDGE_OFFSET = 11;
+
+  function labelAnchorName(label) {
+    var anchor = label && label.anchor;
+    if (anchor === 'start' || anchor === 'end' || anchor === 'middle') return anchor;
+    if (anchor === 'left') return 'start';
+    if (anchor === 'right') return 'end';
+    if (anchor === 'center' || anchor === 'centre') return 'middle';
+    var box = label && label.box;
+    var type = label && label.type;
+    if (box && type &&
+      Math.abs(box.x + box.w / 2 - type.x) <= 1 &&
+      Math.abs(box.y + box.h / 2 - type.y) <= 1) {
+      return 'middle';
+    }
+    if (label.side === 'E') return 'start';
+    if (label.side === 'W') return 'end';
+    return 'middle';
+  }
+
+  function labelPoint(label) {
+    var anchor = labelAnchorName(label);
+    var box = label.box;
+    var type = label.type;
+    if (anchor === 'middle') {
+      return {
+        x: type ? type.x : box.x + box.w / 2,
+        y: type ? type.y : box.y + box.h / 2,
+        anchor: anchor
+      };
+    }
+    if (box) {
+      return {
+        x: anchor === 'start' ? box.x : box.x + box.w,
+        y: box.y + box.h / 2,
+        anchor: anchor
+      };
+    }
+    if (anchor === 'start') return { x: type.x + LABEL_EDGE_OFFSET, y: type.y, anchor: anchor };
+    return { x: type.x - LABEL_EDGE_OFFSET, y: type.y, anchor: anchor };
+  }
+
+  // 反応名（と条件）の text を作る。leader があれば同じ反応グループへ短い折れ線として足す
+  // （同じ LOD で出し入れする。反応点の丸は復活させない）。
+  function reactionLabelNodes(r, extraClass) {
+    var nodes = [];
+    if (!r.label || !r.label.type) return nodes;
+    var leader = r.label.leader;
+    if (Array.isArray(leader)) {
+      var points = leader.filter(function (pt) {
+        return Array.isArray(pt) && pt.length > 1 && isFinite(pt[0]) && isFinite(pt[1]);
+      });
+      if (points.length > 1) {
+        nodes.push(el('polyline', {
+          'class': 'rp-reaction__leader',
+          'data-reaction': r.id,
+          points: points.map(function (pt) { return pt[0] + ',' + pt[1]; }).join(' ')
+        }));
+      }
+    }
+    var place = labelPoint(r.label);
+    var label = el('text', {
+      'class': 'rp-reaction__label' + (extraClass ? ' ' + extraClass : '') +
+        ' rp-reaction__label--' + place.anchor,
+      x: place.x,
+      y: place.y
+    });
+    label.textContent = r.typeLabel;
+    nodes.push(label);
+    if (r.conditions && r.label.cond) {
+      var cond = el('text', {
+        'class': 'rp-reaction__label rp-reaction__label--cond',
+        x: r.label.cond.x,
+        y: r.label.cond.y,
+        'text-anchor': 'middle'
+      });
+      cond.textContent = Core.shorten(r.conditions, 16);
+      nodes.push(cond);
+    }
+    return nodes;
+  }
+
   function buildAcademic() {
     if (!academicEnabled || !academicReactions.length) return;
     academicLayer = el('g', { 'class': 'rp-academic rp-academic-all', 'data-layout': 'academic', 'aria-hidden': 'true' });
@@ -575,26 +717,9 @@
         'aria-label': reactionLabel(r)
       });
       g.appendChild(el('circle', { 'class': 'rp-reaction__dot', cx: r.x, cy: r.y, r: 6 }));
-      if (r.label) {
-        var label = el('text', {
-          'class': 'rp-reaction__label' + (r.academic ? ' rp-reaction__label--academic' : ''),
-          x: r.label.type.x + (r.label.side === 'E' ? 11 : -11),
-          y: r.label.type.y,
-          'text-anchor': r.label.side === 'E' ? 'start' : 'end'
-        });
-        label.textContent = r.typeLabel;
-        g.appendChild(label);
-        if (r.conditions && r.label.cond) {
-          var cond = el('text', {
-            'class': 'rp-reaction__label rp-reaction__label--cond',
-            x: r.label.cond.x,
-            y: r.label.cond.y,
-            'text-anchor': 'middle'
-          });
-          cond.textContent = Core.shorten(r.conditions, 16);
-          g.appendChild(cond);
-        }
-      }
+      reactionLabelNodes(r, r.academic ? 'rp-reaction__label--academic' : '').forEach(function (node) {
+        g.appendChild(node);
+      });
       markerLayer.appendChild(g);
       academicReactionIndex[r.id] = g;
     });
@@ -612,6 +737,307 @@
     var normalMarkers = viewport.querySelector('.rp-reactions');
     if (normalMarkers) viewport.insertBefore(academicLayer, normalMarkers);
     else viewport.appendChild(academicLayer);
+  }
+
+  /* ---------------- 新しい配置案（通常表示の別配置） ---------------- */
+
+  // 配置案の契約を検証する。版・base（通常データとのハッシュ）・427 positions・162 markers・
+  // 375 routes・canvas は共通 module（proposal-contract.js）に任せ、ここでは経路の端点が
+  // 通常データの edge（reaction / dir / compound）と一致することだけを足す。
+  function proposedLayoutProblem(layout) {
+    if (!Contract || typeof Contract.verifyProposal !== 'function') {
+      return '配置案の検証器を読み込めないため、新しい配置案を使えません。';
+    }
+    var verdict = Contract.verifyProposal(layout, D);
+    if (!verdict || !verdict.ok) {
+      // 共通 module の返却形式（{ok:false, reason}）に合わせる。将来 problems 配列・message でも読む。
+      var detail = (verdict && (verdict.reason || verdict.message ||
+        (Array.isArray(verdict.problems) && verdict.problems.length ? verdict.problems[0] : ''))) ||
+        '検証できません';
+      return '配置案が通常データと一致しません（' + detail + '）。';
+    }
+    var routes = layout.routes || {};
+    for (var ri = 0; ri < D.reactions.length; ri++) {
+      var r = D.reactions[ri];
+      for (var ei = 0; ei < r.edges.length; ei++) {
+        var e = r.edges[ei];
+        var route = routes[r.id + '|' + e.dir + '|' + e.id];
+        if (!route) return '配置案の経路がありません: ' + r.id + '|' + e.id;
+        if (route.reaction != null && route.reaction !== r.id) {
+          return '配置案の経路の反応が一致しません: ' + r.id + '|' + e.id;
+        }
+        if (route.compound != null && route.compound !== e.id) {
+          return '配置案の経路の端点が一致しません: ' + r.id + '|' + e.id;
+        }
+        if (route.dir != null && route.dir !== e.dir) {
+          return '配置案の経路の向きが一致しません: ' + r.id + '|' + e.id;
+        }
+      }
+    }
+    return null;
+  }
+
+  // 壊れた・欠けた配置案では何も有効化しない（fail-closed）。現在の配置はそのまま使える。
+  function initProposedLayout() {
+    if (!P) {
+      proposedDisabledReason = '配置案データを読み込めないため、現在の配置だけを使えます。';
+      return false;
+    }
+    try {
+      var problem = proposedLayoutProblem(P);
+      if (problem) {
+        proposedDisabledReason = problem + ' 新しい配置案は使えません（現在の配置はそのまま使えます）。';
+        errMsg(problem);
+        return false;
+      }
+      var markers = P.markers || {};
+      var routes = P.routes || {};
+      proposed = {
+        version: P.version,
+        positions: P.positions,
+        regionFocus: P.regionFocus || {},
+        canvas: P.canvas,
+        normalMarkers: markers,
+        normalRoutes: routes,
+        markers: markers,
+        routes: routes,
+        stats: P.stats || {},
+        warnings: P.warnings || []
+      };
+      // 反応の内容（state / type / 式 / 出典）は data.js のまま。座標とラベル・経路だけを投影する。
+      proposedAll = D.reactions.map(function (r) { return projectNormalReaction(r, proposed, 'proposed'); });
+      proposedAll.forEach(function (r) {
+        proposedAllById[r.id] = r;
+        r.products.forEach(function (id) { (proposedIncoming[id] = proposedIncoming[id] || []).push(r); });
+        r.substrates.forEach(function (id) { (proposedOutgoing[id] = proposedOutgoing[id] || []).push(r); });
+      });
+      projectedCache = null;
+      proposedEnabled = true;
+      return true;
+    } catch (err) {
+      errMsg('配置案データを読み込めないため、現在の配置だけを使います: ' + (err && err.message));
+      proposed = null;
+      proposedAll = [];
+      proposedAllById = {};
+      proposedEnabled = false;
+      proposedDisabledReason = '配置案データを読み込めないため、新しい配置案を使えません。';
+      return false;
+    }
+  }
+
+  // 初回に「新しい配置案」を選んだときだけ DOM を作る（学術表示の 733 DOM と同時に持たない）。
+  function buildProposed() {
+    if (proposedBuilt || !proposedEnabled || !proposed) return;
+    proposedLayer = el('g', { 'class': 'rp-proposed', 'data-layout': 'proposed', 'aria-hidden': 'true' });
+    var secondaryLayer = el('g', { 'class': 'rp-edges rp-edges--secondary' });
+    var primaryLayer = el('g', { 'class': 'rp-edges rp-edges--primary' });
+    var hitLayer = el('g', { 'class': 'rp-edge-hits', 'aria-hidden': 'true' });
+    var markerLayer = el('g', { 'class': 'rp-reactions' });
+    var hitShapes = {};
+    var hitOrder = {};
+
+    var projected = {};
+    D.compounds.forEach(function (c) { projected[c.id] = projectCompound(c, proposed.positions[c.id]); });
+
+    proposedAll.forEach(function (r) {
+      var list = Core.reactionConnectors(r, {
+        compoundById: projected,
+        nodeW: NODE_W,
+        nodeH: NODE_H
+      });
+      list.forEach(function (c) { c.rid = r.id; });
+      proposedConnectors[r.id] = list;
+    });
+    var all = [];
+    Object.keys(proposedConnectors).forEach(function (id) {
+      all = all.concat(proposedConnectors[id]);
+    });
+    Core.separateSharedPorts(all);
+    Core.enforcePaintClearance(all);
+
+    proposedAll.forEach(function (r, reactionOrder) {
+      var tier = r.tier === 'primary' ? 'primary' : 'secondary';
+      var edgeLayer = tier === 'primary' ? primaryLayer : secondaryLayer;
+      (proposedConnectors[r.id] || []).forEach(function (c) {
+        var edgeTier = c.tier === 'primary' ? 'primary' : 'secondary';
+        var shaftD = Core.routePath(c.shaft || c.points, c.gaps, c.bridges);
+        var shaftPath = el('path', {
+          'class': 'rp-edge rp-edge--' + edgeTier,
+          'data-from': c.dir === 'in' ? c.edgeId : r.id,
+          'data-to': c.dir === 'in' ? r.id : c.edgeId,
+          'data-edge': c.edgeKeys[0],
+          'data-edges': c.edgeKeys.join(','),
+          'data-reaction': r.id,
+          'data-compound': c.compounds[0],
+          'data-compounds': JSON.stringify(c.compounds),
+          'data-tier': edgeTier,
+          d: shaftD
+        });
+        edgeLayer.appendChild(shaftPath);
+        if (c.arrowHead) edgeLayer.appendChild(el('path', arrowHeadAttrs(c, edgeTier)));
+        c.edgeKeys.forEach(function (key) { proposedAllEdgeIndex[key] = shaftPath; });
+        var hitShape = connectorHitShape(c, shaftD);
+        hitLayer.appendChild(el('path', {
+          'class': 'rp-edge-hit',
+          'data-kind': 'reaction',
+          'data-id': r.id,
+          'data-reaction': r.id,
+          d: hitShape.d
+        }));
+        if (!hitShapes[r.id]) {
+          hitShapes[r.id] = { lines: [], fills: [] };
+          hitOrder[r.id] = reactionOrder;
+        }
+        hitShapes[r.id].lines = hitShapes[r.id].lines.concat(hitShape.lines);
+        hitShapes[r.id].fills = hitShapes[r.id].fills.concat(hitShape.fills);
+      });
+
+      var g = el('g', {
+        'class': 'rp-reaction rp-reaction--' + tier + (r.state === 'confirmed' ? '' : ' is-pending'),
+        'data-kind': 'reaction',
+        'data-id': r.id,
+        'data-tier': tier,
+        role: 'button',
+        tabindex: '0',
+        'aria-label': reactionLabel(r)
+      });
+      g.appendChild(el('circle', { 'class': 'rp-reaction__dot', cx: r.x, cy: r.y, r: 6 }));
+      reactionLabelNodes(r).forEach(function (node) { g.appendChild(node); });
+      markerLayer.appendChild(g);
+      proposedReactionIndex[r.id] = g;
+    });
+
+    Object.keys(hitShapes).forEach(function (id) {
+      var shape = hitShapes[id];
+      proposedHitCandidates.push(hitCandidate('reaction', id, hitOrder[id] || 0,
+        { lines: shape.lines, fills: shape.fills }));
+    });
+
+    proposedLayer.appendChild(secondaryLayer);
+    proposedLayer.appendChild(primaryLayer);
+    proposedLayer.appendChild(hitLayer);
+    proposedLayer.appendChild(markerLayer);
+    // 通常ノード・一般図より下、通常の当たり判定より上に置く（非表示中は CSS で隠す）。
+    if (normalMarkerLayer) viewport.insertBefore(proposedLayer, normalMarkerLayer);
+    else viewport.appendChild(proposedLayer);
+    proposedBuilt = true;
+  }
+
+  function ensureProposedLayer() {
+    if (proposedBuilt) return;
+    buildProposed();
+  }
+
+  /* ---------------- 配置の切替（現在 / 新しい配置案） ---------------- */
+
+  function layoutButton(name) {
+    return document.getElementById('rp-layout-' + name);
+  }
+
+  // 学術表示は専用配置なので、配置ボタンは両方 disabled。title / aria-label でその理由を示す。
+  function updateLayoutButtons() {
+    var academicMode = mode === 'academic';
+    var dedicated = '学術表示は専用配置です。';
+    var current = layoutButton('current');
+    var proposal = layoutButton('proposed');
+    if (current) {
+      var currentPressed = !academicMode && layoutChoice === 'current';
+      current.setAttribute('aria-pressed', currentPressed ? 'true' : 'false');
+      current.disabled = academicMode;
+      current.setAttribute('aria-disabled', academicMode ? 'true' : 'false');
+      current.title = academicMode ? dedicated : '通常表示の現在の配置を表示します。';
+      if (academicMode) current.setAttribute('aria-label', '現在の配置（学術表示は専用配置）');
+      else current.removeAttribute('aria-label');
+    }
+    if (proposal) {
+      var proposalPressed = !academicMode && layoutChoice === 'proposed';
+      proposal.setAttribute('aria-pressed', proposalPressed ? 'true' : 'false');
+      proposal.disabled = academicMode || !proposedEnabled;
+      proposal.setAttribute('aria-disabled', (academicMode || !proposedEnabled) ? 'true' : 'false');
+      proposal.title = academicMode ? dedicated
+        : proposedEnabled ? '通常表示の新しい配置案を表示します。'
+          : (proposedDisabledReason || '新しい配置案を利用できません。');
+      if (academicMode) proposal.setAttribute('aria-label', '新しい配置案（学術表示は専用配置）');
+      else proposal.removeAttribute('aria-label');
+    }
+  }
+
+  // 切替後、選択中の物質・反応があれば新しい位置へ寄せ、無ければ全体表示へ戻す。
+  // ホイールの途中目標と進行中のアニメーションは切替前に捨てる（競合させない）。
+  function focusAfterLayoutSwitch(logical) {
+    if (logical && logical.kind === 'compound') {
+      var c = compoundAt(logical.id);
+      if (c) {
+        animateTo(entityTarget({ x: c.x, y: c.y }, { w: nodeW(c), h: nodeH(c) }, Math.max(view.scale, 0.92)));
+        return;
+      }
+    } else if (logical && logical.kind === 'reaction') {
+      var r = findReaction(logical.id);
+      if (r) {
+        animateTo(entityTarget({ x: r.x, y: r.y }, { w: 0, h: 0 }, Math.max(view.scale, 0.92)));
+        return;
+      }
+    }
+    animateTo(fitModeCanvasView());
+  }
+
+  // 切替後に隠れるレイヤーに focus が残るときだけ、地図へ focus を移す。
+  // 表示され続けるレイヤー（または地図の外）の focus は動かさない（余分なフォーカス移動を作らない）。
+  function moveFocusOutOfHiddenLayer() {
+    var activeEl = document.activeElement;
+    if (!activeEl || !activeEl.closest) return;
+    var layer = activeEl.closest('.rp-academic') ? 'academic'
+      : activeEl.closest('.rp-proposed') ? 'proposed'
+        : activeEl.closest('.rp-layout-normal') ? 'current'
+          : null;
+    if (!layer) return;
+    var visible = mode === 'academic' ? 'academic'
+      : (layoutChoice === 'proposed' && proposedEnabled ? 'proposed' : 'current');
+    if (layer === visible) return;
+    if (mapEl.focus) {
+      try { mapEl.focus({ preventScroll: true }); } catch (err) { errMsg(err && err.message); }
+    }
+  }
+
+  // 配置の切替。モード（通常 / 学術）とは独立で、選択・カード・検索入力/結果は保つ。
+  // 学術表示中は専用配置なので切り替えない（選択は layoutChoice に残し、通常へ戻すと復元する）。
+  function setLayoutChoice(next) {
+    var value = next === 'proposed' ? 'proposed' : 'current';
+    if (mode === 'academic') return;
+    if (value === 'proposed' && !proposedEnabled) return;
+    if (value === layoutChoice) return;
+    var logical = selected ? { kind: selected.kind, id: selected.id } : null;
+    var cardOpen = !card.hidden;
+    cancelWheelZoom();
+    animToken += 1;
+    closeEquationDialog(false);
+    closePositionPopover(false);
+    clearRegionSelection();
+    layoutChoice = value;
+    if (layoutChoice === 'proposed') ensureProposedLayer();
+    projectedCache = null;
+    svg.setAttribute('data-layout', layoutChoice);
+    mapEl.setAttribute('data-layout', layoutChoice);
+    // 切替後に隠れる層の focus だけ地図へ移す（表示される層の focus は動かさない）。
+    moveFocusOutOfHiddenLayer();
+    syncNodeProjection();
+    syncModeLayers();
+    updateLayoutButtons();
+    updateMarkers(Core.detailLevel(view.scale));
+    var keep = logical && modeHasEntity(logical.kind, logical.id);
+    if (keep) {
+      selectNode(logical.kind, logical.id);
+      if (cardOpen) openCard(logical.kind, logical.id);
+    } else if (cardOpen) {
+      closeCard(false);
+    }
+    // 非表示になった層の要素をフォーカス復帰先に残さない。
+    if (returnFocus && returnFocus.closest) {
+      var hiddenNormal = !!returnFocus.closest('.rp-layout-normal') && layoutChoice === 'proposed';
+      var hiddenProposed = !!returnFocus.closest('.rp-proposed') && layoutChoice !== 'proposed';
+      if (hiddenNormal || hiddenProposed) returnFocus = null;
+    }
+    focusAfterLayoutSwitch(keep ? logical : null);
   }
 
   /* ---------------- build the canvas ---------------- */
@@ -745,26 +1171,7 @@
         'aria-label': reactionLabel(r)
       });
       g.appendChild(el('circle', { 'class': 'rp-reaction__dot', cx: r.x, cy: r.y, r: 6 }));
-      if (r.label) {
-        var label = el('text', {
-          'class': 'rp-reaction__label',
-          x: r.label.type.x,
-          y: r.label.type.y,
-          'text-anchor': 'middle'
-        });
-        label.textContent = r.typeLabel;
-        g.appendChild(label);
-        if (r.conditions && r.label.cond) {
-          var cond = el('text', {
-            'class': 'rp-reaction__label rp-reaction__label--cond',
-            x: r.label.cond.x,
-            y: r.label.cond.y,
-            'text-anchor': 'middle'
-          });
-          cond.textContent = Core.shorten(r.conditions, 16);
-          g.appendChild(cond);
-        }
-      }
+      reactionLabelNodes(r).forEach(function (node) { g.appendChild(node); });
       markerLayer.appendChild(g);
       reactionIndex[r.id] = g;
     });
@@ -836,15 +1243,16 @@
     viewport.appendChild(nodeLayer);
   }
 
-  // 学術表示では、ノードのグループを学術座標へ translate する。rect / band / text / badge は
+  // 学術表示・配置案では、ノードのグループを投影座標へ translate する。rect / band / text / badge は
   // 子要素のまま一緒に動くため、文字を描き直さない。通常へ戻すときは transform を外し、
   // 寸法も canonical から作り直すので累積誤差は出ない。
   function syncNodeProjection() {
-    var acad = mode === 'academic' && academicEnabled && academic;
+    var layout = activeLayout();
+    var positions = layout && layout.positions ? layout.positions : null;
     D.compounds.forEach(function (c) {
       var g = nodeIndex[c.id];
       if (!g) return;
-      var pos = acad ? academic.positions[c.id] : null;
+      var pos = positions ? positions[c.id] : null;
       var tx = pos ? pos.x - c.x : 0;
       var ty = pos ? pos.y - c.y : 0;
       if (tx || ty) g.setAttribute('transform', 'translate(' + tx + ' ' + ty + ')');
@@ -882,14 +1290,18 @@
 
   function syncModeLayers() {
     var acad = mode === 'academic' && academicEnabled;
+    var prop = !acad && mode === 'normal' && layoutChoice === 'proposed' && proposedEnabled && proposedBuilt;
     if (academicLayer && academicLayer.style) academicLayer.style.display = acad ? '' : 'none';
+    if (proposedLayer && proposedLayer.style) proposedLayer.style.display = prop ? '' : 'none';
     setLayerInteractive(academicLayer, acad);
-    setLayerInteractive(normalMarkerLayer, !acad);
+    setLayerInteractive(proposedLayer, prop);
+    setLayerInteractive(normalMarkerLayer, !acad && !prop);
   }
 
   // 俯瞰で分野ごとに1つだけ物質名を出す。学術モードでは regionFocus の中心で選び直す。
   function regionHubs() {
-    if (projectedCache && projectedCache.mode === mode && projectedCache.hubs) return projectedCache.hubs;
+    var key = projectionKey();
+    if (projectedCache && projectedCache.key === key && projectedCache.hubs) return projectedCache.hubs;
     var hubs = {};
     var regions = {};
     activeRegions().forEach(function (r) { regions[r.id] = r; });
@@ -905,7 +1317,7 @@
         hubs[c.region] = { compound: c, distance: distance };
       }
     });
-    if (projectedCache && projectedCache.mode === mode) projectedCache.hubs = hubs;
+    if (projectedCache && projectedCache.key === key) projectedCache.hubs = hubs;
     return hubs;
   }
 
@@ -1090,9 +1502,10 @@
     viewSize.h = Math.max(1, rect.height || mapEl.clientHeight || 1);
   }
 
-  // 通常は modeCanvas() そのもの。アカデミックだけ専用 canvas（右端の追加分）を返す。
+  // 通常は modeCanvas() そのもの。学術表示・配置案は専用 canvas を返す。
   function modeCanvas() {
-    return mode === 'academic' && academic ? academic.canvas : D.meta.canvas;
+    var layout = activeLayout();
+    return layout && layout.canvas ? layout.canvas : D.meta.canvas;
   }
 
   function fitTopInset() {
@@ -1131,13 +1544,14 @@
     return insetFitView(fit, top);
   }
 
-  // アカデミックの専用表示範囲は、通常 canvas を含み、はみ出した分だけ広い。
-  // 通常モードの fit / clamp / 座標は一切変えない。
+  // 学術表示・配置案の専用表示範囲は、通常 canvas を含み、はみ出した分だけ広い。
+  // 通常（現在の配置）の fit / clamp / 座標は一切変えない。
   function fitModeCanvasView() {
-    if (mode !== 'academic' || !academic) return fitCanvasView();
+    var layout = activeLayout();
+    var canvas = layout && layout.canvas ? layout.canvas : D.meta.canvas;
     var top = fitTopInset();
     var innerH = Math.max(160, viewSize.h - top);
-    return insetFitView(Core.fitTransform(academic.canvas, viewSize.w, innerH, 14), top);
+    return insetFitView(Core.fitTransform(canvas, viewSize.w, innerH, 14), top);
   }
 
 
@@ -3024,6 +3438,7 @@
   // 現在モードの反応だけを返す（学術モードでは通常 86 も学術座標へ投影した複製）。
   function findReaction(id) {
     if (mode === 'academic') return academicAllById[id] || null;
+    if (layoutChoice === 'proposed' && proposedEnabled) return proposedAllById[id] || null;
     for (var i = 0; i < D.reactions.length; i++) if (D.reactions[i].id === id) return D.reactions[i];
     return null;
   }
@@ -3198,14 +3613,13 @@
     mode = next;
     svg.setAttribute('data-mode', mode);
     mapEl.setAttribute('data-mode', mode);
-    // 非表示になる層に keyboard focus を残さない（未知の hidden 起点を作らない）。
-    var activeEl = document.activeElement;
-    if (activeEl && activeEl.closest &&
-      (activeEl.closest('.rp-layout-normal') || activeEl.closest('.rp-academic'))) {
-      if (mapEl.focus) {
-        try { mapEl.focus({ preventScroll: true }); } catch (err) { errMsg(err && err.message); }
-      }
-    }
+    // 学術表示では専用配置を使う。通常へ戻すと layoutChoice の選択がそのまま復元される。
+    var layoutName = mode === 'academic' ? 'current' : activeLayoutName();
+    svg.setAttribute('data-layout', layoutName);
+    mapEl.setAttribute('data-layout', layoutName);
+    if (mode === 'normal' && layoutChoice === 'proposed') ensureProposedLayer();
+    // 切替後に隠れる層（通常・配置案・学術）の focus だけ地図へ移す。
+    moveFocusOutOfHiddenLayer();
     syncNodeProjection();
     syncModeLayers();
     searchInput.value = '';
@@ -3214,6 +3628,7 @@
     refreshLists();
     applyAcademicNodeStates();
     updateModeButtons();
+    updateLayoutButtons();
     updateAcademicNotice();
     updateMarkers(Core.detailLevel(view.scale));
     // 同じ物質・同じ通常反応なら、切替後の座標で選択と詳細を保つ。学術だけの反応は閉じる。
@@ -3356,6 +3771,8 @@
     buildReactions();
     initAcademicData();
     buildAcademic();
+    // 新しい配置案は検証だけ行い、DOM は初回選択時に作る（学術 DOM と同時に持たない）。
+    initProposedLayout();
     buildNodes();
     buildClassMap();
     ensureActiveLayer();
@@ -3371,13 +3788,26 @@
     // 表示モード。既定は通常。URL の ?mode=academic は有効な学術データがあるときだけ受け付ける。
     svg.setAttribute('data-mode', 'normal');
     mapEl.setAttribute('data-mode', 'normal');
+    // 配置は既定で現在の配置（ブラウザ保存・URL へは保存しない）。
+    layoutChoice = 'current';
+    svg.setAttribute('data-layout', 'current');
+    mapEl.setAttribute('data-layout', 'current');
     var normalModeButton = modeButton('normal');
     var academicModeButton = modeButton('academic');
     if (normalModeButton) normalModeButton.addEventListener('click', function () { setMode('normal'); });
     if (academicModeButton) {
       academicModeButton.addEventListener('click', function () { setMode('academic'); });
     }
+    var currentLayoutButton = layoutButton('current');
+    var proposedLayoutButton = layoutButton('proposed');
+    if (currentLayoutButton) {
+      currentLayoutButton.addEventListener('click', function () { setLayoutChoice('current'); });
+    }
+    if (proposedLayoutButton) {
+      proposedLayoutButton.addEventListener('click', function () { setLayoutChoice('proposed'); });
+    }
     updateModeButtons();
+    updateLayoutButtons();
     updateAcademicNotice();
     if (academicEnabled && readModeParam(window.location ? window.location.search : '') === 'academic') {
       // ?mode=academic は先にモードを決め、その学術座標で ?focus= を同期する。

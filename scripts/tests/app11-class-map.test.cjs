@@ -599,7 +599,15 @@ test('[static] 既存の entity 処理を壊さず、分類ノードをキーボ
   assert.ok(html.includes('id="rp-classmap-jump"'), '右下の導線');
   assert.ok(html.includes('id="rp-classmap-note"'), '一般図の説明');
   const scripts = [...html.matchAll(/<script src="\.\/([^"]+)"><\/script>/g)].map((m) => m[1]);
-  assert.deepEqual(scripts, ['data.js', 'academic-data.js', 'map-core.js', 'structure-draw.js', 'app.js'], '読み込み順を固定');
+  assert.deepEqual(scripts, [
+    'data.js',
+    'academic-data.js',
+    'proposal-contract.js',
+    'proposed-layout-data.js',
+    'map-core.js',
+    'structure-draw.js',
+    'app.js'
+  ], '読み込み順を固定');
 
   assert.ok(js.includes('D.classMap') && js.includes('buildClassMap'), 'classMap を別レイヤーに描く');
   assert.ok(js.includes("'data-kind': 'class'"), '分類ノードの種別');

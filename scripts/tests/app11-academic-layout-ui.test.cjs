@@ -243,14 +243,26 @@ test('[connectivity] 新たに接続する 136 は反応網の中、未接続 19
  * ------------------------------------------------------------------ */
 
 function loadProjection(initialMode) {
-  const code = ['projectCompound', 'activeCompoundById', 'activeCompounds', 'compoundAt', 'positionOf', 'activeRegions']
+  const code = ['projectCompound', 'activeLayout', 'activeLayoutName', 'projectionKey',
+    'activeCompoundById', 'activeCompounds', 'compoundAt', 'positionOf', 'activeRegions']
     .map((name) => extractFunctionSource(APP_JS, name)).join('\n');
-  const state = { mode: initialMode, academic: { positions: LAYOUT.positions, regionFocus: LAYOUT.regionFocus || {} } };
+  const state = {
+    mode: initialMode,
+    academic: { positions: LAYOUT.positions, regionFocus: LAYOUT.regionFocus || {} },
+    academicEnabled: true,
+    layoutChoice: 'current',
+    proposed: null,
+    proposedEnabled: false
+  };
   const factory = new Function(
     'D', 'state',
     [
       'var mode = state.mode;',
       'var academic = state.academic;',
+      'var academicEnabled = state.academicEnabled;',
+      'var layoutChoice = state.layoutChoice;',
+      'var proposed = state.proposed;',
+      'var proposedEnabled = state.proposedEnabled;',
       'var projectedCache = null;',
       'var NODE_W = D.meta.nodeW, NODE_H = D.meta.nodeH;',
       'function nodeW(c) { return c.w || NODE_W; }',
@@ -263,6 +275,9 @@ function loadProjection(initialMode) {
       '  positionOf: positionOf,',
       '  activeRegions: activeRegions,',
       '  setMode: function (next) { mode = next; projectedCache = null; },',
+      '  setProposed: function (layout) { proposed = layout; proposedEnabled = !!layout; projectedCache = null; },',
+      '  setLayoutChoice: function (next) { layoutChoice = next; projectedCache = null; },',
+      '  layoutName: function () { return activeLayoutName(); },',
       '  mode: function () { return mode; }',
       '};'
     ].join('\n')
@@ -320,6 +335,40 @@ test('[getters] 学術の分野は regionFocus の矩形と中心を使い、通
   });
   api.setMode('normal');
   assert.equal(api.activeRegions(), D.regions);
+});
+
+test('[getters] 配置案は投影座標を返し、学術表示は専用配置、通常へ戻すと選択を復元する', () => {
+  const { api } = loadProjection('normal');
+  const canonical = D.compounds.find((c) => c.id === 'benzene');
+  const positions = {};
+  D.compounds.forEach((c) => {
+    positions[c.id] = { x: c.x, y: c.y + 40, w: c.w, h: c.h };
+  });
+  api.setProposed({ positions: positions, regionFocus: {} });
+
+  assert.equal(api.layoutName(), 'current');
+  assert.equal(api.compoundAt('benzene'), canonical, '現在の配置は canonical');
+
+  api.setLayoutChoice('proposed');
+  assert.equal(api.layoutName(), 'proposed');
+  const projected = api.compoundAt('benzene');
+  assert.notEqual(projected, canonical, '配置案は複製');
+  assert.equal(projected.y, canonical.y + 40, '配置案の座標で描く');
+  assert.equal(projected.name, canonical.name, '化学データは保つ');
+  assert.equal(api.positionOf('benzene').y, canonical.y + 40);
+
+  api.setMode('academic');
+  assert.equal(api.layoutName(), 'current', '学術表示は専用配置');
+  assert.equal(api.compoundAt('benzene').y, LAYOUT.positions.benzene.y, '学術座標');
+  assert.notEqual(api.compoundAt('benzene'), canonical);
+
+  api.setMode('normal');
+  assert.equal(api.layoutName(), 'proposed', '通常へ戻すと前の配置選択');
+  assert.equal(api.compoundAt('benzene').y, canonical.y + 40);
+
+  api.setLayoutChoice('current');
+  assert.equal(api.layoutName(), 'current');
+  assert.equal(api.compoundAt('benzene'), canonical, '現在の配置へ戻すと同一参照');
 });
 
 test('[selection] 学術だけの反応は通常へ戻すと落ち、物質と通常 86 は残る', () => {
@@ -402,7 +451,12 @@ test('[mode] setMode はホイール/アニメを止め、投影・レイヤー�
   assert.match(src, /modeHasEntity\(logical\.kind, logical\.id\)/);
   assert.match(src, /if \(cardOpen\) openCard\(logical\.kind, logical\.id\)/, 'カードを開き直す');
   assert.match(src, /else if \(cardOpen\) \{\s*closeCard\(false\)/, '学術だけの反応は閉じる');
-  assert.match(src, /rp-layout-normal/, 'hidden 起点の focus を残さない');
+  assert.match(src, /moveFocusOutOfHiddenLayer\(\)/, '隠れた層の focus だけ地図へ移す');
+  const helper = extractFunctionSource(APP_JS, 'moveFocusOutOfHiddenLayer');
+  assert.match(helper, /rp-layout-normal/);
+  assert.match(helper, /rp-proposed/);
+  assert.match(helper, /rp-academic/);
+  assert.match(helper, /if \(layer === visible\) return;/, '表示される層の focus は動かさない');
   assert.match(src, /fitModeCanvasView\(\)/);
 });
 
@@ -443,7 +497,23 @@ test('[a11y] 学術レイヤーは aria-hidden と tabindex をモードで切�
   assert.match(src, /setAttribute\('tabindex', enabled \? '0' : '-1'\)/);
   assert.match(src, /querySelectorAll\('\[data-kind\]\[role="button"\]'\)/);
   assert.match(APP_JS, /setLayerInteractive\(academicLayer, acad\)/);
-  assert.match(APP_JS, /setLayerInteractive\(normalMarkerLayer, !acad\)/);
+  // 通常レイヤーは学術でも配置案でも操作対象にしない（片方だけを有効化する）。
+  assert.match(APP_JS, /setLayerInteractive\(normalMarkerLayer, !acad && !prop\)/);
+  assert.match(APP_JS, /setLayerInteractive\(proposedLayer, prop\)/);
+});
+
+test('[layers] 通常 / 学術 / 配置案の3状態で、表示中のレイヤーだけを操作可能にする', () => {
+  const sync = APP_JS.slice(APP_JS.indexOf('function syncModeLayers'), APP_JS.indexOf('function regionHubs'));
+  assert.match(sync, /var acad = mode === 'academic' && academicEnabled;/, '学術は学術データがあるときだけ');
+  assert.match(sync, /var prop = !acad && mode === 'normal' && layoutChoice === 'proposed' && proposedEnabled && proposedBuilt;/,
+    '配置案は通常表示で検証・構築済みのときだけ');
+  assert.match(sync, /academicLayer\.style\.display = acad \? '' : 'none'/);
+  assert.match(sync, /proposedLayer\.style\.display = prop \? '' : 'none'/);
+  assert.match(sync, /setLayerInteractive\(academicLayer, acad\)/);
+  assert.match(sync, /setLayerInteractive\(proposedLayer, prop\)/);
+  assert.match(sync, /setLayerInteractive\(normalMarkerLayer, !acad && !prop\)/);
+  // 学術表示が配置案より優先される（専用配置）。
+  assert.ok(sync.indexOf('!acad &&') !== -1, 'acad が立つと配置案は無効');
 });
 
 /* ------------------------------------------------------------------

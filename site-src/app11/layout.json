@@ -4094,16 +4094,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 1613.9,
-     "y": 1200.85
+     "x": 1601,
+     "y": 1242.64
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1595.9,
-     "y": 1192.85,
+     "x": 1583,
+     "y": 1234.64,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "acetic-acid"
@@ -4136,18 +4138,20 @@
    "y": 789.59,
    "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "W",
     "type": {
-     "x": 1047.4,
-     "y": 820.8
+     "x": 1038.82,
+     "y": 820.14
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1008.4,
-     "y": 812.8,
+     "x": 999.82,
+     "y": 812.14,
      "w": 78,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "acetic-acid",
@@ -4218,13 +4222,24 @@
      "x": 1277.33,
      "y": 1020.04
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 1259.33,
      "y": 1012.04,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      1295.33,
+      1025.68
+     ],
+     [
+      1301.43,
+      1025.68
+     ]
+    ]
    },
    "substrates": [
     "acetic-acid"
@@ -4241,18 +4256,20 @@
    "y": 1012.87,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 1613.87,
-     "y": 1006.87
+     "x": 1503.65,
+     "y": 976.53
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1595.87,
-     "y": 998.87,
+     "x": 1485.65,
+     "y": 968.53,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "acetic-acid"
@@ -4378,16 +4395,18 @@
    "label": {
     "side": "W",
     "type": {
-     "x": 1951.52,
-     "y": 1004.9
+     "x": 1989.26,
+     "y": 940.5
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1912.52,
-     "y": 996.9,
+     "x": 1950.26,
+     "y": 932.5,
      "w": 78,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "aniline",
@@ -4407,16 +4426,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 2306.3,
-     "y": 668.1
+     "x": 2299.18,
+     "y": 672.54
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 2274.3,
-     "y": 660.1,
+     "x": 2267.18,
+     "y": 664.54,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "aniline"
@@ -4433,18 +4454,20 @@
    "y": 721.56,
    "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "W",
     "type": {
-     "x": 2172.5,
-     "y": 695.56
+     "x": 2114.37,
+     "y": 705.42
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 2154.5,
-     "y": 687.56,
+     "x": 2096.37,
+     "y": 697.42,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "aniline"
@@ -4511,13 +4534,24 @@
      "x": 1448.42,
      "y": 961.22
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 1416.42,
      "y": 953.22,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      1416.42,
+      969.22
+     ],
+     [
+      1415.51,
+      978.87
+     ]
+    ]
    },
    "substrates": [
     "aspirin"
@@ -4540,13 +4574,15 @@
      "x": 4027.5,
      "y": 259.59
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 4009.5,
      "y": 251.59,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "benzaldehyde"
@@ -4568,13 +4604,28 @@
      "x": 2835.34,
      "y": 1217.04
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 2796.34,
      "y": 1209.04,
      "w": 78,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      2796.34,
+      1209.04
+     ],
+     [
+      2791.08,
+      1209.04
+     ],
+     [
+      2791.08,
+      1193.05
+     ]
+    ]
    },
    "substrates": [
     "benzene"
@@ -4591,18 +4642,20 @@
    "y": 1161.56,
    "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "W",
     "type": {
-     "x": 2597.5,
-     "y": 1095.56
+     "x": 2592.08,
+     "y": 1117.34
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 2579.5,
-     "y": 1087.56,
+     "x": 2574.08,
+     "y": 1109.34,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "benzene"
@@ -4624,13 +4677,15 @@
      "x": 2374.05,
      "y": 1193.04
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 2342.05,
      "y": 1185.04,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "benzene"
@@ -4668,13 +4723,28 @@
      "x": 2549.48,
      "y": 1374.28
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 2510.48,
      "y": 1366.28,
      "w": 78,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      2510.48,
+      1366.28
+     ],
+     [
+      2505.51,
+      1366.28
+     ],
+     [
+      2505.51,
+      1346.56
+     ]
+    ]
    },
    "substrates": [
     "benzene"
@@ -4706,18 +4776,20 @@
    "y": 454.59,
    "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 3869.6,
-     "y": 448.59
+     "x": 3984.97,
+     "y": 464.88
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 3851.6,
-     "y": 440.59,
+     "x": 3966.97,
+     "y": 456.88,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "benzoic-acid"
@@ -4739,13 +4811,24 @@
      "x": 3827.5,
      "y": 259.59
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 3809.5,
      "y": 251.59,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      3809.5,
+      267.59
+     ],
+     [
+      3797.31,
+      273.29
+     ]
+    ]
    },
    "substrates": [
     "benzyl-alcohol"
@@ -4823,18 +4906,20 @@
    "y": 2139.59,
    "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "W",
     "type": {
-     "x": 3932.58,
-     "y": 2177.96
+     "x": 3894.41,
+     "y": 2111.96
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 3900.58,
-     "y": 2169.96,
+     "x": 3862.41,
+     "y": 2103.96,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "caprolactam"
@@ -4898,18 +4983,20 @@
    "y": 992.46,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 3166.14,
-     "y": 992.46
+     "x": 3105.68,
+     "y": 911.56
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 3148.14,
-     "y": 984.46,
+     "x": 3087.68,
+     "y": 903.56,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "chlorobenzene"
@@ -4946,13 +5033,24 @@
      "x": 3377.5,
      "y": 429.59
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 3359.5,
      "y": 421.59,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      3359.5,
+      437.07
+     ],
+     [
+      3336.55,
+      437.07
+     ]
+    ]
    },
    "substrates": [
     "cumene-hydroperoxide"
@@ -4970,18 +5068,20 @@
    "y": 249.59,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 3027.5,
-     "y": 249.59
+     "x": 3020.74,
+     "y": 245.08
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 3009.5,
-     "y": 241.59,
+     "x": 3002.74,
+     "y": 237.08,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "cumene"
@@ -5013,18 +5113,20 @@
    "y": 552.12,
    "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "W",
     "type": {
-     "x": 2720.77,
-     "y": 588.49
+     "x": 2645.41,
+     "y": 472.12
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 2674.77,
-     "y": 580.49,
+     "x": 2599.41,
+     "y": 464.12,
      "w": 92,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "benzenediazonium-chloride",
@@ -5072,18 +5174,29 @@
    "y": 869.59,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 1017.5,
-     "y": 869.59
+     "x": 1027.69,
+     "y": 871.3
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 999.5,
-     "y": 861.59,
+     "x": 1009.69,
+     "y": 863.3,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      1009.69,
+      879.3
+     ],
+     [
+      1006.58,
+      882.52
+     ]
+    ]
    },
    "substrates": [
     "ethanal"
@@ -5117,16 +5230,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 1239.8,
-     "y": 663.59
+     "x": 1034.19,
+     "y": 789.59
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1221.8,
-     "y": 655.59,
+     "x": 1016.19,
+     "y": 781.59,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethanol"
@@ -5143,18 +5258,20 @@
    "y": 428.32,
    "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 1159.94,
-     "y": 422.32
+     "x": 1275.75,
+     "y": 453.65
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1141.94,
-     "y": 414.32,
+     "x": 1257.75,
+     "y": 445.65,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethanol"
@@ -5171,18 +5288,20 @@
    "y": 549.59,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 1157.5,
-     "y": 549.59
+     "x": 1052.07,
+     "y": 533.02
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1139.5,
-     "y": 541.59,
+     "x": 1034.07,
+     "y": 525.02,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethanol"
@@ -5214,18 +5333,20 @@
    "y": 590.18,
    "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "W",
     "type": {
-     "x": 1042.07,
-     "y": 564.18
+     "x": 994.56,
+     "y": 574.11
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1024.07,
-     "y": 556.18,
+     "x": 976.56,
+     "y": 566.11,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethanol"
@@ -5257,18 +5378,29 @@
    "y": 709.59,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 1017.5,
-     "y": 709.59
+     "x": 946.76,
+     "y": 700.91
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 999.5,
-     "y": 701.59,
+     "x": 928.76,
+     "y": 692.91,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      964.76,
+      708.91
+     ],
+     [
+      969.09,
+      717.57
+     ]
+    ]
    },
    "substrates": [
     "ethanol"
@@ -5287,16 +5419,27 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 1314.57,
-     "y": 504.18
+     "x": 1184.65,
+     "y": 419.21
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1268.57,
-     "y": 496.18,
+     "x": 1138.65,
+     "y": 411.21,
      "w": 92,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      1138.65,
+      418.49
+     ],
+     [
+      1135.52,
+      418.49
+     ]
+    ]
    },
    "substrates": [
     "ethanol"
@@ -5318,13 +5461,15 @@
      "x": 1397.5,
      "y": 249.59
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 1379.5,
      "y": 241.59,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethene"
@@ -5341,18 +5486,20 @@
    "y": 479.59,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 1277.5,
-     "y": 479.59
+     "x": 1207.9,
+     "y": 450
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1259.5,
-     "y": 471.59,
+     "x": 1189.9,
+     "y": 442,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethene"
@@ -5369,18 +5516,20 @@
    "y": 249.59,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 1157.5,
-     "y": 249.59
+     "x": 1097.03,
+     "y": 269.85
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1139.5,
-     "y": 241.59,
+     "x": 1079.03,
+     "y": 261.85,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethene"
@@ -5399,16 +5548,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 1269.48,
-     "y": 234.28
+     "x": 1275.5,
+     "y": 229.03
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1237.48,
-     "y": 226.28,
+     "x": 1243.5,
+     "y": 221.03,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethene"
@@ -5425,18 +5576,20 @@
    "y": 389.59,
    "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 1420.19,
-     "y": 423.57
+     "x": 1417.33,
+     "y": 371.29
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1388.19,
-     "y": 415.57,
+     "x": 1385.33,
+     "y": 363.29,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethene"
@@ -5468,18 +5621,29 @@
    "y": 789.59,
    "tier": "primary",
    "label": {
-    "side": "N",
+    "side": "E",
     "type": {
-     "x": 1416.5,
-     "y": 753.22
+     "x": 1428.88,
+     "y": 770.72
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1384.5,
-     "y": 745.22,
+     "x": 1396.88,
+     "y": 762.72,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      1396.88,
+      778.72
+     ],
+     [
+      1392.98,
+      782.4
+     ]
+    ]
    },
    "substrates": [
     "ethyl-acetate"
@@ -5531,16 +5695,18 @@
    "label": {
     "side": "W",
     "type": {
-     "x": 3813.73,
-     "y": 1464.62
+     "x": 3871.39,
+     "y": 1507.03
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 3795.73,
-     "y": 1456.62,
+     "x": 3853.39,
+     "y": 1499.03,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethylbenzene"
@@ -5590,16 +5756,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 768.45,
-     "y": 845.99
+     "x": 767.7,
+     "y": 849.98
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 736.45,
-     "y": 837.99,
+     "x": 735.7,
+     "y": 841.98,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethyne"
@@ -5618,16 +5786,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 1335.5,
-     "y": 128.62
+     "x": 1141.58,
+     "y": 189.72
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1303.5,
-     "y": 120.62,
+     "x": 1109.58,
+     "y": 181.72,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethyne"
@@ -5644,18 +5814,20 @@
    "y": 877.67,
    "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 776.01,
-     "y": 871.67
+     "x": 775.13,
+     "y": 1176
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 758.01,
-     "y": 863.67,
+     "x": 757.13,
+     "y": 1168,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethyne"
@@ -5687,18 +5859,20 @@
    "y": 595.31,
    "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 691.13,
-     "y": 589.31
+     "x": 964.97,
+     "y": 357.56
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 659.13,
-     "y": 581.31,
+     "x": 932.97,
+     "y": 349.56,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethyne"
@@ -5717,16 +5891,18 @@
    "label": {
     "side": "W",
     "type": {
-     "x": 544.8,
-     "y": 789.61
+     "x": 560.66,
+     "y": 787.76
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 512.8,
-     "y": 781.61,
+     "x": 528.66,
+     "y": 779.76,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethyne"
@@ -5745,16 +5921,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 697.5,
-     "y": 769.59
+     "x": 690.47,
+     "y": 765.06
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 679.5,
-     "y": 761.59,
+     "x": 672.47,
+     "y": 757.06,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "formaldehyde"
@@ -5821,16 +5999,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 1952,
-     "y": 942
+     "x": 1926.83,
+     "y": 1021.92
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1934,
-     "y": 934,
+     "x": 1908.83,
+     "y": 1013.92,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "glucose"
@@ -5915,13 +6095,24 @@
      "x": 1669.48,
      "y": 1554.28
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 1630.48,
      "y": 1546.28,
      "w": 78,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      1630.48,
+      1546.28
+     ],
+     [
+      1626.85,
+      1542.76
+     ]
+    ]
    },
    "substrates": [
     "glycerol",
@@ -5944,13 +6135,24 @@
      "x": 3401.52,
      "y": 1624.9
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 3355.52,
      "y": 1616.9,
      "w": 92,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      3426.03,
+      1632.9
+     ],
+     [
+      3426.03,
+      1661.64
+     ]
+    ]
    },
    "substrates": [
     "glycine",
@@ -5988,13 +6190,24 @@
      "x": 3469.48,
      "y": 1934.28
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 3437.48,
      "y": 1926.28,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      3445.6,
+      1926.28
+     ],
+     [
+      3445.6,
+      1898.04
+     ]
+    ]
    },
    "substrates": [
     "glycylalanine"
@@ -6079,13 +6292,24 @@
      "x": 248,
      "y": 2903.58
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 230,
      "y": 2895.58,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      266,
+      2902.05
+     ],
+     [
+      312.84,
+      2902.05
+     ]
+    ]
    },
    "substrates": [
     "maleic-acid"
@@ -6153,13 +6377,15 @@
      "x": 785.73,
      "y": 238.59
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 739.73,
      "y": 230.59,
      "w": 92,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "methane"
@@ -6178,16 +6404,18 @@
    "label": {
     "side": "W",
     "type": {
-     "x": 333.09,
-     "y": 887.18
+     "x": 313.29,
+     "y": 954.26
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 315.09,
-     "y": 879.18,
+     "x": 295.29,
+     "y": 946.26,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "methanol"
@@ -6204,18 +6432,20 @@
    "y": 979.59,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 877.5,
-     "y": 979.59
+     "x": 850.95,
+     "y": 1057.25
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 859.5,
-     "y": 971.59,
+     "x": 832.95,
+     "y": 1049.25,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "methanol"
@@ -6237,13 +6467,15 @@
      "x": 811.05,
      "y": 1269.76
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 765.05,
      "y": 1261.76,
      "w": 92,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "methanol"
@@ -6260,18 +6492,29 @@
    "y": 999.59,
    "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 1081.52,
-     "y": 974.9
+     "x": 1135.3,
+     "y": 979.79
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1049.52,
-     "y": 966.9,
+     "x": 1103.3,
+     "y": 971.79,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      1125.6,
+      987.79
+     ],
+     [
+      1125.6,
+      1011.14
+     ]
+    ]
    },
    "substrates": [
     "methyl-salicylate"
@@ -6304,18 +6547,20 @@
    "y": 912.36,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 2156.44,
-     "y": 929.45
+     "x": 2160.16,
+     "y": 894.13
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 2138.44,
-     "y": 921.45,
+     "x": 2142.16,
+     "y": 886.13,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "nitrobenzene"
@@ -6365,16 +6610,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 3177.5,
-     "y": 1909.59
+     "x": 3168.5,
+     "y": 1989.59
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 3152.5,
-     "y": 1901.59,
+     "x": 3143.5,
+     "y": 1981.59,
      "w": 50,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "adipic-acid",
@@ -6397,13 +6644,15 @@
      "x": 1404.9,
      "y": 2026.82
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 1386.9,
      "y": 2018.82,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "oleic-acid"
@@ -6441,13 +6690,24 @@
      "x": 2202.5,
      "y": 1909.59
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 2184.5,
      "y": 1901.59,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      2184.5,
+      1917.59
+     ],
+     [
+      2171.9,
+      1923.55
+     ]
+    ]
    },
    "substrates": [
     "p-xylene"
@@ -6466,16 +6726,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 2477.5,
-     "y": 2099.59
+     "x": 2477.39,
+     "y": 2089.73
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 2452.5,
-     "y": 2091.59,
+     "x": 2452.39,
+     "y": 2081.73,
      "w": 50,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "terephthalic-acid",
@@ -6513,13 +6775,15 @@
      "x": 2923.87,
      "y": 746.67
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 2905.87,
      "y": 738.67,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "phenol"
@@ -6541,13 +6805,15 @@
      "x": 2993.5,
      "y": 641.62
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 2954.5,
      "y": 633.62,
      "w": 78,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "phenol"
@@ -6569,13 +6835,28 @@
      "x": 2749.24,
      "y": 638.39
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 2717.24,
      "y": 630.39,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      2781.24,
+      646.39
+     ],
+     [
+      2803.62,
+      648.62
+     ],
+     [
+      2811.23,
+      669.78
+     ]
+    ]
    },
    "substrates": [
     "phenol"
@@ -6594,16 +6875,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 2982.76,
-     "y": 548.23
+     "x": 2992.89,
+     "y": 492.44
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 2964.76,
-     "y": 540.23,
+     "x": 2974.89,
+     "y": 484.44,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "phenol",
@@ -6642,13 +6925,24 @@
      "x": 3040.72,
      "y": 400.48
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 3022.72,
      "y": 392.48,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      3022.72,
+      396.76
+     ],
+     [
+      3005.53,
+      396.76
+     ]
+    ]
    },
    "substrates": [
     "phthalic-acid"
@@ -6682,16 +6976,18 @@
    "label": {
     "side": "W",
     "type": {
-     "x": 446.86,
-     "y": 704.73
+     "x": 623.73,
+     "y": 748.45
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 428.86,
-     "y": 696.73,
+     "x": 605.73,
+     "y": 740.45,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "ethyne"
@@ -6725,16 +7021,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 3584.36,
-     "y": 623.59
+     "x": 3445.09,
+     "y": 677.14
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 3566.36,
-     "y": 615.59,
+     "x": 3427.09,
+     "y": 669.14,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "propan-2-ol"
@@ -6771,13 +7069,15 @@
      "x": 3607.5,
      "y": 699.59
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 3589.5,
      "y": 691.59,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "propan-2-ol"
@@ -6829,13 +7129,15 @@
      "x": 3597.5,
      "y": 929.59
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 3579.5,
      "y": 921.59,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "propene"
@@ -6857,13 +7159,24 @@
      "x": 3189.48,
      "y": 1134.28
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 3157.48,
      "y": 1126.28,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      3157.48,
+      1126.28
+     ],
+     [
+      3141.07,
+      1119.49
+     ]
+    ]
    },
    "substrates": [
     "propene"
@@ -6880,18 +7193,20 @@
    "y": 1149.59,
    "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "W",
     "type": {
-     "x": 3535.5,
-     "y": 1191.59
+     "x": 3538.95,
+     "y": 1196.32
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 3503.5,
-     "y": 1183.59,
+     "x": 3506.95,
+     "y": 1188.32,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "propene"
@@ -6973,13 +7288,15 @@
      "x": 1091.68,
      "y": 1414.37
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 1073.68,
      "y": 1406.37,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "pva"
@@ -7012,18 +7329,20 @@
    "y": 1259.59,
    "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 1474.23,
-     "y": 1300.67
+     "x": 1581.01,
+     "y": 1158.4
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1435.23,
-     "y": 1292.67,
+     "x": 1542.01,
+     "y": 1150.4,
      "w": 78,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "salicylic-acid",
@@ -7046,13 +7365,24 @@
      "x": 1149.48,
      "y": 1284.28
     },
+    "anchor": "center",
     "cond": null,
     "box": {
      "x": 1110.48,
      "y": 1276.28,
      "w": 78,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      1125.83,
+      1276.28
+     ],
+     [
+      1125.83,
+      1247.54
+     ]
+    ]
    },
    "substrates": [
     "salicylic-acid",
@@ -7072,16 +7402,18 @@
    "label": {
     "side": "W",
     "type": {
-     "x": 644.37,
-     "y": 278.56
+     "x": 2029.79,
+     "y": 760.83
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 626.37,
-     "y": 270.56,
+     "x": 2011.79,
+     "y": 752.83,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "sodium-acetate"
@@ -7128,18 +7460,20 @@
    "y": 649.59,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 3227.5,
-     "y": 649.59
+     "x": 3184.19,
+     "y": 629.5
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 3209.5,
-     "y": 641.59,
+     "x": 3166.19,
+     "y": 621.5,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "sodium-phenoxide"
@@ -7188,16 +7522,27 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 2316.71,
-     "y": 1657.69
+     "x": 2294.3,
+     "y": 1650.77
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 2284.71,
-     "y": 1649.69,
+     "x": 2262.3,
+     "y": 1642.77,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      2324.57,
+      1642.77
+     ],
+     [
+      2324.57,
+      1634.86
+     ]
+    ]
    },
    "substrates": [
     "starch"
@@ -7216,16 +7561,18 @@
    "label": {
     "side": "E",
     "type": {
-     "x": 2269.48,
-     "y": 1554.28
+     "x": 2261.5,
+     "y": 1559.03
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 2237.48,
-     "y": 1546.28,
+     "x": 2229.5,
+     "y": 1551.03,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "starch"
@@ -7244,16 +7591,18 @@
    "label": {
     "side": "W",
     "type": {
-     "x": 1186.36,
-     "y": 1999.84
+     "x": 1237.41,
+     "y": 2029.22
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1168.36,
-     "y": 1991.84,
+     "x": 1219.41,
+     "y": 2021.22,
      "w": 36,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "stearic-acid"
@@ -7286,18 +7635,20 @@
    "y": 1469.59,
    "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "W",
     "type": {
-     "x": 3898.42,
-     "y": 1507.96
+     "x": 3918.91,
+     "y": 1414.16
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 3866.42,
-     "y": 1499.96,
+     "x": 3886.91,
+     "y": 1406.16,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "styrene"
@@ -7314,18 +7665,20 @@
    "y": 1629.59,
    "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 2507.4,
-     "y": 1660.8
+     "x": 2596.55,
+     "y": 1572.18
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 2475.4,
-     "y": 1652.8,
+     "x": 2564.55,
+     "y": 1564.18,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "sucrose"
@@ -7405,18 +7758,29 @@
    "y": 1829.59,
    "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 1501.52,
-     "y": 1804.9
+     "x": 1593.19,
+     "y": 1857.24
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1469.52,
-     "y": 1796.9,
+     "x": 1561.19,
+     "y": 1849.24,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": [
+     [
+      1561.19,
+      1865.24
+     ],
+     [
+      1553.69,
+      1866.34
+     ]
+    ]
    },
    "substrates": [
     "triolein"
@@ -7465,18 +7829,20 @@
    "y": 1769.59,
    "tier": "primary",
    "label": {
-    "side": "W",
+    "side": "E",
     "type": {
-     "x": 1355.05,
-     "y": 1798.98
+     "x": 1440.88,
+     "y": 1729.61
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1323.05,
-     "y": 1790.98,
+     "x": 1408.88,
+     "y": 1721.61,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "tristearin"
@@ -7494,18 +7860,20 @@
    "y": 2009.59,
    "tier": "primary",
    "label": {
-    "side": "E",
+    "side": "W",
     "type": {
-     "x": 1357.5,
-     "y": 2009.59
+     "x": 1332.57,
+     "y": 1941.48
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 1332.5,
-     "y": 2001.59,
+     "x": 1307.57,
+     "y": 1933.48,
      "w": 50,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "tristearin"
@@ -7554,18 +7922,20 @@
    "y": 1819.59,
    "tier": "primary",
    "label": {
-    "side": "S",
+    "side": "E",
     "type": {
-     "x": 3898.42,
-     "y": 1857.96
+     "x": 3959.67,
+     "y": 1824.4
     },
+    "anchor": "center",
     "cond": null,
     "box": {
-     "x": 3866.42,
-     "y": 1849.96,
+     "x": 3927.67,
+     "y": 1816.4,
      "w": 64,
      "h": 16
-    }
+    },
+    "leader": null
    },
    "substrates": [
     "vinyl-chloride"

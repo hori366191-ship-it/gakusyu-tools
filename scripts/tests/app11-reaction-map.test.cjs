@@ -389,7 +389,15 @@ test('[data] 状態区分の語彙が揃い、未確認を不可能として扱�
 test('[static] index.html は読込順・テーマ・クレジット・一覧の導線をもつ', () => {
   const html = read('index.html');
   const scripts = [...html.matchAll(/<script src="\.\/([^"]+)"><\/script>/g)].map((m) => m[1]);
-  assert.deepEqual(scripts, ['data.js', 'academic-data.js', 'map-core.js', 'structure-draw.js', 'app.js']);
+  assert.deepEqual(scripts, [
+    'data.js',
+    'academic-data.js',
+    'proposal-contract.js',
+    'proposed-layout-data.js',
+    'map-core.js',
+    'structure-draw.js',
+    'app.js'
+  ]);
   assert.ok(html.includes('../themes/theme.js'));
   assert.ok(html.includes('../themes/pop.css'));
   assert.ok(html.includes('../themes/forest.css'));

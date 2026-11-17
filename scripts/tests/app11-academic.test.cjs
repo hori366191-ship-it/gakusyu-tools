@@ -52,7 +52,7 @@ function fingerprintClassGeometry() {
 
 test('[normal] 通常データの固定ハッシュと件数は正本と一致する', () => {
   // 追加分を含む全体ハッシュは意図的に更新する。旧 86 の不変性は legacy-baseline で保証する。
-  assert.equal(fingerprintConcrete(), 'ae27680be36950cd30ba9bfe5a49e5ee7513095e759fcd29ba6f65d3550d54ec');
+  assert.equal(fingerprintConcrete(), '4f5a8211b3d1cefaa05d91bba84b28dbe7015450116df6deb028d7dd225972f7');
   assert.equal(fingerprintEquation(), '39020fc69016b28c7d1aeb3a4f894138673f3fbcafcefa0156849c5acd8c3f33');
   assert.equal(fingerprintClassGeometry(), '7f413639125c3a6ea6795c2bc2f54bcc49ac7e27c23cb5120896b17cef5ec224');
   const html = read('index.html');
@@ -244,15 +244,17 @@ test('[layout] マーカー・経路は通常ノードを貫通せず、全反�
     const box = m.label.box;
     const textW = Math.ceil(G.textWidth(r.typeLabel, G.TYPE_FONT));
     assert.ok(box.w >= textW, r.id + ' のラベル幅');
-    if (m.label.side === 'E') assert.equal(Math.round(m.label.type.x + 11), Math.round(box.x), r.id + ' Eアンカー');
-    else assert.equal(Math.round(m.label.type.x - 11), Math.round(box.x + box.w), r.id + ' Wアンカー');
+    assert.equal(m.label.anchor, 'center', r.id + ' は center 契約');
+    assert.ok(Math.abs(m.label.type.x - (box.x + box.w / 2)) < 0.02, r.id + ' の中心X');
+    assert.ok(Math.abs(m.label.type.y - (box.y + box.h / 2)) < 0.02, r.id + ' の中心Y');
     boxes.push({ id: r.id, box: box });
   });
   Object.keys(A.layout.normalMarkers).forEach((id) => {
     const m = A.layout.normalMarkers[id];
     const box = m.label.box;
-    if (m.label.side === 'E') assert.equal(Math.round(m.label.type.x + 11), Math.round(box.x), id + ' Eアンカー');
-    else assert.equal(Math.round(m.label.type.x - 11), Math.round(box.x + box.w), id + ' Wアンカー');
+    assert.equal(m.label.anchor, 'center', id + ' は center 契約');
+    assert.ok(Math.abs(m.label.type.x - (box.x + box.w / 2)) < 0.02, id + ' の中心X');
+    assert.ok(Math.abs(m.label.type.y - (box.y + box.h / 2)) < 0.02, id + ' の中心Y');
     boxes.push({ id: id, box: box });
   });
   const overlap = (a, b) => !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
@@ -340,8 +342,16 @@ test('[ui] モード切替は通常を既定にし、隠れた学術を当たり
 test('[restore] 通常モードの件数・文言・カードは元のまま', () => {
   assert.equal(D.meta.confirmedReactionCount, D.reactions.length);
   const js = read('app.js');
-  assert.ok(js.includes("mode === 'academic' ? academicAll : D.reactions"));
-  assert.ok(js.includes("mode === 'academic' ? academicHitCandidates.concat(classHitCandidates) : hitCandidates"));
+  // 通常表示は canonical の配列・当たり判定へ落ち、学術・配置案は別索引。
+  assert.ok(js.includes("if (mode === 'academic') return academicAll;"));
+  assert.ok(js.includes("if (mode === 'academic') return academicHitCandidates.concat(classHitCandidates);"));
+  assert.match(js, /if \(mode === 'academic'\) return academicAll;[\s\S]{0,220}return D\.reactions;/,
+    '通常表示は canonical の反応配列へ落ちる');
+  assert.match(js, /if \(mode === 'academic'\) return academicHitCandidates\.concat\(classHitCandidates\);[\s\S]{0,260}return hitCandidates;/,
+    '通常表示は canonical の当たり判定へ落ちる');
+  // 新しい配置案の分岐は通常表示の後ろにあり、通常の配列を置き換えない。
+  assert.match(js, /if \(layoutChoice === 'proposed' && proposedEnabled\) return proposedAll;/);
+  assert.match(js, /if \(layoutChoice === 'proposed' && proposedEnabled\) return proposedHitCandidates\.concat\(classHitCandidates\);/);
   assert.equal(js.includes('D.reactions.push'), false, '通常配列を書き換えない');
   assert.equal(js.includes('D.meta.compoundCount ='), false);
   assert.ok(js.includes('function buildCardEquationSvg'));
@@ -423,10 +433,12 @@ test('[chemistry] 重合の外側係数・不定組成・variants・出典・条
 
 test('[clamp] modeCanvas は通常 D.meta.canvas と同値、アカデミックだけ専用 bounds', () => {
   const js = read('app.js');
-  assert.match(js, /function modeCanvas\(\)[\s\S]{0,160}return mode === 'academic' && academic \? academic\.canvas : D\.meta\.canvas;/);
+  assert.match(js, /function modeCanvas\(\)[\s\S]{0,140}var layout = activeLayout\(\);[\s\S]{0,90}return layout && layout\.canvas \? layout\.canvas : D\.meta\.canvas;/);
   assert.ok(js.includes('Core.clampPan(next, viewSize.w, viewSize.h, modeCanvas())'), 'setView は modeCanvas');
   assert.ok(js.includes('wheelZoom = Core.clampPan(next, viewSize.w, viewSize.h, modeCanvas())'), 'wheel も modeCanvas');
   assert.ok(js.includes('Core.fitTransform(modeCanvas(), viewSize.w, innerH, 14)'), 'fit も modeCanvas');
+  assert.match(js, /function fitModeCanvasView\(\)[\s\S]{0,300}activeLayout\(\)/,
+    'fit は選択中の配置（学術・配置案）の表示範囲を使う');
   assert.ok(A.layout.canvas.w > D.meta.canvas.w, 'academic は右端が広い');
   assert.equal(D.meta.canvas.x, 0, '通常 canvas の原点');
   assert.equal(D.meta.canvas.y, 0, '通常 canvas の原点');

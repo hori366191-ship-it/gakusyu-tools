@@ -25,6 +25,289 @@ const path = require('node:path');
 
 const S = require('./source-data.cjs');
 const N = require('./academic-network-layout.cjs');
+const Q = require('./label-quality.cjs');
+const G = require('./geometry.cjs');
+
+// ラベル後処理の優先対象（通常モードの代表 + 強5件）。
+const LABEL_PRIORITY = [
+  'ethanol-dehydration-ethene',
+  'ethanol-sodium',
+  'ethanol-cuo-oxidation',
+  'ethyne-full-hydrogenation',
+  'acetic-acid-sodium-carbonate',
+  'methanol-cuo-oxidation',
+  'ethene-hydrogenation',
+  'ethene-hydration'
+];
+
+let ROUTE_REPAIR = null;
+try {
+  ROUTE_REPAIR = require('./label-route-repair.cjs');
+} catch (error) {
+  ROUTE_REPAIR = null;
+}
+
+function summarizeLengths(pointsList) {
+  const lengths = pointsList.map((points) => {
+    let sum = 0;
+    for (let i = 0; i < points.length - 1; i++) sum += Math.hypot(points[i + 1][0] - points[i][0], points[i + 1][1] - points[i][1]);
+    return sum;
+  }).sort((a, b) => a - b);
+  if (!lengths.length) return { count: 0, total: 0, mean: 0, median: 0, p95: 0, max: 0, ge1000: 0 };
+  const total = lengths.reduce((s, v) => s + v, 0);
+  const median = lengths.length % 2 ? lengths[(lengths.length - 1) / 2]
+    : (lengths[lengths.length / 2 - 1] + lengths[lengths.length / 2]) / 2;
+  const r2 = (v) => Math.round(v * 100) / 100;
+  return {
+    count: lengths.length,
+    total: r2(total),
+    mean: r2(total / lengths.length),
+    median: r2(median),
+    p95: r2(lengths[Math.min(lengths.length - 1, Math.ceil(lengths.length * 0.95) - 1)]),
+    max: r2(lengths[lengths.length - 1]),
+    ge1000: lengths.filter((v) => v >= 1000).length
+  };
+}
+
+/** reroute 後に stats.after の長さ系を実測へ合わせる（crossingPairs は元の集計を保持）。 */
+function recomputeAcademicStats(placed) {
+  const normalPoints = Object.keys(placed.normalRoutes || {}).map((key) => placed.normalRoutes[key].points);
+  const academicPoints = Object.keys(placed.routes || {}).map((key) => placed.routes[key].points);
+  const normal = summarizeLengths(normalPoints);
+  const academic = summarizeLengths(academicPoints);
+  const combined = summarizeLengths(normalPoints.concat(academicPoints));
+  const stats = placed.stats || {};
+  const after = stats.after || {};
+  const previous = {
+    combined: after.combined || {},
+    normal: after.normal || {},
+    academic: after.academic || {}
+  };
+  stats.after = Object.assign({}, after, {
+    combined: Object.assign({}, previous.combined, combined),
+    normal: Object.assign({}, previous.normal, normal),
+    academic: Object.assign({}, previous.academic, academic)
+  });
+  const baseline = stats.before || {};
+  if (baseline.combined) {
+    const r2 = (v) => Math.round(v * 100) / 100;
+    stats.after.reduction = Object.assign({}, after.reduction, {
+      total: r2(1 - combined.total / baseline.combined.total),
+      p95: r2(1 - combined.p95 / baseline.combined.p95),
+      max: r2(1 - combined.max / baseline.combined.max),
+      ge1000: combined.ge1000
+    });
+  }
+  placed.stats = stats;
+}
+
+/**
+ * 学術の「真の逆転かつ leader 無し」だけ、B helper で foreign route を局所 reroute し、
+ * その後にラベル/leader を実描画 geometry で再検証する。
+ * own route・ノード・facts・class map は変更しない。
+ */
+function repairAcademicRoutes(placed, classMap, reactionMeta) {
+  if (!ROUTE_REPAIR) return { available: false, targets: 0, changed: [], unresolved: [], invalidLeaders: null };
+  const H = ROUTE_REPAIR;
+  const geometry = Q.academicRepairGeometry(placed, classMap, reactionMeta);
+  const targets = Q.collectRepairTargets(geometry);
+  if (!targets.length) {
+    return { available: true, targets: 0, changed: [], unresolved: [], invalidLeaders: 0, remaining: [] };
+  }
+  const allMarkers = Object.assign({}, placed.normalMarkers || {}, placed.markers || {});
+  const labels = {};
+  const markers = {};
+  for (const id of Object.keys(allMarkers)) {
+    const marker = allMarkers[id];
+    markers[id] = { x: marker.x, y: marker.y };
+    if (marker.label && marker.label.box) {
+      labels[id] = { box: marker.label.box, leader: marker.label.leader || null };
+    }
+  }
+  const protect = {};
+  for (const target of targets) {
+    const box = target.box;
+    const center = { x: box.x + box.w / 2, y: box.y + box.h / 2 };
+    const nearest = H.nearestPointOnPolylines(geometry.ownerLines[target.id] || [], center);
+    if (!nearest) continue;
+    const p = nearest.point;
+    const q = {
+      x: Math.min(box.x + box.w, Math.max(box.x, p.x)),
+      y: Math.min(box.y + box.h, Math.max(box.y, p.y))
+    };
+    protect[target.id] = { corridor: [[q.x, q.y], [p.x, p.y]] };
+  }
+  const classRects = [];
+  if (classMap) {
+    if (classMap.frame) classRects.push(classMap.frame);
+    (classMap.nodes || []).forEach((node) => classRects.push(node));
+  }
+  const routesIn = {};
+  for (const key of Object.keys(placed.normalRoutes || {})) routesIn[key] = placed.normalRoutes[key];
+  for (const key of Object.keys(placed.routes || {})) routesIn[key] = placed.routes[key];
+  const result = H.repair({
+    labels: labels,
+    routes: routesIn,
+    compounds: placed.positions,
+    markers: markers,
+    classRects: classRects,
+    protect: protect
+  }, { clearance: 8, cell: 6, passes: 2 });
+
+  for (const key of result.changed) {
+    const route = result.routes[key];
+    if (!route) continue;
+    if (placed.routes && placed.routes[key]) placed.routes[key].points = route.points;
+    else if (placed.normalRoutes && placed.normalRoutes[key]) placed.normalRoutes[key].points = route.points;
+  }
+  if (result.changed.length) recomputeAcademicStats(placed);
+
+  // reroute 後は実描画 geometry でラベル/leader を再 solve・再検証する。
+  let labelSummary = Q.applyAcademicLabelLayout(placed, classMap, reactionMeta, {
+    nodeW: 136,
+    nodeH: 34,
+    priority: LABEL_PRIORITY,
+    repairPasses: 1
+  }).summary;
+  const changedAll = result.changed.slice();
+  const passReports = [];
+
+  function buildProtect(geometry, list) {
+    const out = {};
+    for (const target of list) {
+      const box = target.box;
+      const center = { x: box.x + box.w / 2, y: box.y + box.h / 2 };
+      const nearest = H.nearestPointOnPolylines(geometry.ownerLines[target.id] || [], center);
+      if (!nearest) continue;
+      const p = nearest.point;
+      const q = {
+        x: Math.min(box.x + box.w, Math.max(box.x, p.x)),
+        y: Math.min(box.y + box.h, Math.max(box.y, p.y))
+      };
+      out[target.id] = { corridor: [[q.x, q.y], [p.x, p.y]] };
+    }
+    return out;
+  }
+  function currentRoutes() {
+    const routesIn = {};
+    for (const key of Object.keys(placed.normalRoutes || {})) routesIn[key] = placed.normalRoutes[key];
+    for (const key of Object.keys(placed.routes || {})) routesIn[key] = placed.routes[key];
+    return routesIn;
+  }
+  function currentLabelsAndMarkers() {
+    const all = Object.assign({}, placed.normalMarkers || {}, placed.markers || {});
+    const labelsOut = {};
+    const markersOut = {};
+    for (const id of Object.keys(all)) {
+      markersOut[id] = { x: all[id].x, y: all[id].y };
+      if (all[id].label && all[id].label.box) labelsOut[id] = { box: all[id].label.box, leader: all[id].label.leader || null };
+    }
+    return { labels: labelsOut, markers: markersOut };
+  }
+  function applyChanged(resultObj) {
+    let count = 0;
+    for (const key of resultObj.changed) {
+      const route = resultObj.routes[key];
+      if (!route) continue;
+      if (placed.routes && placed.routes[key]) placed.routes[key].points = route.points;
+      else if (placed.normalRoutes && placed.normalRoutes[key]) placed.normalRoutes[key].points = route.points;
+      count++;
+    }
+    return count;
+  }
+
+  // 残件だけ、より広い局所探索（searchMargin / passes / maxCells）で 1 回だけ再探索。
+  // 現行 helper は保護矩形が過大で反復すると全体 reroute が増えるため、
+  // B の精密 helper（capsule/正確帯）受領後に反復へ拡張する。
+  let remainingNow = Q.collectRepairTargets(Q.academicRepairGeometry(placed, classMap, reactionMeta));
+  for (let iteration = 1; iteration <= 2 && remainingNow.length; iteration++) {
+    const geometryN = Q.academicRepairGeometry(placed, classMap, reactionMeta);
+    const protectN = buildProtect(geometryN, remainingNow);
+    const lmN = currentLabelsAndMarkers();
+    const options = iteration === 1
+      ? { clearance: 8, cell: 6, passes: 2, searchMargin: 36, maxCells: 60000 }
+      : { clearance: 8, corridorClearance: 4, cell: 3, passes: 3, searchMargin: 56, maxCells: 200000 };
+    const resultN = H.repair({
+      labels: lmN.labels,
+      routes: currentRoutes(),
+      compounds: placed.positions,
+      markers: lmN.markers,
+      classRects: classRects,
+      protect: protectN
+    }, options);
+    const applied = applyChanged(resultN);
+    if (applied) recomputeAcademicStats(placed);
+    changedAll.push(...resultN.changed);
+    labelSummary = Q.applyAcademicLabelLayout(placed, classMap, reactionMeta, {
+      nodeW: 136,
+      nodeH: 34,
+      priority: LABEL_PRIORITY,
+      repairPasses: 1
+    }).summary;
+    const nextRemaining = Q.collectRepairTargets(Q.academicRepairGeometry(placed, classMap, reactionMeta));
+    passReports.push({
+      iteration: iteration,
+      targets: remainingNow.length,
+      changed: resultN.changed.length,
+      remaining: nextRemaining.length,
+      helperUnresolved: resultN.unresolved.length
+    });
+    if (!applied || nextRemaining.length >= remainingNow.length) {
+      remainingNow = nextRemaining;
+      break;
+    }
+    remainingNow = nextRemaining;
+  }
+
+  const finalGeometry = Q.academicRepairGeometry(placed, classMap, reactionMeta);
+  const finalMarkers = Object.assign({}, placed.normalMarkers || {}, placed.markers || {});
+  const finalLabels = {};
+  for (const other of Object.keys(finalMarkers)) {
+    if (finalMarkers[other].label) finalLabels[other] = finalMarkers[other].label;
+  }
+  let invalidLeaders = 0;
+  for (const id of Object.keys(finalMarkers)) {
+    const label = finalMarkers[id].label;
+    if (!label || !label.leader || label.leader.length < 2) continue;
+    const check = Q.validateLeaderGeometry({
+      id: id,
+      label: label,
+      ownerLines: finalGeometry.ownerLines,
+      obstacleLines: finalGeometry.lines,
+      labels: finalLabels,
+      reactions: finalGeometry.reactions,
+      compounds: placed.positions
+    });
+    if (!check.valid) invalidLeaders++;
+  }
+  // 全 visible line とラベル box の貫通 0 を最終確認（actual visible のみ）。
+  let labelLineHits = 0;
+  for (const id of Object.keys(finalLabels)) {
+    const box = finalLabels[id].box;
+    let hit = false;
+    for (const rid of Object.keys(finalGeometry.ownerLines)) {
+      for (const poly of finalGeometry.ownerLines[rid]) {
+        for (let i = 0; i < poly.length - 1; i++) {
+          if (G.segmentRect(poly[i], poly[i + 1], G.inflate(box, -0.5))) { hit = true; break; }
+        }
+        if (hit) break;
+      }
+      if (hit) break;
+    }
+    if (hit) labelLineHits++;
+  }
+  return {
+    available: true,
+    targets: targets.length,
+    changed: changedAll,
+    unresolved: result.unresolved,
+    remaining: Q.collectRepairTargets(finalGeometry).map((t) => t.id),
+    invalidLeaders: invalidLeaders,
+    labelLineHits: labelLineHits,
+    passes: passReports,
+    labelSummary: labelSummary
+  };
+}
 
 const ROOT = S.ROOT;
 const SRC = S.SRC;
@@ -334,10 +617,36 @@ function build(opts) {
       nodes: classMap.nodes.map((n) => ({ x: n.x, y: n.y, w: n.w, h: n.h }))
     },
     nodeW: layout.nodeW,
-    nodeH: layout.nodeH
+    nodeH: layout.nodeH,
+    opts: { spacing: options.academicSpacing || 1.06, netGrow: options.academicNetGrow }
   });
 
   placed.warnings.forEach((w) => warnings.push(w));
+
+  // ラベル後処理: マーカー座標・経路・物質座標は動かさず、ラベル矩形だけを
+  // 実描画線（stored + drawn）に沿って改善する。共通ソルバの出力は center 規約。
+  const reactionMeta = {};
+  allReactionInputs.forEach((r) => {
+    reactionMeta[r.id] = {
+      tier: r.tier,
+      typeLabel: r.typeLabel,
+      substrates: r.substrates,
+      products: r.products
+    };
+  });
+  const labelReport = options.skipLabels ? null : Q.applyAcademicLabelLayout(placed, classMap, reactionMeta, {
+    nodeW: layout.nodeW,
+    nodeH: layout.nodeH,
+    priority: LABEL_PRIORITY,
+    repairPasses: 1
+  });
+
+  // B helper による academic の foreign route 局所救済 → ラベル/leader 再検証。
+  const routeRepair = options.skipLabels ? null : repairAcademicRoutes(placed, classMap, reactionMeta);
+  if (routeRepair && routeRepair.labelSummary) {
+    labelReport.summary = routeRepair.labelSummary;
+  }
+
   reactions.forEach((r) => {
     const marker = placed.markers[r.id];
     if (!marker) throw new Error('アカデミック反応のマーカーがない: ' + r.id);
@@ -444,6 +753,8 @@ function build(opts) {
     },
     types: academicTypes,
     reactions: reactions,
+    labelReport: labelReport,
+    routeRepair: routeRepair,
     layout: {
       version: placed.version,
       positions: placed.positions,
@@ -612,6 +923,15 @@ function main() {
   console.log('生成: site/app11/academic-data.js（アカデミック反応 ' + data.meta.academicReactionCount +
     '、種別 ' + data.meta.typeCount + '、経路 ' + Object.keys(data.layout.routes).length +
     '、通常 ' + Object.keys(data.layout.normalRoutes).length + '、card-only ' + data.meta.cardOnlyCount + '）');
+  if (data.labelReport) {
+    console.log('ラベル: direct ' + data.labelReport.summary.direct + ' / leader ' + data.labelReport.summary.leader +
+      ' / unresolved ' + data.labelReport.summary.unresolved + '（変更 ' + data.labelReport.summary.changed + '）');
+  }
+  if (data.routeRepair) {
+    console.log('学術route救済: targets ' + data.routeRepair.targets + ' / changed ' + data.routeRepair.changed.length +
+      ' / 残 ' + (data.routeRepair.remaining || []).length + ' / 不正leader ' + data.routeRepair.invalidLeaders +
+      ' / label-line貫通 ' + (data.routeRepair.labelLineHits == null ? '-' : data.routeRepair.labelLineHits));
+  }
 }
 
 if (require.main === module) main();

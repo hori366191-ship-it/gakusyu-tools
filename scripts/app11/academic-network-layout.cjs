@@ -28,7 +28,8 @@ const R = require('./priority-router.cjs');
 const LAYOUT_VERSION = 2;
 
 // ネットワーク（接続 237 物質 + 反応 264）を置く領域。class map は x>=4170 なので重ならない。
-const NET = { x0: 40, y0: 40, x1: 4000, y1: 3000 };
+const NET_BASE = { x0: 40, y0: 40, x1: 4000, y1: 3000 };
+let NET = Object.assign({}, NET_BASE);
 // 未接続 190 の専用棚。class map の右外側。
 const SHELF = { x: 5800, y: 20, cols: 10, pitchX: 148, pitchY: 62 };
 
@@ -142,14 +143,15 @@ function seedPositions(compounds, reactions) {
   return { pos: pos, regionCenter: regionCenter };
 }
 
-function forceLayout(compounds, reactions, seeds, iterations) {
+function forceLayout(compounds, reactions, seeds, iterations, spread) {
+  const spacing = typeof spread === 'number' ? spread : 1;
   const compIds = compounds.map((c) => c.id);
   const rxIds = reactions.map((r) => r.id);
   const ids = compIds.concat(rxIds);
   const isCompound = new Set(compIds);
   const radius = new Map();
-  compIds.forEach((id) => radius.set(id, 76));
-  rxIds.forEach((id) => radius.set(id, 52));
+  compIds.forEach((id) => radius.set(id, 76 * spacing));
+  rxIds.forEach((id) => radius.set(id, 52 * spacing));
   const pos = seeds.pos;
   const edges = [];
   reactions.forEach((r) => {
@@ -221,7 +223,7 @@ function forceLayout(compounds, reactions, seeds, iterations) {
       const dx = pc.x - pr.x;
       const dy = pc.y - pr.y;
       const dist = Math.hypot(dx, dy) || 1;
-      const rest = 140;
+      const rest = 140 * spacing;
       const f = Math.max(-6, Math.min(6, (dist - rest) * 0.03));
       const ux = dx / dist;
       const uy = dy / dist;
@@ -320,12 +322,14 @@ function labelOffsets(marker, size) {
   ];
 }
 
-function placeMarkers(reactions, nodeRects, classRects, seeds, pos, hints) {
+function placeMarkers(reactions, nodeRects, classRects, seeds, pos, hints, spread) {
+  const spacing = typeof spread === 'number' ? spread : 1;
   const placed = [];
   const markers = {};
   const obstaclesForLabel = nodeRects.concat(classRects);
   const ordered = reactions.slice().sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  const RADII = [0, 10, 20, 32, 46, 62, 80, 100, 124, 150, 180, 214, 252, 294, 340, 390, 444];
+  const RADII = [0, 10, 20, 32, 46, 62, 80, 100, 124, 150, 180, 214, 252, 294, 340, 390, 444]
+    .map((r) => r * spacing);
   const ANGLES = 16;
   const hintOf = (id) => (hints && hints.get(id)) || 0;
 
@@ -679,6 +683,15 @@ function collisionStats(markers, nodeRects, labelsById, routes, classRects) {
  *   nodeW, nodeH
  */
 function buildLayout(input) {
+  const opts = input.opts || {};
+  const spacing = typeof opts.spacing === 'number' && opts.spacing > 0 ? opts.spacing : 1;
+  const grow = opts.netGrow !== false;
+  NET = {
+    x0: NET_BASE.x0,
+    y0: NET_BASE.y0,
+    x1: NET_BASE.x1 + (grow ? Math.min(120, Math.max(0, (spacing - 1) * 700)) : 0),
+    y1: NET_BASE.y1 + (grow ? Math.max(0, (spacing - 1) * 900) : 0)
+  };
   const compounds = input.compounds.map((c) => ({
     id: c.id,
     x: c.x,
@@ -712,7 +725,7 @@ function buildLayout(input) {
 
   // 1. 力配置
   const seeds = seedPositions(connected, reactions);
-  const raw = forceLayout(connected, reactions, seeds, 420);
+  const raw = forceLayout(connected, reactions, seeds, 420, spacing);
   const separated = separateNodes(connected, raw);
 
   // 2. 座標確定（接続ノードはネットワーク、未接続は棚）
@@ -754,7 +767,7 @@ function buildLayout(input) {
   let routing = null;
   let labelsById = null;
   for (let attempt = 0; attempt < 8; attempt++) {
-    markersAll = placeMarkers(reactions, connectedRects, classRects, seeds, separated, hints);
+    markersAll = placeMarkers(reactions, connectedRects, classRects, seeds, separated, hints, spacing);
     labelsById = {};
     Object.keys(markersAll).forEach((id) => { labelsById[id] = markersAll[id].label.box; });
     routing = buildRoutes(edgeDefs, markersAll, nodeRectsById, labelsById, routeBounds);

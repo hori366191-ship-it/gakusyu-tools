@@ -27,8 +27,29 @@ const M = require('./metrics.cjs');
 const F = require('./layout-format.cjs');
 const G = require('./geometry.cjs');
 const L = require('./legacy-baseline.cjs');
+const Q = require('./label-quality.cjs');
 
 const LAYOUT_VERSION = 4;
+
+// ラベルの優先修理対象（ユーザー報告の代表 + 強5件）。順序は解決の試行順。
+const LABEL_PRIORITY = [
+  'ethanol-dehydration-ethene',
+  'ethanol-sodium',
+  'ethanol-cuo-oxidation',
+  'ethyne-full-hydrogenation',
+  'acetic-acid-sodium-carbonate',
+  'methanol-cuo-oxidation',
+  'ethene-hydration'
+];
+const LABEL_STRONG = LABEL_PRIORITY.slice();
+
+function applyLabelPostprocess(layout, routes, opts) {
+  return Q.applyNormalLabelLayout(layout, routes, {
+    priority: LABEL_PRIORITY,
+    strong: LABEL_STRONG,
+    repairPasses: opts && opts.repairPasses
+  });
+}
 
 function buildScene(source, topology) {
   const placed = B.placePrimaryNodes(source);
@@ -551,9 +572,11 @@ function planExtensionLayout(source, topology, base, addedIds) {
     edges,
     stats: {}
   };
+  // ラベル後処理: 位置・マーカー・経路は動かさず、ラベル矩形だけを実描画線に沿って改善する。
+  const labelReport = applyLabelPostprocess(layout, routes, { source });
   const report = M.measure(M.sceneFromLayout(layout, routes));
   routes.stats = statsFor(report);
-  return { layout, routes, report, source, topology, scene, base, added: addedIds };
+  return { layout, routes, report, source, topology, scene, base, added: addedIds, labelReport };
 }
 
 function planLayout() {
@@ -660,7 +683,7 @@ function checkLegacy(layout, routes, source, base) {
 function main() {
   const check = process.argv.includes('--check');
   const acceptChange = process.argv.includes('--accept-legacy-change');
-  const { layout, routes, report, source, topology, scene, base } = planLayout();
+  const { layout, routes, report, source, topology, scene, base, labelReport } = planLayout();
   const layoutPath = path.join(S.SRC, 'layout.json');
   const routesPath = path.join(S.SRC, 'routes.json');
 
@@ -704,6 +727,10 @@ function main() {
   fs.writeFileSync(layoutPath, F.renderLayout(layout), 'utf8');
   fs.writeFileSync(routesPath, F.renderRoutes(routes), 'utf8');
   console.log('生成: site-src/app11/layout.json / routes.json');
+  if (labelReport) {
+    console.log('ラベル: direct ' + labelReport.summary.direct + ' / leader ' + labelReport.summary.leader +
+      ' / unresolved ' + labelReport.summary.unresolved + '（変更 ' + labelReport.summary.changed + '）');
+  }
   console.log('平面性: ' + (topology.certificate.meta.planar ? 'planar' : 'non-planar') +
     '（主要 ' + topology.certificate.meta.primaryReactions + ' 反応 / ' +
     topology.certificate.meta.primaryBranches + ' 枝、成分 ' + topology.certificate.meta.components +
@@ -724,6 +751,7 @@ module.exports = {
   normalize,
   buildRegions,
   checkLegacy,
+  applyLabelPostprocess,
   renderLayout: F.renderLayout,
   renderRoutes: F.renderRoutes
 };

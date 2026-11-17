@@ -501,7 +501,15 @@ test('[draw] 薄いアダプタは RPStructure 名前空間で、共有canonical
   assert.equal(app10Draw.includes('function renderStructure'), false, 'app10側にも重複実装なし');
   const html = read('index.html');
   const scripts = [...html.matchAll(/<script src="\.\/([^"]+)"><\/script>/g)].map((m) => m[1]);
-  assert.deepEqual(scripts, ['data.js', 'academic-data.js', 'map-core.js', 'structure-draw.js', 'app.js']);
+  assert.deepEqual(scripts, [
+    'data.js',
+    'academic-data.js',
+    'proposal-contract.js',
+    'proposed-layout-data.js',
+    'map-core.js',
+    'structure-draw.js',
+    'app.js'
+  ]);
   assert.ok(html.indexOf('../shared/organic-structure.js') !== -1, '共有モジュールを読み込む');
   assert.ok(html.indexOf('../shared/organic-structure.js') < html.indexOf('./structure-draw.js'),
     '共有モジュールをstructure-draw.jsより先に読み込む');

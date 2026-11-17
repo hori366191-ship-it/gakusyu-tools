@@ -553,6 +553,15 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-reaction__label { fill: var(--rp-muted); font-size: 10px; text-anchor: middle; dominant-baseline: middle; paint-order: stroke; stroke: var(--rp-panel); stroke-width: 3px; stroke-linejoin: round; }
 .rp-reaction--primary .rp-reaction__label { fill: var(--rp-ink); font-weight: 600; }
 .rp-reaction__label--cond { font-size: 9px; fill: var(--rp-muted); opacity: .9; }
+/* 反応名のアンカーは classes で決める（CSS の text-anchor が presentation 属性に優先するため）。
+   bbox（label.box）の対応する辺へ文字を置き、アンカーと実描画を一致させる。 */
+.rp-reaction__label--start { text-anchor: start; }
+.rp-reaction__label--end { text-anchor: end; }
+.rp-reaction__label--middle { text-anchor: middle; }
+/* 反応名から反応点への短い導線。ラベルと同じ LOD で出し入れする。 */
+.rp-reaction__leader { fill: none; stroke: var(--rp-muted); stroke-width: 1; opacity: .5; }
+.rp-map[data-level="0"] .rp-reaction--secondary .rp-reaction__leader,
+.rp-map[data-level="1"] .rp-reaction--secondary .rp-reaction__leader { display: none; }
 .rp-reaction:hover .rp-reaction__dot, .rp-reaction:focus-visible .rp-reaction__dot { stroke: var(--rp-focus); stroke-width: 3; }
 .rp-reaction:focus { outline: none; }
 .rp-reaction.is-pending .rp-reaction__dot { stroke: var(--rp-pending); }
@@ -1083,6 +1092,7 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
   .rp-btn { min-width: 30px; min-height: 30px; padding: 0 6px; font-size: 13px; }
   .rp-btn--wide { min-width: 72px; font-size: 11.5px; }
   .rp-search__input { min-height: 30px; font-size: 12px; }
+  .rp-mode__btn, .rp-layout__btn { padding: 3px 9px; font-size: 11.5px; }
   .rp-chip { padding: 2px 9px; font-size: 11px; }
   .rp-position { font-size: 11.5px; }
   .rp-overlay__region { font-size: 10.5px; padding: 2px 7px; }
@@ -1112,6 +1122,17 @@ html[data-theme="forest"] { --rp-academic: #4f6b2f; --rp-academic-bg: #eef5e4; }
 .rp-mode__btn[aria-pressed="true"] { background: var(--rp-academic); border-color: var(--rp-academic); color: #fff; }
 .rp-mode__btn:disabled { opacity: .45; cursor: not-allowed; }
 .rp-mode__btn:focus-visible { outline: 2px solid var(--rp-focus); outline-offset: 2px; }
+/* 配置の切替（現在 / 新しい配置案）。表示モードとは別の操作として並べる。 */
+.rp-layout { display: flex; gap: 4px; align-items: center; }
+.rp-layout__btn { border: 1px solid var(--rp-line); background: var(--rp-panel); color: var(--rp-ink);
+  border-radius: 999px; padding: 4px 11px; font: inherit; font-size: 12.5px; line-height: 1.2; cursor: pointer; }
+.rp-layout__btn[aria-pressed="true"] { background: var(--rp-primary); border-color: var(--rp-primary); color: #fff; }
+.rp-layout__btn:disabled { opacity: .45; cursor: not-allowed; }
+.rp-layout__btn:focus-visible { outline: 2px solid var(--rp-focus); outline-offset: 2px; }
+/* 新しい配置案のレイヤーは、選んだときだけ表示する（通常の線・マーカーは隠す）。 */
+.rp-proposed { display: none; }
+.rp-svg[data-layout="proposed"] .rp-proposed { display: inline; }
+.rp-svg[data-layout="proposed"] .rp-layout-normal { display: none; }
 .rp-edge--academic { stroke: var(--rp-academic); stroke-width: 1.6; stroke-dasharray: 2 4; opacity: .9; }
 .rp-arrowhead--academic { fill: var(--rp-academic); }
 .rp-reaction--academic .rp-reaction__dot { fill: var(--rp-academic); stroke: var(--rp-panel); stroke-width: 1; }
