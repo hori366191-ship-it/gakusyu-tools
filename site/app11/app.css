@@ -14,6 +14,9 @@
   --rp-accent: #12666f;
   --rp-accent-2: #0d4b52;
   --rp-accent-bg: #e6f4f3;
+  /* 経路線の選択本体。元の線（primary/secondary/academic）と色相で明確に分ける。
+     accent-2 は主要線と同系色のため選択に使わない。 */
+  --rp-select-line: #c2185b;
   --rp-node: #ffffff;
   --rp-node-line: #c3d2de;
   --rp-node-ink: #1d3145;
@@ -60,6 +63,8 @@ html[data-theme="pop"] {
   --rp-accent: #b04a33;
   --rp-accent-2: #8d3826;
   --rp-accent-bg: #fbeade;
+  /* ポップは従来の選択色（accent-2）をそのまま維持する。 */
+  --rp-select-line: #8d3826;
   --rp-node: #fffdf8;
   --rp-node-line: #c9b7a3;
   --rp-node-ink: #2b2b2b;
@@ -93,6 +98,8 @@ html[data-theme="forest"] {
   --rp-accent: #3f6b47;
   --rp-accent-2: #2d5235;
   --rp-accent-bg: #e8f1e4;
+  /* フォレストは主要線・academic がどちらも緑系のため、選択は赤系で分ける。 */
+  --rp-select-line: #c2185b;
   --rp-node: #fdfcf7;
   --rp-node-line: #bccdb6;
   --rp-node-ink: #22331f;
@@ -491,7 +498,7 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-edges-active { pointer-events: none; }
 .rp-edge-active {
   fill: none;
-  stroke: var(--rp-accent-2);
+  stroke: var(--rp-select-line);
   stroke-width: 4.4;
   stroke-linecap: butt;
   stroke-linejoin: round;
@@ -500,7 +507,7 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-arrowhead { stroke: none; }
 .rp-arrowhead--primary { fill: var(--rp-primary); }
 .rp-arrowhead--secondary { fill: var(--rp-secondary); }
-.rp-arrowhead--active { fill: var(--rp-accent-2); }
+.rp-arrowhead--active { fill: var(--rp-select-line); }
 .rp-edge.is-pending { opacity: .5; }
 /* 主要線は LOD で消さない。補助線は俯瞰で薄く残し、詳細で濃くする。 */
 .rp-map[data-level="0"] .rp-edge--secondary { opacity: .16; }
@@ -604,8 +611,8 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 }
 .rp-classmap__arrowhead { fill: var(--rp-accent); stroke: none; }
 .rp-classmap__edge-group:hover .rp-classmap__arrowhead,
-.rp-classmap__edge-group:focus-visible .rp-classmap__arrowhead,
-.rp-classmap__edge-group.is-selected .rp-classmap__arrowhead { fill: var(--rp-accent-2); }
+.rp-classmap__edge-group:focus-visible .rp-classmap__arrowhead { fill: var(--rp-accent-2); }
+.rp-classmap__edge-group.is-selected .rp-classmap__arrowhead { fill: var(--rp-select-line); }
 .rp-classmap__edge.is-active + .rp-classmap__arrowhead { fill: var(--rp-focus); }
 /* 変換線の当たり判定。見た目の線は動かさず、画面ピクセルで一定の太さを確保する。
    ノードより先に描くため、重なった場合はノードのタップが優先される。 */
@@ -625,7 +632,7 @@ html[data-theme="forest"] .rp-header__link:focus-visible { background: rgba(255,
 .rp-classmap__edge-group:focus { outline: none; }
 .rp-classmap__edge-group:focus-visible .rp-classmap__edge { stroke: var(--rp-focus); stroke-width: 3; opacity: 1; }
 .rp-classmap__edge-group:hover .rp-classmap__edge { stroke: var(--rp-accent-2); stroke-width: 2.4; opacity: 1; }
-.rp-classmap__edge-group.is-selected .rp-classmap__edge { stroke: var(--rp-accent-2); stroke-width: 3.4; opacity: 1; }
+.rp-classmap__edge-group.is-selected .rp-classmap__edge { stroke: var(--rp-select-line); stroke-width: 3.4; opacity: 1; }
 .rp-classmap__edge.is-active { stroke: var(--rp-focus); stroke-width: 3; opacity: 1; }
 .rp-classmap__node { cursor: pointer; }
 .rp-classmap__node-box {
