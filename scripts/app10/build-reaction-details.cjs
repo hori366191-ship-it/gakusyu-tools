@@ -35,6 +35,7 @@ const D11 = require(path.join(ROOT, 'site', 'app11', 'data.js'));
 const A11 = require(path.join(ROOT, 'site', 'app11', 'academic-data.js'));
 const GROUPS = require(path.join(ROOT, 'site', 'app11', 'reaction-groups.js'));
 const SHARED = require(path.join(ROOT, 'site', 'shared', 'organic-structure.js'));
+const { sameText } = require('./generated-text.cjs');
 
 const R = SHARED.createRenderer({ structurePrefix: 'oc-', equationPrefix: 'oc-eq-' });
 
@@ -567,12 +568,14 @@ let stale = 0;
 outputs.forEach((entry) => {
   const current = fs.existsSync(entry.file) ? fs.readFileSync(entry.file, 'utf8') : null;
   if (check) {
-    if (current !== entry.text) {
+    // checkout が CRLF でも、生成物の正準は LF。改行だけの差は stale にしない。
+    if (!sameText(current, entry.text)) {
       stale += 1;
       console.error('差分: ' + path.relative(ROOT, entry.file));
     }
     return;
   }
+  // 常に LF で書く（Windows でも fs.writeFileSync は改行を変換しない）。
   fs.writeFileSync(entry.file, entry.text, 'utf8');
 });
 

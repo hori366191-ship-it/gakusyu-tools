@@ -432,3 +432,28 @@ test('[repro] 生成物は --check で再現可能（差分なし）', () => {
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.ok(result.stdout.includes('OK'), result.stdout);
 });
+
+test('[line-endings] --check は CRLF/LF を同一視し、内容差は検出する', () => {
+  const T = require(path.join(ROOT, 'scripts', 'app10', 'generated-text.cjs'));
+  assert.equal(T.normalizeEol('a\r\nb\rc\nd'), 'a\nb\nc\nd');
+  assert.equal(T.sameText('a\r\nb', 'a\nb'), true, 'CRLF と LF は同一');
+  assert.equal(T.sameText('a\nb', 'a\nb'), true);
+  assert.equal(T.sameText('a\r\nb', 'a\nb\n'), false, '末尾改行の差は内容差');
+  assert.equal(T.sameText('a\r\nb', 'a\r\nc'), false, '文字の変更は検出');
+  assert.equal(T.sameText(null, ''), false, '未生成は stale');
+
+  // 実ファイルを CRLF にしても同一、内容を1文字変えると差分。
+  const raw = fs.readFileSync(path.join(SHARED, 'app10-reaction-details.js'), 'utf8');
+  const expected = T.normalizeEol(raw);
+  const crlf = expected.replace(/\n/g, '\r\n');
+  assert.equal(T.sameText(crlf, expected), true, '実データのCRLFコピーは同一');
+  assert.equal(T.sameText(crlf.replace('"version":1', '"version":2'), expected), false,
+    '実データの内容変更は差分');
+
+  const generator = fs.readFileSync(
+    path.join(ROOT, 'scripts', 'app10', 'build-reaction-details.cjs'), 'utf8');
+  assert.ok(generator.includes('sameText(current, entry.text)'), '--check が正規化比較を使う');
+  const helper = fs.readFileSync(
+    path.join(ROOT, 'scripts', 'app10', 'generated-text.cjs'), 'utf8');
+  assert.ok(helper.includes("replace(/\\r\\n?/g, '\\n')"), 'CRLF→LF の正規化を持つ');
+});
