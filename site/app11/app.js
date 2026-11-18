@@ -164,6 +164,14 @@
   var wheelZoom = null;
   var wheelRaf = 0;
   var wheelApplying = false;
+  // パン・ピンチのフレーム集約。pointermove は最新の表示状態だけを保持し、rAF 1本で
+  // 1フレーム1回だけ transform を更新する（イベントごとの全再描画をしない）。
+  // 途中のフレームは補助ラベルの追従だけを行い、重なり判定・現在位置の再計算は最終フレームへ回す。
+  var gestureRaf = 0;
+  var gesturePending = null;
+  var gestureApplying = false;
+  var gestureDirty = false;
+  var insetPending = false;
   var WHEEL_FOLLOW = 0.4;
   var WHEEL_SETTLE_SCALE = 1e-4;
   var WHEEL_SETTLE_PX = 0.5;
@@ -1716,23 +1724,70 @@
     // ホイール以外の操作（パン・ピンチ・キー・ボタン・fit・resize）が入ったら、
     // 途中のホイール目標は捨てる。古い目標へ戻る「巻き戻り」を起こさない。
     if (!wheelApplying) cancelWheelZoom();
-    view = clamp ? Core.clampPan(next, viewSize.w, viewSize.h, modeCanvas()) : next;
+    // ジェスチャー外の操作は予約済みのジェスチャーフレームより新しい。古い座標で
+    // この表示を上書きしないよう、予約を捨てる（ジェスチャー自身の適用中は除く）。
+    if (!gestureApplying) {
+      cancelGestureFrame();
+    }
+    applyView(next, clamp);
+    // 指が押されたままなら、その指の位置を新しい表示の基準へ取り直す。
+    // 以後の move はこの表示からの差分になり、新しい操作を打ち消さない。
+    if (!gestureApplying && pointerList().length) rebaseGestureOrigins();
     render();
   }
 
-  function render() {
+  function applyView(next, clamp) {
+    view = clamp ? Core.clampPan(next, viewSize.w, viewSize.h, modeCanvas()) : next;
+  }
+
+  function renderTransform() {
     viewport.setAttribute('transform', 'translate(' + view.x.toFixed(2) + ' ' + view.y.toFixed(2) + ') scale(' + view.scale.toFixed(4) + ')');
+  }
+
+  // 詳細度（LOD）の切り替え。変わったときだけ true を返し、呼び出し側が
+  // マーカー・補助ラベルの作り直しを行う。ジェスチャー中は実寸を伴う
+  // syncPositionInset を最終フレームまで遅らせる（deferInset）。
+  function applyDetailLevel(level, deferInset) {
+    if (lastLevel === level) return false;
+    lastLevel = level;
+    mapEl.setAttribute('data-level', String(level));
+    mapEl.setAttribute('data-detail', Core.levelNote(level));
+    updateMarkers(level);
+    // 「一般図へ」の表示/非表示が変わると右下の予約寸法も変わる。
+    // ジェスチャー中は実寸の測定を遅らせ、最終描画で1回だけ反映する。
+    if (deferInset) insetPending = true;
+    else {
+      insetPending = false;
+      syncPositionInset();
+    }
+    return true;
+  }
+
+  // 通常の描画。transform・LOD・補助ラベルの再配置・現在位置をまとめて更新する。
+  // skipTransform は「最後に描いた transform のまま」のときに、同じ属性を
+  // 書き直さず補助ラベル・現在位置だけ更新するためのもの。
+  function render(options) {
+    var skipTransform = !!(options && options.skipTransform);
+    if (!skipTransform) renderTransform();
     var level = Core.detailLevel(view.scale);
-    if (lastLevel !== level) {
-      lastLevel = level;
-      mapEl.setAttribute('data-level', String(level));
-      mapEl.setAttribute('data-detail', Core.levelNote(level));
-      updateMarkers(level);
-      // 「一般図へ」の表示/非表示が変わると右下の予約寸法も変わる。
+    applyDetailLevel(level, false);
+    // ジェスチャー中に LOD が変わって遅らせた実寸を、ここで1回だけ反映する。
+    if (insetPending) {
+      insetPending = false;
       syncPositionInset();
     }
     updateOverlay(level);
     updatePosition(level);
+  }
+
+  // ジェスチャー中（パン・ピンチ）の1フレーム。transform と、いま出ている補助ラベルの
+  // 追従だけを行う。重なり判定・補助ラベルの作り直し・現在位置の再計算は最終フレームまで
+  // 遅らせる。メイン SVG の LOD（マーカー）だけは必要に応じて切り替えるが、
+  // 補助ラベルは LOD が変わっても作り直さない（そのまま追従させ、終了時に1回だけ再構築）。
+  function renderGesture() {
+    renderTransform();
+    applyDetailLevel(Core.detailLevel(view.scale), true);
+    trackOverlay();
   }
 
   function updateMarkers(level) {
@@ -1780,6 +1835,10 @@
         tag.style.left = screen.x + 'px';
         tag.style.top = screen.y + 'px';
         tag.textContent = c.label;
+        // ジェスチャー中に world 位置へ追従させるための基準（分野中心 + 下 14px）。
+        tag.__rpAnchor = { x: center.x, y: center.y, ox: 0, oy: 14 };
+        tag.__rpX = screen.x;
+        tag.__rpY = screen.y;
         overlay.appendChild(tag);
       });
     }
@@ -1884,10 +1943,36 @@
             continue;
           }
           tag.style.visibility = '';
+          // 反応マーカーからの画面オフセットを覚え、ジェスチャー中は同じ world 点へ
+          // 追従させる（拡大しても同じ反応の近くに留まる）。
+          tag.__rpAnchor = { x: r.x, y: r.y, ox: cx - screen.x, oy: cy - screen.y };
+          tag.__rpX = cx;
+          tag.__rpY = cy;
           placed.push({ x: rect.x, y: rect.y, w: rect.w, h: rect.h });
           break;
         }
       });
+    }
+  }
+
+  // ジェスチャー中、いま出ている補助ラベルだけを world 位置へ追従させる。
+  // 実寸の測り直し・重なり判定・要素の作り直しはしない（1フレーム内の位置更新だけ）。
+  function trackOverlay() {
+    var node = overlay.firstChild;
+    while (node) {
+      var a = node.__rpAnchor;
+      if (a && node.style) {
+        var s = Core.worldToScreen(view, a.x, a.y);
+        var nx = s.x + a.ox;
+        var ny = s.y + a.oy;
+        if (node.__rpX !== nx || node.__rpY !== ny) {
+          node.style.left = nx + 'px';
+          node.style.top = ny + 'px';
+          node.__rpX = nx;
+          node.__rpY = ny;
+        }
+      }
+      node = node.nextSibling;
     }
   }
 
@@ -2137,6 +2222,84 @@
     wheelRaf = window.requestAnimationFrame(wheelStep);
   }
 
+  /* パン・ピンチのフレーム集約。
+     pointermove は最新の状態だけを gesturePending へ置き、rAF 1本で1フレーム1回だけ反映する。
+     連続する move が同じフレームに来ても、表示は最後の1回だけ更新される。 */
+  function cancelGestureFrame() {
+    if (gestureRaf) {
+      window.cancelAnimationFrame(gestureRaf);
+      gestureRaf = 0;
+    }
+    gesturePending = null;
+  }
+
+  function applyGestureView(next, clamp) {
+    gesturePending = { view: next, clamp: clamp !== false };
+    gestureDirty = true;
+    if (!gestureRaf) gestureRaf = window.requestAnimationFrame(flushGestureFrame);
+  }
+
+  function applyPendingGesture() {
+    var pending = gesturePending;
+    gesturePending = null;
+    if (!pending) return false;
+    gestureApplying = true;
+    try {
+      applyView(pending.view, pending.clamp);
+      renderGesture();
+    } finally {
+      gestureApplying = false;
+    }
+    return true;
+  }
+
+  // 予約済みの位置だけを確定し、描画はしない。ジェスチャーの最終終了で
+  // 「位置の確定 → 通常描画1回」にまとめるために使う（transform の二重書きをしない）。
+  function commitPendingGesture() {
+    var pending = gesturePending;
+    gesturePending = null;
+    if (!pending) return false;
+    applyView(pending.view, pending.clamp);
+    return true;
+  }
+
+  function flushGestureFrame() {
+    gestureRaf = 0;
+    applyPendingGesture();
+  }
+
+  // ジェスチャーの終了・ポインタ構成の切り替わりでは、未実行の rAF を待たずに
+  // 最後の移動を確定する（終点が1フレーム前へ戻らない）。
+  function flushGestureNow() {
+    if (gestureRaf) {
+      window.cancelAnimationFrame(gestureRaf);
+      gestureRaf = 0;
+    }
+    return applyPendingGesture();
+  }
+
+  // 押されている指の現在位置へ基準を取り直す。ジェスチャー中にキー・ボタン・
+  // ホイールなど新しい表示が入っても、次の move がその表示を打ち消さない。
+  function rebaseGestureOrigins() {
+    var pts = pointerList();
+    if (!pts.length) {
+      panOrigin = null;
+      pinchOrigin = null;
+      return;
+    }
+    if (pts.length >= 2) {
+      pinchOrigin = {
+        distance: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1,
+        view: { scale: view.scale, x: view.x, y: view.y },
+        mid: { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      };
+      panOrigin = null;
+      return;
+    }
+    pinchOrigin = null;
+    panOrigin = { x: pts[0].x, y: pts[0].y, view: { scale: view.scale, x: view.x, y: view.y } };
+  }
+
   function pointerList() {
     return Object.keys(pointers).map(function (k) { return pointers[k]; });
   }
@@ -2321,7 +2484,11 @@
     if (e.target.closest && e.target.closest(PHYSICAL_CONTROL_SELECTOR)) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     cancelWheelZoom();
+    // 直前のジェスチャーフレームが未実行なら、ここで確定してから基準点を取る。
+    // （2本目の指が加わるときに、古い view をピンチ基準にしない）
+    flushGestureNow();
     var p = mapPoint(e);
+    if (!pointerList().length) gestureDirty = false;
     pointers[e.pointerId] = p;
     suppressClick = false;
     downEntity = pickDownEntity(e, p);
@@ -2354,7 +2521,8 @@
       var next = Core.zoomAt(pinchOrigin.view, factor, pinchOrigin.mid.x, pinchOrigin.mid.y);
       next.x += mid.x - pinchOrigin.mid.x;
       next.y += mid.y - pinchOrigin.mid.y;
-      setView(next, true);
+      // 最新の状態だけを予約し、表示はフレームに1回だけ更新する。
+      applyGestureView(next, true);
       suppressClick = true;
       return;
     }
@@ -2365,10 +2533,23 @@
       suppressClick = true;
       if (activeRegion) clearRegionSelection();
     }
-    setView({ scale: panOrigin.view.scale, x: panOrigin.view.x + dx, y: panOrigin.view.y + dy }, true);
+    applyGestureView({ scale: panOrigin.view.scale, x: panOrigin.view.x + dx, y: panOrigin.view.y + dy }, true);
   }
 
-  function onPointerUp(e) {
+  // ポインタ終了の共通処理。up では未移動なら詳細を開き、cancel / capture 喪失では開かない。
+  function endPointer(e, allowOpen) {
+    if (!pointers[e.pointerId]) return;
+    var last = pointerList().length === 1;
+    var committed = false;
+    if (last) {
+      // 最終終了では、予約位置の確定だけを行い、ここでは描画しない。
+      // 直後の通常描画1回にまとめる（transform の二重書きをしない）。
+      committed = commitPendingGesture();
+    } else {
+      // まだ指が残る切り替わりでは、未実行の rAF を待たず最後の移動を確定する。
+      // 軽量フレーム（transform と補助ラベルの追従）だけで、重なり判定はしない。
+      flushGestureNow();
+    }
     delete pointers[e.pointerId];
     if (mapEl.releasePointerCapture) {
       try { mapEl.releasePointerCapture(e.pointerId); } catch (err) { errMsg(err && err.message); }
@@ -2376,17 +2557,31 @@
     if (!pointerList().length) {
       // ポインタを押した対象が物質・反応で、動いていなければ詳細を開く。
       // （ポインタキャプチャで click の宛先が変わることがあるため、pointerup で判定する）
-      if (!suppressClick && downEntity) openFromElement(downEntity);
+      if (allowOpen && !suppressClick && downEntity) openFromElement(downEntity);
       panOrigin = null;
       pinchOrigin = null;
       downEntity = null;
       mapEl.classList.remove('is-panning');
-    } else if (pointerList().length === 1) {
-      pinchOrigin = null;
-      var p = pointerList()[0];
-      panOrigin = { x: p.x, y: p.y, view: { scale: view.scale, x: view.x, y: view.y } };
+      cancelGestureFrame();
+      // ジェスチャーで表示が動いたときだけ、重なり判定・現在位置を1回だけ作り直す。
+      // 予約位置をここで確定していなければ、transform は最後のフレームのままなので
+      // 書き直さず、補助ラベルと現在位置だけを更新する。
+      if (gestureDirty) {
+        gestureDirty = false;
+        render({ skipTransform: !committed });
+      }
+    } else {
+      // ピンチ→1本指のパンへ。基準点は確定済みの view から取る（飛ばない）。
+      // 3本以上から2本へ減ったときも、残った指で基準を取り直す。
+      rebaseGestureOrigins();
     }
   }
+
+  function onPointerUp(e) { endPointer(e, true); }
+
+  function onPointerCancel(e) { endPointer(e, false); }
+
+  function onLostPointerCapture(e) { endPointer(e, false); }
 
   function onWheel(e) {
     // 地図の上だけで、修飾キー無しのホイールを拡大縮小に使う。
@@ -4056,7 +4251,9 @@
     mapEl.addEventListener('pointerdown', onPointerDown);
     mapEl.addEventListener('pointermove', onPointerMove);
     mapEl.addEventListener('pointerup', onPointerUp);
-    mapEl.addEventListener('pointercancel', onPointerUp);
+    mapEl.addEventListener('pointercancel', onPointerCancel);
+    // ブラウザ都合で capture が失われても、押下状態を残さず最後の位置で確定する。
+    mapEl.addEventListener('lostpointercapture', onLostPointerCapture);
     svg.addEventListener('focusin', onFocusIn);
     mapEl.addEventListener('wheel', onWheel, { passive: false });
     mapEl.addEventListener('keydown', onKeydown);
