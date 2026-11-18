@@ -18,6 +18,7 @@ const { spawnSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..', '..');
 const APP = path.join(ROOT, 'site', 'app10');
 const SHARED = path.join(ROOT, 'site', 'shared');
+const GENERATED_TEXT = require(path.join(ROOT, 'scripts', 'app10', 'generated-text.cjs'));
 
 const D10 = require(path.join(APP, 'data.js'));
 const D11 = require(path.join(ROOT, 'site', 'app11', 'data.js'));
@@ -29,9 +30,10 @@ const COUNTS = require(path.join(SHARED, 'app10-reaction-detail-counts.js'));
 const DETAILS = require(path.join(SHARED, 'app10-reaction-details.js'));
 const EQUATIONS = require(path.join(SHARED, 'app10-reaction-equations.js'));
 
-const APP_JS = fs.readFileSync(path.join(APP, 'app.js'), 'utf8');
-const INDEX_HTML = fs.readFileSync(path.join(APP, 'index.html'), 'utf8');
-const APP_CSS = fs.readFileSync(path.join(APP, 'app.css'), 'utf8');
+// checkout の改行（CRLF/LF）に依存しないよう、静的に読むソースは LF に正規化する。
+const APP_JS = GENERATED_TEXT.normalizeEol(fs.readFileSync(path.join(APP, 'app.js'), 'utf8'));
+const INDEX_HTML = GENERATED_TEXT.normalizeEol(fs.readFileSync(path.join(APP, 'index.html'), 'utf8'));
+const APP_CSS = GENERATED_TEXT.normalizeEol(fs.readFileSync(path.join(APP, 'app.css'), 'utf8'));
 
 function readShared(name) {
   return fs.readFileSync(path.join(SHARED, name), 'utf8');
@@ -456,4 +458,12 @@ test('[line-endings] --check は CRLF/LF を同一視し、内容差は検出す
   const helper = fs.readFileSync(
     path.join(ROOT, 'scripts', 'app10', 'generated-text.cjs'), 'utf8');
   assert.ok(helper.includes("replace(/\\r\\n?/g, '\\n')"), 'CRLF→LF の正規化を持つ');
+
+  // テスト側の関数抽出も、CRLF checkout の app.js を正規化して同じ位置で切れる。
+  const source = GENERATED_TEXT.normalizeEol(
+    fs.readFileSync(path.join(APP, 'app.js'), 'utf8')
+      .replace(/\r\n/g, '\n').replace(/\n/g, '\r\n'));
+  const start = source.indexOf('  /* ------------------------------------------------------------------\n   * 反応の詳細');
+  assert.ok(start >= 0, 'CRLF を LF に正規化すれば関数ブロックを抽出できる');
+  assert.ok(source.indexOf('  function renderCard(c, opts)') > start);
 });
