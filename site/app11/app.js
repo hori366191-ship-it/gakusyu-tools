@@ -154,6 +154,9 @@
   var returnFocus = null;
   var eqDialogOpener = null;
   var programmaticFocusTarget = null;
+  // ポインタ操作（タップ・ドラッグ開始）に伴う focusin を、1回分だけ再センタリングから外す。
+  // 実際に focus された要素を見て消費し、キーボード操作（keydown）でも必ず解除する。
+  var pointerFocusGuard = false;
   var restoreAfterPointer = null;
   var suppressCompatFocus = false;
   var suppressClick = false;
@@ -2483,6 +2486,9 @@
     // 凡例・一般図への導線・現在位置などの通常のHTML操作要素は地図のパンに使わない。
     if (e.target.closest && e.target.closest(PHYSICAL_CONTROL_SELECTOR)) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    // 直後に来る「ポインタ由来の focusin」を1回だけ再センタリングから外す。
+    // （一般図の変換・反応の線・ラベルは tabindex を持つため、触るだけで focus が付く）
+    pointerFocusGuard = true;
     cancelWheelZoom();
     // 直前のジェスチャーフレームが未実行なら、ここで確定してから基準点を取る。
     // （2本目の指が加わるときに、古い view をピンチ基準にしない）
@@ -2529,7 +2535,10 @@
     if (!panOrigin) return;
     var dx = p.x - panOrigin.x;
     var dy = p.y - panOrigin.y;
-    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+    // 4px 未満はタップのぶれとみなし、表示を動かさない（指を置いただけで数pxずれない）。
+    // しきい値を超えてから従来どおりのパンを行う。
+    if (!suppressClick) {
+      if (Math.abs(dx) <= 4 && Math.abs(dy) <= 4) return;
       suppressClick = true;
       if (activeRegion) clearRegionSelection();
     }
@@ -2555,6 +2564,11 @@
       try { mapEl.releasePointerCapture(e.pointerId); } catch (err) { errMsg(err && err.message); }
     }
     if (!pointerList().length) {
+      // キャンセル・capture 喪失では復帰予約を残さない（次の操作で古い起点を掴まない）。
+      if (!allowOpen) restoreAfterPointer = null;
+      // マウスは focusin が pointerup より前に済むため、取り残したフラグを次の操作へ持ち越さない。
+      // タッチ・ペンは互換 mousedown の focus が pointerup の後に来るので、消費まで残す。
+      if (e.pointerType !== 'touch' && e.pointerType !== 'pen') pointerFocusGuard = false;
       // ポインタを押した対象が物質・反応で、動いていなければ詳細を開く。
       // （ポインタキャプチャで click の宛先が変わることがあるため、pointerup で判定する）
       if (allowOpen && !suppressClick && downEntity) openFromElement(downEntity);
@@ -2664,6 +2678,9 @@
   function onFocusIn(e) {
     var target = e.target.closest ? e.target.closest('[data-kind]') : null;
     if (!target) return;
+    // ポインタ操作に伴う focusin は1回分だけ扱う（キーボード操作では立たない）。
+    var fromPointer = pointerFocusGuard;
+    pointerFocusGuard = false;
     // focusClassMap が全体fit直後に移したプログラムfocusだけ、画面外判定の再センタリングをしない。
     // 通常の Tab 移動（別のnode・別の機会）は従来どおり追随する。
     if (programmaticFocusTarget) {
@@ -2671,6 +2688,9 @@
       programmaticFocusTarget = null;
       if (pending === target || (pending.contains && pending.contains(target))) return;
     }
+    // ポインタで触っただけの実体（一般図の変換・物質・反応の線やラベル）は、
+    // 指した場所をそのまま見せる。触っただけで中央へ寄せない。
+    if (fromPointer) return;
     if (activeRegion) clearRegionSelection();
     var kind = target.getAttribute('data-kind');
     var id = target.getAttribute('data-id');
@@ -2705,6 +2725,28 @@
     } else {
       animateTo(Core.centerOn({ x: c.x - 20, y: c.y - 20 }, { w: 40, h: 40 }, view.scale, viewSize.w, viewSize.h));
     }
+  }
+
+  // 表示位置を変えずに focus する。カードを閉じたときの復帰・カード内の移動など、
+  // 勝手に表示を動かしたくない場面で使う。onFocusIn の再センタリングは
+  // programmaticFocusTarget で1回だけ抑え、ブラウザによるスクロールは preventScroll で止める。
+  function focusWithoutRecentering(target) {
+    if (!target || typeof target.focus !== 'function') return false;
+    if (typeof document.contains === 'function' && !document.contains(target)) return false;
+    if (document.activeElement === target) return false;
+    // 地図上の実体（[data-kind]）だけが onFocusIn の再センタリング対象。カード内などは
+    // フラグを立てない（立てたままにすると次の Tab の判定へ持ち越す）。
+    var inMap = !!(target.closest && target.closest('[data-kind]'));
+    if (inMap) programmaticFocusTarget = target;
+    try {
+      target.focus({ preventScroll: true });
+    } catch (err) {
+      errMsg(err && err.message);
+      try { target.focus(); } catch (err2) { errMsg(err2 && err2.message); }
+    }
+    // focusin が来ないまま終わった（フォーカスできなかった）ときは、次の Tab へ持ち越さない。
+    if (inMap && programmaticFocusTarget === target) programmaticFocusTarget = null;
+    return true;
   }
 
   function openFromElement(target) {
@@ -2890,7 +2932,7 @@
     var heading = cardDetail.querySelector('h2');
     if (heading) {
       heading.setAttribute('tabindex', '-1');
-      heading.focus();
+      focusWithoutRecentering(heading);
     }
   }
 
@@ -2902,7 +2944,9 @@
     cardDetail.innerHTML = '';
     restoreReactionStroke();
     if (restore !== false && returnFocus && document.contains(returnFocus)) {
-      returnFocus.focus();
+      // 画面外の印（反応の線・ラベル）へ戻しても、表示は動かさない。
+      // 地図の実体は再センタリングを抑えて focus する（戻せないときだけ通常の focus）。
+      if (!focusWithoutRecentering(returnFocus)) returnFocus.focus();
     }
     returnFocus = null;
   }
@@ -4341,20 +4385,33 @@
       if (eqDialogEl && eqDialogEl.open) return;
       if (card.contains(e.target)) return;
       // クリック自体でフォーカスが動くため、復帰は pointerup の後に行う
-      restoreAfterPointer = returnFocus;
-      closeCard(false);
+      prepareCardFocusRestore();
     }, true);
 
-    document.addEventListener('pointerup', function (e) {
+    // カード外を押した時点では閉じるだけにし、起点への復帰は pointerup の後へ回す
+    // （押下自体のフォーカス移動に奪われないように）。
+    function prepareCardFocusRestore() {
+      restoreAfterPointer = returnFocus;
+      closeCard(false);
+    }
+
+    // 押した場所が実体（物質・反応・一般図）なら、直後の pointerup で新しいカードが開き、
+    // その見出しへフォーカスが移る。この場合に前の起点へ戻すと、古い（画面外のこともある）
+    // 印へ表示が飛ぶため戻さない。何も無い場所を押して閉じたときだけ起点へ戻す。
+    function onDocumentPointerUpRestoreFocus(e) {
       var target = restoreAfterPointer;
       restoreAfterPointer = null;
       if (!target || !document.contains(target)) return;
       if (!card.hidden) return;
-      target.focus();
+      if (downEntity) return;
+      // 戻すときも表示位置・スクロールは動かさない。
+      if (!focusWithoutRecentering(target)) target.focus();
       // タッチの互換mousedownは pointerup の後に来てフォーカスをBODYへ戻す。
       // 次の1回だけ、非操作要素へのmousedown既定動作を止めて起点focusを保つ。
       if (e.pointerType === 'touch' || e.pointerType === 'pen') suppressCompatFocus = true;
-    }, true);
+    }
+
+    document.addEventListener('pointerup', onDocumentPointerUpRestoreFocus, true);
 
     document.addEventListener('mousedown', function (e) {
       if (!suppressCompatFocus) return;
@@ -4381,7 +4438,9 @@
     positionPopover.addEventListener('pointerup', onPopoverPointerUp);
     positionPopover.addEventListener('pointercancel', onPopoverPointerUp);
 
-    document.addEventListener('keydown', function (e) {
+    // キーボード操作では、ポインタ由来の focusin 抑制を持ち越さない（Tab の追随を妨げない）。
+    function onDocumentKeydown(e) {
+      pointerFocusGuard = false;
       if (e.key === 'Escape') {
         // ダイアログの Escape は native の閉じ処理に任せる（フォーカスも native が戻す）。
         if (eqDialogEl && eqDialogEl.open) return;
@@ -4396,7 +4455,8 @@
           closeCard(true);
         }
       }
-    });
+    }
+    document.addEventListener('keydown', onDocumentKeydown);
 
     searchInput.addEventListener('input', function () { applySearch(searchInput.value); });
     searchInput.addEventListener('keydown', function (e) {

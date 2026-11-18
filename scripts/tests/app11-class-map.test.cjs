@@ -770,7 +770,7 @@ test('[keyboard] 一般図へ直後のprogrammatic focusはreduce/animate両方�
       'classNodeById', 'view', 'activeRegion', 'clearRegionSelection', 'clearSelection',
       'compoundById', 'findReaction', 'nodeW', 'nodeH', 'document',
       'positionBox', 'jumpBox', 'fitTopInset', 'modeCanvas',
-      'var programmaticFocusTarget = null;\n' + insetSrc + '\n' + focusSrc + '\n' + focusInSrc +
+      'var programmaticFocusTarget = null;\nvar pointerFocusGuard = false;\n' + insetSrc + '\n' + focusSrc + '\n' + focusInSrc +
       '\nreturn { focusClassMap: focusClassMap, onFocusIn: onFocusIn };'
     );
     const api = factory(
