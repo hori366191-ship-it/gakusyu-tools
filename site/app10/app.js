@@ -957,6 +957,319 @@
     return R.condensedTextFor ? R.condensedTextFor(c) : { text: '', note: '' };
   }
 
+  /* ------------------------------------------------------------------
+   * 反応の詳細（化合物カード内・2段階の遅延読み込み）
+   *
+   * - 件数だけは index.html が先に読む小さな表（OCReactionCounts）から出す。
+   * - 外側の <details> を初めて開いたとき、site/shared/app10-reaction-details.js を読む。
+   * - 内側の <details> を初めて開いたとき、site/shared/app10-reaction-equations.js を読む。
+   * - 反応式は既存の共有レンダラ R.renderEquation だけで描き、app11 の app.js は読まない。
+   * ------------------------------------------------------------------ */
+  var REACTION_COUNTS = (window.OCReactionCounts && typeof window.OCReactionCounts === 'object')
+    ? window.OCReactionCounts : null;
+  var reactionBaseCache = null;
+  var reactionScriptPromises = Object.create(null);
+  var reactionDetailPack = null;
+  var reactionEquationPack = null;
+  var reactionDetailPromise = null;
+  var reactionEquationPromise = null;
+
+  var REACTION_ROLE_LABELS = {
+    substrate: '基質',
+    product: '生成物',
+    reagent: '試薬',
+    reactant: '反応式中の反応物',
+    byproduct: '副生成物',
+    equation: '反応式中の物質'
+  };
+
+  var EQUATION_MODE_NOTES = {
+    B: '係数・副生成物まで含む反応式です。',
+    N: '元素収支は合うが、塩の生成・中和・後処理などを省略した総括式です。',
+    T: '反応物と生成物の構造だけを示す変換図です。完全な反応式ではありません。',
+    P: '繰り返し単位 n で示す重合の模式式です。末端を省略しています。'
+  };
+
+  function reactionScriptBase(doc) {
+    if (reactionBaseCache !== null) return reactionBaseCache;
+    reactionBaseCache = '';
+    var scripts = doc && doc.getElementsByTagName ? doc.getElementsByTagName('script') : [];
+    for (var i = 0; i < scripts.length; i++) {
+      var src = scripts[i] && scripts[i].getAttribute ? scripts[i].getAttribute('src') : '';
+      if (src && /(^|\/)app10-reaction-detail-counts\.js(?:\?.*)?$/.test(src)) {
+        reactionBaseCache = src.replace(/[^/]*$/, '');
+        break;
+      }
+    }
+    return reactionBaseCache;
+  }
+
+  function loadReactionScript(file) {
+    if (reactionScriptPromises[file]) return reactionScriptPromises[file];
+    var promise = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = reactionScriptBase(document) + file;
+      script.async = true;
+      script.onload = function () { resolve(); };
+      script.onerror = function () {
+        delete reactionScriptPromises[file];
+        reject(new Error('反応データを読み込めませんでした: ' + file));
+      };
+      document.head.appendChild(script);
+    });
+    reactionScriptPromises[file] = promise;
+    return promise;
+  }
+
+  function ensureReactionDetails() {
+    if (reactionDetailPack) return Promise.resolve(reactionDetailPack);
+    if (!reactionDetailPromise) {
+      reactionDetailPromise = loadReactionScript('app10-reaction-details.js').then(function () {
+        reactionDetailPack = window.OCReactionDetails || null;
+        if (!reactionDetailPack) throw new Error('反応詳細データが見つかりません。');
+        return reactionDetailPack;
+      }).catch(function (err) {
+        reactionDetailPromise = null;
+        throw err;
+      });
+    }
+    return reactionDetailPromise;
+  }
+
+  function ensureReactionEquations() {
+    if (reactionEquationPack) return Promise.resolve(reactionEquationPack);
+    if (!reactionEquationPromise) {
+      reactionEquationPromise = loadReactionScript('app10-reaction-equations.js').then(function () {
+        reactionEquationPack = window.OCReactionEquations || null;
+        if (!reactionEquationPack) throw new Error('反応式データが見つかりません。');
+        return reactionEquationPack;
+      }).catch(function (err) {
+        reactionEquationPromise = null;
+        throw err;
+      });
+    }
+    return reactionEquationPromise;
+  }
+
+  function reactionCountsFor(id) {
+    if (!REACTION_COUNTS || !REACTION_COUNTS.byCompound) return null;
+    var value = REACTION_COUNTS.byCompound[id];
+    if (!value || !value.length) return null;
+    return { hs: value[0] || 0, university: value[1] || 0 };
+  }
+
+  function reactionLevelPlaceholder(id, key, label, count) {
+    return '<details class="oc-reactions__level" data-reaction-level="' + esc(key) +
+      '" data-reactions-for="' + esc(id) + '">' +
+      '<summary class="oc-reactions__level-summary">' +
+      '<span class="oc-reactions__level-name">' + esc(label) + '</span>' +
+      '<span class="oc-reactions__level-count">' + count + '件</span></summary>' +
+      '<div class="oc-reactions__level-body" data-level-body="' + esc(key) + '">' +
+      '<p class="oc-reactions__hint">開くと反応の詳細を読み込みます。</p></div></details>';
+  }
+
+  function reactionBlockHtml(id) {
+    if (!REACTION_COUNTS || !REACTION_COUNTS.byCompound) return '';
+    var counts = reactionCountsFor(id);
+    if (!counts || (!counts.hs && !counts.university)) {
+      return '<div class="oc-reactions oc-reactions--none"><strong>反応</strong>' +
+        '<span>関連反応は未収録</span></div>';
+    }
+    var countHtml = '';
+    if (counts.hs) countHtml += '<span class="oc-reactions__count oc-reactions__count--hs">高校 ' + counts.hs + '件</span>';
+    if (counts.university) countHtml += '<span class="oc-reactions__count oc-reactions__count--uni">大学 ' + counts.university + '件</span>';
+    var levels = '';
+    if (counts.hs) levels += reactionLevelPlaceholder(id, 'high-school', '高校内容', counts.hs);
+    if (counts.university) levels += reactionLevelPlaceholder(id, 'university', '大学内容', counts.university);
+    // 外側の「反応の詳細」details は置かない。開く操作は高校内容／大学内容の2段階だけ。
+    return '<div class="oc-reactions">' +
+      '<div class="oc-reactions__head"><span class="oc-reactions__title">反応の詳細</span>' +
+      '<span class="oc-reactions__counts">' + countHtml + '</span></div>' +
+      levels + '</div>';
+  }
+
+  function reactionTypeInfo(member) {
+    var types = (reactionDetailPack && reactionDetailPack.types) || {};
+    return types[member.typeKey] || { label: '', summary: '', schematic: '' };
+  }
+
+  function reactionCompoundName(id) {
+    var c = D.COMPOUNDS[id];
+    return c ? c.name : id;
+  }
+
+  function reactionEndpointText(ids, fallbackText) {
+    var text = (ids || []).map(reactionCompoundName).join(' ＋ ');
+    if (text) return text;
+    return fallbackText || '生成物の記載なし';
+  }
+
+  function reactionReagentText(member) {
+    return (member.reagents || []).map(function (r) {
+      return r.id ? reactionCompoundName(r.id) : r.name;
+    }).join('、');
+  }
+
+  function reactionFact(label, value) {
+    if (!value) return '';
+    return '<div class="oc-reactions__fact"><dt>' + esc(label) + '</dt><dd>' + esc(value) + '</dd></div>';
+  }
+
+  function reactionMemberHtml(member, index, total, education) {
+    var type = reactionTypeInfo(member);
+    var steps = (member.steps || []).length ? member.steps.join('／') : '';
+    var equationSources = (member.equation.sources && member.equation.sources.length)
+      ? member.equation.sources.join('／') : '';
+    var heading = total > 1
+      ? '<h5 class="oc-reactions__member-head">' + esc(type.label) +
+        '<span>同じ端点の反応 ' + (index + 1) + ' / ' + total + '</span></h5>'
+      : '';
+    var facts = '<dl class="oc-reactions__facts">' +
+      reactionFact('反応型', type.label + (type.schematic ? '（' + type.schematic + '）' : '')) +
+      reactionFact('条件', member.conditions) +
+      reactionFact('試薬', reactionReagentText(member)) +
+      reactionFact('状態・根拠', member.stateLabel + '・' + member.evidenceLabel) +
+      reactionFact('教育段階', education) +
+      reactionFact('範囲', member.scope) +
+      reactionFact('段階', member.stepKind === 'multi-step'
+        ? ('多段階（' + steps + '）') : steps) +
+      reactionFact('生成物の注記', member.productNote) +
+      reactionFact('注記', member.note) +
+      reactionFact('保留中の根拠', member.basedOnHeld
+        ? member.basedOnHeld + '（本文は未収録）' : '') +
+      reactionFact('出典', (member.sources || []).join('／')) +
+      reactionFact('式の根拠', equationSources) +
+      '</dl>';
+    var typeSummary = type.summary
+      ? '<p class="oc-reactions__type-note">' + esc(type.summary) + '</p>' : '';
+    return '<div class="oc-reactions__member">' + heading + facts + typeSummary +
+      '<div class="oc-reactions__equation" data-equation-for="' + esc(member.id) + '">' +
+      '<p class="oc-reactions__hint">反応式を読み込みます…</p></div></div>';
+  }
+
+  function reactionGroupHtml(group, ref) {
+    var role = REACTION_ROLE_LABELS[ref.role] || '';
+    var productFallback = (group.members[0] && group.members[0].productNote) || '';
+    var sizeBadge = group.size > 1
+      ? '<span class="oc-reactions__size">同じ端点 ' + group.size + '件</span>' : '';
+    return '<details class="oc-reactions__item" data-reaction-group="' + esc(group.id) + '">' +
+      '<summary class="oc-reactions__item-summary">' +
+      '<span class="oc-reactions__item-type">' + esc(group.typeLabel) + '</span>' +
+      '<span class="oc-reactions__item-path">' +
+      '<span class="oc-reactions__side">' + esc(reactionEndpointText(group.substrates)) + '</span>' +
+      '<span class="oc-reactions__arrow" aria-hidden="true">→</span>' +
+      '<span class="oc-reactions__side">' + esc(reactionEndpointText(group.products, productFallback)) + '</span>' +
+      '</span>' +
+      sizeBadge +
+      '<span class="oc-reactions__role">この物質: ' + esc(role) + '</span>' +
+      '<span class="oc-reactions__edu">' + esc(group.education) + '</span>' +
+      '</summary>' +
+      '<div class="oc-reactions__item-body">' +
+      (group.size > 1
+        ? '<p class="oc-reactions__group-note">同じ端点の反応 ' + group.size +
+          '件をまとめています。条件・出典・注記が異なるため、それぞれを示します。</p>'
+        : '') +
+      group.members.map(function (member, index) {
+        return reactionMemberHtml(member, index, group.members.length, member.education || group.education);
+      }).join('') +
+      '</div></details>';
+  }
+
+  function renderReactionLevel(body, id, levelKey) {
+    var record = reactionDetailPack.byCompound[id];
+    var level = record && record.levels
+      ? record.levels.filter(function (item) { return item.key === levelKey; })[0]
+      : null;
+    if (!level || !level.groups.length) {
+      body.innerHTML = '<p class="oc-reactions__hint">関連反応は未収録です。</p>';
+      return;
+    }
+    var html = level.groups.map(function (ref) {
+      var group = reactionDetailPack.groups[ref.groupId];
+      return group ? reactionGroupHtml(group, ref) : '';
+    }).join('');
+    // レベルを開いた直後に、反応カード（内側のdetails）を直接並べる。
+    body.innerHTML = html || '<p class="oc-reactions__hint">関連反応は未収録です。</p>';
+  }
+
+  function reactionEquationHtml(reactionId) {
+    var plan = reactionEquationPack && reactionEquationPack.byReactionId
+      ? reactionEquationPack.byReactionId[reactionId] : null;
+    if (!plan) return '<p class="oc-reactions__hint">反応式は未収録です。</p>';
+    var modeNote = EQUATION_MODE_NOTES[plan.mode] || '';
+    return plan.equations.map(function (entry) {
+      var items = (entry.left || []).concat(entry.right || []);
+      var fallback = items.some(function (item) { return item.fallback; });
+      var aria = '反応式。' + (entry.label ? entry.label + '。' : '') + reactionId;
+      var svg = '';
+      try {
+        svg = R.renderEquation({
+          arrow: entry.arrow,
+          above: entry.above,
+          below: entry.below,
+          left: entry.left,
+          right: entry.right
+        }, aria, { stack: true });
+      } catch (err) {
+        svg = '';
+      }
+      if (!svg) {
+        return '<p class="oc-reactions__hint">反応式を表示できませんでした。' +
+          '根拠のない式を推定して表示することはありません。</p>';
+      }
+      var caption = (entry.label || plan.modeLabel || '反応式');
+      var notes = [];
+      if (modeNote) notes.push(modeNote);
+      if (fallback) notes.push('示性式・名称で表示している項目があります。');
+      return '<figure class="oc-fig oc-fig--zoom oc-reactions__figure">' +
+        '<div class="oc-fig__canvas">' + svg + '</div>' +
+        '<div class="oc-fig__bar"><figcaption class="oc-fig__caption">' + esc(caption) + '</figcaption>' +
+        '<button type="button" class="oc-fig__zoom-btn" data-zoom="1" aria-haspopup="dialog">拡大</button></div>' +
+        (notes.length ? '<p class="oc-fig__note">' + esc(notes.join(' ')) + '</p>' : '') +
+        '</figure>';
+    }).join('');
+  }
+
+  function fillReactionEquations(root) {
+    var slots = Array.prototype.slice.call(root.querySelectorAll('[data-equation-for]'));
+    if (!slots.length) return;
+    ensureReactionEquations().then(function () {
+      slots.forEach(function (slot) {
+        if (slot.getAttribute('data-loaded') === '1') return;
+        slot.innerHTML = reactionEquationHtml(slot.getAttribute('data-equation-for'));
+        slot.setAttribute('data-loaded', '1');
+      });
+    }).catch(function () {
+      slots.forEach(function (slot) {
+        if (slot.getAttribute('data-loaded') === '1') return;
+        slot.innerHTML = '<p class="oc-reactions__hint">反応式を読み込めませんでした。</p>';
+      });
+    });
+  }
+
+  function onReactionToggle(details) {
+    if (!details || details.tagName !== 'DETAILS' || !details.open) return;
+    if (details.hasAttribute('data-reaction-level')) {
+      var body = details.querySelector('[data-level-body]');
+      if (!body || body.getAttribute('data-loaded') === '1') return;
+      var id = details.getAttribute('data-reactions-for');
+      var levelKey = details.getAttribute('data-reaction-level');
+      body.setAttribute('data-loading', '1');
+      ensureReactionDetails().then(function () {
+        renderReactionLevel(body, id, levelKey);
+        body.setAttribute('data-loaded', '1');
+        body.removeAttribute('data-loading');
+      }).catch(function () {
+        body.removeAttribute('data-loading');
+        body.innerHTML = '<p class="oc-reactions__hint">反応の詳細を読み込めませんでした。</p>';
+      });
+      return;
+    }
+    if (details.hasAttribute('data-reaction-group')) {
+      fillReactionEquations(details);
+    }
+  }
+
   function renderCard(c, opts) {
     opts = opts || {};
     var check = validation[c.id] || {};
@@ -1011,6 +1324,7 @@
         (c.reactions ? fact('主な反応', c.reactions) : '') +
         (c.hazards ? fact('危険性', c.hazards, { warn: true }) : '') +
       '</div>' +
+      reactionBlockHtml(c.id) +
       (note ? '<p class="oc-card__note">' + esc(note) + '</p>' : '') +
       '<div class="oc-card__foot"><span class="oc-verify">検証: ' + esc(verificationShort) + '</span>' + pubchem +
         mapLinkHtml(c.id, document) +
@@ -2144,6 +2458,22 @@
       if (detailTab) detailTab.focus();
     });
   }
+
+  // toggle はバブリングしないため、capture で受けて details 自身を調べる。
+  els.results.addEventListener('toggle', function (e) {
+    onReactionToggle(e.target);
+  }, true);
+  // ブラウザ差に備え、summary のクリック後にも同じ処理を1回だけ確認する
+  // （data-loaded で二重描画はしない）。
+  els.results.addEventListener('click', function (e) {
+    var summary = e.target.closest ? e.target.closest('summary') : null;
+    if (!summary) return;
+    var details = summary.parentElement;
+    if (!details || details.tagName !== 'DETAILS') return;
+    if (!details.hasAttribute('data-reaction-level') &&
+        !details.hasAttribute('data-reaction-group')) return;
+    window.setTimeout(function () { onReactionToggle(details); }, 0);
+  });
 
   els.results.addEventListener('click', function (e) {
     var fig = e.target.closest('.oc-fig--zoom');
