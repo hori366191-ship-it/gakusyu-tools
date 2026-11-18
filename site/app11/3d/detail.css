@@ -1,0 +1,374 @@
+/* ============================================================
+   app11-3d — 選択パネル本文（detail.js）のスタイル
+   固定ダーク（.r3d-app の変数を継承し、無い場合も読める値を持つ）。
+   構造式・反応式は共有 canonical の oc-* / oc-eq-* をそのまま使う。
+   ============================================================ */
+
+.rp3d-detail {
+  --rp3d-ink: var(--r3d-ink, #f2f6ff);
+  --rp3d-muted: var(--r3d-muted, #9aa8bb);
+  --rp3d-line: var(--r3d-line, rgba(145, 165, 190, 0.32));
+  --rp3d-accent: var(--r3d-accent, #ffd166);
+  --rp3d-cyan: var(--r3d-cyan, #48e4ff);
+  --rp3d-panel: rgba(10, 17, 27, 0.9);
+  color: var(--rp3d-ink);
+  font-size: 12.5px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.rp3d-detail__section + .rp3d-detail__section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(145, 165, 190, 0.16);
+}
+
+.rp3d-detail__heading {
+  margin: 0 0 7px;
+  padding-left: 8px;
+  border-left: 3px solid var(--rp3d-cyan);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #dbe9f8;
+}
+
+.rp3d-detail__formula {
+  margin: 0 0 6px;
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 12px;
+  color: #d8e6f6;
+}
+
+.rp3d-detail__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.rp3d-detail__note {
+  margin: 6px 0 0;
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: #8fa2b9;
+}
+
+.rp3d-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid rgba(145, 165, 190, 0.4);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+  color: #dfeaf7;
+}
+.rp3d-badge--state { border-color: rgba(72, 228, 255, 0.5); color: #b9f0ff; }
+.rp3d-badge--academic { border-color: rgba(72, 228, 255, 0.55); color: #b9f0ff; }
+.rp3d-badge--mixed {
+  border-color: rgba(180, 200, 225, 0.45);
+  color: #d2e2f3;
+  box-shadow: inset 2px 0 0 rgba(255, 209, 102, 0.85), inset -2px 0 0 rgba(72, 228, 255, 0.85);
+}
+
+/* ---------- 事実の定義リスト ---------- */
+.rp3d-facts {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+.rp3d-facts__row {
+  display: grid;
+  grid-template-columns: minmax(92px, 0.38fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+.rp3d-facts__term {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #93a6bd;
+}
+.rp3d-facts__value {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #e2ecf8;
+}
+
+.rp3d-build-link {
+  display: inline-block;
+  margin: 2px 0 0;
+  color: #9fe8ff;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.rp3d-build-link:focus-visible { outline: 3px solid var(--rp3d-cyan); outline-offset: 2px; }
+
+.rp3d-empty,
+.rp3d-route__empty {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #8fa2b9;
+}
+
+/* ---------- 構造式（共有 canonical の oc-*） ---------- */
+.rp3d-struct {
+  margin: 0 0 8px;
+  padding: 6px;
+  border: 1px solid rgba(145, 165, 190, 0.2);
+  border-radius: 8px;
+  background: rgba(14, 22, 34, 0.72);
+}
+.rp3d-struct:last-child { margin-bottom: 0; }
+.rp3d-struct__caption {
+  margin: 0 0 4px;
+  font-size: 10.5px;
+  color: #9fb2c8;
+}
+.rp3d-struct__canvas {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.rp3d-struct__note,
+.rp3d-struct-missing {
+  margin: 4px 0 0;
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: #8fa2b9;
+}
+.rp3d-struct-group { margin: 0 0 8px; }
+.rp3d-struct__heading {
+  margin: 0 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #c8d8e9;
+}
+.rp3d-struct--wide .rp3d-struct__canvas .oc-svg { min-width: 520px; }
+
+.rp3d-detail .oc-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.rp3d-detail .oc-bond { stroke: #c6d4e6; fill: none; }
+.rp3d-detail .oc-bond--h { stroke: #8194ab; }
+.rp3d-detail .oc-bond--inner { stroke: #c6d4e6; }
+.rp3d-detail .oc-bond--backbone { stroke: #dbe6f4; }
+.rp3d-detail .oc-bond--coordinate { stroke: #c6d4e6; stroke-dasharray: 5 4; opacity: 0.75; }
+.rp3d-detail .oc-atom {
+  fill: #f4f8ff;
+  stroke: #0a111b;
+  stroke-width: 4.5;
+  paint-order: stroke;
+  font-family: 'Yu Gothic UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  font-weight: 600;
+}
+.rp3d-detail .oc-h {
+  fill: #9fb0c6;
+  stroke: #0a111b;
+  stroke-width: 4;
+  paint-order: stroke;
+}
+.rp3d-detail .oc-charge { fill: #ffd166; font-weight: 800; }
+.rp3d-detail .oc-condensed {
+  fill: #f4f8ff;
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-weight: 600;
+}
+.rp3d-detail .oc-bracket { stroke: #c6d4e6; fill: none; }
+.rp3d-detail .oc-vertex { fill: #c6d4e6; }
+.rp3d-detail .oc-projection-note,
+.rp3d-detail .oc-ring-num { fill: #9fb0c6; }
+.rp3d-detail .oc-schematic-box { fill: #101a27; stroke: #52657c; stroke-width: 1.5; }
+.rp3d-detail .oc-schematic-ring { fill: none; stroke: #9fb0c6; }
+.rp3d-detail .oc-schematic-text { fill: #eef4fc; font-weight: 700; }
+.rp3d-detail .oc-schematic-note { fill: #9fb0c6; }
+
+/* ---------- 反応式（共有 canonical の oc-eq-*） ---------- */
+.rp3d-eq {
+  margin: 8px 0 0;
+  padding: 6px;
+  border: 1px solid rgba(145, 165, 190, 0.2);
+  border-radius: 8px;
+  background: rgba(9, 15, 24, 0.86);
+}
+.rp3d-eq__caption {
+  margin: 0 0 4px;
+  font-size: 10.5px;
+  color: #9fb2c8;
+}
+.rp3d-eq__scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  direction: ltr;
+}
+.rp3d-eq__scroll .oc-eq-svg {
+  display: block;
+  width: 100%;
+  min-width: 480px;
+  height: auto;
+  overflow: visible;
+}
+.rp3d-eq__note {
+  margin: 5px 0 0;
+  font-size: 10px;
+  line-height: 1.55;
+  color: #8fa2b9;
+}
+.rp3d-detail .oc-eq-arrow-line { stroke: #dce8f6; fill: none; }
+.rp3d-detail .oc-eq-arrow-head { fill: #dce8f6; }
+.rp3d-detail .oc-eq-arrow { stroke: #dce8f6; fill: none; }
+.rp3d-detail .oc-eq-conditions { fill: #a9bad0; }
+.rp3d-detail .oc-eq-op { fill: #f2f6ff; font-weight: 700; }
+.rp3d-detail .oc-eq-species { fill: #dce8f6; }
+.rp3d-detail .oc-eq-cond { fill: #dce8f6; }
+
+/* ---------- 経路グループ ---------- */
+.rp3d-group {
+  margin: 0 0 6px;
+  border: 1px solid rgba(145, 165, 190, 0.22);
+  border-left: 3px solid var(--rp3d-accent);
+  border-radius: 8px;
+  background: rgba(13, 21, 32, 0.7);
+}
+.rp3d-group {
+  /* 通常経路はアンバー。3D の通常ハイライト線（#ffd166）と同系。 */
+  border-left-color: var(--rp3d-accent);
+}
+.rp3d-group[data-academic="true"] {
+  /* 大学レベル専用はシアン。3D の academic ハイライト線（#48e4ff）と同系。 */
+  border-left-color: var(--rp3d-cyan);
+}
+.rp3d-group[data-mixed="true"] {
+  /* 共通グループは通常アンバー + 内側にシアンの二重アクセント。 */
+  border-left-color: var(--rp3d-accent);
+  box-shadow: inset 2px 0 0 var(--rp3d-cyan);
+}
+.rp3d-group[data-academic="true"] > .rp3d-group__summary > .rp3d-group__dir {
+  color: var(--rp3d-cyan);
+}
+.rp3d-group__summary {
+  padding: 7px 9px;
+  cursor: pointer;
+  font-size: 11.5px;
+  line-height: 1.5;
+  list-style-position: inside;
+  color: #dbe8f6;
+  /* 端点名が長くても折り返す。省略記号や横スクロールは使わない。 */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.rp3d-group__summary:focus-visible { outline: 3px solid var(--rp3d-cyan); outline-offset: -2px; }
+.rp3d-group__summary > span { margin-right: 6px; }
+.rp3d-group__dir { color: var(--rp3d-accent); font-weight: 800; }
+.rp3d-group__type { font-weight: 700; }
+.rp3d-group__size { color: #9fb2c8; font-size: 10.5px; }
+.rp3d-group__endpoints {
+  display: block;
+  margin: 4px 0 0;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: #b8c9dc;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.rp3d-group__summary > .rp3d-group__endpoints { margin-right: 0; }
+.rp3d-group__body {
+  padding: 2px 9px 9px;
+  border-top: 1px solid rgba(145, 165, 190, 0.16);
+}
+.rp3d-group__body:empty { display: none; }
+
+.rp3d-common {
+  margin: 7px 0;
+  padding: 7px 8px;
+  border: 1px dashed rgba(145, 165, 190, 0.3);
+  border-radius: 7px;
+}
+.rp3d-common .rp3d-detail__heading { border-left-color: var(--rp3d-accent); }
+.rp3d-common__summary { margin: 0; font-size: 11.5px; color: #d6e4f4; }
+.rp3d-common__schematic {
+  margin: 5px 0 0;
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 11px;
+  color: #b9cbe0;
+}
+
+.rp3d-member {
+  margin: 9px 0 0;
+  padding: 8px;
+  border: 1px solid rgba(145, 165, 190, 0.18);
+  border-radius: 7px;
+  background: rgba(9, 15, 24, 0.55);
+}
+.rp3d-member + .rp3d-member { margin-top: 8px; }
+.rp3d-member__heading {
+  margin: 0 0 3px;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 800;
+  color: #f1f7ff;
+}
+.rp3d-member__tier {
+  margin: 0 0 3px;
+  font-size: 10.5px;
+  color: #a9bdd4;
+}
+.rp3d-member__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px;
+  margin: 0 0 5px;
+}
+.rp3d-member__note {
+  margin: 4px 0;
+  padding: 4px 6px;
+  border-radius: 5px;
+  background: rgba(72, 228, 255, 0.08);
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: #bcd3e8;
+}
+.rp3d-member__label {
+  margin: 5px 0 2px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #c4d6e9;
+}
+.rp3d-member__steps {
+  margin: 0 0 4px;
+  padding-left: 20px;
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: #c9d9ea;
+}
+.rp3d-member__sources {
+  margin: 6px 0 0;
+  padding-top: 5px;
+  border-top: 1px dashed rgba(145, 165, 190, 0.22);
+  font-size: 10px;
+  line-height: 1.55;
+  color: #8fa2b9;
+}
+
+/* ---------- モバイル ---------- */
+@media (max-width: 520px) {
+  .rp3d-detail { font-size: 12px; }
+  .rp3d-facts__row { grid-template-columns: minmax(82px, 0.42fr) minmax(0, 1fr); }
+  .rp3d-eq__scroll .oc-eq-svg { min-width: 420px; }
+  .rp3d-struct--wide .rp3d-struct__canvas .oc-svg { min-width: 440px; }
+}

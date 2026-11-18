@@ -9,6 +9,7 @@ on:
       - '.github/workflows/pages.yml'
       - '仕様書_移行案.md'
       - 'scripts/build-app1-bundle.mjs'
+      - 'scripts/app11/**'
   workflow_dispatch:
 
 permissions:
@@ -26,6 +27,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # ステージング生成と事実データ生成は Node 22 で検証している（tests.yml と同じ）。
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
       - name: Build app1 bundle from MD
         run: |
@@ -45,13 +52,21 @@ jobs:
           echo "files count:"
           node -e "const j=require('./site/app1/bundle.json'); console.log(j.files.length + ' files, updatedAt=' + j.updatedAt); j.files.forEach(f=>console.log(' - '+f.name+' ('+f.content.length+' chars)'))"
 
+      # app11 の公開統合。site/ は変更せず、配信物 _pages/ を決定論的に組み立てる。
+      # - 2D 用の学術配置データ（座標込み）を配信物から外す
+      # - 公開 index の「アカデミック」を 3D 画面（./3d/）へのリンクへ変換する
+      # - 旧アカデミックのディープリンクは 3D へ引き継ぐ
+      # - 3D 用の座標なし事実データ（academic-facts.js）を元データから再生成し、パリティを検証する
+      - name: Build Pages staging (app11 public integration)
+        run: node scripts/app11/build-pages-staging.cjs --out _pages
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: _pages
 
   deploy:
     environment:

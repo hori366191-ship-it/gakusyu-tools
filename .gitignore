@@ -21,3 +21,6 @@ desktop.ini
 archive/
 # clasp scriptId（機密列挙防止・個別管理）
 **/.clasp.json
+
+# Pages staging output (scripts/app11/build-pages-staging.cjs)
+_pages/
