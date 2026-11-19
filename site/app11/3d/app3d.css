@@ -241,12 +241,89 @@ a.r3d-btn { display: inline-flex; align-items: center; justify-content: center; 
   background: rgba(7, 11, 18, 0.86);
   backdrop-filter: blur(8px);
 }
-.r3d-toolbar__stats {
+/* 色の凡例（カードの地色 = 物質の分類）。狭い画面では summary だけ残して閉じる。 */
+.r3d-legend {
+  flex: 1 1 260px;
+  min-width: 0;
   padding: 0 6px;
   font-size: 11px;
+  line-height: 1.5;
   color: #9aabc0;
+}
+.r3d-legend[open] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+}
+.r3d-legend__summary {
+  list-style: none;
+  cursor: pointer;
+  white-space: nowrap;
+  color: #b6c6da;
+  border-radius: 4px;
+}
+.r3d-legend__summary::-webkit-details-marker { display: none; }
+.r3d-legend__summary::before {
+  content: '▸';
+  display: inline-block;
+  width: 1em;
+  color: #8fa3bb;
+}
+.r3d-legend[open] .r3d-legend__summary::before { content: '▾'; }
+.r3d-legend__summary:focus-visible {
+  outline: 2px solid var(--r3d-focus);
+  outline-offset: 2px;
+}
+.r3d-legend__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 9px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.r3d-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   white-space: nowrap;
 }
+button.r3d-legend__item {
+  appearance: none;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+button.r3d-legend__item:hover { background: rgba(145, 165, 190, 0.14); }
+button.r3d-legend__item:focus-visible {
+  outline: 2px solid var(--r3d-focus);
+  outline-offset: 1px;
+}
+button.r3d-legend__item[aria-pressed="true"] {
+  background: rgba(143, 211, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(143, 211, 255, 0.5);
+  color: #eaf3ff;
+}
+.r3d-legend__item--all { color: #b6c6da; }
+.r3d-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+.r3d-legend__line {
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+}
+.r3d-legend__item--route { color: #b6c6da; }
 
 /* 1本指の移動 / 回転トグル。デスクトップでは隠し、狭い画面で出す。 */
 .r3d-touch-mode {
@@ -491,7 +568,7 @@ a.r3d-btn { display: inline-flex; align-items: center; justify-content: center; 
     max-height: min(40vh, 330px);
   }
   .r3d-toolbar { left: 10px; right: 10px; bottom: 10px; max-width: none; }
-  .r3d-toolbar__stats { flex-basis: 100%; padding: 0 2px; }
+  .r3d-legend { flex-basis: 100%; padding: 0 2px; font-size: 10.5px; }
   .r3d-touch-mode { flex-basis: 100%; }
   .r3d-hint { display: none; }
   .r3d-btn kbd { display: none; }

@@ -34,12 +34,15 @@
     query: '',
     selectedId: null,
     showUnconnectedOnly: false,
+    // 下部凡例で選んだ分類。null は全分類。選択・検索はこれを一時的に上書きする。
+    region: null,
     camera: null,
     results: [],
     resultIndex: -1,
     plan: null,
     pointerCount: 0,
-    touchMode: 'move',
+    // 1本指の既定は回転。ツールバーで「移動」を選ぶとパンになる。
+    touchMode: 'rotate',
     // 選択の自動センタリング。userAdjusted が立つと、リサイズでも勝手に寄せ直さない。
     centerRect: null,
     userAdjusted: false,
@@ -239,6 +242,7 @@
       query: state.query,
       selectedId: state.selectedId,
       showUnconnectedOnly: state.showUnconnectedOnly,
+      region: state.region,
       exclusions: exclusions(),
       structurePlane: state.structurePlane,
       // 遷移中だけ preview/travel を渡す。着地（または reduced-motion の即時）は
@@ -249,12 +253,8 @@
     });
     R.drawScene(ctx, plan, {});
     state.plan = plan;
-    var stats = model.stats(state.layer);
-    if (els.stats) {
-      els.stats.textContent = '物質 ' + stats.compounds + ' / 反応グループ ' + stats.groups +
-        ' / 接続 ' + stats.connected + ' / 未接続 ' + stats.unconnected +
-        ' / 表示カード ' + plan.labelCount;
-    }
+    // カード枚数などの診断値は plan（labelCount / drawStats）に残す。
+    // 下部は色の凡例なので、描画ごとに DOM は更新しない。
     // 遷移中だけ次フレームを予約する（アイドルでは回さない）。
     if (state.transition) requestRender();
   }
@@ -840,7 +840,8 @@
     state.userAdjusted = false;
     renderDetail();
     requestRender();
-    announce('選択を解除しました。');
+    var regionName = state.region ? (regionNamesById[state.region] || state.region) : '';
+    announce('選択を解除しました。' + (regionName ? regionName + 'の絞り込みに戻ります。' : ''));
   }
 
   function focusSelected() {
@@ -1336,6 +1337,125 @@
     setTouchMode(state.touchMode);
   }
 
+  // ---------------- 色の凡例（分類フィルタ） ----------------
+
+  var regionButtons = [];
+  var allRegionButton = null;
+  var regionNamesById = Object.create(null);
+
+  // 下部の凡例は起動時に 1 回だけ組む。カードの地色 = 物質の分類で、
+  // 選択・検索時の一時的な強調色や経路色とは別（操作ダイアログにも記載）。
+  function legendLine(color) {
+    var line = document.createElement('span');
+    line.className = 'r3d-legend__line';
+    line.setAttribute('aria-hidden', 'true');
+    line.style.background = color;
+    return line;
+  }
+
+  function legendButton(className) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'r3d-legend__item ' + className;
+    return button;
+  }
+
+  function syncRegionUi() {
+    regionButtons.forEach(function (entry) {
+      var active = state.region === entry.id;
+      entry.button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      entry.button.title = active
+        ? 'もう一度押すと全分類に戻す'
+        : entry.name + 'だけを表示';
+    });
+    if (allRegionButton) {
+      var allActive = !state.region;
+      allRegionButton.setAttribute('aria-pressed', allActive ? 'true' : 'false');
+      allRegionButton.title = allActive ? '全分類を表示中' : '全分類に戻す';
+    }
+  }
+
+  // 分類の適用。カメラ・選択・検索は変えない（表示の絞り込みだけ）。
+  function applyRegion(region) {
+    state.region = region || null;
+    syncRegionUi();
+    requestRender();
+  }
+
+  function toggleRegion(id) {
+    if (!id) return;
+    if (state.region === id) {
+      applyRegion(null);
+      announce('分類の絞り込みを解除して、すべて表示に戻しました。');
+      return;
+    }
+    applyRegion(id);
+    var name = regionNamesById[id] || id;
+    var note = state.selectedId
+      ? '選択中は、選択した物質と関係する経路を優先しています。'
+      : (state.query.trim()
+        ? '検索中は一致した物質を全分類から表示します。'
+        : '同じボタンをもう一度押すと解除します。');
+    announce(name + 'だけを表示しています。' + note);
+  }
+
+  function buildLegend(regions) {
+    var list = $('r3d-legend-list');
+    if (!list || !R || typeof R.legendItems !== 'function') return;
+    list.textContent = '';
+    regionButtons = [];
+    allRegionButton = legendButton('r3d-legend__item--all');
+    allRegionButton.id = 'r3d-legend-all';
+    allRegionButton.textContent = 'すべて';
+    allRegionButton.setAttribute('aria-pressed', 'true');
+    allRegionButton.setAttribute('aria-label', 'すべての分類を表示');
+    allRegionButton.addEventListener('click', function () {
+      if (!state.region) return;
+      applyRegion(null);
+      announce('すべての分類を表示しています。');
+    });
+    list.appendChild(allRegionButton);
+
+    R.legendItems(regions || []).forEach(function (item) {
+      if (item.route) {
+        var route = document.createElement('span');
+        route.className = 'r3d-legend__item r3d-legend__item--route';
+        route.appendChild(document.createTextNode('経路'));
+        route.appendChild(legendLine(item.normal));
+        route.appendChild(document.createTextNode('通常'));
+        route.appendChild(document.createTextNode(' / '));
+        route.appendChild(legendLine(item.academic));
+        route.appendChild(document.createTextNode('大学'));
+        list.appendChild(route);
+        return;
+      }
+      regionNamesById[item.id] = item.name;
+      var button = legendButton('r3d-legend__item--region');
+      button.setAttribute('data-region', item.id);
+      button.setAttribute('aria-pressed', 'false');
+      button.setAttribute('aria-label', item.name + 'だけを表示');
+      var swatch = document.createElement('span');
+      swatch.className = 'r3d-legend__swatch';
+      swatch.setAttribute('aria-hidden', 'true');
+      swatch.style.background = item.color;
+      button.appendChild(swatch);
+      button.appendChild(document.createTextNode(item.name));
+      button.addEventListener('click', function () { toggleRegion(item.id); });
+      regionButtons.push({ id: item.id, name: item.name, button: button });
+      list.appendChild(button);
+    });
+    syncRegionUi();
+
+    var legend = $('r3d-legend');
+    if (!legend) return;
+    // 狭い画面ではツールバーを潰さないよう既定で閉じる（summary で開ける）。
+    // 開閉してもカメラは動かさず、次の描画だけ予約する。
+    if (window.matchMedia && window.matchMedia('(max-width: 820px)').matches) legend.open = false;
+    legend.addEventListener('toggle', function () {
+      if (state.camera) requestRender();
+    });
+  }
+
   // ---------------- 初期化 ----------------
 
   function init() {
@@ -1352,7 +1472,6 @@
       search: $('r3d-search'),
       searchStatus: $('r3d-search-status'),
       results: $('r3d-results'),
-      stats: $('r3d-stats'),
       focus: $('r3d-focus'),
       unconnected: $('r3d-unconnected'),
       hint: document.querySelector('.r3d-hint'),
@@ -1393,6 +1512,9 @@
       return;
     }
     ctx = context;
+    // 凡例を先に組み、ツールバーの高さを確定させてから起動カメラを決める
+    // （凡例もツールバー矩形として中心計算の除外領域に入る）。
+    buildLegend(normalData.regions);
     var vp = viewport();
     resizeCanvas(vp);
     // 起動だけ最大ズーム（最小距離）。以後のリサイズで勝手にズームしない。

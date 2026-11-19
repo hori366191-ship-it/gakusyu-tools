@@ -541,3 +541,149 @@ test('[labels] 長い名前でも矩形が正のサイズで、文字が切れ�
   assert.ok(text.endsWith('…'));
   assert.ok(R.estimateTextWidth(text, 12) <= 120 + 12);
 });
+
+// ---------------- 分類フィルタ ----------------
+
+function regionCompounds(region) {
+  return new Set(D.compounds.filter((compound) => compound.region === region).map((compound) => compound.id));
+}
+
+test('[region] 分類フィルタは分類外の物質・点・経路を完全に消す（ヒット対象にも残さない）', () => {
+  const region = 'aromatic';
+  const expected = regionCompounds(region);
+  const p = plan({ region });
+  assert.equal(p.region, region);
+  assert.equal(Object.keys(p.projections).length, expected.size);
+  for (const id of Object.keys(p.projections)) assert.ok(expected.has(id), id);
+  assert.deepEqual(p.nodes.map((node) => node.id).sort(), [...expected].sort());
+  for (const edge of p.edges) {
+    const group = model.groupById[edge.groupId];
+    const endpoints = group.substrateIds.concat(group.productIds);
+    assert.ok(endpoints.every((id) => expected.has(id)), '分類外の端点を含む経路: ' + edge.id);
+  }
+});
+
+test('[region] 一致なしの分類は空計画になり、fail-closed で経路も出さない', () => {
+  const p = plan({ region: '__no-such-region__' });
+  assert.equal(p.cards.length, 0);
+  assert.equal(p.markers.length, 0);
+  assert.equal(p.edges.length, 0);
+  assert.deepEqual(Object.keys(p.projections), []);
+});
+
+test('[region] 多端点グループは全端点が同じ分類のときだけ経路を描く', () => {
+  // 分類をまたぐ端点をもつグループを実データから探す。
+  const spanning = model.groups.filter((group) => {
+    const ids = group.substrateIds.concat(group.productIds);
+    const regions = new Set(ids.map((id) => model.byId[id] && model.byId[id].region));
+    if (regions.size < 2) return false;
+    // 同一分類内で完結する基質→生成物の組がある（= 一部だけなら描けてしまう）
+    return group.substrateIds.some((from) => group.productIds.some((to) => (
+      model.byId[from] && model.byId[to] && model.byId[from].region === model.byId[to].region
+    )));
+  });
+  assert.ok(spanning.length > 0, '分類をまたぐ多端点グループが必要');
+  const group = spanning[0];
+  const pair = group.substrateIds.map((from) => group.productIds.map((to) => ({ from, to })))
+    .flat()
+    .find(({ from, to }) => model.byId[from] && model.byId[to] &&
+      model.byId[from].region === model.byId[to].region);
+  const region = model.byId[pair.from].region;
+  const p = plan({ region });
+  assert.equal(p.edges.some((edge) => edge.groupId === group.id), false,
+    '全端点が分類内に揃っていないグループの経路を描いている');
+  // 同分類内で完結するグループは描かれる（フィルタが経路を全消ししていない）
+  const complete = model.groups.find((candidate) => {
+    const ids = candidate.substrateIds.concat(candidate.productIds);
+    return ids.length > 0 && ids.every((id) => model.byId[id] && model.byId[id].region === region);
+  });
+  if (complete) {
+    assert.ok(p.edges.some((edge) => edge.groupId === complete.id), '完結グループの経路が出ていない');
+  }
+});
+
+test('[region] 選択は分類を無視して関係物質・経路を保ち、選択解除で分類へ戻る', () => {
+  const region = 'aromatic';
+  const selectedId = 'ethanol';
+  const related = new Set([selectedId]);
+  model.groupsForCompound(selectedId, 'normal').forEach((group) => {
+    group.substrateIds.concat(group.productIds).forEach((id) => related.add(id));
+  });
+
+  const final = plan({ region, selectedId });
+  assert.equal(final.selectedId, selectedId);
+  for (const id of related) {
+    assert.ok(final.projections[id], '選択の関係物質が分類外で消えた: ' + id);
+    assert.ok(final.nodes.some((node) => node.id === id), id);
+  }
+  assert.equal(final.nodes.every((node) => related.has(node.id)), true);
+  assert.ok(final.edges.every((edge) => !!final.selectedGroupIds[edge.groupId]));
+  assert.ok(final.edges.some((edge) => (
+    model.byId[edge.from].region !== region || model.byId[edge.to].region !== region
+  )), '分類外へ伸びる選択経路が出ていない');
+
+  // プレビュー/移動中は「分類のベースライン + 選択の関係」を両方残す
+  const travel = plan({ region, selectedId, focusPhase: 'travel' });
+  for (const id of related) assert.ok(travel.projections[id], '移動中に関係物質が消えた: ' + id);
+  assert.ok(Object.keys(travel.projections).some((id) => !related.has(id) && model.byId[id].region === region),
+    '移動中に分類のベースラインが消えた');
+
+  // 着地後の減光でも関係物質は消さない
+  const fade = plan({ region, selectedId, focusPhase: 'fade', focusFade: 0.6 });
+  for (const id of related) assert.ok(fade.projections[id], '減光中に関係物質が消えた: ' + id);
+
+  // 選択解除（region は維持）で分類だけに戻る
+  const cleared = plan({ region });
+  assert.equal(cleared.selectedId, null);
+  assert.equal(cleared.projections[selectedId], undefined);
+  assert.ok(Object.keys(cleared.projections).every((id) => model.byId[id].region === region));
+});
+
+test('[region] 検索は全分類を対象にし、一致と直接の文脈は分類外でも表示する', () => {
+  const region = 'aromatic';
+  // 検索結果から分類外の物質を実際に選べる（検索一覧はフィルタに絞られない）
+  const hits = model.search('ethanol', 8);
+  const crossHit = hits.find((hit) => model.byId[hit.id].region !== region);
+  assert.ok(crossHit, '分類外の検索結果が必要');
+  const picked = plan({ region, selectedId: crossHit.id });
+  assert.ok(picked.projections[crossHit.id], '検索から選んだ分類外の物質が選択で消えた');
+
+  const p = plan({ region, query: 'ethanol' });
+  assert.equal(p.searchActive, true);
+  const matches = new Set(Object.keys(p.matchIds));
+  assert.ok(matches.has('ethanol'), '分類外の一致が検索から漏れている');
+  const context = new Set();
+  for (const id of matches) {
+    model.groupsForCompound(id, 'normal').forEach((group) => {
+      group.substrateIds.concat(group.productIds).forEach((endpoint) => context.add(endpoint));
+    });
+  }
+  assert.ok(p.projections.ethanol, '分類外の一致が描画対象に残っていない');
+  for (const id of Object.keys(p.projections)) {
+    assert.ok(model.byId[id].region === region || matches.has(id) || context.has(id),
+      '分類外の無関係な物質が検索中に残った: ' + id);
+  }
+  // 分類内のベースラインは残る（検索状態は保持）
+  assert.ok(Object.keys(p.projections).some((id) => (
+    model.byId[id].region === region && !matches.has(id) && !context.has(id)
+  )));
+});
+
+test('[region] 分類切替はカメラ入力を変えず、同じ分類の再押下で解除できる（静的配線）', () => {
+  const fs = require('node:fs');
+  const src = fs.readFileSync(path.join(ROOT, 'site', 'app11', '3d', 'app.js'), 'utf8');
+  const start = src.indexOf('function applyRegion');
+  const end = src.indexOf('function buildLegend', start);
+  const body = src.slice(start, end);
+  assert.equal(/state\.camera\s*=/.test(body), false);
+  assert.equal(body.includes('enterCameraLock'), false);
+  assert.equal(body.includes('exitCameraLock'), false);
+  assert.equal(body.includes('resetSearchState'), false);
+  assert.ok(body.includes('state.region = region || null'));
+  assert.ok(body.includes('syncRegionUi()'));
+  assert.ok(body.includes('requestRender()'));
+  const toggleStart = body.indexOf('function toggleRegion');
+  const toggleBody = body.slice(toggleStart);
+  assert.ok(toggleBody.includes('if (state.region === id)'));
+  assert.ok(toggleBody.includes('applyRegion(null)'));
+});

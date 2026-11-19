@@ -186,8 +186,9 @@
   }
 
   // タッチ 1 本指のモード。UI の Move / Rotate トグルと一致させる。
+  // 既定は回転（地図を眺める操作を優先）。移動は明示的に選んだときだけ。
   function touchMode(value) {
-    return value === 'rotate' ? 'rotate' : 'move';
+    return value === 'move' ? 'move' : 'rotate';
   }
 
   // 実際のポインタから 1 本指ドラッグの意味を決める。

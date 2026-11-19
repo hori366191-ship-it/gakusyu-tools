@@ -250,7 +250,8 @@ test('[pinch] 距離・中点・角度・ジェスチャー', () => {
 test('[touch] 1本指は移動/回転トグルに従い、マウスは従来どおり', () => {
   assert.equal(I.touchMode('rotate'), 'rotate');
   assert.equal(I.touchMode('move'), 'move');
-  assert.equal(I.touchMode(undefined), 'move');
+  assert.equal(I.touchMode(undefined), 'rotate');
+  assert.equal(I.touchMode(''), 'rotate');
   assert.equal(I.oneFingerMode('touch', 'move'), 'pan');
   assert.equal(I.oneFingerMode('touch', 'rotate'), 'orbit');
   assert.equal(I.oneFingerMode('mouse', 'rotate', { button: 0 }), 'orbit');

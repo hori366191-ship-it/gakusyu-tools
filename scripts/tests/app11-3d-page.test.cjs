@@ -23,6 +23,8 @@ const html = fs.readFileSync(path.join(APP, 'index.html'), 'utf8');
 const js = fs.readFileSync(path.join(APP, 'app.js'), 'utf8');
 const css = fs.readFileSync(path.join(APP, 'app3d.css'), 'utf8');
 const readme = fs.readFileSync(path.join(APP, 'README.md'), 'utf8');
+const R3D = require(path.join(APP, 'renderer.js'));
+const DATA = require(path.join(ROOT, 'site', 'app11', 'data.js'));
 
 function scriptSources(source) {
   const out = [];
@@ -94,11 +96,16 @@ test('[dark] 固定ダークテーマが .r3d に閉じ、全体テーマを読�
   assert.equal(html.includes('noindex'), false);
 });
 
-test('[touch] 1本指の移動/回転トグルが HTML と配線にある', () => {
+test('[touch] 1本指の既定は回転で、移動トグルを明示したときだけパン', () => {
   assert.ok(html.includes('id="r3d-touch-move"'));
   assert.ok(html.includes('id="r3d-touch-rotate"'));
   assert.ok(html.includes('aria-label="1本指ドラッグの操作"'));
-  assert.ok(js.includes('wireTouchMode'));
+  // HTML の初期状態も回転が押された状態
+  assert.ok(/id="r3d-touch-rotate"\s+aria-pressed="true"/.test(html));
+  assert.ok(/id="r3d-touch-move"\s+aria-pressed="false"/.test(html));
+  // 実際の初期ロジックも回転
+  assert.ok(js.includes("touchMode: 'rotate'"));
+  assert.ok(js.includes('I.touchMode(mode)'));
   assert.ok(js.includes("I.oneFingerMode(event.pointerType, state.touchMode, event)"));
   assert.ok(js.includes("setTouchMode('rotate')"));
   // 2本指のひねりでは回転しない
@@ -120,9 +127,10 @@ test('[lock] 選択/単一検索のフォーカス固定が全入力へ配線さ
   assert.ok(js.includes('if (state.lock) return;'));
   assert.ok(js.includes('if (state.lock) break;'));
   assert.ok(js.includes("state.lock && event.pointerType === 'touch'"));
-  // 1本指移動トグルは lock 中 disabled / 解除で復元
+  // 1本指移動トグルは lock 中 disabled / 解除で復元（選んでいたモードへ）
   assert.ok(js.includes('els.touchMove.disabled = locked'));
   assert.ok(js.includes("state.touchMode === 'move' ? 'true' : 'false'"));
+  assert.ok(js.includes("state.touchMode === 'rotate' ? 'true' : 'false'"));
   // clear / reset で解除（camera は戻さない = update を呼ばない）
   const clearStart = js.indexOf('function clearSelection');
   const clearEnd = js.indexOf('function focusSelected');
@@ -267,6 +275,56 @@ test('[camera] 明示的なジャンプは reset / focus だけ', () => {
   assert.ok(js.includes('function focusSelected'));
   // 自動でフォーカスするタイマーがない
   assert.equal(/setTimeout\([^)]*focusSelected/.test(js), false);
+});
+
+test('[legend] 凡例は D.regions の並びと描画パレットを単一の色定義から使う', () => {
+  const items = R3D.legendItems(DATA.regions);
+  assert.equal(items.length, DATA.regions.length + 1);
+  assert.deepEqual(items.slice(0, -1).map((item) => item.id), DATA.regions.map((region) => region.id));
+  for (const item of items.slice(0, -1)) {
+    assert.equal(item.color, R3D.REGION_COLORS[item.id]);
+    assert.equal(item.color, R3D.regionColor(item.id));
+  }
+  // 実データの region はすべてパレットに載っている（未知色・フォールバックを使わない）
+  const palette = new Set(Object.keys(R3D.REGION_COLORS));
+  for (const compound of DATA.compounds) {
+    assert.ok(palette.has(compound.region), compound.id + ' の region がパレットにない');
+  }
+  const route = items[items.length - 1];
+  assert.equal(route.route, true);
+  assert.equal(route.normal, R3D.ROUTE_INK.normal);
+  assert.equal(route.academic, R3D.ROUTE_INK.academic);
+});
+
+test('[legend] 下部ツールバー内に凡例があり、旧カウント表示は残らない', () => {
+  const controls = html.indexOf('id="r3d-controls"');
+  const legend = html.indexOf('id="r3d-legend"');
+  const detail = html.indexOf('id="r3d-detail"');
+  assert.ok(controls > -1 && legend > controls && legend < detail);
+  assert.ok(html.includes('id="r3d-legend-list"'));
+  assert.ok(html.includes('role="group"'));
+  assert.equal(/r3d-stats/.test(html + js + css), false);
+  assert.equal(js.includes('表示カード'), false);
+  assert.ok(js.includes('R.legendItems(regions'));
+  assert.ok(js.includes('region: state.region'));
+  assert.ok(js.includes('function toggleRegion'));
+  assert.ok(js.includes("setAttribute('aria-pressed'"));
+  // 分類切替はカメラ・選択・フォーカス固定を触らない
+  const start = js.indexOf('function applyRegion');
+  const end = js.indexOf('function buildLegend', start);
+  const body = js.slice(start, end);
+  assert.equal(/state\.camera\s*=/.test(body), false);
+  assert.equal(body.includes('enterCameraLock'), false);
+  assert.equal(body.includes('exitCameraLock'), false);
+  assert.ok(body.includes('syncRegionUi'));
+  assert.ok(body.includes('requestRender'));
+  // 狭い画面では既定で閉じ、ツールバーを潰さない
+  assert.ok(js.includes("matchMedia('(max-width: 820px)')"));
+  assert.ok(js.includes('legend.open = false'));
+  assert.ok(css.includes('@media (max-width: 820px)'));
+  assert.ok(css.includes('.r3d-legend { flex-basis: 100%'));
+  // 凡例の高さを確定してから起動カメラを測る（ツールバー矩形が中心計算の除外領域）
+  assert.ok(js.indexOf('buildLegend(normalData.regions)') < js.indexOf('state.camera = makeStartup()'));
 });
 
 test('[url] README に公開URLとローカル確認手順がある', () => {

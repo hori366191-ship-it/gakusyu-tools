@@ -49,6 +49,27 @@
     return REGION_COLORS[regionId] || FALLBACK_COLOR;
   }
 
+  // 下部凡例の内容。D.regions の並びをそのまま使い、色は描画と同じパレットから
+  // 引く（凡例とカードの色がずれない）。最後に経路色を 1 項目だけ足す。
+  function legendItems(regions) {
+    var items = [];
+    (regions || []).forEach(function (region) {
+      if (!region || !region.id) return;
+      items.push({
+        id: region.id,
+        name: region.name || region.id,
+        color: regionColor(region.id)
+      });
+    });
+    items.push({
+      id: 'route',
+      route: true,
+      normal: ROUTE_INK.normal,
+      academic: ROUTE_INK.academic
+    });
+    return items;
+  }
+
   function isCjk(ch) {
     var code = ch.codePointAt(0);
     return code > 0x2e7f;
@@ -121,6 +142,8 @@
     var query = options.query || '';
     var selectedId = options.selectedId || null;
     var showUnconnectedOnly = !!options.showUnconnectedOnly;
+    var region = options.region || null;
+    var regionActive = !!region;
     var exclusions = Array.isArray(options.exclusions) ? options.exclusions : [];
     var margin = options.margin == null ? 180 : options.margin;
     var structurePlaneOptions = options.structurePlane || null;
@@ -205,6 +228,24 @@
     }
 
     var connected = model.connectedIds(layer);
+    // 分類フィルタ。周囲の経路は、グループの全端点（基質＋生成物）が同じ分類に
+    // 揃っているときだけ描く。一部の端点だけ見せて、反応の相手を誤解させない。
+    var regionGroupCache = Object.create(null);
+    function groupCompleteInRegion(groupId) {
+      if (!regionActive) return true;
+      if (regionGroupCache[groupId] !== undefined) return regionGroupCache[groupId];
+      var group = model.groupById && model.groupById[groupId];
+      var ok = !!group;
+      if (group) {
+        var ids = (group.substrateIds || []).concat(group.productIds || []);
+        for (var k = 0; k < ids.length; k++) {
+          var member = model.byId[ids[k]];
+          if (!member || member.region !== region) { ok = false; break; }
+        }
+      }
+      regionGroupCache[groupId] = ok;
+      return ok;
+    }
     var projections = Object.create(null);
     var candidates = [];
     var zNear = Infinity;
@@ -221,6 +262,13 @@
       var compound = model.compounds[i];
       // 選択中は無関係の物質を投影前から除外する（暗い点もヒット対象も残さない）。
       if (focalIds && !focalIds[compound.id]) continue;
+      // 分類フィルタ中は分類外を完全に隠す。ただし検索の一致・文脈と、
+      // 選択遷移中の関係物質は分類外でも残す（選択・検索が優先）。
+      if (!focalIds && regionActive && compound.region !== region) {
+        var keepOutside = (searchActive && (!!matchIds[compound.id] || !!contextIds[compound.id])) ||
+          ((transitSelection || fadeSelection) && !!focusIds[compound.id]);
+        if (!keepOutside) continue;
+      }
       var point = layout.points[compound.id];
       if (!point) continue;
       var projected = P.cameraViewWithBasis(camera, basis, point, viewport);
@@ -348,6 +396,13 @@
     if (focalIds) {
       // 選択中は関係グループのエッジだけ。無関係の経路は完全に消す。
       edgeList = edgeList.filter(function (edge) { return !!selectedGroupIds[edge.groupId]; });
+    } else if (regionActive && !searchActive) {
+      // 周囲は「全端点が同じ分類」のグループだけ。選択遷移中は選択の関係グループも
+      // 分類外へ伸びてよい（着地後は focalIds 側で選択グラフだけになる）。
+      edgeList = edgeList.filter(function (edge) {
+        if (groupCompleteInRegion(edge.groupId)) return true;
+        return (transitSelection || fadeSelection) && !!focusGroupIds[edge.groupId];
+      });
     }
     var edges = [];
     var culledEdges = 0;
@@ -444,6 +499,7 @@
       query: query,
       searchActive: searchActive,
       selectedId: selectedId,
+      region: region,
       focusPhase: focusPhase,
       focusPivotId: focusPivotId,
       fadeProgress: fadeProgress,
@@ -831,6 +887,7 @@
     EDGE_DIMMED_ALPHA: EDGE_DIMMED_ALPHA,
     edgePaint: edgePaint,
     regionColor: regionColor,
+    legendItems: legendItems,
     estimateTextWidth: estimateTextWidth,
     truncateToWidth: truncateToWidth,
     rectsOverlap: rectsOverlap,
