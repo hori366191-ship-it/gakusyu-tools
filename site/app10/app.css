@@ -244,6 +244,10 @@ a { color: var(--oc-accent); }
   color: var(--oc-muted);
 }
 .oc-pick[aria-pressed="true"] .oc-pick__sub { color: inherit; opacity: .82; }
+/* 選択中タイル内の小さい説明も選択色のインクに寄せ、4.5:1 を保つ */
+.oc-pick[aria-pressed="true"] .oc-fam__name,
+.oc-pick[aria-pressed="true"] .oc-ring-frag__name,
+.oc-pick[aria-pressed="true"] .oc-shape__none { color: var(--oc-accent-ink); }
 .oc-tag {
   flex-shrink: 0;
   font-size: 10px;

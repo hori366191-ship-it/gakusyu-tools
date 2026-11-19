@@ -933,6 +933,8 @@ html[data-theme="pop"] .oc-pick[aria-pressed="true"] {
   border-color: var(--color-charcoal-ink);
 }
 html[data-theme="pop"] .oc-pick:hover:not(:disabled) { background: var(--color-cream-paper); }
+/* sky-crayon 選択地でも 82% の小さな説明が 4.5:1 を満たす濃さにする */
+html[data-theme="pop"] .oc-pick[aria-pressed="true"] .oc-pick__sub { color: #222; }
 html[data-theme="pop"] .oc-tag {
   border: 1px solid var(--color-charcoal-ink);
   border-radius: var(--radius-sm);

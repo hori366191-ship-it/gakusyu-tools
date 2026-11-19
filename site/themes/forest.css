@@ -999,11 +999,16 @@ html[data-theme="forest"] .oc-list {
   background: var(--color-keylime-wash);
 }
 html[data-theme="forest"] .oc-pick[aria-pressed="true"] {
-  background: var(--color-forest-ink);
-  color: var(--color-cream-paper);
+  background: var(--color-mint-veil);
+  color: var(--color-forest-ink);
   border-color: var(--color-forest-ink);
 }
 html[data-theme="forest"] .oc-pick:hover:not(:disabled) { background: var(--color-sage-mist); }
+html[data-theme="forest"] .oc-pick[aria-pressed="true"]:hover:not(:disabled) {
+  background: var(--color-mint-veil);
+  color: var(--color-forest-ink);
+  border-color: var(--color-forest-ink);
+}
 html[data-theme="forest"] .oc-tag {
   border: 1px solid var(--color-border-mist);
   border-radius: var(--radius-badges);
