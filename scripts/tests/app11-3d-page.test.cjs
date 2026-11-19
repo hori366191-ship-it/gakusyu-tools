@@ -327,6 +327,19 @@ test('[legend] 下部ツールバー内に凡例があり、旧カウント表�
   assert.ok(js.indexOf('buildLegend(normalData.regions)') < js.indexOf('state.camera = makeStartup()'));
 });
 
+test('[legend] 凡例の開閉でツールバーの実測矩形が変わったら固定中心を追従する', () => {
+  // toggle ハンドラ内で maybeRecenter() を呼ぶ（凡例を開くとツールバーが背高になり、
+  // 使える領域が変わるため）。カメラを直接動かすのではなく、リサイズと同じ経路に任せる。
+  const start = js.indexOf("legend.addEventListener('toggle'");
+  assert.ok(start > -1);
+  const body = js.slice(start, js.indexOf('});', start) + 3);
+  assert.ok(body.includes('maybeRecenter()'));
+  assert.equal(/state\.camera\s*=/.test(body), false);
+  // ヘッダの折り返し・ツールバーの高さ変化も ResizeObserver で拾う。
+  assert.ok(js.includes('observer.observe(els.head)'));
+  assert.ok(js.includes('observer.observe(els.toolbar)'));
+});
+
 test('[url] README に公開URLとローカル確認手順がある', () => {
   assert.ok(readme.includes('https://hori366191-ship-it.github.io/gakusyu-tools/app11/3d/'));
   assert.ok(readme.includes('http://localhost:8000/site/app11/3d/'));

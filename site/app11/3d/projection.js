@@ -318,90 +318,117 @@
     return out;
   }
 
+  // パネル矩形を viewport と正しく交差させる（負オフセットも切り落とす）。
+  function clipRectToViewport(rect, viewport) {
+    var x0 = Math.max(0, rect.x);
+    var y0 = Math.max(0, rect.y);
+    var x1 = Math.min(viewport.width, rect.x + rect.width);
+    var y1 = Math.min(viewport.height, rect.y + rect.height);
+    if (!(x1 > x0) || !(y1 > y0)) return null;
+    return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
+  }
+
+  function rectsOverlap(a, b) {
+    return a.x < b.x + b.width && a.x + a.width > b.x &&
+      a.y < b.y + b.height && a.y + a.height > b.y;
+  }
+
+  // 実測した詳細パネルの矩形から、右ドック / 下ドックを決める。
+  // CSS のブレークポイントではなく実際の位置で判定するので、パネルが右にあれば
+  // 幅が狭い端末でも「下パネル扱い」にならない。
+  function detailDockSide(detail, viewport) {
+    if (!detail || !(detail.width > 0) || !(detail.height > 0)) return null;
+    var midX = viewport.width / 2;
+    var midY = viewport.height / 2;
+    var cx = detail.x + detail.width / 2;
+    var cy = detail.y + detail.height / 2;
+    // 右サイドバー: 画面の右半分に置かれ、上端から伸びる。
+    if (detail.x >= midX && detail.y < midY) return 'right';
+    // 下部パネル: 画面幅の過半を占め、下半分にある。
+    if (detail.x < midX && detail.width > midX && cy > midY) return 'bottom';
+    // 端に寄っていない中途半端な形は、縦長=右 / 横長=下で補う。
+    if (detail.height >= detail.width && cx > midX) return 'right';
+    if (detail.width >= detail.height && cy > midY) return 'bottom';
+    return null;
+  }
+
   // panels: { header, toolbar, detail } の矩形（canvas 座標）または null。
-  // パネルの辺で区切ったセル格子を作り、空セルだけで作れる最大矩形を返す。
+  // パネルの辺で区切ったセル格子を作り、パネルと重ならない最大矩形を返す。
   // これで「ツールバーの上・詳細の左」のような横断した空き領域も 1 つの矩形として扱える。
+  // 格子は総当たりで列挙する（パネルは 3 枚までなので境界は最大 8 本、十分軽い）。
   function computeUsableViewport(viewport, panels) {
     var full = { x: 0, y: 0, width: viewport.width, height: viewport.height };
     var rects = [];
     var keys = ['header', 'toolbar', 'detail'];
     for (var k = 0; k < keys.length; k++) {
       var cut = panels && panels[keys[k]];
-      if (!cut || !(cut.width > 0) || !(cut.height > 0)) continue;
-      rects.push({
-        x: Math.max(0, cut.x),
-        y: Math.max(0, cut.y),
-        width: Math.min(cut.width, viewport.width - Math.max(0, cut.x)),
-        height: Math.min(cut.height, viewport.height - Math.max(0, cut.y))
-      });
+      if (!cut) continue;
+      var clipped = clipRectToViewport(cut, viewport);
+      if (clipped) rects.push(clipped);
     }
     if (!rects.length) return full;
 
     var xs = [0, viewport.width];
     var ys = [0, viewport.height];
-    function addUnique(list, value) {
-      if (value <= 0 || value >= (list === xs ? viewport.width : viewport.height)) return;
+    function addUnique(list, value, max) {
+      if (!(value > 0) || value >= max) return;
       if (list.indexOf(value) === -1) list.push(value);
     }
     rects.forEach(function (rect) {
-      addUnique(xs, rect.x);
-      addUnique(xs, rect.x + rect.width);
-      addUnique(ys, rect.y);
-      addUnique(ys, rect.y + rect.height);
+      addUnique(xs, rect.x, viewport.width);
+      addUnique(xs, rect.x + rect.width, viewport.width);
+      addUnique(ys, rect.y, viewport.height);
+      addUnique(ys, rect.y + rect.height, viewport.height);
     });
     xs.sort(function (a, b) { return a - b; });
     ys.sort(function (a, b) { return a - b; });
 
-    var cols = xs.length - 1;
-    var rows = ys.length - 1;
-    var free = [];
-    for (var r = 0; r < rows; r++) {
-      free.push([]);
-      for (var c = 0; c < cols; c++) {
-        var cx = (xs[c] + xs[c + 1]) / 2;
-        var cy = (ys[r] + ys[r + 1]) / 2;
-        var blocked = false;
-        for (var ri = 0; ri < rects.length; ri++) {
-          var cutRect = rects[ri];
-          if (cx > cutRect.x && cx < cutRect.x + cutRect.width &&
-            cy > cutRect.y && cy < cutRect.y + cutRect.height) {
-            blocked = true;
-            break;
-          }
-        }
-        free[r][c] = !blocked;
+    function isFree(candidate) {
+      for (var i = 0; i < rects.length; i++) {
+        if (rectsOverlap(candidate, rects[i])) return false;
       }
+      return true;
+    }
+    // 同面積のときの順序を固定し、リサイズ中の描画で結果が揺れないようにする。
+    function isBetter(candidate, current) {
+      if (!current) return true;
+      var candidateArea = candidate.width * candidate.height;
+      var currentArea = current.width * current.height;
+      if (candidateArea !== currentArea) return candidateArea > currentArea;
+      if (candidate.width !== current.width) return candidate.width > current.width;
+      if (candidate.y !== current.y) return candidate.y < current.y;
+      return candidate.x < current.x;
     }
 
-    // 最大矩形（ヒストグラム法）。空セルだけを対象にする。
     var best = null;
-    var bestArea = 0;
-    var heights = new Array(cols).fill(0);
-    for (var row = 0; row < rows; row++) {
-      for (var col = 0; col < cols; col++) {
-        heights[col] = free[row][col] ? heights[col] + (ys[row + 1] - ys[row]) : 0;
-      }
-      var stack = [];
-      for (var i = 0; i <= cols; i++) {
-        var h = i < cols ? heights[i] : 0;
-        while (stack.length && heights[stack[stack.length - 1]] > h) {
-          var top = stack.pop();
-          var rectHeight = heights[top];
-          var left = stack.length ? stack[stack.length - 1] + 1 : 0;
-          var rectWidth = xs[i] - xs[left];
-          var area = rectHeight * rectWidth;
-          if (area > bestArea) {
-            bestArea = area;
-            best = { x: xs[left], y: ys[row + 1] - rectHeight, width: rectWidth, height: rectHeight };
+    var preferred = null;
+    var detailRect = (panels && panels.detail) ? clipRectToViewport(panels.detail, viewport) : null;
+    var dock = detailDockSide(detailRect, viewport);
+    for (var c0 = 0; c0 < xs.length - 1; c0++) {
+      for (var c1 = c0 + 1; c1 < xs.length; c1++) {
+        var rectX = xs[c0];
+        var rectW = xs[c1] - rectX;
+        if (!(rectW > 0)) continue;
+        for (var r0 = 0; r0 < ys.length - 1; r0++) {
+          for (var r1 = r0 + 1; r1 < ys.length; r1++) {
+            var rectY = ys[r0];
+            var rectH = ys[r1] - rectY;
+            if (!(rectH > 0)) continue;
+            var candidate = { x: rectX, y: rectY, width: rectW, height: rectH };
+            if (!isFree(candidate)) continue;
+            if (isBetter(candidate, best)) best = candidate;
+            // ドックの反対側（右ドックなら左、下ドックなら上）に収まる矩形を優先する。
+            // 面積最大だけだと、短い右パネルの下へ伸びる全幅の帯が勝ち、
+            // パネルの高さ次第でドックの向きが入れ替わって見えるため。
+            if (dock === 'right' && rectX + rectW > detailRect.x + 0.5) continue;
+            if (dock === 'bottom' && rectY + rectH > detailRect.y + 0.5) continue;
+            if (isBetter(candidate, preferred)) preferred = candidate;
           }
-        }
-        if (i < cols) {
-          if (stack.length && heights[stack[stack.length - 1]] === h) continue;
-          stack.push(i);
         }
       }
     }
-    return bestArea > 0 ? best : full;
+    if (dock && preferred) return preferred;
+    return best || full;
   }
 
   // 投影が rect の中心に来るよう target を平行移動する（距離・角度は不変）。

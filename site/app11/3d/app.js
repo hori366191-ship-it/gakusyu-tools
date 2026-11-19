@@ -619,6 +619,8 @@
     syncTouchModeUi();
     var target = lockedTargetCamera();
     if (!target) return;
+    // 固定に使った実測矩形を保持しておく（解除後のリサイズ判定にも使う）。
+    state.centerRect = target.rect;
     if (animate && !prefersReducedMotion()) {
       // 直前のポーズを ~130ms 見せてから、向き・倍率を保ったまま中心へ寄せる。
       // 着地後にカメラを固定したまま、無関係の物質・経路だけを ~900ms かけて落とす。
@@ -1449,10 +1451,14 @@
     var legend = $('r3d-legend');
     if (!legend) return;
     // 狭い画面ではツールバーを潰さないよう既定で閉じる（summary で開ける）。
-    // 開閉してもカメラは動かさず、次の描画だけ予約する。
+    // 開閉でツールバーの高さが変わったら、固定中の選択中心だけは実測に合わせて追従する。
     if (window.matchMedia && window.matchMedia('(max-width: 820px)').matches) legend.open = false;
     legend.addEventListener('toggle', function () {
-      if (state.camera) requestRender();
+      if (!state.camera) return;
+      // 凡例の開閉でツールバーの高さ（＝使える領域）が変わるため、
+      // 選択の固定中心も今の実測矩形へ追従させる。
+      maybeRecenter();
+      requestRender();
     });
   }
 
@@ -1640,6 +1646,10 @@
       observer.observe(canvas);
       // 詳細本文の高さが確定したとき（構造式の描画後など）に使える領域が変わる。
       if (els.detail) observer.observe(els.detail);
+      // ヘッダの折り返し（検索状態の表示）やツールバー（凡例の開閉）でも
+      // 使える領域が変わる。実測矩形が変わったら固定中心を追従させる。
+      if (els.head) observer.observe(els.head);
+      if (els.toolbar) observer.observe(els.toolbar);
     }
 
     render();

@@ -195,6 +195,153 @@ test('[usable] モバイル 390x844 は下部パネルを除いた領域を残�
   assert.ok(usable.y + usable.height <= panels.detail.y);
 });
 
+function overlaps(a, b) {
+  return a.x < b.x + b.width && a.x + a.width > b.x &&
+    a.y < b.y + b.height && a.y + a.height > b.y;
+}
+
+function assertFreeOfPanels(usable, panels, label) {
+  for (const key of Object.keys(panels)) {
+    const panel = panels[key];
+    if (!panel) continue;
+    assert.equal(overlaps(usable, panel), false, `${label}: ${key} と重なっている`);
+  }
+}
+
+test('[usable] 右サイドバーの実在する縦長タブレットで、パネル背後を中心にしない', () => {
+  // 縦長タブレット 834x1194。詳細は右サイドバー（x=444..816）。
+  // ツールバーが横に伸びてサイドバーの左端より右へ入る配置。
+  // 旧実装はヒストグラムの等高境界を取り違え、サイドバーの列 x=444..834 を
+  // 「空き領域」として返し、選択物質をパネルの裏へ寄せていた。
+  const vp = { width: 834, height: 1194 };
+  const panels = {
+    header: { x: 0, y: 0, width: 834, height: 104 },
+    toolbar: { x: 18, y: 856, width: 520, height: 320 },
+    detail: { x: 444, y: 104, width: 372, height: 1072 }
+  };
+  const usable = P.computeUsableViewport(vp, panels);
+  assert.deepEqual(usable, { x: 0, y: 104, width: 444, height: 752 });
+  assertFreeOfPanels(usable, panels, 'portrait 834');
+  const cx = usable.x + usable.width / 2;
+  const cy = usable.y + usable.height / 2;
+  assert.ok(cx < panels.detail.x, '中心が右サイドバーの裏に入っている');
+  assert.ok(cy > panels.header.height && cy < panels.toolbar.y);
+});
+
+test('[usable] 右ドックは縦横どちらの向きでも左側の領域を選ぶ（向きで下パネル扱いにならない）', () => {
+  const portrait = {
+    vp: { width: 834, height: 1194 },
+    panels: {
+      header: { x: 0, y: 0, width: 834, height: 150 },
+      toolbar: { x: 18, y: 1036, width: 700, height: 140 },
+      detail: { x: 444, y: 104, width: 372, height: 1072 }
+    }
+  };
+  const landscape = {
+    vp: { width: 1194, height: 834 },
+    panels: {
+      header: { x: 0, y: 0, width: 1194, height: 104 },
+      toolbar: { x: 18, y: 676, width: 700, height: 140 },
+      detail: { x: 804, y: 104, width: 372, height: 712 }
+    }
+  };
+  for (const { vp, panels } of [portrait, landscape]) {
+    const usable = P.computeUsableViewport(vp, panels);
+    assertFreeOfPanels(usable, panels, `${vp.width}x${vp.height}`);
+    assert.ok(usable.x + usable.width <= panels.detail.x, '右サイドバーの列まで使っている');
+    assert.ok(usable.x + usable.width / 2 < panels.detail.x);
+    assert.ok(usable.y >= panels.header.height);
+  }
+});
+
+test('[usable] 短い右パネルでも全幅の下帯ではなく左側を選ぶ（ドック判定は実測矩形）', () => {
+  // 高さの低い右パネル。面積最大だけを取ると「パネルの下へ伸びる全幅の帯」が勝ち、
+  // パネルの高さ次第でドックの向きが入れ替わって見える。
+  const vp = { width: 1440, height: 900 };
+  const panels = {
+    header: { x: 0, y: 0, width: 1440, height: 104 },
+    toolbar: { x: 18, y: 830, width: 520, height: 52 },
+    detail: { x: 1050, y: 104, width: 372, height: 180 }
+  };
+  const usable = P.computeUsableViewport(vp, panels);
+  assert.deepEqual(usable, { x: 0, y: 104, width: 1050, height: 726 });
+  assertFreeOfPanels(usable, panels, 'short right dock');
+  assert.ok(usable.x + usable.width <= panels.detail.x);
+});
+
+test('[usable] 下部ドック（820x1180）は従来どおりパネルの上側を残す', () => {
+  const vp = { width: 820, height: 1180 };
+  const panels = {
+    header: { x: 0, y: 0, width: 820, height: 150 },
+    toolbar: { x: 10, y: 1110, width: 800, height: 60 },
+    detail: { x: 10, y: 754, width: 800, height: 330 }
+  };
+  const usable = P.computeUsableViewport(vp, panels);
+  assert.deepEqual(usable, { x: 0, y: 150, width: 820, height: 604 });
+  assertFreeOfPanels(usable, panels, 'bottom 820');
+  assert.ok(usable.y + usable.height <= panels.detail.y);
+});
+
+test('[usable] 負オフセットのパネルは viewport と正しく交差して切り落とす', () => {
+  const vp = { width: 800, height: 600 };
+  const panels = { header: { x: -20, y: -10, width: 900, height: 120 } };
+  const usable = P.computeUsableViewport(vp, panels);
+  // 上端 -10・下端 110 のパネル。右端は 880 ではなく viewport 幅 800 で切る。
+  assert.deepEqual(usable, { x: 0, y: 110, width: 800, height: 490 });
+});
+
+test('[usable] 代表的な画面寸法で、返る矩形はパネルと重ならず中心もパネル内に入らない', () => {
+  const scenarios = [
+    {
+      vp: { width: 1440, height: 900 },
+      panels: {
+        header: { x: 0, y: 0, width: 1440, height: 104 },
+        toolbar: { x: 18, y: 830, width: 520, height: 52 },
+        detail: { x: 1050, y: 104, width: 372, height: 778 }
+      }
+    },
+    {
+      vp: { width: 834, height: 1194 },
+      panels: {
+        header: { x: 0, y: 0, width: 834, height: 150 },
+        toolbar: { x: 18, y: 1036, width: 700, height: 140 },
+        detail: { x: 444, y: 104, width: 372, height: 1072 }
+      }
+    },
+    {
+      vp: { width: 1024, height: 768 },
+      panels: {
+        header: { x: 0, y: 0, width: 1024, height: 104 },
+        toolbar: { x: 18, y: 646, width: 640, height: 104 },
+        detail: { x: 634, y: 104, width: 372, height: 646 }
+      }
+    },
+    {
+      vp: { width: 390, height: 844 },
+      panels: {
+        header: { x: 0, y: 0, width: 390, height: 150 },
+        toolbar: { x: 10, y: 774, width: 370, height: 60 },
+        detail: { x: 10, y: 418, width: 370, height: 330 }
+      }
+    }
+  ];
+  for (const { vp, panels } of scenarios) {
+    const usable = P.computeUsableViewport(vp, panels);
+    const label = `${vp.width}x${vp.height}`;
+    assertFreeOfPanels(usable, panels, label);
+    assert.ok(usable.width > 0 && usable.height > 0, label + ': 空の矩形');
+    const cx = usable.x + usable.width / 2;
+    const cy = usable.y + usable.height / 2;
+    for (const key of Object.keys(panels)) {
+      const panel = panels[key];
+      if (!panel) continue;
+      const inside = cx > panel.x && cx < panel.x + panel.width &&
+        cy > panel.y && cy < panel.y + panel.height;
+      assert.equal(inside, false, `${label}: 中心が ${key} の内側`);
+    }
+  }
+});
+
 test('[center] 選択点を実表示領域の中心へ置き、ズーム（距離）は変えない', () => {
   for (const scenario of [
     {
