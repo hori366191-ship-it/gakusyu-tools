@@ -22,7 +22,8 @@ const APP = path.join(ROOT, 'site', 'app11');
 const D = require(path.join(APP, 'data.js'));
 const A = require(path.join(APP, 'academic-data.js'));
 const G = require(path.join(APP, 'reaction-groups.js'));
-const L = require(path.join(ROOT, 'site', 'app11', '3d', 'layout3d.js'));
+const LEGACY = path.join(ROOT, 'scripts', 'legacy', 'app11-3d');
+const L = require(path.join(LEGACY, 'layout3d.js'));
 
 function build(compounds, reactions) {
   return L.buildLayout3D(compounds || D.compounds, { reactions: reactions || D.reactions });
@@ -158,7 +159,7 @@ test('[groups] 分野ごとの高低差が残り、同じ分野は近くにま�
 });
 
 test('[stable] 通常データだけを読み、academic の x/y に依存しない', () => {
-  const source = fs.readFileSync(path.join(ROOT, 'site', 'app11', '3d', 'layout3d.js'), 'utf8');
+  const source = fs.readFileSync(path.join(LEGACY, 'layout3d.js'), 'utf8');
   assert.equal(/academicData|academic\.reactions|academic\.layout/i.test(source), false);
   const base = build();
   // 通常データの reactions を落としても座標は有限（springs なしでも壊れない）

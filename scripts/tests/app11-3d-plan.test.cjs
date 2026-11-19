@@ -22,7 +22,8 @@ const D = require(path.join(APP, 'data.js'));
 const A = require(path.join(APP, 'academic-data.js'));
 const G = require(path.join(APP, 'reaction-groups.js'));
 const P = require(path.join(ROOT, 'site', 'app11', '3d', 'projection.js'));
-const L = require(path.join(ROOT, 'site', 'app11', '3d', 'layout3d.js'));
+const LEGACY = path.join(ROOT, 'scripts', 'legacy', 'app11-3d');
+const L = require(path.join(LEGACY, 'layout3d.js'));
 const S = require(path.join(ROOT, 'site', 'app11', '3d', 'scene-model.js'));
 const R = require(path.join(ROOT, 'site', 'app11', '3d', 'renderer.js'));
 
@@ -671,7 +672,7 @@ test('[region] 検索は全分類を対象にし、一致と直接の文脈は�
 
 test('[region] 分類切替はカメラ入力を変えず、同じ分類の再押下で解除できる（静的配線）', () => {
   const fs = require('node:fs');
-  const src = fs.readFileSync(path.join(ROOT, 'site', 'app11', '3d', 'app.js'), 'utf8');
+  const src = fs.readFileSync(path.join(LEGACY, 'app.js'), 'utf8');
   const start = src.indexOf('function applyRegion');
   const end = src.indexOf('function buildLegend', start);
   const body = src.slice(start, end);

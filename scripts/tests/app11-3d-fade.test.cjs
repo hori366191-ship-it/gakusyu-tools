@@ -22,11 +22,12 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const APP = path.join(ROOT, 'site', 'app11');
 const APP3D = path.join(APP, '3d');
+const LEGACY = path.join(ROOT, 'scripts', 'legacy', 'app11-3d');
 const D = require(path.join(APP, 'data.js'));
 const A = require(path.join(APP, 'academic-data.js'));
 const G = require(path.join(APP, 'reaction-groups.js'));
 const P = require(path.join(APP3D, 'projection.js'));
-const L = require(path.join(APP3D, 'layout3d.js'));
+const L = require(path.join(LEGACY, 'layout3d.js'));
 const S = require(path.join(APP3D, 'scene-model.js'));
 const R = require(path.join(APP3D, 'renderer.js'));
 
@@ -77,7 +78,7 @@ test('[fade/timing] 着地後 900ms で 0→1、既存の phase 判定とタイ�
   assert.equal(P.transitionPhase(130 + 430, 130, 430), null);
   assert.equal(P.transitionPhase(130 + 430 + FADE_MS - 1, 130, 430), null);
 
-  const js = fs.readFileSync(path.join(APP3D, 'app.js'), 'utf8');
+  const js = fs.readFileSync(path.join(LEGACY, 'app.js'), 'utf8');
   assert.ok(js.includes('TRANSITION_FADE_MS = 900'));
   assert.ok(js.includes("transition.phase = 'fade'"));
   assert.ok(js.includes('P.transitionFade(elapsed - travelEnd, transition.fadeMs)'));
@@ -287,7 +288,7 @@ test('[fade/motion] reduced-motion は減光せず即時の最終表示になる
   assert.ok(reduced.nodes.every((node) => !node.fade));
   assert.deepEqual([...new Set(reduced.nodes.map((node) => node.id))].sort(), [...focal.ids].sort());
 
-  const js = fs.readFileSync(path.join(APP3D, 'app.js'), 'utf8');
+  const js = fs.readFileSync(path.join(LEGACY, 'app.js'), 'utf8');
   const lockStart = js.indexOf('function enterCameraLock');
   const lockEnd = js.indexOf('function exitCameraLock', lockStart);
   const lockBody = js.slice(lockStart, lockEnd);

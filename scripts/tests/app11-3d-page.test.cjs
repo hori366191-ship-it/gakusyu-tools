@@ -3,7 +3,9 @@
  *
  * 実行: node --test scripts/tests/app11-3d-page.test.cjs
  *
- * 対象: site/app11/3d/index.html / app.js / app3d.css / README.md
+ * 対象: 旧公開 3D エンジン（scripts/legacy/app11-3d/ に保存。配信しない）の index.html / app.js /
+ *   README.md と、現行公開 site/app11/3d/ の app3d.css / renderer.js / scene-model.js。
+ *   旧エンジンは本番では球ビューに置き換わったが、挙動の回帰を残すため保存版を検証する。
  *   - 共有データの読み込み順
  *   - 外部 CDN・Three.js に依存しない
  *   - 固定ダークテーマが .r3d に閉じている
@@ -19,10 +21,11 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const APP = path.join(ROOT, 'site', 'app11', '3d');
-const html = fs.readFileSync(path.join(APP, 'index.html'), 'utf8');
-const js = fs.readFileSync(path.join(APP, 'app.js'), 'utf8');
+const LEGACY = path.join(ROOT, 'scripts', 'legacy', 'app11-3d');
+const html = fs.readFileSync(path.join(LEGACY, 'index.html'), 'utf8');
+const js = fs.readFileSync(path.join(LEGACY, 'app.js'), 'utf8');
 const css = fs.readFileSync(path.join(APP, 'app3d.css'), 'utf8');
-const readme = fs.readFileSync(path.join(APP, 'README.md'), 'utf8');
+const readme = fs.readFileSync(path.join(LEGACY, 'README.md'), 'utf8');
 const R3D = require(path.join(APP, 'renderer.js'));
 const DATA = require(path.join(ROOT, 'site', 'app11', 'data.js'));
 
@@ -35,9 +38,13 @@ function scriptSources(source) {
 }
 
 test('[files] 必要なファイルが存在する', () => {
+  const legacyFiles = ['index.html', 'app.js', 'layout3d.js', 'README.md'];
+  for (const file of legacyFiles) {
+    assert.ok(fs.existsSync(path.join(LEGACY, file)), 'legacy/' + file);
+  }
   const files = [
-    'index.html', 'app3d.css', 'projection.js', 'layout3d.js', 'scene-model.js',
-    'renderer.js', 'interaction.js', 'app.js', 'README.md'
+    'app3d.css', 'projection.js', 'scene-model.js',
+    'renderer.js', 'interaction.js'
   ];
   for (const file of files) {
     assert.ok(fs.existsSync(path.join(APP, file)), file);
@@ -358,7 +365,7 @@ test('[controls] 検索・未接続・操作説明の要素があり、層切替
 });
 
 test('[shared] 3D は site/app11 の宣言データだけを読み、academic の x/y を使わない', () => {
-  const layout = fs.readFileSync(path.join(APP, 'layout3d.js'), 'utf8');
+  const layout = fs.readFileSync(path.join(LEGACY, 'layout3d.js'), 'utf8');
   assert.ok(layout.includes("compound.x"));
   assert.ok(layout.includes("compound.y"));
   // layout3d は academic データを引数に取らない

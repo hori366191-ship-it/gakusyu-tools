@@ -1,0 +1,174 @@
+/* ============================================================
+   app11/3d 球ビュー — 球ビューの差分スタイル
+   公開版 app3d.css / detail.css を読み込んだ後に重ねる。
+   既存クラスはそのまま使い、球ビューに必要な追加だけを書く。
+   ============================================================ */
+
+/* ---------- 表示モード（球の外 / 球の中） ---------- */
+.s3d-mode {
+  display: inline-flex;
+  gap: 0;
+  padding: 2px;
+  border: 1px solid var(--r3d-line);
+  border-radius: 9px;
+  background: rgba(8, 13, 21, 0.86);
+}
+.s3d-mode .s3d-mode__btn {
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  min-height: 28px;
+}
+.s3d-mode .s3d-mode__btn[aria-pressed="true"] {
+  background: rgba(255, 209, 102, 0.18);
+  color: #ffe6a3;
+  box-shadow: inset 0 0 0 1px rgba(255, 209, 102, 0.5);
+}
+
+/* ---------- モード切替の短いフェード ---------- */
+/* 球面を横切るカメラ補間の特異点を避けるため、切替の瞬間だけ暗転する。 */
+.s3d-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: #05070c;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms linear;
+}
+.s3d-fade.is-on { opacity: 1; }
+
+/* ---------- 反応式カード: 初期は幅に収める（横スクロールなし） ---------- */
+/* detail.js の DOM は変えず、表示上の overflow だけを上書きする。 */
+.rp3d-detail .rp3d-eq__scroll {
+  overflow-x: visible;
+  overflow-y: visible;
+  padding-bottom: 0;
+}
+.rp3d-detail .rp3d-eq__scroll .oc-eq-svg {
+  width: 100%;
+  min-width: 0;
+}
+
+/* 構造式も同じ方針（初期は収める）。 */
+.rp3d-detail .rp3d-struct__canvas {
+  overflow-x: visible;
+}
+.rp3d-detail .rp3d-struct--wide .rp3d-struct__canvas .oc-svg {
+  min-width: 0;
+}
+
+/* 明示的な拡大。押したカードの中だけ横スクロールを許可する。 */
+.rp3d-eq {
+  position: relative;
+}
+.rp3d-eq.is-zoomed .rp3d-eq__scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+}
+.rp3d-detail .rp3d-eq.is-zoomed .rp3d-eq__scroll .oc-eq-svg {
+  width: max-content;
+  min-width: 560px;
+}
+.rp3d-eq__zoom {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-height: 24px;
+  padding: 2px 8px;
+  border: 1px solid rgba(145, 165, 190, 0.4);
+  border-radius: 6px;
+  background: rgba(12, 18, 28, 0.92);
+  color: #cfe2f5;
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.rp3d-eq__zoom:hover { border-color: rgba(190, 210, 235, 0.7); }
+.rp3d-eq__zoom:focus-visible { outline: 3px solid var(--r3d-focus); outline-offset: 1px; }
+.rp3d-eq__zoom[aria-expanded="true"] {
+  border-color: rgba(255, 209, 102, 0.7);
+  color: #ffe6a3;
+}
+.rp3d-eq > .rp3d-eq__caption { padding-right: 58px; }
+
+/* 反応式カード自体はパネルからはみ出さない（カード内のみスクロール）。 */
+.rp3d-detail .rp3d-eq {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+@media (max-width: 520px) {
+  .rp3d-detail .rp3d-eq__scroll .oc-eq-svg { min-width: 0; }
+  .rp3d-detail .rp3d-eq.is-zoomed .rp3d-eq__scroll .oc-eq-svg { min-width: 440px; }
+  .rp3d-eq > .rp3d-eq__caption { padding-right: 54px; }
+}
+
+/* ---------- モーション設定 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .s3d-fade { transition: none; }
+  .s3d-fade.is-on { opacity: 1; }
+}
+
+/* ---------- 縁の名前付き仮想カード（Canvas 描画 + 透明なネイティブ button） ---------- */
+.r3d-virtual-cards {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.r3d-virtual-card {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: transparent;
+  font-size: 12px;
+  line-height: 1.25;
+  overflow: hidden;
+  cursor: pointer;
+  /* ポインタは Canvas に通す（ドラッグ・タップのジェスチャーを奪わない）。
+     Tab / Enter / Space のネイティブ操作は pointer-events の影響を受けない。 */
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.r3d-virtual-card:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(5, 7, 12, 0.9);
+}
+@media (forced-colors: active) {
+  .r3d-virtual-card { border: 1px solid CanvasText; }
+}
+
+/* ---------- detail のドック: 地図の実表示領域が縦長なら下部へ ---------- */
+/* 判定は sphere-dock.js（canvas − header − toolbar。detail 自身は含めない）。
+   画面幅の固定ブレークポイントではなく、実測 net 領域の aspect で切り替える。 */
+.r3d-app.r3d-dock-bottom .r3d-detail {
+  top: auto;
+  left: 10px;
+  right: 10px;
+  bottom: var(--r3d-dock-bottom-offset, 96px);
+  width: auto;
+  max-height: min(40%, 360px);
+}
+
+/* net が横長のときは、画面幅のメディアクエリより aspect 判定を優先する。 */
+.r3d-app.r3d-dock-right .r3d-detail {
+  top: 104px;
+  left: auto;
+  right: 18px;
+  bottom: 18px;
+  width: min(372px, calc(100vw - 36px));
+  max-height: calc(100% - 124px);
+}
+.r3d-app.r3d-dock-right .r3d-detail {
+  top: var(--r3d-dock-top-offset, 104px);
+  max-height: var(--r3d-dock-right-max-height, calc(100% - 124px));
+}

@@ -258,18 +258,28 @@ function verify(out, data) {
   }
 
   const threeD = readStaged(out, path.join('app11', '3d', 'index.html'));
-  const threeDjs = readStaged(out, path.join('app11', '3d', 'app.js'));
+  const threeDjs = readStaged(out, path.join('app11', '3d', 'sphere-app.js'));
   if (!threeD.includes('src="./academic-facts.js"')) fail('3D が academic-facts.js を読んでいない');
   if (/<script[^>]+src="[^"]*academic-data\.js"/.test(threeD)) {
     fail('3D が academic-data.js を script で参照している');
   }
+  if (!threeD.includes('src="./sphere-app.js"')) fail('3D が球ビューの app を読んでいない');
+  if (threeD.indexOf('./academic-facts.js') > threeD.indexOf('./sphere-app.js')) fail('3D の script 読み込み順が不正');
   if (!threeD.includes('href="../"')) fail('3D から 2D 通常画面への戻りリンクがない');
   if (threeD.includes('id="r3d-layer"')) fail('3D に層切替 UI が残っている');
-  if (threeD.indexOf('./academic-facts.js') > threeD.indexOf('./app.js')) fail('3D の script 読み込み順が不正');
+  if (threeD.includes('academic-facts.js') && /\.\.\/\.\.\/site\//.test(threeD)) {
+    fail('3D が設計ラボ前提の相対パスを参照している');
+  }
 
+  // 球ビューは通常＋大学を常時合成し、事実データが無ければ fail-closed。
+  if (!threeDjs.includes("var LAYER = 'academic'")) fail('3D が通常＋大学の固定層になっていない');
   if (/state\.layer\s*=\s*'normal'/.test(threeDjs)) fail('3D の層が通常で初期化されている');
-  if (!threeDjs.includes("var COMBINED_LAYER = 'academic'")) fail('3D が通常＋大学の固定層になっていない');
-  if (!/case 'layer':[\s\S]{0,200}break;/.test(threeDjs)) fail('3D の L キーが無効化されていない');
+  if (!threeDjs.includes('大学レベルの追加反応データ（academic-facts.js）を読み込めませんでした。')) {
+    fail('3D の学術データ未読込メッセージがない');
+  }
+  if (!threeDjs.includes('if (!academicData || !Array.isArray(academicData.reactions)')) {
+    fail('3D が学術データ未読込時に fail-closed でない');
+  }
 
   // 事実データ（座標なし）のパリティ
   const staged = require(path.join(out, 'app11', '3d', 'academic-facts.js'));
@@ -288,11 +298,33 @@ function verify(out, data) {
 
   // 3D の全ファイルが配信物にある
   for (const file of [
-    'academic-facts.js', 'app.js', 'app3d.css', 'detail.js', 'detail.css',
-    'interaction.js', 'layout3d.js', 'projection.js', 'renderer.js', 'scene-model.js'
+    'academic-facts.js', 'app3d.css', 'detail.js', 'detail.css', 'equation-fit.js',
+    'index.html', 'interaction.js', 'projection.js', 'renderer.js', 'scene-model.js',
+    'sphere-app.js', 'sphere-camera.js', 'sphere-dock.js', 'sphere-input.js',
+    'sphere-layout.js', 'sphere-render.js', 'sphere.css'
   ]) {
     if (!fs.existsSync(path.join(out, 'app11', '3d', file))) fail('3D のファイルがない: ' + file);
   }
+
+  // 配信物の 3D は設計ラボ（design-lab）を参照しない。
+  for (const file of fs.readdirSync(path.join(out, 'app11', '3d'))) {
+    if (!/\.(?:html|js|css)$/.test(file)) continue;
+    const text = fs.readFileSync(path.join(out, 'app11', '3d', file), 'utf8');
+    if (text.includes('design-lab')) fail('3D の ' + file + ' が design-lab を参照している');
+  }
+
+  // 427 物質 / 反応 314（通常 162 + 大学 152）/ グループ 308 のパリティ。
+  const stagedData = require(path.join(out, 'app11', 'data.js'));
+  const stagedFacts = require(path.join(out, 'app11', '3d', 'academic-facts.js'));
+  const stagedGroups = require(path.join(out, 'app11', 'reaction-groups.js'));
+  const stagedModel = require(path.join(out, 'app11', '3d', 'scene-model.js')).createModel(
+    stagedData, stagedFacts, stagedGroups
+  );
+  const stagedStats = stagedModel.stats('academic');
+  if (stagedStats.compounds !== 427) fail('配信物の物質数が 427 でない: ' + stagedStats.compounds);
+  if (stagedStats.groups !== 308) fail('配信物の反応グループ数が 308 でない: ' + stagedStats.groups);
+  if (stagedStats.academicGroups !== 152) fail('配信物の大学レベル反応数が 152 でない');
+  if (stagedFacts.meta.normalCounts.reactionCount !== 162) fail('配信物の通常反応数が 162 でない');
 
   // 他の公開資産はそのまま
   for (const rel of [

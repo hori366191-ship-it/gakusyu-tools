@@ -82,6 +82,7 @@ test('[parity] 427 物質 / 通常 162 + 大学 152 / 合成 308 グループ', 
   assert.equal(combined.groups, 308);
   assert.equal(combined.academicGroups, 152);
   assert.equal(combined.mixedGroups, 0);
+  assert.equal(F.meta.normalCounts.reactionCount + F.meta.academicReactionCount, 314);
   assert.equal(model.stats('normal').groups, 156);
   assert.equal(model.normalGroups.length + model.academicGroups.filter((g) => !g.hasNormal).length, 308);
 });
@@ -158,23 +159,22 @@ test('[staging] 他の公開資産と app1 bundle はそのまま含まれる', 
   }
 });
 
-test('[staging] 公開 3D は常時合成で、層切替 UI も L の切替もない', () => {
+test('[staging] 公開 3D は球ビューで常時合成、層切替 UI も design-lab 参照もない', () => {
   buildOnce();
   const pages = path.join(outDir, 'pages');
   const html = fs.readFileSync(path.join(pages, 'app11', '3d', 'index.html'), 'utf8');
-  const js = fs.readFileSync(path.join(pages, 'app11', '3d', 'app.js'), 'utf8');
+  const js = fs.readFileSync(path.join(pages, 'app11', '3d', 'sphere-app.js'), 'utf8');
 
   assert.ok(html.includes('src="./academic-facts.js"'));
   assert.equal(/<script[^>]+src="[^"]*academic-data\.js"/.test(html), false);
   assert.equal(html.includes('id="r3d-layer"'), false, '層切替の要素を持たない');
   assert.ok(html.includes('id="r3d-back"') && html.includes('href="../"'), '2D 通常画面への戻り');
   assert.ok(html.includes('2Dの全体マップ'));
+  assert.equal(html.includes('design-lab'), false, '公開ページが設計ラボを参照している');
+  assert.equal(html.includes('noindex'), false, '公開ページに noindex が残っている');
 
-  assert.ok(js.includes("var COMBINED_LAYER = 'academic'"));
+  assert.ok(js.includes("var LAYER = 'academic'"));
   assert.equal(/state\.layer\s*=\s*'normal'/.test(js), false);
-  // L キーは interaction から来ても切替しない
-  assert.ok(/case 'layer':[\s\S]{0,200}break;/.test(js));
-  assert.equal(/setLayer\(state\.layer === 'normal'/.test(js), false);
   // 事実データが無ければ通常のみへ落とさず、フォールバックで止める（fail-closed）
   assert.ok(js.includes('大学レベルの追加反応データ（academic-facts.js）を読み込めませんでした。'));
   assert.ok(js.includes("if (!academicData || !Array.isArray(academicData.reactions)"));
@@ -184,16 +184,28 @@ test('[staging] 3D の全ファイルが配信物にあり、詳細の builder �
   buildOnce();
   const pages = path.join(outDir, 'pages');
   for (const file of [
-    'academic-facts.js', 'app.js', 'app3d.css', 'detail.js', 'detail.css',
-    'interaction.js', 'layout3d.js', 'projection.js', 'renderer.js', 'scene-model.js'
+    'academic-facts.js', 'app3d.css', 'detail.js', 'detail.css', 'equation-fit.js',
+    'index.html', 'interaction.js', 'projection.js', 'renderer.js', 'scene-model.js',
+    'sphere-app.js', 'sphere-camera.js', 'sphere-dock.js', 'sphere-input.js',
+    'sphere-layout.js', 'sphere-render.js', 'sphere.css'
   ]) {
     assert.ok(fs.existsSync(path.join(pages, 'app11', '3d', file)), file);
+  }
+  // 旧 3D エンジンの app.js / layout3d.js は配信しない（scripts/legacy に保存）。
+  for (const file of ['app.js', 'layout3d.js']) {
+    assert.equal(fs.existsSync(path.join(pages, 'app11', '3d', file)), false, file);
   }
   const detail = fs.readFileSync(path.join(pages, 'app11', '3d', 'detail.js'), 'utf8');
   // site/app11/3d/ から site/app10/ へは 2 階層上。
   assert.ok(detail.includes("var BUILDER_SAFE_PREFIX = '../../app10/'"));
   // 旧パス（design-lab 前提の 3 階層）が残っていない
   assert.equal(detail.includes("'../../site/app10/'"), false);
+  // 公開 3D の HTML/JS/CSS は design-lab を参照しない。
+  for (const file of fs.readdirSync(path.join(pages, 'app11', '3d'))) {
+    if (!/\.(?:html|js|css)$/.test(file)) continue;
+    const text = fs.readFileSync(path.join(pages, 'app11', '3d', file), 'utf8');
+    assert.equal(text.includes('design-lab'), false, file + ' が design-lab を参照している');
+  }
 });
 
 test('[determinism] ステージングは同じ入力から同じ成果物になる', () => {
@@ -204,6 +216,7 @@ test('[determinism] ステージングは同じ入力から同じ成果物にな
   for (const rel of [
     ['app11', 'index.html'],
     ['app11', '3d', 'index.html'],
+    ['app11', '3d', 'sphere-app.js'],
     ['app11', '3d', 'academic-facts.js']
   ]) {
     assert.equal(

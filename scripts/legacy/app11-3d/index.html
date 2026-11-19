@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>有機反応マップ 3D</title>
+<meta name="description" content="高校有機化学の通常反応と大学レベルの追加反応を、奥行きのある一枚の3D地図で見渡す学習ツールです。">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./app3d.css">
+<link rel="stylesheet" href="./detail.css">
+</head>
+<body class="r3d-body">
+<div class="r3d-app" id="r3d-app">
+  <a class="r3d-skip" href="#r3d-controls">操作へスキップ</a>
+
+  <canvas id="r3d-canvas" class="r3d-canvas" tabindex="0"
+    aria-label="有機反応マップの3Dビュー。矢印キーで移動、Shift+矢印で視点回転、+と-で拡大縮小、Rで起動時の初期位置、Fで選択した物質へ移動します。"
+    aria-describedby="r3d-help-text"></canvas>
+
+  <header class="r3d-head">
+    <div class="r3d-title">
+      <p class="r3d-kicker">有機反応マップ / 3D</p>
+      <h1>有機反応マップ <span>3D</span></h1>
+      <p class="r3d-sub">高校の通常反応と大学レベルの追加反応を、奥行きのある一枚の地図で見渡す。</p>
+    </div>
+    <div class="r3d-search">
+      <label class="r3d-sr" for="r3d-search">物質名・示性式で検索</label>
+      <input id="r3d-search" class="r3d-search__input" type="search" role="combobox"
+        aria-expanded="false" aria-controls="r3d-results" aria-autocomplete="list"
+        autocomplete="off" spellcheck="false" placeholder="検索: エタノール / C2H6O">
+      <div id="r3d-results" class="r3d-results" role="listbox" aria-label="検索結果" hidden></div>
+      <p id="r3d-search-status" class="r3d-search__status" role="status" aria-live="polite"></p>
+    </div>
+    <div class="r3d-head__actions">
+      <a class="r3d-btn r3d-head__back" id="r3d-back" href="../">2Dの全体マップ</a>
+      <button type="button" class="r3d-btn" id="r3d-help-open" aria-haspopup="dialog" aria-controls="r3d-help">操作</button>
+    </div>
+  </header>
+
+  <div class="r3d-toolbar" id="r3d-controls" role="toolbar" aria-label="3Dビューの操作">
+    <button type="button" class="r3d-btn r3d-btn--icon" id="r3d-zoom-out" aria-label="縮小">−</button>
+    <button type="button" class="r3d-btn r3d-btn--icon" id="r3d-zoom-in" aria-label="拡大">＋</button>
+    <button type="button" class="r3d-btn" id="r3d-reset" title="起動時の位置・倍率・向きへ戻す (R / 0)">初期位置 <kbd>R</kbd></button>
+    <button type="button" class="r3d-btn" id="r3d-focus" disabled>選択へ移動 <kbd>F</kbd></button>
+    <button type="button" class="r3d-btn" id="r3d-unconnected" aria-pressed="false"
+      title="確認済みの経路がない物質だけを目立たせる (U)">未接続 <kbd>U</kbd></button>
+    <div class="r3d-touch-mode" role="group" aria-label="1本指ドラッグの操作">
+      <button type="button" class="r3d-btn r3d-btn--small" id="r3d-touch-rotate"
+        aria-pressed="true" title="1本指ドラッグで視点を回転（既定）">1本指: 回転</button>
+      <button type="button" class="r3d-btn r3d-btn--small" id="r3d-touch-move"
+        aria-pressed="false" title="1本指ドラッグで平行移動">1本指: 移動</button>
+    </div>
+    <details class="r3d-legend" id="r3d-legend" open>
+      <summary class="r3d-legend__summary" title="カードの色は物質の分類です。選択・検索の強調は一時的なもので、分類色ではありません。分類を押すとその分類だけを表示します。">カードの色</summary>
+      <div class="r3d-legend__list" id="r3d-legend-list" role="group" aria-label="物質カードの分類（同じ分類をもう一度押すと解除）"></div>
+    </details>
+  </div>
+
+  <aside class="r3d-detail" id="r3d-detail" aria-label="選択した物質の詳細" hidden>
+    <div class="r3d-detail__bar">
+      <p class="r3d-detail__eyebrow" id="r3d-detail-eyebrow">選択中</p>
+      <button type="button" class="r3d-btn r3d-btn--small" id="r3d-clear">選択解除</button>
+    </div>
+    <h2 class="r3d-detail__title" id="r3d-detail-title"></h2>
+    <p class="r3d-detail__meta" id="r3d-detail-meta"></p>
+    <div class="r3d-detail__body" id="r3d-detail-body"></div>
+    <div class="r3d-detail__actions">
+      <button type="button" class="r3d-btn" id="r3d-detail-focus">この物質を中心に</button>
+    </div>
+    <p class="r3d-detail__note">反応の条件・出典は各グループの代表に基づきます。向きは基質 → 生成物で固定し、逆向きは別グループとして扱います。</p>
+  </aside>
+
+  <div class="r3d-hint" id="r3d-hint">
+    <p>ドラッグで回転 / 右ドラッグまたは Shift+ドラッグで移動 / ホイールはカーソル位置を保って拡大縮小</p>
+    <p>1本指は既定で回転。「1本指: 移動」を選ぶと平行移動。2本指は拡大縮小と移動（ひねりでは回りません）。下部の色を押すと分類で絞り込めます。</p>
+    <p>カードを選ぶと、詳細で隠れない範囲の中心へ寄せます。選択中は、その物質と直接関係する反応グループの物質・経路だけを表示します（選択解除で全表示に戻ります）。</p>
+  </div>
+
+  <div class="r3d-fallback" id="r3d-fallback" hidden>
+    <div class="r3d-fallback__inner">
+      <h2>3D表示を開始できませんでした</h2>
+      <p id="r3d-fallback-message">Canvas 2D が利用できないため、検索できる一覧で代用しています。</p>
+      <label class="r3d-sr" for="r3d-fallback-search">物質名で検索</label>
+      <input id="r3d-fallback-search" class="r3d-search__input" type="search" placeholder="検索: エタノール / C2H6O">
+      <ul id="r3d-fallback-list" class="r3d-fallback__list"></ul>
+      <p class="r3d-fallback__back"><a href="../">2Dの全体マップへ戻る</a></p>
+    </div>
+  </div>
+
+  <dialog class="r3d-dialog" id="r3d-help" aria-labelledby="r3d-help-title">
+    <div class="r3d-dialog__bar">
+      <h2 id="r3d-help-title">3Dマップの操作</h2>
+      <button type="button" class="r3d-btn r3d-btn--small" id="r3d-help-close">閉じる</button>
+    </div>
+    <div class="r3d-dialog__body" id="r3d-help-text">
+      <dl class="r3d-keys">
+        <dt>ドラッグ</dt><dd>視点を回転（オービット）</dd>
+        <dt>右ドラッグ / Shift+ドラッグ</dt><dd>平行移動</dd>
+        <dt>ホイール / ピンチ</dt><dd>ホイールはカーソル位置を固定して拡大・縮小（ピンチは中点基準）</dd>
+        <dt>1本指ドラッグ（回転・既定）</dt><dd>視点回転（上下で仰角も変化）。最初はこの回転です</dd>
+        <dt>1本指ドラッグ（移動）</dt><dd>平行移動。ツールバーの「1本指: 移動」に切り替えたとき</dd>
+        <dt>2本指</dt><dd>ピンチで拡大縮小、移動で平行移動。ひねりでは回転しません（誤操作防止）</dd>
+        <dt>矢印キー / W A S D</dt><dd>カメラの平行移動（←/A=カメラが左、→/D=右、↑/W=上、↓/S=下。固定した地図は逆へ流れます。ズーム・前後移動ではありません）</dd>
+        <dt>Shift+矢印キー / Shift+WASD</dt><dd>視点回転</dd>
+        <dt>+ / −</dt><dd>拡大・縮小</dd>
+        <dt>R / 0</dt><dd>初期位置（起動時と同じ最大ズーム・地図中心・元の向き）へ戻す</dd>
+        <dt>F</dt><dd>選択した物質へ移動</dd>
+        <dt>U</dt><dd>未接続の物質を目立たせる</dd>
+        <dt>/</dt><dd>検索へ移動</dd>
+        <dt>Esc</dt><dd>選択・検索を閉じる</dd>
+      </dl>
+      <p>この3Dマップは、高校の通常反応と大学レベルの追加反応を常に合わせて表示します。表示する層の切り替えはありません。</p>
+      <p>物質を選ぶとフォーカス固定になります。選択点を表示領域の中心に保ち、回転・ズームはその点を軸にします。パン（矢印/WASD・右ドラッグ・2本指の中点）は固定中は無効です。1本指は回転になり、解除すると固定前に選んでいた回転/移動（既定は回転）に戻ります。</p>
+      <p>検索が 1 件だけに絞られたときも同じ固定を一時適用します（詳細は開きません）。複数一致では通常表示のままです。Esc・検索クリア・選択解除で固定だけを解除し、向き・倍率・位置は戻しません。初期位置（R / 0）は選択・検索を解除し、起動時と同じ最大ズーム・地図中心・元の向きへ戻します。広い全体像は手動でズームアウトして見ます。</p>
+      <p>カメラが自動で跳ぶことはありません。初期位置（R / 0）と選択への移動（F）だけが明示的なジャンプです。</p>
+      <p>カードの色は物質の分類です（下部の凡例と同じ並び）。選択中・検索一致・文脈表示の色は一時的な強調で、分類色ではありません。分類は 10 種類あり、凡例は狭い画面では「カードの色」を押すと開きます。</p>
+      <p>下部の分類ボタンを押すと、その分類の物質だけを表示します（同じボタンで解除、「すべて」で全分類）。分類を切り替えてもカメラは動きません。周囲の経路は、反応グループの全端点（基質と生成物）が同じ分類に揃っているときだけ描きます。途中の端点だけを見せて、反応の相手を誤解させません。</p>
+      <p>物質を選んでいる間は、分類の絞り込みより選択した物質の関係を優先します。分類外の関係物質と経路も表示し、選択解除で選んでいた分類に戻ります。検索は全分類を対象にし、一致した物質とその直接の文脈は分類外でも表示します（検索を消すと分類に戻ります）。</p>
+      <p>経路の色: 通常はアンバー（黄）、大学レベル専用はシアン（青）。詳細の反応カードも同じ色で、共通グループは両色のアクセントと「共通グループ」バッジで示します。</p>
+      <p>キーボードのパンは短い平滑化つきで、キーを離す・フォーカスが外れる・別の操作を始めると止まります。OS のキーリピートには依存せず、<code>prefers-reduced-motion</code> では即時移動になります。</p>
+      <p>この画面は固定の暗色テーマです。アイドル時のアニメーションループはなく、操作や選択遷移のあいだだけ描画します。</p>
+    </div>
+  </dialog>
+
+  <p class="r3d-sr" id="r3d-live" role="status" aria-live="polite"></p>
+</div>
+
+<noscript>
+  <p class="r3d-noscript">この3DマップはJavaScriptを有効にすると利用できます。</p>
+</noscript>
+
+<!-- 共有データ（読み取り専用）。2D 側のファイルは変更しない。 -->
+<script src="../../shared/organic-structure.js"></script>
+<script src="../data.js"></script>
+<!-- 大学レベル追加反応の事実データ（座標を含まない）。2D 用の academic-data.js は読まない。 -->
+<script src="./academic-facts.js"></script>
+<script src="../reaction-groups.js"></script>
+<!-- この画面のモジュール -->
+<script src="./projection.js"></script>
+<script src="./layout3d.js"></script>
+<script src="./scene-model.js"></script>
+<script src="./renderer.js"></script>
+<script src="./interaction.js"></script>
+<!-- 詳細本文（別担当）。未読込でも app 側フォールバックで動く。 -->
+<script src="./detail.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

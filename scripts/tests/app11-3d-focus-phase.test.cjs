@@ -20,11 +20,12 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const APP = path.join(ROOT, 'site', 'app11');
 const APP3D = path.join(APP, '3d');
+const LEGACY = path.join(ROOT, 'scripts', 'legacy', 'app11-3d');
 const D = require(path.join(APP, 'data.js'));
 const A = require(path.join(APP, 'academic-data.js'));
 const G = require(path.join(APP, 'reaction-groups.js'));
 const P = require(path.join(ROOT, 'site', 'app11', '3d', 'projection.js'));
-const L = require(path.join(ROOT, 'site', 'app11', '3d', 'layout3d.js'));
+const L = require(path.join(LEGACY, 'layout3d.js'));
 const S = require(path.join(ROOT, 'site', 'app11', '3d', 'scene-model.js'));
 const R = require(path.join(ROOT, 'site', 'app11', '3d', 'renderer.js'));
 
@@ -251,7 +252,7 @@ test('[motion] reduced-motion は遷移を作らず、着地と同じ最終表�
 });
 
 test('[wiring] app.js は phase を animation 状態から渡し、タイマーを増やさない', () => {
-  const js = fs.readFileSync(path.join(APP3D, 'app.js'), 'utf8');
+  const js = fs.readFileSync(path.join(LEGACY, 'app.js'), 'utf8');
   assert.ok(js.includes("phase: previewMs > 0 ? 'preview' : 'travel'"));
   assert.ok(js.includes('P.transitionPhase(elapsed, transition.previewMs, transition.durationMs)'));
   assert.ok(js.includes('transition.phase = \'travel\''));

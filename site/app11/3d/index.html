@@ -3,25 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>有機反応マップ 3D</title>
-<meta name="description" content="高校有機化学の通常反応と大学レベルの追加反応を、奥行きのある一枚の3D地図で見渡す学習ツールです。">
+<title>有機反応マップ 3D 球ビュー</title>
+<meta name="description" content="高校有機化学の通常反応と大学レベルの追加反応を、427 物質すべて同じ球の上に置いて見渡す3D学習ツールです。">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./app3d.css">
 <link rel="stylesheet" href="./detail.css">
+<link rel="stylesheet" href="./sphere.css">
 </head>
 <body class="r3d-body">
 <div class="r3d-app" id="r3d-app">
   <a class="r3d-skip" href="#r3d-controls">操作へスキップ</a>
 
   <canvas id="r3d-canvas" class="r3d-canvas" tabindex="0"
-    aria-label="有機反応マップの3Dビュー。矢印キーで移動、Shift+矢印で視点回転、+と-で拡大縮小、Rで起動時の初期位置、Fで選択した物質へ移動します。"
+    aria-label="有機反応マップの球ビュー。ドラッグで視点を回転、ホイールまたはピンチで拡大縮小、Iで球の外と中を切り替え、Rで全体表示、Fで選択した物質へ移動します。"
     aria-describedby="r3d-help-text"></canvas>
+
+  <div class="r3d-virtual-cards" id="r3d-virtual-cards"
+    role="group" aria-label="画面の縁に表示した反応相手（選ぶと中心へ寄せます）" hidden></div>
 
   <header class="r3d-head">
     <div class="r3d-title">
-      <p class="r3d-kicker">有機反応マップ / 3D</p>
-      <h1>有機反応マップ <span>3D</span></h1>
-      <p class="r3d-sub">高校の通常反応と大学レベルの追加反応を、奥行きのある一枚の地図で見渡す。</p>
+      <p class="r3d-kicker">有機反応マップ / 3D / 球ビュー</p>
+      <h1>有機反応マップ <span>球</span></h1>
+      <p class="r3d-sub">427 物質すべてを同じ球の上に。分野は近い場所にまとまり、球の外から全体を、中から一部を眺めます。</p>
     </div>
     <div class="r3d-search">
       <label class="r3d-sr" for="r3d-search">物質名・示性式で検索</label>
@@ -37,21 +41,21 @@
     </div>
   </header>
 
-  <div class="r3d-toolbar" id="r3d-controls" role="toolbar" aria-label="3Dビューの操作">
+  <div class="r3d-toolbar" id="r3d-controls" role="toolbar" aria-label="球ビューの操作">
+    <div class="s3d-mode" role="group" aria-label="表示モード">
+      <button type="button" class="r3d-btn r3d-btn--small s3d-mode__btn" id="r3d-mode-outside"
+        aria-pressed="true" title="球の外から全体を見る（既定）">球の外</button>
+      <button type="button" class="r3d-btn r3d-btn--small s3d-mode__btn" id="r3d-mode-inside"
+        aria-pressed="false" title="球の中から見渡す">球の中</button>
+    </div>
     <button type="button" class="r3d-btn r3d-btn--icon" id="r3d-zoom-out" aria-label="縮小">−</button>
     <button type="button" class="r3d-btn r3d-btn--icon" id="r3d-zoom-in" aria-label="拡大">＋</button>
-    <button type="button" class="r3d-btn" id="r3d-reset" title="起動時の位置・倍率・向きへ戻す (R / 0)">初期位置 <kbd>R</kbd></button>
+    <button type="button" class="r3d-btn" id="r3d-reset" title="球全体の初期位置へ戻す (R / 0)">全体表示 <kbd>R</kbd></button>
     <button type="button" class="r3d-btn" id="r3d-focus" disabled>選択へ移動 <kbd>F</kbd></button>
     <button type="button" class="r3d-btn" id="r3d-unconnected" aria-pressed="false"
       title="確認済みの経路がない物質だけを目立たせる (U)">未接続 <kbd>U</kbd></button>
-    <div class="r3d-touch-mode" role="group" aria-label="1本指ドラッグの操作">
-      <button type="button" class="r3d-btn r3d-btn--small" id="r3d-touch-rotate"
-        aria-pressed="true" title="1本指ドラッグで視点を回転（既定）">1本指: 回転</button>
-      <button type="button" class="r3d-btn r3d-btn--small" id="r3d-touch-move"
-        aria-pressed="false" title="1本指ドラッグで平行移動">1本指: 移動</button>
-    </div>
     <details class="r3d-legend" id="r3d-legend" open>
-      <summary class="r3d-legend__summary" title="カードの色は物質の分類です。選択・検索の強調は一時的なもので、分類色ではありません。分類を押すとその分類だけを表示します。">カードの色</summary>
+      <summary class="r3d-legend__summary" title="カードの色は物質の分類です。押すとその分類だけを表示します。">カードの色</summary>
       <div class="r3d-legend__list" id="r3d-legend-list" role="group" aria-label="物質カードの分類（同じ分類をもう一度押すと解除）"></div>
     </details>
   </div>
@@ -71,14 +75,16 @@
   </aside>
 
   <div class="r3d-hint" id="r3d-hint">
-    <p>ドラッグで回転 / 右ドラッグまたは Shift+ドラッグで移動 / ホイールはカーソル位置を保って拡大縮小</p>
-    <p>1本指は既定で回転。「1本指: 移動」を選ぶと平行移動。2本指は拡大縮小と移動（ひねりでは回りません）。下部の色を押すと分類で絞り込めます。</p>
-    <p>カードを選ぶと、詳細で隠れない範囲の中心へ寄せます。選択中は、その物質と直接関係する反応グループの物質・経路だけを表示します（選択解除で全表示に戻ります）。</p>
+    <p>ドラッグは指の下の球面を掴んで運びます（マウスも1本指も同じ）。ホイール・ピンチは拡大縮小。球の外は距離を保って回り、球の中は視点が中心のまま視線と画角だけが変わります（平行移動はしません）。</p>
+    <p>下部の「球の外 / 球の中」で表示モードを明示的に切り替えます。切り替えは短いフェードで行い、選択中の物質と関係グラフはそのまま保持されます。選択中は、投影できる裏半球の直接の反応相手も通常カードとして実位置に表示し、画面外・パネル裏・カメラの後ろだけを、縁に並べた名前付きカードで補います。選択解除時は、表示されていなかった物質と経路を約0.9秒でフェードインします。</p>
+    <p>カードを選ぶと、詳細パネルを除いた実表示領域の中心へ寄せます。選択解除・全体表示（R）で戻ります。</p>
   </div>
+
+  <div class="s3d-fade" id="s3d-fade" aria-hidden="true"></div>
 
   <div class="r3d-fallback" id="r3d-fallback" hidden>
     <div class="r3d-fallback__inner">
-      <h2>3D表示を開始できませんでした</h2>
+      <h2>球ビューを開始できませんでした</h2>
       <p id="r3d-fallback-message">Canvas 2D が利用できないため、検索できる一覧で代用しています。</p>
       <label class="r3d-sr" for="r3d-fallback-search">物質名で検索</label>
       <input id="r3d-fallback-search" class="r3d-search__input" type="search" placeholder="検索: エタノール / C2H6O">
@@ -89,36 +95,32 @@
 
   <dialog class="r3d-dialog" id="r3d-help" aria-labelledby="r3d-help-title">
     <div class="r3d-dialog__bar">
-      <h2 id="r3d-help-title">3Dマップの操作</h2>
+      <h2 id="r3d-help-title">球ビューの操作</h2>
       <button type="button" class="r3d-btn r3d-btn--small" id="r3d-help-close">閉じる</button>
     </div>
     <div class="r3d-dialog__body" id="r3d-help-text">
       <dl class="r3d-keys">
-        <dt>ドラッグ</dt><dd>視点を回転（オービット）</dd>
-        <dt>右ドラッグ / Shift+ドラッグ</dt><dd>平行移動</dd>
-        <dt>ホイール / ピンチ</dt><dd>ホイールはカーソル位置を固定して拡大・縮小（ピンチは中点基準）</dd>
-        <dt>1本指ドラッグ（回転・既定）</dt><dd>視点回転（上下で仰角も変化）。最初はこの回転です</dd>
-        <dt>1本指ドラッグ（移動）</dt><dd>平行移動。ツールバーの「1本指: 移動」に切り替えたとき</dd>
-        <dt>2本指</dt><dd>ピンチで拡大縮小、移動で平行移動。ひねりでは回転しません（誤操作防止）</dd>
-        <dt>矢印キー / W A S D</dt><dd>カメラの平行移動（←/A=カメラが左、→/D=右、↑/W=上、↓/S=下。固定した地図は逆へ流れます。ズーム・前後移動ではありません）</dd>
-        <dt>Shift+矢印キー / Shift+WASD</dt><dd>視点回転</dd>
+        <dt>ドラッグ</dt><dd>指の下の球面を掴んで回す（球の外は距離一定のまま）</dd>
+        <dt>ホイール / ピンチ</dt><dd>球の外は距離、球の中は画角（FOV）の拡大縮小</dd>
+        <dt>1本指ドラッグ</dt><dd>マウスと同じ掴み操作</dd>
+        <dt>2本指</dt><dd>ピンチで拡大縮小（平行移動はしません）</dd>
+        <dt>選択中の裏側</dt><dd>投影できる相手は実位置の通常カード。画面外・パネル裏は縁の名前付きカード</dd>
+        <dt>選択解除</dt><dd>表示されていなかった物質・経路を約0.9秒でフェードイン</dd>
+        <dt>球の外 / 球の中</dt><dd>表示モードを明示的に切り替え（短いフェード）</dd>
+        <dt>I</dt><dd>球の外 / 球の中を切り替え</dd>
         <dt>+ / −</dt><dd>拡大・縮小</dd>
-        <dt>R / 0</dt><dd>初期位置（起動時と同じ最大ズーム・地図中心・元の向き）へ戻す</dd>
-        <dt>F</dt><dd>選択した物質へ移動</dd>
+        <dt>R / 0</dt><dd>球全体の初期位置へ戻す（選択・検索も解除）</dd>
+        <dt>F</dt><dd>選択した物質を表示領域の中心へ</dd>
         <dt>U</dt><dd>未接続の物質を目立たせる</dd>
         <dt>/</dt><dd>検索へ移動</dd>
         <dt>Esc</dt><dd>選択・検索を閉じる</dd>
       </dl>
-      <p>この3Dマップは、高校の通常反応と大学レベルの追加反応を常に合わせて表示します。表示する層の切り替えはありません。</p>
-      <p>物質を選ぶとフォーカス固定になります。選択点を表示領域の中心に保ち、回転・ズームはその点を軸にします。パン（矢印/WASD・右ドラッグ・2本指の中点）は固定中は無効です。1本指は回転になり、解除すると固定前に選んでいた回転/移動（既定は回転）に戻ります。</p>
-      <p>検索が 1 件だけに絞られたときも同じ固定を一時適用します（詳細は開きません）。複数一致では通常表示のままです。Esc・検索クリア・選択解除で固定だけを解除し、向き・倍率・位置は戻しません。初期位置（R / 0）は選択・検索を解除し、起動時と同じ最大ズーム・地図中心・元の向きへ戻します。広い全体像は手動でズームアウトして見ます。</p>
-      <p>カメラが自動で跳ぶことはありません。初期位置（R / 0）と選択への移動（F）だけが明示的なジャンプです。</p>
-      <p>カードの色は物質の分類です（下部の凡例と同じ並び）。選択中・検索一致・文脈表示の色は一時的な強調で、分類色ではありません。分類は 10 種類あり、凡例は狭い画面では「カードの色」を押すと開きます。</p>
-      <p>下部の分類ボタンを押すと、その分類の物質だけを表示します（同じボタンで解除、「すべて」で全分類）。分類を切り替えてもカメラは動きません。周囲の経路は、反応グループの全端点（基質と生成物）が同じ分類に揃っているときだけ描きます。途中の端点だけを見せて、反応の相手を誤解させません。</p>
-      <p>物質を選んでいる間は、分類の絞り込みより選択した物質の関係を優先します。分類外の関係物質と経路も表示し、選択解除で選んでいた分類に戻ります。検索は全分類を対象にし、一致した物質とその直接の文脈は分類外でも表示します（検索を消すと分類に戻ります）。</p>
-      <p>経路の色: 通常はアンバー（黄）、大学レベル専用はシアン（青）。詳細の反応カードも同じ色で、共通グループは両色のアクセントと「共通グループ」バッジで示します。</p>
-      <p>キーボードのパンは短い平滑化つきで、キーを離す・フォーカスが外れる・別の操作を始めると止まります。OS のキーリピートには依存せず、<code>prefers-reduced-motion</code> では即時移動になります。</p>
-      <p>この画面は固定の暗色テーマです。アイドル時のアニメーションループはなく、操作や選択遷移のあいだだけ描画します。</p>
+      <p>427 物質は Fibonacci 球の固定スロットに置き、分野は球面上の近い範囲へまとめています。カードは画面に正対し、球の裏側のカードは表示しません（球の外）。</p>
+      <p>球の外では、ドラッグで球のまわりを回り、ホイール・ピンチは距離だけを変えます（球の中へは入りません）。球の中では視点が球の中心に固定され、ドラッグで視線、ホイール・ピンチで画角が変わります。どちらも平行移動はしません。</p>
+      <p>物質を選ぶと、詳細で隠れない実表示領域の中心に投影が来るよう、視線（球の外では球のまわりの向き）を合わせます。選択中にドラッグすると、この自動センタリングは解除され、指の下の面を掴む直接操作になります（選択・関係グラフ・詳細は保持。F で再センタリング）。投影できる裏半球の直接の反応相手も実位置の通常カードとして表示し、画面外・カメラの後ろ・パネル裏だけを、縁に沿って並べた名前付きカードと破線の続きで補います。カードは Tab で移動して Enter / Space でも選べます。選択・関係グラフ・詳細はモードを切り替えても保持されます。切り替えは短いフェードで行い、<code>prefers-reduced-motion</code> では即時です。</p>
+      <p>反応式カードは初期状態でパネル幅に収まり、横スクロールしません。各反応式の「拡大」を押したときだけ、そのカードの中が横スクロールになります。係数・複数の基質/生成物・条件・出典は共有 canonical の表示のままです。</p>
+      <p>経路の色: 通常はアンバー（黄）、大学レベル専用はシアン（青）。カードの色は物質の分類です。</p>
+      <p>この画面は固定の暗色テーマで、アイドル時のアニメーションループはありません。</p>
     </div>
   </dialog>
 
@@ -126,7 +128,7 @@
 </div>
 
 <noscript>
-  <p class="r3d-noscript">この3DマップはJavaScriptを有効にすると利用できます。</p>
+  <p class="r3d-noscript">この球ビューはJavaScriptを有効にすると利用できます。</p>
 </noscript>
 
 <!-- 共有データ（読み取り専用）。2D 側のファイルは変更しない。 -->
@@ -135,14 +137,19 @@
 <!-- 大学レベル追加反応の事実データ（座標を含まない）。2D 用の academic-data.js は読まない。 -->
 <script src="./academic-facts.js"></script>
 <script src="../reaction-groups.js"></script>
-<!-- この画面のモジュール -->
+<!-- 投影は公開 projection を拡張してから renderer を読む（renderer は読み込み時の P を保持する）。 -->
 <script src="./projection.js"></script>
-<script src="./layout3d.js"></script>
+<script src="./sphere-camera.js"></script>
 <script src="./scene-model.js"></script>
 <script src="./renderer.js"></script>
 <script src="./interaction.js"></script>
-<!-- 詳細本文（別担当）。未読込でも app 側フォールバックで動く。 -->
 <script src="./detail.js"></script>
-<script src="./app.js"></script>
+<!-- 球ビューのモジュール -->
+<script src="./sphere-layout.js"></script>
+<script src="./sphere-render.js"></script>
+<script src="./sphere-input.js"></script>
+<script src="./sphere-dock.js"></script>
+<script src="./equation-fit.js"></script>
+<script src="./sphere-app.js"></script>
 </body>
 </html>
