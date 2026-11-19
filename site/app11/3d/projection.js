@@ -598,6 +598,13 @@
     return easeInOutCubic((elapsedMs - preview) / duration);
   }
 
+  // 着地後の減光（0→1）。カメラ移動が終わった時点を 0 とし、fadeMs で 1 へ。
+  // 線形で十分（無関係の物質・経路の alpha をこの値から 1-値 で落とす）。
+  function transitionFade(elapsedMs, fadeMs) {
+    var duration = Math.max(1, fadeMs || 1);
+    return clamp(elapsedMs / duration, 0, 1);
+  }
+
   function interpolateCamera(from, to, t) {
     var k = clamp(t, 0, 1);
     var next = cloneCamera(from);
@@ -706,6 +713,7 @@
     easeInOutCubic: easeInOutCubic,
     transitionPhase: transitionPhase,
     transitionProgress: transitionProgress,
+    transitionFade: transitionFade,
     interpolateCamera: interpolateCamera,
     clipSegment: clipSegment
   };

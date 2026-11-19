@@ -126,13 +126,23 @@
     var structurePlaneOptions = options.structurePlane || null;
     // カメラ移動のフェーズ。preview/travel 中は「分離表示」をまだ出さず、
     // 直前の全体文脈に焦点（選択・一致・直接ネットワーク）だけを重ねる。
-    // 既定（'final'）は従来どおりの最終表示なので、既存の呼び出しは変わらない。
-    var focusPhase = options.focusPhase === 'preview' || options.focusPhase === 'travel'
+    // 'fade' は着地後、カメラを固定したまま無関係の物質・経路だけを
+    // focusFade（0→1）で徐々に消す。既定（'final'）は従来どおりの最終表示。
+    var focusPhase = options.focusPhase === 'preview' || options.focusPhase === 'travel' ||
+      options.focusPhase === 'fade'
       ? options.focusPhase
       : 'final';
-    var transit = focusPhase !== 'final';
-    var focusPivotId = transit ? (selectedId || options.focusPivotId || null) : null;
+    var fadeActive = focusPhase === 'fade';
+    var fadeProgress = fadeActive
+      ? clamp(options.focusFade == null ? 0 : options.focusFade, 0, 1)
+      : 0;
+    var fadeAlpha = 1 - fadeProgress;
+    var transit = focusPhase === 'preview' || focusPhase === 'travel';
+    var focusPivotId = (transit || fadeActive) ? (selectedId || options.focusPivotId || null) : null;
     var transitSelection = transit && !!selectedId;
+    // 着地後の減光では「最終表示に残るもの」は今の見え方のまま置き、
+    // 最終表示で消えるものだけを fade 付きで残す（着地の瞬間に切り替えない）。
+    var fadeSelection = fadeActive && !!selectedId;
 
     var basis = P.cameraBasis(camera);
     var q = model.normalizeText(query);
@@ -156,7 +166,7 @@
           neighborIds[id] = true;
         });
       });
-      if (!transitSelection) {
+      if (!transitSelection && !fadeSelection) {
         focalIds = Object.create(null);
         focalIds[selectedId] = true;
         Object.keys(neighborIds).forEach(function (id) { focalIds[id] = true; });
@@ -227,9 +237,11 @@
       var isContext = !focalIds && !!contextIds[compound.id] && !isMatch && !isSelected;
       var isConnected = !!connected[compound.id];
       var isNeighbor = !!neighborIds[compound.id];
-      var isLinked = transitSelection && !isSelected && !!focusIds[compound.id];
+      var isLinked = (transitSelection || fadeSelection) && !isSelected && !!focusIds[compound.id];
+      // 着地後の減光で最終表示から消える物質（選択・直接ネットワーク以外）。
+      var isFading = fadeSelection && !isSelected && !focusIds[compound.id];
       // 移動中の選択では無関係を減光しない（直前の全体文脈のまま）。
-      var dimmed = !focalIds && !transitSelection &&
+      var dimmed = !focalIds && !transitSelection && !fadeSelection &&
         ((searchActive && !isMatch && !isContext) || (showUnconnectedOnly && isConnected));
       var priority;
       if (isSelected) priority = 0;
@@ -259,6 +271,7 @@
         context: isContext,
         neighbor: isNeighbor,
         linked: isLinked,
+        fade: isFading,
         connected: isConnected,
         dimmed: dimmed,
         regionColor: regionColor(compound.region)
@@ -351,8 +364,12 @@
       var clipped = P.clipSegment(from.x, from.y, to.x, to.y, clipRect);
       if (!clipped) { culledEdges++; continue; }
       var selectedEdge = !!selectedGroupIds[edge.groupId] ||
-        (transit && !!focusGroupIds[edge.groupId]);
+        ((transit || fadeSelection) && !!focusGroupIds[edge.groupId]);
       var searchLink = !!searchGroupIds[edge.groupId];
+      var edgeFade = fadeSelection && !selectedEdge;
+      // 単一検索の着地後は、移動中に強調した経路を「通常の線の上のハイライト」として
+      // 徐々に薄くする（無関係の点・経路は最終検索表示のまま残す）。
+      var highlightFade = fadeActive && !fadeSelection && !!focusGroupIds[edge.groupId];
       var avgZ = (from.z + to.z) / 2;
       edges.push({
         id: edge.id,
@@ -370,9 +387,11 @@
         selected: selectedEdge,
         searchLink: searchLink,
         academic: edge.academicOnly,
+        fade: edgeFade,
+        highlightFade: highlightFade,
         // 検索文脈の経路は、選択中でも消さない（他の経路だけ減光する）。
         // 移動中は無関係の経路も直前の見え方のまま残す。
-        dimmed: !transit && !!selectedId && !selectedEdge && !searchLink,
+        dimmed: !transit && !fadeSelection && !!selectedId && !selectedEdge && !searchLink,
         typeLabel: edge.typeLabel
       });
     }
@@ -383,18 +402,35 @@
     for (var bi = 0; bi < edges.length; bi++) {
       var item = edges[bi];
       var key;
-      if (item.selected) key = item.academic ? 'sel-academic' : 'sel-normal';
+      if (item.fade) key = item.academic ? 'academic' : 'normal';
+      else if (item.selected) key = item.academic ? 'sel-academic' : 'sel-normal';
       else if (item.searchLink) key = item.academic ? 'academic' : 'normal';
       else if (item.academic) key = anySelected ? 'academic-dim' : 'academic';
       else key = anySelected ? 'normal-dim' : 'normal';
       // 奥行きで濃さを変えるため 3 バンドに分ける（スタイル単位のバッチは保つ）。
+      // 減光中の経路は通常スタイルのまま、フレーム共通の alpha を掛ける専用バッチへ。
       var band = item.depth < 1 / 3 ? 0 : (item.depth < 2 / 3 ? 1 : 2);
-      var batchKey = key + '|' + band;
+      var batchKey = key + '|' + band + (item.fade ? '|fade' : '');
       if (!batchesById[batchKey]) {
-        batchesById[batchKey] = { key: key, band: band, edges: [] };
+        batchesById[batchKey] = { key: key, band: band, fade: !!item.fade, highlight: false, edges: [] };
         batches.push(batchesById[batchKey]);
       }
       batchesById[batchKey].edges.push(item);
+      if (item.highlightFade) {
+        // 検索の着地後だけ、強調を通常線の上に重ねて薄くしていく（1 バッチに集約）。
+        var highlightKey = (item.academic ? 'sel-academic' : 'sel-normal') + '|' + band + '|hl';
+        if (!batchesById[highlightKey]) {
+          batchesById[highlightKey] = {
+            key: item.academic ? 'sel-academic' : 'sel-normal',
+            band: band,
+            fade: false,
+            highlight: true,
+            edges: []
+          };
+          batches.push(batchesById[highlightKey]);
+        }
+        batchesById[highlightKey].edges.push(item);
+      }
     }
 
     var floorSegments = buildFloorGrid(layout, camera, basis, viewport);
@@ -410,6 +446,8 @@
       selectedId: selectedId,
       focusPhase: focusPhase,
       focusPivotId: focusPivotId,
+      fadeProgress: fadeProgress,
+      fadeAlpha: fadeActive ? fadeAlpha : 1,
       focusIds: focusIds,
       focusGroupIds: focusGroupIds,
       selectedGroupIds: selectedGroupIds,
@@ -646,6 +684,7 @@
     var paper = theme.paper || '#05070c';
     var selectedInk = theme.selectedInk || ROUTE_INK.normal;
     var academicInk = theme.academicInk || ROUTE_INK.academic;
+    var fadeAlpha = plan.fadeAlpha == null ? 1 : plan.fadeAlpha;
     var stats = { drawCalls: 0, edgeBatches: 0, edgeSegments: 0, cards: 0, markers: 0, floorSegments: 0 };
 
     ctx.clearRect(0, 0, plan.viewport.width, plan.viewport.height);
@@ -671,7 +710,8 @@
     for (var bi = 0; bi < plan.edgeBatches.length; bi++) {
       var batch = plan.edgeBatches[bi];
       var style = edgeBatchStyle(batch.key, batch.band, theme);
-      ctx.globalAlpha = style.alpha;
+      // 減光中の無関係経路と、着地後に薄れる検索ハイライトは共通のフレーム値で落とす。
+      ctx.globalAlpha = (batch.fade || batch.highlight) ? style.alpha * fadeAlpha : style.alpha;
       ctx.strokeStyle = style.stroke;
       ctx.lineWidth = style.width;
       ctx.lineCap = 'round';
@@ -721,7 +761,7 @@
           ctx.shadowBlur = 0;
         }
         roundRectPath(ctx, node.rect.x, node.rect.y, node.rect.width, node.rect.height, 7);
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = node.fade ? fadeAlpha : 1;
         ctx.fillStyle = node.selected ? '#202b3d' : node.fill;
         ctx.fill();
         ctx.lineWidth = node.selected ? 2 : (node.match ? 1.8 : ((node.context || node.linked) ? 1.3 : 1));
@@ -738,7 +778,8 @@
         stats.cards += 1;
         stats.drawCalls += 3;
       } else {
-        ctx.globalAlpha = node.dimmed ? 0.14 : depthAlpha(node.depth, 0.92, 0.4);
+        var markerAlpha = node.dimmed ? 0.14 : depthAlpha(node.depth, 0.92, 0.4);
+        ctx.globalAlpha = node.fade ? markerAlpha * fadeAlpha : markerAlpha;
         ctx.fillStyle = node.selected ? selectedInk : node.regionColor;
         if (node.selected) {
           ctx.shadowColor = selectedInk;
@@ -749,7 +790,8 @@
         ctx.fill();
         ctx.shadowBlur = 0;
         if (node.connected) {
-          ctx.globalAlpha = node.dimmed ? 0.2 : depthAlpha(node.depth, 0.6, 0.22);
+          var markerRing = node.dimmed ? 0.2 : depthAlpha(node.depth, 0.6, 0.22);
+          ctx.globalAlpha = node.fade ? markerRing * fadeAlpha : markerRing;
           ctx.strokeStyle = 'rgba(230,240,255,0.7)';
           ctx.lineWidth = 0.8;
           ctx.stroke();
@@ -768,6 +810,8 @@
   function pickScene(plan, x, y) {
     for (var i = plan.nodes.length - 1; i >= 0; i--) {
       var node = plan.nodes[i];
+      // 消えていく背景（着地後の減光対象）はヒットさせない。
+      if (node.fade) continue;
       if (node.card) {
         if (pointInRect(x, y, node.rect)) return node.id;
         continue;

@@ -92,8 +92,8 @@
   }
 
   // 遷移の進行。preview 中は from のまま、その後 ease で to へ。
-  // phase はアニメーション状態そのもの（preview / travel / 着地）で、
-  // 表示計画はこの値だけを見て「分離表示をまだ出さない」を決める。
+  // 着地後は camera を固定したまま 'fade' へ入り、無関係の物質・経路だけを
+  // fadeMs かけて落とす（同じ rAF・同じ transition 状態のまま、追加タイマーなし）。
   function applyCameraTransition(timestamp) {
     var transition = state.transition;
     if (!transition) return;
@@ -102,6 +102,13 @@
     if (phase === 'preview') {
       transition.phase = 'preview';
       state.camera = P.cloneCamera(transition.from);
+      return;
+    }
+    var travelEnd = transition.previewMs + transition.durationMs;
+    if (!phase && transition.fadeMs > 0 && elapsed < travelEnd + transition.fadeMs) {
+      state.camera = P.cloneCamera(transition.to);
+      transition.phase = 'fade';
+      transition.fadeProgress = P.transitionFade(elapsed - travelEnd, transition.fadeMs);
       return;
     }
     var t = P.transitionProgress(elapsed, transition.previewMs, transition.durationMs);
@@ -237,6 +244,7 @@
       // 遷移中だけ preview/travel を渡す。着地（または reduced-motion の即時）は
       // 既定の 'final' で、従来どおりの選択分離・検索の文脈表示になる。
       focusPhase: state.transition ? state.transition.phase : 'final',
+      focusFade: state.transition && state.transition.phase === 'fade' ? state.transition.fadeProgress : 0,
       focusPivotId: state.lock && state.lock.kind === 'search' ? state.lock.id : null
     });
     R.drawScene(ctx, plan, {});
@@ -555,6 +563,8 @@
   var TRANSITION_EASE_MS = 430;
   var TRANSITION_RETARGET_MS = 320;
   var TRANSITION_RESET_MS = 520;
+  // 着地後、カメラを固定したまま無関係の物質・経路を落とす時間。
+  var TRANSITION_FADE_MS = 900;
 
   function nowMs() {
     return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
@@ -573,7 +583,7 @@
     };
   }
 
-  function startCameraTransition(kind, toCamera, previewMs, durationMs, keepPending) {
+  function startCameraTransition(kind, toCamera, previewMs, durationMs, keepPending, fadeMs) {
     state.transition = {
       kind: kind,
       phase: previewMs > 0 ? 'preview' : 'travel',
@@ -581,7 +591,9 @@
       to: P.cloneCamera(toCamera),
       startTs: nowMs(),
       previewMs: previewMs,
-      durationMs: durationMs
+      durationMs: durationMs,
+      fadeMs: fadeMs == null ? 0 : fadeMs,
+      fadeProgress: 0
     };
     if (!keepPending) state.pendingInput = null;
   }
@@ -609,7 +621,8 @@
     if (!target) return;
     if (animate && !prefersReducedMotion()) {
       // 直前のポーズを ~130ms 見せてから、向き・倍率を保ったまま中心へ寄せる。
-      startCameraTransition(kind, target.camera, TRANSITION_PREVIEW_MS, TRANSITION_EASE_MS, false);
+      // 着地後にカメラを固定したまま、無関係の物質・経路だけを ~900ms かけて落とす。
+      startCameraTransition(kind, target.camera, TRANSITION_PREVIEW_MS, TRANSITION_EASE_MS, false, TRANSITION_FADE_MS);
     } else {
       state.camera = target.camera;
       state.centerRect = target.rect;
@@ -715,8 +728,22 @@
       var target = lockedTargetCamera();
       if (!target) return;
       if (state.transition) {
-        // 進行中の遷移は、今の見えているポーズから新しい目標へ滑らかに振り直す。
-        startCameraTransition(state.transition.kind, target.camera, 0, TRANSITION_RETARGET_MS, true);
+        if (state.transition.phase === 'fade') {
+          // 減光中はカメラを固定したまま目標だけ差し替える（減光の時計は進めたまま）。
+          state.transition.to = P.cloneCamera(target.camera);
+          state.camera = P.cloneCamera(target.camera);
+          state.centerRect = target.rect;
+        } else {
+          // 進行中の遷移は、今の見えているポーズから新しい目標へ滑らかに振り直す。
+          startCameraTransition(
+            state.transition.kind,
+            target.camera,
+            0,
+            TRANSITION_RETARGET_MS,
+            true,
+            state.transition.fadeMs
+          );
+        }
       } else {
         state.camera = target.camera;
         state.centerRect = target.rect;
