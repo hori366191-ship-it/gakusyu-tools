@@ -580,6 +580,16 @@
     return v < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2;
   }
 
+  // 表示フェーズ。プレビュー中は 'preview'、移動中は 'travel'、着地後は null。
+  // 画面側はこの値だけで「分離表示をまだ出さない」判定をする（タイマーは使わない）。
+  function transitionPhase(elapsedMs, previewMs, durationMs) {
+    var preview = Math.max(0, previewMs || 0);
+    var duration = Math.max(1, durationMs || 1);
+    if (elapsedMs < preview) return 'preview';
+    if (elapsedMs >= preview + duration) return null;
+    return 'travel';
+  }
+
   // 0..previewMs は 0（前のポーズのまま）、その後 durationMs で 0→1。
   function transitionProgress(elapsedMs, previewMs, durationMs) {
     var preview = Math.max(0, previewMs || 0);
@@ -694,6 +704,7 @@
     zoomCameraAt: zoomCameraAt,
     zoomCameraAtScreen: zoomCameraAtScreen,
     easeInOutCubic: easeInOutCubic,
+    transitionPhase: transitionPhase,
     transitionProgress: transitionProgress,
     interpolateCamera: interpolateCamera,
     clipSegment: clipSegment

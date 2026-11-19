@@ -124,6 +124,15 @@
     var exclusions = Array.isArray(options.exclusions) ? options.exclusions : [];
     var margin = options.margin == null ? 180 : options.margin;
     var structurePlaneOptions = options.structurePlane || null;
+    // カメラ移動のフェーズ。preview/travel 中は「分離表示」をまだ出さず、
+    // 直前の全体文脈に焦点（選択・一致・直接ネットワーク）だけを重ねる。
+    // 既定（'final'）は従来どおりの最終表示なので、既存の呼び出しは変わらない。
+    var focusPhase = options.focusPhase === 'preview' || options.focusPhase === 'travel'
+      ? options.focusPhase
+      : 'final';
+    var transit = focusPhase !== 'final';
+    var focusPivotId = transit ? (selectedId || options.focusPivotId || null) : null;
+    var transitSelection = transit && !!selectedId;
 
     var basis = P.cameraBasis(camera);
     var q = model.normalizeText(query);
@@ -137,16 +146,32 @@
     var neighborIds = Object.create(null);
     // 選択中は「選択物質 + 直接関係する反応グループの全端点」だけを表示する。
     // 多端点の反応は参加する端点をすべて残す。無関係は完全に隠す（点も出さない）。
+    // ただしカメラ移動中（preview/travel）は隠さず、直接ネットワークだけ強調する。
     var focalIds = null;
     if (selectedId) {
-      focalIds = Object.create(null);
-      focalIds[selectedId] = true;
       selectedGroups.forEach(function (group) {
         selectedGroupIds[group.id] = true;
         group.substrateIds.concat(group.productIds).forEach(function (id) {
           if (id === selectedId) return;
           neighborIds[id] = true;
-          focalIds[id] = true;
+        });
+      });
+      if (!transitSelection) {
+        focalIds = Object.create(null);
+        focalIds[selectedId] = true;
+        Object.keys(neighborIds).forEach(function (id) { focalIds[id] = true; });
+      }
+    }
+
+    // 移動中に強調する範囲（選択 or 単一検索の pivot + 直接関係グループの全端点）。
+    var focusIds = Object.create(null);
+    var focusGroupIds = Object.create(null);
+    if (focusPivotId) {
+      focusIds[focusPivotId] = true;
+      model.groupsForCompound(focusPivotId, layer).forEach(function (group) {
+        focusGroupIds[group.id] = true;
+        group.substrateIds.concat(group.productIds).forEach(function (id) {
+          focusIds[id] = true;
         });
       });
     }
@@ -160,7 +185,7 @@
     }
     var searchGroupIds = Object.create(null);
     // 選択中は検索より選択グラフを優先する（他の一致が残っていても広げない）。
-    if (searchActive && !selectedId) {
+    if (searchActive && !selectedId && !transitSelection) {
       searchResults.forEach(function (result) {
         model.groupsForCompound(result.id, layer).forEach(function (group) {
           searchGroupIds[group.id] = true;
@@ -202,14 +227,16 @@
       var isContext = !focalIds && !!contextIds[compound.id] && !isMatch && !isSelected;
       var isConnected = !!connected[compound.id];
       var isNeighbor = !!neighborIds[compound.id];
-      var dimmed = !focalIds &&
+      var isLinked = transitSelection && !isSelected && !!focusIds[compound.id];
+      // 移動中の選択では無関係を減光しない（直前の全体文脈のまま）。
+      var dimmed = !focalIds && !transitSelection &&
         ((searchActive && !isMatch && !isContext) || (showUnconnectedOnly && isConnected));
       var priority;
       if (isSelected) priority = 0;
       else if (focalIds) priority = 2;
-      else if (searchActive) priority = isMatch ? 1 : (isContext ? 2 : 99);
+      else if (searchActive && !transitSelection) priority = isMatch ? 1 : (isContext ? 2 : 99);
       else if (showUnconnectedOnly && isConnected) priority = 99;
-      else if (isNeighbor) priority = 2;
+      else if (isNeighbor || isLinked) priority = 2;
       else if (compound.hub) priority = 3;
       else if (compound.tier === 'primary') priority = 4;
       else if (isConnected) priority = 5;
@@ -231,6 +258,7 @@
         match: isMatch,
         context: isContext,
         neighbor: isNeighbor,
+        linked: isLinked,
         connected: isConnected,
         dimmed: dimmed,
         regionColor: regionColor(compound.region)
@@ -322,7 +350,8 @@
       if (from.y > viewport.height + margin && to.y > viewport.height + margin) { culledEdges++; continue; }
       var clipped = P.clipSegment(from.x, from.y, to.x, to.y, clipRect);
       if (!clipped) { culledEdges++; continue; }
-      var selectedEdge = !!selectedGroupIds[edge.groupId];
+      var selectedEdge = !!selectedGroupIds[edge.groupId] ||
+        (transit && !!focusGroupIds[edge.groupId]);
       var searchLink = !!searchGroupIds[edge.groupId];
       var avgZ = (from.z + to.z) / 2;
       edges.push({
@@ -342,12 +371,13 @@
         searchLink: searchLink,
         academic: edge.academicOnly,
         // 検索文脈の経路は、選択中でも消さない（他の経路だけ減光する）。
-        dimmed: !!selectedId && !selectedEdge && !searchLink,
+        // 移動中は無関係の経路も直前の見え方のまま残す。
+        dimmed: !transit && !!selectedId && !selectedEdge && !searchLink,
         typeLabel: edge.typeLabel
       });
     }
 
-    var anySelected = !!selectedId;
+    var anySelected = !!selectedId && !transitSelection;
     var batchesById = Object.create(null);
     var batches = [];
     for (var bi = 0; bi < edges.length; bi++) {
@@ -378,6 +408,10 @@
       query: query,
       searchActive: searchActive,
       selectedId: selectedId,
+      focusPhase: focusPhase,
+      focusPivotId: focusPivotId,
+      focusIds: focusIds,
+      focusGroupIds: focusGroupIds,
       selectedGroupIds: selectedGroupIds,
       matchIds: matchIds,
       connectedIds: connected,
@@ -690,10 +724,10 @@
         ctx.globalAlpha = 1;
         ctx.fillStyle = node.selected ? '#202b3d' : node.fill;
         ctx.fill();
-        ctx.lineWidth = node.selected ? 2 : (node.match ? 1.8 : (node.context ? 1.3 : 1));
+        ctx.lineWidth = node.selected ? 2 : (node.match ? 1.8 : ((node.context || node.linked) ? 1.3 : 1));
         ctx.strokeStyle = node.selected
           ? selectedInk
-          : (node.match ? academicInk : (node.context ? '#b6c8dd' : node.regionColor));
+          : (node.match ? academicInk : ((node.context || node.linked) ? '#b6c8dd' : node.regionColor));
         ctx.stroke();
         ctx.shadowBlur = 0;
         ctx.fillStyle = node.selected ? '#fff8e6' : node.ink;

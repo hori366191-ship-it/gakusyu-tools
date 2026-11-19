@@ -92,21 +92,27 @@
   }
 
   // 遷移の進行。preview 中は from のまま、その後 ease で to へ。
+  // phase はアニメーション状態そのもの（preview / travel / 着地）で、
+  // 表示計画はこの値だけを見て「分離表示をまだ出さない」を決める。
   function applyCameraTransition(timestamp) {
     var transition = state.transition;
     if (!transition) return;
     var elapsed = (typeof timestamp === 'number' ? timestamp : nowMs()) - transition.startTs;
-    if (elapsed < transition.previewMs) {
+    var phase = P.transitionPhase(elapsed, transition.previewMs, transition.durationMs);
+    if (phase === 'preview') {
+      transition.phase = 'preview';
       state.camera = P.cloneCamera(transition.from);
       return;
     }
     var t = P.transitionProgress(elapsed, transition.previewMs, transition.durationMs);
     state.camera = P.interpolateCamera(transition.from, transition.to, t);
-    if (elapsed >= transition.previewMs + transition.durationMs) {
+    if (!phase) {
       state.camera = P.cloneCamera(transition.to);
       state.transition = null;
       flushPendingInput();
+      return;
     }
+    transition.phase = 'travel';
   }
 
   // ---------------- キーボードパン（短い平滑化） ----------------
@@ -227,7 +233,11 @@
       selectedId: state.selectedId,
       showUnconnectedOnly: state.showUnconnectedOnly,
       exclusions: exclusions(),
-      structurePlane: state.structurePlane
+      structurePlane: state.structurePlane,
+      // 遷移中だけ preview/travel を渡す。着地（または reduced-motion の即時）は
+      // 既定の 'final' で、従来どおりの選択分離・検索の文脈表示になる。
+      focusPhase: state.transition ? state.transition.phase : 'final',
+      focusPivotId: state.lock && state.lock.kind === 'search' ? state.lock.id : null
     });
     R.drawScene(ctx, plan, {});
     state.plan = plan;
@@ -566,6 +576,7 @@
   function startCameraTransition(kind, toCamera, previewMs, durationMs, keepPending) {
     state.transition = {
       kind: kind,
+      phase: previewMs > 0 ? 'preview' : 'travel',
       from: P.cloneCamera(state.camera),
       to: P.cloneCamera(toCamera),
       startTs: nowMs(),
@@ -1052,6 +1063,16 @@
     requestRender();
   }
 
+  // 選択/単一検索の位置合わせ中は、強調されていない背景の物質を誤って選ばない。
+  // 空白タップで選択解除もしない（着地までは今の焦点だけを操作対象にする）。
+  function focusLockedDuringTransition() {
+    return !!(state.transition && state.transition.kind !== 'reset');
+  }
+
+  function isFocusTarget(id) {
+    return !!(id && state.plan && state.plan.focusIds && state.plan.focusIds[id]);
+  }
+
   function onPointerUp(event) {
     var pos = pointerPosition(event);
     var wasSingle = pointers.size === 1;
@@ -1060,7 +1081,9 @@
 
     if (wasSingle && !drag.moved && !drag.pinching && !drag.suppressTap && state.plan && event.button === 0) {
       var id = R.pickScene(state.plan, pos.x, pos.y);
-      if (id) {
+      if (focusLockedDuringTransition() && !isFocusTarget(id)) {
+        // 遷移中の背景タップは無視（新しい選択・解除を起こさない）。
+      } else if (id) {
         select(id, { focus: false });
       } else if (state.selectedId) {
         clearSelection();
@@ -1120,6 +1143,7 @@
     if (!state.plan) return;
     var pos = pointerPosition(event);
     var id = R.pickScene(state.plan, pos.x, pos.y);
+    if (focusLockedDuringTransition() && !isFocusTarget(id)) return;
     if (id) {
       select(id, { focus: false });
       focusSelected();
