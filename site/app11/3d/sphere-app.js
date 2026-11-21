@@ -26,6 +26,7 @@
   var G = window.RP3DSphereInput;
   var DOCK = window.RP3DSphereDock || null;
   var EQ = window.RP3DEquationFit;
+  var RES = window.RP3DSphereResolution || null;
 
   var LAYER = 'academic';
   var REFOCUS_MS = 400;
@@ -43,6 +44,8 @@
   var els = {};
   var frameRequested = 0;
   var reducedMotionQuery = null;
+  // 操作中だけ内部解像度を落とす状態機械（null なら従来どおり常時ネイティブ）。
+  var resolution = null;
 
   var state = {
     mode: 'outside',
@@ -90,7 +93,27 @@
   function viewport() {
     var width = Math.max(1, canvas.clientWidth || window.innerWidth);
     var height = Math.max(1, canvas.clientHeight || window.innerHeight);
-    return { width: width, height: height, dpr: Math.min(2, window.devicePixelRatio || 1) };
+    // 内部解像度（バッキング）だけを操作中に落とす。CSS サイズと座標系は不変。
+    var dpr = resolution
+      ? resolution.dprFor(width, height, window.devicePixelRatio || 1)
+      : Math.min(2, window.devicePixelRatio || 1);
+    return { width: width, height: height, dpr: dpr };
+  }
+
+  // ?res=cap / ?res=full と reduced-motion からモードを決めて状態機械を作る。
+  // 復帰は既存の scheduler（requestRender → render → resizeCanvas）に任せる。
+  function createResolution() {
+    if (!RES || typeof RES.createController !== 'function') return null;
+    try {
+      var search = window.location ? window.location.search : '';
+      var mode = RES.resolveMode(search, prefersReducedMotion());
+      return RES.createController({
+        mode: mode,
+        onIdle: function () { requestRender(); }
+      });
+    } catch (error) {
+      return null;
+    }
   }
 
   function requestRender() {
@@ -875,6 +898,7 @@
   function onPointerDown(event) {
     if (event.pointerType === 'mouse' && event.button !== 0 && event.button !== 1 && event.button !== 2) return;
     canvas.focus();
+    if (resolution) resolution.pointerDown(event.pointerId);
     if (gestures && gestures.pointerDown(event)) {
       try { canvas.setPointerCapture(event.pointerId); } catch (error) { /* 古いブラウザ */ }
     }
@@ -886,16 +910,19 @@
 
   function onPointerUp(event) {
     if (gestures) gestures.pointerUp(event);
+    if (resolution) resolution.pointerUp(event.pointerId);
     try { canvas.releasePointerCapture(event.pointerId); } catch (error) { /* noop */ }
   }
 
   function onPointerCancel(event) {
     if (gestures) gestures.pointerCancel(event);
+    if (resolution) resolution.pointerCancel(event.pointerId);
     try { canvas.releasePointerCapture(event.pointerId); } catch (error) { /* noop */ }
   }
 
   function onWheel(event) {
     event.preventDefault();
+    if (resolution) resolution.wheel();
     var factor = I.wheelZoomFactor(event.deltaY, event.deltaMode);
     if (factor === 1) return;
     zoomBy(factor);
@@ -1200,6 +1227,7 @@
     }
     ctx = context;
     buildLegend(normalData.regions);
+    resolution = createResolution();
     var vp = viewport();
     resizeCanvas(vp);
     setCamera(defaultOutside());
@@ -1211,10 +1239,21 @@
     canvas.addEventListener('pointermove', onPointerMove);
     canvas.addEventListener('pointerup', onPointerUp);
     canvas.addEventListener('pointercancel', onPointerCancel);
+    canvas.addEventListener('lostpointercapture', onPointerCancel);
     canvas.addEventListener('wheel', onWheel, { passive: false });
     canvas.addEventListener('dblclick', onDoubleClick);
     canvas.addEventListener('contextmenu', function (event) { event.preventDefault(); });
     document.addEventListener('keydown', onKeyDown);
+    // 操作中に低解像度のまま残さない（フォーカス喪失・非表示・ページ離脱）。
+    window.addEventListener('blur', function () {
+      if (resolution) resolution.abort();
+    });
+    window.addEventListener('pagehide', function () {
+      if (resolution) resolution.abort();
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && resolution) resolution.abort();
+    });
 
     $('r3d-zoom-in').addEventListener('click', function () { zoomBy(0.8); });
     $('r3d-zoom-out').addEventListener('click', function () { zoomBy(1.25); });

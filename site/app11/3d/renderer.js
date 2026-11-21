@@ -693,21 +693,19 @@
   //
   // 形状は sphere-territory.js が一度だけ作り、ここではスクリーン座標に
   // なった三角形と境界線分を、カード・経路より奥に描くだけ。
-  // 塗りは共有パレット（REGION_COLORS）を低い不透明度で使い、境界は
-  // 2 分野の色を混ぜて彩度を落とした細い実線＋控えめなグローにする。
+  // 塗りは共有パレット（REGION_COLORS）を低い不透明度で使う。境界は常時の
+  // グローを持たず、白寄りの青灰色の細い実線＋近不透明の芯を 2 回重ねて描く
+  // （選択カード 18 / マッチカード 8 / 選択経路 9 / マーカー 16 のグローは別物で、
+  //  ここでは一切触らない）。
 
   var TERRITORY_STYLE = {
     fillAlpha: 0.105,
     fillAlphaActive: 0.165,
     fillAlphaDimmed: 0.045,
-    borderAlpha: 0.44,
-    borderAlphaActive: 0.7,
-    borderAlphaDimmed: 0.18,
-    borderWidth: 1.15,
-    borderWidthActive: 1.45,
-    borderGlowBlur: 6,
-    borderGlowAlpha: 0.3,
-    borderDesaturate: 0.5
+    // 境界線の見た目。edge* は外側にだけ重ねる淡い縁（ぼかしは使わない）。
+    borderRest: { color: 'rgb(214, 224, 238)', alpha: 0.86, width: 1.1, edgeAlpha: 0.26, edgeWidth: 2.4 },
+    borderActive: { color: 'rgb(228, 238, 250)', alpha: 0.95, width: 1.3, edgeAlpha: 0.3, edgeWidth: 2.7 },
+    borderDimmed: { color: 'rgb(168, 184, 204)', alpha: 0.34, width: 1, edgeAlpha: 0, edgeWidth: 0 }
   };
 
   function hexToRgb(hex) {
@@ -720,25 +718,6 @@
     var number = parseInt(value, 16);
     if (!isFinite(number)) return [154, 168, 187];
     return [(number >> 16) & 255, (number >> 8) & 255, number & 255];
-  }
-
-  function blendRgb(a, b) {
-    return [
-      Math.round((a[0] + b[0]) / 2),
-      Math.round((a[1] + b[1]) / 2),
-      Math.round((a[2] + b[2]) / 2)
-    ];
-  }
-
-  // 知覚輝度へ寄せて彩度を落とす（塾向けの落ち着いた境界色）。
-  function desaturateRgb(rgb, amount) {
-    var t = clamp(amount == null ? 0.5 : amount, 0, 1);
-    var l = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
-    return [
-      Math.round(rgb[0] + (l - rgb[0]) * t),
-      Math.round(rgb[1] + (l - rgb[1]) * t),
-      Math.round(rgb[2] + (l - rgb[2]) * t)
-    ];
   }
 
   function rgbCss(rgb) {
@@ -755,20 +734,16 @@
 
   function territoryBorderPaint(regionAId, regionBId, options) {
     options = options || {};
-    var rgb = desaturateRgb(
-      blendRgb(hexToRgb(regionColor(regionAId)), hexToRgb(regionColor(regionBId))),
-      TERRITORY_STYLE.borderDesaturate
-    );
-    var alpha = options.active ? TERRITORY_STYLE.borderAlphaActive : TERRITORY_STYLE.borderAlpha;
-    if (options.dimmed) alpha = TERRITORY_STYLE.borderAlphaDimmed;
+    // 2 分野の混色はもう使わない（線は白寄りの青灰色で統一する）。
+    var key = options.dimmed ? 'borderDimmed' : (options.active ? 'borderActive' : 'borderRest');
+    var paint = TERRITORY_STYLE[key];
     return {
-      strokeStyle: rgbCss(rgb),
-      glowStyle: 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' +
-        TERRITORY_STYLE.borderGlowAlpha + ')',
-      alpha: alpha,
-      width: options.active ? TERRITORY_STYLE.borderWidthActive : TERRITORY_STYLE.borderWidth,
-      blur: TERRITORY_STYLE.borderGlowBlur,
-      rgb: rgb
+      mode: options.dimmed ? 'dimmed' : (options.active ? 'active' : 'rest'),
+      color: paint.color,
+      alpha: paint.alpha,
+      width: paint.width,
+      edgeAlpha: paint.edgeAlpha,
+      edgeWidth: paint.edgeWidth
     };
   }
 
@@ -808,7 +783,9 @@
       stats.fills += 1;
       stats.drawCalls += 1;
     }
-    // 2) 分野境界。低彩度の細い実線 + 弱いグロー（破線にはしない）。
+    // 2) 分野境界。白寄りの青灰色の細い実線 + 近不透明の芯（グローなし・破線なし）。
+    //    外側の淡い縁 → 芯 の順に、同じパスを 2 回なぞるだけ。
+    ctx.shadowBlur = 0;
     for (var b = 0; b < borders.length; b++) {
       var border = borders[b];
       var segs = border.points || [];
@@ -819,15 +796,17 @@
         ctx.moveTo(segs[s], segs[s + 1]);
         ctx.lineTo(segs[s + 2], segs[s + 3]);
       }
-      ctx.globalAlpha = borderPaint.alpha;
-      ctx.strokeStyle = borderPaint.strokeStyle;
-      ctx.lineWidth = borderPaint.width;
+      ctx.strokeStyle = borderPaint.color;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.shadowColor = borderPaint.glowStyle;
-      ctx.shadowBlur = borderPaint.blur;
+      if (borderPaint.edgeAlpha > 0 && borderPaint.edgeWidth > borderPaint.width) {
+        ctx.globalAlpha = borderPaint.edgeAlpha;
+        ctx.lineWidth = borderPaint.edgeWidth;
+        ctx.stroke();
+      }
+      ctx.globalAlpha = borderPaint.alpha;
+      ctx.lineWidth = borderPaint.width;
       ctx.stroke();
-      ctx.shadowBlur = 0;
       stats.borders += 1;
       stats.drawCalls += 1;
     }

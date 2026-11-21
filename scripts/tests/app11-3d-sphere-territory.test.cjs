@@ -145,6 +145,13 @@ function firstIndex(calls, predicate) {
   return -1;
 }
 
+/** 'rgb(r, g, b)' → [r, g, b]。 */
+function rgbChannels(css) {
+  const m = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.exec(css);
+  assert.ok(m, '色の形式が想定外: ' + css);
+  return m.slice(1).map(Number);
+}
+
 /* ---------------- 形状 ---------------- */
 
 test('[coverage] 427 スロットがすべて自分の分野のボロノイセルに入る', () => {
@@ -342,8 +349,10 @@ test('[draw] 面 → 境界 → 経路 → カードの順に描き、低彩度�
 
   const firstFill = firstIndex(calls, (call) =>
     call.op === 'fill' && /^rgb\(/.test(call.fillStyle) && call.globalAlpha < 0.2);
+  // 境界は白寄りの青灰色の実線（グローなし）。外側の縁 → 芯 の 2 回描く。
+  const restColor = R.TERRITORY_STYLE.borderRest.color;
   const firstBorder = firstIndex(calls, (call) =>
-    call.op === 'stroke' && /^rgb\(/.test(call.strokeStyle) && call.shadowBlur > 0);
+    call.op === 'stroke' && call.strokeStyle === restColor);
   const firstEdge = firstIndex(calls, (call) =>
     call.op === 'stroke' && /^rgba\((?:150,175,205|72,228,255)/.test(call.strokeStyle));
   const firstCard = firstIndex(calls, (call) =>
@@ -354,23 +363,33 @@ test('[draw] 面 → 境界 → 経路 → カードの順に描き、低彩度�
   assert.ok(firstBorder < firstEdge, '経路より後に境界を描いている');
   assert.ok(firstEdge < firstCard, 'カードより後に経路を描いている');
 
-  // 塗りは共有パレットの低不透明度。
+  // 塗りは共有パレットの低不透明度のまま。
   const regionId = plan.territory.fills[0].regionId;
   const fillPaint = R.territoryFillPaint(regionId, {});
   assert.ok(fillPaint.alpha <= 0.12);
   assert.equal(fillPaint.fillStyle, 'rgb(' + fillPaint.rgb.join(',') + ')');
 
-  // 境界は低彩度・細線・控えめなグロー。
+  // 境界は常時グローを持たず、細線＋近不透明の芯（外縁は芯より淡い）。
   const border = plan.territory.borders[0];
   const borderPaint = R.territoryBorderPaint(border.regionAId, border.regionBId, {});
-  assert.ok(borderPaint.alpha <= 0.5);
+  assert.equal(borderPaint.color, restColor);
+  assert.ok(borderPaint.alpha >= 0.8 && borderPaint.alpha <= 1);
   assert.ok(borderPaint.width <= 1.2);
-  assert.ok(borderPaint.blur <= 6);
-  const spread = Math.max(...borderPaint.rgb) - Math.min(...borderPaint.rgb);
-  assert.ok(spread <= 80, '境界色の彩度が高い: ' + spread);
-  const borderCall = calls[firstBorder];
-  assert.equal(borderCall.lineWidth, borderPaint.width);
-  assert.equal(borderCall.globalAlpha, borderPaint.alpha);
+  assert.ok(borderPaint.edgeAlpha < borderPaint.alpha);
+  const edgeCall = calls[firstBorder];
+  const coreCall = calls[firstBorder + 1];
+  assert.equal(edgeCall.op, 'stroke');
+  assert.equal(edgeCall.globalAlpha, borderPaint.edgeAlpha);
+  assert.equal(edgeCall.lineWidth, borderPaint.edgeWidth);
+  assert.equal(coreCall.op, 'stroke');
+  assert.equal(coreCall.globalAlpha, borderPaint.alpha);
+  assert.equal(coreCall.lineWidth, borderPaint.width);
+  // テリトリーの境界では shadowBlur を使わない。
+  for (const call of [edgeCall, coreCall]) {
+    assert.equal(call.shadowBlur, 0, '境界に常時グローが残っている');
+  }
+  const spread = Math.max(...rgbChannels(restColor)) - Math.min(...rgbChannels(restColor));
+  assert.ok(spread <= 80, '境界色（白寄りの青灰色）の彩度が高い: ' + spread);
 });
 
 test('[draw] 選択中はテリトリーをさらに薄くし、カードはその上に残る', () => {

@@ -238,8 +238,10 @@ a.r3d-btn { display: inline-flex; align-items: center; justify-content: center; 
   padding: 8px;
   border: 1px solid rgba(145, 165, 190, 0.24);
   border-radius: 12px;
-  background: rgba(7, 11, 18, 0.86);
-  backdrop-filter: blur(8px);
+  /* 不透明（blur なし）。半透明地を背景 #05070c 上で合成した等価値。 */
+  background: #070b12;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 /* 色の凡例（カードの地色 = 物質の分類）。狭い画面では summary だけ残して閉じる。 */
 .r3d-legend {
@@ -349,9 +351,11 @@ button.r3d-legend__item[aria-pressed="true"] {
   padding: 14px;
   border: 1px solid rgba(145, 165, 190, 0.28);
   border-radius: 14px;
-  background: rgba(7, 11, 18, 0.92);
+  /* 不透明（blur なし）。半透明地を背景 #05070c 上で合成した等価値。 */
+  background: #070b12;
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 .r3d-detail__bar {
   display: flex;

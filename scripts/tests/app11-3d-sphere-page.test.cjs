@@ -149,6 +149,7 @@ test('[page] 公開版のデータと detail / renderer をそのまま読み、
     './sphere-input.js',
     './sphere-dock.js',
     './equation-fit.js',
+    './sphere-resolution.js',
     './sphere-app.js'
   ];
   for (const src of required) {
@@ -163,6 +164,8 @@ test('[page] 公開版のデータと detail / renderer をそのまま読み、
   assert.ok(order('./sphere-territory.js') < order('./sphere-render.js'));
   assert.ok(order('../data.js') < order('./scene-model.js'));
   assert.ok(order('./academic-facts.js') < order('./sphere-app.js'));
+  // 解像度ポリシーは sphere-app より前に読む（viewport が参照する）。
+  assert.ok(order('./sphere-resolution.js') < order('./sphere-app.js'));
   // CSS は公開版 → 球ビューの上書き順。
   const cssOrder = (needle) => html.indexOf('href="' + needle + '"');
   assert.ok(cssOrder('./app3d.css') < cssOrder('./sphere.css'));
