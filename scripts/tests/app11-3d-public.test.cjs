@@ -187,7 +187,7 @@ test('[staging] 3D の全ファイルが配信物にあり、詳細の builder �
     'academic-facts.js', 'app3d.css', 'detail.js', 'detail.css', 'equation-fit.js',
     'index.html', 'interaction.js', 'projection.js', 'renderer.js', 'scene-model.js',
     'sphere-app.js', 'sphere-camera.js', 'sphere-dock.js', 'sphere-input.js',
-    'sphere-layout.js', 'sphere-render.js', 'sphere.css'
+    'sphere-layout.js', 'sphere-render.js', 'sphere-territory.js', 'sphere.css'
   ]) {
     assert.ok(fs.existsSync(path.join(pages, 'app11', '3d', file)), file);
   }

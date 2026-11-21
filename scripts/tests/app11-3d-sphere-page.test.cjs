@@ -144,6 +144,7 @@ test('[page] 公開版のデータと detail / renderer をそのまま読み、
     './interaction.js',
     './detail.js',
     './sphere-layout.js',
+    './sphere-territory.js',
     './sphere-render.js',
     './sphere-input.js',
     './sphere-dock.js',
@@ -158,6 +159,8 @@ test('[page] 公開版のデータと detail / renderer をそのまま読み、
   const order = (needle) => html.indexOf('src="' + needle + '"');
   assert.ok(order('./projection.js') < order('./sphere-camera.js'));
   assert.ok(order('./sphere-camera.js') < order('./renderer.js'));
+  assert.ok(order('./sphere-layout.js') < order('./sphere-territory.js'));
+  assert.ok(order('./sphere-territory.js') < order('./sphere-render.js'));
   assert.ok(order('../data.js') < order('./scene-model.js'));
   assert.ok(order('./academic-facts.js') < order('./sphere-app.js'));
   // CSS は公開版 → 球ビューの上書き順。

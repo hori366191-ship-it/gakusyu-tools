@@ -17,6 +17,7 @@
   var P = window.RP3DProjection;
   var C = window.RP3DSphereCamera || null;
   var L = window.RP3DSphereLayout;
+  var ST = window.RP3DSphereTerritory || null;
   var SR = window.RP3DSphereRender;
   var S = window.RP3DScene;
   var R = window.RP3DRenderer;
@@ -33,6 +34,9 @@
 
   var model = null;
   var layout = null;
+  // 球面の分野テリトリー（起動時に一度だけ構築する）。
+  var territory = null;
+  var regionIndexById = Object.create(null);
   var ctx = null;
   var canvas = null;
   var els = {};
@@ -357,6 +361,13 @@
 
   // ---------------- 描画 ----------------
 
+  // 凡例の分類 id（例: 'hydrocarbon'）→ 球面レイアウトの regionIndex。
+  function activeRegionIndex() {
+    if (!state.region) return null;
+    var index = regionIndexById[state.region];
+    return index == null ? null : index;
+  }
+
   function render(timestamp) {
     if (!ctx || !state.camera) return;
     var ts = typeof timestamp === 'number' ? timestamp : nowMs();
@@ -388,6 +399,15 @@
       focusPhase: refocus ? refocus.phase : 'final',
       focusFade: refocus ? refocus.fade : 0
     });
+    // 分野テリトリーはカード・経路より奥に描く。分類フィルタ中はその分野だけ、
+    // 選択中はさらに薄くする（選択グラフは面の上に残る）。
+    if (territory && ST && typeof ST.buildFrame === 'function') {
+      plan.territory = ST.buildFrame(territory, state.camera, vp, {
+        center: layout.center,
+        activeRegion: activeRegionIndex(),
+        dimmed: !!state.selectedId
+      });
+    }
     var guides = SR.buildGuideSegments(state.camera, layout.center, layout.radius, vp, {});
     SR.replaceFloorSegments(plan, guides);
     // 選択解除の復帰: 直前に見えていなかったノード・辺だけを fade する。
@@ -1124,12 +1144,28 @@
       return;
     }
 
+    regionIndexById = Object.create(null);
+    normalData.compounds.forEach(function (compound) {
+      if (compound && compound.region && compound.regionIndex != null) {
+        regionIndexById[compound.region] = compound.regionIndex;
+      }
+    });
     try {
       model = S.createModel(normalData, academicData, groups);
       layout = L.buildSphereLayout(normalData.compounds);
     } catch (error) {
       showFallback('共有データの構築に失敗しました。');
       return;
+    }
+    // 球面テリトリーは起動時に一度だけ構築する（以後は投影と可視判定だけ）。
+    // 失敗しても地図・カードは従来どおり動かす（装飾レイヤのため）。
+    territory = null;
+    if (ST && typeof ST.buildGeometry === 'function') {
+      try {
+        territory = ST.buildGeometry(layout, { subdivision: ST.DEFAULT_SUBDIVISION });
+      } catch (error) {
+        territory = null;
+      }
     }
 
     var context = canvas.getContext('2d');

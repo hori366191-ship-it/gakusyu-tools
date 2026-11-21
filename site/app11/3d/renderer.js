@@ -672,6 +672,153 @@
 
   var edgeBatchStyle = edgePaint;
 
+  // ---------------- 分野テリトリー（球面の半透明面・境界） ----------------
+  //
+  // 形状は sphere-territory.js が一度だけ作り、ここではスクリーン座標に
+  // なった三角形と境界線分を、カード・経路より奥に描くだけ。
+  // 塗りは共有パレット（REGION_COLORS）を低い不透明度で使い、境界は
+  // 2 分野の色を混ぜて彩度を落とした細い実線＋控えめなグローにする。
+
+  var TERRITORY_STYLE = {
+    fillAlpha: 0.105,
+    fillAlphaActive: 0.165,
+    fillAlphaDimmed: 0.045,
+    borderAlpha: 0.44,
+    borderAlphaActive: 0.7,
+    borderAlphaDimmed: 0.18,
+    borderWidth: 1.15,
+    borderWidthActive: 1.45,
+    borderGlowBlur: 6,
+    borderGlowAlpha: 0.3,
+    borderDesaturate: 0.5
+  };
+
+  function hexToRgb(hex) {
+    var value = String(hex == null ? '' : hex).replace('#', '');
+    if (value.length === 3) {
+      value = value.charAt(0) + value.charAt(0) +
+        value.charAt(1) + value.charAt(1) +
+        value.charAt(2) + value.charAt(2);
+    }
+    var number = parseInt(value, 16);
+    if (!isFinite(number)) return [154, 168, 187];
+    return [(number >> 16) & 255, (number >> 8) & 255, number & 255];
+  }
+
+  function blendRgb(a, b) {
+    return [
+      Math.round((a[0] + b[0]) / 2),
+      Math.round((a[1] + b[1]) / 2),
+      Math.round((a[2] + b[2]) / 2)
+    ];
+  }
+
+  // 知覚輝度へ寄せて彩度を落とす（塾向けの落ち着いた境界色）。
+  function desaturateRgb(rgb, amount) {
+    var t = clamp(amount == null ? 0.5 : amount, 0, 1);
+    var l = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+    return [
+      Math.round(rgb[0] + (l - rgb[0]) * t),
+      Math.round(rgb[1] + (l - rgb[1]) * t),
+      Math.round(rgb[2] + (l - rgb[2]) * t)
+    ];
+  }
+
+  function rgbCss(rgb) {
+    return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
+  }
+
+  function territoryFillPaint(regionId, options) {
+    options = options || {};
+    var rgb = hexToRgb(regionColor(regionId));
+    var alpha = options.active ? TERRITORY_STYLE.fillAlphaActive : TERRITORY_STYLE.fillAlpha;
+    if (options.dimmed) alpha = TERRITORY_STYLE.fillAlphaDimmed;
+    return { fillStyle: rgbCss(rgb), alpha: alpha, rgb: rgb };
+  }
+
+  function territoryBorderPaint(regionAId, regionBId, options) {
+    options = options || {};
+    var rgb = desaturateRgb(
+      blendRgb(hexToRgb(regionColor(regionAId)), hexToRgb(regionColor(regionBId))),
+      TERRITORY_STYLE.borderDesaturate
+    );
+    var alpha = options.active ? TERRITORY_STYLE.borderAlphaActive : TERRITORY_STYLE.borderAlpha;
+    if (options.dimmed) alpha = TERRITORY_STYLE.borderAlphaDimmed;
+    return {
+      strokeStyle: rgbCss(rgb),
+      glowStyle: 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' +
+        TERRITORY_STYLE.borderGlowAlpha + ')',
+      alpha: alpha,
+      width: options.active ? TERRITORY_STYLE.borderWidthActive : TERRITORY_STYLE.borderWidth,
+      blur: TERRITORY_STYLE.borderGlowBlur,
+      rgb: rgb
+    };
+  }
+
+  function drawTerritory(ctx, frame) {
+    var stats = { fills: 0, borders: 0, drawCalls: 0 };
+    if (!frame) return stats;
+    var fills = frame.fills || [];
+    var borders = frame.borders || [];
+    if (!fills.length && !borders.length) return stats;
+    var active = frame.activeRegion != null;
+    var paintOptions = { active: active, dimmed: !!frame.dimmed };
+    ctx.save();
+    if (frame.disc && frame.disc.radius > 0) {
+      ctx.beginPath();
+      ctx.arc(frame.disc.cx, frame.disc.cy, frame.disc.radius, 0, Math.PI * 2);
+      ctx.clip();
+      stats.drawCalls += 1;
+    }
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+    // 1) 分野ごとの半透明の面（同一分野は 1 パスにまとめる）。
+    for (var i = 0; i < fills.length; i++) {
+      var fill = fills[i];
+      var points = fill.points || [];
+      if (points.length < 6) continue;
+      var fillPaint = territoryFillPaint(fill.regionId, paintOptions);
+      ctx.beginPath();
+      for (var k = 0; k + 5 < points.length; k += 6) {
+        ctx.moveTo(points[k], points[k + 1]);
+        ctx.lineTo(points[k + 2], points[k + 3]);
+        ctx.lineTo(points[k + 4], points[k + 5]);
+        ctx.closePath();
+      }
+      ctx.globalAlpha = fillPaint.alpha;
+      ctx.fillStyle = fillPaint.fillStyle;
+      ctx.fill();
+      stats.fills += 1;
+      stats.drawCalls += 1;
+    }
+    // 2) 分野境界。低彩度の細い実線 + 弱いグロー（破線にはしない）。
+    for (var b = 0; b < borders.length; b++) {
+      var border = borders[b];
+      var segs = border.points || [];
+      if (segs.length < 4) continue;
+      var borderPaint = territoryBorderPaint(border.regionAId, border.regionBId, paintOptions);
+      ctx.beginPath();
+      for (var s = 0; s + 3 < segs.length; s += 4) {
+        ctx.moveTo(segs[s], segs[s + 1]);
+        ctx.lineTo(segs[s + 2], segs[s + 3]);
+      }
+      ctx.globalAlpha = borderPaint.alpha;
+      ctx.strokeStyle = borderPaint.strokeStyle;
+      ctx.lineWidth = borderPaint.width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.shadowColor = borderPaint.glowStyle;
+      ctx.shadowBlur = borderPaint.blur;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      stats.borders += 1;
+      stats.drawCalls += 1;
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    return stats;
+  }
+
   function strokeSegments(ctx, segments) {
     ctx.beginPath();
     for (var i = 0; i < segments.length; i++) {
@@ -741,7 +888,16 @@
     var selectedInk = theme.selectedInk || ROUTE_INK.normal;
     var academicInk = theme.academicInk || ROUTE_INK.academic;
     var fadeAlpha = plan.fadeAlpha == null ? 1 : plan.fadeAlpha;
-    var stats = { drawCalls: 0, edgeBatches: 0, edgeSegments: 0, cards: 0, markers: 0, floorSegments: 0 };
+    var stats = {
+      drawCalls: 0,
+      edgeBatches: 0,
+      edgeSegments: 0,
+      cards: 0,
+      markers: 0,
+      floorSegments: 0,
+      territoryFills: 0,
+      territoryBorders: 0
+    };
 
     ctx.clearRect(0, 0, plan.viewport.width, plan.viewport.height);
     ctx.fillStyle = paper;
@@ -751,6 +907,16 @@
     ctx.fillStyle = gradientFor(ctx, plan, paper);
     ctx.fillRect(0, 0, plan.viewport.width, plan.viewport.height);
     stats.drawCalls += 1;
+
+    // 球面の分野テリトリー。カード・経路より奥に置き、半透明のまま重ねる。
+    // 奥（裏側）の選択グラフがこの面の上に残るよう、必ずここで描く。
+    if (plan.territory) {
+      var territoryStats = drawTerritory(ctx, plan.territory);
+      stats.territoryFills = territoryStats.fills;
+      stats.territoryBorders = territoryStats.borders;
+      stats.drawCalls += territoryStats.drawCalls;
+      ctx.globalAlpha = 1;
+    }
 
     // 床グリッド（1 パス）。
     if (plan.floorSegments.length) {
@@ -886,6 +1052,10 @@
     EDGE_ORDINARY_ALPHA: EDGE_ORDINARY_ALPHA,
     EDGE_DIMMED_ALPHA: EDGE_DIMMED_ALPHA,
     edgePaint: edgePaint,
+    TERRITORY_STYLE: TERRITORY_STYLE,
+    territoryFillPaint: territoryFillPaint,
+    territoryBorderPaint: territoryBorderPaint,
+    drawTerritory: drawTerritory,
     regionColor: regionColor,
     legendItems: legendItems,
     estimateTextWidth: estimateTextWidth,

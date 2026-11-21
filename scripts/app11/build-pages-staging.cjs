@@ -301,7 +301,7 @@ function verify(out, data) {
     'academic-facts.js', 'app3d.css', 'detail.js', 'detail.css', 'equation-fit.js',
     'index.html', 'interaction.js', 'projection.js', 'renderer.js', 'scene-model.js',
     'sphere-app.js', 'sphere-camera.js', 'sphere-dock.js', 'sphere-input.js',
-    'sphere-layout.js', 'sphere-render.js', 'sphere.css'
+    'sphere-layout.js', 'sphere-render.js', 'sphere-territory.js', 'sphere.css'
   ]) {
     if (!fs.existsSync(path.join(out, 'app11', '3d', file))) fail('3D のファイルがない: ' + file);
   }
