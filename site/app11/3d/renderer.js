@@ -96,6 +96,25 @@
     return out ? out + ellipsis : ellipsis;
   }
 
+  // カード 1 枚の実寸（ラベル幅・選択・ハブで決まる）。planScene と、
+  // 選択時のズームアウト量を求める sphere-fit.js が同じ値を使う。
+  function cardMetrics(compound, viewport, selected) {
+    var maxLabelWidth = Math.max(110, Math.min(230, viewport.width * 0.22));
+    var fontSize = selected ? 13 : 12;
+    var label = compound ? (compound.label || compound.name) : '';
+    var text = truncateToWidth(label, maxLabelWidth, fontSize);
+    var textWidth = estimateTextWidth(text, fontSize);
+    var width = Math.max(46, textWidth + (selected ? 24 : 18));
+    var height = selected ? 28 : (compound && compound.hub ? 26 : 24);
+    return {
+      text: text,
+      fontSize: fontSize,
+      maxLabelWidth: maxLabelWidth,
+      width: width,
+      height: height
+    };
+  }
+
   function rectsOverlap(a, b, gap) {
     var g = gap || 0;
     return !(a.x + a.width + g <= b.x ||
@@ -333,7 +352,6 @@
 
     var cards = [];
     var markers = [];
-    var maxLabelWidth = Math.max(110, Math.min(230, viewport.width * 0.22));
     var viewRect = { x: -8, y: -8, width: viewport.width + 16, height: viewport.height + 16 };
 
     for (var ci = 0; ci < candidates.length; ci++) {
@@ -343,11 +361,10 @@
         markers.push(makeMarker(candidate, depth));
         continue;
       }
-      var fontSize = candidate.selected ? 13 : 12;
-      var text = truncateToWidth(candidate.compound.label || candidate.compound.name, maxLabelWidth, fontSize);
-      var textWidth = estimateTextWidth(text, fontSize);
-      var width = Math.max(46, textWidth + (candidate.selected ? 24 : 18));
-      var height = candidate.selected ? 28 : (candidate.compound.hub ? 26 : 24);
+      var metrics = cardMetrics(candidate.compound, viewport, candidate.selected);
+      var text = metrics.text;
+      var width = metrics.width;
+      var height = metrics.height;
       var rect = {
         x: candidate.x - width / 2,
         y: candidate.y - height / 2,
@@ -362,7 +379,7 @@
       var bucket = depthBucket(depth);
       cards.push(Object.assign({}, candidate, {
         text: text,
-        fontSize: fontSize,
+        fontSize: metrics.fontSize,
         width: width,
         height: height,
         rect: rect,
@@ -1060,6 +1077,7 @@
     legendItems: legendItems,
     estimateTextWidth: estimateTextWidth,
     truncateToWidth: truncateToWidth,
+    cardMetrics: cardMetrics,
     rectsOverlap: rectsOverlap,
     planScene: planScene,
     drawScene: drawScene,

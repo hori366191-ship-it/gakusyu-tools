@@ -19,6 +19,7 @@
   var L = window.RP3DSphereLayout;
   var ST = window.RP3DSphereTerritory || null;
   var SR = window.RP3DSphereRender;
+  var SF = window.RP3DSphereFit || null;
   var S = window.RP3DScene;
   var R = window.RP3DRenderer;
   var I = window.RP3DInteraction;
@@ -65,7 +66,8 @@
     dockOffset: '',
     dockTop: '',
     dockMaxHeight: '',
-    reveal: null
+    reveal: null,
+    selectionFit: null
   };
 
   function $(id) { return document.getElementById(id); }
@@ -319,11 +321,28 @@
   }
 
   // 選択点を usableRect の中心に置くカメラ。モードは変えない。
+  // あわせて、選択カードと直接の反応相手カードが実表示領域に収まるよう、
+  // 必要な分だけズームアウトする（既に収まっていれば距離・FOV は不変）。
+  function fitSelectionCamera(camera, rect) {
+    if (!SF || !camera || !state.selectedId) return camera;
+    var result = SF.fitSelectionCamera(camera, {
+      model: model,
+      selectedId: state.selectedId,
+      layer: LAYER,
+      layout: layout,
+      viewport: viewport(),
+      usableRect: rect || usableArea()
+    });
+    state.selectionFit = result.info;
+    return result.camera;
+  }
+
   function framingCamera(point) {
     var vp = viewport();
     var rect = usableArea();
     state.centerRect = rect;
-    return C.framePoint(state.camera, point, layout.center, rect, vp, { radius: layout.radius });
+    var framed = C.framePoint(state.camera, point, layout.center, rect, vp, { radius: layout.radius });
+    return fitSelectionCamera(framed, rect);
   }
 
   // パネル（詳細・凡例・ヘッダ折り返し）の実測矩形が変わったとき、
@@ -344,13 +363,13 @@
     var point = state.selectedId ? layout.points[state.selectedId] : null;
     if (point && !state.userAdjusted) {
       if (state.refocus) {
-        state.refocus.to = C.framePoint(state.refocus.to, point, layout.center, rect, viewport(), {
+        state.refocus.to = fitSelectionCamera(C.framePoint(state.refocus.to, point, layout.center, rect, viewport(), {
           radius: layout.radius
-        });
+        }), rect);
       } else {
-        setCamera(C.framePoint(state.camera, point, layout.center, rect, viewport(), {
+        setCamera(fitSelectionCamera(C.framePoint(state.camera, point, layout.center, rect, viewport(), {
           radius: layout.radius
-        }));
+        }), rect));
       }
       return;
     }
@@ -633,6 +652,7 @@
     resetSearchState();
     state.selectedId = null;
     state.centerRect = null;
+    state.selectionFit = null;
     state.xray = null;
     state.virtualSignature = '';
     state.userAdjusted = false;
@@ -706,6 +726,9 @@
         ? C.DEFAULT_INSIDE_FOV
         : (state.outsideFov ? state.outsideFov * 180 / Math.PI : undefined)
     });
+    // モード切替後も、選択カードと直接の反応相手が実表示領域に収まる距離を保つ
+    // （既に収まるなら FOV・距離はそのまま）。
+    if (point) target = fitSelectionCamera(target, usableArea());
     var timing = C.switchTiming(prefersReducedMotion());
     state.userAdjusted = false;
     if (!timing.fadeOut) {
@@ -942,6 +965,7 @@
     if (gestures) gestures.clearAnchor();
     state.selectedId = null;
     state.centerRect = null;
+    state.selectionFit = null;
     state.userAdjusted = false;
     state.xray = null;
     state.virtualSignature = '';
