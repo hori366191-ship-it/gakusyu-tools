@@ -51,7 +51,11 @@
       <div><p id="radar-title" class="eyebrow">接近観察</p><h2 id="radar-name"></h2><p id="radar-task"></p></div>
       <button id="inspect" class="primary" type="button">観察メモ <span aria-hidden="true">↗</span></button>
     </section>
-    <button id="overview-back" class="chip overview-back" type="button" hidden><span aria-hidden="true">◎</span> 真上から見る</button>
+    <div class="view-actions">
+      <button id="moon-open" class="chip" type="button" hidden>衛星</button>
+      <button id="parent-back" class="chip" type="button" hidden></button>
+      <button id="overview-back" class="chip overview-back" type="button" hidden><span aria-hidden="true">◎</span> 真上から見る</button>
+    </div>
     <p id="look-hint" class="look-hint">ドラッグで見回す</p>
     <p id="announce" class="sr-only" role="status"></p>
 
@@ -99,6 +103,15 @@
     </div>
   </dialog>
 
+  <dialog id="moon-dialog" aria-labelledby="moon-title">
+    <div class="dialog-head">
+      <div><p class="eyebrow">衛星を選ぶ</p><h2 id="moon-title"></h2></div>
+      <form method="dialog"><button class="chip icon-chip" aria-label="衛星一覧を閉じる">×</button></form>
+    </div>
+    <p class="dialog-copy">視野に入っていない衛星にも近づけます。</p>
+    <div id="moon-list" class="moon-list"></div>
+  </dialog>
+
   <dialog id="help-dialog" aria-labelledby="help-title">
     <div class="dialog-head">
       <div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">観察方法とモデルの説明</h2></div>
@@ -108,9 +121,12 @@
       <h3>真上から見る・近くで見る</h3>
       <p>最初は地球の公転面に垂直な真上から見ています。内惑星は太陽の近くに集まるので、「内惑星を拡大」で軌道を見分けられます。位置を示す点は天体の実寸ではありません。</p>
       <p>カードを選ぶと、真上の位置から同じ3D空間を通って天体に近づきます。到着後は太陽に照らされた面が見える位置から公転に追随します。ステージをドラッグするか矢印キーで、その天体を中心に回り込み、裏側や極の向きも見られます。「真上から見る」を押すと徐々に離れ、全軌道を見渡せる位置へ戻ります。時刻はリセットされません。</p>
+      <h3>惑星を回る衛星を見る</h3>
+      <p>代表的な21個の衛星は、視野に入り、惑星に隠れていないときに見えます。通過を待つなら、まず時間の速さを「1日/秒」にしてみましょう。右下の「衛星」から選べば、見えていない衛星にも近づけます。到着したら「観察メモ」で詳細を読み、右下から親惑星に戻れます。</p>
       <h3>科学モデルと演出</h3>
       <p>軌道は太陽を焦点とするケプラーの楕円軌道です。離心率・軌道傾斜・公転周期を反映していますが、初期配置は演出用で、惑星同士の重力や正確な暦は再現しません。自転は恒星に対する周期の近似、惑星の傾きは軌道面に対する概略です。20日/秒・100日/秒では自転も同じ倍率で速くなり、目で追えない場合があります。</p>
       <p>軌道の距離と天体の平均半径に同じ縮尺を使っています。1 AU は約1億4,960万 km です。接近時は天体を拡大せず、カメラとの距離を変えています。8惑星には観測画像をもとにした地図を使い、金星の未観測部分は画像生成AIで補完しています。地球の雲・環・大気・星雲などは観察用の描画です。接近時に流れる塵や小石は観察用の演出で、実寸・実密度ではありません。</p>
+      <p>衛星も同じ縮尺です。親惑星の周りの軌道は平均値を使った近似で、初期位置は演出用です。日食・月食や軌道面の長期変化は再現しません。衛星の色や地形は特徴をもとにコードで描いたもので、観測地図ではありません。</p>
       <p><a href="../credits.html#solar-references">天体データの出典・クレジット</a></p>
     </div>
   </dialog>

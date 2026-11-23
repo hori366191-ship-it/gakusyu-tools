@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BODIES, RAD, TAU, SCENE_UNITS_PER_AU, orbitalPoint, positionAt, sceneRadii } from './bodies.mjs';
 import { cloudsFragment, earthAirFragment, earthClouds, saturnRings } from './planet-effects.mjs';
+import { createMoonModels } from './moon-models.mjs';
 
 const noiseSource = /* glsl */`
 float hash(vec3 p) {
@@ -381,12 +382,18 @@ export function createWorld(scene) {
     return { body, root, axial, surface, haze, clouds, axis, radius, position: root.position, au: new THREE.Vector3() };
   });
   const haloOffset = new THREE.Vector3();
+  const moons = createMoonModels(scene, models, sunPosition);
+  const targets = new Map([...models, ...moons.models].map(model => [model.body.id, model]));
   const localAxis = new THREE.Vector3(0, 1, 0), inverseTilt = new THREE.Quaternion();
   const sunRadius = models[0].radius;
   halo.scale.setScalar(sunRadius / 15);
   return {
     models,
-    place(days, spinDays, cameraAU, orbitOpacity) {
+    target: id => targets.get(id),
+    positionAt(model, days, out) {
+      return model.parent ? moons.positionAt(model, days, out) : out.fromArray(positionAt(model.body, days));
+    },
+    place(days, spinDays, cameraAU, orbitOpacity, focus) {
       sunPosition.copy(cameraAU).multiplyScalar(-SCENE_UNITS_PER_AU);
       tracks.position.copy(sunPosition);
       tracks.visible = orbitOpacity > .007;
@@ -412,6 +419,7 @@ export function createWorld(scene) {
             .applyAxisAngle(localAxis, -spin);
         }
       }
+      moons.place(days, cameraAU, focus);
     },
     updateEffects(time, camera) {
       models[0].surface.material.uniforms.clock.value = time;
@@ -424,6 +432,7 @@ export function createWorld(scene) {
       halo.visible = sunDistance < 18.7;
     },
     setQuality(level) {
+      moons.setQuality(level);
       models.forEach(model => {
         model.surface.geometry = level >= 2 ? sphere : lowSphere;
         for (const layer of [model.surface, model.haze, model.clouds]) {
@@ -433,5 +442,6 @@ export function createWorld(scene) {
         }
       });
     },
+    disposeMoons() { moons.dispose(); },
   };
 }

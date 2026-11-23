@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import { SCENE_UNITS_PER_AU, positionAt } from './bodies.mjs';
+import { SCENE_UNITS_PER_AU } from './bodies.mjs';
 import { makeSky } from './sky.mjs';
 import { createWorld } from './world.mjs';
 import { makeDust } from './dust.mjs';
 import { makePlanetMaps } from './planet-maps.mjs';
 import {
-  easedTravel, observationDistance, orbitAngles, orbitDirection, orbitPitchBounds, overheadPose, travelDistance,
+  easedTravel, observationDistance, orbitAngles, orbitDirection, orbitPitchBounds, overheadPose, satelliteTransferPoint, travelDistance,
 } from './views.mjs';
 import { approachStreak } from './dust-field.mjs';
 
@@ -14,8 +14,9 @@ const sunView = new THREE.Vector3(-15, 8.7, 14).normalize();
 const lookingDown = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
 const qualityNames = ['軽量', '省電力', 'バランス', '高精細'];
 const dayFormat = new Intl.NumberFormat('ja-JP', { maximumFractionDigits: 1 });
+const ringExtents = { saturn: 2.34, uranus: 2.03 };
 
-export function createViewer($, chart, onContextLost) {
+export function createViewer($, chart, onContextLost, onObservation) {
   const mission = $('mission'), stage = $('flight-view'), radar = $('radar'), back = $('overview-back');
   const coarse = matchMedia('(pointer: coarse)'), reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const renderer = new THREE.WebGLRenderer({ alpha: false, antialias: true });
@@ -31,6 +32,7 @@ export function createViewer($, chart, onContextLost) {
   const aim = new THREE.Vector3(), direction = new THREE.Vector3();
   const sunward = new THREE.Vector3(), flank = new THREE.Vector3(), eye = new THREE.Vector3();
   const cameraAU = new THREE.Vector3(), bodyAU = new THREE.Vector3(), overviewAU = new THREE.Vector3();
+  const parentAU = new THREE.Vector3(), arrivalAU = new THREE.Vector3();
   const prevAU = new THREE.Vector3(), stepAU = new THREE.Vector3();
   const currentViewProjection = new THREE.Matrix4(), prevViewProjection = new THREE.Matrix4();
   const relative = new THREE.Vector3(), screen = new THREE.Vector3();
@@ -55,8 +57,9 @@ export function createViewer($, chart, onContextLost) {
     overviewAU.fromArray(overheadPose(width, height, box, camera.fov, inner));
   }
 
-  function setDepth(distance) {
-    const near = THREE.MathUtils.clamp(distance * .03, .0003, 2400);
+  function setDepth(distance, satellite = false) {
+    // Deimos has a mean radius of only ~0.00004 scene units.
+    const near = THREE.MathUtils.clamp(distance * .03, satellite ? .000001 : .0003, 2400);
     const far = Math.max(45000, cameraAU.length() * SCENE_UNITS_PER_AU + 36000);
     if (Math.abs(camera.near - near) > near * .001 || Math.abs(camera.far - far) > far * .001) {
       camera.near = near;
@@ -82,8 +85,9 @@ export function createViewer($, chart, onContextLost) {
       const { body } = visit.model;
       status.textContent = body.a ? `公転に追随・${body.name}` : `観察中・${body.name}`;
       $('radar-name').textContent = body.name;
-      $('radar-task').textContent = body.task;
+      $('radar-task').textContent = body.parentId ? `${visit.model.parent.body.name}の衛星` : body.task;
     }
+    onObservation?.(mode === 'follow' ? visit.model.body : undefined);
   }
 
   function resize() {
@@ -114,7 +118,8 @@ export function createViewer($, chart, onContextLost) {
   function toOverview() {
     if (!active || mode === 'overview' || mode === 'return') return;
     orbitYaw = orbitPitch = 0;
-    visit.start = cameraAU.clone().sub(bodyAU.fromArray(positionAt(visit.model.body, days)));
+    visit.local = visit.model.parent ? localRoute(visit.model.parent, visit.model.axis) : undefined;
+    visit.start = cameraAU.clone().sub(world.positionAt(visit.model, days, bodyAU));
     visit.startRotation = camera.quaternion.clone();
     visit.initialOpacity = orbitOpacity;
     visit.elapsed = 0;
@@ -127,7 +132,7 @@ export function createViewer($, chart, onContextLost) {
   }
 
   function finishReturn() {
-    const visited = visit.model.body.id;
+    const visited = visit.model.parent?.body.id ?? visit.model.body.id;
     cameraAU.copy(overviewAU);
     camera.quaternion.copy(lookingDown);
     visit = undefined;
@@ -136,20 +141,34 @@ export function createViewer($, chart, onContextLost) {
     $('destination-list').querySelector(`[data-body="${visited}"]`)?.focus({ preventScroll: true });
   }
 
+  function localRoute(parent, pole) {
+    world.positionAt(parent, days, parentAU);
+    const start = cameraAU.clone().sub(parentAU);
+    const guide = pole.clone().multiplyScalar(start.dot(pole) < 0 ? -1 : 1);
+    return {
+      parent, start: start.toArray(), guide: guide.toArray(),
+      // Keep a margin outside the outer edge of the modeled rings.
+      clearance: parent.radius * ((ringExtents[parent.body.id] ?? 1) + .1) / SCENE_UNITS_PER_AU,
+    };
+  }
+
   function travelTo(id, edgeOn = false) {
-    const model = world.models.find(item => item.body.id === id);
+    const model = world.target(id);
     if (!model || !active) return;
     const same = mode === 'follow' && visit?.model === model;
+    const from = mode === 'follow' ? visit?.model : undefined;
+    const local = model.parent && from === model.parent ? localRoute(model.parent, model.axis)
+      : from?.parent === model ? localRoute(model, from.axis) : undefined;
     // A new pose always starts from the manual view that is on screen now;
     // the offsets themselves reset so arrival keeps the sunlit default.
     orbitYaw = orbitPitch = 0;
-    const rings = id === 'saturn' ? 2.34 : id === 'uranus' ? 2.03 : 1;
+    const rings = ringExtents[id] ?? 1;
     visit = {
-      model, rings, edgeOn, same,
+      model, rings, edgeOn, same, local,
       start: cameraAU.clone(), startRotation: camera.quaternion.clone(), initialOpacity: orbitOpacity,
-      elapsed: 0, duration: reduced.matches ? 0 : same ? .72 : 3.25,
+      elapsed: 0, duration: reduced.matches ? 0 : same ? .72 : local ? 2.4 : 3.25,
     };
-    if (same) visit.start.sub(bodyAU.fromArray(positionAt(model.body, days)));
+    if (same) visit.start.sub(world.positionAt(model, days, bodyAU));
     zoom = undefined;
     showMode('travel');
     $('announce').textContent = `${model.body.name}に接近します。`;
@@ -184,19 +203,25 @@ export function createViewer($, chart, onContextLost) {
       return;
     }
 
-    const { model, rings, edgeOn, start, startRotation, duration, same, initialOpacity } = visit;
-    bodyAU.fromArray(positionAt(model.body, days));
+    const { model, rings, edgeOn, start, startRotation, duration, same, initialOpacity, local } = visit;
+    world.positionAt(model, days, bodyAU);
     visit.elapsed += Math.min(.15, dt);
     const progress = duration ? Math.min(1, visit.elapsed / duration) : 1;
     const e = easedTravel(progress);
     if (mode === 'return') {
       relative.subVectors(overviewAU, bodyAU);
       const dist = travelDistance(start.length(), relative.length(), e);
-      direction.copy(start).normalize().lerp(relative.normalize(), easedTravel(progress / .78)).normalize();
-      cameraAU.copy(bodyAU).addScaledVector(direction, dist);
+      if (local) {
+        world.positionAt(local.parent, days, parentAU);
+        arrivalAU.copy(overviewAU).sub(parentAU);
+        cameraAU.fromArray(satelliteTransferPoint(local.start, arrivalAU.toArray(), local.guide, progress, local.clearance)).add(parentAU);
+      } else {
+        direction.copy(start).normalize().lerp(relative.normalize(), easedTravel(progress / .78)).normalize();
+        cameraAU.copy(bodyAU).addScaledVector(direction, dist);
+      }
       camera.quaternion.copy(startRotation).slerp(lookingDown, easedTravel((progress - .15) / .85));
       orbitOpacity = initialOpacity + (1 - initialOpacity) * easedTravel((progress - .24) / .60);
-      setDepth(dist * SCENE_UNITS_PER_AU);
+      setDepth((local ? cameraAU.distanceTo(bodyAU) : dist) * SCENE_UNITS_PER_AU, Boolean(model.parent));
       if (progress === 1) finishReturn();
       return;
     }
@@ -210,29 +235,35 @@ export function createViewer($, chart, onContextLost) {
     } else {
       eye.y += .27;
     }
-    const distance = observationDistance(model.radius, rings, camera.aspect, camera.fov) / SCENE_UNITS_PER_AU;
+    const distance = observationDistance(model.viewingRadius ?? model.radius, rings, camera.aspect, camera.fov) / SCENE_UNITS_PER_AU;
     let dist = distance;
     eye.normalize();
     // Apply the manual orbit as an offset from this body's arrival pose.
     const angles = orbitAngles([eye.x, eye.y, eye.z]);
     baseElevation = angles.elevation;
     eye.fromArray(orbitDirection(angles, orbitYaw, orbitPitch));
-    if (mode === 'travel') {
+    if (mode === 'travel' && local) {
+      world.positionAt(local.parent, days, parentAU);
+      arrivalAU.copy(bodyAU).addScaledVector(eye, distance).sub(parentAU);
+      cameraAU.fromArray(satelliteTransferPoint(local.start, arrivalAU.toArray(), local.guide, progress, local.clearance)).add(parentAU);
+      dist = cameraAU.distanceTo(bodyAU);
+    } else if (mode === 'travel') {
       if (same) relative.copy(start);
       else relative.subVectors(start, bodyAU);
       dist = travelDistance(relative.length(), distance, e);
       direction.copy(relative).normalize().lerp(eye, easedTravel((progress - (same ? 0 : .27)) / (same ? 1 : .73))).normalize();
+      cameraAU.copy(bodyAU).addScaledVector(direction, dist);
     } else {
-      direction.copy(eye);
+      cameraAU.copy(bodyAU).addScaledVector(eye, dist);
     }
-    cameraAU.copy(bodyAU).addScaledVector(direction, dist);
     targetLook(model, rings);
     camera.quaternion.copy(startRotation).slerp(aimQuaternion, same ? e : easedTravel(progress / .52));
     orbitOpacity = mode === 'follow' ? 0 : initialOpacity * (1 - easedTravel((progress - .15) / .57));
-    setDepth(dist * SCENE_UNITS_PER_AU);
+    setDepth(dist * SCENE_UNITS_PER_AU, Boolean(model.parent));
     if (mode === 'travel' && progress === 1) {
       showMode('follow');
       $('announce').textContent = `${model.body.name}に到着しました。観察メモを開けます。`;
+      if (model.parent && document.activeElement === back) $('inspect').focus({ preventScroll: true });
     }
   }
 
@@ -280,7 +311,7 @@ export function createViewer($, chart, onContextLost) {
     }
     prevAU.copy(cameraAU);
     pose(dialogOpen ? 0 : elapsed);
-    world.place(days, spinDays, cameraAU, orbitOpacity);
+    world.place(days, spinDays, cameraAU, orbitOpacity, visit?.model);
     // The dust field lives camera-relative: a +ΔAU camera step slides it the
     // other way. The previous frame is projected with last frame's view, so
     // orbit drags and body-follow motion do not need a rotation approximation.
@@ -302,7 +333,7 @@ export function createViewer($, chart, onContextLost) {
       $('elapsed-days').textContent = `経過 ${dayFormat.format(days)} 日`;
       nextReadout = time + 180;
     }
-    planetMaps.update(time, dt, camera, level, coarse.matches, visit?.model);
+    planetMaps.update(time, dt, camera, level, coarse.matches, visit?.model.parent ?? visit?.model);
     // Keep the decorative sky outside the physical depth/frustum budget.
     skyCamera.quaternion.copy(camera.quaternion);
     sky.update(skyCamera);
@@ -378,6 +409,7 @@ export function createViewer($, chart, onContextLost) {
     cancelAnimationFrame(frame);
     planetMaps.dispose();
     dust.dispose();
+    world.disposeMoons();
     observer.disconnect();
     coarse.removeEventListener('change', pointerModeChanged);
     document.removeEventListener('visibilitychange', resetFrameTime);

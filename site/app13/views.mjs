@@ -65,3 +65,35 @@ export function travelDistance(start, end, progress) {
   if (progress >= 1) return end;
   return Math.exp(Math.log(start) * (1 - progress) + Math.log(end) * progress);
 }
+
+const dot = ([ax, ay, az], [bx, by, bz]) => ax * bx + ay * by + az * bz;
+const unit = vector => {
+  const length = Math.hypot(...vector);
+  return length > 0 ? vector.map(value => value / length) : [0, 1, 0];
+};
+
+function sphericalArc(from, to, t) {
+  const dotProduct = Math.max(-1, Math.min(1, dot(from, to)));
+  if (dotProduct > .999999) return unit(from.map((value, i) => value + (to[i] - value) * t));
+  let tangent = to.map((value, i) => value - dotProduct * from[i]);
+  if (Math.hypot(...tangent) < 1e-12) {
+    const orthogonal = Math.abs(from[1]) < .8 ? [0, 1, 0] : [1, 0, 0];
+    tangent = orthogonal.map((value, i) => value - dot(orthogonal, from) * from[i]);
+  }
+  tangent = unit(tangent);
+  const angle = Math.acos(dotProduct) * t;
+  return from.map((value, i) => value * Math.cos(angle) + tangent[i] * Math.sin(angle));
+}
+
+// In the parent-centred frame, a radial interpolation with a separate angular
+// arc cannot go through the planet (or its rings) the way a straight chord can.
+// The fixed guide keeps the arc away from an ambiguous antipodal shortcut.
+export function satelliteTransferPoint(start, end, guide, progress, clearance) {
+  if (progress <= 0) return start;
+  if (progress >= 1) return end;
+  const radius = Math.max(clearance, travelDistance(Math.hypot(...start), Math.hypot(...end), easedTravel(progress)));
+  const direction = progress < .4
+    ? sphericalArc(unit(start), guide, easedTravel(progress / .4))
+    : sphericalArc(guide, unit(end), easedTravel((progress - .4) / .6));
+  return direction.map(value => value * radius);
+}

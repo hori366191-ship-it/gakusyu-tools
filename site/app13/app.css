@@ -103,12 +103,14 @@
 .radar {
   position: absolute; left: var(--edge); bottom: 98px; background: var(--panel); border: 1px solid var(--border);
   border-inline-start: 3px solid var(--accent); border-radius: 11px; padding: 13px 15px;
-  display: flex; align-items: center; gap: 13px; max-width: min(460px, calc(100% - var(--edge) * 2));
+  display: flex; align-items: center; gap: 13px; max-width: min(460px, calc(100% - var(--edge) * 2 - 285px));
 }
 .radar h2 { font-size: 20px; }
 .radar p:not(.eyebrow) { font-size: 12px; color: var(--muted); }
 .radar .primary { min-height: 44px; flex: none; }
-.overview-back { position: absolute; right: var(--edge); bottom: 98px; color: var(--accent); border-color: #ffcf9970; }
+.view-actions { position: absolute; right: var(--edge); bottom: 98px; display: flex; gap: 8px; }
+.overview-back { color: var(--accent); border-color: #ffcf9970; }
+.moon-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .deck {
   position: absolute; inset-inline: var(--edge); bottom: max(17px, env(safe-area-inset-bottom)); padding-top: 12px;
   border-top: 1px solid var(--border); display: grid; align-items: center; gap: 12px;
@@ -194,7 +196,7 @@
   .destination-list button small { display: none; }
   .radar { inset-inline: var(--edge); max-width: none; bottom: calc(142px + env(safe-area-inset-bottom)); gap: 8px; padding: 9px 12px; }
   .radar h2 { font-size: 18px; }
-  .overview-back { bottom: calc(88px + env(safe-area-inset-bottom)); }
+  .view-actions { bottom: calc(88px + env(safe-area-inset-bottom)); }
   .deck {
     grid-template-columns: minmax(0,1fr) auto; gap: 3px 7px; bottom: max(8px, env(safe-area-inset-bottom)); padding-top: 6px;
   }
@@ -223,5 +225,5 @@
   .destination-list button { min-height: 48px; }
   .destination-list button small { display: none; }
   .radar p:not(.eyebrow) { display: none; }
-  .radar, .overview-back { bottom: 75px; }
+  .radar, .view-actions { bottom: 75px; }
 }
