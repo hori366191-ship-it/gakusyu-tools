@@ -667,8 +667,12 @@
       if (!T || !banner) return;
       var WORKER_BASE = 'https://gakusyu-tools-proxy.hori-shota.workers.dev';
       var DIRECT_PROBE_URL = 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
-      var PROBE_URL_WORKER = (WORKER_BASE && WORKER_BASE.indexOf('REPLACE')===-1 && WORKER_BASE.indexOf('workers.dev')!==-1) ? WORKER_BASE.replace(/\/+$/,'') + '/app2' : '';
+      var WORKER_READY = !!(WORKER_BASE && WORKER_BASE.indexOf('REPLACE')===-1 && WORKER_BASE.indexOf('workers.dev')!==-1);
+      var PROBE_URL_WORKER = WORKER_READY ? WORKER_BASE.replace(/\/+$/,'') + '/app2' : '';
       var PROBE_URL = PROBE_URL_WORKER || DIRECT_PROBE_URL;
+      // 印刷用(pdfdrop)は別デプロイ。app2 が ok でもこちらが落ちていれば印刷だけ失敗する
+      var DIRECT_PDFDROP_URL = 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbwj7qTaMDmKGa-KTEEwa2jcP7wtZ8xh_rVMANzfwKapz5u8tThqjxc2pQsbN-lAWU5L7Q/exec';
+      var PDFDROP_URL_WORKER = WORKER_READY ? WORKER_BASE.replace(/\/+$/,'') + '/pdfdrop' : '';
       var PROBE_TOKEN = 'e6135dfd707ab9a6916635fa';
       T.configure({ origins: [WORKER_BASE] });
 
@@ -697,12 +701,13 @@
         banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
         banner.appendChild(makeEl('span', '', '確認中…'));
       }
-      function renderOk(isOwner) {
+      function renderOk(isOwner, pdfOk) {
         setState('is-ok', 'ok');
         clearEl(banner);
         banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
-        var okText = makeEl('span', '', isOwner ? '先生アカウントでログイン中 \u2705' : '教室タブレットとしてログイン中 \u2705');
-        // ここでの ok は app2 の判定。印刷アプリ(pdfdrop)の可否は保証しない（表示文言は増やさない）。
+        var base = isOwner ? '先生アカウントでログイン中' : '教室タブレットとしてログイン中';
+        // pdfOk===false のときだけ印刷の要確認を添える（ログイン状態は落とさない）
+        var okText = makeEl('span', '', pdfOk === false ? base + '（印刷は要確認）' : base + ' \u2705');
         okText.title = '印刷アプリ（原稿用紙・学習プリント）は別に認証を確認します';
         banner.appendChild(okText);
         var redo = makeEl('button', 'auth-banner__btn', 'ログインし直す');
@@ -781,6 +786,22 @@
           }
         });
       }
+      // app2 が ok のときだけ pdfdrop も probe する（匿名時は通信を増やさない）。
+      // id_token 付きで呼ぶので、pdfdrop 側の LAST_PROBE に失敗理由が残る。
+      function probePdfdrop(seq, isOwner) {
+        T.probeAuth({
+          workerUrl: PDFDROP_URL_WORKER,
+          directUrl: DIRECT_PDFDROP_URL,
+          token: PROBE_TOKEN,
+          totalMs: 12000
+        }).then(function (res) {
+          if (seq !== probeSeq) return;
+          renderOk(isOwner, !!res && res.status === 'ok');
+        }, function () {
+          if (seq !== probeSeq) return;
+          renderOk(isOwner, false);
+        });
+      }
       function runProbe() {
         var token = T.getIdToken();
         var t = Date.now();
@@ -797,7 +818,8 @@
           totalMs: 22000
         }).then(function (res) {
           if (seq !== probeSeq) return;
-          if (res.status === 'ok') { renderOk(res.isOwner); return; }
+          // app2 の時点で従来表示へ戻し、pdfdrop の応答待ち（最大12秒）で「確認中…」を残さない
+          if (res.status === 'ok') { renderOk(!!res.isOwner); probePdfdrop(seq, !!res.isOwner); return; }
           if (res.status === 'notallowed') { renderLogin('is-out'); return; }
           if (res.status === 'noauth') { renderLogin('is-warn'); return; }
           renderLogin('is-warn', { unreachable: true });
