@@ -299,22 +299,32 @@
       + '</tr>';
   }
 
-  function ivTableHtml(table) {
-    var groups = (table && table.groups) || [];
-    var body = groups.map(function (group) {
-      return '<tbody>'
-        // 型グループ見出しの直前に、罫線も背景も持たない小さな余白行を置く
-        + '<tr class="lp-iv-gap" aria-hidden="true"><td colspan="5"></td></tr>'
-        + '<tr class="lp-iv-grp"><th colspan="5" scope="colgroup">' + esc(group.title) + '</th></tr>'
-        + (group.rows || []).map(ivRowHtml).join('')
-        + '</tbody>';
-    }).join('');
-    return '<table class="lp-iv">'
-      + '<colgroup><col class="lp-iv-col-no"><col class="lp-iv-col-form"><col class="lp-iv-col-form">'
-      + '<col class="lp-iv-col-form"><col class="lp-iv-col-mean"></colgroup>'
+  // 列見出し表と各カードで同じ幅を使い、桁を揃える（#5% / 3形 各24.5% / 意味21.5%）
+  var IV_COLGROUP = '<colgroup><col class="lp-iv-col-no"><col class="lp-iv-col-form"><col class="lp-iv-col-form">'
+    + '<col class="lp-iv-col-form"><col class="lp-iv-col-mean"></colgroup>';
+
+  // 列見出しは1列に1回だけ（外周線なし・下線だけの帯）
+  function ivHeadHtml() {
+    return '<table class="lp-iv-headtbl">' + IV_COLGROUP
+      + '<caption class="lp-iv-sr">列の見出し</caption>'
       + '<thead><tr><th scope="col">#</th><th scope="col">原形</th><th scope="col">過去形</th>'
       + '<th scope="col">過去分詞</th><th scope="col">意味</th></tr></thead>'
-      + body + '</table>';
+      + '</table>';
+  }
+
+  // 型グループ1つ＝角丸カード1枚（theadなし・見出し行＋データ行）
+  function ivCardHtml(group) {
+    return '<div class="lp-iv-card"><table class="lp-iv-cardtbl">' + IV_COLGROUP
+      + '<tbody>'
+      + '<tr class="lp-iv-grp"><th colspan="5" scope="colgroup">' + esc(group.title) + '</th></tr>'
+      + (group.rows || []).map(ivRowHtml).join('')
+      + '</tbody></table></div>';
+  }
+
+  // 1列分＝列見出し＋型グループごとのカードを縦積み（カード間は外側の白余白）
+  function ivTableHtml(table) {
+    var groups = (table && table.groups) || [];
+    return '<div class="lp-iv-col">' + ivHeadHtml() + groups.map(ivCardHtml).join('') + '</div>';
   }
 
   function irregularTablesHtml(page) {

@@ -442,28 +442,28 @@ test('[iv-data] 表をまたぐグループは「（全N語・i/j）」「（続
   assert.equal(partTotal('発展 ／ A-B-B'), 15);
 });
 
-test('[iv-render] 不規則動詞の紙面はA4横・3表・landscapeクラスで、語は太字＋発音は語の下', () => {
+test('[iv-render] 不規則動詞の紙面はA4横・3列・列見出し1回＋型グループごとの角丸カード', () => {
   const html = app.materialHtml(IV);
   assert.equal(count(html, 'class="lp-sheet lp-sheet--landscape"'), 2, '2ページとも横向き');
   assert.equal(count(html, 'data-orientation="landscape"'), 2);
-  assert.equal(count(html, '<div class="lp-iv-grid">'), 2, 'ページごとに表のグリッド');
-  assert.equal(count(html, '<table class="lp-iv">'), 6, '1ページ3表×2ページ');
+  assert.equal(count(html, '<div class="lp-iv-grid">'), 2, 'ページごとに列のグリッド');
+  assert.equal(count(html, '<div class="lp-iv-col">'), 6, '1ページ3列×2ページ');
+  assert.equal(count(html, '<table class="lp-iv-headtbl">'), 6, '列見出しは1列に1回だけ');
+  assert.equal(count(html, '<div class="lp-iv-card">'), 14, '型グループごとに1枚のカード');
+  assert.equal(count(html, '<table class="lp-iv-cardtbl">'), 14, 'カード1枚＝table 1つ');
+  assert.equal(count(html, '<thead>'), 6, 'theadは列見出しだけ（カードには付けない）');
+  assert.equal(count(html, 'class="lp-iv-gap"'), 0, '旧・余白行は使わない');
   assert.equal(count(html, '<td class="lp-iv-no">'), 102, '全102行');
   assert.equal(count(html, '<span class="lp-iv-word">'), 306, '3形×102語');
   assert.equal(count(html, '<span class="lp-iv-pron">'), 306, 'カタカナも3形ぶん');
   const headers = html.match(/<thead><tr>(?:(?!<\/tr>).)*原形(?:(?!<\/tr>).)*過去分詞(?:(?!<\/tr>).)*意味(?:(?!<\/tr>).)*<\/tr><\/thead>/g) || [];
-  assert.equal(headers.length, 6, '各表に # / 原形 / 過去形 / 過去分詞 / 意味 のヘッダ');
+  assert.equal(headers.length, 6, '各列に # / 原形 / 過去形 / 過去分詞 / 意味 のヘッダ');
   assert.equal(count(html, '<tr class="lp-iv-grp">'), 14, 'グループ見出し行');
-  // 型グループ見出しの直前に、罫線・背景を持たない余白行（gap）を1行ずつ置く
-  const GAP_ROW = '<tr class="lp-iv-gap" aria-hidden="true"><td colspan="5"></td></tr>';
-  assert.equal(count(html, 'class="lp-iv-gap"'), 14, 'グループ数と同数の余白行');
-  assert.equal(count(html, GAP_ROW), 14, '余白行は colspan=5・装飾なし・読み上げ対象外');
-  assert.equal(count(html, GAP_ROW + '<tr class="lp-iv-grp">'), 14, '余白行は各グループ見出しの直前');
-  assert.equal(count(html, '<tbody>' + GAP_ROW), 14, '各tbodyの先頭に余白行');
-  // 余白行はデータ行の数に含めない（17行×6表のまま）
+  assert.ok(html.includes('<th colspan="5" scope="colgroup">基本 ／ A-A-A'), '見出しはcolspan=5');
+  // 見出しと各カードで同じ colgroup 幅（#5% / 3形 各24.5% / 意味21.5%）
+  assert.equal(count(html, '<col class="lp-iv-col-no"><col class="lp-iv-col-form"><col class="lp-iv-col-form"><col class="lp-iv-col-form"><col class="lp-iv-col-mean">'), 20, '列見出し6＋カード14で同じ桁');
   const dataRows = html.match(/<tr>(?:(?!<\/tr>).)*?class="lp-iv-no"/g) || [];
   assert.equal(dataRows.length, 102, 'データ行は102行のまま');
-  assert.ok(html.includes('<th colspan="5" scope="colgroup">基本 ／ A-A-A'), '見出しはcolspan=5');
   assert.ok(html.includes('<span class="lp-iv-word">be (am/is/are)</span>'));
   assert.ok(html.includes('<span class="lp-iv-pron">ビー</span>'));
   assert.ok(html.includes('<span>1 / 2</span>') && html.includes('<span>2 / 2</span>'));
@@ -484,7 +484,7 @@ test('[iv-render] 不規則動詞の紙面はA4横・3表・landscapeクラス�
   assert.equal(count(portrait, 'class="lp-sheet"'), 1);
 });
 
-test('[iv-css] 横向き紙面・表・発音のスタイル（白地黒インク・3表・太字/細字6pt）', () => {
+test('[iv-css] 横向き紙面・3列グリッド・カード・発音のスタイル（白地黒インク・太字/細字6pt）', () => {
   const css = read('site/app12/app.css');
   const landscape = css.match(/\.lp-sheet--landscape \{([\s\S]*?)\n\}/);
   assert.ok(landscape, '.lp-sheet--landscape の定義');
@@ -499,59 +499,85 @@ test('[iv-css] 横向き紙面・表・発音のスタイル（白地黒イン�
   assert.ok(/\.lp-sheet\.lp-sheet--landscape\s*\{[^}]*width:\s*297mm/.test(print), '印刷もA4横');
   assert.ok(/\.lp-sheet\.lp-sheet--landscape\s*\{[^}]*height:\s*210mm/.test(print));
 
-  assert.ok(/\.lp-iv-grid\s*\{[^}]*grid-template-columns:\s*repeat\(3,/.test(css), '1ページ3表');
-  assert.ok(/\.lp-iv \.lp-iv-col-no \{\s*width:\s*5%/.test(css));
-  assert.ok(/\.lp-iv \.lp-iv-col-form \{\s*width:\s*24\.5%/.test(css));
-  assert.ok(/\.lp-iv \.lp-iv-col-mean \{\s*width:\s*21\.5%/.test(css));
+  assert.ok(/\.lp-iv-grid\s*\{[^}]*grid-template-columns:\s*repeat\(3,/.test(css), '1ページ3列');
+  assert.ok(/\.lp-iv-grid\s*\{[^}]*column-gap:\s*3\.5mm/.test(css), '列間3.5mm');
+  assert.ok(/\.lp-iv-grid\s*\{[^}]*align-items:\s*start/.test(css));
+  assert.ok(/\.lp-iv-(?:headtbl|cardtbl) \.lp-iv-col-no \{\s*width:\s*5%/.test(css));
+  assert.ok(/\.lp-iv-(?:headtbl|cardtbl) \.lp-iv-col-form \{\s*width:\s*24\.5%/.test(css));
+  assert.ok(/\.lp-iv-(?:headtbl|cardtbl) \.lp-iv-col-mean \{\s*width:\s*21\.5%/.test(css));
   assert.ok(/\.lp-iv-word \{[^}]*font-weight:\s*700/.test(css), '英単語は太字');
   assert.ok(/\.lp-iv-pron \{[^}]*font-weight:\s*300/.test(css), '発音は細字');
   assert.ok(/\.lp-iv-pron \{[^}]*font-size:\s*6pt/.test(css), '発音は6pt');
   assert.ok(/\.lp-iv-pron \{[^}]*text-align:\s*left/.test(css), '発音は左揃え');
-  assert.ok(/\.lp-iv tr\.lp-iv-grp th \{[^}]*background:\s*#e6e6e6/.test(css), 'グループ見出しの帯');
-  assert.ok(/\.lp-sheet \.lp-iv th,[\s\S]{0,200}color:\s*#111\s*!important/.test(css), '紙面は黒インク固定');
+  assert.ok(/\.lp-iv-cardtbl tr\.lp-iv-grp th \{[^}]*background:\s*#f2f2f2/.test(css), 'グループ見出しの帯');
+  assert.ok(/\.lp-sheet \.lp-iv-cardtbl th,[\s\S]{0,200}color:\s*#111\s*!important/.test(css), '紙面は黒インク固定');
   assert.ok(/\.lp-iv-legend \{[\s\S]{0,120}display:\s*flex/.test(css), '凡例');
 });
 
-test('[iv-render] 余白行を入れても1ページ3表・各17行・2ページのまま（レイアウト維持）', () => {
+test('[iv-render] カード分割しても1ページ3列・各17行・2ページのまま（レイアウト維持）', () => {
   const html = app.materialHtml(IV);
   const pages = html.split('<article ');
   assert.equal(pages.length - 1, 2, '2ページ');
   pages.slice(1).forEach((page, i) => {
-    const tables = page.split('<table class="lp-iv">').slice(1);
-    assert.equal(tables.length, 3, (i + 1) + 'ページ目は3表');
-    tables.forEach((table, j) => {
-      const dataRows = (table.match(/<td class="lp-iv-no">/g) || []).length;
-      const gapRows = (table.match(/<tr class="lp-iv-gap"/g) || []).length;
-      const groupRows = (table.match(/<tr class="lp-iv-grp"/g) || []).length;
-      assert.equal(dataRows, 17, (i + 1) + 'ページ目 ' + (j + 1) + '表目のデータ行');
-      assert.equal(gapRows, groupRows, '余白行はグループ数と同数');
-      assert.ok(gapRows >= 1 && gapRows <= 4, '余白行は1〜4行に収まる: ' + gapRows);
-      // 余白行は必ず見出しの直前（データ行の直前には置かない）
-      assert.equal((table.match(/<tr class="lp-iv-gap" aria-hidden="true"><td colspan="5"><\/td><\/tr><tr class="lp-iv-grp"/g) || []).length, groupRows);
+    const cols = page.split('<div class="lp-iv-col">').slice(1);
+    assert.equal(cols.length, 3, (i + 1) + 'ページ目は3列');
+    cols.forEach((col, j) => {
+      const cardRows = (col.match(/<div class="lp-iv-card">/g) || []).length;
+      const dataRows = (col.match(/<td class="lp-iv-no">/g) || []).length;
+      const groupRows = (col.match(/<tr class="lp-iv-grp"/g) || []).length;
+      assert.equal(dataRows, 17, (i + 1) + 'ページ目 ' + (j + 1) + '列目のデータ行');
+      assert.equal((col.match(/<table class="lp-iv-headtbl">/g) || []).length, 1, '列見出しは列ごとに1回');
+      assert.equal(cardRows, groupRows, 'カード1枚＝グループ見出し1行');
+      assert.ok(cardRows >= 1 && cardRows <= 4, 'カードは1〜4枚に収まる: ' + cardRows);
+      // カードは必ずグループ見出し行から始まる
+      assert.equal((col.match(/<tbody><tr class="lp-iv-grp">/g) || []).length, cardRows);
     });
   });
 });
 
-test('[iv-css] 余白行（gap）は罫線・背景・ゼブラ・左アクセントを持たず、高さだけ取る', () => {
+test('[iv-css] カード間は罫線の通らない白余白・カードは角丸・外周0.2mm・横線のみ', () => {
   const css = read('site/app12/app.css');
-  const gapRule = css.match(/\.lp-iv tr\.lp-iv-gap > td \{([\s\S]*?)\n\}/);
-  assert.ok(gapRule, '.lp-iv tr.lp-iv-gap のセル定義');
-  const body = gapRule[1];
-  assert.equal(/border:\s*0(\.\d+)?(mm|px)?\s*!important/.test(body), true, '罫線を消す');
-  assert.equal(/background:\s*transparent\s*!important/.test(body), true, '背景を持たない');
-  assert.ok(/padding:\s*0\s*!important/.test(body), '内側の余白を0');
-  assert.ok(/line-height:\s*0/.test(body), '行の高さを字面に左右させない');
-  const h = Number((body.match(/height:\s*([\d.]+)mm/) || [])[1]);
-  assert.ok(h >= 1.4 && h <= 1.8, '高さは1.4〜1.8mm: ' + h);
 
-  // ゼブラは余白行を除いてデータ行にだけ付ける
-  const zebra = css.match(/\.lp-sheet \.lp-iv tbody tr:not\(\.lp-iv-grp\)[^\n]*/g) || [];
-  assert.ok(zebra.length >= 1);
-  zebra.forEach((sel) => assert.ok(sel.includes(':not(.lp-iv-gap)'), 'ゼブラから余白行を除外: ' + sel));
-  // 左アクセント（グループ見出しのborder-left）は見出しだけ
-  const accent = css.match(/border-left:\s*1mm solid #111/g) || [];
-  assert.equal(accent.length, 1, '左アクセントは1か所だけ');
-  assert.ok(/\.lp-iv tr\.lp-iv-grp th \{[^}]*border-left/.test(css), '付くのはグループ見出しだけ');
+  // 列＝縦積み。カード間（＝見出し下）の余白はgapだけで取り、罫線は引かない
+  const colRule = css.match(/\.lp-iv-col \{([\s\S]*?)\n\}/);
+  assert.ok(colRule, '.lp-iv-col の定義');
+  assert.ok(/display:\s*flex/.test(colRule[1]));
+  assert.ok(/flex-direction:\s*column/.test(colRule[1]));
+  const gap = Number((colRule[1].match(/gap:\s*([\d.]+)mm/) || [])[1]);
+  assert.ok(gap >= 1.4 && gap <= 1.8, 'カード間・見出し下は1.4〜1.8mm: ' + gap);
+  assert.equal(/border/.test(colRule[1]), false, '列に罫線を引かない');
+
+  // カード: 外周0.2mm #c9c9c9・角丸3mm・クリップ・白地
+  const cardRule = css.match(/\.lp-iv-card \{([\s\S]*?)\n\}/);
+  assert.ok(cardRule, '.lp-iv-card の定義');
+  assert.ok(/border:\s*0\.2mm solid #c9c9c9/.test(cardRule[1]), '外周線');
+  assert.ok(/border-radius:\s*3mm/.test(cardRule[1]), '角丸');
+  assert.ok(/overflow:\s*hidden/.test(cardRule[1]), '角丸でクリップ');
+  assert.ok(/background:\s*#ffffff/.test(cardRule[1]), '白地');
+
+  // 列見出し: 外周線なし・下線だけ
+  const headRule = css.match(/\.lp-sheet \.lp-iv-headtbl \{([\s\S]*?)\n\}/);
+  assert.ok(headRule, '.lp-iv-headtbl の定義');
+  assert.ok(/border:\s*0/.test(headRule[1]), '外周線なし');
+  const headTh = css.match(/\.lp-sheet \.lp-iv-headtbl th \{([\s\S]*?)\n\}/);
+  assert.ok(headTh, '列見出しセル');
+  assert.ok(/border:\s*0;/.test(headTh[1]), 'セルの格子なし');
+  assert.ok(/border-bottom:\s*0\.2mm solid #c9c9c9/.test(headTh[1]), '下線のみ');
+
+  // カード内: 縦線なし・横線0.12mm・最下段は下線なし・ゼブラなし
+  const cellRule = css.match(/\.lp-sheet \.lp-iv-cardtbl th,\n\.lp-sheet \.lp-iv-cardtbl td \{([\s\S]*?)\n\}/);
+  assert.ok(cellRule, 'カード内セル');
+  assert.ok(/border:\s*0;/.test(cellRule[1]), '格子を消す');
+  assert.ok(/border-bottom:\s*0\.12mm solid #cfcfcf/.test(cellRule[1]), '横線のみ');
+  assert.ok(/\.lp-sheet \.lp-iv-cardtbl tbody tr:last-child > \* \{ border-bottom: 0; \}/.test(css), '最下段は下線なし');
+  assert.equal(/nth-of-type\(odd\)|nth-child\(odd\)|#f7f7f7/.test(css), false, 'ゼブラなし');
+  // グループ見出しは背景のみ（左の黒アクセントなし）
+  const grpRule = css.match(/\.lp-sheet \.lp-iv-cardtbl tr\.lp-iv-grp th \{([\s\S]*?)\n\}/);
+  assert.ok(grpRule, 'グループ見出し');
+  assert.ok(/border-left:\s*0/.test(grpRule[1]));
+  assert.equal(/border-left:\s*1mm/.test(css), false, '太い黒アクセントを残さない');
+  // 番号は #666
+  assert.ok(/\.lp-sheet \.lp-iv-cardtbl td\.lp-iv-no \{[\s\S]{0,200}color:\s*#666 !important/.test(css));
 });
 
 test('[iv-page] 印刷の@pageは教材の向きで切り替える（縦/横）', () => {

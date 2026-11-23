@@ -443,6 +443,7 @@ html[data-theme="forest"] .lp-header .lp-title {
   min-height: 0;
 }
 
+/* 1ページ3列。列の間はカード外の白余白 */
 .lp-iv-grid {
   flex: 1 1 auto;
   min-height: 0;
@@ -452,19 +453,38 @@ html[data-theme="forest"] .lp-header .lp-title {
   align-items: start;
 }
 
-.lp-iv {
+/* 1列＝列見出し＋型グループごとのカードの縦積み。カード間（と見出し下）は白余白 */
+.lp-iv-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6mm;
+  min-width: 0;
+}
+
+.lp-iv-headtbl,
+.lp-iv-cardtbl {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
   font-size: 8pt;
   line-height: 1.2;
 }
-.lp-iv .lp-iv-col-no { width: 5%; }
-.lp-iv .lp-iv-col-form { width: 24.5%; }
-.lp-iv .lp-iv-col-mean { width: 21.5%; }
+.lp-iv-headtbl .lp-iv-col-no,
+.lp-iv-cardtbl .lp-iv-col-no { width: 5%; }
+.lp-iv-headtbl .lp-iv-col-form,
+.lp-iv-cardtbl .lp-iv-col-form { width: 24.5%; }
+.lp-iv-headtbl .lp-iv-col-mean,
+.lp-iv-cardtbl .lp-iv-col-mean { width: 21.5%; }
 
-.lp-sheet .lp-iv thead th {
-  background: #e6e6e6;
+/* 列見出し: 外周線なし・下線だけの軽い帯（1列に1回） */
+.lp-sheet .lp-iv-headtbl {
+  border: 0;
+  background: #fafafa;
+}
+.lp-sheet .lp-iv-headtbl th {
+  border: 0;
+  border-bottom: 0.2mm solid #c9c9c9;
+  background: transparent;
   font-size: 7.3pt;
   font-weight: 700;
   letter-spacing: .04em;
@@ -472,11 +492,33 @@ html[data-theme="forest"] .lp-header .lp-title {
   white-space: nowrap;
   text-align: left;
   vertical-align: middle;
+  color: #111 !important;
 }
-/* 型グループの見出し行（全N語・i/j の分割も含む） */
-.lp-iv tr.lp-iv-grp th {
-  background: #e6e6e6;
-  border-left: 1mm solid #111;
+
+/* グループカード: 外周線あり・角丸・横線のみ */
+.lp-iv-card {
+  border: 0.2mm solid #c9c9c9;
+  border-radius: 3mm;
+  overflow: hidden;            /* 印刷でも角丸でクリップする */
+  background: #ffffff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.lp-sheet .lp-iv-cardtbl th,
+.lp-sheet .lp-iv-cardtbl td {
+  border: 0;
+  border-bottom: 0.12mm solid #cfcfcf;   /* 横線のみ（縦線なし） */
+  padding: 0.75mm 0.6mm;
+  text-align: left;
+  vertical-align: top;
+  font-weight: 400;
+  color: #111 !important;
+  background: transparent;
+}
+/* 型グループの見出し行（全N語・i/j の分割も含む）。背景のみ・左の黒アクセントなし */
+.lp-sheet .lp-iv-cardtbl tr.lp-iv-grp th {
+  background: #f2f2f2 !important;
+  border-left: 0;
   font-size: 7.4pt;
   font-weight: 700;
   letter-spacing: .02em;
@@ -484,42 +526,28 @@ html[data-theme="forest"] .lp-header .lp-title {
   line-height: 1.2;
   text-align: left;
 }
-.lp-sheet .lp-iv th,
-.lp-sheet .lp-iv td {
-  border: 0.15mm solid #111;
-  padding: 0.75mm 0.6mm;
-  text-align: left;
-  vertical-align: top;
-  font-weight: 400;
-  color: #111 !important;
-  background: #ffffff;
-}
-/* 型グループ見出しの直前の余白行。罫線・背景・ゼブラ・左アクセントを一切付けない */
-.lp-sheet .lp-iv tr.lp-iv-gap > td,
-.lp-iv tr.lp-iv-gap > td {
-  border: 0 !important;
-  padding: 0 !important;
-  height: 1.6mm;
-  line-height: 0;
-  font-size: 0;
-  background: transparent !important;
-}
+/* カード下端は外周線に任せる（二重線を避ける） */
+.lp-sheet .lp-iv-cardtbl tbody tr:last-child > * { border-bottom: 0; }
 
-/* 共通テーマの `th` 背景・`td` 色より紙面（白地黒インク）を優先する */
-.lp-sheet .lp-iv thead th,
-.lp-sheet .lp-iv tr.lp-iv-grp th { background: #e6e6e6 !important; }
-/* ゼブラはデータ行だけに付ける（余白行 lp-iv-gap を数えないよう、見出し直後の奇数番目を拾う） */
-.lp-sheet .lp-iv tbody tr:not(.lp-iv-grp):not(.lp-iv-gap):nth-of-type(odd) > th,
-.lp-sheet .lp-iv tbody tr:not(.lp-iv-grp):not(.lp-iv-gap):nth-of-type(odd) > td { background: #f7f7f7 !important; }
-
-.lp-sheet .lp-iv td.lp-iv-no {
-  width: 5%;
+.lp-sheet .lp-iv-cardtbl td.lp-iv-no {
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-size: 6.5pt;
-  color: #333 !important;
+  color: #666 !important;
   padding-right: 1.3mm;
   padding-left: 0.4mm;
+}
+/* 読み上げ用キャプションは紙面に出さない */
+.lp-iv-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .lp-iv-cell { display: block; }
