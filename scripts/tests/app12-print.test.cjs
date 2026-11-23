@@ -214,6 +214,120 @@ test('[render] 過去/現在/未来の3ブロック見出しと、点/斜線帯/
   assert.equal(/rgb\(|hsl\(|#[0-9a-fA-F]{3,6}/.test(html.slice(html.indexOf('lp-legend'), html.indexOf('<table'))), false, '凡例に色指定なし');
 });
 
+test('[render] 期間の帯は右端（終端）だけ閉じ、左端は開く。斜線はclip内だけに切る', () => {
+  const html = app.pageHtml(MATERIAL.pages[0], MATERIAL, 0, 1);
+  const outlines = html.match(/<path class="lp-tl__period" d="([^"]+)" data-marker="period"\/>/g) || [];
+  assert.equal(outlines.length, 6, '完了系6行だけが期間の帯を持つ');
+  assert.equal(count(html, '<polygon class="lp-tl__period"'), 0, '閉じた四角形の輪郭は描かない');
+  assert.equal(count(html, '<clipPath id='), 6, '斜線用のclipPathは残す');
+  assert.equal(count(html, 'clip-path="url(#'), 6, '斜線だけを帯の内側に切る');
+
+  outlines.forEach((tag) => {
+    const d = tag.match(/d="([^"]+)"/)[1];
+    assert.match(d, /^M [\d.]+ 9 H [\d.]+ V 31$/, '上辺＋終端の縦線だけの開いたpath: ' + d);
+    assert.equal(/[LlZz]/.test(d), false, '左の縦線・閉じた輪郭を描かない');
+  });
+  // 既存の開始・終了座標は維持する（左端は開いたまま）
+  assert.ok(html.includes('M 36 9 H 100 V 31'), '過去完了: 過去0.15〜0.45');
+  assert.ok(html.includes('M 36 9 H 110 V 31'), '現在完了: 過去0.15〜現在');
+  assert.ok(html.includes('M 106 9 H 184 V 31'), '未来完了: 現在〜0.87');
+
+  // 基線の目盛りは期間の帯と別に残り、3つとも読める
+  assert.equal(count(html, 'x1="110" y1="24" x2="110" y2="31"'), 12, '現在の目盛り');
+  assert.equal(count(html, 'x1="10" y1="22" x2="10" y2="31"'), 12, '過去の目盛り');
+  assert.equal(count(html, 'x1="210" y1="22" x2="210" y2="31"'), 12, '未来の目盛り');
+
+  // 凡例の期間記号も同じ慣例（上辺＋右の縦線、左端は開く）
+  const legend = app.legendHtml();
+  assert.ok(legend.includes('<path d="M 11 4 H 26 V 14"/>'), '凡例の期間記号');
+  assert.equal(legend.includes('<polygon'), false, '凡例でも閉じた四角形にしない');
+});
+
+test('[render] 単純形の2本の弧は櫛形と点から別々に始まり、図の内側で滑らかに終わる', () => {
+  const TL = app.timeline;
+  const pctAt = (v) => TL.x0 + (TL.x1 - TL.x0) * v;
+
+  function arcsOf(tl) {
+    const svg = app.timelineSvg(tl);
+    const group = svg.match(/<g class="lp-tl__arcs" aria-hidden="true">([\s\S]*?)<\/g>/);
+    assert.ok(group, '弧のグループがある');
+    const ds = Array.from(group[1].matchAll(/<path d="([^"]+)"/g)).map((m) => m[1]);
+    assert.equal(ds.length, 2, '1行に2本');
+    return ds.map((d) => {
+      const m = d.match(/^M ([\d.]+) ([\d.]+) Q ([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+)$/);
+      assert.ok(m, '二次ベジェの放物線: ' + d);
+      const n = m.slice(1).map(Number);
+      return { x0: n[0], y0: n[1], cx: n[2], cy: n[3], x2: n[4], y2: n[5] };
+    });
+  }
+
+  ['past-simple', 'present-simple', 'future-simple'].forEach((id) => {
+    const row = ROWS.find((r) => r.id === id);
+    const tl = row.timeline;
+    const anchors = app.arcAnchors(tl);
+    const [upper, lower] = arcsOf(tl);
+
+    // 始点はそれぞれの記号の座標に対応する（上=櫛形の右端すぐ右、下=点の右上）
+    assert.equal(upper.x0, anchors.upper.x, id + ' 上の始点x');
+    assert.equal(lower.x0, anchors.lower.x, id + ' 下の始点x');
+    assert.ok(Math.abs(upper.x0 - (pctAt(tl.habit) + 20)) < 0.6, id + ' 櫛形の右端+3');
+    assert.ok(Math.abs(lower.x0 - (pctAt(tl.point) + 6)) < 0.6, id + ' 点の右上');
+    assert.equal(upper.y0, TL.habitY + 2, id + ' 上の始点は櫛の高さ');
+    assert.equal(lower.y0, TL.axisY - 3, id + ' 下の始点は点のすぐ上');
+    assert.ok(upper.y0 < lower.y0, id + ' 上は下より上');
+
+    // 終端は図の内側（はみ出して切れない）で、上下が十分に離れる
+    [upper, lower].forEach((arc) => {
+      assert.ok(arc.x2 <= TL.w - 4, id + ' 終端がSVG内: ' + arc.x2);
+      assert.ok(arc.x2 > arc.x0 + 10, id + ' 弧の長さを確保');
+      assert.ok(arc.cx > arc.x0 && arc.cx < arc.x2, id + ' 制御点は始点と終端の間');
+      [arc.y0, arc.cy, arc.y2].forEach((y) => assert.ok(y >= 0 && y <= TL.h, id + ' yがSVG内: ' + y));
+      // 終端の接線が縦に近くない（未来形でも「とがらない」）
+      const slope = Math.abs(arc.y2 - arc.cy) / (arc.x2 - arc.cx);
+      assert.ok(slope <= 1.5, id + ' 終端が滑らか: ' + slope.toFixed(2));
+    });
+    assert.ok(upper.y2 <= lower.y2 - 8, id + ' 終端でも上下が判別できる');
+    assert.equal(upper.x2, lower.x2, id + ' 終端xは揃える');
+
+    // 弧が立つ（制御点が上下に振れる）ことで、放物線として読める
+    assert.ok(upper.cy <= 4, id + ' 上の制御点は上へ');
+    assert.ok(lower.cy >= 18 && lower.cy <= 21, id + ' 下の制御点');
+  });
+
+  // 未来形は右の残距離が短いが、上・下とも弧として見える
+  const future = ROWS.find((r) => r.id === 'future-simple').timeline;
+  const [fu, fl] = arcsOf(future);
+  assert.ok(fu.x2 - fu.x0 >= 20, '未来の上弧の長さ');
+  assert.ok(fl.x2 - fl.x0 >= 35, '未来の下弧の長さ');
+  assert.ok(fu.y2 < fl.cy, '上弧は下弧より上（交差しない）');
+});
+
+test('[theme] 紙面タイトルは明朝を使わず、app12の範囲だけゴシックを保つ', () => {
+  const css = read('site/app12/app.css');
+  const titleRule = css.match(/\.lp-sheet__title \{\n([\s\S]*?)\n\}/);
+  assert.ok(titleRule, '.lp-sheet__title の定義');
+  assert.equal(/Mincho|(^|[^-])serif/.test(titleRule[1]), false, '明朝・serifを使わない');
+  assert.ok(/Yu Gothic/.test(titleRule[1]), '和文ゴシック系');
+  // 既存の視覚階層・余白は変えない（A4 1枚に収まる）
+  assert.ok(/font-size: 15pt/.test(titleRule[1]));
+  assert.ok(/line-height: 1\.25/.test(titleRule[1]));
+  assert.ok(/letter-spacing: \.08em/.test(titleRule[1]));
+
+  // 共通テーマの明朝指定より優先させるが、対象は app12 の紙面・画面ヘッダーだけ
+  ['pop', 'forest'].forEach((theme) => {
+    const scoped = new RegExp('html\\[data-theme="' + theme + '"\\] \\.lp-(sheet|header) [^{]*\\{');
+    assert.ok(scoped.test(css), theme + ' のスコープ限定ルール');
+  });
+  assert.ok(/html\[data-theme="(?:pop|forest)"\] \.lp-sheet \.lp-sheet__title[\s\S]{0,400}font-family:[^;]*!important/.test(css));
+  const themedSelectors = css.match(/html\[data-theme="(?:pop|forest)"\][^\n{]*\{/g) || [];
+  themedSelectors.forEach((sel) => {
+    assert.ok(
+      /^html\[data-theme="(?:pop|forest)"\] \{$/.test(sel) || /\.lp-/.test(sel),
+      'app12の要素に限定する: ' + sel
+    );
+  });
+});
+
 test('[render] 1教材=全ページ。紙面はページ数分・順序どおり・番号付き', () => {
   const fixture = {
     id: 'fixture-three-pages',

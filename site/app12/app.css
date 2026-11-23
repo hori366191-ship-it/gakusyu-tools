@@ -250,13 +250,21 @@ html[data-theme="pop"] .lp-header__links a:focus-visible { background: rgba(255,
 }
 .lp-sheet__title {
   margin: 0;
-  font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, sans-serif;
   font-size: 15pt;
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: .08em;
 }
 .lp-sheet__caption { font-size: 8.5pt; color: #444; white-space: nowrap; }
+
+/* 共通テーマ（pop/forest）が明朝を当てても、このアプリの画面・紙面だけはゴシックを保つ */
+html[data-theme="pop"] .lp-sheet .lp-sheet__title,
+html[data-theme="forest"] .lp-sheet .lp-sheet__title,
+html[data-theme="pop"] .lp-header .lp-title,
+html[data-theme="forest"] .lp-header .lp-title {
+  font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, sans-serif !important;
+}
 
 .lp-sheet__body { flex: 1 1 auto; min-height: 0; }
 
@@ -386,7 +394,7 @@ html[data-theme="pop"] .lp-header__links a:focus-visible { background: rgba(255,
 .lp-legend__item { display: inline-flex; align-items: center; gap: 1.2mm; }
 .lp-legend__svg { width: 12mm; height: 4.2mm; flex: 0 0 auto; }
 .lp-legend__svg line,
-.lp-legend__svg polygon {
+.lp-legend__svg path {
   stroke: #111;
   fill: none;
   stroke-width: 1.15;
@@ -403,7 +411,7 @@ html[data-theme="pop"] .lp-header__links a:focus-visible { background: rgba(255,
 .lp-tl__habit line,
 .lp-tl__arcs path { stroke: #111; fill: none; stroke-linecap: round; }
 .lp-tl__axis line { stroke-width: 1.15; }
-.lp-tl__period { fill: none; stroke: #111; stroke-width: 1.15; stroke-linejoin: round; }
+.lp-tl__period { fill: none; stroke: #111; stroke-width: 1.15; stroke-linejoin: round; stroke-linecap: butt; }
 .lp-tl__hatch line { stroke-width: .9; }
 .lp-tl__habit line { stroke-width: 1.05; }
 .lp-tl__arcs path { stroke-width: .85; opacity: .72; }

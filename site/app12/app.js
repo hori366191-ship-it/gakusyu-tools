@@ -84,6 +84,8 @@
     return out;
   }
 
+  // 期間の帯は「開始時点は特定しない」ため左の縦線を描かない。
+  // 上辺＋右の縦線（終端）だけを開いた path で描き、斜線は clipPath で内側だけに切る。
   function blockPoints(block) {
     var x1 = pct(block.from);
     var x2 = pct(block.to);
@@ -93,11 +95,19 @@
       + ' ' + r1(x1 - 4) + ',' + TL.topY;
   }
 
+  function blockOutline(block) {
+    var x1 = pct(block.from);
+    var x2 = pct(block.to);
+    return 'M ' + r1(x1 - 4) + ' ' + TL.topY
+      + ' H ' + r1(x2)
+      + ' V ' + TL.axisY;
+  }
+
   function hatchMarkup(block) {
     var x1 = pct(block.from);
     var x2 = pct(block.to);
     var lines = '';
-    for (var x = x1 - 12; x <= x2; x += 9) {
+    for (var x = x1 - 4; x <= x2; x += 9) {
       lines += '<line x1="' + r1(x) + '" y1="' + TL.axisY + '" x2="' + r1(x + 14) + '" y2="' + TL.topY + '"/>';
     }
     return lines;
@@ -116,12 +126,32 @@
     return out + '</g>';
   }
 
+  // 単純形の2本の弧は、上＝櫛形（くり返し）・下＝点（その時点）の
+  // それぞれの記号から描き始める。終端は図の内側に収め、未来形でも
+  // 急に切れない滑らかな放物線（二次ベジェ）にする。
+  var ARC_END_X = TL.w - 8;
+  var ARC_UPPER_END_Y = TL.topY + 5;
+  var ARC_LOWER_END_Y = TL.axisY - 6;
+
+  function arcAnchors(tl) {
+    var habitAt = typeof tl.habit === 'number' ? tl.habit : tl.point;
+    var pointAt = typeof tl.point === 'number' ? tl.point : tl.habit;
+    return {
+      upper: { x: r1(pct(habitAt) + 20), y: TL.habitY + 2 },
+      lower: { x: r1(pct(pointAt) + 6), y: TL.axisY - 3 }
+    };
+  }
+
   function arcsMarkup(tl) {
-    var start = (typeof tl.point === 'number' ? pct(tl.point) : TL.nowX) + 22;
-    var end = TL.w + 8;
+    var a = arcAnchors(tl);
+    function curve(from, ctrlY, endY) {
+      return 'M ' + r1(from.x) + ' ' + r1(from.y)
+        + ' Q ' + r1((from.x + ARC_END_X) / 2) + ' ' + r1(ctrlY)
+        + ' ' + ARC_END_X + ' ' + r1(endY);
+    }
     return '<g class="lp-tl__arcs" aria-hidden="true">'
-      + '<path d="M ' + r1(start) + ' 28 C ' + r1(start + 44) + ' 1, ' + r1(end - 34) + ' -3, ' + end + ' 17"/>'
-      + '<path d="M ' + r1(start) + ' 29 C ' + r1(start + 44) + ' 14, ' + r1(end - 44) + ' 9, ' + end + ' 29"/>'
+      + '<path d="' + curve(a.upper, TL.topY - 6, ARC_UPPER_END_Y) + '"/>'
+      + '<path d="' + curve(a.lower, TL.axisY - 12, ARC_LOWER_END_Y) + '"/>'
       + '</g>';
   }
 
@@ -133,7 +163,7 @@
     if (tl.arcs) body += arcsMarkup(tl);
     if (tl.block) {
       body += '<defs><clipPath id="' + clipId + '"><polygon points="' + blockPoints(tl.block) + '"/></clipPath></defs>'
-        + '<polygon class="lp-tl__period" points="' + blockPoints(tl.block) + '" data-marker="period"/>'
+        + '<path class="lp-tl__period" d="' + blockOutline(tl.block) + '" data-marker="period"/>'
         + '<g class="lp-tl__hatch" clip-path="url(#' + clipId + ')" aria-hidden="true">' + hatchMarkup(tl.block) + '</g>';
     }
     if (typeof tl.habit === 'number') body += habitMarkup(tl.habit);
@@ -207,8 +237,9 @@
       out += '<line x1="3" y1="14" x2="45" y2="14"/>'
         + '<circle class="is-point" cx="24" cy="14" r="3.4"/>';
     } else if (kind === 'period') {
+      // 紙面の期間の帯と同じ慣例: 上辺＋右の縦線だけを描き、左端は開く
       out += '<line x1="3" y1="14" x2="45" y2="14"/>'
-        + '<polygon points="11,14 26,14 26,4 11,4"/>'
+        + '<path d="M 11 4 H 26 V 14"/>'
         + '<line x1="11" y1="14" x2="17" y2="4"/>'
         + '<line x1="18" y1="14" x2="24" y2="4"/>';
     } else {
@@ -964,6 +995,7 @@
     timeline: TL,
     timelineSvg: timelineSvg,
     timelineLabel: timelineLabel,
+    arcAnchors: arcAnchors,
     rowHtml: rowHtml,
     pageHtml: pageHtml,
     materialHtml: materialHtml,
