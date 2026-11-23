@@ -9,6 +9,7 @@ const $ = id => document.getElementById(id);
 const learn = $('learn-dialog'), help = $('help-dialog');
 const moonDialog = $('moon-dialog'), moonList = $('moon-list');
 const moonOpen = $('moon-open'), parentBack = $('parent-back');
+const coverage = $('learn-coverage'), coverageImage = $('learn-coverage-map');
 const planetById = new Map(BODIES.map(body => [body.id, body]));
 const visited = new Set();
 const destinations = new Map();
@@ -92,6 +93,10 @@ function openMemo(body, inRange) {
     }
     visual.append(sourceLink);
   }
+  coverage.open = false;
+  coverage.hidden = !moonSource?.coverageMap;
+  coverageImage.removeAttribute('src');
+  coverage.dataset.moon = coverage.hidden ? '' : body.id;
   const values = (parent ? moonReadings(body, parent.name) : readingsFor(body)).map(([term, value]) => {
     const item = document.createElement('div');
     const dt = document.createElement('dt'), dd = document.createElement('dd');
@@ -151,6 +156,11 @@ for (const body of BODIES) {
 }
 
 $('help-open').addEventListener('click', () => show(help));
+coverage.addEventListener('toggle', () => {
+  if (coverage.open && coverage.dataset.moon && !coverageImage.hasAttribute('src')) {
+    coverageImage.src = new URL(`./textures/moons/${coverage.dataset.moon}-coverage.png`, import.meta.url).href;
+  }
+});
 $('overview-back').addEventListener('click', () => flight?.overview());
 moonOpen.addEventListener('click', () => {
   const planet = flight?.observation();

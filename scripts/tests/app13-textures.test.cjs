@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
+const { readdirSync, readFileSync } = require('node:fs');
 const { join } = require('node:path');
 const source = import('../../site/app13/texture-policy.mjs');
 const root = join(__dirname, '../../site');
@@ -84,4 +84,23 @@ test('each moon has a bounded lossless map and its own observation or generation
   }
   assert.match(MOON_MAPS.nereid.note, /全体がOpenAIの画像生成/);
   assert.match(readFileSync(join(root, 'credits.html'), 'utf8'), /id="solar-moons"/);
+});
+
+test('mixed moon maps have one compact binary coverage image matching the base map size', async () => {
+  const { MOON_MAPS } = await import('../../site/app13/moon-maps.mjs');
+  const dir = join(root, 'app13', 'textures', 'moons');
+  const names = Object.entries(MOON_MAPS).filter(([id, map]) => {
+    assert.equal(Boolean(map.coverageMap), map.partial && id !== 'nereid', id);
+    return map.coverageMap;
+  }).map(([id]) => `${id}-coverage.png`).sort();
+  assert.equal(names.length, 10);
+  assert.deepEqual(readdirSync(dir).filter(name => name.endsWith('-coverage.png')).sort(), names);
+  for (const name of names) {
+    const png = readFileSync(join(dir, name));
+    assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
+    assert.equal(png.toString('ascii', 12, 16), 'IHDR');
+    assert.deepEqual([png.readUInt32BE(16), png.readUInt32BE(20)], [1024, 512]);
+    assert.deepEqual([png[24], png[25]], [1, 0]); // 1-bit grayscale
+    assert.ok(png.length < 10_000, name);
+  }
 });

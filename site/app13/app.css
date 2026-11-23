@@ -145,6 +145,11 @@
 .solar-app .dialog-copy { color: var(--muted); margin: 12px 0 15px; }
 .solar-app .visual-note { color: var(--muted); font-size: 11px; margin: -5px 0 13px; }
 .visual-note a { margin-inline-start: .55em; text-underline-offset: .18em; }
+.learn-coverage { margin: -4px 0 13px; color: var(--muted); font-size: 12px; }
+.learn-coverage summary { cursor: pointer; padding: 6px 0; }
+.learn-coverage figure { margin: 2px 0 0; }
+.learn-coverage img { display: block; width: 100%; height: auto; border: 1px solid var(--border); }
+.learn-coverage figcaption { margin-top: 4px; }
 .destinations {
   position: absolute; width: clamp(228px, 24vw, 325px); right: var(--edge); bottom: 98px;
   padding: 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px;

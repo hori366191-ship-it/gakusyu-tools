@@ -8,8 +8,8 @@ const cassiniVoyager = 'カッシーニとボイジャーの画像モザイク�
 const schenk = 'カッシーニの強調色モザイク（NASA/JPL-Caltech・Space Science Institute・Paul Schenk／LPI）';
 
 function map(href, description, partial = false) {
-  return { href, partial, note: `画像：${description}。${partial
-    ? '欠損をOpenAIの画像生成で補っています。青灰色がかった補完部分は観測ではありません。'
+  return { href, partial, coverageMap: partial, note: `画像：${description}。${partial
+    ? '欠損をOpenAIの画像生成で補っています。補完部分は実際の観測ではありません。'
     : ''}` };
 }
 

@@ -142,23 +142,57 @@ def observed_mask(id, im):
     return Image.new("L", SIZE, 255)
 
 
-def atlas_panel(atlas, index, id):
+def atlas_panel(atlas, index):
     w, h = atlas.size
     x, y = index % 3, index // 3
     r = min(w // 3, h // 2) // 24
     image = atlas.crop((x*w//3 + r, y*h//2 + r, (x+1)*w//3 - r, (y+1)*h//2 - r))
-    pixels = np.asarray(image.resize(SIZE, Image.Resampling.LANCZOS), dtype=np.float32)
-    # Cooler hue is an intentional legend, not a colour measurement.
-    light = pixels @ np.array([.25, .58, .17])
-    cold = np.clip(70 + light[..., None] * np.array([.50, .55, .65]), 0, 255)
-    out = (pixels * .22 + cold * .78) if id != "nereid" else cold
+    out = np.array(image.resize(SIZE, Image.Resampling.LANCZOS), dtype=np.float32)
     # Crossfade the atlas ends so the invented patch has no engraved meridian.
     for i in range(18):
         f = .5 * (1 - i / 18)
         both = (out[:, i] + out[:, -1-i]) * f
         out[:, i] = out[:, i] * (1 - 2*f) + both
         out[:, -1-i] = out[:, -1-i] * (1 - 2*f) + both
-    return Image.fromarray(out.astype(np.uint8))
+    return out
+
+
+def box_sum(values, radius):
+    """Sum a square neighborhood; longitude wraps, latitude does not."""
+    for axis, mode in ((0, "edge"), (1, "wrap")):
+        padding = [(0, 0)] * values.ndim
+        padding[axis] = (radius + 1, radius)
+        sums = np.cumsum(np.pad(values, padding, mode=mode), axis=axis, dtype=np.float64)
+        sums = np.moveaxis(sums, axis, 0)
+        width = 2*radius + 1
+        values = np.moveaxis(sums[width:] - sums[:-width], 0, axis)
+    return values
+
+
+def match_fill(observed, mask, generated):
+    """Adjust only the generated layer, first overall and then near the seam."""
+    known = np.asarray(mask) == 255
+    if not known.any():  # Nereid has no observed map to match.
+        return Image.fromarray(generated.astype(np.uint8))
+    reference = np.asarray(observed, dtype=np.float32)
+    radius = 15
+    total = (2*radius + 1)**2
+    count = box_sum(known, radius)
+    near_edge = (count > 0) & (count < total)
+    ref_levels = np.percentile(reference[known & near_edge], [10, 50, 90], axis=0)
+    gen_levels = np.percentile(generated[~known & near_edge], [10, 50, 90], axis=0)
+    gain = np.clip((ref_levels[2] - ref_levels[0]) / np.maximum(gen_levels[2] - gen_levels[0], 8), .8, 1.25)
+    layer = np.clip((generated - gen_levels[1])*gain + ref_levels[1], 0, 255)
+
+    # Match neighboring averages, not individual features. Fade this color
+    # offset away from the seam or when only a few source pixels are nearby.
+    missing = total - count
+    ref_mean = box_sum(reference * known[..., None], radius) / np.maximum(count[..., None], 1)
+    gen_mean = box_sum(layer * ~known[..., None], radius) / np.maximum(missing[..., None], 1)
+    strength = np.clip(np.minimum(count, missing) / (.16 * total), 0, 1)
+    strength = strength**2 * (3 - 2*strength)
+    layer += np.clip(ref_mean - gen_mean, -64, 64) * strength[..., None]
+    return Image.fromarray(np.uint8(np.clip(layer + .5, 0, 255)))
 
 
 def compose(observed, mask, generated):
@@ -196,7 +230,10 @@ def main():
         else:
             if id in INFILL:
                 group, index = INFILL[id]
-                observed = compose(observed, mask, atlas_panel(atlases[group], index, id))
+                fill = match_fill(observed, mask, atlas_panel(atlases[group], index))
+                observed = compose(observed, mask, fill)
+                if id != "nereid":
+                    mask.convert("1").save(out / f"{id}-coverage.png", optimize=True)
             observed.save(out / f"{id}.webp", "WEBP", lossless=True, method=6)
         print(f"{id}: {coverage:.1%} of the map uses observations")
 
