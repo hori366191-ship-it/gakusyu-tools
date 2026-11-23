@@ -34,6 +34,7 @@ function loadMaterials(previous) {
 const DATA = loadMaterials();
 const MATERIAL = DATA.materials[0];
 const ROWS = MATERIAL.pages[0].rows;
+const IV = DATA.materials[1];
 
 const EXPECTED_NAMES = [
   '過去形', '過去進行形', '過去完了形', '過去完了進行形',
@@ -89,11 +90,13 @@ function plain(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-test('[data] 教材は「時制のまとめノート」1件・12行（過去4/現在4/未来4）', () => {
+test('[data] 教材は「時制のまとめノート」と「不規則動詞」の2件（時制は12行のまま）', () => {
   assert.deepEqual(Object.keys(DATA).sort(), ['materials', 'version']);
-  assert.equal(DATA.materials.length, 1);
+  assert.equal(DATA.materials.length, 2);
+  assert.equal(DATA.materials[0].id, 'tense-notes');
+  assert.equal(DATA.materials[1].id, 'irregular-verbs');
   assert.equal(MATERIAL.title, '時制のまとめノート');
-  assert.equal(MATERIAL.pages.length, 1, '初回教材はA4 1ページ');
+  assert.equal(MATERIAL.pages.length, 1, '時制教材はA4 1ページ');
   const page = MATERIAL.pages[0];
   assert.equal(page.kind, 'tense-table');
   assert.equal(page.rows.length, 12);
@@ -320,6 +323,268 @@ test('[render] 単純形の2本の弧は櫛形と点から別々に始まり、�
   assert.ok(fu.y2 < fl.cy, '上弧は下弧より上（交差しない）');
 });
 
+test('[iv-data] 不規則動詞は102語・2ページ・6表・各17行、番号は1〜102の連番', () => {
+  assert.equal(IV.slug, 'irregular-verbs');
+  assert.equal(IV.title, '不規則動詞');
+  assert.equal(IV.orientation, 'landscape', 'A4横');
+  assert.equal(IV.pages.length, 2, 'A4横2ページ');
+  assert.deepEqual(plain(IV.pages.map((p) => p.kind)), ['irregular-verbs', 'irregular-verbs']);
+  assert.deepEqual(plain(IV.pages.map((p) => p.caption)), ['基本 1/2', '基本・発展 2/2']);
+
+  let tables = 0;
+  let rows = 0;
+  IV.pages.forEach((page) => {
+    assert.equal(page.tables.length, 3, '1ページ3表');
+    page.tables.forEach((table) => {
+      tables += 1;
+      assert.ok(Array.isArray(table.groups) && table.groups.length, '表にgroupsを持つ');
+      let tableRows = 0;
+      table.groups.forEach((group) => {
+        assert.equal(typeof group.title, 'string');
+        assert.ok(Array.isArray(group.rows) && group.rows.length);
+        tableRows += group.rows.length;
+      });
+      assert.equal(tableRows, 17, '各表17行');
+      rows += tableRows;
+    });
+  });
+  assert.equal(tables, 6);
+  assert.equal(rows, 102, '全102語');
+
+  const all = IV.pages.flatMap((p) => p.tables.flatMap((t) => t.groups.flatMap((g) => g.rows)));
+  assert.deepEqual(plain(all.map((r) => r.no)), Array.from({ length: 102 }, (_, i) => i + 1), '表示順1〜102');
+
+  // 発音は全語に3形ぶんあり、語の下に出す
+  all.forEach((row) => {
+    assert.equal(row.pron.length, 3, row.b + ' の発音3形');
+    row.pron.forEach((p) => assert.ok(typeof p === 'string' && p.length > 0, row.b + ' の発音が空でない'));
+    ['b', 'p', 'pp', 'm'].forEach((k) => assert.ok(typeof row[k] === 'string' && row[k].length > 0, row.b + '.' + k));
+  });
+  // design-lab の DATA/PRON からの転記（begin は ビギン/ビギャン/ビガン）
+  const begin = all.find((r) => r.b === 'begin');
+  assert.deepEqual(plain(begin.pron), ['ビギン', 'ビギャン', 'ビガン']);
+  assert.equal(begin.past === undefined, true);
+  assert.equal(begin.p, 'began');
+  assert.equal(begin.pp, 'begun');
+  assert.equal(all.find((r) => r.b === 'get').pp, 'got / gotten', '「/」併記は原本どおり');
+});
+
+test('[iv-data] 型順（基本→発展／A-A-A→A-B-A→A-B-B→A-B-C→A-A-B→その他）と型内アルファベット順', () => {
+  const groups = IV.pages.flatMap((p) => p.tables.flatMap((t) => t.groups));
+  const meta = groups.map((g) => {
+    const m = String(g.title).match(/^(基本|発展) ／ ([^　]+)/);
+    assert.ok(m, '見出しにレベルと型: ' + g.title);
+    return { level: m[1], type: m[2] };
+  });
+  const seq = [];
+  meta.forEach((m) => {
+    if (!seq.length || seq[seq.length - 1] !== m.level + '/' + m.type) seq.push(m.level + '/' + m.type);
+  });
+  assert.deepEqual(seq, [
+    '基本/A-A-A', '基本/A-B-A', '基本/A-B-B', '基本/A-B-C', '基本/その他',
+    '発展/A-A-A', '発展/A-B-B', '発展/A-B-C', '発展/A-A-B'
+  ], '型の並び順と基本→発展');
+
+  // 同じ型に属する語は（表をまたいでも）表示順がアルファベット順
+  const buckets = {};
+  groups.forEach((g, i) => {
+    const key = meta[i].level + '/' + meta[i].type;
+    buckets[key] = (buckets[key] || []).concat(g.rows.map((r) => r.b));
+  });
+  Object.keys(buckets).forEach((key) => {
+    const words = buckets[key];
+    assert.deepEqual(words, words.slice().sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)), key + ' は型内アルファベット順');
+  });
+
+  // 語数の内訳（基本74・発展28）
+  const countOf = (key) => (buckets[key] || []).length;
+  assert.equal(countOf('基本/A-A-A'), 8);
+  assert.equal(countOf('基本/A-B-A'), 3);
+  assert.equal(countOf('基本/A-B-B'), 32);
+  assert.equal(countOf('基本/A-B-C'), 30);
+  assert.equal(countOf('基本/その他'), 1);
+  assert.equal(countOf('発展/A-A-A'), 4);
+  assert.equal(countOf('発展/A-B-B'), 15);
+  assert.equal(countOf('発展/A-B-C'), 8);
+  assert.equal(countOf('発展/A-A-B'), 1);
+});
+
+test('[iv-data] 表をまたぐグループは「（全N語・i/j）」「（続き・i/j）」で分割を示す', () => {
+  const groups = IV.pages.flatMap((p) => p.tables.flatMap((t) => t.groups));
+  const titles = groups.map((g) => g.title);
+
+  // 分割しないグループは語数だけ
+  assert.ok(titles.includes('基本 ／ A-A-A　3形同じ（8語）'), titles[0]);
+  assert.ok(titles.includes('発展 ／ A-B-C　3形すべて異なる（8語）'));
+  assert.ok(titles.includes('基本 ／ その他　型に当てはまらない（1語）'));
+
+  // 分割したグループ（A-B-B基本32語=3分割 / A-B-C基本30語=3分割 / A-B-B発展15語=2分割）
+  const split = plain(titles.filter((t) => /（(全\d+語・\d+\/\d+|続き・\d+\/\d+)）/.test(t)));
+  assert.deepEqual(split, [
+    '基本 ／ A-B-B　過去形＝過去分詞（全32語・1/3）',
+    '基本 ／ A-B-B　過去形＝過去分詞（続き・2/3）',
+    '基本 ／ A-B-B　過去形＝過去分詞（続き・3/3）',
+    '基本 ／ A-B-C　3形すべて異なる（全30語・1/3）',
+    '基本 ／ A-B-C　3形すべて異なる（続き・2/3）',
+    '基本 ／ A-B-C　3形すべて異なる（続き・3/3）',
+    '発展 ／ A-B-B　過去形＝過去分詞（全15語・1/2）',
+    '発展 ／ A-B-B　過去形＝過去分詞（続き・2/2）'
+  ]);
+
+  // 分割されたグループの行の合計が見出しの全N語と一致する
+  function partTotal(label) {
+    return groups
+      .filter((g) => g.title.indexOf(label) === 0)
+      .reduce((n, g) => n + g.rows.length, 0);
+  }
+  assert.equal(partTotal('基本 ／ A-B-B'), 32);
+  assert.equal(partTotal('基本 ／ A-B-C'), 30);
+  assert.equal(partTotal('発展 ／ A-B-B'), 15);
+});
+
+test('[iv-render] 不規則動詞の紙面はA4横・3表・landscapeクラスで、語は太字＋発音は語の下', () => {
+  const html = app.materialHtml(IV);
+  assert.equal(count(html, 'class="lp-sheet lp-sheet--landscape"'), 2, '2ページとも横向き');
+  assert.equal(count(html, 'data-orientation="landscape"'), 2);
+  assert.equal(count(html, '<div class="lp-iv-grid">'), 2, 'ページごとに表のグリッド');
+  assert.equal(count(html, '<table class="lp-iv">'), 6, '1ページ3表×2ページ');
+  assert.equal(count(html, '<td class="lp-iv-no">'), 102, '全102行');
+  assert.equal(count(html, '<span class="lp-iv-word">'), 306, '3形×102語');
+  assert.equal(count(html, '<span class="lp-iv-pron">'), 306, 'カタカナも3形ぶん');
+  const headers = html.match(/<thead><tr>(?:(?!<\/tr>).)*原形(?:(?!<\/tr>).)*過去分詞(?:(?!<\/tr>).)*意味(?:(?!<\/tr>).)*<\/tr><\/thead>/g) || [];
+  assert.equal(headers.length, 6, '各表に # / 原形 / 過去形 / 過去分詞 / 意味 のヘッダ');
+  assert.equal(count(html, '<tr class="lp-iv-grp">'), 14, 'グループ見出し行');
+  assert.ok(html.includes('<th colspan="5" scope="colgroup">基本 ／ A-A-A'), '見出しはcolspan=5');
+  assert.ok(html.includes('<span class="lp-iv-word">be (am/is/are)</span>'));
+  assert.ok(html.includes('<span class="lp-iv-pron">ビー</span>'));
+  assert.ok(html.includes('<span>1 / 2</span>') && html.includes('<span>2 / 2</span>'));
+  assert.ok(html.includes('aria-label="不規則動詞 1ページ目"'));
+
+  // 凡例は1ページ目だけ
+  const pages = html.split('<article ');
+  assert.equal(count(pages[1], 'class="lp-iv-legend"'), 1, '1ページ目に凡例');
+  assert.equal(count(pages[2], 'class="lp-iv-legend"'), 0, '2ページ目には凡例を出さない');
+  assert.ok(pages[1].includes('型の見方'));
+  assert.ok(pages[1].includes('A-A-A'));
+  assert.ok(pages[1].includes('カタカナは代表的な発音の目安'));
+
+  // 縦教材（時制）は従来どおり
+  const portrait = app.materialHtml(MATERIAL);
+  assert.equal(portrait.includes('lp-sheet--landscape'), false);
+  assert.equal(portrait.includes('data-orientation'), false);
+  assert.equal(count(portrait, 'class="lp-sheet"'), 1);
+});
+
+test('[iv-css] 横向き紙面・表・発音のスタイル（白地黒インク・3表・太字/細字6pt）', () => {
+  const css = read('site/app12/app.css');
+  const landscape = css.match(/\.lp-sheet--landscape \{([\s\S]*?)\n\}/);
+  assert.ok(landscape, '.lp-sheet--landscape の定義');
+  assert.ok(/width:\s*297mm/.test(landscape[1]));
+  assert.ok(/height:\s*210mm/.test(landscape[1]));
+  assert.ok(/padding:\s*9mm 10mm 7mm/.test(landscape[1]), '試作と同じ余白');
+  assert.equal(/var\(--lp-/.test(landscape[1]), false, '紙面の色はテーマ変数を使わない');
+
+  const printAt = css.indexOf('@media print');
+  const print = css.slice(printAt);
+  assert.equal(/@page\s*\{/.test(print), false, '固定の@pageを置かない（向きはapp.jsが切り替える）');
+  assert.ok(/\.lp-sheet\.lp-sheet--landscape\s*\{[^}]*width:\s*297mm/.test(print), '印刷もA4横');
+  assert.ok(/\.lp-sheet\.lp-sheet--landscape\s*\{[^}]*height:\s*210mm/.test(print));
+
+  assert.ok(/\.lp-iv-grid\s*\{[^}]*grid-template-columns:\s*repeat\(3,/.test(css), '1ページ3表');
+  assert.ok(/\.lp-iv \.lp-iv-col-no \{\s*width:\s*5%/.test(css));
+  assert.ok(/\.lp-iv \.lp-iv-col-form \{\s*width:\s*24\.5%/.test(css));
+  assert.ok(/\.lp-iv \.lp-iv-col-mean \{\s*width:\s*21\.5%/.test(css));
+  assert.ok(/\.lp-iv-word \{[^}]*font-weight:\s*700/.test(css), '英単語は太字');
+  assert.ok(/\.lp-iv-pron \{[^}]*font-weight:\s*300/.test(css), '発音は細字');
+  assert.ok(/\.lp-iv-pron \{[^}]*font-size:\s*6pt/.test(css), '発音は6pt');
+  assert.ok(/\.lp-iv-pron \{[^}]*text-align:\s*left/.test(css), '発音は左揃え');
+  assert.ok(/\.lp-iv tr\.lp-iv-grp th \{[^}]*background:\s*#e6e6e6/.test(css), 'グループ見出しの帯');
+  assert.ok(/\.lp-sheet \.lp-iv th,[\s\S]{0,200}color:\s*#111\s*!important/.test(css), '紙面は黒インク固定');
+  assert.ok(/\.lp-iv-legend \{[\s\S]{0,120}display:\s*flex/.test(css), '凡例');
+});
+
+test('[iv-page] 印刷の@pageは教材の向きで切り替える（縦/横）', () => {
+  const js = read('site/app12/app.js');
+  assert.ok(js.includes("var PAGE_SIZE_STYLE_ID = 'lp-page-size';"));
+  assert.ok(/@page\{size:' \+ \(orientation === 'landscape' \? 'A4 landscape' : 'A4 portrait'\) \+ ';margin:0\}/.test(js), '@pageの切り替え');
+  assert.ok(js.includes('setPrintPageSize(materials[index] && materials[index].orientation);'), 'タブ切替で向きを反映');
+  assert.ok(/\(landscape \? 297 : 210\) \* 96 \/ 25\.4/.test(js), 'fitSheetsは向きに応じた基準幅');
+
+  // 実挙動: 横→縦で同じ<style>を更新する
+  const styles = [];
+  const doc = {
+    head: { appendChild: function (el) { styles.push(el); } },
+    createElement: function () { return { id: '', textContent: '' }; },
+    getElementById: function (id) { return styles.find((s) => s.id === id) || null; }
+  };
+  global.window = { document: doc };
+  try {
+    app.setPrintPageSize('landscape');
+    assert.equal(styles.length, 1);
+    assert.equal(styles[0].id, app.PAGE_SIZE_STYLE_ID);
+    assert.equal(styles[0].textContent, '@page{size:A4 landscape;margin:0}');
+    app.setPrintPageSize('portrait');
+    assert.equal(styles.length, 1, 'styleは1つだけ');
+    assert.equal(styles[0].textContent, '@page{size:A4 portrait;margin:0}');
+    app.setPrintPageSize(undefined);
+    assert.equal(styles[0].textContent, '@page{size:A4 portrait;margin:0}', '未指定は縦');
+  } finally {
+    delete global.window;
+  }
+});
+
+test('[pdf] makePdfは横向き教材をA4横で出力し、縦の挙動は変えない', async () => {
+  async function run(orientation, canvasSize) {
+    const state = { opts: null, addPage: [], images: [] };
+    const pdf = {
+      addPage: function () { state.addPage.push(Array.prototype.slice.call(arguments)); },
+      addImage: function (data, fmt, x, y, w, h) { state.images.push({ x: x, y: y, w: w, h: h }); },
+      output: function () { return 'data:application/pdf;base64,JVBERi0='; }
+    };
+    global.window = {
+      html2canvas: function () {
+        return Promise.resolve({
+          width: canvasSize[0],
+          height: canvasSize[1],
+          toDataURL: function () { return 'data:image/jpeg;base64,x'; }
+        });
+      },
+      jspdf: { jsPDF: function (opts) { state.opts = opts; return pdf; } }
+    };
+    const sheets = [{ style: {} }, { style: {} }];
+    try {
+      await new Promise((resolve) => {
+        app.makePdf(sheets, function () { resolve(); }, orientation);
+      });
+    } finally {
+      delete global.window;
+    }
+    return state;
+  }
+
+  const land = await run('landscape', [2970, 2100]);
+  assert.equal(land.opts.orientation, 'landscape');
+  assert.equal(land.opts.unit, 'mm');
+  assert.equal(land.opts.format, 'a4');
+  assert.deepEqual(land.addPage, [['a4', 'landscape']], '2ページ目も横向きで追加');
+  assert.equal(land.images.length, 2);
+  land.images.forEach((img) => {
+    assert.equal(img.y, 0);
+    assert.ok(img.h <= 210 && img.w <= 297, 'A4横に収める: ' + img.w + 'x' + img.h);
+    assert.ok(img.x >= 0 && Math.abs(img.x - (297 - img.w) / 2) < 0.01, '横方向は中央');
+  });
+
+  const port = await run(undefined, [1240, 1754]);
+  assert.equal(port.opts.orientation, 'portrait', '省略時は従来どおり縦');
+  assert.deepEqual(port.addPage, [['a4', 'portrait']]);
+  assert.ok(port.images[0].h <= 297 && port.images[0].w <= 210);
+  assert.ok(Math.abs(port.images[0].x - (210 - port.images[0].w) / 2) < 0.01);
+
+  // 教室タブレット送信は教材の向きを渡す
+  const js = read('site/app12/app.js');
+  assert.ok(js.includes('}, material.orientation);'), '送信時のPDFも教材の向き');
+});
+
 test('[theme] 紙面タイトルは明朝を使わず、app12の範囲だけゴシックを保つ', () => {
   const css = read('site/app12/app.css');
   const titleRule = css.match(/\.lp-sheet__title \{\n([\s\S]*?)\n\}/);
@@ -404,7 +669,8 @@ test('[static] 印刷CSSは画面UIを出さず、最後の紙面に余分な改
   assert.ok(printAt > 0);
   const print = css.slice(printAt);
 
-  assert.ok(print.includes('@page { size: A4 portrait; margin: 0; }'), '@page指定');
+  assert.equal(/@page\s*\{/.test(print), false, '固定の@pageを置かない（向きはapp.jsが切り替える）');
+  assert.ok(/\.lp-sheet\.lp-sheet--landscape\s*\{[^}]*width:\s*297mm/.test(print), '横向き紙面もA4横で印刷');
   ['\.no-print', '\.lp-header', '\.lp-tabs', '\.lp-toolbar'].forEach((sel) => {
     assert.ok(new RegExp(sel + '[\\s\\S]*?display:\\s*none\\s*!important').test(print), '印刷で隠す: ' + sel);
   });

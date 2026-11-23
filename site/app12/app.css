@@ -238,6 +238,16 @@ html[data-theme="pop"] .lp-header__links a:focus-visible { background: rgba(255,
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
 }
 
+/* A4横の紙面（不規則動詞など、material.orientation === 'landscape'）。
+   余白は試作（design-lab/irregular-verbs）に合わせる。 */
+.lp-sheet--landscape {
+  width: 297mm;
+  height: 210mm;
+  padding: 9mm 10mm 7mm;
+  font-size: 8pt;
+  line-height: 1.2;
+}
+
 .lp-sheet__head {
   display: flex;
   align-items: baseline;
@@ -424,6 +434,126 @@ html[data-theme="forest"] .lp-header .lp-title {
 }
 
 /* ============================================================
+   不規則動詞（A4横・1ページ3表・5列）。接頭辞 lp-iv- で時制表と分ける。
+   語は太字、カタカナ発音は語の下に左揃え・細字6pt。白地黒インク。
+   ============================================================ */
+.lp-sheet--landscape .lp-sheet__body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.lp-iv-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 3.5mm;
+  align-items: start;
+}
+
+.lp-iv {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 8pt;
+  line-height: 1.2;
+}
+.lp-iv .lp-iv-col-no { width: 5%; }
+.lp-iv .lp-iv-col-form { width: 24.5%; }
+.lp-iv .lp-iv-col-mean { width: 21.5%; }
+
+.lp-sheet .lp-iv thead th {
+  background: #e6e6e6;
+  font-size: 7.3pt;
+  font-weight: 700;
+  letter-spacing: .04em;
+  padding: 0.5mm 1.1mm;
+  white-space: nowrap;
+  text-align: left;
+  vertical-align: middle;
+}
+/* 型グループの見出し行（全N語・i/j の分割も含む） */
+.lp-iv tr.lp-iv-grp th {
+  background: #e6e6e6;
+  border-left: 1mm solid #111;
+  font-size: 7.4pt;
+  font-weight: 700;
+  letter-spacing: .02em;
+  padding: 0.45mm 1.2mm;
+  line-height: 1.2;
+  text-align: left;
+}
+.lp-sheet .lp-iv th,
+.lp-sheet .lp-iv td {
+  border: 0.15mm solid #111;
+  padding: 0.75mm 0.6mm;
+  text-align: left;
+  vertical-align: top;
+  font-weight: 400;
+  color: #111 !important;
+  background: #ffffff;
+}
+/* 共通テーマの `th` 背景・`td` 色より紙面（白地黒インク）を優先する */
+.lp-sheet .lp-iv thead th,
+.lp-sheet .lp-iv tr.lp-iv-grp th { background: #e6e6e6 !important; }
+.lp-sheet .lp-iv tbody tr:not(.lp-iv-grp):nth-of-type(even) > th,
+.lp-sheet .lp-iv tbody tr:not(.lp-iv-grp):nth-of-type(even) > td { background: #f7f7f7 !important; }
+
+.lp-sheet .lp-iv td.lp-iv-no {
+  width: 5%;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 6.5pt;
+  color: #333 !important;
+  padding-right: 1.3mm;
+  padding-left: 0.4mm;
+}
+
+.lp-iv-cell { display: block; }
+.lp-iv-word {
+  display: block;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+.lp-iv-pron {
+  display: block;
+  margin-left: 0;
+  font-weight: 300;
+  font-size: 6pt;
+  line-height: 1.15;
+  text-align: left;
+  white-space: nowrap;
+  color: #222 !important;
+}
+.lp-iv-mean {
+  font-size: 7pt;
+  line-height: 1.25;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* ---- 凡例（型の見方・カタカナの注記）。1ページ目だけ ---- */
+.lp-iv-legend {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6mm 4mm;
+  margin: 0 0 1.6mm;
+  font-size: 6.5pt;
+  line-height: 1.4;
+  color: #1c1c1c;
+}
+.lp-iv-legend__title { font-weight: 700; letter-spacing: .06em; }
+.lp-iv-legend__item { display: inline-flex; align-items: baseline; gap: 1mm; }
+.lp-iv-legend__key { font-weight: 700; }
+.lp-iv-legend__note { margin-left: auto; color: #333; }
+
+/* ============================================================
    モバイル
    ============================================================ */
 @media (max-width: 720px) {
@@ -442,7 +572,8 @@ html[data-theme="forest"] .lp-header .lp-title {
    印刷（画面UIは出さない・1ページ = 1枚・余分な白紙を作らない）
    ============================================================ */
 @media print {
-  @page { size: A4 portrait; margin: 0; }
+  /* 用紙サイズ（縦/横）は app.js が教材の向きに合わせて <style id="lp-page-size"> で切り替える。
+     ここに固定の @page を置くと横向き教材の印刷が縦紙面になってしまう。 */
 
   html, body { background: #fff !important; }
   .no-print,
@@ -473,5 +604,14 @@ html[data-theme="forest"] .lp-header .lp-title {
   .lp-sheet:last-child {
     break-after: auto;
     page-break-after: auto;
+  }
+
+  /* A4横の紙面（不規則動詞など）。@page は app.js 側で A4 landscape に切り替える */
+  .lp-sheet.lp-sheet--landscape {
+    width: 297mm;
+    height: 210mm;
+    padding: 9mm 10mm 7mm;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

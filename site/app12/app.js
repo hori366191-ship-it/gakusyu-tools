@@ -279,14 +279,74 @@
       + '</div>';
   }
 
+  // ---- 不規則動詞（A4横・1ページ3表） ----
+  // 語は太字、カタカナ発音は語の下に左揃え・細字で置く。
+  function ivCellHtml(word, pron) {
+    return '<span class="lp-iv-cell">'
+      + '<span class="lp-iv-word">' + esc(word) + '</span>'
+      + (pron ? '<span class="lp-iv-pron">' + esc(pron) + '</span>' : '')
+      + '</span>';
+  }
+
+  function ivRowHtml(row) {
+    var pron = row.pron || [];
+    return '<tr>'
+      + '<td class="lp-iv-no">' + esc(row.no) + '</td>'
+      + '<th scope="row">' + ivCellHtml(row.b, pron[0]) + '</th>'
+      + '<td>' + ivCellHtml(row.p, pron[1]) + '</td>'
+      + '<td>' + ivCellHtml(row.pp, pron[2]) + '</td>'
+      + '<td class="lp-iv-mean">' + esc(row.m) + '</td>'
+      + '</tr>';
+  }
+
+  function ivTableHtml(table) {
+    var groups = (table && table.groups) || [];
+    var body = groups.map(function (group) {
+      return '<tbody>'
+        + '<tr class="lp-iv-grp"><th colspan="5" scope="colgroup">' + esc(group.title) + '</th></tr>'
+        + (group.rows || []).map(ivRowHtml).join('')
+        + '</tbody>';
+    }).join('');
+    return '<table class="lp-iv">'
+      + '<colgroup><col class="lp-iv-col-no"><col class="lp-iv-col-form"><col class="lp-iv-col-form">'
+      + '<col class="lp-iv-col-form"><col class="lp-iv-col-mean"></colgroup>'
+      + '<thead><tr><th scope="col">#</th><th scope="col">原形</th><th scope="col">過去形</th>'
+      + '<th scope="col">過去分詞</th><th scope="col">意味</th></tr></thead>'
+      + body + '</table>';
+  }
+
+  function irregularTablesHtml(page) {
+    var tables = (page && page.tables) || [];
+    return '<div class="lp-iv-grid">' + tables.map(ivTableHtml).join('') + '</div>';
+  }
+
+  // 型の見方とカタカナの注記（1ページ目だけ）
+  function irregularLegendHtml(material) {
+    var legend = (material && material.legend) || null;
+    if (!legend) return '';
+    var items = (legend.items || []).map(function (item) {
+      return '<span class="lp-iv-legend__item">'
+        + '<span class="lp-iv-legend__key">' + esc(item[0]) + '</span>' + esc(item[1]) + '</span>';
+    }).join('');
+    return '<div class="lp-iv-legend">'
+      + '<span class="lp-iv-legend__title">' + esc(legend.title || '') + '</span>'
+      + items
+      + (legend.note ? '<span class="lp-iv-legend__note">' + esc(legend.note) + '</span>' : '')
+      + '</div>';
+  }
+
   function pageBodyHtml(page) {
     if (page.kind === 'tense-table') return tenseTableHtml(page);
+    if (page.kind === 'irregular-verbs') return irregularTablesHtml(page);
     return '';
   }
 
   function pageHtml(page, material, index, total) {
     var no = index + 1;
-    return '<article class="lp-sheet" data-page="' + no + '" data-material="' + esc(material.id) + '"'
+    var landscape = material.orientation === 'landscape';
+    return '<article class="lp-sheet' + (landscape ? ' lp-sheet--landscape' : '') + '" data-page="' + no + '"'
+      + ' data-material="' + esc(material.id) + '"'
+      + (landscape ? ' data-orientation="landscape"' : '')
       + ' aria-label="' + esc(material.title + ' ' + no + 'ページ目') + '">'
       + '<div class="lp-sheet__head">'
       + '<h2 class="lp-sheet__title">' + esc(material.title) + '</h2>'
@@ -294,6 +354,7 @@
       + '</div>'
       + '<div class="lp-sheet__body">'
       + (page.kind === 'tense-table' ? legendHtml() : '')
+      + (page.kind === 'irregular-verbs' && index === 0 ? irregularLegendHtml(material) : '')
       + pageBodyHtml(page) + '</div>'
       + '<footer class="lp-sheet__foot"><span>' + esc(material.title) + '</span>'
       + '<span>' + no + ' / ' + total + '</span></footer>'
@@ -307,6 +368,23 @@
 
   function safeId(value) {
     return String(value || '').replace(/[^A-Za-z0-9_-]/g, '-');
+  }
+
+  // ---------------------------------------------------------------- 紙面の向き（@page）
+  // 印刷の用紙サイズは教材の向きに合わせて1か所で差し替える（縦=A4 portrait / 横=A4 landscape）。
+  // app.css 側には固定の @page を置かない。
+  var PAGE_SIZE_STYLE_ID = 'lp-page-size';
+  function setPrintPageSize(orientation) {
+    var d = docOf(null);
+    if (!d || !d.head) return;
+    var el = d.getElementById(PAGE_SIZE_STYLE_ID);
+    if (!el) {
+      el = d.createElement('style');
+      el.id = PAGE_SIZE_STYLE_ID;
+      d.head.appendChild(el);
+    }
+    var css = '@page{size:' + (orientation === 'landscape' ? 'A4 landscape' : 'A4 portrait') + ';margin:0}';
+    if (el.textContent !== css) el.textContent = css;
   }
 
   // タブのキーボード移動（WAI-ARIA tabs pattern: 左右・Home・End）
@@ -390,11 +468,16 @@
   /**
    * 紙面（A4 1枚 = 1ページ）を順番どおりに1つのPDFへまとめる。
    * callbackはちょうど1回。zoomは必ず復元する。
+   * orientation: 'landscape' のときA4横で出力する（省略時は従来どおりA4縦）。
    */
-  function makePdf(sheets, cb) {
+  function makePdf(sheets, cb, orientation) {
     var w = win();
     var list = Array.prototype.slice.call(sheets || []);
     if (!list.length) { cb(new Error('印刷するページがありません')); return; }
+    var landscape = orientation === 'landscape';
+    var jsPdfOrientation = landscape ? 'landscape' : 'portrait';
+    var pageW = landscape ? 297 : 210;
+    var pageH = landscape ? 210 : 297;
     var finished = false;
     var timer = null;
     var zooms = list.map(function (el) {
@@ -421,7 +504,7 @@
       for (var i = 0; i < list.length; i++) list[i].style.zoom = 1;
       var pdf;
       try {
-        pdf = new w.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        pdf = new w.jspdf.jsPDF({ orientation: jsPdfOrientation, unit: 'mm', format: 'a4' });
       } catch (e) { finish(e); return; }
       var index = 0;
       function next() {
@@ -435,10 +518,10 @@
         Promise.resolve(rendering).then(function (canvas) {
           if (finished) return;
           try {
-            if (at > 0) pdf.addPage('a4', 'portrait');
-            var imgH = Math.min(297, 210 * canvas.height / canvas.width);
+            if (at > 0) pdf.addPage('a4', jsPdfOrientation);
+            var imgH = Math.min(pageH, pageW * canvas.height / canvas.width);
             var imgW = imgH * canvas.width / canvas.height;
-            pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', (210 - imgW) / 2, 0, imgW, imgH);
+            pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', (pageW - imgW) / 2, 0, imgW, imgH);
             index = at + 1;
             next();
           } catch (e) { finish(e); }
@@ -783,9 +866,11 @@
     function fitSheets() {
       if (!paperWrap) return;
       var avail = paperWrap.clientWidth - 8;
-      var base = 210 * 96 / 25.4;
-      var zoom = avail > 0 ? Math.min(1, avail / base) : 1;
+      // 紙面の向きに応じた基準幅（縦210mm / 横297mm）で画面表示だけを縮小する
       sheetsOf(activeIndex).forEach(function (sheet) {
+        var landscape = sheet.getAttribute('data-orientation') === 'landscape';
+        var base = (landscape ? 297 : 210) * 96 / 25.4;
+        var zoom = avail > 0 ? Math.min(1, avail / base) : 1;
         sheet.style.zoom = zoom < 1 ? String(Math.round(zoom * 1000) / 1000) : '';
       });
     }
@@ -799,6 +884,7 @@
         tab.setAttribute('tabindex', on ? '0' : '-1');
       });
       panels.forEach(function (panel, i) { panel.hidden = i !== index; });
+      setPrintPageSize(materials[index] && materials[index].orientation);
       fitSheets();
       if (focusTab) tabs[index].focus();
     }
@@ -960,7 +1046,7 @@
               }
               release('送信失敗: ' + (errText || '不明なエラー'));
             }, { expectToken: clickToken });
-          });
+          }, material.orientation);
         });
       });
     }
@@ -1011,6 +1097,9 @@
     pageHtml: pageHtml,
     materialHtml: materialHtml,
     legendHtml: legendHtml,
+    irregularLegendHtml: irregularLegendHtml,
+    setPrintPageSize: setPrintPageSize,
+    PAGE_SIZE_STYLE_ID: PAGE_SIZE_STYLE_ID,
     GROUP_LABELS: GROUP_LABELS,
     appMarkup: appMarkup,
     nextTabIndex: nextTabIndex,
