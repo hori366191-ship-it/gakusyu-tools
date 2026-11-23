@@ -23,18 +23,25 @@ function read(rel) {
   return fs.readFileSync(path.join(ROOT, rel), 'utf8');
 }
 
-/** materials.js を vm で読み込み、既存の window.GakusyuPrintMaterials があれば上書きしないことを再現する */
+/** materials.js と生成済み history-data.js を、ブラウザと同じ順（history-data → materials）で読み込む */
 function loadMaterials(previous) {
   const sandbox = {};
   if (previous) sandbox.GakusyuPrintMaterials = previous;
+  vm.runInNewContext(read('site/app12/history-data.js'), sandbox);
   vm.runInNewContext(read('site/app12/materials.js'), sandbox);
-  return sandbox.GakusyuPrintMaterials || null;
+  const data = sandbox.GakusyuPrintMaterials || null;
+  const history = sandbox.GakusyuPrintHistoryMaterial;
+  if (!data || !history || data.fixture || !Array.isArray(data.materials)) return data;
+  if (!data.materials.some((m) => m && m.id === 'tense-notes')) return data;
+  if (data.materials.some((m) => m && m.id === history.id)) return data;
+  return { version: data.version, materials: data.materials.concat([history]) };
 }
 
 const DATA = loadMaterials();
 const MATERIAL = DATA.materials[0];
 const ROWS = MATERIAL.pages[0].rows;
 const IV = DATA.materials[1];
+const HC = DATA.materials[2];
 
 const EXPECTED_NAMES = [
   '過去形', '過去進行形', '過去完了形', '過去完了進行形',
@@ -90,11 +97,13 @@ function plain(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-test('[data] 教材は「時制のまとめノート」と「不規則動詞」の2件（時制は12行のまま）', () => {
+test('[data] 教材は「時制のまとめノート」「不規則動詞」「中学歴史年表」の3件（時制は12行のまま）', () => {
   assert.deepEqual(Object.keys(DATA).sort(), ['materials', 'version']);
-  assert.equal(DATA.materials.length, 2);
+  assert.equal(DATA.materials.length, 3);
   assert.equal(DATA.materials[0].id, 'tense-notes');
   assert.equal(DATA.materials[1].id, 'irregular-verbs');
+  assert.equal(DATA.materials[2].id, 'history-chronology');
+  assert.equal(HC.title, '中学歴史年表');
   assert.equal(MATERIAL.title, '時制のまとめノート');
   assert.equal(MATERIAL.pages.length, 1, '時制教材はA4 1ページ');
   const page = MATERIAL.pages[0];
@@ -1224,6 +1233,175 @@ test('[portal] ツールに「学習プリント」カードをapp9の直後に�
   assert.ok(cards[2].includes('タブで教材を選び、A4で印刷できます。'), '説明は簡潔に');
   assert.equal(cards[2].includes('タブレット'), false, 'タブレットから送る（逆向き）記述をしない');
 });
+
+test('[hc-data] 中学歴史年表は7章・226行・A4縦4ページ（各2段）で原稿順のまま', () => {
+  assert.equal(HC.slug, 'history-chronology');
+  assert.equal(HC.title, '中学歴史年表');
+  assert.equal(HC.orientation, undefined, 'A4縦');
+  assert.equal(HC.note, 'この語呂合わせは厳しいのでは？と思ったら、遠慮なくいってね！');
+  assert.equal(HC.pages.length, 4, 'A4縦4ページ（片面4枚以内）');
+  HC.pages.forEach((page) => {
+    assert.equal(page.kind, 'history-chronology');
+    assert.equal(page.columns.length, 2, '左右2段');
+    assert.ok(page.caption, '段の範囲を示す見出しを持つ');
+  });
+
+  const columns = HC.pages.flatMap((page) => page.columns);
+  assert.equal(columns.length, 8, '4ページ×2段');
+  assert.deepEqual(
+    plain(columns.map((column) => column.blocks.reduce((n, block) => n + block.rows.length, 0))),
+    [31, 27, 28, 29, 27, 28, 28, 28],
+    '実測割りの列末'
+  );
+
+  const blocks = columns.flatMap((column) => column.blocks);
+  const chapterOrder = [];
+  blocks.forEach((block) => {
+    if (chapterOrder.indexOf(block.chapter) < 0) chapterOrder.push(block.chapter);
+  });
+  assert.deepEqual(chapterOrder, [
+    '1. 古代', '2. 中世', '3. 近世①', '4. 近世②',
+    '5. 近世③', '6. 近代・現代①', '7. 現代②'
+  ], '章見出し7件（順序どおり）');
+  assert.equal(blocks.filter((block) => block.continued).length, 7, '段をまたぐ章は「（続き）」');
+
+  const rows = blocks.flatMap((block) => block.rows);
+  assert.equal(rows.length, 226);
+  assert.equal(rows[0].year, '紀元前4世紀頃');
+  assert.equal(rows[225].year, '2022年');
+  assert.equal(rows[225].event, 'ロシアがウクライナに軍事侵攻を開始する');
+  // 句読点・複数文・注記を切り捨てない
+  assert.ok(rows.some((row) => row.goro.includes('※なよせ(人・物・名所などの名を寄せ集めること。)')));
+  assert.ok(rows.some((row) => row.event.includes('（〜1477年）')));
+  assert.ok(rows.some((row) => row.goro.includes('※日本の要求は聞き入れなかった')));
+});
+
+test('[hc-gen] 生成物は原稿Markdownから決定的に再生成でき、全行・全文字が一致する', () => {
+  const gen = require(path.join(ROOT, 'scripts', 'app12', 'build-history-chronology.cjs'));
+  assert.equal(gen.build(), read('site/app12/history-data.js').replace(/\r\n/g, '\n'), 'history-data.js は再生成結果と一致');
+
+  const source = fs.readFileSync(gen.SOURCE, 'utf8');
+  const expected = source.split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => /^\|/.test(line) && !/^\|\s*-/.test(line) && !/^\|\s*西暦\s*\|/.test(line))
+    .map((line) => line.split('|').slice(1, -1).map((cell) => cell.trim()));
+  assert.equal(expected.length, 226);
+  const actual = HC.pages
+    .flatMap((page) => page.columns)
+    .flatMap((column) => column.blocks)
+    .flatMap((block) => block.rows)
+    .map((row) => [row.year, row.event, row.goro]);
+  assert.deepEqual(plain(actual), expected, '西暦・出来事・語呂合わせの全文字が原稿と一致');
+});
+
+test('[hc-render] 4ページ・8段・226行。値はescし、注意文は初頁だけ、向きは縦のまま', () => {
+  const html = app.materialHtml(HC);
+  assert.equal(count(html, 'class="lp-sheet lp-sheet--history"'), 4);
+  assert.equal(count(html, 'lp-sheet--landscape'), 0);
+  assert.equal(count(html, '<div class="lp-hc-grid">'), 4);
+  assert.equal(count(html, '<div class="lp-hc-col">'), 8);
+  assert.equal(count(html, '<thead><tr><th scope="col">西暦</th><th scope="col">出来事</th><th scope="col">語呂合わせ</th></tr></thead>'), 8, '各段に原文どおりの列見出し');
+  assert.equal(count(html, '<thead>'), 8);
+  assert.equal(count(html, '<tr><th scope="row" class="lp-hc-year">'), 226);
+  assert.equal(count(html, '<tr class="lp-hc-chapter">'), 14, '章見出しは段ごと（7章＋続き7）');
+  assert.equal(count(html, '（続き）'), 7);
+  assert.equal(count(html, 'class="lp-hc-note"'), 1, '冒頭の注意文は初頁だけ');
+  const pages = html.split('<article ');
+  assert.equal(count(pages[1], 'class="lp-hc-note"'), 1);
+  assert.equal(count(pages[2], 'class="lp-hc-note"'), 0);
+  ['<span>1 / 4</span>', '<span>2 / 4</span>', '<span>3 / 4</span>', '<span>4 / 4</span>']
+    .forEach((foot) => assert.ok(html.includes(foot), foot));
+  assert.ok(html.includes('aria-label="中学歴史年表 1ページ目"'));
+  assert.equal(count(html, '<header'), 0, '紙面内に素のheaderを置かない');
+
+  // レンダラーは必ずescを通す
+  const evil = {
+    id: 'evil', title: '<b>中学歴史</b>', note: '<script>x</script>',
+    pages: [{
+      id: 'e1', kind: 'history-chronology', caption: '<i>cap</i>',
+      columns: [{ id: 'c1', blocks: [{ chapter: '<章>', continued: false, rows: [{ year: '<1>', event: 'a&b', goro: '"q" <img>' }] }] }]
+    }]
+  };
+  const out = app.materialHtml(evil);
+  assert.equal(out.includes('<b>中学歴史</b>'), false);
+  assert.equal(out.includes('<script>'), false);
+  assert.equal(out.includes('<img>'), false);
+  assert.ok(out.includes('&lt;b&gt;中学歴史&lt;/b&gt;'));
+  assert.ok(out.includes('&lt;章&gt;') && out.includes('&lt;1&gt;') && out.includes('a&amp;b'));
+  assert.ok(out.includes('&quot;q&quot; &lt;img&gt;'));
+
+  // 既存2教材の見た目・クラスは変えない
+  assert.equal(count(app.materialHtml(MATERIAL), 'lp-sheet--history'), 0);
+  assert.equal(count(app.materialHtml(MATERIAL), 'class="lp-sheet"'), 1);
+  assert.equal(count(app.materialHtml(IV), 'lp-sheet--history'), 0);
+  assert.equal(count(app.materialHtml(IV), 'class="lp-sheet lp-sheet--landscape"'), 2);
+});
+
+test('[hc-css] A4縦・余白8mmはこの教材だけ・2段5mm・15/43/42%・7.5pt/1.15', () => {
+  const css = read('site/app12/app.css');
+  const base = css.match(/\.lp-sheet \{([\s\S]*?)\n\}/)[1];
+  assert.equal(/padding:\s*8mm/.test(base), false, '共通の紙面余白は変えない');
+
+  const hist = css.match(/\.lp-sheet--history \{([\s\S]*?)\n\}/);
+  assert.ok(hist, '.lp-sheet--history の定義');
+  assert.ok(/padding:\s*8mm/.test(hist[1]));
+  assert.ok(/font-size:\s*7\.5pt/.test(hist[1]));
+  assert.ok(/line-height:\s*1\.15/.test(hist[1]));
+
+  const grid = css.match(/\.lp-hc-grid \{([\s\S]*?)\n\}/);
+  assert.ok(grid, '.lp-hc-grid の定義');
+  assert.ok(/grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/.test(grid[1]));
+  assert.ok(/column-gap:\s*5mm/.test(grid[1]));
+
+  const table = css.match(/\.lp-hc-tbl \{([\s\S]*?)\n\}/);
+  assert.ok(table, '.lp-hc-tbl の定義');
+  assert.ok(/table-layout:\s*fixed/.test(table[1]));
+  assert.ok(/width:\s*100%/.test(table[1]));
+  assert.ok(/\.lp-hc-tbl \.lp-hc-col-year \{ width: 15%; \}/.test(css));
+  assert.ok(/\.lp-hc-tbl \.lp-hc-col-event \{ width: 43%; \}/.test(css));
+  assert.ok(/\.lp-hc-tbl \.lp-hc-col-goro \{ width: 42%; \}/.test(css));
+
+  const cell = css.match(/\.lp-sheet \.lp-hc-tbl th,\n\.lp-sheet \.lp-hc-tbl td \{([\s\S]*?)\n\}/);
+  assert.ok(cell, '歴史年表のセル');
+  assert.ok(/padding:\s*\.30mm 1\.1mm/.test(cell[1]));
+  assert.ok(/position:\s*relative/.test(cell[1]), '疑似要素罫線の基準');
+  assert.equal(/border-bottom/.test(cell[1]), false, '罫線は寸法を消費しない');
+  assert.equal(/background-image/.test(cell[1]), false, 'html2canvasが失敗するgradientを使わない');
+  assert.ok(/vertical-align:\s*top/.test(cell[1]));
+  assert.ok(/overflow-wrap:\s*break-word/.test(cell[1]), '長文は折り返す');
+
+  const rule = css.match(/\.lp-sheet \.lp-hc-tbl th::after,\n\.lp-sheet \.lp-hc-tbl td::after \{([\s\S]*?)\n\}/);
+  assert.ok(rule, 'セルの水平罫線は疑似要素');
+  assert.ok(/content:\s*""/.test(rule[1]));
+  assert.ok(/position:\s*absolute/.test(rule[1]));
+  assert.ok(/left:\s*0/.test(rule[1]) && /right:\s*0/.test(rule[1]) && /bottom:\s*0/.test(rule[1]));
+  assert.ok(/height:\s*\.2mm/.test(rule[1]));
+  assert.ok(/background:\s*#ddd/.test(rule[1]));
+  assert.ok(/pointer-events:\s*none/.test(rule[1]));
+  assert.ok(/tr\.lp-hc-chapter th::after \{\s*height:\s*\.3mm;\s*background:\s*#999;/.test(css), '章見出しの罫線');
+  assert.ok(/thead th::after \{\s*height:\s*\.3mm;\s*background:\s*#bbb;/.test(css), '列見出しの罫線');
+  assert.ok(/\.lp-sheet \.lp-hc-tbl thead th \{[^}]*white-space:\s*nowrap/.test(css), '列見出しは1行');
+
+  const print = css.slice(css.indexOf('@media print'));
+  assert.ok(/\.lp-sheet\.lp-sheet--history\s*\{[^}]*padding:\s*8mm/.test(print), '印刷/PDFでも8mm');
+  assert.equal(/@page\s*\{/.test(print), false, '固定@pageは置かない（縦はapp.js）');
+});
+
+test('[hc-fixture] history-data.js が欠けても既存2教材とfixtureはそのまま動く', () => {
+  const js = read('site/app12/app.js');
+  assert.ok(js.includes('GakusyuPrintHistoryMaterial'), '生成データを教材一覧へ合成する');
+  assert.ok(/if \(!history \|\| data\.fixture \|\| !Array\.isArray\(data\.materials\)\) return data;/.test(js), '欠落・fixture時は触らない');
+
+  const sandbox = {};
+  vm.runInNewContext(read('site/app12/materials.js'), sandbox);
+  assert.equal(sandbox.GakusyuPrintMaterials.materials.length, 2, '生成物が無ければ2教材のまま');
+
+  const html = read('site/app12/index.html');
+  assert.ok(html.indexOf('./history-data.js') > 0);
+  assert.ok(html.indexOf('./history-data.js') < html.indexOf('./materials.js'), 'materials.jsより先に読む');
+  assert.ok(html.indexOf('./history-data.js') < html.indexOf('./app.js'));
+});
+
 
 test('[fixture] 本番教材を増やさずにfixtureで複数ページを差し替えられる', () => {
   const src = read('site/app12/materials.js');

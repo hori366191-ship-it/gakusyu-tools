@@ -347,16 +347,44 @@
       + '</div>';
   }
 
+  // ---- 中学歴史年表（A4縦・1ページ2段。西暦15% / 出来事43% / 語呂合わせ42%） ----
+  // 段（列）は章の続きでも見出しを出し、「（続き）」で同一章であることを示す。
+  function historyColumnHtml(column) {
+    var blocks = (column && column.blocks) || [];
+    var body = blocks.map(function (block) {
+      var heading = esc(block.chapter) + (block.continued ? '（続き）' : '');
+      var rows = (block.rows || []).map(function (row) {
+        return '<tr><th scope="row" class="lp-hc-year">' + esc(row.year) + '</th>'
+          + '<td class="lp-hc-event">' + esc(row.event) + '</td>'
+          + '<td class="lp-hc-goro">' + esc(row.goro) + '</td></tr>';
+      }).join('');
+      return '<tbody><tr class="lp-hc-chapter"><th colspan="3" scope="colgroup">' + heading + '</th></tr>'
+        + rows + '</tbody>';
+    }).join('');
+    return '<div class="lp-hc-col"><table class="lp-hc-tbl">'
+      + '<colgroup><col class="lp-hc-col-year"><col class="lp-hc-col-event"><col class="lp-hc-col-goro"></colgroup>'
+      + '<thead><tr><th scope="col">西暦</th><th scope="col">出来事</th><th scope="col">語呂合わせ</th></tr></thead>'
+      + body + '</table></div>';
+  }
+
+  function historyColumnsHtml(page) {
+    var columns = (page && page.columns) || [];
+    return '<div class="lp-hc-grid">' + columns.map(historyColumnHtml).join('') + '</div>';
+  }
+
   function pageBodyHtml(page) {
     if (page.kind === 'tense-table') return tenseTableHtml(page);
     if (page.kind === 'irregular-verbs') return irregularTablesHtml(page);
+    if (page.kind === 'history-chronology') return historyColumnsHtml(page);
     return '';
   }
 
   function pageHtml(page, material, index, total) {
     var no = index + 1;
     var landscape = material.orientation === 'landscape';
-    return '<article class="lp-sheet' + (landscape ? ' lp-sheet--landscape' : '') + '" data-page="' + no + '"'
+    var history = page.kind === 'history-chronology';
+    return '<article class="lp-sheet' + (landscape ? ' lp-sheet--landscape' : '')
+      + (history ? ' lp-sheet--history' : '') + '" data-page="' + no + '"'
       + ' data-material="' + esc(material.id) + '"'
       + (landscape ? ' data-orientation="landscape"' : '')
       + ' aria-label="' + esc(material.title + ' ' + no + 'ページ目') + '">'
@@ -367,6 +395,7 @@
       + '<div class="lp-sheet__body">'
       + (page.kind === 'tense-table' ? legendHtml() : '')
       + (page.kind === 'irregular-verbs' && index === 0 ? irregularLegendHtml(material) : '')
+      + (history && index === 0 && material.note ? '<p class="lp-hc-note">' + esc(material.note) + '</p>' : '')
       + pageBodyHtml(page) + '</div>'
       + '<footer class="lp-sheet__foot"><span>' + esc(material.title) + '</span>'
       + '<span>' + no + ' / ' + total + '</span></footer>'
@@ -838,7 +867,19 @@
   // ---------------------------------------------------------------- mount
   function readData() {
     var w = win();
-    return (w && w.GakusyuPrintMaterials) || { materials: [] };
+    var data = (w && w.GakusyuPrintMaterials) || { materials: [] };
+    var history = w && w.GakusyuPrintHistoryMaterial;
+    if (!history || data.fixture || !Array.isArray(data.materials)) return data;
+    var i;
+    for (i = 0; i < data.materials.length; i++) {
+      if (data.materials[i] && data.materials[i].id === history.id) return data;
+    }
+    var merged = {};
+    for (var key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) merged[key] = data[key];
+    }
+    merged.materials = data.materials.concat([history]);
+    return merged;
   }
 
   function mount(opts) {
