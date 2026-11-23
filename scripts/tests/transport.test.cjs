@@ -128,11 +128,21 @@ function createMiniDom() {
   const banner = createElement('div');
   banner.id = 'auth-banner-inner';
   byId.set(banner.id, banner);
+  const docListeners = {};
   const document = {
     createElement,
-    getElementById: (id) => byId.get(id) || null
+    getElementById: (id) => byId.get(id) || null,
+    visibilityState: 'visible',
+    addEventListener(type, fn) {
+      if (!docListeners[type]) docListeners[type] = [];
+      docListeners[type].push(fn);
+    }
   };
-  return { banner, document, byId };
+  function dispatch(type) {
+    const list = docListeners[type] || [];
+    for (const fn of list.slice()) fn({ type: type });
+  }
+  return { banner, document, byId, dispatch };
 }
 
 function findNodeByText(root, text) {
@@ -2108,6 +2118,98 @@ test('portal GIS retry: 失敗表示後も#gis-btnを作り直し、再試行で
   assert.ok(dom.byId.get('gis-btn'));
   assert.strictEqual(dom.byId.get('gis-btn').__rendered, true);
   assert.strictEqual(findNodeByText(dom.banner, '再試行'), null, '成功後は再試行を消す');
+});
+
+test('portal auth: ok表示中も「ログインし直す」でclearIdToken→GIS再表示、復帰probeは60秒で間引く（fakeDOM実行）', async () => {
+  const html = readSiteFile('index.html');
+  const start = html.indexOf('/* ---- 認証プローブ');
+  assert.ok(start > 0, 'portal probe blockがある');
+  const end = html.indexOf('\n  </script>', start);
+  assert.ok(end > start);
+  const code = html.slice(start, end);
+  const dom = createMiniDom();
+  let now = 2000000;
+  let token = 'stored-token';
+  const calls = { clear: 0, probe: 0, initialize: 0, render: 0 };
+  let authHandler = null;
+  const T = {
+    configure() {},
+    getIdToken() { return token; },
+    peekIdToken() { return token; },
+    setIdToken(v) { token = v; },
+    clearIdToken() { token = ''; calls.clear++; if (authHandler) authHandler(''); },
+    onAuthChange(fn) { authHandler = fn; },
+    waitForGis() { return Promise.resolve(true); },
+    probeAuth() { calls.probe++; return Promise.resolve({ status: token ? 'ok' : 'noauth' }); }
+  };
+  const google = {
+    accounts: {
+      id: {
+        initialize() { calls.initialize++; },
+        renderButton(el) { calls.render++; el.__rendered = true; }
+      }
+    }
+  };
+  const windowListeners = {};
+  const sandbox = {
+    document: dom.document,
+    T,
+    google,
+    GIS_CLIENT_ID: 'mock-client-id',
+    console,
+    Promise,
+    Date: { now: () => now },
+    Object,
+    setTimeout,
+    clearTimeout,
+    addEventListener(type, fn) {
+      if (!windowListeners[type]) windowListeners[type] = [];
+      windowListeners[type].push(fn);
+    }
+  };
+  const ctx = vm.createContext(sandbox);
+  vm.runInContext('this.window = this; this.GakusyuTransport = this.T; this.google = this.google;', ctx);
+  vm.runInContext(code, ctx);
+  await wait(10);
+
+  assert.strictEqual(calls.probe, 1);
+  assert.match(dom.banner.className, /is-ok/);
+  assert.ok(authHandler, 'authchangeを購読している');
+  const okText = findNodeByText(dom.banner, '教室タブレットとしてログイン中 \u2705');
+  assert.ok(okText, 'ok表示');
+  assert.match(String(okText.title || ''), /印刷アプリ/, 'pdfdropの可否を保証しない旨を注記');
+
+  // ok表示中でも「ログインし直す」が出る
+  const redo = findNodeByText(dom.banner, 'ログインし直す');
+  assert.ok(redo, 'okでもログインし直せる');
+  redo.click();
+  assert.strictEqual(calls.clear, 1, '保存トークンを破棄する');
+  assert.strictEqual(calls.probe, 2, 'authchangeで再probe（明示呼び出しは同一トークンで間引く）');
+  await wait(10);
+  assert.match(dom.banner.className, /is-warn/, '未ログイン表示へ戻す');
+  const gisBtn = dom.byId.get('gis-btn');
+  assert.ok(gisBtn && gisBtn.__rendered, 'GISボタンを再表示する');
+
+  // 復帰時の再probeは前回probeから60秒以上経過したときだけ
+  now += 30000;
+  dom.document.visibilityState = 'visible';
+  dom.dispatch('visibilitychange');
+  assert.strictEqual(calls.probe, 2, '60秒未満は再probeしない');
+  assert.ok((windowListeners.focus || []).length >= 1, 'focusでも復帰確認する');
+  const focus = windowListeners.focus[0];
+  focus({ type: 'focus' });
+  assert.strictEqual(calls.probe, 2, 'focusも間引く');
+  now += 31000;
+  dom.dispatch('visibilitychange');
+  assert.strictEqual(calls.probe, 3, '60秒以上経過したら再probe');
+  await wait(10);
+  assert.match(dom.banner.className, /is-warn/);
+
+  // 非表示化イベントではprobeしない
+  now += 61000;
+  dom.document.visibilityState = 'hidden';
+  dom.dispatch('visibilitychange');
+  assert.strictEqual(calls.probe, 3, 'hiddenでは確認しない');
 });
 
 // ── app2: 向き（横⇔縦）の変化で読書を継続する ─────────────────

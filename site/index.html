@@ -701,7 +701,19 @@
         setState('is-ok', 'ok');
         clearEl(banner);
         banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
-        banner.appendChild(makeEl('span', '', isOwner ? '先生アカウントでログイン中 \u2705' : '教室タブレットとしてログイン中 \u2705'));
+        var okText = makeEl('span', '', isOwner ? '先生アカウントでログイン中 \u2705' : '教室タブレットとしてログイン中 \u2705');
+        // ここでの ok は app2 の判定。印刷アプリ(pdfdrop)の可否は保証しない（表示文言は増やさない）。
+        okText.title = '印刷アプリ（原稿用紙・学習プリント）は別に認証を確認します';
+        banner.appendChild(okText);
+        var redo = makeEl('button', 'auth-banner__btn', 'ログインし直す');
+        redo.type = 'button';
+        redo.addEventListener('click', function () {
+          redo.disabled = true;
+          if (typeof T.clearIdToken === 'function') T.clearIdToken();
+          // clearIdToken の authchange でも走るが、トークンが無い場合も GIS ボタンへ戻す
+          runProbe();
+        });
+        banner.appendChild(redo);
       }
       function renderLogin(state, opts) {
         opts = opts || {};
@@ -791,6 +803,17 @@
           renderLogin('is-warn', { unreachable: true });
         });
       }
+      // 復帰時の再確認は前回probeから60秒以上経ったときだけ（連打・往復での連続probeを避ける）
+      var PROBE_STALE_MS = 60000;
+      function probeIfStale() {
+        if (Date.now() - lastProbeAt < PROBE_STALE_MS) return;
+        runProbe();
+      }
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState && document.visibilityState !== 'visible') return;
+        probeIfStale();
+      });
+      if (typeof window.addEventListener === 'function') window.addEventListener('focus', probeIfStale);
       T.onAuthChange(function () { runProbe(); });
       runProbe();
     })();

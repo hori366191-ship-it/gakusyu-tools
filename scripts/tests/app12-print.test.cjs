@@ -824,6 +824,40 @@ test('[isolation] sessionStorageはapp9（genko_*）と別名前空間、PDFdrop
   assert.equal(app.classroom.token, (app9.match(/token: '([^']+)'/) || [])[1], 'PDFdropのtokenも同一');
 });
 
+test('[auth] pdfdropのnoauthは保存トークンの状態で文言を分け、内部エラー文字列を出さない', () => {
+  const valid = app.noauthHelpMessage({
+    peekIdToken: () => 'stored-token',
+    inspectToken: () => ({ valid: true, email: 'student@example.com' })
+  });
+  assert.match(valid, /印刷先の認証を確認できませんでした/, '有効なトークンをpdfdropが拒否した場合');
+  assert.match(valid, /教室用アカウントでログインし直/);
+  assert.equal(valid.includes('期限切れ'), false, 'ローカルで有効なトークンを期限切れと言わない');
+  assert.equal(/noauth|bad token|tokeninfo/i.test(valid), false, '内部エラー文字列を出さない');
+
+  const expired = app.noauthHelpMessage({
+    peekIdToken: () => 'stored-token',
+    inspectToken: () => ({ valid: false, reason: 'expired' })
+  });
+  assert.equal(expired, 'ログインの有効期限が切れています。');
+
+  const none = app.noauthHelpMessage({
+    peekIdToken: () => '',
+    inspectToken: () => ({ valid: false, reason: 'empty' })
+  });
+  assert.equal(none, 'ログインの有効期限が切れています。', 'トークン無しも従来の文言');
+
+  // 起動時probe・送信前probeの両経路が原因別の文言を使う
+  const js = read('site/app12/app.js');
+  assert.equal(count(js, 'showAuthHelp(noauthHelpMessage(T))'), 2, '起動時と送信前の両方');
+  assert.equal(js.includes("showAuthHelp('Google にログインされていない可能性があります。')"), false);
+
+  // app9（原稿用紙）も同じ判定・文言に揃える
+  const app9 = read('site/app9/index.html');
+  assert.equal(count(app9, 'showAuthHelp(noauthHelpMessage())'), 2, 'app9も起動時と送信前の両方');
+  assert.ok(app9.includes('印刷先の認証を確認できませんでした'));
+  assert.equal(app9.indexOf('function noauthHelpMessage()') < app9.indexOf('showAuthHelp(noauthHelpMessage())'), true);
+});
+
 test('[portal] ツールに「学習プリント」カードをapp9の直後に追加', () => {
   const portal = read('site/index.html');
   const toolStart = portal.indexOf('<section class="section sec--tool">');

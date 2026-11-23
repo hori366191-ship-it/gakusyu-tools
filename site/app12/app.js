@@ -58,6 +58,17 @@
     return w && w.document ? w.document : null;
   }
 
+  var MSG_TOKEN_EXPIRED = 'ログインの有効期限が切れています。';
+  // pdfdropだけが noauth を返す場合（ポータルのapp2判定は通る）は「期限切れ」と言い切らない。
+  // サーバの内部文字列（bad token等）は出さず、保存トークンの状態だけで文言を選ぶ。
+  var MSG_PDFDROP_NOAUTH = '印刷先の認証を確認できませんでした。少し待って再試行するか、教室用アカウントでログインし直してください。';
+  function noauthHelpMessage(T) {
+    var raw = (T && typeof T.peekIdToken === 'function') ? T.peekIdToken() : '';
+    var st = null;
+    try { st = (T && typeof T.inspectToken === 'function') ? T.inspectToken(raw) : null; } catch (e) { st = null; }
+    return (st && st.valid) ? MSG_PDFDROP_NOAUTH : MSG_TOKEN_EXPIRED;
+  }
+
   // ---------------------------------------------------------------- 時間軸SVG
   // 点＝丸、期間＝斜線の帯、習慣＝櫛形の記号。形だけで読み分けられるようにする（色に頼らない）。
   function timelineLabel(tl) {
@@ -864,7 +875,7 @@
         } else if (pr.state === 'noauth' && (hadToken || authExpiredNotice)) {
           authExpiredNotice = true;
           classroomBtn.hidden = true;
-          showAuthHelp('ログインの有効期限が切れています。');
+          showAuthHelp(noauthHelpMessage(T));
         } else if (!authExpiredNotice) {
           classroomBtn.hidden = true;
           setStatus('');
@@ -905,7 +916,7 @@
           }
           if (pr.state !== 'ok') {
             setBusy(false);
-            if (pr.state === 'noauth') showAuthHelp('Google にログインされていない可能性があります。');
+            if (pr.state === 'noauth') showAuthHelp(noauthHelpMessage(T));
             else if (pr.state === 'notallowed') setStatus('送信失敗: このアカウント(' + (pr.masked || '不明') + ')は許可リストにありません');
             else if (pr.state === 'unreachable') setStatus('送信失敗: 認証サーバーに接続できませんでした。通信状態を確認して、もう一度お試しください。');
             else setStatus('送信失敗: ' + (pr.message || '不明なエラー'));
@@ -913,7 +924,7 @@
           }
           // 以降の送信は「クリック時に認証が通ったトークン」でのみ行う
           var clickToken = T.getIdToken() || '';
-          if (!clickToken) { setBusy(false); showAuthHelp('ログインの有効期限が切れています。'); return; }
+          if (!clickToken) { setBusy(false); showAuthHelp(MSG_TOKEN_EXPIRED); return; }
           // 生成中にタブが切り替わっても別教材を送らないよう、ここで教材とシートを確定する
           var material = materials[activeIndex];
           var sheets = sheetsOf(activeIndex).slice();
@@ -1008,6 +1019,7 @@
     pdfByteLength: pdfByteLength,
     isPdfTooLarge: isPdfTooLarge,
     PDF_MAX_BYTES: PDF_MAX_BYTES,
+    noauthHelpMessage: noauthHelpMessage,
     loadScriptOnce: loadScriptOnce,
     ensurePdfLibs: ensurePdfLibs,
     makePdf: makePdf,

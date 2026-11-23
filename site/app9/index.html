@@ -611,6 +611,17 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     });
   }
 
+  // pdfdropだけが noauth を返す場合（ポータルのapp2判定は通る）は「期限切れ」と言い切らない。
+  // サーバの内部文字列（bad token等）は出さず、保存トークンの状態だけで文言を選ぶ。
+  var MSG_TOKEN_EXPIRED = 'ログインの有効期限が切れています。';
+  var MSG_PDFDROP_NOAUTH = '印刷先の認証を確認できませんでした。少し待って再試行するか、教室用アカウントでログインし直してください。';
+  function noauthHelpMessage() {
+    var raw = (T && typeof T.peekIdToken === 'function') ? T.peekIdToken() : '';
+    var st = null;
+    try { st = (T && typeof T.inspectToken === 'function') ? T.inspectToken(raw) : null; } catch (e) { st = null; }
+    return (st && st.valid) ? MSG_PDFDROP_NOAUTH : MSG_TOKEN_EXPIRED;
+  }
+
   // 外部文字列を innerHTML に入れない（msgはtextContent、リンクはDOMで組立）
   function showAuthHelp(msg) {
     var statusEl = document.getElementById('sendStatus');
@@ -650,14 +661,14 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     probeAuth(function (pr) {
       if (pr.state !== 'ok') {
         btn.disabled = false;
-        if (pr.state === 'noauth') showAuthHelp('Googleにログインされていない可能性があります。');
+        if (pr.state === 'noauth') showAuthHelp(noauthHelpMessage());
         else if (pr.state === 'notallowed') setStatus('送信失敗: このアカウント(' + (pr.masked || '不明') + ')は許可リストにありません');
         else if (pr.state === 'unreachable') setStatus('送信失敗: 認証サーバーに接続できませんでした。通信状態を確認して、もう一度お試しください。');
         else setStatus('送信失敗: ' + (pr.message || '不明なエラー'));
         return;
       }
       // 期限切れ/欠落トークンは送信前に破棄済み。PDF POSTは strict 検証のため id_token 必須
-      if (!getIdToken()) { btn.disabled = false; showAuthHelp('ログインの有効期限が切れています。'); return; }
+      if (!getIdToken()) { btn.disabled = false; showAuthHelp(MSG_TOKEN_EXPIRED); return; }
       setStatus('PDFを生成中…');
       makePdf(function (err, pdf) {
         if (err) {
@@ -708,7 +719,7 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
       } else if (pr.state === 'noauth' && (hadToken || authExpiredNotice)) {
         authExpiredNotice = true;
         btn.style.display = 'none';
-        showAuthHelp('ログインの有効期限が切れています。');
+        showAuthHelp(noauthHelpMessage());
       } else if (!authExpiredNotice) {
         btn.style.display = 'none';
         setStatus('');
