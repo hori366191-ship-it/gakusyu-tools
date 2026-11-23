@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>app12 PDFハーネス（複数ページ確認用・本番非配信）</title>
+<!--
+  使い方（リポジトリのルートで静的サーバを立てる）:
+    python -m http.server 8000
+    http://localhost:8000/scripts/tests/fixtures/app12/pdf-harness.html
+
+  このページは scripts/tests/fixtures 配下にあり、Pages では配信されない。
+  本番 app12 にはデバッグ用の開口を置かず、ここで
+  「fixture教材（3ページ）→ 描画 → makePdf」だけを確認する。
+
+  通信はしない: transport.js を読み込まないため、教室タブレット印刷の
+  認証プローブは走らない（T 未定義でボタンは非表示のまま）。
+  html2canvas / jsPDF もスタブに差し替え、1ページずつ順番に
+  addPage / addImage が呼ばれることだけを検証する。
+-->
+<link rel="stylesheet" href="../../../../site/app12/app.css">
+<style>
+  .harness { max-width: 1080px; margin: 0 auto; padding: 16px; }
+  .harness h1 { font-size: 18px; margin: 0 0 8px; }
+  .harness__log { font-family: Consolas, monospace; font-size: 12px; white-space: pre-wrap; background: #0f1720; color: #d7e3ec; padding: 12px; border-radius: 8px; }
+  .harness__ok { color: #7ee0a2; }
+  .harness__ng { color: #ff9d9d; }
+</style>
+<script>
+(function () {
+  'use strict';
+  // ---- html2canvas スタブ（各紙面を 1 枚の canvas として返す） ----
+  var canvasCalls = 0;
+  window.html2canvas = function (element) {
+    canvasCalls += 1;
+    var page = element && element.getAttribute ? element.getAttribute('data-page') : '';
+    return Promise.resolve({
+      width: 1240,
+      height: 1754,
+      page: page,
+      toDataURL: function () { return 'data:image/jpeg;base64,TESTPAGE' + page; }
+    });
+  };
+  // ---- jsPDF スタブ（addPage / addImage / output の順序を記録） ----
+  var images = [];
+  var addPageCount = 0;
+  function FakePdf() {}
+  FakePdf.prototype.addPage = function () { addPageCount += 1; };
+  FakePdf.prototype.addImage = function (data, fmt, x, y, w, h) {
+    images.push({ data: data, fmt: fmt, x: x, y: y, w: w, h: h });
+  };
+  FakePdf.prototype.output = function () { return 'data:application/pdf;base64,JVBERi0xLjQK'; };
+  window.jspdf = { jsPDF: FakePdf };
+
+  window.__lpHarness = function () {
+    return { canvasCalls: canvasCalls, addPageCount: addPageCount, images: images.slice() };
+  };
+})();
+</script>
+<script src="./fixture-materials.js"></script>
+<script src="../../../../site/app12/app.js"></script>
+</head>
+<body class="lp-app">
+<main class="harness">
+  <h1>app12 PDFハーネス（fixture 3ページ）</h1>
+  <p>fixture教材の3ページを、順序どおり1つのPDFにまとめられるかを確認します。本番配信はされません。</p>
+  <pre class="harness__log" id="harness-log">実行中…</pre>
+</main>
+
+<div data-lp-app></div>
+
+<script>
+(function () {
+  'use strict';
+  var logEl = document.getElementById('harness-log');
+  var lines = [];
+  function log(text, ok) {
+    lines.push((ok === true ? '[OK] ' : ok === false ? '[NG] ' : '     ') + text);
+    logEl.textContent = lines.join('\n');
+  }
+  function fail(text) {
+    log(text, false);
+    window.__lpHarnessResult = { ok: false, lines: lines };
+  }
+
+  function verify() {
+    var api = window.GakusyuPrint;
+    if (!api) { fail('app.js が読み込まれていません'); return; }
+
+    var sheets = Array.prototype.slice.call(document.querySelectorAll('.lp-sheet'));
+    log('描画された紙面: ' + sheets.length + ' 枚（期待 3）', sheets.length === 3);
+    if (sheets.length !== 3) { window.__lpHarnessResult = { ok: false, lines: lines }; return; }
+
+    api.makePdf(sheets, function (err, pdf) {
+      if (err) { fail('makePdf エラー: ' + err.message); return; }
+      var h = window.__lpHarness();
+      log('html2canvas 呼び出し: ' + h.canvasCalls + ' 回（期待 3）', h.canvasCalls === 3);
+      log('addPage: ' + h.addPageCount + ' 回（期待 2 = 2ページ目以降）', h.addPageCount === 2);
+      log('addImage: ' + h.images.length + ' 枚（期待 3）', h.images.length === 3);
+      var order = h.images.map(function (img) { return String(img.data).replace(/^.*TESTPAGE/, ''); });
+      log('画像の順序: ' + order.join(' → ') + '（期待 1 → 2 → 3）', order.join(',') === '1,2,3');
+      log('PDF出力: ' + (pdf ? 'あり' : 'なし'), !!pdf);
+      var ok = sheets.length === 3 && h.canvasCalls === 3 && h.addPageCount === 2
+        && h.images.length === 3 && order.join(',') === '1,2,3' && !!pdf;
+      log(ok ? '複数ページPDF: 合格' : '複数ページPDF: 不合格', ok);
+      window.__lpHarnessResult = { ok: ok, lines: lines, images: h.images.length, addPage: h.addPageCount, order: order };
+    });
+  }
+
+  // app.js は head で読み込まれ、DOMContentLoaded で boot する。
+  // このスクリプトは body 末尾（DOMContentLoaded より前）なので、
+  // 先に登録済みの boot が走ったあとに検証する。
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', verify);
+  } else {
+    verify();
+  }
+})();
+</script>
+</body>
+</html>

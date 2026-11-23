@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>学習プリント</title>
+<meta name="description" content="授業で配る学習プリントを画面で確認し、そのまま印刷できるツールです。教材ごとにタブで切り替え、A4縦1ページずつ印刷できます。">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script src="../themes/theme.js"></script>
+<link rel="stylesheet" href="../themes/pop.css">
+<link rel="stylesheet" href="../themes/forest.css">
+<link rel="stylesheet" href="./app.css">
+<script src="../shared/transport.js"></script>
+<script src="./materials.js"></script>
+<script src="./app.js"></script>
+</head>
+<body class="lp-app">
+<a class="lp-skip" href="#lp-main">本文へ</a>
+
+<header class="lp-header no-print">
+  <div class="lp-header__in">
+    <div class="lp-brand">
+      <span class="lp-brandmark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 3h9l4 4v14H6z"/>
+          <path d="M15 3v4h4"/>
+          <path d="M9 12h7M9 15.5h7M9 19h4"/>
+        </svg>
+      </span>
+      <div>
+        <h1 class="lp-title">学習プリント</h1>
+        <p class="lp-sub">教材を選んで画面で確認し、そのまま印刷できます。</p>
+      </div>
+    </div>
+    <nav class="lp-header__links" aria-label="サイト内リンク">
+      <a href="../">ポータル</a>
+      <a href="../credits.html">クレジット</a>
+    </nav>
+  </div>
+</header>
+
+<main class="lp-main" id="lp-main">
+  <div data-lp-app></div>
+  <noscript>
+    <p class="lp-noscript">このページはJavaScriptを有効にすると表示されます。</p>
+  </noscript>
+</main>
+</body>
+</html>
