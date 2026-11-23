@@ -177,10 +177,6 @@
 .dialog-end { flex-wrap: wrap; margin-top: 13px; }
 .manual h3 { margin-top: 12px; }
 .manual p { margin-top: 6px; }
-[data-theme="pop"] .solar-app { --accent: #ffd451; --accent-ink: #191528; --chip: #221936ed; --border: #cbb5f37b; }
-[data-theme="pop"] .solar-app .chip, [data-theme="pop"] .solar-app .primary, [data-theme="pop"] .solar-app .ghost { border-radius: 3px; }
-[data-theme="forest"] .solar-app { --accent: #c4efb0; --accent-ink: #13291e; --panel: #102824ef; --chip: #152a26ed; --border: #9dccb359; }
-[data-theme="forest"] .solar-app dialog { background: #122523; }
 @media (max-width: 760px) {
   .topbar { top: max(11px, env(safe-area-inset-top)); }
   .top-actions .chip { font-size: 12px; padding-inline: 9px; }
