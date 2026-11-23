@@ -303,6 +303,8 @@
     var groups = (table && table.groups) || [];
     var body = groups.map(function (group) {
       return '<tbody>'
+        // 型グループ見出しの直前に、罫線も背景も持たない小さな余白行を置く
+        + '<tr class="lp-iv-gap" aria-hidden="true"><td colspan="5"></td></tr>'
         + '<tr class="lp-iv-grp"><th colspan="5" scope="colgroup">' + esc(group.title) + '</th></tr>'
         + (group.rows || []).map(ivRowHtml).join('')
         + '</tbody>';

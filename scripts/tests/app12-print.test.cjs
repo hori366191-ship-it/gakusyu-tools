@@ -454,6 +454,15 @@ test('[iv-render] 不規則動詞の紙面はA4横・3表・landscapeクラス�
   const headers = html.match(/<thead><tr>(?:(?!<\/tr>).)*原形(?:(?!<\/tr>).)*過去分詞(?:(?!<\/tr>).)*意味(?:(?!<\/tr>).)*<\/tr><\/thead>/g) || [];
   assert.equal(headers.length, 6, '各表に # / 原形 / 過去形 / 過去分詞 / 意味 のヘッダ');
   assert.equal(count(html, '<tr class="lp-iv-grp">'), 14, 'グループ見出し行');
+  // 型グループ見出しの直前に、罫線・背景を持たない余白行（gap）を1行ずつ置く
+  const GAP_ROW = '<tr class="lp-iv-gap" aria-hidden="true"><td colspan="5"></td></tr>';
+  assert.equal(count(html, 'class="lp-iv-gap"'), 14, 'グループ数と同数の余白行');
+  assert.equal(count(html, GAP_ROW), 14, '余白行は colspan=5・装飾なし・読み上げ対象外');
+  assert.equal(count(html, GAP_ROW + '<tr class="lp-iv-grp">'), 14, '余白行は各グループ見出しの直前');
+  assert.equal(count(html, '<tbody>' + GAP_ROW), 14, '各tbodyの先頭に余白行');
+  // 余白行はデータ行の数に含めない（17行×6表のまま）
+  const dataRows = html.match(/<tr>(?:(?!<\/tr>).)*?class="lp-iv-no"/g) || [];
+  assert.equal(dataRows.length, 102, 'データ行は102行のまま');
   assert.ok(html.includes('<th colspan="5" scope="colgroup">基本 ／ A-A-A'), '見出しはcolspan=5');
   assert.ok(html.includes('<span class="lp-iv-word">be (am/is/are)</span>'));
   assert.ok(html.includes('<span class="lp-iv-pron">ビー</span>'));
@@ -501,6 +510,48 @@ test('[iv-css] 横向き紙面・表・発音のスタイル（白地黒イン�
   assert.ok(/\.lp-iv tr\.lp-iv-grp th \{[^}]*background:\s*#e6e6e6/.test(css), 'グループ見出しの帯');
   assert.ok(/\.lp-sheet \.lp-iv th,[\s\S]{0,200}color:\s*#111\s*!important/.test(css), '紙面は黒インク固定');
   assert.ok(/\.lp-iv-legend \{[\s\S]{0,120}display:\s*flex/.test(css), '凡例');
+});
+
+test('[iv-render] 余白行を入れても1ページ3表・各17行・2ページのまま（レイアウト維持）', () => {
+  const html = app.materialHtml(IV);
+  const pages = html.split('<article ');
+  assert.equal(pages.length - 1, 2, '2ページ');
+  pages.slice(1).forEach((page, i) => {
+    const tables = page.split('<table class="lp-iv">').slice(1);
+    assert.equal(tables.length, 3, (i + 1) + 'ページ目は3表');
+    tables.forEach((table, j) => {
+      const dataRows = (table.match(/<td class="lp-iv-no">/g) || []).length;
+      const gapRows = (table.match(/<tr class="lp-iv-gap"/g) || []).length;
+      const groupRows = (table.match(/<tr class="lp-iv-grp"/g) || []).length;
+      assert.equal(dataRows, 17, (i + 1) + 'ページ目 ' + (j + 1) + '表目のデータ行');
+      assert.equal(gapRows, groupRows, '余白行はグループ数と同数');
+      assert.ok(gapRows >= 1 && gapRows <= 4, '余白行は1〜4行に収まる: ' + gapRows);
+      // 余白行は必ず見出しの直前（データ行の直前には置かない）
+      assert.equal((table.match(/<tr class="lp-iv-gap" aria-hidden="true"><td colspan="5"><\/td><\/tr><tr class="lp-iv-grp"/g) || []).length, groupRows);
+    });
+  });
+});
+
+test('[iv-css] 余白行（gap）は罫線・背景・ゼブラ・左アクセントを持たず、高さだけ取る', () => {
+  const css = read('site/app12/app.css');
+  const gapRule = css.match(/\.lp-iv tr\.lp-iv-gap > td \{([\s\S]*?)\n\}/);
+  assert.ok(gapRule, '.lp-iv tr.lp-iv-gap のセル定義');
+  const body = gapRule[1];
+  assert.equal(/border:\s*0(\.\d+)?(mm|px)?\s*!important/.test(body), true, '罫線を消す');
+  assert.equal(/background:\s*transparent\s*!important/.test(body), true, '背景を持たない');
+  assert.ok(/padding:\s*0\s*!important/.test(body), '内側の余白を0');
+  assert.ok(/line-height:\s*0/.test(body), '行の高さを字面に左右させない');
+  const h = Number((body.match(/height:\s*([\d.]+)mm/) || [])[1]);
+  assert.ok(h >= 1.4 && h <= 1.8, '高さは1.4〜1.8mm: ' + h);
+
+  // ゼブラは余白行を除いてデータ行にだけ付ける
+  const zebra = css.match(/\.lp-sheet \.lp-iv tbody tr:not\(\.lp-iv-grp\)[^\n]*/g) || [];
+  assert.ok(zebra.length >= 1);
+  zebra.forEach((sel) => assert.ok(sel.includes(':not(.lp-iv-gap)'), 'ゼブラから余白行を除外: ' + sel));
+  // 左アクセント（グループ見出しのborder-left）は見出しだけ
+  const accent = css.match(/border-left:\s*1mm solid #111/g) || [];
+  assert.equal(accent.length, 1, '左アクセントは1か所だけ');
+  assert.ok(/\.lp-iv tr\.lp-iv-grp th \{[^}]*border-left/.test(css), '付くのはグループ見出しだけ');
 });
 
 test('[iv-page] 印刷の@pageは教材の向きで切り替える（縦/横）', () => {

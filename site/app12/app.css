@@ -494,11 +494,23 @@ html[data-theme="forest"] .lp-header .lp-title {
   color: #111 !important;
   background: #ffffff;
 }
+/* 型グループ見出しの直前の余白行。罫線・背景・ゼブラ・左アクセントを一切付けない */
+.lp-sheet .lp-iv tr.lp-iv-gap > td,
+.lp-iv tr.lp-iv-gap > td {
+  border: 0 !important;
+  padding: 0 !important;
+  height: 1.6mm;
+  line-height: 0;
+  font-size: 0;
+  background: transparent !important;
+}
+
 /* 共通テーマの `th` 背景・`td` 色より紙面（白地黒インク）を優先する */
 .lp-sheet .lp-iv thead th,
 .lp-sheet .lp-iv tr.lp-iv-grp th { background: #e6e6e6 !important; }
-.lp-sheet .lp-iv tbody tr:not(.lp-iv-grp):nth-of-type(even) > th,
-.lp-sheet .lp-iv tbody tr:not(.lp-iv-grp):nth-of-type(even) > td { background: #f7f7f7 !important; }
+/* ゼブラはデータ行だけに付ける（余白行 lp-iv-gap を数えないよう、見出し直後の奇数番目を拾う） */
+.lp-sheet .lp-iv tbody tr:not(.lp-iv-grp):not(.lp-iv-gap):nth-of-type(odd) > th,
+.lp-sheet .lp-iv tbody tr:not(.lp-iv-grp):not(.lp-iv-gap):nth-of-type(odd) > td { background: #f7f7f7 !important; }
 
 .lp-sheet .lp-iv td.lp-iv-no {
   width: 5%;
