@@ -165,7 +165,26 @@ function verifyIdTokenStrict_(idToken) {
   try {
     res = UrlFetchApp.fetch(TOKENINFO_ENDPOINT + encodeURIComponent(token), { muteHttpExceptions: true, followRedirects: false });
   } catch (e1) {
-    return { ok: false, error: 'tokeninfo unreachable' };
+    // 例外の分類のみを返す（生メッセージ・URL・トークンは出力しない）
+    var emsg = '';
+    try { emsg = String((e1 && e1.message) || e1 || '').toLowerCase(); } catch (e5) { emsg = ''; }
+    var ekind = 'tokeninfo error';
+    if (/authorization is required|authorization required|再承認|承認が必要/.test(emsg)) ekind = 'tokeninfo consent required';
+    else if (/you do not have permission|not authorized to call|permission denied|access denied|ポリシー|管理者/.test(emsg)) ekind = 'tokeninfo permission denied';
+    else if (/too many times|quota|rate limit/.test(emsg)) ekind = 'tokeninfo quota';
+    else if (/dns|resolve|timeout|timed out|ssl|connection/.test(emsg)) ekind = 'tokeninfo network';
+    else if (/permission|not authorized|権限/.test(emsg)) ekind = 'tokeninfo permission';
+    try { console.error('tokeninfo fetch failed: ' + ekind); } catch (e6) {}
+    // 例外メッセージの安全な短縮版（URL と長い連続は伏せ、空白圧縮・110文字上限）
+    var clean = '';
+    try {
+      clean = String((e1 && e1.message) || e1 || '');
+      clean = clean.replace(/[A-Za-z][A-Za-z0-9+.-]*:\/\/\S+/g, '<url>');
+      clean = clean.replace(/[A-Za-z0-9_\-+/=.]{32,}/g, '<long>');
+      clean = clean.replace(/\s+/g, ' ');
+      if (clean.length > 110) clean = clean.slice(0, 110);
+    } catch (e7) { clean = ''; }
+    return { ok: false, error: 'tokeninfo fetch: ' + clean };
   }
   var code = 0;
   try { code = res.getResponseCode(); } catch (e2) { code = 0; }
@@ -778,6 +797,8 @@ function handleProbe_(p) {
       // diag=1 のときだけ失敗理由を返す（auth.error は固定文言のみ・トークン/メールは含めない）
       if (diag) result.reason = String(auth.error || '').slice(0, 120);
     } else {
+      // 認証成功（id_token 付きの実 probe）を公開 status の last probe に残す
+      if (String(p.id_token || '')) noteProbe_('ok');
       result = {
         genkoProbe: true,
         ok: true,
@@ -786,6 +807,21 @@ function handleProbe_(p) {
         allowed: isAllowed_(auth.email)
       };
     }
+  }
+  if (diag) {
+    // 実行ユーザー診断（diag=1 のときだけ・メールは伏せる）。取得失敗でも probe は壊さない
+    try {
+      var eff = String(Session.getEffectiveUser().getEmail() || '');
+      result.exec_effective = eff ? maskEmail_(eff) : '';
+    } catch (e8) { result.exec_effective = ''; }
+    try {
+      var act = String(Session.getActiveUser().getEmail() || '');
+      result.exec_active = act ? maskEmail_(act) : '';
+    } catch (e9) { result.exec_active = ''; }
+    // 実行ユーザーに script.external_request の承認を促す同意 URL（未承認時のみ取得・無ければ null）
+    try {
+      result.auth_url = ScriptApp.getAuthorizationInfo(ScriptApp.AuthMode.FULL).getAuthorizationUrl() || null;
+    } catch (e10) { result.auth_url = null; }
   }
   if (rid) result.rid = rid;
   var cb = String(p.callback || '');
