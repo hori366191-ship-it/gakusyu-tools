@@ -557,6 +557,12 @@
       overflow: auto;
     }
 
+    /* 旧テンプレートの空行3本分（line-height 0.7 で 2.1em）の行間だけを復元する */
+    #historyList > div + div,
+    #deletedList > div + div {
+      margin-block-start: 2.1em;
+    }
+
     .bl-pane {
       flex: 1 1 50%;
       min-width: 0;
