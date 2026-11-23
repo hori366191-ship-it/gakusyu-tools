@@ -3,6 +3,7 @@ import { createOrbitChart } from './orbit-chart.mjs';
 import { detailsFor } from './observations.mjs';
 import { moonReadings, moonsOf } from './moons.mjs';
 import { moonMemos } from './moon-observations.mjs';
+import { moonMapNote } from './moon-maps.mjs';
 
 const $ = id => document.getElementById(id);
 const learn = $('learn-dialog'), help = $('help-dialog');
@@ -15,7 +16,7 @@ let flight;
 
 const visualSources = {
   mercury: '観測地図：MESSENGERのモノクロ観測。表示色は調整しています。',
-  venus: '「あかつき」が紫外線で捉えた雲頂を着色し、観測できなかった部分は画像生成AIで補いました。補完部分は実際の観測ではありません。',
+  venus: '「あかつき」が紫外線で捉えた雲頂を着色しました。その観測画像を参照に、観測できなかった部分だけを画像生成AIで補っています。補完部分は実際の観測ではありません。',
   earth: '観測地図：NASAの2004年7月の合成画像。雲と大気はシミュレーションです。',
   mars: '観測地図：Viking探査機の画像をつないで着色した全球地図です。',
   jupiter: '観測地図：Cassiniが2000年に撮影した雲頂。見た目の色に近づけた合成画像です。',
@@ -78,12 +79,17 @@ function openMemo(body, inRange) {
   $('learn-title').textContent = body.name;
   $('learn-intro').textContent = memo.intro;
   const visual = $('learn-visual');
-  visual.textContent = parent ? '描画：衛星の特徴をもとにコードで描いた近似表現です。観測地図ではありません。'
+  const moonSource = parent && moonMapNote(body.id);
+  visual.textContent = parent ? moonSource.note
     : visualSources[body.id] || '描画：天体の見え方をコードで再現したモデルです。';
-  if (visualSources[body.id]) {
+  if (moonSource?.href || visualSources[body.id]) {
     const sourceLink = document.createElement('a');
-    sourceLink.href = `../credits.html#solar-${body.id}`;
-    sourceLink.textContent = '観測画像の出典';
+    sourceLink.href = moonSource?.href || `../credits.html#solar-${body.id}`;
+    sourceLink.textContent = moonSource?.label || '観測画像の出典';
+    if (moonSource) {
+      sourceLink.target = '_blank';
+      sourceLink.rel = 'noopener';
+    }
     visual.append(sourceLink);
   }
   const values = (parent ? moonReadings(body, parent.name) : readingsFor(body)).map(([term, value]) => {
