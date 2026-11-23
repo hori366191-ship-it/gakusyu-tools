@@ -86,6 +86,7 @@
         <li><b>KaTeX</b> <span class="tag">MIT</span> <a href="https://github.com/KaTeX/KaTeX" target="_blank" rel="noopener">github.com/KaTeX/KaTeX</a> — 正規分布 / 立体図形 / 原子・周期表 / 微分積分（0.18.4 / cdnjs）</li>
         <li><b>html2canvas</b> <span class="tag">MIT</span> <a href="https://html2canvas.hertzen.com/" target="_blank" rel="noopener">html2canvas.hertzen.com</a> — 原稿用紙メーカー・学習プリント（1.4.1 / jsDelivr）</li>
         <li><b>jsPDF</b> by parallax <span class="tag">MIT</span> <a href="https://github.com/parallax/jsPDF" target="_blank" rel="noopener">github.com/parallax/jsPDF</a> — 原稿用紙メーカー・学習プリント（2.5.2 / jsDelivr）</li>
+        <li><b>Three.js</b> <span class="tag">MIT</span> <a href="https://github.com/mrdoob/three.js" target="_blank" rel="noopener">github.com/mrdoob/three.js</a> — 星巡り（0.180.0 / jsDelivr）</li>
       </ul>
     </section>
 
@@ -96,6 +97,30 @@
         <li><b>Wiktionary</b> <span class="tag">CC BY-SA 3.0</span> <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.ja" target="_blank" rel="noopener">creativecommons.org/licenses/by-sa/3.0</a> — 英語長文 多読リーダーの辞書データ。Wiktionary 由来の部分は CC BY-SA 3.0 の継承物として同ライセンス下で提供されます</li>
         <li><b>WordNet</b> (Princeton University) <a href="https://wordnet.princeton.edu/license-and-commercial-use" target="_blank" rel="noopener">wordnet.princeton.edu/license-and-commercial-use</a> — 英語長文 多読リーダーの辞書データ</li>
       </ul>
+    </section>
+
+    <section class="section" id="solar-references">
+      <h2>Solar System References <span>NASA / JPL</span></h2>
+      <ul class="list">
+        <li><b>JPL Planetary Physical Parameters</b> <a href="https://ssd.jpl.nasa.gov/planets/phys_par.html" target="_blank" rel="noopener">ssd.jpl.nasa.gov</a> — 惑星の半径・周期など</li>
+        <li><b>JPL Approximate Positions of the Planets</b> <a href="https://ssd.jpl.nasa.gov/planets/approx_pos.html" target="_blank" rel="noopener">ssd.jpl.nasa.gov</a> — 惑星軌道の形と向きの近似値</li>
+        <li><b>NASA Solar System Exploration</b> <a href="https://science.nasa.gov/solar-system/" target="_blank" rel="noopener">science.nasa.gov</a> — 太陽・惑星の観察メモの参考</li>
+      </ul>
+      <p class="note">星巡りの惑星の形、雲の描画（地球）、大気、環、恒星、星雲はコードで生成しています。以下の観測画像は、測地位置や観測時期を正確に再現する地図製品ではなく、回転する天体の見た目を表すために加工・縮小しています。既存の3Dモデルは使っていません。NASA・JPL等による承認・推奨を示すものではありません。</p>
+      <h2>Observation Textures <span>USGS / NASA / ISAS・JAXA / STScI</span></h2>
+      <ul class="list">
+        <li id="solar-mercury"><b>水星 · MESSENGER MDIS Global Mosaic 250m</b> <span class="tag">Public domain</span> <a href="https://astrogeology.usgs.gov/search/map/mercury_messenger_mdis_global_mosaic_250m">USGS Astropedia</a> — Credit: MESSENGER Team / USGS Astrogeology Science Center。公式の全球プレビューを縮小・WebP化し、表示時にモノクロ観測へ弱い色味を付加。</li>
+        <li id="solar-venus"><b>金星 · あかつき UVI（365 nm、2016年5月17日）</b> <a class="tag" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0（観測データ）</a> <a href="https://doi.org/10.17597/isas.darts/vco-00300">DARTS / ISAS・JAXA</a> — Credit: ISAS/JAXA・あかつきUVIチーム（Watanabe et al., UVI Bundle v5.0）。<a href="https://data.darts.isas.jaxa.jp/pub/pds4/data/vco/vco_uvi/data_map/l3b/r0015/uvi_20160517_081718_365_l3b_v21.lblx">L3b元データのラベル</a>。撮影時の照明の影響を抑え、着色・経度の移動・WebP化。観測できなかった部分は画像生成AI（OpenAI）による補完で、実際の雲を示すものではありません。</li>
+        <li id="solar-earth"><b>地球 · Blue Marble: Next Generation, July 2004</b> <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map#july">NASA Earth Observatory</a> — Credit: NASA Earth Observatory（Reto Stöckli / NASA Goddard Space Flight Center）。全球画像を縮小・WebP化し、海陸の明るさと色を描画時に調整。</li>
+        <li id="solar-mars"><b>火星 · Mars Viking Colorized Global Mosaic（MDIM 2.1）</b> <span class="tag">Public domain</span> <a href="https://astrogeology.usgs.gov/search/map/mars_viking_colorized_global_mosaic_232m">USGS Astropedia</a> — Credit: USGS Astrogeology Science Center / NASA Ames。探査機画像をもとに公式に着色した1 km/px派生画像を縮小・WebP化。</li>
+        <li id="solar-jupiter"><b>木星 · Cassini’s Best Maps of Jupiter, PIA07782</b> <a href="https://science.nasa.gov/photojournal/cassinis-best-maps-of-jupiter-cylindrical-map/">NASA Photojournal</a> — Credit: NASA/JPL/Space Science Institute。2000年12月の2波長観測から作った疑似自然色地図の経度の起点を見せ方に合わせてずらし、縮小・WebP化。教育用途で利用。</li>
+        <li id="solar-saturn"><b>土星 · Hubble OPAL 2024a</b> <a class="tag" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> <a href="https://archive.stsci.edu/hlsp/opal/opal-saturn-cycle-31">MAST Cycle 31</a> — 三つの観測波長（395・502・631 nm）から合成した雲頂地図。色・緯度を調整してWebP化し、環による遮蔽と極付近の欠測を生成描画で補完。</li>
+        <li id="solar-uranus"><b>天王星 · Hubble OPAL 2014a</b> <a class="tag" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> <a href="https://archive.stsci.edu/hlsp/opal/opal-uranus-cycle-22">MAST Cycle 22</a> — 三つの観測波長（467・547・658 nm）から合成した雲頂地図。色・緯度を調整してWebP化し、南側などの欠測・低信頼域を生成描画で補完。</li>
+        <li id="solar-neptune"><b>海王星 · Hubble OPAL 2016a</b> <a class="tag" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> <a href="https://archive.stsci.edu/hlsp/opal/opal-neptune-cycle-23">MAST Cycle 23</a> — 三つの観測波長（467・547・657 nm）から合成した雲頂地図。色・緯度を調整してWebP化し、北側などの欠測・低信頼域を生成描画で補完。</li>
+      </ul>
+      <p class="note" lang="en">This work used data acquired from the NASA/ESA HST Space Telescope, associated with OPAL program (PI: Simon, GO13937), and archived by the Space Telescope Science Institute, which is operated by the Association of Universities for Research in Astronomy, Inc., under NASA contract NAS 5-26555. All maps are available at <a href="https://doi.org/10.17909/T9G593">https://doi.org/10.17909/T9G593</a>.</p>
+      <p class="note">OPAL参考論文：<a href="https://ui.adsabs.harvard.edu/abs/2015ApJ...812...55S/abstract">Simon et al. (2015)</a> ／ <a href="https://ui.adsabs.harvard.edu/abs/2020ApJS..247...58W/abstract">Wong et al. (2020)</a>。</p>
+      <p class="note">利用条件：<a href="https://www.nasa.gov/nasa-brand-center/images-and-media/">NASA Images and Media Usage Guidelines</a> ／ <a href="https://www.jpl.nasa.gov/jpl-image-use-policy/">JPL Image Use Policy</a> ／ USGSの素材別条件（上記各ページ）。これらの素材にアプリ独自のライセンスを付与するものではありません。</p>
     </section>
 
     <section class="section">

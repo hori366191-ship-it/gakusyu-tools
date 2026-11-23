@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="太陽系を実縮尺で見渡し、太陽と8つの惑星の姿や動きを観察する3D科学学習ツール。">
+  <meta name="theme-color" content="#080b18">
+  <title>星巡り — 幻想太陽系</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <script src="../themes/theme.js"></script>
+  <link rel="stylesheet" href="../themes/pop.css">
+  <link rel="stylesheet" href="../themes/forest.css">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}
+  </script>
+</head>
+<body class="solar-app">
+  <main id="mission" class="mission" data-mode="overview">
+    <div id="flight-view" class="flight-view" aria-hidden="true"></div>
+    <div class="screen-shade" aria-hidden="true"></div>
+    <svg id="orbit-chart" role="img" aria-label="太陽と8惑星を地球の公転面の真上から表示。点は天体の位置を示す目印です。"></svg>
+    <header class="topbar">
+      <a class="home-link" href="../" aria-label="学習ツール ポータルへ">
+        <span class="emblem" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="7"/><ellipse cx="16" cy="16" rx="14" ry="5" transform="rotate(-33 16 16)"/><circle cx="25" cy="8" r="2" class="emblem-dot"/></svg></span>
+        <span><b>星巡り</b><small>SOLAR EXPLORER</small></span>
+      </a>
+      <div class="top-actions">
+        <button id="help-open" class="chip icon-chip" type="button" aria-label="観察方法とモデルの説明">?</button>
+      </div>
+    </header>
+
+    <section id="overview" class="overview" aria-labelledby="hero-title">
+      <div class="hero">
+        <p class="eyebrow"><span></span> 実縮尺の太陽系</p>
+        <h1 id="hero-title" tabindex="-1">太陽系を<br>真上から</h1>
+        <p class="hero-copy">軌道の広がりを見渡し、<br>気になる天体に近づいてみよう。</p>
+        <button id="inner-zoom" class="chip" type="button" aria-pressed="false">内惑星を拡大</button>
+      </div>
+      <div class="chart-shell">
+        <p class="chart-caption"><span aria-hidden="true">⊕</span> 地球の公転面の真上 <b>·</b> 軌道は実際の距離比、点は実寸ではありません</p>
+        <div id="chart-frame" class="chart-frame" aria-hidden="true"></div>
+      </div>
+      <nav id="destinations" class="destinations" aria-labelledby="destination-title">
+        <div class="destination-head"><h2 id="destination-title">観察する天体を選ぶ</h2><span id="visited-count" aria-label="観察した天体の数">00 / 09</span></div>
+        <div id="destination-list" class="destination-list"></div>
+        <p id="load-status" class="loading" role="status">接近ビューを準備中…</p>
+        <noscript><p class="loading">表示には JavaScript が必要です。</p></noscript>
+      </nav>
+    </section>
+
+    <p class="sky-note"><span></span> 星雲は演出上の遠景</p>
+    <section id="radar" class="radar" aria-labelledby="radar-title" hidden>
+      <div><p id="radar-title" class="eyebrow">接近観察</p><h2 id="radar-name"></h2><p id="radar-task"></p></div>
+      <button id="inspect" class="primary" type="button">観察メモ <span aria-hidden="true">↗</span></button>
+    </section>
+    <button id="overview-back" class="chip overview-back" type="button" hidden><span aria-hidden="true">◎</span> 真上から見る</button>
+    <p id="look-hint" class="look-hint">ドラッグで見回す</p>
+    <p id="announce" class="sr-only" role="status"></p>
+
+    <footer class="deck">
+      <div class="deck-readout">
+        <span class="status-light"></span><span id="flight-status">太陽系・真上</span>
+        <span class="separator" aria-hidden="true"></span>
+        <span id="quality-status">描画準備中</span>
+      </div>
+      <div class="deck-controls">
+        <div class="time-controls">
+          <button id="pause" class="chip icon-chip" type="button" aria-label="時間を一時停止" aria-pressed="false" disabled><span aria-hidden="true">Ⅱ</span></button>
+          <label class="sr-only" for="time-rate">時間の速さ</label>
+          <select id="time-rate" class="chip" disabled>
+            <option value="0.05" selected>0.05 日/秒</option>
+            <option value="1">1 日/秒</option>
+            <option value="20">20 日/秒</option>
+            <option value="100">100 日/秒</option>
+          </select>
+        </div>
+      </div>
+      <p id="elapsed-days" class="deck-hint">経過 0 日</p>
+    </footer>
+  </main>
+
+  <dialog id="learn-dialog" aria-labelledby="learn-title">
+    <div class="dialog-head">
+      <div><p class="eyebrow" id="learn-kind"></p><h2 id="learn-title"></h2></div>
+      <form method="dialog"><button class="chip icon-chip" aria-label="観察メモを閉じる">×</button></form>
+    </div>
+    <div id="learn-scroll" class="learn-scroll" tabindex="0" role="region" aria-label="観察メモの本文">
+      <p id="learn-intro" class="dialog-copy"></p>
+      <p id="learn-visual" class="visual-note"></p>
+      <dl id="learn-values" class="readings"></dl>
+      <div class="observation">
+        <h3>観察してみよう</h3>
+        <p id="learn-task"></p>
+        <details><summary>なぜそう見える？</summary><p id="learn-why"></p></details>
+      </div>
+      <section id="learn-details" class="learn-details"></section>
+      <div class="dialog-end">
+        <button id="edge-on" class="chip" type="button" hidden>環を横から見る →</button>
+        <button id="change-target" class="chip" type="button">別の天体を選ぶ</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head">
+      <div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">観察方法とモデルの説明</h2></div>
+      <form method="dialog"><button class="chip icon-chip" aria-label="説明を閉じる">×</button></form>
+    </div>
+    <div class="manual">
+      <h3>真上から見る・近くで見る</h3>
+      <p>最初は地球の公転面に垂直な真上から見ています。内惑星は太陽の近くに集まるので、「内惑星を拡大」で軌道を見分けられます。位置を示す点は天体の実寸ではありません。</p>
+      <p>カードを選ぶと、真上の位置から同じ3D空間を通って天体に近づきます。到着後は太陽に照らされた面が見える位置から公転に追随します。ステージをドラッグするか矢印キーで、その天体を中心に回り込み、裏側や極の向きも見られます。「真上から見る」を押すと徐々に離れ、全軌道を見渡せる位置へ戻ります。時刻はリセットされません。</p>
+      <h3>科学モデルと演出</h3>
+      <p>軌道は太陽を焦点とするケプラーの楕円軌道です。離心率・軌道傾斜・公転周期を反映していますが、初期配置は演出用で、惑星同士の重力や正確な暦は再現しません。自転は恒星に対する周期の近似、惑星の傾きは軌道面に対する概略です。20日/秒・100日/秒では自転も同じ倍率で速くなり、目で追えない場合があります。</p>
+      <p>軌道の距離と天体の平均半径に同じ縮尺を使っています。1 AU は約1億4,960万 km です。接近時は天体を拡大せず、カメラとの距離を変えています。8惑星には観測画像をもとにした地図を使い、金星の未観測部分は画像生成AIで補完しています。地球の雲・環・大気・星雲などは観察用の描画です。</p>
+      <p><a href="../credits.html#solar-references">天体データの出典・クレジット</a></p>
+    </div>
+  </dialog>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
