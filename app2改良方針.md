@@ -91,25 +91,25 @@
 - 公開後 read-only 検証（2026-11-03）: 公開版で **90 assert pass**（3テーマ × 2サイズ）。HTML・`keyword-pool.json`・pop/forest CSS・transport の**全5 asset が HTTP 200** で git HEAD の blob と byte/SHA 一致。overflow 0・押下後のキーワード入力 focus なし・想定外エラー 0・network failure 0。公開 UI テストは認証・辞書・履歴のみ stub で、picker / pool / CSS は実物。backend AI 呼出・mutation は 0（UI からの生成 AI 追加もなし）。証拠はローカル Temp `app2-random-keywords-published-20261103/REPORT`（リポジトリ外）。
 - 未確認・懸念: 実機スマートフォンのキーボード・タップ、実データでの見た目。語の意味の教材適切性はプールの手選定に依存する。
 
-## 7. AI移行（Ollama Cloud / Gemma4 31B）と対訳表示 — 2026-10-26・app2 `@50` で公開済・実 API smoke 確認済（`@49`）
+## 7. AI移行（旧: Ollama Cloud / Gemma4 31B、現行: OpenCode Zen / DeepSeek V4.1 Flash）と対訳表示 — 2026-10-26・app2 `@50` で公開済・実 API smoke 確認済（`@49`）
 
-> 状態: ローカル実装・Node 回帰・モック UI スモークに加え、2026-10-26 に GAS 既存デプロイ **app2 `@47`→`@48`** と Pages を公開（実装 commit `fb8380a82e679ecaa1d61aa745c435e46c585423`）、続けて言語境界修正を **`@49`** で公開（`fc65c08`）。`@48` 時点では実 API 未検証だったが、`@49` 公開後にユーザー承認の実 smoke を実施し、**生成・翻訳・保存再利用まで確認済み**（7.9）。課金額と Ollama 内部呼出回数は未取得、語数の厳密性と時制の揺れは残課題。その後 2026-10-26 に対訳 UI と翻訳バックエンド（記号保持）の改善を実装し、commit `878ae1d` として app2 `@50` と Pages で公開した（7.10）。実 AI による記号混在翻訳の追加課金検証と本番 Drive 書込みは未実施。
+> 状態: ローカル実装・Node 回帰・モック UI スモークに加え、2026-10-26 に GAS 既存デプロイ **app2 `@47`→`@48`** と Pages を公開（実装 commit `fb8380a82e679ecaa1d61aa745c435e46c585423`）、続けて言語境界修正を **`@49`** で公開（`fc65c08`）。`@48` 時点では実 API 未検証だったが、`@49` 公開後にユーザー承認の実 smoke を実施し、**生成・翻訳・保存再利用まで確認済み**（7.9）。課金額と Ollama 内部呼出回数は未取得、語数の厳密性と時制の揺れは残課題。その後 2026-10-26 に対訳 UI と翻訳バックエンド（記号保持）の改善を実装し、commit `878ae1d` として app2 `@50` と Pages で公開した（7.10）。実 AI による記号混在翻訳の追加課金検証と本番 Drive 書込みは未実施。**2026-11-23 に4経路を Zen（`deepseek-v4.1-flash`）へ切り替え、既存デプロイを version 55 へ更新済み**（既存ID/entryPoints不変、source canonical SHA `472e3096…`、141 pass、GASエディタ固定リクエスト HTTP 200 / protocol ok）。
 
 ### 7.1 生成・審査・翻訳の移行
 
-- 生成（`generatePassage_`）・審査（`checkPassage_`）・新規翻訳（`translateSentences_` / `checkTranslation_`）は Ollama Cloud 公式 API `POST https://ollama.com/api/chat` を使う。
-- モデルは `gemma4:31b`（API 名。CLI の `gemma4:cloud` とは別名）。`stream:false` / `think:false`（思考無効）。
-- 認証は Script Properties `OLLAMA_API_KEY` のみ。`ZEN_API_KEY` / `OPENCODE_API_KEY` へは**暗黙フォールバックしない**（未設定は `api_key_missing` で AI を呼ばない）。
-- Cloud は Structured Outputs 非対応のため `format` / JSON Schema は送らない。JSON はプロンプトで要求し、サーバーで厳格検証する。
-- 応答は `message.content` のみ。HTTP 失敗・非 JSON・空・`done:false`・`done_reason=length`・接続例外は保存しない（fail closed）。
+- 生成（`generatePassage_`）・審査（`checkPassage_`）・新規翻訳（`translateSentences_` / `checkTranslation_`）は Zen の OpenAI 互換 API `POST https://opencode.ai/inference/openai/v1/chat/completions` を使う（2026-11-23 移行）。
+- モデルは `deepseek-v4.1-flash`（生成・審査・翻訳で共通）。`stream:false` / `thinking:{type:'disabled'}`（推論本文は使わない）。
+- 認証は Script Properties `OPENCODE_ZEN_API_KEY` のみ。旧 `OLLAMA_API_KEY` / `ZEN_API_KEY` / `OPENCODE_API_KEY` へは**暗黙フォールバックしない**（未設定は `api_key_missing` で AI を呼ばない）。
+- `format` / JSON Schema / `response_format` は送らない（互換差を避ける）。JSON はプロンプトで要求し、サーバーで厳格検証する。
+- 応答は `choices[0].message.content` のみ。`finish_reason` は `stop` のみ成功とし、欠落・未知・`tool_calls`・`length`・`content_filter` は保存しない。HTTP 失敗は status のみを返し、外部応答・鍵・プロンプトは UI/ログへ出さない（fail closed）。
 - 既存の不変条件（共通トークン＋厳格 ID トークン検証＋`ALLOWED_EMAILS`、`request_id` 台帳、匿名 quota の API 前予約、moderation 明示 OK のみ保存、保存結果不明時 fail closed）は変更しない。
 
-### 7.2 `OLLAMA_API_KEY` の設定（値は書かない）
+### 7.2 `OPENCODE_ZEN_API_KEY` の設定（値は書かない）
 
-1. Ollama Cloud の API キーを発行する（ollama.com のアカウント設定 → API keys）。
-2. GAS `site-app2-backend` の「プロジェクトの設定 → スクリプト プロパティ」に `OLLAMA_API_KEY` を追加し、発行した値を貼り付ける。
-3. 旧 `ZEN_API_KEY` / `OPENCODE_API_KEY` は削除するか空にする（コードは読まない）。
-4. 確認: オーナー限定の GET（`action=debugIndexInfo`）で `ollama_key_set:true` のみを確認する。鍵の値は返さないが、応答には index 情報などの内部情報が含まれるため、内容は表示・共有しない。実 API を呼ぶ生成・翻訳は課金と本番 Drive 保存を伴うため、確認はモックテスト（`scripts/tests`）を優先する。
+1. OpenCode Console（opencode.ai）で有効な API キーを発行する（paid model `deepseek-v4.1-flash` を利用）。
+2. GAS `site-app2-backend` の「プロジェクトの設定 → スクリプト プロパティ」に `OPENCODE_ZEN_API_KEY` を追加し、発行した値を貼り付ける。
+3. 旧 `OLLAMA_API_KEY` / `ZEN_API_KEY` / `OPENCODE_API_KEY` は削除するか空にする（コードは読まない）。
+4. 確認: オーナー限定の GET（`action=debugIndexInfo`）で `zen_key_set:true` のみを確認する。鍵の値は返さないが、応答には index 情報などの内部情報が含まれるため、内容は表示・共有しない。実 API を呼ぶ生成・翻訳は課金と本番 Drive 保存を伴うため、確認はモックテスト（`scripts/tests`）を優先する。
 5. キーはコード・docs・ログ・チャットに書かない。
 
 ### 7.3 翻訳 API（`action=translateText`）
@@ -152,7 +152,7 @@
 
 ### 7.5 テスト（ローカル・モック＋公開後の read-only 検証）
 
-- `scripts/tests/security-backends.test.cjs`: AI モックを Ollama 形式（`message.content` / `done`）へ変更。Ollama の HTTP 失敗・非JSON・切断・打ち切り・空・think 400 の再試行、ZEN 非フォールバック、翻訳の取得/作成/再利用/同一ID再送/並行予約/不正出力/中国語疑い/常用漢字の正常系/moderation/保存不明（永続 unknown）/入力検証の実行順/削除連動を追加。2026-10-26 の変更（記号保持。app2 `@50` で公開済）では、記号だけスパンの AI 除外と原文 trim 保持、新形式の完全一致検証、旧 cache 互換、通常英文への記号のみ応答の拒否、合成後全訳の moderation（全記号時も審査1回・明示 OK のみ）、`TRANS_VERSION` 不変を追加。
+- `scripts/tests/security-backends.test.cjs`: AI モックを Ollama 形式（`message.content` / `done`）へ変更。Ollama の HTTP 失敗・非JSON・切断・打ち切り・空・think 400 の再試行、ZEN 非フォールバック、翻訳の取得/作成/再利用/同一ID再送/並行予約/不正出力/中国語疑い/常用漢字の正常系/moderation/保存不明（永続 unknown）/入力検証の実行順/削除連動を追加。2026-10-26 の変更（記号保持。app2 `@50` で公開済）では、記号だけスパンの AI 除外と原文 trim 保持、新形式の完全一致検証、旧 cache 互換、通常英文への記号のみ応答の拒否、合成後全訳の moderation（全記号時も審査1回・明示 OK のみ）、`TRANS_VERSION` 不変を追加。**2026-11-23 の Zen 移行では AI モックを OpenAI 互換形式（`choices[0].message.content` / `finish_reason`）へ更新し、`followRedirects:false`・HTTP status のみのエラー・非 `stop` の fail closed・debug `zen_key_set` を検証して 141 pass**。
 - `scripts/tests/transport.test.cjs`: `translateText` の送信契約（get は request_id 不要、create は必須、record_id のみ送信）と対訳 UI の静的検証を追加。2026-10-26 の変更（app2 `@50` で公開済）では、段落の改行数（LF/CRLF/空行/インデント/先頭末尾/文間スペース）、縦長/横長のリンク座標、辞書の遅延応答（モード/レコード切替/連打/close）、smooth の中断と reduced motion を追加。
 - 2026-10-27 の縦長リンクの変更（7.11。修正当時はローカル・未公開 → commit `08110ba` で Pages 公開済み）では、文末文字の実測（末尾の空白/CRLF/タブ/全角空白/絵文字・ZWJ・肌色・旗、`Intl.Segmenter` 不可時のフォールバック）と `Range` の最後の行の採用、接続点＝文末文字の右下角（+2px。gap が上なら右上角）と文字 bbox へ stroke が入らないこと、行間余白 y の決め方（次の行→行送り→前の行→clip 外なら bbox のすぐ外→不可なら非表示）、接続点が clip 外なら非表示、**空白なしで同じ行に続く後続文（`猫。犬。鳥。` の実 bbox）でも route が本文 bbox に入らない**こと、縦長の端点が pane 右端固定でないこと、横長 path の完全一致（`M 470 110 C 510 110, 510 210, 550 210`）を追加した。線分を 0.5px 刻みで標本化し、stroke 半径 1px を含めて本文 rect と交差しないことを検証する。
 - 実ブラウザ確認はモック（ローカル `http.server` + `window.test*` フック）で PC 1280x900 / スマホ 390x844 / 3テーマを確認。最終の実機・実 API 回帰は `test` 担当。
@@ -505,6 +505,8 @@
 ## 9. 生成モデル比較（2026-11-03 実行済・採点/unblind確定／Gemma維持）
 
 > 状態: **20件生成・保存・ブラインド採点・unblind確定。Gemma4:31b維持を決定。cleanup実行PASS（DS10削除成功、GM10 hash不変、保護既存59/59、最終DB69）。実装・比較・cleanup・**v54公開まで完了**。最終コードは source commit `5c8ee7a` / code `b6907392` / bundle `3e8f6bff`、独立 **221 pass / 0 fail / 0 skip**。本番 app2 は **v54**（最終deploy済）、**GitHub pushはpending**。結果は下記 §9.6・§12。**
+>
+> **2026-11-23 追記**: app2 は v55 で全4経路を Zen / `deepseek-v4.1-flash` へ移行済み。以下の比較条件・Gemma 固定は当時の記録で、現行実装のモデルではない。
 
 ### 9.1 比較条件
 
@@ -579,12 +581,14 @@
 ## 10. owner 専用 benchmark override（準備版 v53 → 最終 v54 で無効化）
 
 > 状態: 準備版 **v53** では owner override を公開済み。**最終コード（`b6907392`）では無効化フラグを追加し、v54 で公開済み**。**GitHub pushはpending**。一般利用者向けの機能ではない。
+>
+> **2026-11-23 追記**: v55 で `MODEL` / `AI_JUDGE_MODEL` / `AI_TRANS_MODEL` は `deepseek-v4.1-flash` に統一。以下の v54 時点のモデル分離記述は履歴。
 
 - **最終コードの無効化（v54 公開済）**: `BENCHMARK_MODEL_OVERRIDE_ENABLED=false` を追加。strict owner チェック後でも owner には `benchmark_disabled` を**台帳・quota・AI の前**に返す。一般・匿名は `not_allowed`。通常のGemma生成は `model` metadata を保存できる。比較用helperは廃止せず、大規模リファクタもしていない。
 - **検証**: coder unit **139 pass**。独立最終回帰 **221 pass / 0 fail / 0 skip**。code `b6907392f2df62e86eec64198f5a03fe5024266e5fed3613e2d16fdb492426bb`、tests `e91d9de368fd8988e89fced264a6f867a6d0e12f78a49b725f25e877caa7e244`、最終source commit `5c8ee7a`。
 
 - **目的**: モデル比較のため、owner だけが生成モデルを限定切替できるようにする。対象モデルを限定した最小実装とし、大規模な設定機構は作らない。
-- **モデル分離（v53で公開済・最終コードでも維持）**: `MODEL` は生成の既定 `gemma4:31b`。`AI_JUDGE_MODEL`（審査）と `AI_TRANS_MODEL`（翻訳）は `gemma4:31b` 固定で、生成モデルを変えても引きずらない。`AI_GENERATION_MODELS` は `gemma4:31b` / `deepseek-v4.1-flash` の allowlist。
+- **モデル分離（v53で公開済・v54時点の記録。v55でZenへ移行）**: `MODEL` は生成の既定 `gemma4:31b`。`AI_JUDGE_MODEL`（審査）と `AI_TRANS_MODEL`（翻訳）は `gemma4:31b` 固定で、生成モデルを変えても引きずらない。`AI_GENERATION_MODELS` は `gemma4:31b` / `deepseek-v4.1-flash` の allowlist。
 - **benchmark_model（v53で公開済・最終コードでは無効化）**: `benchmark_model` は**厳格検証済みの `auth.ok` と owner 一致だけ**を認め、認可・設定・台帳・quota・AI の前に拒否する。`settings.model` 等の未検証キーでは切り替えない。許可外・非文字列・空は `invalid_model`。
 - **認可**: owner のみ。**匿名・一般利用者は切替不可**。一般利用の切替 UI は作らない。
 - **記録**: 生成 record に使用モデルを `model` metadata として保存する。**旧レコードの metadata 欠落は変更しない**（遡及補完しない）。

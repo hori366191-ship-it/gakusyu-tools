@@ -231,7 +231,7 @@ function createNet() {
         if (resp.throw) throw new Error('network down');
         return response(resp.code || 200, typeof resp.body === 'string' ? resp.body : JSON.stringify(resp.body));
       }
-      if (u.indexOf('https://ollama.com/api/chat') === 0) {
+      if (u.indexOf('https://opencode.ai/inference/openai/v1/chat/completions') === 0) {
         const next = ai.length ? ai.shift() : { code: 500, body: { error: 'no queued ai response' } };
         if (next.throw) throw new Error('ai network down');
         return response(next.code || 200, typeof next.body === 'string' ? next.body : JSON.stringify(next.body));
@@ -239,7 +239,7 @@ function createNet() {
       return response(404, '{}');
     },
     aiCalls() {
-      return calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0).length;
+      return calls.filter((c) => c.url.indexOf('https://opencode.ai/inference/openai/v1/chat/completions') === 0).length;
     },
     tokeninfoCalls() {
       return calls.filter((c) => c.url.indexOf('https://oauth2.googleapis.com/tokeninfo') === 0).length;
@@ -434,11 +434,15 @@ function chatReply(content, extra) {
   return {
     code: 200,
     body: Object.assign({
-      model: 'gemma4:31b',
-      created_at: '2026-10-27T00:00:00Z',
-      message: { role: 'assistant', content: String(content) },
-      done: true,
-      done_reason: 'stop',
+      id: 'chatcmpl-test',
+      object: 'chat.completion',
+      created: 0,
+      model: 'deepseek-v4.1-flash',
+      choices: [{
+        index: 0,
+        message: { role: 'assistant', content: String(content) },
+        finish_reason: 'stop',
+      }],
     }, extra || {}),
   };
 }
@@ -473,7 +477,7 @@ function setupApp2(opts) {
     DROP_TOKEN: TOKEN,
     ALLOWED_EMAILS: TEACHER,
     OWNER_EMAIL: TEACHER,
-    OLLAMA_API_KEY: 'test-key',
+    OPENCODE_ZEN_API_KEY: 'test-key',
     OPEN_GENERATE: 'false',
   }, opts.props || {}), APP2_PATH);
   return rt;
@@ -819,7 +823,7 @@ test('app2: moderation が 503 なら保存ゼロ（再生成もしない）', (
 test('app2: moderation が JSON 異常 / 打ち切り / 判定不能 でも保存しない', () => {
   for (const mod of [
     { code: 200, body: 'not-json' },
-    { code: 200, body: { message: { role: 'assistant', content: 'OK' }, done: false } },
+    { code: 200, body: { choices: [] } },
     chatReply('MAYBE'),
   ]) {
     const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
@@ -849,16 +853,21 @@ test('app2: NG が2回続けば保存しない（再生成は1回まで）', () 
   assert.equal(rt.net.aiCalls(), 4);
 });
 
-test('app2: Ollama へ system/user を分離して送り、審査本文を system に混ぜない', () => {
+test('app2: Zen へ system/user を分離して送り、審査本文を system に混ぜない', () => {
   const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
   rt.net.ai.push(genOk(RECORD_TEXT), modOk());
   rt.postJson(genBody(rt));
-  const aiCall = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[1];
+  const aiCall = rt.net.calls.filter((c) => c.url.indexOf('https://opencode.ai/inference/openai/v1/chat/completions') === 0)[1];
   const payload = JSON.parse(aiCall.opts.payload);
-  assert.equal(payload.model, 'gemma4:31b');
-  assert.equal(payload.stream, false, 'stream=false で message.content を読む');
-  assert.equal(payload.think, false, '思考を無効化する');
-  assert.equal(payload.format, undefined, 'Cloud 非対応の format を送らない');
+  assert.equal(aiCall.url, 'https://opencode.ai/inference/openai/v1/chat/completions', '固定ホストだけを使う');
+  assert.equal(aiCall.opts.followRedirects, false, 'Authorization をリダイレクト先へ転送しない');
+  assert.equal(payload.model, 'deepseek-v4.1-flash');
+  assert.equal(payload.stream, false, 'stream=false で choices[0].message.content を読む');
+  assert.deepEqual(payload.thinking, { type: 'disabled' }, '推論を無効化する');
+  assert.equal(payload.max_tokens, 64, 'num_predict ではなく max_tokens で上限を指定する');
+  assert.equal(payload.options, undefined, 'Ollama の options を送らない');
+  assert.equal(payload.format, undefined, '互換差のある format を送らない');
+  assert.equal(payload.response_format, undefined, 'response_format は送らない');
   const sys = payload.messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n');
   const usr = payload.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
   assert.ok(usr.indexOf('-----BEGIN BODY-----') !== -1, '本文は user 側');
@@ -869,8 +878,10 @@ test('app2: 生成 system は英語のみ・出力は英語タイトルと本文
   const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
   rt.net.ai.push(genOk(RECORD_TEXT), modOk());
   rt.postJson(genBody(rt));
-  const genCall = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[0];
+  const genCall = rt.net.calls.filter((c) => c.url.indexOf('https://opencode.ai/inference/openai/v1/chat/completions') === 0)[0];
   const payload = JSON.parse(genCall.opts.payload);
+  assert.equal(payload.max_tokens, 8192, '生成の上限は max_tokens');
+  assert.equal(payload.temperature, 0.9, 'temperature をそのまま渡す');
   const sys = payload.messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n');
   const usr = payload.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
   assert.ok(!/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(sys), '生成 system に日本語を混ぜない');
@@ -915,7 +926,7 @@ test('app2: 審査 user は TITLE/BODY の ASCII 区切りだけ・設定メタ�
   const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
   rt.net.ai.push(genOk(RECORD_TEXT), modOk());
   rt.postJson(genBody(rt));
-  const modCall = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[1];
+  const modCall = rt.net.calls.filter((c) => c.url.indexOf('https://opencode.ai/inference/openai/v1/chat/completions') === 0)[1];
   const payload = JSON.parse(modCall.opts.payload);
   const sys = payload.messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n');
   const usr = payload.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
@@ -991,19 +1002,19 @@ test('app2: 既定では benchmark_model を閉じ、strict owner チェック�
   assertNoGenSideEffects(anon, 'anonymous');
 });
 
-test('app2: benchmark 無効時も通常 Gemma 生成は従来どおり保存できる', () => {
+test('app2: benchmark 無効時も通常の Zen 生成は従来どおり保存できる', () => {
   const rt = setupApp2();
   assert.equal(rt.ctx.BENCHMARK_MODEL_OVERRIDE_ENABLED, false);
   rt.net.ai.push(genOk(RECORD_TEXT), modOk());
   const res = rt.postJson(genBody(rt));
   assert.equal(res.json.ok, true, JSON.stringify(res.json));
-  assert.equal(res.json.item.model, 'gemma4:31b', '既定MODELはGemma');
-  assert.deepEqual(aiPayloads(rt).map((p) => p.model), ['gemma4:31b', 'gemma4:31b']);
+  assert.equal(res.json.item.model, 'deepseek-v4.1-flash', '既定MODELはZen');
+  assert.deepEqual(aiPayloads(rt).map((p) => p.model), ['deepseek-v4.1-flash', 'deepseek-v4.1-flash']);
   assert.equal(savedCount(rt), 1);
   assert.equal(Object.prototype.hasOwnProperty.call(res.json.item.settings, 'model'), false, 'settings に model を残さない');
 });
 
-test('app2: オーナーの benchmark_model は生成だけ切り替え、審査は Gemma 固定・record/receipt に実モデルを残す', () => {
+test('app2: オーナーの benchmark_model は生成だけ切り替え、審査は固定・record/receipt に実モデルを残す', () => {
   const rt = enableBenchmarkOverride(setupApp2());
   rt.net.ai.push(genOk(RECORD_TEXT), modOk());
   const body = genBody(rt, { benchmark_model: 'deepseek-v4.1-flash' });
@@ -1013,7 +1024,7 @@ test('app2: オーナーの benchmark_model は生成だけ切り替え、審査
 
   const payloads = aiPayloads(rt);
   assert.equal(payloads[0].model, 'deepseek-v4.1-flash', '生成だけ指定モデル');
-  assert.equal(payloads[1].model, 'gemma4:31b', '審査は Gemma 固定');
+  assert.equal(payloads[1].model, 'deepseek-v4.1-flash', '審査も同じ固定モデル');
 
   const idx = JSON.parse(rt.drive.findByName('tadoku-index.json').content);
   assert.equal(idx.items[0].model, 'deepseek-v4.1-flash', 'record.model を top-level 保存');
@@ -1023,19 +1034,13 @@ test('app2: オーナーの benchmark_model は生成だけ切り替え、審査
   assert.equal(receipt.result.model, 'deepseek-v4.1-flash', 'receipt に実モデルを保持');
 });
 
-test('app2: benchmark_model は gemma4:31b も明示でき、通常 Gemma と同じ生成モデルで保存する', () => {
+test('app2: 旧 Ollama モデル名（gemma4:31b）は benchmark_model でも許可せず AI を呼ばない', () => {
   const rt = enableBenchmarkOverride(setupApp2());
-  rt.net.ai.push(genOk(RECORD_TEXT), modOk());
-  const body = genBody(rt, { benchmark_model: 'gemma4:31b' });
-  const res = rt.postJson(body);
-  assert.equal(res.json.ok, true, JSON.stringify(res.json));
-  assert.equal(res.json.item.model, 'gemma4:31b');
-  assert.deepEqual(aiPayloads(rt).map((p) => p.model), ['gemma4:31b', 'gemma4:31b']);
-  // 明示 Gemma は通常 Gemma と payloadHash が異なる（同一 request_id は conflict）
-  const aiAfter = rt.net.aiCalls();
-  const conflict = rt.postJson(genBody(rt, { request_id: body.request_id }));
-  assert.equal(conflict.json.code, 'request_id_conflict');
-  assert.equal(rt.net.aiCalls(), aiAfter);
+  const res = rt.postJson(genBody(rt, { benchmark_model: 'gemma4:31b' }));
+  assert.equal(res.json.ok, false);
+  assert.equal(res.json.code, 'invalid_model');
+  assert.equal(rt.net.aiCalls(), 0);
+  assert.equal(savedCount(rt), 0);
 });
 
 test('app2: benchmark_model はオーナー以外・匿名・不正トークン・不正モデルを副作用前に拒否する', () => {
@@ -1151,13 +1156,13 @@ test('app2: settings.model など未検証キーでは生成モデルを切り�
   const res = rt.postJson(genBody(rt, { settings }));
   assert.equal(res.json.ok, true, JSON.stringify(res.json));
   const payloads = aiPayloads(rt);
-  assert.equal(payloads[0].model, 'gemma4:31b', '生成は既定 Gemma');
-  assert.equal(payloads[1].model, 'gemma4:31b', '審査は Gemma');
-  assert.equal(res.json.item.model, 'gemma4:31b', 'record.model は実際のモデル');
+  assert.equal(payloads[0].model, 'deepseek-v4.1-flash', '生成は既定モデル');
+  assert.equal(payloads[1].model, 'deepseek-v4.1-flash', '審査も同じ固定モデル');
+  assert.equal(res.json.item.model, 'deepseek-v4.1-flash', 'record.model は実際のモデル');
   assert.equal(Object.prototype.hasOwnProperty.call(res.json.item.settings, 'model'), false, 'settings に model を残さない');
 });
 
-test('app2: 同じ request_id は同一モデルだけ replay し、別モデル・通常 Gemma は conflict にする', () => {
+test('app2: 同じ request_id は同一モデル指定だけ replay し、モデル指定なしは conflict にする', () => {
   const rt = enableBenchmarkOverride(setupApp2());
   const requestId = rid('modelreplay');
   rt.net.ai.push(genOk(RECORD_TEXT), modOk());
@@ -1173,14 +1178,14 @@ test('app2: 同じ request_id は同一モデルだけ replay し、別モデル
   assert.equal(same.json.item.model, 'deepseek-v4.1-flash');
   assert.equal(rt.net.aiCalls(), aiAfter, '同一モデルの再送で AI を呼ばない');
 
-  for (const over of [{ benchmark_model: 'gemma4:31b' }, {}]) {
+  for (const over of [{}]) {
     const conflict = rt.postJson(genBody(rt, Object.assign({ request_id: requestId }, over)));
     assert.equal(conflict.json.code, 'request_id_conflict', JSON.stringify(over));
-    assert.equal(rt.net.aiCalls(), aiAfter, '別モデル/通常 Gemma は再実行しない');
+    assert.equal(rt.net.aiCalls(), aiAfter, 'モデル指定なしは再実行しない');
   }
 });
 
-test('app2: 通常 Gemma は旧 payloadHash の receipt と互換で、旧 record の model 欠落を推測しない', () => {
+test('app2: 通常生成は旧 payloadHash の receipt と互換で、旧 record の model 欠落を推測しない', () => {
   const rt = setupApp2();
   const requestId = rid('oldhash');
   const settings = JSON.parse(JSON.stringify(rt.ctx.normalizeSettings_({ settings: BASE_SETTINGS })));
@@ -1218,12 +1223,12 @@ test('app2: NG 再生成でも benchmark_model を維持し、再生成は1回�
   const res = rt.postJson(genBody(rt, { benchmark_model: 'deepseek-v4.1-flash' }));
   assert.equal(res.json.ok, true, JSON.stringify(res.json));
   assert.deepEqual(aiPayloads(rt).map((p) => p.model), [
-    'deepseek-v4.1-flash', 'gemma4:31b', 'deepseek-v4.1-flash', 'gemma4:31b',
+    'deepseek-v4.1-flash', 'deepseek-v4.1-flash', 'deepseek-v4.1-flash', 'deepseek-v4.1-flash',
   ]);
   assert.equal(res.json.item.model, 'deepseek-v4.1-flash');
 });
 
-test('app2: MODEL を変えても審査・翻訳は Gemma 固定で、翻訳保存ラベルも変わらない', () => {
+test('app2: MODEL を変えても審査・翻訳は固定モデルで、翻訳保存ラベルも変わらない', () => {
   const rt = setupApp2();
   rt.ctx.MODEL = 'sentinel-not-a-model';
 
@@ -1237,10 +1242,10 @@ test('app2: MODEL を変えても審査・翻訳は Gemma 固定で、翻訳保�
   assert.equal(res.json.ok, true, JSON.stringify(res.json));
 
   assert.deepEqual(aiPayloads(rt).map((p) => p.model), [
-    'gemma4:31b', 'gemma4:31b', 'gemma4:31b',
-  ], '審査・翻訳・翻訳審査は Gemma 固定');
-  assert.equal(res.json.translation.model, 'gemma4:31b', '公開翻訳の model');
-  assert.equal(JSON.parse(trFile(rt, rec.id).content).model, 'gemma4:31b', '保存翻訳の model ラベル');
+    'deepseek-v4.1-flash', 'deepseek-v4.1-flash', 'deepseek-v4.1-flash',
+  ], '審査・翻訳・翻訳審査は固定モデル');
+  assert.equal(res.json.translation.model, 'deepseek-v4.1-flash', '公開翻訳の model');
+  assert.equal(JSON.parse(trFile(rt, rec.id).content).model, 'deepseek-v4.1-flash', '保存翻訳の model ラベル');
 });
 
 test('app2: 内部生成でも許可外モデルは AI を呼ばず invalid_model', () => {
@@ -1249,11 +1254,11 @@ test('app2: 内部生成でも許可外モデルは AI を呼ばず invalid_mode
   assert.equal(rt.net.aiCalls(), 0);
 });
 
-test('app2: resolveAiModel_ は内部欠落の null/undefined/空だけ既定 Gemma、非文字列は拒否する', () => {
+test('app2: resolveAiModel_ は内部欠落の null/undefined/空だけ既定モデル、非文字列は拒否する', () => {
   const rt = setupApp2();
-  assert.equal(rt.ctx.resolveAiModel_(null), 'gemma4:31b');
-  assert.equal(rt.ctx.resolveAiModel_(undefined), 'gemma4:31b');
-  assert.equal(rt.ctx.resolveAiModel_(''), 'gemma4:31b');
+  assert.equal(rt.ctx.resolveAiModel_(null), 'deepseek-v4.1-flash');
+  assert.equal(rt.ctx.resolveAiModel_(undefined), 'deepseek-v4.1-flash');
+  assert.equal(rt.ctx.resolveAiModel_(''), 'deepseek-v4.1-flash');
   for (const bad of [['gemma4:31b'], { model: 'gemma4:31b' }, 123, true]) {
     assert.throws(() => rt.ctx.resolveAiModel_(bad), /生成モデルの指定が不正です/, JSON.stringify(bad));
   }
@@ -1274,7 +1279,7 @@ function resolvedList(rt, level) {
 
 function aiPayloads(rt) {
   return rt.net.calls
-    .filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)
+    .filter((c) => c.url.indexOf('https://opencode.ai/inference/openai/v1/chat/completions') === 0)
     .map((c) => JSON.parse(c.opts.payload));
 }
 
@@ -1600,7 +1605,7 @@ test('app2: 定義破損時の審査は AI を呼ばず unavailable（保存し�
   assert.equal(rt.net.aiCalls(), 0);
 });
 
-// ────────────────────────────── app2: Ollama / 対訳 ──────────────────────────────
+// ────────────────────────────── app2: Zen / 対訳 ──────────────────────────────
 
 const TRANS_TEXT = 'Mr. Smith went to Tokyo. He said, "Hello!" Then he left.\n\nThe next day, he came back.';
 function seedRecord(rt, text, id) {
@@ -1639,26 +1644,29 @@ function translatedFileCount(rt) {
   return rt.drive.activeFiles().filter((f) => f.name.indexOf('tadoku-trans-') === 0).length;
 }
 
-test('app2: OLLAMA_API_KEY のみを使い、ZEN/OPENCODE へ暗黙フォールバックしない', () => {
-  const rt = setupApp2({ props: { OLLAMA_API_KEY: '', ZEN_API_KEY: 'zen-key', OPENCODE_API_KEY: 'oc-key' } });
+test('app2: OPENCODE_ZEN_API_KEY のみを使い、旧 Ollama / ZEN / OPENCODE へ暗黙フォールバックしない', () => {
+  const rt = setupApp2({ props: { OPENCODE_ZEN_API_KEY: '', OLLAMA_API_KEY: 'ollama-key', ZEN_API_KEY: 'zen-key', OPENCODE_API_KEY: 'oc-key' } });
   const res = rt.postJson(genBody(rt));
   assert.equal(res.json.ok, false);
   assert.equal(res.json.code, 'api_key_missing');
   assert.equal(rt.net.aiCalls(), 0, '鍵が無ければ AI を呼ばない');
 
-  const rt2 = setupApp2({ props: { OLLAMA_API_KEY: 'ollama-key' } });
+  const rt2 = setupApp2({ props: { OPENCODE_ZEN_API_KEY: 'zen-key' } });
   rt2.net.ai.push(genOk(RECORD_TEXT), modOk());
   assert.equal(rt2.postJson(genBody(rt2)).json.ok, true);
-  const call = rt2.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[0];
-  assert.equal(call.opts.headers.Authorization, 'Bearer ollama-key');
+  const call = rt2.net.calls.filter((c) => c.url.indexOf('https://opencode.ai/inference/openai/v1/chat/completions') === 0)[0];
+  assert.equal(call.opts.headers.Authorization, 'Bearer zen-key');
 });
 
-test('app2: Ollama の HTTP失敗 / 非JSON / 切断 / 打ち切り / 空 は保存しない', () => {
+test('app2: Zen の HTTP失敗 / 非JSON / choices欠落 / 打ち切り / 空 は保存しない', () => {
   const cases = [
     { name: 'http500', nexts: [{ code: 500, body: { error: 'down' } }], code: 'ai_http_error', calls: 1 },
     { name: 'badjson', nexts: [{ code: 200, body: 'not-json' }], code: 'ai_bad_json', calls: 1 },
-    { name: 'done-false', nexts: [{ code: 200, body: { message: { role: 'assistant', content: 'A Cat Story\n\nA cat.' }, done: false } }], code: 'ai_incomplete', calls: 1 },
-    { name: 'length', nexts: [chatReply('A Cat Story\n\nA cat.', { done_reason: 'length' })], code: 'ai_incomplete', calls: 1 },
+    { name: 'no-choices', nexts: [{ code: 200, body: { choices: [] } }], code: 'ai_bad_json', calls: 1 },
+    { name: 'length', nexts: [chatReply('A Cat Story\n\nA cat.', { choices: [{ index: 0, message: { role: 'assistant', content: 'A Cat Story\n\nA cat.' }, finish_reason: 'length' }] })], code: 'ai_incomplete', calls: 1 },
+    { name: 'content-filter', nexts: [chatReply('A Cat Story\n\nA cat.', { choices: [{ index: 0, message: { role: 'assistant', content: '' }, finish_reason: 'content_filter' }] })], code: 'ai_incomplete', calls: 1 },
+    { name: 'missing-finish-reason', nexts: [chatReply('A Cat Story\n\nA cat.', { choices: [{ index: 0, message: { role: 'assistant', content: 'A Cat Story\n\nA cat.' } }] })], code: 'ai_incomplete', calls: 1 },
+    { name: 'tool-calls', nexts: [chatReply('A Cat Story\n\nA cat.', { choices: [{ index: 0, message: { role: 'assistant', content: 'A Cat Story\n\nA cat.' }, finish_reason: 'tool_calls' }] })], code: 'ai_incomplete', calls: 1 },
     { name: 'empty', nexts: [chatReply('   ')], code: 'ai_empty', calls: 1 },
   ];
   for (const c of cases) {
@@ -1672,15 +1680,47 @@ test('app2: Ollama の HTTP失敗 / 非JSON / 切断 / 打ち切り / 空 は保
   }
 });
 
-test('app2: think 非対応の 400 は think を外して1回だけ再試行する', () => {
+test('app2: Zen の HTTP エラーは status のみを返し、外部応答・鍵・プロンプトを漏らさない', () => {
+  const secret = 'SECRET_UPSTREAM_DETAIL';
   const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
-  rt.net.ai.push({ code: 400, body: { error: 'think is not supported by this model' } }, genOk(RECORD_TEXT), modOk());
+  rt.net.ai.push({ code: 403, body: { error: { message: secret + ' Authorization: Bearer test-key prompt=A Cat Story' } } });
+  const res = rt.postJson(genBody(rt));
+  assert.equal(res.json.ok, false);
+  assert.equal(res.json.code, 'ai_http_error');
+  assert.ok(res.json.error.indexOf('403') !== -1, 'status は返す');
+  assert.equal(res.json.error.indexOf(secret), -1, '外部エラー本文を返さない');
+  assert.equal(res.json.error.indexOf('test-key'), -1, '鍵を返さない');
+  assert.equal(res.text.indexOf(secret), -1, '応答全体にも外部エラー本文を出さない');
+  assert.equal(res.text.indexOf('test-key'), -1, '応答全体にも鍵を出さない');
+  assert.equal(JSON.stringify(rt.logs).indexOf(secret), -1, 'ログにも外部エラー本文を出さない');
+  assert.equal(JSON.stringify(rt.logs).indexOf('test-key'), -1, 'ログにも鍵を出さない');
+  assert.equal(savedCount(rt), 0);
+});
+
+test('app2: thinking 非対応の 400 は thinking を外して1回だけ再試行する', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  rt.net.ai.push({ code: 400, body: { error: { message: 'thinking is not supported by this model' } } }, genOk(RECORD_TEXT), modOk());
   const res = rt.postJson(genBody(rt));
   assert.equal(res.json.ok, true, JSON.stringify(res.json));
-  const calls = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0);
+  const calls = rt.net.calls.filter((c) => c.url.indexOf('https://opencode.ai/inference/openai/v1/chat/completions') === 0);
   assert.equal(calls.length, 3, '400 + 再試行 + 審査');
-  assert.equal(JSON.parse(calls[0].opts.payload).think, false);
-  assert.equal(JSON.parse(calls[1].opts.payload).think, undefined, '再試行では think を送らない');
+  assert.deepEqual(JSON.parse(calls[0].opts.payload).thinking, { type: 'disabled' });
+  assert.equal(JSON.parse(calls[1].opts.payload).thinking, undefined, '再試行では thinking を送らない');
+});
+
+test('app2: Zen は reasoning_content を本文に使わず content だけを読む', () => {
+  const rt = setupApp2({ props: { OPEN_GENERATE: 'true' } });
+  rt.net.ai.push(chatReply('A Cat Story\n\nA cat sat on a mat.', {
+    choices: [{
+      index: 0,
+      message: { role: 'assistant', content: 'A Cat Story\n\nA cat sat on a mat.', reasoning_content: 'SECRET REASONING' },
+      finish_reason: 'stop',
+    }],
+  }), modOk());
+  const res = rt.postJson(genBody(rt));
+  assert.equal(res.json.ok, true, JSON.stringify(res.json));
+  assert.equal(res.json.item.title, 'A Cat Story');
+  assert.equal(String(res.json.item.text || '').indexOf('SECRET REASONING'), -1, '推論本文を保存しない');
 });
 
 test('app2 translate: get は未作成なら LLM なしで translation_missing を返す', () => {
@@ -1714,12 +1754,19 @@ test('app2 translate: 作成は LLM 2回（翻訳+審査）で別JSONに保存�
   assert.equal(created.json.ok, true, JSON.stringify(created.json));
   const tr = created.json.translation;
   assert.equal(tr.record_id, rec.id);
-  assert.equal(tr.model, 'gemma4:31b');
+  assert.equal(tr.model, 'deepseek-v4.1-flash');
   assert.equal(tr.source_hash, rt.ctx.sourceHashOf_(TRANS_TEXT));
   assert.equal(tr.items.length, spans.length);
   assert.equal(tr.spans.map((s) => s.start).join(','), spans.map((s) => s.start).join(','));
   assert.equal(tr.spans.map((s) => s.end).join(','), spans.map((s) => s.end).join(','));
   assert.equal(rt.net.aiCalls(), 2);
+  const trPayloads = aiPayloads(rt);
+  assert.deepEqual(trPayloads.map((p) => p.model), ['deepseek-v4.1-flash', 'deepseek-v4.1-flash'], '翻訳・審査とも固定モデル');
+  assert.ok(trPayloads[0].max_tokens > 0, '翻訳も max_tokens で上限を指定');
+  assert.equal(trPayloads[0].temperature, 0.2);
+  assert.deepEqual(trPayloads[0].thinking, { type: 'disabled' });
+  assert.equal(trPayloads[1].max_tokens, 64, '翻訳審査は1行');
+  assert.equal(trPayloads[1].temperature, 0);
 
   const file = trFile(rt, rec.id);
   assert.ok(file, '別JSONに保存する');
@@ -1748,7 +1795,7 @@ test('app2 translate: 審査 user は ASCII 区切り（TITLE/BODY）だけで�
   rt.net.ai.push(trReply(rt, TRANS_TEXT), modOk());
   const res = rt.postJson(trBody(rt, rec.id));
   assert.equal(res.json.ok, true);
-  const modCall = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[1];
+  const modCall = rt.net.calls.filter((c) => c.url.indexOf('https://opencode.ai/inference/openai/v1/chat/completions') === 0)[1];
   const payload = JSON.parse(modCall.opts.payload);
   const usr = payload.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
   assert.ok(usr.indexOf('-----BEGIN TITLE-----') === 0, 'TITLE の ASCII 区切りで始まる');
@@ -1855,8 +1902,8 @@ test('app2 translate: 文分割は省略語・小数・会話の省略・段落�
 
 const SYMBOL_SENTENCE_TEXT = 'First sentence.\n\n***\n\nNext sentence.';
 
-function ollamaPayloadOf(rt, index) {
-  const calls = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0);
+function aiPayloadOf(rt, index) {
+  const calls = rt.net.calls.filter((c) => c.url.indexOf('https://opencode.ai/inference/openai/v1/chat/completions') === 0);
   return JSON.parse(calls[index || 0].opts.payload);
 }
 function payloadText(payload, role) {
@@ -1891,7 +1938,7 @@ test('app2 translate: 記号だけのスパンは AI に渡さず、原文をそ
   assert.equal(tr.spans.map((s) => SYMBOL_SENTENCE_TEXT.slice(s.start, s.end)).join(''), SYMBOL_SENTENCE_TEXT, '原文を復元できる');
   assert.equal(rt.net.aiCalls(), 2, '翻訳1 + 審査1（記号の再生成はしない）');
 
-  const user = payloadText(ollamaPayloadOf(rt, 0), 'user');
+  const user = payloadText(aiPayloadOf(rt, 0), 'user');
   assert.equal(user.indexOf('s1:'), -1, '記号スパンは AI の文リストに含めない');
   assert.ok(user.indexOf('s0: First sentence.') !== -1);
   assert.ok(user.indexOf('s2: Next sentence.') !== -1);
@@ -2063,7 +2110,7 @@ test('app2 translate: Cf（soft hyphen/ZWSP/LRM/RLM/bidi/word joiner）は記号
   assert.equal(res.json.ok, true, JSON.stringify(res.json).slice(0, 200));
   assert.deepEqual(res.json.translation.items.map((i) => i.ja), ['猫が座りました。', '\u200b\u200b', '次の文です。']);
   assert.equal(rt.ctx.isSymbolOnlySource_(text.slice(spans[1].start, spans[1].end)), true);
-  assert.equal(payloadText(ollamaPayloadOf(rt, 0), 'user').indexOf('s1:'), -1, '不可視だけの段落も AI に渡さない');
+  assert.equal(payloadText(aiPayloadOf(rt, 0), 'user').indexOf('s1:'), -1, '不可視だけの段落も AI に渡さない');
 });
 
 test('app2 translate: AI の ID 照合は翻訳対象だけを厳格に扱い、記号ID・重複・欠落・余分は fail closed', () => {
@@ -2136,7 +2183,7 @@ test('app2 translate: 審査は記号を合成した全訳を対象にし、NG �
   assert.equal(res.json.code, 'moderation_rejected');
   assert.equal(translatedFileCount(rt), 0, '保存しない');
   assert.equal(rt.net.aiCalls(), 2);
-  const user = payloadText(ollamaPayloadOf(rt, 1), 'user');
+  const user = payloadText(aiPayloadOf(rt, 1), 'user');
   assert.ok(user.indexOf('***') !== -1, '合成済みの記号も審査対象');
   assert.ok(user.indexOf('最初の文です。') !== -1);
   assert.ok(user.indexOf('次の文です。') !== -1);
@@ -2295,7 +2342,7 @@ test('app2 translate: クライアントの本文・訳は使わず、record 本
   rt.net.ai.push(trReply(rt, TRANS_TEXT), modOk());
   const res = rt.postJson(trBody(rt, rec.id, { text: 'CLIENT INJECTED TEXT', ja: '偽の訳', translation: { items: [] } }));
   assert.equal(res.json.ok, true);
-  const transCall = rt.net.calls.filter((c) => c.url.indexOf('https://ollama.com/api/chat') === 0)[0];
+  const transCall = rt.net.calls.filter((c) => c.url.indexOf('https://opencode.ai/inference/openai/v1/chat/completions') === 0)[0];
   const payload = JSON.parse(transCall.opts.payload);
   const user = payload.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
   assert.ok(user.indexOf(TRANS_TEXT) !== -1, 'サーバー保有本文を使う');
@@ -2476,7 +2523,11 @@ test('app2: debug はオーナー限定で ALLOWED_EMAILS を返さない', () =
   const owner = rt.get({ action: 'debugIndexInfo', token: TOKEN, id_token: tokenFor(rt, TEACHER) });
   assert.equal(owner.json.ok, true);
   assert.equal(owner.text.indexOf(TEACHER), -1, '生PIIを返さない');
+  assert.equal(owner.text.indexOf('test-key'), -1, '鍵の値を返さない');
   assert.ok(owner.text.indexOf('allowed_count') !== -1);
+  const debugProps = JSON.parse(owner.json.props);
+  assert.equal(debugProps.zen_key_set, true, 'Zen キーの有無だけを返す');
+  assert.equal(Object.prototype.hasOwnProperty.call(debugProps, 'ollama_key_set'), false, '旧キー名の誤読を招く別名を返さない');
 });
 
 test('app2: 辞書キー未設定は拒否', () => {
@@ -3351,7 +3402,13 @@ for (const be of BACKENDS) {
     // 既存 receipt は重複防止のまま（done に戻らない）
     const stored = JSON.parse(rt.props.get(entries[0].key));
     assert.equal(stored.state, 'failed');
-    assert.equal(stored.error.length, 200);
+    if (be.name === 'app2') {
+      assert.ok(stored.error.length <= 200);
+      assert.ok(stored.error.indexOf('503') !== -1, 'HTTP status だけを残す');
+      assert.equal(stored.error.indexOf('界'), -1, '外部応答本文を台帳に残さない');
+    } else {
+      assert.equal(stored.error.length, 200);
+    }
   });
 
   test(be.name + ': 極端に長い actor / request_id は副作用前に ledger_full で拒否', () => {

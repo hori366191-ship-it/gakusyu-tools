@@ -4,12 +4,13 @@
 // ・AI 生成は許可ユーザーのみ（Script Properties: ALLOWED_EMAILS。空なら書込みは全て拒否）
 //   ただし OPEN_GENERATE=true の試験期間中は匿名生成も可（端末上限＋全体上限つき。削除は従来通りオーナーのみ）
 // ・生成物の削除はオーナーのみ（Script Properties: OWNER_EMAIL）
-// ・AI 生成/審査/翻訳（Script Properties: OLLAMA_API_KEY のみ。Ollama Cloud 公式 API https://ollama.com/api/chat、
-//   生成の既定 model=gemma4:31b、審査・翻訳は gemma4:31b 固定。stream=false、think=false。
-//   生成モデルの切替はオーナー限定の benchmark_model だけ（許可: gemma4:31b / deepseek-v4.1-flash）。
+// ・AI 生成/審査/翻訳（Script Properties: OPENCODE_ZEN_API_KEY のみ。Zen の OpenAI 互換 API
+//   https://opencode.ai/inference/openai/v1/chat/completions、model=deepseek-v4.1-flash 固定（生成・審査・翻訳とも）。
+//   stream=false、max_tokens で出力上限、thinking:{type:'disabled'} で推論本文を要求しない。
+//   生成モデルの切替はオーナー限定の benchmark_model だけ（許可: deepseek-v4.1-flash のみ）。
 //   ただし比較用APIは既定で無効（BENCHMARK_MODEL_OVERRIDE_ENABLED=false）。通常UIには出さない。
-//   ZEN/OPENCODE への暗黙フォールバックはしない）
-// ・Ollama Cloud は Structured Outputs 非対応のため format/schema は送らない。JSON はプロンプトで要求し厳格検証する
+//   旧 Ollama キー（OLLAMA_API_KEY）や ZEN/OPENCODE キーへの暗黙フォールバックはしない）
+// ・JSON はプロンプトで要求し厳格検証する（response_format は互換差を避けるため送らない）
 // ・生成物は共有フォルダに保存（Script Properties: FOLDER_ID。未設定なら「生成済み長文」を自動作成）
 // ・生成物フォルダ（FOLDER_ID）は全員に閲覧可 + 許可ユーザーに編集可で共有しておくこと
 // ・辞書ファイル（DICTIONARY_ID / MAP_ID）は全員に閲覧可で共有しておくこと
@@ -42,20 +43,21 @@ var INDEX_FOLDER_NAME = '生成済み長文_index';
 var INDEX_FILE_NAME   = 'tadoku-index.json';
 var INDEX_CACHE_KEY   = 'tadoku_index_cache';
 var INDEX_CACHE_TTL   = 60;
-var API_BASE      = 'https://ollama.com/api';
-var MODEL         = 'gemma4:31b'; // 生成の既定。Ollama Cloud 公式。ローカルCLIの gemma4:cloud とは別名（APIはこの名前）
-var AI_GENERATION_MODELS = ['gemma4:31b', 'deepseek-v4.1-flash']; // benchmark_model で指定できる生成モデル
+var API_BASE      = 'https://opencode.ai/inference/openai/v1';
+var API_PATH      = '/chat/completions';
+var MODEL         = 'deepseek-v4.1-flash'; // Zen（OpenCode Console）の OpenAI 互換 API。生成・審査・翻訳で共通
+var AI_GENERATION_MODELS = ['deepseek-v4.1-flash']; // benchmark_model で指定できる生成モデル（旧 Ollama 名は許可しない）
 var BENCHMARK_MODEL_OVERRIDE_ENABLED = false; // 比較専用API。通常運用は常時false（有効化はsourceで明示変更）
-var AI_JUDGE_MODEL = 'gemma4:31b'; // 審査は固定（MODEL を変えても引きずらない）
-var AI_TRANS_MODEL = 'gemma4:31b'; // 翻訳は固定（MODEL を変えても引きずらない）
-var OLLAMA_KEY_PROP = 'OLLAMA_API_KEY';
+var AI_JUDGE_MODEL = 'deepseek-v4.1-flash'; // 審査は固定（MODEL を変えても引きずらない）
+var AI_TRANS_MODEL = 'deepseek-v4.1-flash'; // 翻訳は固定（MODEL を変えても引きずらない）
+var ZEN_KEY_PROP = 'OPENCODE_ZEN_API_KEY';
 // 生成 system は英語で固定する（日本語の指示文をモデルが書き写し、生成物へ日本語が混入するのを避ける）
 var SYSTEM_PROMPT = 'You are a writer of English reading materials for Japanese learners. '
   + 'Follow the user instructions and write one English passage. '
   + 'Output only an English title on the first line, one blank line, then the English body. '
   + 'Output language is English only: never output Japanese text, notes, explanations, headings, markdown, or a restatement of the instructions.';
-var AI_GEN_NUM_PREDICT = 8192;        // 生成の上限トークン（思考は無効化するが余裕を取る）
-var AI_MOD_NUM_PREDICT = 64;          // 審査は1行のみ
+var AI_GEN_MAX_TOKENS = 8192;        // 生成の出力上限（推論は無効化するが余裕を取る）
+var AI_MOD_MAX_TOKENS = 64;          // 審査は1行のみ
 
 // ── 対訳（translateText）の定数 ─────────────────────
 var TRANS_FILE_PREFIX = 'tadoku-trans-';
@@ -294,9 +296,9 @@ function props_() {
   return PropertiesService.getScriptProperties();
 }
 
-function getOllamaKey_() {
-  // 既存の ZEN_API_KEY / OPENCODE_API_KEY は読まない（暗黙のフォールバック禁止）
-  return String(props_().getProperty(OLLAMA_KEY_PROP) || '').trim();
+function getZenKey_() {
+  // 旧 OLLAMA_API_KEY / ZEN_API_KEY / OPENCODE_API_KEY は読まない（暗黙のフォールバック禁止）
+  return String(props_().getProperty(ZEN_KEY_PROP) || '').trim();
 }
 
 function message_(err) {
@@ -1162,8 +1164,8 @@ function handleGenerateRequest_(body, auth, rid) {
   } catch (errSettings) {
     return jsonOut_({ ok: false, error: message_(errSettings), code: 'invalid_settings', rid: rid });
   }
-  if (!getOllamaKey_()) {
-    return jsonOut_({ ok: false, error: OLLAMA_KEY_PROP + ' が設定されていません', code: 'api_key_missing', rid: rid });
+  if (!getZenKey_()) {
+    return jsonOut_({ ok: false, error: ZEN_KEY_PROP + ' が設定されていません', code: 'api_key_missing', rid: rid });
   }
 
   var allowedUser = !!(auth && auth.ok && isAllowed_(auth.email));
@@ -1402,8 +1404,8 @@ function handleTranslateRequest_(body, auth, rid) {
   if (!requestId) {
     return jsonOut_({ ok: false, error: 'request_id が必要です', code: 'request_id_required', rid: rid });
   }
-  if (!getOllamaKey_()) {
-    return jsonOut_({ ok: false, error: OLLAMA_KEY_PROP + ' が設定されていません', code: 'api_key_missing', rid: rid });
+  if (!getZenKey_()) {
+    return jsonOut_({ ok: false, error: ZEN_KEY_PROP + ' が設定されていません', code: 'api_key_missing', rid: rid });
   }
   var deviceId = '';
   if (!allowedUser) {
@@ -1732,10 +1734,10 @@ function normalizeSettings_(body) {
 }
 
 /**
- * generateText の payloadHash。通常の Gemma 生成（benchmark_model なし）は
+ * generateText の payloadHash。通常生成（benchmark_model なし）は
  * 旧実装と同じ文字列で計算し、既存 receipt との互換を保つ。
  * benchmark_model を明示した場合だけモデル名を末尾に足し、同じ request_id でも
- * モデルが違えば conflict になるようにする。
+ * モデル指定の有無で conflict になるようにする。
  */
 function generationPayloadHash_(settings, benchmarkModel) {
   var base = 'generateText\n' + JSON.stringify(settings);
@@ -1865,9 +1867,12 @@ function truncateUnicode_(value, maxLen) {
   return out;
 }
 
-// ── Ollama Cloud クライアント ─────────────────────
-// 公式: POST https://ollama.com/api/chat（Bearer OLLAMA_API_KEY）。stream=false で message.content を読む。
-// 思考は think=false で無効化する。Cloud は Structured Outputs 非対応のため format/schema は送らない。
+// ── Zen（OpenCode Console）OpenAI 互換クライアント ─────────────────────
+// 公式: POST https://opencode.ai/inference/openai/v1/chat/completions（Bearer OPENCODE_ZEN_API_KEY）。
+// stream=false で choices[0].message.content を読み、finish_reason を検証する。推論本文（reasoning_content）は使わない。
+// DeepSeek 系の互換指定 thinking:{type:'disabled'} は、400/422 で非対応と返った場合だけ1回外して再試行する。
+// JSON は既存のプロンプト指示＋厳格パーサを維持する。response_format は json_object 非対応や
+// スキーマ差異の互換リスクを避けるため送らない。
 // 秘密（APIキー・応答全文・プロンプト）はログに出さない。
 
 /**
@@ -1906,29 +1911,30 @@ function resolveAiModel_(value) {
   return model;
 }
 
-function ollamaPayload_(messages, opts) {
+function zenPayload_(messages, opts) {
   opts = opts || {};
-  var options = {};
-  if (opts.temperature != null) options.temperature = opts.temperature;
-  if (opts.numPredict != null) options.num_predict = opts.numPredict;
-  if (opts.seed != null) options.seed = opts.seed;
-  var payload = { model: resolveAiModel_(opts.model), messages: messages, stream: false, think: false };
-  if (Object.keys(options).length) payload.options = options;
+  var payload = { model: resolveAiModel_(opts.model), messages: messages, stream: false };
+  if (opts.temperature != null) payload.temperature = opts.temperature;
+  if (opts.maxTokens != null) payload.max_tokens = opts.maxTokens;
+  if (opts.seed != null) payload.seed = opts.seed;
+  // Zen カタログで reasoning toggle 対応のモデル向けに推論を無効化する（推論本文は使用しない）
+  payload.thinking = { type: 'disabled' };
   return payload;
 }
 
-/** 1回の chat 呼出。戻り値 { ok, data } / { ok:false, code, badJson, thinkUnsupported, text }（秘密は返さない） */
-function ollamaFetchOnce_(payload) {
-  var key = getOllamaKey_();
+/** 1回の chat 呼出。戻り値 { ok, data } / { ok:false, code, badJson, thinkingUnsupported }（応答本文・鍵は返さない） */
+function zenFetchOnce_(payload) {
+  var key = getZenKey_();
   if (!key) return { ok: false, code: 0, apiKeyMissing: true };
   var res;
   try {
-    res = UrlFetchApp.fetch(API_BASE + '/chat', {
+    res = UrlFetchApp.fetch(API_BASE + API_PATH, {
       method: 'post',
       contentType: 'application/json',
       headers: { Authorization: 'Bearer ' + key },
       payload: JSON.stringify(payload),
-      muteHttpExceptions: true
+      muteHttpExceptions: true,
+      followRedirects: false // 固定ホスト以外へ Authorization を転送しない（3xx は下でエラー扱い）
     });
   } catch (eNet) {
     return { ok: false, code: 0, network: true };
@@ -1945,53 +1951,59 @@ function ollamaFetchOnce_(payload) {
       hint = data && data.error ? String(data.error.message || data.error) : '';
       hint = hint.replace(/[\r\n\t]+/g, ' ').slice(0, 300);
     } catch (e0) { hint = ''; }
+    // hint は互換判定だけに使い、呼び出し側や UI / ログへは返さない
     return {
       ok: false,
       code: code,
-      hint: hint,
-      thinkUnsupported: (code === 400 || code === 422) && /think/i.test(hint)
+      thinkingUnsupported: (code === 400 || code === 422) && /think|reasoning/i.test(hint)
     };
   }
   if (!data || typeof data !== 'object') return { ok: false, code: code, badJson: true };
   return { ok: true, data: data };
 }
 
-/** chat 応答から本文だけを取り出す（thinking は使わない） */
-function extractChatContent_(data) {
+/** chat 応答から本文だけを取り出す（reasoning_content 等の推論本文は使わない） */
+function extractZenContent_(data) {
   if (!data || typeof data !== 'object') return '';
-  var msg = data.message;
+  var choices = data.choices;
+  if (!Array.isArray(choices) || !choices.length) return '';
+  var msg = choices[0] && choices[0].message;
   if (msg && typeof msg.content === 'string') return msg.content;
-  if (typeof data.response === 'string') return data.response;
   return '';
 }
 
 /**
- * chat 呼出し（think 非対応モデル/APIの 400 だけは think を外して1回だけ再試行）。
+ * chat 呼出し（thinking 非対応の 400/422 だけは thinking を外して1回だけ再試行）。
  * 失敗は例外（appCode: ai_network / ai_http_error / ai_bad_json / ai_incomplete / ai_empty / api_key_missing）。
- * 応答が done=false / done_reason=length の場合は切断・打ち切りとして fail closed。
+ * HTTP エラーは status だけを返し、外部応答・鍵・プロンプト本文は例外/UI/ログへ出さない。
+ * finish_reason は正常な 'stop' だけを成功とし、欠落・未知・tool_calls 等は fail closed（保存しない）。
  */
-function ollamaChat_(messages, opts) {
-  if (!getOllamaKey_()) throw appError_(OLLAMA_KEY_PROP + ' が設定されていません', 'api_key_missing');
-  var payload = ollamaPayload_(messages, opts);
-  var out = ollamaFetchOnce_(payload);
-  if (!out.ok && out.thinkUnsupported) {
-    var retryPayload = ollamaPayload_(messages, opts);
-    delete retryPayload.think;
-    out = ollamaFetchOnce_(retryPayload);
+function zenChat_(messages, opts) {
+  if (!getZenKey_()) throw appError_(ZEN_KEY_PROP + ' が設定されていません', 'api_key_missing');
+  var payload = zenPayload_(messages, opts);
+  var out = zenFetchOnce_(payload);
+  if (!out.ok && out.thinkingUnsupported) {
+    var retryPayload = zenPayload_(messages, opts);
+    delete retryPayload.thinking;
+    out = zenFetchOnce_(retryPayload);
   }
   if (!out.ok) {
-    if (out.apiKeyMissing) throw appError_(OLLAMA_KEY_PROP + ' が設定されていません', 'api_key_missing');
+    if (out.apiKeyMissing) throw appError_(ZEN_KEY_PROP + ' が設定されていません', 'api_key_missing');
     if (out.network) throw appError_('AI への接続に失敗しました。もう一度お試しください。', 'ai_network', true);
     if (out.badJson) throw appError_('AI の応答を解釈できませんでした。もう一度お試しください。', 'ai_bad_json');
-    throw appError_('AI API エラー (HTTP ' + out.code + (out.hint ? '：' + out.hint : '') + ')', 'ai_http_error');
+    throw appError_('AI API エラー (HTTP ' + out.code + ')', 'ai_http_error');
   }
   var data = out.data;
-  if (data.done === false) throw appError_('AI の応答が途中で終了しました', 'ai_incomplete');
-  var reason = String(data.done_reason || '');
-  if (reason === 'length' || reason === 'max_tokens') {
-    throw appError_('AI出力が上限で中断しました(status:length)', 'ai_incomplete');
+  var choices = data.choices;
+  if (!Array.isArray(choices) || !choices.length) {
+    throw appError_('AI の応答を解釈できませんでした。もう一度お試しください。', 'ai_bad_json');
   }
-  var content = String(extractChatContent_(data) || '');
+  var choice = choices[0] || {};
+  var reason = String(choice.finish_reason || '');
+  if (reason !== 'stop') {
+    throw appError_('AI の応答が完了しませんでした。もう一度お試しください。', 'ai_incomplete');
+  }
+  var content = String(extractZenContent_(data) || '');
   if (!content.trim()) throw appError_('AI の応答が空でした。もう一度お試しください。', 'ai_empty');
   return content;
 }
@@ -2045,7 +2057,7 @@ function generateTextInternal_(settings, requestId, generationModel) {
 }
 
 function generatePassage_(settings, generationModel) {
-  if (!getOllamaKey_()) throw appError_(OLLAMA_KEY_PROP + ' が設定されていません', 'api_key_missing');
+  if (!getZenKey_()) throw appError_(ZEN_KEY_PROP + ' が設定されていません', 'api_key_missing');
   var model = resolveAiModel_(generationModel);
   var retryHint = 'IMPORTANT: Do not output your reasoning, any reference to the user, a copy of these instructions, or headings. '
     + 'Output only the English title (first line), one blank line, then the English body. The previous output was invalid.';
@@ -2056,7 +2068,7 @@ function generatePassage_(settings, generationModel) {
       { role: 'system', content: attempt === 0 ? SYSTEM_PROMPT : SYSTEM_PROMPT + ' ' + retryHint },
       { role: 'user', content: prompt }
     ];
-    var raw = ollamaChat_(messages, { temperature: 0.9, numPredict: AI_GEN_NUM_PREDICT, model: model });
+    var raw = zenChat_(messages, { temperature: 0.9, maxTokens: AI_GEN_MAX_TOKENS, model: model });
     content = String(raw || '').replace(/```[\s\S]*?```/g, '').trim();
     if (content && !looksLikeThinking_(content)) break;
     content = '';
@@ -2116,7 +2128,7 @@ function moderationEnvelope_(title, body) {
  * ・user は ASCII 区切りの TITLE / BODY だけにし、日本語の枠文や設定メタを混ぜない。
  */
 function checkPassage_(settings, title, text) {
-  if (!getOllamaKey_()) return { ok: false, unavailable: true, reason: 'api key missing' };
+  if (!getZenKey_()) return { ok: false, unavailable: true, reason: 'api key missing' };
   var def = EIKEN_LEVELS[settings.level];
   if (!def) return { ok: false, unavailable: true, reason: 'invalid level definition' };
   var resolved;
@@ -2150,10 +2162,10 @@ function checkPassage_(settings, title, text) {
 
   var content;
   try {
-    content = ollamaChat_([
+    content = zenChat_([
       { role: 'system', content: lines.join('\n') },
       { role: 'user', content: input }
-    ], { model: AI_JUDGE_MODEL, temperature: 0, numPredict: AI_MOD_NUM_PREDICT });
+    ], { model: AI_JUDGE_MODEL, temperature: 0, maxTokens: AI_MOD_MAX_TOKENS });
   } catch (eMod) {
     var code = (eMod && eMod.appCode) || '';
     if (code === 'api_key_missing') return { ok: false, unavailable: true, reason: 'api key missing' };
@@ -2616,7 +2628,7 @@ function parseTranslationOutput_(content, spans) {
 
 /** 翻訳用 moderation。明示 OK のみ保存（判定不能・失敗・NG は不可） */
 function checkTranslation_(record, jaTexts) {
-  if (!getOllamaKey_()) return { ok: false, unavailable: true, reason: 'api key missing' };
+  if (!getZenKey_()) return { ok: false, unavailable: true, reason: 'api key missing' };
   var lines = moderationRulesLines_([
     '【教材適合性】',
     '- 日本語訳が学習教材として自然で、原文の内容から逸脱していないこと',
@@ -2627,10 +2639,10 @@ function checkTranslation_(record, jaTexts) {
   var input = moderationEnvelope_(record && record.title, list.join('\n'));
   var content;
   try {
-    content = ollamaChat_([
+    content = zenChat_([
       { role: 'system', content: lines.join('\n') },
       { role: 'user', content: input }
-    ], { model: AI_JUDGE_MODEL, temperature: 0, numPredict: AI_MOD_NUM_PREDICT });
+    ], { model: AI_JUDGE_MODEL, temperature: 0, maxTokens: AI_MOD_MAX_TOKENS });
   } catch (eMod) {
     if ((eMod && eMod.appCode) === 'api_key_missing') return { ok: false, unavailable: true, reason: 'api key missing' };
     return { ok: false, unavailable: true, reason: 'translation moderation failure' };
@@ -2665,10 +2677,10 @@ function translateSentences_(record, spans) {
     var targetChars = 0;
     for (i = 0; i < targets.length; i++) targetChars += (targets[i].end - targets[i].start);
     var numPredict = Math.min(8192, 1200 + Math.ceil(targetChars * 1.2));
-    var content = ollamaChat_([
+    var content = zenChat_([
       { role: 'system', content: TRANS_SYSTEM_PROMPT },
       { role: 'user', content: buildTranslatePrompt_(record, targets) }
-    ], { model: AI_TRANS_MODEL, temperature: 0.2, numPredict: numPredict });
+    ], { model: AI_TRANS_MODEL, temperature: 0.2, maxTokens: numPredict });
     var parsed = parseTranslationOutput_(content, targets);
     for (i = 0; i < parsed.length; i++) jaTexts[targetIdx[i]] = parsed[i];
   }
@@ -3382,7 +3394,7 @@ function debugProps_() {
     migration_state: p.getProperty('MIGRATION_STATE') || '',
     allowed_count: getAllowedList_().length,
     open_generate: isOpenGenerate_(),
-    ollama_key_set: !!getOllamaKey_(),
+    zen_key_set: !!getZenKey_(),
     gen_state_day: (readGenTrialState_(p, trialDay_()).day || '')
   });
 }
