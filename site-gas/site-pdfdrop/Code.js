@@ -19,6 +19,7 @@ var PROP_EMAILS = 'ALLOWED_EMAILS';
 var PROP_MAX_DAY = 'MAX_PER_DAY';
 var PROP_LAST_ERROR = 'LAST_ERROR';
 var PROP_LAST_OK = 'LAST_OK';
+var PROP_LAST_PROBE = 'LAST_PROBE'; // 直近の probe 認証失敗理由（固定文言のみ）
 var DEFAULT_MAX_DAY = 200;
 var MAX_BYTES = 10 * 1024 * 1024;
 var MAX_B64_CHARS = Math.ceil(MAX_BYTES / 3) * 4 + 16;
@@ -687,6 +688,20 @@ function noteErr_(msg) {
   try { console.error(msg); } catch (e2) {}
 }
 
+/** probe の認証失敗理由を残す（auth.error は固定文言のみ。個人情報・トークンは含めない） */
+function noteProbe_(reason) {
+  reason = String(reason || '').slice(0, 120);
+  // 同一理由が連続しても値の形は変わらず時刻だけが進む（重複検出は不要）
+  try { props_().setProperty(PROP_LAST_PROBE, stamp_() + ' | ' + reason); } catch (e) {}
+}
+
+function lastProbeLabel_() {
+  var v = '';
+  try { v = String(props_().getProperty(PROP_LAST_PROBE) || ''); } catch (e) {}
+  if (!v) return '(none)';
+  return v.length > 120 ? v.slice(0, 120) : v;
+}
+
 function gateLabel_() {
   var list = getAllowedList_();
   return list.length ? 'ON (' + list.length + ' accounts)' : 'OFF (writes denied)';
@@ -698,7 +713,8 @@ function doGet(e) {
   var params = (e && e.parameter) || {};
   if (params.poll) return handlePoll_(params);
   if (params.probe) return handleProbe_(params);
-  // 公開 status は簡易 health のみ（last_ok / last_error の生文言は出さない）
+  // 公開 status は簡易 health のみ（last_ok / last_error の生文言は出さない）。
+  // last probe は固定文言の失敗理由だけを出す（個人情報・トークンは含まれない）
   var html = HtmlService.createHtmlOutput(
     '<body style="font-family:sans-serif;padding:16px">'
     + '<h2 style="margin:0 0 8px">pdfdrop</h2>'
@@ -706,6 +722,7 @@ function doGet(e) {
     + 'status     : ' + (getToken_() && getFolderId_() ? 'ready' : 'not configured')
     + '\ngate       : ' + gateLabel_()
     + '\nlimit      : ' + getTodayCount_() + '/' + getMaxDay_()
+    + '\nlast probe : ' + lastProbeLabel_()
     + '</pre></body>'
   );
   html.setTitle('pdfdrop');
@@ -747,13 +764,19 @@ function handleProbe_(p) {
   var rid = normalizeRid_(p.rid);
   var parent = resolveParentOrigin_(p.parent_origin);
   var token = getToken_();
+  var diag = String(p.diag || '') === '1';
   var result;
   if (!token || String(p.token || '') !== token) {
     result = { genkoProbe: true, ok: false, error: 'bad token' };
+    if (diag) result.reason = 'bad_token';
   } else {
     var auth = verifyIdTokenStrict_(p.id_token);
     if (!auth.ok) {
+      // 匿名スキャン（id_token も diag も無い）では property を書かない
+      if (String(p.id_token || '') || diag) noteProbe_(auth.error);
       result = { genkoProbe: true, ok: false, error: 'noauth' };
+      // diag=1 のときだけ失敗理由を返す（auth.error は固定文言のみ・トークン/メールは含めない）
+      if (diag) result.reason = String(auth.error || '').slice(0, 120);
     } else {
       result = {
         genkoProbe: true,

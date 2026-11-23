@@ -23,6 +23,11 @@ a{color:#2563eb}
 <p style="font-size:12px;color:#64748b">site/index.html と同じ ?probe を JSONP→iframe の順で実行し、結果を文字で表示します。スクショを撮ってください。</p>
 
 <div class="card">
+<h2>0. 保存トークンの概要</h2>
+<div id="token-summary" style="font-size:12px;line-height:1.8">確認中…</div>
+</div>
+
+<div class="card">
 <h2>1. site-app2-backend（site/index と site/app2 が使用）</h2>
 <div>URL: <span id="url1" style="font-size:10px;word-break:break-all"></span></div>
 <div style="margin:8px 0">JSONP: <span id="s1j" class="badge wait">実行中…</span> <span id="t1j" style="font-size:11px;color:#64748b"></span></div>
@@ -64,10 +69,11 @@ a{color:#2563eb}
   var WORKER_URL2=(WORKER_BASE && WORKER_BASE.indexOf('REPLACE')===-1 && WORKER_BASE.indexOf('workers.dev')!==-1) ? WORKER_BASE.replace(/\/+$/,'') + '/pdfdrop' : '';
   var URL1=WORKER_URL1 || DIRECT_URL1;
   var URL2=WORKER_URL2 || DIRECT_URL2;
-  document.getElementById('url1').textContent=(WORKER_URL1?WORKER_URL1+'?probe=1&token='+TOKEN+' (Worker) → ':'')+DIRECT_URL1+'?probe=1&token='+TOKEN+' (Direct fallback)  [active:'+URL1+']';
-  document.getElementById('url2').textContent=(WORKER_URL2?WORKER_URL2+'?probe=1&token='+TOKEN+' (Worker) → ':'')+DIRECT_URL2+'?probe=1&token='+TOKEN+' (Direct fallback)  [active:'+URL2+']';
-  document.getElementById('direct1').href=URL1+'?probe=1&token='+TOKEN+'&callback=cb';
-  document.getElementById('direct2').href=URL2+'?probe=1&token='+TOKEN+'&callback=cb';
+  var PROBE_QS='?probe=1&token='+TOKEN+'&diag=1';
+  document.getElementById('url1').textContent=(WORKER_URL1?WORKER_URL1+PROBE_QS+' (Worker) → ':'')+DIRECT_URL1+PROBE_QS+' (Direct fallback)  [active:'+URL1+']';
+  document.getElementById('url2').textContent=(WORKER_URL2?WORKER_URL2+PROBE_QS+' (Worker) → ':'')+DIRECT_URL2+PROBE_QS+' (Direct fallback)  [active:'+URL2+']';
+  document.getElementById('direct1').href=URL1+PROBE_QS+'&callback=cb';
+  document.getElementById('direct2').href=URL2+PROBE_QS+'&callback=cb';
   document.getElementById('direct1').textContent='site-app2-backend を直接開く ('+(WORKER_URL1?'Worker優先':'Directのみ')+')';
   document.getElementById('direct2').textContent='site-pdfdrop を直接開く ('+(WORKER_URL2?'Worker優先':'Directのみ')+')';
 
@@ -76,11 +82,98 @@ a{color:#2563eb}
     el.textContent=text||(ok?'成功':'失敗');
   }
   function fmt(o){ try{ return JSON.stringify(o,null,2);}catch(e){ return String(o);} }
+  function reasonLine(raw){ return (raw && typeof raw.reason!=='undefined' && raw.reason!=='') ? '\nreason: '+String(raw.reason) : ''; }
+
+  // ---- 保存トークンの概要（トークン本文はDOM・consoleに出さない） ----
+  function decodePayloadOnly(raw){
+    try{
+      var parts=String(raw||'').split('.');
+      if(parts.length!==3) return null;
+      var s=parts[1].replace(/-/g,'+').replace(/_/g,'/');
+      while(s.length%4) s+='=';
+      var bin=window.atob(s);
+      var json=null;
+      try{ json=JSON.parse(bin); }
+      catch(e1){
+        var bytes=new Uint8Array(bin.length);
+        for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i)&255;
+        json=JSON.parse(new TextDecoder('utf-8').decode(bytes));
+      }
+      return (json&&typeof json==='object')?json:null;
+    }catch(e){ return null; }
+  }
+  function maskEmail(value){
+    var s=String(value||'');
+    if(!s) return '';
+    var at=s.lastIndexOf('@');
+    if(at<=0||at===s.length-1) return s.slice(0,2)+'***';
+    return s.slice(0,2)+'***@'+s.slice(at+1);
+  }
+  function fmtAud(value){
+    if(typeof value==='string'&&value) return value;
+    if(value instanceof Array&&value.length) return value.join(', ');
+    return 'なし';
+  }
+  function fmtDuration(sec){
+    sec=Math.floor(sec);
+    if(sec<=0) return '切れています（期限切れ）';
+    var d=Math.floor(sec/86400), h=Math.floor((sec%86400)/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+    if(d>0) return '残り '+d+'日'+h+'時間';
+    if(h>0) return '残り '+h+'時間'+m+'分';
+    if(m>0) return '残り '+m+'分'+s+'秒';
+    return '残り '+s+'秒';
+  }
+  function renderTokenSummary(){
+    var box=document.getElementById('token-summary');
+    if(!box) return;
+    box.textContent='';
+    var raw='';
+    try{ raw=T.peekIdToken?String(T.peekIdToken()||''):''; }catch(e){ raw=''; }
+    function row(label,value,level){
+      var d=document.createElement('div');
+      var l=document.createElement('span'); l.style.color='#64748b'; l.textContent=label+'：';
+      var v=document.createElement('span');
+      if(level==='ng'){ v.style.color='#b91c1c'; v.style.fontWeight='700'; v.textContent='⚠ '+value; }
+      else if(level==='warn'){ v.style.color='#b45309'; v.style.fontWeight='700'; v.textContent=value; }
+      else v.textContent=value;
+      d.appendChild(l); d.appendChild(v);
+      return d;
+    }
+    function presenceRow(label,present){
+      var d=document.createElement('div');
+      var l=document.createElement('span'); l.style.color='#64748b'; l.textContent=label+'：';
+      var b=document.createElement('span'); b.className='badge '+(present?'ok':'ng'); b.textContent=present?'あり':'なし';
+      d.appendChild(l); d.appendChild(b);
+      return d;
+    }
+    if(!raw){
+      box.appendChild(presenceRow('保存',false));
+      box.appendChild(row('状態','未ログイン（id_token が保存されていません）','warn'));
+      return;
+    }
+    box.appendChild(presenceRow('保存',true));
+    var len=raw.length;
+    box.appendChild(row('文字数',String(len)+(len>8192?'（8192超：大きすぎます）':''),len>8192?'ng':''));
+    var payload=decodePayloadOnly(raw);
+    var st=null;
+    try{ st=T.inspectToken?T.inspectToken(raw):null; }catch(e){ st=null; }
+    if(payload&&typeof payload.exp==='number'&&isFinite(payload.exp)){
+      var left=payload.exp-Date.now()/1000;
+      box.appendChild(row('exp 残り',fmtDuration(left),left<=0?'ng':''));
+    }else{
+      box.appendChild(row('exp 残り','exp が読めません','ng'));
+    }
+    box.appendChild(row('aud',payload?fmtAud(payload.aud):'不明'));
+    box.appendChild(row('iss',payload&&typeof payload.iss==='string'&&payload.iss?payload.iss:'不明'));
+    box.appendChild(row('email_verified',payload?(payload.email_verified===true?'true':(payload.email_verified===false?'false':'なし')):'不明'));
+    box.appendChild(row('メール',payload&&payload.email?'（伏せ字）'+maskEmail(payload.email):'なし'));
+    if(st) box.appendChild(row('クライアント判定',st.valid?'有効':'無効（'+String(st.reason||'')+'）',st.valid?'':'ng'));
+  }
 
   // 新契約: probeのPOST/GET iframeには rid と parent_origin を付与し、応答のridを検証する
   function probePost(base){
     var rid=T.newNonce();
-    var payload={ probe:1, token:TOKEN, rid:rid };
+    var payload={ probe:1, token:TOKEN, rid:rid, diag:1 };
     var po = T.parentOriginForBackend ? T.parentOriginForBackend() : '';
     if(po) payload.parent_origin=po;
     var idt=getIdToken();
@@ -92,7 +185,7 @@ a{color:#2563eb}
   }
   function probeJsonp(base){
     var rid=T.newNonce();
-    var q='?probe=1&token='+encodeURIComponent(TOKEN)+'&rid='+encodeURIComponent(rid);
+    var q='?probe=1&token='+encodeURIComponent(TOKEN)+'&diag=1&rid='+encodeURIComponent(rid);
     var idt=getIdToken();
     if(idt) q+='&id_token='+encodeURIComponent(idt);
     return T.jsonp(base+q, { timeoutMs:6000, rid:rid })
@@ -104,7 +197,7 @@ a{color:#2563eb}
     var idt=getIdToken();
     if(idt) return probePost(base);
     var rid=T.newNonce();
-    var q='?probe=1&token='+encodeURIComponent(TOKEN);
+    var q='?probe=1&token='+encodeURIComponent(TOKEN)+'&diag=1';
     return T.getViaIframe(base+q, { rid:rid, timeoutMs:5000, kinds:['genkoProbe'] })
       .then(function(r){
         return { ok: !!(r.ok && r.data && r.data.genkoProbe), via:'iframe', ms:r.ms, raw:(r.ok?r.data:null), error:(r.ok?'':(r.error||'no-data')), rid:rid };
@@ -134,14 +227,14 @@ a{color:#2563eb}
     var fin=document.getElementById(fId);
     var det=document.getElementById(dId);
     var r=i.ok?i:j;
-    if(!r||!r.raw||!r.raw.genkoProbe){ fin.textContent='ログインを促す表示（is-warn）'; fin.className='badge ng'; det.textContent='GASから genkoProbe が返りませんでした。token不一致、デプロイ未更新（rid契約）、サードパーティCookieブロックの可能性。 base='+base; }
-    else if(!r.raw.ok){ fin.textContent='エラー（is-warn）'; fin.className='badge ng'; det.textContent=fmt(r.raw); }
-    else if(!r.raw.allowed){ fin.textContent='教室外アカウント（is-out）'; fin.className='badge ng'; det.textContent=fmt(r.raw); }
+    if(!r||!r.raw||!r.raw.genkoProbe){ fin.textContent='ログインを促す表示（is-warn）'; fin.className='badge ng'; det.textContent='GASから genkoProbe が返りませんでした。token不一致、デプロイ未更新（rid契約）、サードパーティCookieブロックの可能性。 base='+base+reasonLine(r&&r.raw); }
+    else if(!r.raw.ok){ fin.textContent='エラー（is-warn）'; fin.className='badge ng'; det.textContent=fmt(r.raw)+reasonLine(r.raw); }
+    else if(!r.raw.allowed){ fin.textContent='教室外アカウント（is-out）'; fin.className='badge ng'; det.textContent=fmt(r.raw)+reasonLine(r.raw); }
     else{
       var isOwner=!!r.raw.is_owner;
       fin.textContent=(isOwner?'先生アカウントでログイン中 ✅':'教室タブレットとしてログイン中 ✅')+'（is-ok） '+(base===WORKER_URL1||base===WORKER_URL2?'[Worker]':'[Direct]');
       fin.className='badge ok';
-      det.textContent=fmt(r.raw);
+      det.textContent=fmt(r.raw)+reasonLine(r.raw);
     }
     return {ok: !!(r && r.raw && r.raw.genkoProbe && r.raw.ok), raw:r && r.raw};
   }
@@ -168,6 +261,8 @@ a{color:#2563eb}
     }
     return res;
   }
+  renderTokenSummary();
+  if(T.onAuthChange) T.onAuthChange(function(){ renderTokenSummary(); });
   runOneWithFallback(WORKER_URL1, DIRECT_URL1,'s1j','t1j','r1j','s1i','t1i','r1i','f1','d1');
   runOneWithFallback(WORKER_URL2, DIRECT_URL2,'s2j','t2j','r2j','s2i','t2i','r2i','f2','d2');
 })();
