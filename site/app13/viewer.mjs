@@ -2,10 +2,12 @@ import * as THREE from 'three';
 import { SCENE_UNITS_PER_AU, positionAt } from './bodies.mjs';
 import { makeSky } from './sky.mjs';
 import { createWorld } from './world.mjs';
+import { makeDust } from './dust.mjs';
 import { makePlanetMaps } from './planet-maps.mjs';
 import {
   easedTravel, observationDistance, orbitAngles, orbitDirection, orbitPitchBounds, overheadPose, travelDistance,
 } from './views.mjs';
+import { approachStreak } from './dust-field.mjs';
 
 const up = new THREE.Vector3(0, 1, 0);
 const sunView = new THREE.Vector3(-15, 8.7, 14).normalize();
@@ -24,10 +26,13 @@ export function createViewer($, chart, onContextLost) {
   skyScene.add(sky.group);
   renderer.autoClear = false;
   const world = createWorld(scene);
+  const dust = makeDust(scene);
   const planetMaps = makePlanetMaps(world.models, renderer.capabilities.maxTextureSize, renderer.capabilities.getMaxAnisotropy());
   const aim = new THREE.Vector3(), direction = new THREE.Vector3();
   const sunward = new THREE.Vector3(), flank = new THREE.Vector3(), eye = new THREE.Vector3();
   const cameraAU = new THREE.Vector3(), bodyAU = new THREE.Vector3(), overviewAU = new THREE.Vector3();
+  const prevAU = new THREE.Vector3(), stepAU = new THREE.Vector3();
+  const currentViewProjection = new THREE.Matrix4(), prevViewProjection = new THREE.Matrix4();
   const relative = new THREE.Vector3(), screen = new THREE.Vector3();
   const viewMatrix = new THREE.Matrix4();
   const aimQuaternion = new THREE.Quaternion();
@@ -41,6 +46,7 @@ export function createViewer($, chart, onContextLost) {
   let days = 0, spinDays = 0, clock = 0, paused = false, rate = Number($('time-rate').value);
   let frame, previousTime, nextChart = 0, nextReadout = 0;
   let perfTime = 0, perfFrames = 0, fastWindows = 0, warmup = 1.4, active = true;
+  let dustPrimed = false, dustSkipStreak = false;
   const modal = () => Boolean(document.querySelector('dialog[open]'));
 
   function updateOverviewPoint(inner = chart.inner()) {
@@ -95,6 +101,11 @@ export function createViewer($, chart, onContextLost) {
     renderer.setSize(width, height, false);
     sky.setQuality(level, ratio);
     world.setQuality(level);
+    dust.setQuality(level);
+    dust.setSize(width, height);
+    // The projection just changed, so the previous frame's matrix is not a
+    // fair comparison: skip one frame of streaks instead of drawing a jump.
+    dustSkipStreak = true;
     $('quality-status').textContent = `自動品質・${qualityNames[level]}`;
     mission.dataset.quality = ['lite', 'eco', 'balanced', 'high'][level];
     updateOverviewPoint(mode === 'return' ? false : chart.inner());
@@ -267,13 +278,30 @@ export function createViewer($, chart, onContextLost) {
       spinDays += stepDays;
       if (!reduced.matches) clock += dt;
     }
+    prevAU.copy(cameraAU);
     pose(dialogOpen ? 0 : elapsed);
     world.place(days, spinDays, cameraAU, orbitOpacity);
+    // The dust field lives camera-relative: a +ΔAU camera step slides it the
+    // other way. The previous frame is projected with last frame's view, so
+    // orbit drags and body-follow motion do not need a rotation approximation.
+    stepAU.subVectors(cameraAU, prevAU).multiplyScalar(-SCENE_UNITS_PER_AU);
+    camera.updateMatrixWorld();
+    currentViewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    const travelProgress = visit?.duration ? Math.min(1, visit.elapsed / visit.duration) : 1;
+    const approach = mode === 'travel' && visit ? approachStreak(travelProgress, visit.same) : 0;
+    const streaking = dustPrimed && !dustSkipStreak;
+    dustSkipStreak = false;
+    dust.update({
+      shift: stepAU,
+      prevViewProjection,
+      streak: streaking ? approach : 0,
+      reduced: reduced.matches, time, pixelRatio: renderer.getPixelRatio(),
+    });
+    dustPrimed = true;
     if (time >= nextReadout) {
       $('elapsed-days').textContent = `経過 ${dayFormat.format(days)} 日`;
       nextReadout = time + 180;
     }
-    camera.updateMatrixWorld();
     planetMaps.update(time, dt, camera, level, coarse.matches, visit?.model);
     // Keep the decorative sky outside the physical depth/frustum budget.
     skyCamera.quaternion.copy(camera.quaternion);
@@ -283,6 +311,8 @@ export function createViewer($, chart, onContextLost) {
     renderer.render(skyScene, skyCamera);
     renderer.clearDepth();
     renderer.render(scene, camera);
+    // Ready for next frame's streak comparison.
+    prevViewProjection.copy(currentViewProjection);
     if (time >= nextChart) { updateMarkers(); nextChart = time + 25; }
     if (!dialogOpen) tuneQuality(elapsed);
   }
@@ -296,7 +326,7 @@ export function createViewer($, chart, onContextLost) {
     level = Math.min(level, ceiling);
     resize();
   };
-  const resetFrameTime = () => { previousTime = undefined; };
+  const resetFrameTime = () => { previousTime = undefined; dustSkipStreak = true; };
   const orbiting = () => active && mode === 'follow' && !modal();
   const rotate = (dx, dy) => {
     const scale = Math.PI / Math.max(240, height);
@@ -347,6 +377,7 @@ export function createViewer($, chart, onContextLost) {
     active = false;
     cancelAnimationFrame(frame);
     planetMaps.dispose();
+    dust.dispose();
     observer.disconnect();
     coarse.removeEventListener('change', pointerModeChanged);
     document.removeEventListener('visibilitychange', resetFrameTime);
