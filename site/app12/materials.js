@@ -24,7 +24,7 @@
   var PAST_POINT = 0.18;
   var NOW_POINT = 0.5;
   var FUTURE_POINT = 0.78;
-  var PAST_BLOCK = { from: 0.15, to: 0.45 };
+  var PAST_BLOCK = { from: 0.15, to: 0.37 };
   var PAST_TO_NOW_BLOCK = { from: 0.15, to: 0.5 };
   var NOW_TO_FUTURE_BLOCK = { from: 0.5, to: 0.87 };
 

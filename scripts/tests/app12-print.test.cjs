@@ -147,12 +147,20 @@ test('[timeline] 現在は全行で中央・点/期間/習慣は相に応じて�
   ['past-simple', 'past-progressive'].forEach((id) => assert.equal(pointAt(id).point, 0.18, id));
   ['present-simple', 'present-progressive'].forEach((id) => assert.equal(pointAt(id).point, 0.5, id));
   ['future-simple', 'future-progressive'].forEach((id) => assert.equal(pointAt(id).point, 0.78, id));
-  assert.deepEqual(plain(pointAt('past-perfect').block), { from: 0.15, to: 0.45 });
+  assert.deepEqual(plain(pointAt('past-perfect').block), { from: 0.15, to: 0.37 });
   assert.deepEqual(plain(pointAt('past-perfect-progressive').block), plain(pointAt('past-perfect').block));
   assert.deepEqual(plain(pointAt('present-perfect').block), { from: 0.15, to: 0.5 });
   assert.deepEqual(plain(pointAt('present-perfect-progressive').block), plain(pointAt('present-perfect').block));
   assert.deepEqual(plain(pointAt('future-perfect').block), { from: 0.5, to: 0.87 });
   assert.deepEqual(plain(pointAt('future-perfect-progressive').block), plain(pointAt('future-perfect').block));
+
+  // 過去完了の終点は現在（0.5）から全軸長の13%以上左に離し、現在完了系と見分けられるようにする
+  const pastEnd = pointAt('past-perfect').block.to;
+  assert.ok(pastEnd <= 0.5 - 0.13, '過去完了の終点は現在から13%以上左: ' + pastEnd);
+  assert.ok(pastEnd > pointAt('past-perfect').block.from, '帯は正の長さを持つ');
+  assert.equal(pastEnd, pointAt('past-perfect-progressive').block.to, '過去完了は2行で同じ終点');
+  assert.equal(pointAt('present-perfect').block.to, 0.5, '現在完了の終点は現在のまま');
+  assert.equal(pointAt('future-perfect').block.from, 0.5, '未来完了の開始は現在のまま');
 });
 
 test('[render] 12行の紙面HTML。時間軸は現在位置が全行一致し、形（点/帯/櫛形）で読み分けられる', () => {
@@ -228,9 +236,19 @@ test('[render] 期間の帯は右端（終端）だけ閉じ、左端は開く�
     assert.equal(/[LlZz]/.test(d), false, '左の縦線・閉じた輪郭を描かない');
   });
   // 既存の開始・終了座標は維持する（左端は開いたまま）
-  assert.ok(html.includes('M 36 9 H 100 V 31'), '過去完了: 過去0.15〜0.45');
+  assert.ok(html.includes('M 36 9 H 84 V 31'), '過去完了: 過去0.15〜0.37');
   assert.ok(html.includes('M 36 9 H 110 V 31'), '現在完了: 過去0.15〜現在');
   assert.ok(html.includes('M 106 9 H 184 V 31'), '未来完了: 現在〜0.87');
+
+  // 過去完了の終点は現在の目盛り(110)から十分左（両過去完了行で同一）
+  const pastOutlines = outlines.filter((tag) => tag.includes('H 84 V 31'));
+  assert.equal(pastOutlines.length, 2, '過去完了形・過去完了進行形の2行');
+  pastOutlines.forEach((tag) => {
+    const endX = Number(tag.match(/H ([\d.]+) V 31/)[1]);
+    assert.equal(endX, 84, '過去完了の終点x');
+    assert.ok(110 - endX >= 26, '現在の目盛りから26px(=全軸長の13%)以上左: ' + (110 - endX));
+  });
+  pastOutlines.forEach((tag) => assert.equal(tag, pastOutlines[0], '過去完了の2行は同じ帯'));
 
   // 基線の目盛りは期間の帯と別に残り、3つとも読める
   assert.equal(count(html, 'x1="110" y1="24" x2="110" y2="31"'), 12, '現在の目盛り');
