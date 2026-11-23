@@ -617,6 +617,50 @@ test('[static] 3テーマ・reduced motion・390px幅の規約に従う', () => 
   assert.equal(read('index.html').includes('setGakusyuTheme'), false);
 });
 
+test('[static] 選択中の経路線は各テーマで元の線色と明確に区別できる', () => {
+  const css = read('app.css');
+  // テーマ変数は :root / html[data-theme=...] に複数ブロックで分かれるため、宣言を横断して拾う。
+  function themeVar(theme, name) {
+    const selector = theme === 'default' ? ':root' : 'html\\[data-theme="' + theme + '"\\]';
+    const re = new RegExp(selector + '\\s*\\{([^}]*)\\}', 'g');
+    let found = '';
+    let m;
+    while ((m = re.exec(css))) {
+      const value = cssValue(m[1], name);
+      if (value) found = value;
+    }
+    return found;
+  }
+  function rgbDistance(a, b) {
+    const dr = parseInt(a.slice(1, 3), 16) - parseInt(b.slice(1, 3), 16);
+    const dg = parseInt(a.slice(3, 5), 16) - parseInt(b.slice(3, 5), 16);
+    const db = parseInt(a.slice(5, 7), 16) - parseInt(b.slice(5, 7), 16);
+    return Math.sqrt(dr * dr + dg * dg + db * db);
+  }
+  const layers = ['--rp-primary', '--rp-secondary', '--rp-academic'];
+  ['default', 'pop', 'forest'].forEach((theme) => {
+    const selected = themeVar(theme, '--rp-select-line');
+    assert.match(selected, /^#[0-9a-f]{6}$/i, theme + ': 選択線の色');
+    const panel = themeVar(theme, '--rp-panel');
+    layers.forEach((name) => {
+      const line = themeVar(theme, name);
+      assert.match(line, /^#[0-9a-f]{6}$/i, theme + ': ' + name);
+      // 選択線を描く全tier（primary/secondary/academic）と、通常線と見分けられる色差を確保する。
+      assert.ok(rgbDistance(selected, line) >= 90,
+        theme + ': 選択線 ' + selected + ' が ' + name + ' ' + line + ' と近すぎる');
+    });
+    // 地図背景（panel相当）に対して図形として 3:1 以上。
+    assert.ok(contrastRatio(selected, panel) >= 3,
+      theme + ': 選択線と背景のコントラスト不足 ' + selected + ' / ' + panel);
+  });
+  // ポップは従来の選択色を維持する（見た目を変えない）。
+  assert.equal(themeVar('pop', '--rp-select-line').toLowerCase(), '#8d3826');
+  // 選択本体（連続ストローク・矢印）は選択色だけを使い、元の線色に戻さない。
+  assert.match(ruleBody(css, '.rp-edge-active'), /stroke:\s*var\(--rp-select-line\)/);
+  assert.match(css, /\.rp-arrowhead--active\s*\{[^}]*fill:\s*var\(--rp-select-line\)/);
+  assert.match(css, /\.rp-classmap__edge-group\.is-selected \.rp-classmap__edge\s*\{[^}]*stroke:\s*var\(--rp-select-line\)/);
+});
+
 test('[static] forest のヘッダーは共通テーマの汎用 header と衝突せず、文字が読める', () => {
   const css = read('app.css');
   const block = themeBlock(css, 'forest');

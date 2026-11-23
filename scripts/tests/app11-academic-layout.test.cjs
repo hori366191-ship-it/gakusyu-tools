@@ -5,9 +5,10 @@
  *
  * 目的:
  *   - 通常 427 物質は data.js のまま不変。アカデミック表示だけ専用座標 positions を持つ。
- *   - 接続 237（通常 101 + 新規 136）を 1 つのネットワークへ移し、未接続 190 だけ別棚へ置く。
- *   - 通常 86 反応 / 学術 178 反応の全 264 マーカーと、通常 207 + 学術 421 = 628 辺を配線する。
+ *   - 接続 255（通常 158 + 新規 97）を 1 つのネットワークへ移し、未接続 172 だけ別棚へ置く。
+ *   - 通常 162 反応 / 学術 152 反応の全 314 マーカーと、通常 375 + 学術 358 = 733 辺を配線する。
  *   - ラベル・マーカー・経路の衝突 0、経路長の大幅短縮（旧 baseline 比）を確認する。
+ *   - 交差は最終経路から独立に数え直し、旧 gate 5,799 と改修前実測 6,111 の 6% 低減を確認する。
  */
 'use strict';
 
@@ -243,18 +244,20 @@ test('[metrics] 全辺の総延長・p95・長辺が旧 baseline から半減す
   assert.equal(stats.count, lengths.length);
   const total = lengths.reduce((s, v) => s + v, 0);
   assert.ok(Math.abs(total - stats.total) < 1, 'stats.total と実測が一致しない');
-  // 総延長の上限。A の label spacing 1.06 + searchMargin 最終出力（298560.12）が旧 0.55 上限
-  // （297814.11）を 746.01px（0.250%）超えるため、上限だけを承認済みの最小値 0.5515
-  // （298626.33）へ更新する。旧出力 275827.94 → 新出力 298560.12（+8.2%）は出力差で、
-  // 上限差 0.250% とは別物。
+  // 総延長の上限は旧 overlay の 0.5515 倍（298626.33）を維持したうえで、
+  // 交差低減の改修前実測 298560.12 を上限にする（改修で総延長は増やさない）。
   const limit = BASELINE.combined.total * 0.5515;
   assert.ok(stats.total <= limit,
     '総延長が旧の50%を切っていない: ' + stats.total + ' > ' + limit);
+  assert.ok(stats.total <= 298560.12,
+    '交差低減の改修前実測より総延長が増えた: ' + stats.total);
   assert.ok(stats.p95 <= BASELINE.combined.p95 * 0.6,
     'p95 が十分に下がっていない: ' + stats.p95);
   assert.ok(stats.max <= BASELINE.combined.max, '最大辺が旧 baseline を超えた: ' + stats.max);
   assert.ok(stats.ge1000 <= Math.floor(BASELINE.combined.ge1000 * 0.5),
     '1000px 以上の辺が多い: ' + stats.ge1000);
+  // 交差低減の改修前実測（同じ定義・同じ 733 辺）は ge1000 57 だったので、長い裾を増やさない。
+  assert.ok(stats.ge1000 <= 57, '1000px 以上の辺が改修前より増えた: ' + stats.ge1000);
   // 学術側だけで見ても旧 508034.9 から半減している。
   assert.ok(L.stats.after.academic.total <= BASELINE.academic.total * 0.5,
     '学術側の総延長: ' + L.stats.after.academic.total);
@@ -264,9 +267,68 @@ test('[metrics] 全辺の総延長・p95・長辺が旧 baseline から半減す
   assert.equal(L.stats.before.combined.crossingPairs, BASELINE.combined.crossingPairs);
   assert.equal(L.stats.before.academic.crossingPairs, BASELINE.academic.crossingPairs);
   assert.equal(L.stats.before.combined.crossingPairs, 5043);
+});
+
+test('[crossings] 交差数は最終経路から測り直した値で、旧 gate と改修前実測の両方を満たす', () => {
+  // canonical な定義: 異なるルートキー同士の線分交差の総数（同一ルート内は除外、
+  // 同一組の複数交差は回数分、同じ反応の別辺（in/out）同士も別キーとして数える）。
+  const recount = () => {
+    const keys = Object.keys(allRoutes).sort();
+    const segs = [];
+    for (const key of keys) {
+      const pts = allRoutes[key].points;
+      for (let i = 0; i < pts.length - 1; i++) {
+        segs.push({
+          key: key,
+          reaction: allRoutes[key].reaction,
+          a: { x: pts[i][0], y: pts[i][1] },
+          b: { x: pts[i + 1][0], y: pts[i + 1][1] }
+        });
+      }
+    }
+    let raw = 0;
+    for (let i = 0; i < segs.length; i++) {
+      const s = segs[i];
+      const minX = Math.min(s.a.x, s.b.x);
+      const maxX = Math.max(s.a.x, s.b.x);
+      const minY = Math.min(s.a.y, s.b.y);
+      const maxY = Math.max(s.a.y, s.b.y);
+      for (let j = i + 1; j < segs.length; j++) {
+        const t = segs[j];
+        if (t.key === s.key) continue;
+        if (Math.max(t.a.x, t.b.x) < minX || Math.min(t.a.x, t.b.x) > maxX) continue;
+        if (Math.max(t.a.y, t.b.y) < minY || Math.min(t.a.y, t.b.y) > maxY) continue;
+        if (!G.segSegIntersection(s.a, s.b, t.a, t.b)) continue;
+        raw++;
+      }
+    }
+    return { raw: raw };
+  };
+  const measured = recount();
   assert.ok(Number.isInteger(L.stats.collisions.crossingPairs));
-  assert.ok(L.stats.collisions.crossingPairs <= L.stats.before.combined.crossingPairs * 1.15,
-    '交差が旧 combined より大きく増えた: ' + L.stats.collisions.crossingPairs);
+  assert.equal(L.stats.crossings.raw, measured.raw, 'stats.crossings.raw が最終経路の実測と一致しない');
+  assert.equal(L.stats.collisions.crossingPairs, measured.raw,
+    'stats.collisions.crossingPairs が最終経路の実測と一致しない（reroute 前の古い値ではない）');
+  assert.ok(typeof L.stats.crossings.definition === 'string' && L.stats.crossings.definition.length > 10,
+    '交差の数え方（定義）をデータに残す');
+  assert.ok(L.stats.crossings.differentReaction <= L.stats.crossings.raw);
+  // 旧 gate（= 旧 combined 5043 × 1.15 = 5799）は据え置き。改修前の同じ定義での実測 6111 を
+  // 基準に 6% 以上の低減（≤ 5744）も要求する（数値を緩めるのではなく、両方を満たす）。
+  const OLD_GATE = 5799;
+  const PRE_RELIEF = 6111;
+  assert.ok(L.stats.crossings.raw <= OLD_GATE, '旧 gate を超えた: ' + L.stats.crossings.raw);
+  assert.ok(L.stats.crossings.raw <= Math.floor(PRE_RELIEF * 0.94),
+    '改修前実測から 6% 以上減っていない: ' + L.stats.crossings.raw);
+  // 改修の before/after は同じ定義・同じ最終データから測った値を残す。
+  const relief = L.stats.crossingRelief;
+  assert.ok(relief, 'crossingRelief の記録がない');
+  assert.equal(relief.definition, L.stats.crossings.definition);
+  assert.equal(relief.before.crossings, PRE_RELIEF, '改修前実測を記録する');
+  assert.equal(relief.after.crossings, measured.raw);
+  assert.ok(relief.changed > 0, '差し替えた辺がない');
+  assert.ok(relief.after.crossings < relief.before.crossings, '交差が減っていない');
+  assert.ok(relief.after.length <= relief.before.length, '差し替えで総延長が増えている');
+  assert.equal(relief.after.length, L.stats.after.combined.total);
 });
 
 test('[baseline] 通常データの座標・経路ラベルは不変（専用レイアウトは書き戻さない）', () => {

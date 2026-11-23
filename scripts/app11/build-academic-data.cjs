@@ -27,6 +27,8 @@ const S = require('./source-data.cjs');
 const N = require('./academic-network-layout.cjs');
 const Q = require('./label-quality.cjs');
 const G = require('./geometry.cjs');
+const X = require('./academic-crossing-relief.cjs');
+const P = require('./academic-paint.cjs');
 
 // ラベル後処理の優先対象（通常モードの代表 + 強5件）。
 const LABEL_PRIORITY = [
@@ -309,8 +311,292 @@ function repairAcademicRoutes(placed, classMap, reactionMeta) {
   };
 }
 
-const ROOT = S.ROOT;
-const SRC = S.SRC;
+function round2(value) {
+  return Math.round(value * 100) / 100;
+}
+
+/**
+ * 交差低減（crossing relief）。物質座標・マーカー座標・ラベル箱・反応・出典は変えず、
+ * 辺の点列だけを、他辺を soft cost にした格子 A* の候補へ差し替える。
+ *
+ * 1. 交差低減: 交差が減り、総延長を増やさない候補だけを採る（伸ばす候補は 2% 以内・
+ *    1000px 未満・交差 10% 減かつ累積短縮の範囲内に限る）。
+ * 2. 短縮: 交差を増やさず 3%（最低 20px）以上短くなる候補だけを採る。
+ * 3. ラベル箱は動かさない。leader は実描画（Core paint）の線へ付け替え、検証に通らなければ
+ *    その反応の辺を元へ戻す。leader を持たないラベルは、帰属が壊れる（箱の貫通 /
+ *    自分の線なし / 異名の逆転）辺を元へ戻す。
+ * 4. 差し戻しで空いた余地を 1 回だけ再探索する（小さめの 2 巡目）。
+ */
+function relieveAcademicCrossings(placed, classMap, reactionMeta) {
+  const markers = Object.assign({}, placed.normalMarkers || {}, placed.markers || {});
+  const routes = {};
+  for (const key of Object.keys(placed.normalRoutes || {})) routes[key] = placed.normalRoutes[key];
+  for (const key of Object.keys(placed.routes || {})) routes[key] = placed.routes[key];
+  const saved = {};
+  const savedLeaders = {};
+  Object.keys(routes).forEach((key) => {
+    saved[key] = routes[key].points.map((p) => p.slice());
+  });
+  Object.keys(markers).forEach((id) => {
+    const label = markers[id].label;
+    if (label && Array.isArray(label.leader) && label.leader.length > 1) {
+      savedLeaders[id] = label.leader.map((p) => p.slice());
+    }
+  });
+  const restoreLeader = (id) => {
+    if (!savedLeaders[id]) return;
+    markers[id].label.leader = savedLeaders[id].map((p) => p.slice());
+  };
+  const beforeCombined = Object.assign({}, (placed.stats.after && placed.stats.after.combined) || {});
+  const beforeReport = X.crossingReport(routes);
+  const beforeCrossings = beforeReport.raw;
+  const beforeCrossingsDifferentReaction = beforeReport.differentReaction;
+  const beforeLength = X.lengthOfAll(routes);
+  const normalizeType = (id) => {
+    const meta = reactionMeta[id] || {};
+    return String(meta.typeLabel == null ? '' : meta.typeLabel).replace(/\s+/g, '');
+  };
+
+  // 実描画線での「自分の線までの距離」を 1 回だけ測り、候補の帰属ガードに使う
+  // （ラベル箱を動かさないので、この距離は差し替え対象の辺が自分の反応でない限り不変）。
+  const beforeGeometry = Q.academicRepairGeometry(placed, classMap, reactionMeta);
+  const beforeLabels = {};
+  Object.keys(markers).forEach((id) => {
+    if (markers[id].label) beforeLabels[id] = markers[id].label;
+  });
+  const beforeMeasured = Q.measureLabels(beforeLabels, beforeGeometry.lines, { ownerLines: beforeGeometry.lines });
+  const ownDistanceOf = (id, fallback) => {
+    const entry = beforeMeasured[id];
+    if (!entry || entry.ownerDistance == null) return fallback;
+    return entry.ownerDistance;
+  };
+
+  const done = new Set();
+  const reverted = [];
+  const guardRounds = [];
+  const rounds = [];
+
+    const revertRoutes = (keys) => {
+    let count = 0;
+    keys.forEach((key) => {
+      if (done.has(key) || !saved[key]) return;
+      routes[key].points = saved[key];
+      restoreLeader(routes[key].reaction);
+      done.add(key);
+      reverted.push(key);
+      count++;
+    });
+    return count;
+  };
+  const revertReactions = (targets) => {
+    const keys = new Set();
+    touchedAll.forEach((key) => {
+      if (!done.has(key) && targets.has(routes[key].reaction)) keys.add(key);
+    });
+    return revertRoutes(keys);
+  };
+
+  let touchedAll = [];
+  const runRound = (reliefOptions, roundLabel) => {
+    const relief = X.relieve({
+      routes: routes,
+      markers: markers,
+      positions: placed.positions,
+      bounds: placed.canvas
+    }, Object.assign({
+      margins: [160, 260],
+      maxTargets: 250,
+      minCrossings: 6,
+      passes: 2,
+      extraLongest: 10,
+      lastPassTargets: 60,
+      labelPad: 3,
+      typeLabelOf: normalizeType,
+      ownDistanceOf: ownDistanceOf,
+      skipKeys: done
+    }, reliefOptions));
+
+    const touched = relief.changed.map((entry) => entry.key)
+      .concat(relief.shortened.map((entry) => entry.key))
+      .filter((key) => !done.has(key));
+    touchedAll = touchedAll.concat(touched);
+    if (touched.length) {
+      // 0. leader を実描画（Core paint）の線へ付け替える。付け替えが検証に通らなければ辺を戻す。
+      const paintEdges = {};
+      Object.keys(routes).forEach((key) => { paintEdges[key] = routes[key]; });
+      const paint = P.buildPaint({
+        positions: placed.positions,
+        markers: markers,
+        edges: paintEdges,
+        nodeW: 136,
+        nodeH: 34
+      });
+      const labelsNow = Object.assign({}, placed.normalMarkers || {}, placed.markers || {});
+      const labelMap = {};
+      Object.keys(labelsNow).forEach((id) => { if (labelsNow[id].label) labelMap[id] = labelsNow[id].label; });
+      const brokenLeaders = new Set();
+      touched.forEach((key) => {
+        if (done.has(key)) return;
+        const id = routes[key].reaction;
+        const label = markers[id] && markers[id].label;
+        if (!label || !savedLeaders[id]) return;
+        const built = P.buildLeader(paint, id, label);
+        if (!built.leader) { brokenLeaders.add(id); return; }
+        const candidate = Object.assign({}, label, { leader: built.leader });
+        const check = P.validateLeader({ paint: paint, id: id, label: candidate, labels: labelMap, markers: markers, positions: placed.positions });
+        if (!check.valid) { brokenLeaders.add(id); return; }
+        label.leader = built.leader;
+      });
+      if (brokenLeaders.size) revertReactions(brokenLeaders);
+
+      // ラベルは動かさない。差し替えた辺が帰属を壊していないかだけを測り、壊す辺を戻す。
+      //    a. ラベル箱の貫通  b. 持ち主線の喪失（own なし / leader 無しで 25px 超）
+      //    c. 異なる typeLabel の線の方が近い（leader 無し）＝実描画の真逆転ゲート相当
+      for (let round = 0; round < 3; round++) {
+        let revertedNow = 0;
+        const pending = touched.filter((key) => !done.has(key));
+        const hits = X.labelHits(routes, Object.assign({}, placed.normalMarkers || {}, placed.markers || {}), pending);
+        const hitKeys = new Set();
+        hits.forEach((_labels, key) => { if (!done.has(key)) hitKeys.add(key); });
+        revertedNow += revertRoutes(hitKeys);
+        const geometry = Q.academicRepairGeometry(placed, classMap, reactionMeta);
+        const labelsNow = Object.assign({}, placed.normalMarkers || {}, placed.markers || {});
+        const labelMap = {};
+        Object.keys(labelsNow).forEach((id) => { if (labelsNow[id].label) labelMap[id] = labelsNow[id].label; });
+        const measured = Q.measureLabels(labelMap, geometry.lines, { ownerLines: geometry.lines });
+        const targets = new Set();
+        Object.keys(measured).forEach((id) => {
+          const own = measured[id].ownerDistance;
+          const margin = measured[id].margin;
+          const label = labelsNow[id] && labelsNow[id].label;
+          const hasLeader = !!(label && Array.isArray(label.leader) && label.leader.length > 1);
+          if (own == null) targets.add(id);
+          else if (own > 25 && !hasLeader) targets.add(id);
+          if (margin != null && margin < 0 && !hasLeader && measured[id].foreignId &&
+              normalizeType(measured[id].foreignId) !== normalizeType(id)) {
+            targets.add(id);
+            targets.add(measured[id].foreignId);
+          }
+        });
+        if (targets.size) revertedNow += revertReactions(targets);
+        guardRounds.push({
+          round: roundLabel + "." + round,
+          targets: targets.size,
+          reverted: revertedNow,
+          labelHits: hitKeys.size
+        });
+        if (!revertedNow) break;
+      }
+    }
+
+rounds.push({
+      round: roundLabel,
+      evaluated: relief.evaluated,
+      changed: relief.changed.length,
+      shortened: relief.shortened.length,
+      crossings: relief.after.crossings,
+      length: relief.after.length
+    });
+  };
+
+  runRound({}, 'pass1');
+  // 差し戻しで戻った辺の余地を、小さめの 2 巡目で拾う。
+  runRound({
+    maxTargets: 120,
+    passes: 1,
+    lastPassTargets: 120,
+    extraLongest: 6,
+    shortenTargets: 20,
+    minShortenLength: 1100,
+    minCrossings: 8
+  }, 'pass2');
+  // 最終整合: 経路が確定した後、leader を実描画線へ合わせる。
+  // separateSharedPorts / enforcePaintClearance は全体最適なので、途中の巡目で作った leader は
+  // 別の辺の差し替えでずれる。ここで全 leader を検証し、直せない反応は辺ごと元へ戻して繰り返す。
+  const reconcileLeaders = () => {
+    let updated = 0;
+    let unfixable = [];
+    for (let iter = 0; iter < 3; iter++) {
+      const paintEdges = {};
+      Object.keys(routes).forEach((key) => { paintEdges[key] = routes[key]; });
+      const paint = P.buildPaint({
+        positions: placed.positions,
+        markers: markers,
+        edges: paintEdges,
+        nodeW: 136,
+        nodeH: 34
+      });
+      const labelsNow = Object.assign({}, placed.normalMarkers || {}, placed.markers || {});
+      const labelMap = {};
+      Object.keys(labelsNow).forEach((id) => { if (labelsNow[id].label) labelMap[id] = labelsNow[id].label; });
+      const broken = new Set();
+      updated = 0;
+      Object.keys(savedLeaders).sort().forEach((id) => {
+        const label = markers[id] && markers[id].label;
+        if (!label) return;
+        const check = P.validateLeader({ paint: paint, id: id, label: label, labels: labelMap, markers: markers, positions: placed.positions });
+        if (check.valid) return;
+        const candidates = P.leaderCandidates(paint, id, label, 60);
+        let chosen = null;
+        for (const leader of candidates) {
+          const probe = P.validateLeader({
+            paint: paint,
+            id: id,
+            label: Object.assign({}, label, { leader: leader }),
+            labels: labelMap,
+            markers: markers,
+            positions: placed.positions
+          });
+          if (probe.valid) { chosen = leader; break; }
+        }
+        if (chosen) {
+          label.leader = chosen;
+          updated++;
+        } else {
+          broken.add(id);
+        }
+      });
+      if (!broken.size) { unfixable = []; break; }
+      // 直せない leader の反応は、差し替えた辺を元へ戻して元の leader に戻す。
+      const revertedNow = revertReactions(broken);
+      unfixable = Array.from(broken);
+      if (!revertedNow) break;
+    }
+    return { updated: updated, unfixable: unfixable };
+  };
+  const leaderReconcile = reconcileLeaders();
+
+  recomputeAcademicStats(placed);
+
+  const finalReport = X.crossingReport(routes);
+  return {
+    definition: X.CROSSING_DEFINITION,
+    evaluated: rounds.reduce((sum, round) => sum + round.evaluated, 0),
+    changed: touchedAll.length - reverted.length,
+    changedKeys: touchedAll.filter((key) => !done.has(key)),
+    shortened: rounds.reduce((sum, round) => sum + round.shortened, 0),
+    reverted: reverted.length,
+    revertedKeys: reverted,
+    guardRounds: guardRounds,
+    leaderUpdates: leaderReconcile.updated,
+    leaderUnfixable: leaderReconcile.unfixable,
+    rounds: rounds,
+    before: {
+      crossings: beforeCrossings,
+      crossingsDifferentReaction: beforeCrossingsDifferentReaction,
+      length: round2(beforeLength),
+      p95: beforeCombined.p95 == null ? 0 : beforeCombined.p95
+    },
+    after: {
+      crossings: finalReport.raw,
+      crossingsDifferentReaction: finalReport.differentReaction,
+      length: X.lengthOfAll(routes),
+      pairs: finalReport.pairCount
+    }
+  };
+}
+
+const ROOT = S.ROOT;const SRC = S.SRC;
 const ACADEMIC_PATH = path.join(SRC, 'academic-reactions.json');
 const NORMAL_DATA_PATH = path.join(ROOT, 'site', 'app11', 'data.js');
 const LAYOUT_PATH = path.join(SRC, 'layout.json');
@@ -647,6 +933,49 @@ function build(opts) {
     labelReport.summary = routeRepair.labelSummary;
   }
 
+  // 交差低減: 端点・座標・事実はそのままに、辺の点列だけを交差の少ない候補へ差し替える。
+  // 差し替え後はラベルを実描画線へ追従させ、最終経路から hard/交差を測り直す。
+  const crossingRelief = options.skipLabels ? null : relieveAcademicCrossings(placed, classMap, reactionMeta);
+  if (crossingRelief && crossingRelief.labelSummary) {
+    labelReport.summary = crossingRelief.labelSummary;
+  }
+
+  // 最終計測: reroute 後の実ジオメトリで衝突と交差を数え直す（build 時の値は reroute 前なので使わない）。
+  const finalRoutes = {};
+  for (const key of Object.keys(placed.normalRoutes || {})) finalRoutes[key] = placed.normalRoutes[key];
+  for (const key of Object.keys(placed.routes || {})) finalRoutes[key] = placed.routes[key];
+  const classRectsFinal = [];
+  if (classMap) {
+    if (classMap.frame) classRectsFinal.push(classMap.frame);
+    (classMap.nodes || []).forEach((node) => classRectsFinal.push(node));
+  }
+  const finalCollisions = X.finalCollisions({
+    routes: finalRoutes,
+    markers: Object.assign({}, placed.normalMarkers || {}, placed.markers || {}),
+    positions: placed.positions,
+    classRects: classRectsFinal
+  });
+  Object.assign(placed.stats.collisions, finalCollisions.counts);
+  placed.stats.crossings = finalCollisions.crossings;
+  placed.stats.crossingRelief = crossingRelief ? {
+    definition: crossingRelief.definition,
+    evaluated: crossingRelief.evaluated,
+    changed: crossingRelief.changed,
+    reverted: crossingRelief.reverted,
+    before: crossingRelief.before,
+    after: crossingRelief.after
+  } : null;
+  const hardKeys = [
+    'nodeNodeOverlaps', 'labelLabelOverlaps', 'labelNodeOverlaps', 'labelClassMapOverlaps',
+    'markerNodeOverlaps', 'markerMarkerOverlaps',
+    'routeNodePenetrations', 'routeLabelPenetrations', 'routeMarkerPenetrations'
+  ];
+  const hardLeft = hardKeys.filter((key) => placed.stats.collisions[key] !== 0);
+  if (hardLeft.length) {
+    throw new Error('学術レイアウト: 衝突が残る: ' +
+      hardLeft.map((key) => key + '=' + placed.stats.collisions[key]).join(', '));
+  }
+
   reactions.forEach((r) => {
     const marker = placed.markers[r.id];
     if (!marker) throw new Error('アカデミック反応のマーカーがない: ' + r.id);
@@ -755,6 +1084,7 @@ function build(opts) {
     reactions: reactions,
     labelReport: labelReport,
     routeRepair: routeRepair,
+    crossingRelief: crossingRelief,
     layout: {
       version: placed.version,
       positions: placed.positions,
@@ -931,6 +1261,20 @@ function main() {
     console.log('学術route救済: targets ' + data.routeRepair.targets + ' / changed ' + data.routeRepair.changed.length +
       ' / 残 ' + (data.routeRepair.remaining || []).length + ' / 不正leader ' + data.routeRepair.invalidLeaders +
       ' / label-line貫通 ' + (data.routeRepair.labelLineHits == null ? '-' : data.routeRepair.labelLineHits));
+  }
+  if (data.crossingRelief) {
+    const relief = data.crossingRelief;
+    console.log('交差低減: 評価 ' + relief.evaluated + ' 辺 / 差し替え ' + relief.changed +
+      ' / 差し戻し ' + relief.reverted +
+      ' / 交差 ' + relief.before.crossings + ' → ' + relief.after.crossings +
+      '（反応違い ' + relief.before.crossingsDifferentReaction + ' → ' + relief.after.crossingsDifferentReaction + '）' +
+      ' / 総延長 ' + relief.before.length + ' → ' + relief.after.length);
+  }
+  const finalStats = data.layout.stats;
+  if (finalStats && finalStats.crossings) {
+    console.log('最終計測: 交差(raw) ' + finalStats.crossings.raw +
+      ' / 反応違い ' + finalStats.crossings.differentReaction +
+      ' / 総延長 ' + finalStats.after.combined.total + ' / p95 ' + finalStats.after.combined.p95);
   }
 }
 

@@ -298,6 +298,25 @@ const targets = Q.collectRepairTargets(geometry);
   他閾値は充足: p95 1,164.69 ≤ 1,511、max 2,853.25 ≤ 3,457.6、ge1000 57 ≤ 113、
   academic.total 146,164.96 ≤ 254,017、crossingPairs 5,755 ≤ 5,799。hard 0（penetration / paintgap /
   fieldbounds）と不変 hash（D 55e806… / 旧86 coords・routes・labels）は据置。
+
+### 交差数 5,755 の訂正（2026-11-19）
+
+上の `crossingPairs 5,755` は **reroute 前の build 時点**（`academic-network-layout.cjs` の
+`collisionStats`）の値で、ラベル再配置と学術 route 救済で辺を差し替えた後の値ではなかった。
+最終データを同じ定義（異なるルートキー同士の線分交差・raw）で測り直すと **6,111**（反応が異なる組のみ
+6,094）で、実際は 5,799 の gate を超えていた。gate を緩めずに直すため、
+`scripts/app11/academic-crossing-relief.cjs` で辺の点列だけを交差の少ない候補へ差し替え、
+build の最後に最終経路から hard collision と交差を測り直すようにした。
+
+- 交差: 6,111 → **5,607**（raw、−8.2%）／反応違い 6,094 → 5,592。旧 gate 5,799 は据え置き、
+  改修前実測比 6% 減の追加 gate（≤ 5,744）も満たす。
+- 総延長: 298,560.12 → **296,810.01**（増やさない）。p95 1,164.69（同じ）、最長辺 2,853.25（同じ）、
+  ge1000 57 → 56。
+- ラベル: direct 195 / leader 111 / **unresolved 8（改修前と同じ）**。leader は実描画（Core paint）で
+  再検証し、直せない反応の辺は元へ戻すため、不正 leader・異名逆転・遠距離 leader 無しは 0 を維持。
+- ラベルを解き直して箱を動かす方式なら交差 4,821 まで下がるが、`unresolved` が 11 件へ増えるため採らない
+  （既存ゲートとラベル品質を優先）。
+
 - 代わりに実 visible label 対応ゲートを強化: leader は実 Core paint（shaft+arrow 塗り, sample 0.25）へ
   終点≈0・≤80・foreign/node/label/leader 横断0。通常26 ID と全80で独立検証、不正 leader 0。
 
