@@ -75,16 +75,34 @@ function baseEnv(db) {
  * Google のモック
  * ------------------------------------------------------------------ */
 
-function makeJwt(payload) {
-  const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
-  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
-  return `${header}.${body}.signature-not-verified-here`;
+const { publicKey: PUBLIC_KEY_1, privateKey: PRIVATE_KEY_1 } = crypto.generateKeyPairSync('rsa', {
+  modulusLength: 2048,
+});
+const { publicKey: PUBLIC_KEY_2, privateKey: PRIVATE_KEY_2 } = crypto.generateKeyPairSync('rsa', {
+  modulusLength: 2048,
+});
+const KID_1 = 'test-kid-1';
+const KID_2 = 'test-kid-2';
+const JWK_1 = { ...PUBLIC_KEY_1.export({ format: 'jwk' }), kid: KID_1, alg: 'RS256', use: 'sig' };
+const JWK_2 = { ...PUBLIC_KEY_2.export({ format: 'jwk' }), kid: KID_2, alg: 'RS256', use: 'sig' };
+
+function makeJwt(payload, { kid = KID_1, privateKey = PRIVATE_KEY_1, alg = 'RS256', header = {} } = {}) {
+  const encodedHeader = Buffer.from(
+    JSON.stringify({ alg, typ: 'JWT', kid, ...header }),
+  ).toString('base64url');
+  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signingInput = `${encodedHeader}.${encodedPayload}`;
+  const signature =
+    alg === 'RS256'
+      ? crypto.sign('RSA-SHA256', Buffer.from(signingInput), privateKey).toString('base64url')
+      : '';
+  return `${signingInput}.${signature}`;
 }
 
-function jsonResponse(body, status = 200) {
+function jsonResponse(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...headers },
   });
 }
 
@@ -96,13 +114,14 @@ function createGoogleDouble() {
     refreshIdToken: null,
     exchangeStatus: 200,
     refreshStatus: 200,
-    tokeninfoStatus: 200,
-    tokeninfoOverrides: {},
+    jwks: { keys: [JWK_1] },
+    jwksStatus: 200,
+    jwksCacheControl: 'public, max-age=3600',
+    onJwks: null,
     onRefresh: null,
-    onTokeninfo: null,
     omitRefreshIdToken: false,
     refreshNetworkError: false,
-    tokeninfoNetworkError: false,
+    jwksNetworkError: false,
   };
   async function fetch(input, init = {}) {
     const url = new URL(String(input));
@@ -113,6 +132,9 @@ function createGoogleDouble() {
       body: init.body === undefined ? null : String(init.body),
       hasSignal: Boolean(init.signal),
       signal: init.signal || null,
+      cache: init.cache,
+      hasCache: Object.prototype.hasOwnProperty.call(init, 'cache'),
+      redirect: init.redirect,
     });
 
     if (url.origin + url.pathname === 'https://oauth2.googleapis.com/token') {
@@ -144,18 +166,11 @@ function createGoogleDouble() {
       return jsonResponse({ error: 'unsupported_grant' }, 400);
     }
 
-    if (url.pathname === '/tokeninfo') {
-      if (state.onTokeninfo) await state.onTokeninfo();
-      if (state.tokeninfoNetworkError) throw new TypeError('fetch failed');
-      if (state.tokeninfoStatus !== 200) return jsonResponse({ error: 'invalid_token' }, state.tokeninfoStatus);
-      const token = url.searchParams.get('id_token') || '';
-      let payload = {};
-      try {
-        payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'));
-      } catch {
-        return jsonResponse({ error: 'invalid_token' }, 400);
-      }
-      return jsonResponse({ ...payload, ...state.tokeninfoOverrides });
+    if (url.origin + url.pathname === 'https://www.googleapis.com/oauth2/v3/certs') {
+      if (state.onJwks) await state.onJwks();
+      if (state.jwksNetworkError) throw new TypeError('fetch failed');
+      if (state.jwksStatus !== 200) return jsonResponse({ error: 'server_error' }, state.jwksStatus);
+      return jsonResponse(state.jwks, 200, { 'cache-control': state.jwksCacheControl });
     }
 
     throw new Error('unexpected fetch: ' + url);
@@ -264,8 +279,7 @@ function loginPayload(ctx, start, { sub = 'sub-1', email = 'person@example.com',
 async function fullLogin(ctx, options = {}) {
   const start = await startLogin(ctx.login, { returnTo: options.returnTo });
   const claims = loginPayload(ctx, start, options);
-  ctx.google.state.idToken = makeJwt(claims);
-  if (options.tokeninfoOverrides) ctx.google.state.tokeninfoOverrides = options.tokeninfoOverrides;
+  ctx.google.state.idToken = makeJwt(claims, options.jwt || {});
   const res = await doCallback(ctx.login, { state: start.state, cookie: start.cookie });
   return { start, res, claims, sessionCookie: findCookie(res, '__Host-classroom_session') };
 }
@@ -503,7 +517,7 @@ test('callback verifies the token, issues a __Host- session cookie and stores en
   const columns = ctx.rows('PRAGMA table_info(classroom_oauth_credentials)').map((column) => column.name);
   assert.ok(!columns.includes('email'), 'credentials table must not have an email column');
 
-  // token exchange / tokeninfo は固定 HTTPS エンドポイントへ
+  // token exchange / JWKS は固定 HTTPS エンドポイントへ
   const tokenCall = ctx.google.calls.find((call) => call.url === 'https://oauth2.googleapis.com/token');
   assert.ok(tokenCall);
   const tokenParams = new URLSearchParams(tokenCall.body);
@@ -515,7 +529,7 @@ test('callback verifies the token, issues a __Host- session cookie and stores en
   assert.equal((tokenParams.get('code_verifier') || '').length, 43);
   assert.ok(!tokenCall.body.includes(start.state));
 
-  assert.ok(ctx.google.calls.some((call) => call.url.startsWith('https://oauth2.googleapis.com/tokeninfo?id_token=')));
+  assert.ok(ctx.google.calls.some((call) => call.url === 'https://www.googleapis.com/oauth2/v3/certs'));
 
   const auth = await ctx.login.authenticate(authRequest(cookiePair(sessionCookie)));
   assert.ok(auth);
@@ -622,14 +636,90 @@ test('callback rejects nonce mismatch and any unverified Google claim without is
     assert.equal(ctx.count('classroom_oauth_credentials'), 0, variant.name);
   }
 
-  // tokeninfo が 200 以外なら拒否
+  // JWKS が 200 以外なら拒否（fail closed）
   const ctx = await setup();
   const start = await startLogin(ctx.login);
   ctx.google.state.idToken = makeJwt(loginPayload(ctx, start));
-  ctx.google.state.tokeninfoStatus = 401;
+  ctx.google.state.jwksStatus = 500;
   const res = await doCallback(ctx.login, { state: start.state, cookie: start.cookie });
-  assert.match(res.headers.get('location'), /login_error=tokeninfo_rejected/);
+  assert.match(res.headers.get('location'), /login_error=jwks_http_server/);
   assert.equal(ctx.count('classroom_sessions'), 0);
+});
+
+test('JWKS verifies RS256, rejects tampering/none, and refetches exactly once for an unknown kid', async () => {
+  // payload 改ざん（署名は元のまま）
+  const tampered = await setup();
+  const tamperedStart = await startLogin(tampered.login);
+  const valid = makeJwt(loginPayload(tampered, tamperedStart));
+  const [header, , signature] = valid.split('.');
+  const forgedPayload = Buffer.from(
+    JSON.stringify({ ...loginPayload(tampered, tamperedStart), sub: 'sub-evil' }),
+  ).toString('base64url');
+  tampered.google.state.idToken = `${header}.${forgedPayload}.${signature}`;
+  const tamperedRes = await doCallback(tampered.login, {
+    state: tamperedStart.state,
+    cookie: tamperedStart.cookie,
+  });
+  assert.match(tamperedRes.headers.get('location'), /login_error=signature_invalid/);
+  assert.equal(tampered.count('classroom_sessions'), 0);
+
+  // alg=none
+  const none = await setup();
+  const noneStart = await startLogin(none.login);
+  none.google.state.idToken = makeJwt(loginPayload(none, noneStart), { alg: 'none' });
+  const noneRes = await doCallback(none.login, { state: noneStart.state, cookie: noneStart.cookie });
+  assert.match(noneRes.headers.get('location'), /login_error=alg_rejected/);
+  assert.equal(none.count('classroom_sessions'), 0);
+
+  // 未知 kid → 1 回だけ再取得し、2 回目の JWKS に新鍵があれば成功
+  const rotated = await setup();
+  const rotatedStart = await startLogin(rotated.login);
+  rotated.google.state.idToken = makeJwt(loginPayload(rotated, rotatedStart), {
+    kid: KID_2,
+    privateKey: PRIVATE_KEY_2,
+  });
+  let rotatedCalls = 0;
+  rotated.google.state.onJwks = async () => {
+    rotatedCalls += 1;
+    if (rotatedCalls === 2) rotated.google.state.jwks = { keys: [JWK_1, JWK_2] };
+  };
+  const rotatedRes = await doCallback(rotated.login, {
+    state: rotatedStart.state,
+    cookie: rotatedStart.cookie,
+  });
+  assert.equal(rotatedRes.headers.get('location'), '/');
+  assert.equal(rotatedCalls, 2);
+  assert.equal(rotated.count('classroom_sessions'), 1);
+
+  // 再取得しても無ければ 401 key_not_found（再取得は 1 回だけ）
+  const unknown = await setup();
+  const unknownStart = await startLogin(unknown.login);
+  unknown.google.state.idToken = makeJwt(loginPayload(unknown, unknownStart), {
+    kid: 'unknown-kid',
+    privateKey: PRIVATE_KEY_2,
+  });
+  let unknownCalls = 0;
+  unknown.google.state.onJwks = async () => {
+    unknownCalls += 1;
+  };
+  const unknownRes = await doCallback(unknown.login, {
+    state: unknownStart.state,
+    cookie: unknownStart.cookie,
+  });
+  assert.match(unknownRes.headers.get('location'), /login_error=key_not_found/);
+  assert.equal(unknownCalls, 2);
+  assert.equal(unknown.count('classroom_sessions'), 0);
+});
+
+test('JWKS cache avoids refetching within the max-age window (including a 5 minute floor)', async () => {
+  const ctx = await setup();
+  ctx.google.state.jwksCacheControl = 'max-age=0';
+  await fullLogin(ctx);
+  await fullLogin(ctx);
+  const certCalls = ctx.google.calls.filter(
+    (call) => call.url === 'https://www.googleapis.com/oauth2/v3/certs',
+  ).length;
+  assert.equal(certCalls, 1);
 });
 
 test('callback requires authorize before the first issue and fails closed when it is absent, denies or throws', async () => {
@@ -697,7 +787,8 @@ test('authenticate refreshes an expired id_token for the same subject only', asy
     aud: CLIENT_ID,
     sub: 'sub-1',
     email: 'person@example.com',
-    email_verified: 'true',
+    email_verified: true,
+    iat: Math.floor(ctx.nowMs() / 1000),
     exp: Math.floor(ctx.nowMs() / 1000) + 3600,
   };
   ctx.google.state.refreshIdToken = makeJwt(refreshedClaims);
@@ -737,6 +828,7 @@ test('refreshed tokens fail closed: clear invalid_grant/subject mismatch -> null
           sub: 'sub-2',
           email: 'other@example.com',
           email_verified: true,
+          iat: Math.floor(ctx.nowMs() / 1000),
           exp: Math.floor(ctx.nowMs() / 1000) + 3600,
         });
       },
@@ -752,6 +844,7 @@ test('refreshed tokens fail closed: clear invalid_grant/subject mismatch -> null
           sub: 'sub-1',
           email: 'person@example.com',
           email_verified: true,
+          iat: Math.floor(ctx.nowMs() / 1000),
           exp: Math.floor(ctx.nowMs() / 1000),
         });
       },
@@ -765,6 +858,7 @@ test('refreshed tokens fail closed: clear invalid_grant/subject mismatch -> null
           sub: 'sub-1',
           email: 'person@example.com',
           email_verified: true,
+          iat: Math.floor(ctx.nowMs() / 1000),
           exp: Math.floor(ctx.nowMs() / 1000) + 3600,
         });
       },
@@ -784,17 +878,20 @@ test('refreshed tokens fail closed: clear invalid_grant/subject mismatch -> null
     { name: 'refresh 400 rate limited', prepare(ctx) { ctx.google.state.refreshStatus = 429; } },
     { name: 'refresh 500', prepare(ctx) { ctx.google.state.refreshStatus = 500; } },
     { name: 'refresh network error', prepare(ctx) { ctx.google.state.refreshNetworkError = true; } },
-    { name: 'tokeninfo 500', prepare(ctx) { ctx.google.state.tokeninfoStatus = 500; } },
-    { name: 'tokeninfo network error', prepare(ctx) { ctx.google.state.tokeninfoNetworkError = true; } },
+    { name: 'JWKS 500', prepare(ctx) { ctx.google.state.jwksStatus = 500; } },
+    { name: 'JWKS network error', prepare(ctx) { ctx.google.state.jwksNetworkError = true; } },
     { name: 'refresh response without id_token', prepare(ctx) { ctx.google.state.omitRefreshIdToken = true; } },
   ];
 
+  const { clearJwksCacheForTests } = await loginModule;
   for (const item of unavailableCases) {
     const ctx = await setup();
     const { sessionCookie } = await fullLogin(ctx);
     const cookie = cookiePair(sessionCookie);
     ctx.advance(2 * 60 * 60);
     item.prepare(ctx);
+    // 初回ログインで温まった JWKS キャッシュを消し、refresh 後の検証で再取得させる。
+    clearJwksCacheForTests(ctx.google.fetch);
     await assertUnavailable(ctx.login.authenticate(authRequest(cookie)));
   }
 });
@@ -856,6 +953,7 @@ test('authenticate fails closed when the credential disappears during the refres
     sub: 'sub-1',
     email: 'person@example.com',
     email_verified: true,
+    iat: Math.floor(ctx.nowMs() / 1000),
     exp: Math.floor(ctx.nowMs() / 1000) + 3600,
   });
   ctx.google.state.onRefresh = async () => {
@@ -1068,6 +1166,7 @@ test('authenticate re-reads the session after Google refresh and returns no idTo
     sub: 'sub-1',
     email: 'person@example.com',
     email_verified: true,
+    iat: Math.floor(ctx.nowMs() / 1000),
     exp: Math.floor(ctx.nowMs() / 1000) + 3600,
   });
 
@@ -1089,6 +1188,7 @@ test('every Google verification call uses a fixed HTTPS endpoint with a bounded 
     sub: 'sub-1',
     email: 'person@example.com',
     email_verified: true,
+    iat: Math.floor(ctx.nowMs() / 1000),
     exp: Math.floor(ctx.nowMs() / 1000) + 3600,
   });
   assert.ok(await ctx.login.authenticate(authRequest(cookiePair(sessionCookie))));
@@ -1098,10 +1198,13 @@ test('every Google verification call uses a fixed HTTPS endpoint with a bounded 
     const url = new URL(call.url);
     assert.equal(url.protocol, 'https:', call.url);
     assert.ok(
-      ['oauth2.googleapis.com', 'accounts.google.com'].includes(url.hostname),
+      ['oauth2.googleapis.com', 'accounts.google.com', 'www.googleapis.com'].includes(url.hostname),
       'unexpected Google host: ' + url.hostname,
     );
     assert.equal(call.hasSignal, true, 'missing abort deadline: ' + call.url);
     assert.ok(call.signal instanceof AbortSignal);
+    // Cloudflare Workers は RequestInit.cache 未実装 / redirect:'error' 非対応。
+    assert.equal(call.hasCache, false, 'RequestInit.cache must not be used: ' + call.url);
+    assert.notEqual(call.redirect, 'error', "RequestInit.redirect must not be 'error': " + call.url);
   }
 });

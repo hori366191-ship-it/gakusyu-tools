@@ -5,7 +5,7 @@
  *  - 既存 GitHub Pages（https://hori366191-ship-it.github.io）の学習面からだけ使う、
  *    認証専用の API。Pages 側の JS は Google Identity Services の popup code model で
  *    取得した `code` だけをこの Worker に POST する。
- *  - OAuth の code→token 交換、tokeninfo 全 claim 検証、既存 GAS probe 許可、
+ *  - OAuth の code→token 交換、JWKS 署名 + 全 claim 検証、既存 GAS probe 許可、
  *    セッション発行はすべてこの Worker（サーバー側）で行う。ブラウザ JS へは
  *    id_token / refresh_token / セッションハンドルを返さない。
  *  - ブラウザへ渡すのは `__Host-gakusyu_session`
@@ -243,7 +243,9 @@ export function createClassroomAuthApi(env, deps = {}) {
   const settings = env || {};
   const db = settings.CLASSROOM_DB;
   const hasDb = Boolean(db && typeof db.prepare === 'function');
-  const fetchImpl = deps.fetchImpl || (globalThis.fetch ? globalThis.fetch.bind(globalThis) : null);
+  // bind しない: JWKS キャッシュは fetchImpl の同一性をキーにするため、
+  // リクエストごとに新しい関数を作らない（本番は global fetch を共有）。
+  const fetchImpl = deps.fetchImpl || (globalThis.fetch ? globalThis.fetch : null);
   const now = typeof deps.now === 'function' ? deps.now : Date.now;
   if (!fetchImpl) throw new TypeError('createClassroomAuthApi requires fetch');
 

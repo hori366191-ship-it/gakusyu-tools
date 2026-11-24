@@ -12,6 +12,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { DatabaseSync } = require('node:sqlite');
+const crypto = require('node:crypto');
 
 const API_ORIGIN = 'https://gakusyu-classroom-auth.hori-shota.workers.dev';
 const SITE_ORIGIN = 'https://hori366191-ship-it.github.io';
@@ -72,16 +73,27 @@ function d1(sqlite) {
   return db;
 }
 
-function makeJwt(payload) {
-  const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
+const { publicKey: PUBLIC_KEY, privateKey: PRIVATE_KEY } = crypto.generateKeyPairSync('rsa', {
+  modulusLength: 2048,
+});
+const KID = 'api-test-kid';
+const JWK = { ...PUBLIC_KEY.export({ format: 'jwk' }), kid: KID, alg: 'RS256', use: 'sig' };
+
+function makeJwt(payload, { kid = KID, alg = 'RS256', privateKey = PRIVATE_KEY } = {}) {
+  const header = Buffer.from(JSON.stringify({ alg, typ: 'JWT', kid })).toString('base64url');
   const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
-  return `${header}.${body}.signature-not-verified-here`;
+  const signingInput = `${header}.${body}`;
+  const signature =
+    alg === 'RS256'
+      ? crypto.sign('RSA-SHA256', Buffer.from(signingInput), privateKey).toString('base64url')
+      : '';
+  return `${signingInput}.${signature}`;
 }
 
-function jsonResponse(body, status = 200) {
+function jsonResponse(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...headers },
   });
 }
 
@@ -97,14 +109,22 @@ function createUpstreamDouble() {
     refreshToken: 'refresh-token-1',
     omitRefreshToken: false,
     exchangeStatus: 200,
-    tokeninfoOverrides: {},
+    jwks: { keys: [JWK] },
+    jwksStatus: 200,
     gasAllowed: true,
   };
 
   async function fetch(input, init = {}) {
     const url = new URL(String(input));
     const method = init.method || 'GET';
-    calls.push({ url: String(input), method, body: init.body === undefined ? null : String(init.body) });
+    calls.push({
+      url: String(input),
+      method,
+      body: init.body === undefined ? null : String(init.body),
+      cache: init.cache,
+      hasCache: Object.prototype.hasOwnProperty.call(init, 'cache'),
+      redirect: init.redirect,
+    });
 
     if (url.origin + url.pathname === 'https://oauth2.googleapis.com/token') {
       const params = new URLSearchParams(String(init.body || ''));
@@ -126,15 +146,9 @@ function createUpstreamDouble() {
       return jsonResponse({ error: 'unsupported_grant' }, 400);
     }
 
-    if (url.pathname === '/tokeninfo') {
-      const token = url.searchParams.get('id_token') || '';
-      let payload = {};
-      try {
-        payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'));
-      } catch {
-        return jsonResponse({ error: 'invalid_token' }, 400);
-      }
-      return jsonResponse({ ...payload, ...state.tokeninfoOverrides });
+    if (url.origin + url.pathname === 'https://www.googleapis.com/oauth2/v3/certs') {
+      if (state.jwksStatus !== 200) return jsonResponse({ error: 'server_error' }, state.jwksStatus);
+      return jsonResponse(state.jwks, 200, { 'cache-control': 'public, max-age=3600' });
     }
 
     if (url.hostname === 'script.google.com') {
@@ -187,7 +201,7 @@ async function setup(overrides = {}) {
     sub: 'sub-1',
     email: 'person@example.com',
     email_verified: true,
-    exp: T0 + 100 * DAY,
+    exp: T0 + 20 * 3600,
     iat: T0,
   };
   upstream.state.claims = claims;
@@ -499,6 +513,11 @@ test('popup-exchange exchanges only the code with a fixed site redirect_uri and 
 
   assert.equal(ctx.count('classroom_sessions'), 1);
   assert.equal(ctx.count('classroom_oauth_credentials'), 1);
+  for (const call of ctx.upstream.calls) {
+    // Cloudflare Workers は RequestInit.cache 未実装 / redirect:'error' 非対応。
+    assert.equal(call.hasCache, false, 'RequestInit.cache must not be used: ' + call.url);
+    assert.notEqual(call.redirect, 'error', "RequestInit.redirect must not be 'error': " + call.url);
+  }
   const row = ctx.sqliteRows('SELECT * FROM classroom_oauth_credentials')[0];
   for (const value of Object.values(row)) {
     assert.ok(!String(value || '').includes('refresh-token-1'));
@@ -520,33 +539,24 @@ test('popup-exchange fails closed when Google omits the refresh token, with a le
   assert.equal(ctx.count('classroom_oauth_credentials'), 0);
 });
 
-test('popup-exchange re-verifies every Google claim, subject consistency and the existing GAS probe', async () => {
+test('popup-exchange re-verifies every Google claim, subject format and the existing GAS probe', async () => {
   const cases = [
     { name: 'aud', overrides: { aud: 'other-client' }, status: 401, error: 'aud_mismatch' },
     { name: 'iss', overrides: { iss: 'https://evil.example' }, status: 401, error: 'iss_mismatch' },
     { name: 'exp', overrides: { exp: T0 - 1 }, status: 401, error: 'token_expired' },
     { name: 'email_verified', overrides: { email_verified: false }, status: 401, error: 'email_not_verified' },
+    { name: 'sub', overrides: { sub: '' }, status: 401, error: 'sub_invalid' },
   ];
 
   for (const item of cases) {
     const ctx = await setup();
-    ctx.upstream.state.tokeninfoOverrides = item.overrides;
+    ctx.upstream.state.idToken = makeJwt({ ...ctx.upstream.state.claims, ...item.overrides });
     const response = await post(ctx.api, '/_classroom/popup-exchange', { code: '4/auth-code-1' });
     assert.equal(response.status, item.status, item.name);
     assert.equal((await bodyOf(response)).error, item.error, item.name);
     assert.equal(findCookie(response, COOKIE), null, item.name);
     assert.equal(ctx.count('classroom_sessions'), 0, item.name);
   }
-
-  const mismatch = await setup();
-  const payload = { ...mismatch.upstream.state.claims, sub: 'sub-other' };
-  mismatch.upstream.state.idToken = makeJwt(payload);
-  // tokeninfo は sub-1 を返すが JWT payload は sub-other（不一致は拒否）。
-  mismatch.upstream.state.tokeninfoOverrides = { sub: 'sub-1' };
-  const mismatchRes = await post(mismatch.api, '/_classroom/popup-exchange', { code: '4/auth-code-1' });
-  assert.equal(mismatchRes.status, 401);
-  assert.equal((await bodyOf(mismatchRes)).error, 'sub_mismatch');
-  assert.equal(mismatch.count('classroom_sessions'), 0);
 
   const denied = await setup();
   denied.upstream.state.gasAllowed = false;
@@ -631,7 +641,7 @@ test('probe/generate/translate reuse the gateway with the partitioned session an
   assert.match(probeBody.context, /^[0-9a-f]{64}$/);
 
   const context = probeBody.context;
-  ctx.advance(DAY);
+  ctx.advance(3600);
   const idleBeforeGenerate = ctx.sqliteRows('SELECT idle_expires_at FROM classroom_sessions')[0].idle_expires_at;
 
   const generate = await post(
@@ -654,7 +664,7 @@ test('probe/generate/translate reuse the gateway with the partitioned session an
   const idleAfterGenerate = ctx.sqliteRows('SELECT idle_expires_at FROM classroom_sessions')[0].idle_expires_at;
   assert.ok(idleAfterGenerate > idleBeforeGenerate);
 
-  ctx.advance(DAY);
+  ctx.advance(3600);
   const idleBeforeTranslate = ctx.sqliteRows('SELECT idle_expires_at FROM classroom_sessions')[0].idle_expires_at;
   const translate = await post(
     ctx.api,
@@ -679,6 +689,10 @@ test('probe/generate/translate reuse the gateway with the partitioned session an
   const gasCalls = ctx.upstream.calls.filter((call) => call.url.includes('script.google.com'));
   assert.ok(gasCalls.some((call) => String(call.body).includes('generateText')));
   assert.ok(gasCalls.some((call) => String(call.body).includes('translateText')));
+  for (const call of ctx.upstream.calls) {
+    assert.equal(call.hasCache, false, 'RequestInit.cache must not be used: ' + call.url);
+    assert.notEqual(call.redirect, 'error', "RequestInit.redirect must not be 'error': " + call.url);
+  }
 });
 
 test('operations reject duplicate session cookies before calling GAS', async () => {

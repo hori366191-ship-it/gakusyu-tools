@@ -482,6 +482,15 @@ test('print confirms probe + rid + request_id, then extends the session', async 
   assert.equal(body.rid, RID);
   assert.equal(body.request_id, REQUEST_ID);
   assert.deepEqual(extensions, [{ op: 'classroom-print', result: { ok: true }, subject: sess.subject }]);
+  // Cloudflare Workers は RequestInit.cache 未実装 / redirect:'error' 非対応。
+  for (const call of fetchImpl.calls) {
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(call.init, 'cache'),
+      false,
+      'RequestInit.cache must not be used: ' + call.url,
+    );
+    assert.notEqual(call.init.redirect, 'error', "RequestInit.redirect must not be 'error': " + call.url);
+  }
 });
 
 /* ── generate / translate ──────────────────────── */

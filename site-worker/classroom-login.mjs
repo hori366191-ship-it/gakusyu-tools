@@ -2,7 +2,8 @@
  * 教室ログインの OAuth/OIDC 境界（Cloudflare Workers / D1）
  *
  * 目的:
- *  - 既存 GAS の tokeninfo + 全 claim 検証は変更しない。その手前で
+ *  - ID token は Google 公式 JWKS の RS256 署名 + 全 claim 検証で確認する
+ *    （tokeninfo には依存しない）。その手前で
  *    「Google OAuth Web-server authorization code flow」(openid email, offline) を行い、
  *    長期ログイン用の refresh token をサーバー側だけに暗号化保存する。
  *  - 長期証明（raw handle / refresh token / id_token）を JS や URL へ渡さない。
@@ -48,7 +49,7 @@
  *    subject 一致・資格情報の存在まで確認する（延長はしない）。明確な不一致は false、
  *    DB 障害や資格情報欠落などの不確定は ClassroomAuthUnavailableError。
  *  - authenticate は refresh 直後にセッションを再読込し、失効/期限切れなら idToken を返さない。
- *  - Google への検証通信（code exchange / refresh / tokeninfo）は固定 HTTPS エンドポイントに
+ *  - Google への検証通信（code exchange / refresh / JWKS）は固定 HTTPS エンドポイントに
  *    対して行い、上限付きの deadline（AbortSignal.timeout）を必ず付ける。
  */
 
@@ -73,7 +74,7 @@ export const DEFAULT_RETURN_TO_ALLOWLIST = Object.freeze([
 
 export const GOOGLE_AUTHORIZE_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
 export const GOOGLE_TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
-export const GOOGLE_TOKENINFO_ENDPOINT = 'https://oauth2.googleapis.com/tokeninfo';
+export const GOOGLE_JWKS_ENDPOINT = 'https://www.googleapis.com/oauth2/v3/certs';
 
 const SCOPE = 'openid email';
 const ALLOWED_ISSUERS = new Set(['accounts.google.com', 'https://accounts.google.com']);
@@ -87,7 +88,26 @@ const MAX_EMAIL_LENGTH = 320;
 const CREDENTIAL_AAD_PREFIX = 'classroom-oauth-credentials:';
 const STATE_AAD_PREFIX = 'classroom-oauth-state:';
 const ID_TOKEN_SKEW_SECONDS = 60;
+const MAX_JWT_HEADER_BYTES = 8 * 1024;
+const MAX_JWT_PAYLOAD_BYTES = 8 * 1024;
+const MAX_IAT_FUTURE_SECONDS = 5 * 60;
+const MAX_TOKEN_LIFETIME_SECONDS = 24 * 60 * 60;
+const JWKS_MIN_TTL_MS = 5 * 60 * 1000;
+const JWKS_MAX_TTL_MS = 60 * 60 * 1000;
+const JWKS_DEFAULT_TTL_MS = 5 * 60 * 1000;
 export const VERIFICATION_TIMEOUT_MS = 10_000;
+
+/**
+ * JWKS のモジュール内メモリキャッシュ。
+ * fetchImpl をキーにする（本番は global fetch、テストはスタブごとに独立）。
+ * 値: { keys: Map<kid, jwk> | null, expiresAt: epoch ms }
+ */
+const jwksCaches = new WeakMap();
+
+/** テスト用: 指定 fetchImpl の JWKS メモリキャッシュを消す（本番経路では呼ばない）。 */
+export function clearJwksCacheForTests(fetchImpl) {
+  if (typeof fetchImpl === 'function') jwksCaches.delete(fetchImpl);
+}
 
 export class ClassroomLoginError extends Error {
   constructor(status, code, unavailable = false) {
@@ -428,12 +448,17 @@ async function postTokenEndpoint(fetchImpl, params) {
           accept: 'application/json',
         },
         body: new URLSearchParams(params).toString(),
+        // Workers は redirect:'error' 非対応。manual で 3xx を追従せず fail closed にする。
+        redirect: 'manual',
       }),
     );
   } catch {
     throw new LoginError(503, 'token_endpoint_unreachable', true);
   }
   if (!response) throw new LoginError(503, 'token_endpoint_unreachable', true);
+  if (response.status >= 300 && response.status < 400) {
+    throw new LoginError(503, 'token_endpoint_unavailable', true);
+  }
   if (response.status === 429 || response.status >= 500) {
     throw new LoginError(503, 'token_endpoint_unavailable', true);
   }
@@ -449,50 +474,205 @@ async function readJsonBody(response) {
 }
 
 /**
- * tokeninfo で Google 検証済み claim を取得し、必須 claim をすべて確認する。
- * 署名未検証 JWT の claim だけで許可しない（tokeninfo の HTTP 200 + 全 claim が条件）。
+ * base64url の厳格デコード。
+ * - 英数字・`-`・`_` のみ（padding `=` は受け入れない）
+ * - length % 4 === 1 は不正
+ * - デコード結果を再エンコードして一致すること（非 canonical を拒否）
  */
-async function verifyIdToken(config, idToken, fetchImpl, nowMs) {
+function decodeBase64urlStrict(value) {
+  if (typeof value !== 'string' || value.length === 0) return null;
+  if (!/^[A-Za-z0-9_-]+$/.test(value)) return null;
+  if (value.length % 4 === 1) return null;
+  const bytes = fromBase64url(value);
+  if (!bytes) return null;
+  return toBase64url(bytes) === value ? bytes : null;
+}
+
+function parseJwtSegment(value, maxBytes) {
+  const bytes = decodeBase64urlStrict(value);
+  if (!bytes || bytes.length > maxBytes) throw new LoginError(401, 'jwt_invalid');
+  let parsed;
+  try {
+    parsed = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+  } catch {
+    throw new LoginError(401, 'jwt_invalid');
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new LoginError(401, 'jwt_invalid');
+  }
+  return parsed;
+}
+
+/** Cache-Control の max-age をミリ秒に変換する（不正・欠落は null）。 */
+function jwksMaxAgeMs(cacheControl) {
+  if (typeof cacheControl !== 'string') return null;
+  const match = /(?:^|,)\s*max-age\s*=\s*"?(\d+)"?/i.exec(cacheControl);
+  if (!match) return null;
+  const seconds = Number(match[1]);
+  if (!Number.isFinite(seconds) || seconds < 0) return null;
+  return seconds * 1000;
+}
+
+function jwksCacheFor(fetchImpl) {
+  let cache = jwksCaches.get(fetchImpl);
+  if (!cache) {
+    cache = { keys: null, expiresAt: 0 };
+    jwksCaches.set(fetchImpl, cache);
+  }
+  return cache;
+}
+
+/** JWKS を取得し、kid -> JWK の Map とキャッシュ TTL を返す。 */
+async function fetchJwks(fetchImpl) {
   let response;
   try {
     response = await fetchImpl(
-      `${GOOGLE_TOKENINFO_ENDPOINT}?id_token=${encodeURIComponent(idToken)}`,
+      GOOGLE_JWKS_ENDPOINT,
       withVerificationDeadline({
         method: 'GET',
-        headers: { accept: 'application/json' },
-        cache: 'no-store',
+        // Cloudflare Workers は RequestInit.cache 未実装のため、ヘッダで no-store を指定する。
+        // redirect は 'error' 非対応なので manual にし、3xx は下で明示的に失敗させる。
+        headers: { accept: 'application/json', 'cache-control': 'no-store' },
+        redirect: 'manual',
       }),
     );
+  } catch (error) {
+    const name = error && typeof error.name === 'string' ? error.name : '';
+    const causeCode =
+      error && error.cause && typeof error.cause.code !== 'undefined'
+        ? String(error.cause.code)
+        : '';
+    const message =
+      error && typeof error.message === 'string' ? error.message.slice(0, 120) : '';
+    console.error(
+      `[classroom] jwks_fetch_failed name=${name} cause=${causeCode} message=${message}`,
+    );
+    const nm =
+      String((error && error.name) || 'error')
+        .toLowerCase()
+        .replace(/[^a-z]/g, '')
+        .slice(0, 20) || 'error';
+    throw new LoginError(503, 'jwks_net_' + nm, true);
+  }
+  if (!response || response.status !== 200) {
+    console.error(
+      '[classroom] jwks_http status=' + (response ? response.status : 'no_response'),
+    );
+    let code = 'jwks_http_other';
+    if (!response) code = 'jwks_no_response';
+    else if (response.status >= 300 && response.status < 400) code = 'jwks_http_redirect';
+    else if (response.status >= 400 && response.status < 500) code = 'jwks_http_client';
+    else if (response.status >= 500 && response.status < 600) code = 'jwks_http_server';
+    throw new LoginError(503, code, true);
+  }
+
+  const body = await readJsonBody(response);
+  const list = body && Array.isArray(body.keys) ? body.keys : null;
+  if (!list || list.length === 0) throw new LoginError(503, 'jwks_unreachable', true);
+
+  const keys = new Map();
+  for (const jwk of list) {
+    if (!jwk || typeof jwk !== 'object') continue;
+    if (jwk.kty !== 'RSA') continue;
+    if (typeof jwk.kid !== 'string' || jwk.kid === '') continue;
+    if (jwk.alg && jwk.alg !== 'RS256') continue;
+    if (jwk.use && jwk.use !== 'sig') continue;
+    keys.set(jwk.kid, jwk);
+  }
+  if (keys.size === 0) throw new LoginError(503, 'jwks_unreachable', true);
+
+  const maxAge = jwksMaxAgeMs(response.headers.get('cache-control'));
+  const ttlMs = Math.min(
+    JWKS_MAX_TTL_MS,
+    Math.max(JWKS_MIN_TTL_MS, maxAge === null ? JWKS_DEFAULT_TTL_MS : maxAge),
+  );
+  return { keys, ttlMs };
+}
+
+async function getJwks(fetchImpl, { force = false } = {}) {
+  if (typeof fetchImpl !== 'function') throw new LoginError(503, 'jwks_unreachable', true);
+  const cache = jwksCacheFor(fetchImpl);
+  if (!force && cache.keys && Date.now() < cache.expiresAt) return cache.keys;
+
+  const { keys, ttlMs } = await fetchJwks(fetchImpl);
+  cache.keys = keys;
+  cache.expiresAt = Date.now() + ttlMs;
+  return keys;
+}
+
+/**
+ * Google 公式 JWKS で ID token の RS256 署名を検証し、必須 claim をすべて確認する。
+ * tokeninfo には依存しない。署名検証に失敗した claim は採用しない。
+ */
+async function verifyIdToken(config, idToken, fetchImpl, nowMs) {
+  if (typeof idToken !== 'string' || idToken.length === 0 || idToken.length > 32 * 1024) {
+    throw new LoginError(401, 'jwt_invalid');
+  }
+  const parts = idToken.split('.');
+  if (parts.length !== 3) throw new LoginError(401, 'jwt_invalid');
+
+  const header = parseJwtSegment(parts[0], MAX_JWT_HEADER_BYTES);
+  if (header.alg !== 'RS256') throw new LoginError(401, 'alg_rejected');
+  if (typeof header.kid !== 'string' || header.kid === '' || header.kid.length > 256) {
+    throw new LoginError(401, 'kid_missing');
+  }
+
+  const payload = parseJwtSegment(parts[1], MAX_JWT_PAYLOAD_BYTES);
+  const signature = decodeBase64urlStrict(parts[2]);
+  if (!signature) throw new LoginError(401, 'signature_invalid');
+
+  let keys = await getJwks(fetchImpl);
+  let jwk = keys.get(header.kid);
+  if (!jwk) {
+    // 未知の kid は鍵ローテーションの可能性があるため、キャッシュ有効中でも 1 回だけ再取得する。
+    keys = await getJwks(fetchImpl, { force: true });
+    jwk = keys.get(header.kid);
+    if (!jwk) throw new LoginError(401, 'key_not_found');
+  }
+
+  let cryptoKey;
+  try {
+    cryptoKey = await crypto.subtle.importKey(
+      'jwk',
+      jwk,
+      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+      false,
+      ['verify'],
+    );
   } catch {
-    throw new LoginError(503, 'tokeninfo_unreachable', true);
+    throw new LoginError(503, 'jwks_invalid', true);
   }
-  if (!response) throw new LoginError(503, 'tokeninfo_unreachable', true);
-  if (response.status === 429 || response.status >= 500) {
-    throw new LoginError(503, 'tokeninfo_unavailable', true);
+
+  let verified = false;
+  try {
+    verified = await crypto.subtle.verify(
+      { name: 'RSASSA-PKCS1-v1_5' },
+      cryptoKey,
+      signature,
+      new TextEncoder().encode(`${parts[0]}.${parts[1]}`),
+    );
+  } catch {
+    verified = false;
   }
-  if (response.status !== 200) throw new LoginError(401, 'tokeninfo_rejected');
-
-  const claims = await readJsonBody(response);
-  if (!claims || typeof claims !== 'object') throw new LoginError(502, 'tokeninfo_invalid', true);
-
-  const audMatches = Array.isArray(claims.aud)
-    ? claims.aud.includes(config.clientId)
-    : claims.aud === config.clientId;
-  if (!audMatches) throw new LoginError(401, 'aud_mismatch');
-
-  if (!ALLOWED_ISSUERS.has(claims.iss)) throw new LoginError(401, 'iss_mismatch');
+  if (!verified) throw new LoginError(401, 'signature_invalid');
 
   const nowSeconds = Math.floor(nowMs / 1000);
-  const exp = Number(claims.exp);
+  const iat = Number(payload.iat);
+  if (!Number.isFinite(iat) || iat > nowSeconds + MAX_IAT_FUTURE_SECONDS) {
+    throw new LoginError(401, 'iat_invalid');
+  }
+  const exp = Number(payload.exp);
   if (!Number.isFinite(exp) || exp <= nowSeconds) throw new LoginError(401, 'token_expired');
+  if (exp - iat > MAX_TOKEN_LIFETIME_SECONDS) throw new LoginError(401, 'token_expired');
 
-  const emailVerified = claims.email_verified === true || claims.email_verified === 'true';
-  if (!emailVerified) throw new LoginError(401, 'email_not_verified');
+  if (payload.aud !== config.clientId) throw new LoginError(401, 'aud_mismatch');
+  if (!ALLOWED_ISSUERS.has(payload.iss)) throw new LoginError(401, 'iss_mismatch');
+  if (payload.email_verified !== true) throw new LoginError(401, 'email_not_verified');
 
-  const sub = typeof claims.sub === 'string' ? claims.sub.trim() : '';
+  const sub = typeof payload.sub === 'string' ? payload.sub.trim() : '';
   if (!sub || sub.length > MAX_SUBJECT_LENGTH) throw new LoginError(401, 'sub_invalid');
 
-  const email = typeof claims.email === 'string' ? claims.email.trim() : '';
+  const email = typeof payload.email === 'string' ? payload.email.trim() : '';
   if (!email || email.length > MAX_EMAIL_LENGTH || !email.includes('@')) {
     throw new LoginError(401, 'email_invalid');
   }
@@ -500,7 +680,7 @@ async function verifyIdToken(config, idToken, fetchImpl, nowMs) {
   return { sub, email, exp };
 }
 
-/** GIS popup code model からも同じ tokeninfo 全 claim 検証を使う。 */
+/** GIS popup code model からも同じ JWKS 署名 + 全 claim 検証を使う。 */
 export const verifyGoogleIdToken = verifyIdToken;
 
 /**
@@ -908,7 +1088,7 @@ export function createClassroomLogin(
       throw new LoginError(502, 'refresh_id_token_missing', true);
     }
 
-    // refresh でも tokeninfo + 全 claim を再検証し、同一 subject だけ許可する
+    // refresh でも JWKS 署名 + 全 claim を再検証し、同一 subject だけ許可する
     const claims = await verifyIdToken(config, body.id_token, fetchImpl, nowMs);
     if (claims.sub !== sessionSubject) throw new LoginError(401, 'refresh_subject_mismatch');
 
@@ -1066,7 +1246,7 @@ export function createClassroomLogin(
    * Google Identity Services の popup code model から受け取った code だけを交換する。
    * - 入力は code のみ。redirect_uri は呼び出しページの origin（固定）を使う。
    * - state/nonce は使わない（popup は公式の exact Origin + X-Requested-With で CSRF 防御）。
-   * - 既存 callback と同じ tokeninfo 全 claim 検証と GAS probe 許可を必須にする。
+   * - 既存 callback と同じ JWKS 署名 + 全 claim 検証と GAS probe 許可を必須にする。
    * - refresh token が無ければ LoginError('refresh_token_missing') を投げ、
    *   呼び出し側が従来 GIS へ安全に戻せるようにする。
    * 返却は { handle, subject } のみ（id_token / refresh token は返さない）。
