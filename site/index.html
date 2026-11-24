@@ -897,7 +897,7 @@
             wrap.appendChild(localOnly);
             wrap.appendChild(makeEl('span', 'classroom-persist__note', '合言葉が未設定（サーバー側の失効は別途必要です）'));
           } else {
-            var clear = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', '保持を解除');
+            var clear = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'ログアウト');
             clear.type = 'button';
             clear.addEventListener('click', openPersistPrompt);
             wrap.appendChild(clear);
