@@ -2055,43 +2055,27 @@ test('app9 PDF: POST応答不明＋poll失敗はauthではなくunknownで終了
   assert.notStrictEqual(explicitAuth.results[0].unknown, true);
 });
 
-test('portal GIS retry: 失敗表示後も#gis-btnを作り直し、再試行で描画・同時initを抑止する（fakeDOM実行）', async () => {
+function findNode(root, pred) {
+  if (!root) return null;
+  if (pred(root)) return root;
+  for (const child of root.children || []) {
+    const found = findNode(child, pred);
+    if (found) return found;
+  }
+  return null;
+}
+
+function runPortalBanner(CS) {
   const html = readSiteFile('index.html');
-  const start = html.indexOf('/* ---- 認証プローブ');
-  assert.ok(start > 0, 'portal probe blockがある');
+  const start = html.lastIndexOf('/* ----', html.indexOf('教室タブレットのバナー'));
+  assert.ok(start > 0, 'portal banner block がある');
   const end = html.indexOf('\n  </script>', start);
   assert.ok(end > start);
   const code = html.slice(start, end);
   const dom = createMiniDom();
-  const calls = { wait: 0, initialize: 0, render: 0 };
-  let pendingResolve = null;
-  let waitCount = 0;
-  const T = {
-    configure() {},
-    getIdToken() { return ''; },
-    setIdToken() {},
-    onAuthChange() {},
-    probeAuth() { return Promise.resolve({ status: 'noauth' }); },
-    waitForGis() {
-      calls.wait++;
-      waitCount++;
-      if (waitCount === 1) return Promise.resolve(false);
-      return new Promise((resolve) => { pendingResolve = resolve; });
-    }
-  };
-  const google = {
-    accounts: {
-      id: {
-        initialize() { calls.initialize++; },
-        renderButton(el) { calls.render++; el.__rendered = true; }
-      }
-    }
-  };
   const sandbox = {
     document: dom.document,
-    T: T,
-    google: google,
-    GIS_CLIENT_ID: 'mock-client-id',
+    GakusyuClassroomApi: CS,
     console,
     Promise,
     Date,
@@ -2100,225 +2084,85 @@ test('portal GIS retry: 失敗表示後も#gis-btnを作り直し、再試行で
     clearTimeout
   };
   const ctx = vm.createContext(sandbox);
-  vm.runInContext('this.window = this; this.GakusyuTransport = this.T; this.google = this.google;', ctx);
+  vm.runInContext('this.window = this;', ctx);
   vm.runInContext(code, ctx);
+  return { dom, code, ctx };
+}
+
+test('portal banner: 専用APIのログインボタン1個で popup→保持中（GIS二段階なし）', async () => {
+  const calls = { status: 0, popup: 0, probe: 0, set: 0 };
+  const CS = {
+    published: true,
+    hasOptIn: () => false,
+    status: () => { calls.status += 1; return Promise.resolve({ ok: true, active: false }); },
+    popupLogin: () => { calls.popup += 1; return Promise.resolve({ ok: true, active: true }); },
+    setOptIn: () => { calls.set += 1; },
+    probe: (t) => { calls.probe += 1; return Promise.resolve({ status: 'ok', isOwner: t === 'app2' }); }
+  };
+  const { dom } = runPortalBanner(CS);
   await wait(10);
 
-  assert.match(dom.banner.className, /is-warn/);
-  assert.strictEqual(findNodeByText(dom.banner, 'Googleログインを読み込めませんでした') !== null, true);
-  assert.ok(dom.byId.get('gis-btn'), '失敗表示でも描画先がある');
-  assert.strictEqual(calls.wait, 1);
+  const login = findNodeByText(dom.banner, '教室タブレットとしてログイン');
+  assert.ok(login, 'ログインボタンがある');
+  assert.strictEqual(findNodeByText(dom.banner, 'ログインし直す'), null);
+  assert.strictEqual(calls.probe, 0, '未ログインでは probe しない');
 
-  // 再試行①: 失敗が続いてもボタン/描画先を再作成し、連打は1回に抑止
-  const retry1 = findNodeByText(dom.banner, '再試行');
-  assert.ok(retry1, '再試行ボタンがある');
-  retry1.click();
-  retry1.click();
-  assert.strictEqual(calls.wait, 2, '同時initはgisPendingで抑止');
-  pendingResolve(false);
+  login.click();
   await wait(10);
-  assert.strictEqual(calls.wait, 2);
-  assert.ok(dom.byId.get('gis-btn'), '2回目の失敗でも描画先がある');
-  const retry2 = findNodeByText(dom.banner, '再試行');
-  assert.ok(retry2, '再試行ボタンが復旧する');
-
-  // 再試行②: 成功してGISボタンを描画
-  retry2.click();
-  retry2.click();
-  assert.strictEqual(calls.wait, 3, '2回目のretryも同時initしない');
-  pendingResolve(true);
-  await wait(10);
-  assert.strictEqual(calls.initialize, 1);
-  assert.strictEqual(calls.render, 1);
-  assert.ok(dom.byId.get('gis-btn'));
-  assert.strictEqual(dom.byId.get('gis-btn').__rendered, true);
-  assert.strictEqual(findNodeByText(dom.banner, '再試行'), null, '成功後は再試行を消す');
+  assert.strictEqual(calls.popup, 1, '1回のポップアップ');
+  assert.ok(findNodeByText(dom.banner, '教室タブレットとしてログイン中（先生アカウント）'), 'probe の isOwner で先生判定');
+  assert.ok(findNodeByText(dom.banner, 'ログアウト'), '保持中はログアウトのみ');
+  assert.strictEqual(findNodeByText(dom.banner, 'この端末でログインを保持'), null);
+  assert.strictEqual(findNodeByText(dom.banner, '保持を解除'), null);
+  assert.ok(calls.set >= 1, '成功時にオプトインを立てる');
 });
 
-test('portal auth: ok表示中も「ログインし直す」でclearIdToken→GIS再表示、復帰probeは60秒で間引く（fakeDOM実行）', async () => {
-  const html = readSiteFile('index.html');
-  const start = html.indexOf('/* ---- 認証プローブ');
-  assert.ok(start > 0, 'portal probe blockがある');
-  const end = html.indexOf('\n  </script>', start);
-  assert.ok(end > start);
-  const code = html.slice(start, end);
-  const dom = createMiniDom();
-  let now = 2000000;
-  let token = 'stored-token';
-  const calls = { clear: 0, probe: 0, pdf: 0, initialize: 0, render: 0 };
-  let authHandler = null;
-  const T = {
-    configure() {},
-    getIdToken() { return token; },
-    peekIdToken() { return token; },
-    setIdToken(v) { token = v; },
-    clearIdToken() { token = ''; calls.clear++; if (authHandler) authHandler(''); },
-    onAuthChange(fn) { authHandler = fn; },
-    waitForGis() { return Promise.resolve(true); },
-    probeAuth(cfg) {
-      calls.probe++;
-      const isPdf = String((cfg && (cfg.workerUrl || cfg.directUrl)) || '').indexOf('pdfdrop') !== -1;
-      if (isPdf) calls.pdf++;
-      return Promise.resolve({ status: token ? 'ok' : 'noauth' });
-    }
+test('portal banner: 保持中のログアウトは合言葉をその場で渡し、成功でログイン表示へ', async () => {
+  const passed = [];
+  const CS = {
+    published: true,
+    hasOptIn: () => true,
+    status: () => Promise.resolve({ ok: true, active: true, passphraseRequired: true }),
+    probe: () => Promise.resolve({ status: 'ok', isOwner: false }),
+    logout: (value) => { passed.push(value); return Promise.resolve({ ok: true }); },
+    setOptIn: () => {}
   };
-  const google = {
-    accounts: {
-      id: {
-        initialize() { calls.initialize++; },
-        renderButton(el) { calls.render++; el.__rendered = true; }
-      }
-    }
-  };
-  const windowListeners = {};
-  const sandbox = {
-    document: dom.document,
-    T,
-    google,
-    GIS_CLIENT_ID: 'mock-client-id',
-    console,
-    Promise,
-    Date: { now: () => now },
-    Object,
-    setTimeout,
-    clearTimeout,
-    addEventListener(type, fn) {
-      if (!windowListeners[type]) windowListeners[type] = [];
-      windowListeners[type].push(fn);
-    }
-  };
-  const ctx = vm.createContext(sandbox);
-  vm.runInContext('this.window = this; this.GakusyuTransport = this.T; this.google = this.google;', ctx);
-  vm.runInContext(code, ctx);
+  const { dom } = runPortalBanner(CS);
   await wait(10);
+  assert.ok(findNodeByText(dom.banner, '教室タブレットとしてログイン中'));
 
-  assert.strictEqual(calls.probe, 2, 'app2 と pdfdrop を probe する');
-  assert.strictEqual(calls.pdf, 1, 'pdfdrop も確認する');
-  assert.match(dom.banner.className, /is-ok/);
-  assert.ok(authHandler, 'authchangeを購読している');
-  const okText = findNodeByText(dom.banner, '教室タブレットとしてログイン中 \u2705');
-  assert.ok(okText, 'ok表示');
-  assert.match(String(okText.title || ''), /印刷アプリ/, 'pdfdropの可否を保証しない旨を注記');
-
-  // ok表示中でも「ログインし直す」が出る
-  const redo = findNodeByText(dom.banner, 'ログインし直す');
-  assert.ok(redo, 'okでもログインし直せる');
-  redo.click();
-  assert.strictEqual(calls.clear, 1, '保存トークンを破棄する');
-  assert.strictEqual(calls.probe, 3, 'authchangeで再probe（明示呼び出しは同一トークンで間引く）');
-  assert.strictEqual(calls.pdf, 1, '未ログインでは pdfdrop へ行かない');
+  findNodeByText(dom.banner, 'ログアウト').click();
+  await wait(0);
+  const input = findNode(dom.banner, (n) => n.tagName === 'INPUT');
+  assert.ok(input && input.type === 'password', '合言葉入力が出る');
+  input.value = 'secret-phrase';
+  const form = findNode(dom.banner, (n) => n.tagName === 'FORM');
+  assert.ok(form && form.listeners.submit, 'form がある');
+  form.listeners.submit[0]({ preventDefault() {} });
   await wait(10);
-  assert.match(dom.banner.className, /is-warn/, '未ログイン表示へ戻す');
-  const gisBtn = dom.byId.get('gis-btn');
-  assert.ok(gisBtn && gisBtn.__rendered, 'GISボタンを再表示する');
-
-  // 復帰時の再probeは前回probeから60秒以上経過したときだけ
-  now += 30000;
-  dom.document.visibilityState = 'visible';
-  dom.dispatch('visibilitychange');
-  assert.strictEqual(calls.probe, 3, '60秒未満は再probeしない');
-  assert.ok((windowListeners.focus || []).length >= 1, 'focusでも復帰確認する');
-  const focus = windowListeners.focus[0];
-  focus({ type: 'focus' });
-  assert.strictEqual(calls.probe, 3, 'focusも間引く');
-  now += 31000;
-  dom.dispatch('visibilitychange');
-  assert.strictEqual(calls.probe, 4, '60秒以上経過したら再probe');
-  await wait(10);
-  assert.match(dom.banner.className, /is-warn/);
-
-  // 非表示化イベントではprobeしない
-  now += 61000;
-  dom.document.visibilityState = 'hidden';
-  dom.dispatch('visibilitychange');
-  assert.strictEqual(calls.probe, 4, 'hiddenでは確認しない');
+  assert.deepStrictEqual(passed, ['secret-phrase'], '入力値をその場で渡す');
+  assert.strictEqual(input.value, '', '入力値を残さない');
+  assert.ok(findNodeByText(dom.banner, '教室タブレットとしてログイン'), '成功でログイン表示へ');
 });
 
-// ── app2: 向き（横⇔縦）の変化で読書を継続する ─────────────────
-test('portal auth: pdfdrop も probe し、両方okは従来表示・pdfdrop失敗は印刷要確認を出す（fakeDOM実行）', async () => {
-  const html = readSiteFile('index.html');
-  const start = html.indexOf('/* ---- 認証プローブ');
-  assert.ok(start > 0, 'portal probe blockがある');
-  const end = html.indexOf('\n  </script>', start);
-  assert.ok(end > start);
-  const code = html.slice(start, end);
-
-  async function run(pdfStatus) {
-    const dom = createMiniDom();
-    const calls = { app2: 0, pdf: 0, pdfCfg: null };
-    let pdfResolve = null;
-    const T = {
-      configure() {},
-      getIdToken() { return 'id-token-1'; },
-      setIdToken() {},
-      onAuthChange() {},
-      waitForGis() { return Promise.resolve(true); },
-      probeAuth(cfg) {
-        const url = String((cfg && (cfg.workerUrl || cfg.directUrl)) || '');
-        if (url.indexOf('pdfdrop') !== -1) {
-          calls.pdf++;
-          calls.pdfCfg = cfg;
-          if (pdfStatus === 'pending') return new Promise((resolve) => { pdfResolve = resolve; });
-          return Promise.resolve({ status: pdfStatus });
-        }
-        calls.app2++;
-        return Promise.resolve({ status: 'ok', isOwner: false });
-      }
-    };
-    const google = { accounts: { id: { initialize() {}, renderButton() {} } } };
-    const sandbox = {
-      document: dom.document,
-      T,
-      google,
-      GIS_CLIENT_ID: 'mock-client-id',
-      console,
-      Promise,
-      Date,
-      Object,
-      setTimeout,
-      clearTimeout
-    };
-    const ctx = vm.createContext(sandbox);
-    vm.runInContext('this.window = this; this.GakusyuTransport = this.T; this.google = this.google;', ctx);
-    vm.runInContext(code, ctx);
-    await wait(10);
-    return { dom, calls, resolve: (v) => { if (pdfResolve) pdfResolve(v); } };
-  }
-
-  // 両方 ok: 従来の表示のまま
-  const both = await run('ok');
-  assert.strictEqual(both.calls.app2, 1);
-  assert.strictEqual(both.calls.pdf, 1, 'app2がokならpdfdropもprobeする');
-  assert.strictEqual(both.calls.pdfCfg.totalMs, 12000, 'pdfdropは短い予算で確認する');
-  assert.match(both.dom.banner.className, /is-ok/);
-  const okText = findNodeByText(both.dom.banner, '教室タブレットとしてログイン中 \u2705');
-  assert.ok(okText, '両方okは従来表示');
-  assert.match(String(okText.title || ''), /印刷アプリ/, 'title注記は維持');
-  assert.ok(findNodeByText(both.dom.banner, 'ログインし直す'), 'ログインし直すは維持');
-
-  // pdfdrop 応答待ちの間は「確認中…」ではなく従来表示にしておく
-  const waiting = await run('pending');
-  assert.strictEqual(waiting.calls.pdf, 1);
-  assert.match(waiting.dom.banner.className, /is-ok/, 'pdfdrop応答待ちでもok表示');
-  assert.ok(findNodeByText(waiting.dom.banner, '教室タブレットとしてログイン中 \u2705'), '待ち中は従来表示');
-  assert.strictEqual(findNodeByText(waiting.dom.banner, '教室タブレットとしてログイン中（印刷は要確認）'), null);
-  waiting.resolve({ status: 'error' });
+test('portal banner: オプトイン無効は status だけ確認し probe しない（期限切れ表示）', async () => {
+  const calls = { status: 0, probe: 0 };
+  const CS = {
+    published: true,
+    hasOptIn: () => true,
+    status: () => { calls.status += 1; return Promise.resolve({ ok: true, active: false, passphraseRequired: true }); },
+    probe: () => { calls.probe += 1; return Promise.resolve({ status: 'ok' }); },
+    setOptIn: () => {}
+  };
+  const { dom } = runPortalBanner(CS);
   await wait(10);
-  assert.ok(findNodeByText(waiting.dom.banner, '教室タブレットとしてログイン中（印刷は要確認）'), '失敗時だけ要確認へ更新');
-
-  // pdfdrop だけ失敗: ログイン状態は落とさず短く印刷要確認を添える
-  const failed = await run('error');
-  assert.strictEqual(failed.calls.app2, 1);
-  assert.strictEqual(failed.calls.pdf, 1);
-  assert.match(failed.dom.banner.className, /is-ok/, 'pdfdrop失敗でもログイン状態は落とさない');
-  const warnText = findNodeByText(failed.dom.banner, '教室タブレットとしてログイン中（印刷は要確認）');
-  assert.ok(warnText, '印刷の要確認を短く添える');
-  assert.match(String(warnText.title || ''), /印刷アプリ/, 'title注記は維持');
-  assert.strictEqual(findNodeByText(failed.dom.banner, '教室タブレットとしてログイン中 \u2705'), null, 'ok記号は出さない');
-  assert.ok(findNodeByText(failed.dom.banner, 'ログインし直す'), '再ログイン導線は維持');
+  assert.strictEqual(calls.status, 1);
+  assert.strictEqual(calls.probe, 0, '無効時は probe しない');
+  assert.ok(findNodeByText(dom.banner, '保持の期限が切れています（ログインし直してください）'));
+  assert.ok(findNodeByText(dom.banner, '教室タブレットとしてログイン'));
+  assert.ok(findNodeByText(dom.banner, 'ログアウト'), '期限切れも同じ合言葉ログアウト');
 });
 
-// ── app2: 向き（横⇔縦）の変化で読書を継続する ─────────────────
 test('app2 orientation: 横→縦は本文表示中だけ本文モードにし、明示backは同縦長で覆さない', () => {
   const app2 = readSiteFile('app2/index.html');
   const ctx = runTestableBlock(app2, 'ORIENTATION', {},

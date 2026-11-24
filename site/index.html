@@ -421,9 +421,9 @@
     <h1 class="hero__title">学習ツール</h1>
     <p class="hero__sub">教室長自作の学習ツール</p>
     <div class="theme-switch" id="theme-switch" role="group" aria-label="デザインテーマ切替">
-      <button type="button" class="theme-switch__btn is-active" data-theme="default">標準</button>
-      <button type="button" class="theme-switch__btn" data-theme="pop">ポップ</button>
-      <button type="button" class="theme-switch__btn" data-theme="forest">フォレスト</button>
+      <button type="button" class="theme-switch__btn" data-theme="default" aria-pressed="false">標準</button>
+      <button type="button" class="theme-switch__btn is-active" data-theme="pop" aria-pressed="true">ポップ</button>
+      <button type="button" class="theme-switch__btn" data-theme="forest" aria-pressed="false">フォレスト</button>
     </div>
     <div class="hero__qr" id="hero-qr">
       <div class="hero__qr-box" id="hero-qr-box"></div>
@@ -1290,7 +1290,11 @@
     function syncUI() {
       var cur = document.documentElement.getAttribute('data-theme');
       if (cur !== 'pop' && cur !== 'forest') cur = 'default';
-      btns.forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-theme') === cur); });
+      btns.forEach(function (b) {
+        var on = b.getAttribute('data-theme') === cur;
+        b.classList.toggle('is-active', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
     }
     btns.forEach(function (b) {
       b.addEventListener('click', function () {

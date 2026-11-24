@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   var KEY = 'gakusyu-theme';
+  var DEFAULT_THEME = 'pop';
   var VALID = { 'pop': 1, 'forest': 1, 'default': 1 };
   // backward compat: old value 'motherduck' -> 'pop'
   var LEGACY = { 'motherduck': 'pop' };
@@ -45,32 +46,34 @@
   // これにより ?theme=付きで開いた後に別タブでテーマ変更→リロードで巻き戻るのを防止
   var stored = getStored();
   var param = getParam();
-  var theme = '';
+  var theme = DEFAULT_THEME;
+  // explicit: 保存値か ?theme= で明示された場合だけ true。
+  // 既定へフォールバックした場合は storage/URL/カードリンクを一切書き換えない。
+  var explicit = false;
   if (stored && VALID[stored]) {
     theme = stored;
+    explicit = true;
     // URLが古いparamのままなら stored に合わせて書き換え（リロード時の巻き戻り防止）
     if (param && param !== stored) {
       updateHistoryTheme(theme);
     }
   } else if (param && VALID[param]) {
     theme = param;
+    explicit = true;
     setStored(theme);
   } else {
-    theme = stored || 'default';
-    if (!VALID[theme]) theme = 'default';
+    theme = DEFAULT_THEME;
   }
   // Normalize: pop/forest are non-default
   if (theme === 'pop' || theme === 'forest') applyTheme(theme);
   else applyTheme('default');
-  // 初回表示時もURLを正規化（stored優先で書き換えた場合や param が無い場合）
-  if (stored && VALID[stored]) {
-    // 既に上で書き換え済みだが、paramが無い場合もURLに反映しておく（共有時の混乱を避けるため初回のみ）
-    // ただし stored が default の場合は URL から theme を除去
-    // ここでは既に updateHistoryTheme で処理済みのため追加処理なし
-  } else if (theme === 'pop' || theme === 'forest') {
-    updateHistoryTheme(theme);
-  } else {
-    updateHistoryTheme('default');
+  // 初回表示時のURL正規化は明示時だけ（既定フォールバックではURLを触らない）
+  if (explicit) {
+    if (stored && VALID[stored]) {
+      // 保存値優先。古い param は上の updateHistoryTheme で処理済み（param が無ければ何もしない）
+    } else {
+      updateHistoryTheme(theme === 'pop' || theme === 'forest' ? theme : 'default');
+    }
   }
 
   function updateCardHrefs(t) {
@@ -92,8 +95,8 @@
       }
     } catch (e) {}
   }
-  // Initial href sync after DOM is ready (for when theme is pop/forest)
-  if (theme === 'pop' || theme === 'forest') {
+  // Initial href sync after DOM is ready (explicit pop/forest only)
+  if (explicit && (theme === 'pop' || theme === 'forest')) {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function () { updateCardHrefs(theme); });
     } else {
@@ -104,13 +107,14 @@
   try {
     window.addEventListener('storage', function (e) {
       if (e.key === KEY) {
-        var v = normalizeTheme(e.newValue || 'default');
-        if (VALID[v || 'default']) {
-          applyTheme(v || 'default');
-          updateCardHrefs(v || 'default');
-          updateHistoryTheme(v || 'default');
-          try { window.dispatchEvent(new CustomEvent('gakusyu-theme-change', { detail: v })); } catch (_) {}
-        }
+        // キー削除（newValue null）は既定（ポップ）に戻す
+        var v = e.newValue ? normalizeTheme(e.newValue) : DEFAULT_THEME;
+        if (!VALID[v]) v = DEFAULT_THEME;
+        applyTheme(v);
+        var urlTheme = (v === DEFAULT_THEME) ? 'default' : v;
+        updateCardHrefs(urlTheme);
+        updateHistoryTheme(urlTheme);
+        try { window.dispatchEvent(new CustomEvent('gakusyu-theme-change', { detail: v })); } catch (_) {}
       }
     });
   } catch (e) {}
@@ -118,7 +122,7 @@
   // Expose global helper for UI
   window.setGakusyuTheme = function (t) {
     t = normalizeTheme(t);
-    if (!VALID[t]) t = 'default';
+    if (!VALID[t]) t = DEFAULT_THEME;
     setStored(t);
     applyTheme(t);
     updateCardHrefs(t);

@@ -54,7 +54,7 @@ design-lab/ … デザイン実験工房（Pages非配信・`site` に影響を�
 
 - `site/` の本流デザインを一切変えずに試作するための隔離工房。Pages配信対象外（`.github/workflows/pages.yml` は `site/` のみを配信）
 - `site/` を複製して `design-lab/portal/` / `design-lab/app1/` 等に配置し、`themes/pop.css` だけで見た目を上書きして検証。ローカルは `python -m http.server 8000` → `http://localhost:8000/design-lab/portal/` で確認
-- 本流 `site/` のデフォルトは従来通り。テーマ切替が必要になった段階で `design-lab/themes/pop.css` → `site/themes/pop.css` へ移植し、`site/index.html` の切替UI（`localStorage` 永続化）で有効化する
+- 本流 `site/` のデフォルトは**ポップ**（未保存・`?theme=` 無しでは `data-theme="pop"`。既定フォールバック時は storage / URL / カードリンクを書き換えない）。テーマ切替は `site/index.html` の切替UI（`localStorage` 永続化）で行う
 
 ### テーマ機構について
 
