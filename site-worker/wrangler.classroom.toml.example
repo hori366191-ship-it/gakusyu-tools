@@ -33,6 +33,9 @@ CLASSROOM_ORIGIN = "https://classroom.example.edu"
 # CLASSROOM_GOOGLE_CLIENT_ID  GIS と同じ OAuth クライアント ID
 # CLASSROOM_GOOGLE_CLIENT_SECRET
 # CLASSROOM_ENCRYPTION_KEY    32 byte を base64url で表現した AES-GCM 鍵
+# CLASSROOM_LOGOUT_PASSPHRASE_HASH  現行は `sha256$<hex64>`
+#   （scripts/classroom-logout-passphrase.mjs で生成）。未設定なら 403 `logout_disabled`。
+#   PBKDF2 形式もパース可能だが Workers では動作せず非推奨。
 
 [[d1_databases]]
 binding = "CLASSROOM_DB"
