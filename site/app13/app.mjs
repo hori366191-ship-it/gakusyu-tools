@@ -207,6 +207,8 @@ function fallback() {
   $('radar').hidden = true;
   $('edge-on').hidden = true;
   $('overview-back').hidden = true;
+  $('compare-earth').hidden = true;
+  $('compare-note').hidden = true;
   chart.useFallback();
   for (const id of ['pause', 'time-rate']) $(id).disabled = true;
   for (const card of destinations.values()) card.disabled = false;

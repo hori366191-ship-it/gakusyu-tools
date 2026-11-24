@@ -389,6 +389,7 @@ export function createWorld(scene) {
   halo.scale.setScalar(sunRadius / 15);
   return {
     models,
+    sunPosition,
     target: id => targets.get(id),
     positionAt(model, days, out) {
       return model.parent ? moons.positionAt(model, days, out) : out.fromArray(positionAt(model.body, days));

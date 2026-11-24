@@ -7,6 +7,8 @@ import { makePlanetMaps } from './planet-maps.mjs';
 import {
   easedTravel, observationDistance, orbitAngles, orbitDirection, orbitPitchBounds, overheadPose, satelliteTransferPoint, travelDistance,
 } from './views.mjs';
+import { comparisonCaption, comparisonDistance, comparisonLayout } from './comparison-layout.mjs';
+import { createEarthComparison } from './comparison.mjs';
 import { approachStreak } from './dust-field.mjs';
 
 const up = new THREE.Vector3(0, 1, 0);
@@ -28,6 +30,16 @@ export function createViewer($, chart, onContextLost, onObservation) {
   renderer.autoClear = false;
   const world = createWorld(scene);
   const dust = makeDust(scene);
+  const earthModel = world.models.find(model => model.body.id === 'earth');
+  const comparison = createEarthComparison({
+    radius: earthModel.radius,
+    polarRadius: earthModel.surface.scale.y,
+    axis: earthModel.axial.quaternion,
+    spin: () => earthModel.surface.rotation.y,
+    sunPosition: world.sunPosition,
+    anisotropy: renderer.capabilities.getMaxAnisotropy(),
+  });
+  scene.add(comparison.group);
   const planetMaps = makePlanetMaps(world.models, renderer.capabilities.maxTextureSize, renderer.capabilities.getMaxAnisotropy());
   const aim = new THREE.Vector3(), direction = new THREE.Vector3();
   const sunward = new THREE.Vector3(), flank = new THREE.Vector3(), eye = new THREE.Vector3();
@@ -36,9 +48,14 @@ export function createViewer($, chart, onContextLost, onObservation) {
   const prevAU = new THREE.Vector3(), stepAU = new THREE.Vector3();
   const currentViewProjection = new THREE.Matrix4(), prevViewProjection = new THREE.Matrix4();
   const relative = new THREE.Vector3(), screen = new THREE.Vector3();
+  const targetScene = new THREE.Vector3();
   const viewMatrix = new THREE.Matrix4();
   const aimQuaternion = new THREE.Quaternion();
   let mode = 'overview', visit, orbitOpacity = 1;
+  let compareOn = false, compareBlend = 0, compareFade = 0;
+  // The fit only changes with the target, projection or base distance, so the
+  // bisection result is cached instead of being solved every frame.
+  const compareFit = { model: undefined, fov: 0, aspect: 0, base: 0, units: 0 };
   // Manual view offsets are measured from the arrival pose of the current
   // visit, so orbit growth and the sunlit side still drive the base view.
   let orbitYaw = 0, orbitPitch = 0, baseElevation = 0;
@@ -68,6 +85,28 @@ export function createViewer($, chart, onContextLost, onObservation) {
     }
   }
 
+  function comparisonPair(model) {
+    return comparisonLayout({
+      targetRadius: model.viewingRadius ?? model.radius,
+      earthRadius: earthModel.radius,
+      ringExtent: ringExtents[model.body.id] ?? 1,
+    });
+  }
+
+  function setComparison(next) {
+    compareOn = Boolean(next) && active && mode === 'follow' && Boolean(visit);
+    $('compare-earth').setAttribute('aria-pressed', String(compareOn));
+    const note = $('compare-note');
+    if (compareOn) {
+      const { body } = visit.model;
+      note.textContent = comparisonCaption(body.name, body.km);
+      note.hidden = false;
+      // Start fetching the map while the camera eases back, so the disc is
+      // already textured when it becomes visible.
+      comparison.prepare();
+    } else note.hidden = true;
+  }
+
   function showMode(next) {
     mode = next;
     mission.dataset.mode = mode;
@@ -77,6 +116,10 @@ export function createViewer($, chart, onContextLost, onObservation) {
     back.hidden = mode === 'overview';
     back.disabled = mode === 'return';
     radar.hidden = mode !== 'follow';
+    // The comparison only makes sense for a settled arrival view. Moving to
+    // another target, a parent or the overhead view resets it.
+    if (mode !== 'follow') setComparison(false);
+    $('compare-earth').hidden = mode !== 'follow';
     const status = $('flight-status');
     if (mode === 'overview') status.textContent = '太陽系・真上';
     else if (mode === 'travel') status.textContent = `接近中・${visit.model.body.name}`;
@@ -183,6 +226,18 @@ export function createViewer($, chart, onContextLost, onObservation) {
   }
 
   function pose(dt) {
+    // The comparison pulls the camera back over a short transition and eases
+    // it home again when switched off. Days and orbit offsets never change.
+    const wantCompare = compareOn && mode === 'follow' ? 1 : 0;
+    if (compareBlend !== wantCompare) {
+      if (reduced.matches) compareBlend = wantCompare;
+      else {
+        const step = Math.min(.12, Math.max(0, dt)) / .5;
+        compareBlend = wantCompare > compareBlend
+          ? Math.min(wantCompare, compareBlend + step)
+          : Math.max(wantCompare, compareBlend - step);
+      }
+    }
     if (mode === 'overview') {
       if (chart.inner() !== priorInner) {
         priorInner = chart.inner();
@@ -254,6 +309,27 @@ export function createViewer($, chart, onContextLost, onObservation) {
       direction.copy(relative).normalize().lerp(eye, easedTravel((progress - (same ? 0 : .27)) / (same ? 1 : .73))).normalize();
       cameraAU.copy(bodyAU).addScaledVector(direction, dist);
     } else {
+      if (compareBlend > .0001) {
+        const baseUnits = distance * SCENE_UNITS_PER_AU;
+        if (compareFit.model !== model || compareFit.fov !== camera.fov
+          || compareFit.aspect !== camera.aspect || compareFit.base !== baseUnits) {
+          compareFit.model = model;
+          compareFit.fov = camera.fov;
+          compareFit.aspect = camera.aspect;
+          compareFit.base = baseUnits;
+          compareFit.units = comparisonDistance({
+            baseDistance: baseUnits, targetRadius: model.viewingRadius ?? model.radius,
+            earthRadius: earthModel.radius, ringExtent: ringExtents[model.body.id] ?? 1,
+            fov: camera.fov, aspect: camera.aspect,
+          });
+        }
+        const fitUnits = compareFit.units;
+        // While the pair does not fit yet the Earth is still growing into the
+        // frame, so it fades in only for the last part of the pull-back.
+        compareFade = fitUnits > baseUnits * 1.002 ? .92 : 0;
+        dist = (baseUnits + (Math.max(baseUnits, fitUnits) - baseUnits) * easedTravel(compareBlend))
+          / SCENE_UNITS_PER_AU;
+      }
       cameraAU.copy(bodyAU).addScaledVector(eye, dist);
     }
     targetLook(model, rings);
@@ -317,6 +393,14 @@ export function createViewer($, chart, onContextLost, onObservation) {
     // orbit drags and body-follow motion do not need a rotation approximation.
     stepAU.subVectors(cameraAU, prevAU).multiplyScalar(-SCENE_UNITS_PER_AU);
     camera.updateMatrixWorld();
+    // Same view-space depth as the target, offset along the camera's right:
+    // both spheres then share one scale while dragging or orbiting.
+    const compareVisibility = easedTravel(compareFade > 0
+      ? (compareBlend - compareFade) / (1 - compareFade) : compareBlend);
+    if (mode === 'follow' && visit && compareVisibility > .004) {
+      targetScene.copy(bodyAU).sub(cameraAU).multiplyScalar(SCENE_UNITS_PER_AU);
+      comparison.place(targetScene, camera, comparisonPair(visit.model).offset, compareVisibility);
+    } else comparison.hide();
     currentViewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
     const travelProgress = visit?.duration ? Math.min(1, visit.elapsed / visit.duration) : 1;
     const approach = mode === 'travel' && visit ? approachStreak(travelProgress, visit.same) : 0;
@@ -410,6 +494,8 @@ export function createViewer($, chart, onContextLost, onObservation) {
     planetMaps.dispose();
     dust.dispose();
     world.disposeMoons();
+    comparison.dispose();
+    setComparison(false);
     observer.disconnect();
     coarse.removeEventListener('change', pointerModeChanged);
     document.removeEventListener('visibilitychange', resetFrameTime);
@@ -422,6 +508,10 @@ export function createViewer($, chart, onContextLost, onObservation) {
     stage.style.touchAction = '';
     renderer.domElement.remove();
     onContextLost();
+  });
+  $('compare-earth').addEventListener('click', () => {
+    if (mode !== 'follow') return;
+    setComparison(!compareOn);
   });
   $('pause').addEventListener('click', () => {
     paused = !paused;
@@ -439,5 +529,6 @@ export function createViewer($, chart, onContextLost, onObservation) {
     travelTo, overview: toOverview,
     observation: () => mode === 'follow' ? visit.model.body : undefined,
     ringEdgeOn: () => mode === 'follow' && visit.edgeOn,
+    comparison: () => compareOn,
   };
 }

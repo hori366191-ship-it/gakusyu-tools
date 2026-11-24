@@ -54,9 +54,11 @@
     <div class="view-actions">
       <button id="moon-open" class="chip" type="button" hidden>衛星</button>
       <button id="parent-back" class="chip" type="button" hidden></button>
+      <button id="compare-earth" class="chip compare-chip" type="button" aria-pressed="false" hidden>地球と比較</button>
       <button id="overview-back" class="chip overview-back" type="button" hidden><span aria-hidden="true">◎</span> 真上から見る</button>
     </div>
     <p id="look-hint" class="look-hint">ドラッグで見回す</p>
+    <p id="compare-note" class="compare-note" hidden></p>
     <p id="announce" class="sr-only" role="status"></p>
 
     <footer class="deck">
@@ -133,6 +135,7 @@
       <h3>科学モデルと演出</h3>
       <p>軌道は太陽を焦点とするケプラーの楕円軌道です。離心率・軌道傾斜・公転周期を反映していますが、初期配置は演出用で、惑星同士の重力や正確な暦は再現しません。自転は恒星に対する周期の近似、惑星の傾きは軌道面に対する概略です。20日/秒・100日/秒では自転も同じ倍率で速くなり、目で追えない場合があります。</p>
       <p>軌道の距離と天体の平均半径に同じ縮尺を使っています。1 AU は約1億4,960万 km です。接近時は天体を拡大せず、カメラとの距離を変えています。8惑星には観測画像をもとにした地図を使い、金星の未観測部分は画像生成AIで補完しています。地球の雲・環・大気・星雲などは観察用の描画です。接近時に流れる塵や小石は観察用の演出で、実寸・実密度ではありません。</p>
+      <p>右下の「地球と比較」を押すと、対象の右側に半透明の地球を同じ縮尺で並べ、大きさを見比べられます。この地球の位置は大きさを比べるための表示で、実際の位置関係や距離を示すものではありません。対象が小さいときやスマートフォンでは、両方が収まるように視点を引きます。</p>
       <p>衛星も同じ縮尺です。親惑星の周りの軌道は平均値を使った近似で、初期位置は演出用です。日食・月食や軌道面の長期変化は再現しません。衛星の接近ビューでは、観測画像を基に、欠損した範囲だけを画像生成AI（OpenAI）で補っています。「観察メモ」の地図で、観測画像を使った範囲と補完した範囲を確認できます。ネレイドは地形を判別できる写真がないため全面が生成画像です。</p>
       <p><a href="../credits.html#solar-references">天体データの出典・クレジット</a></p>
     </div>

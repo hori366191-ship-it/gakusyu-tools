@@ -33,6 +33,12 @@
   text-shadow: 0 1px 8px #050713;
 }
 .mission[data-mode="follow"] .look-hint { display: block; }
+.compare-note {
+  position: absolute; z-index: 2; pointer-events: none; left: 50%; transform: translateX(-50%);
+  top: max(112px, calc(env(safe-area-inset-top) + 96px)); max-width: calc(100% - var(--edge) * 2);
+  color: var(--accent); font-size: 11px; letter-spacing: .05em; white-space: nowrap; text-align: center;
+  text-shadow: 0 1px 8px #050713;
+}
 .screen-shade {
   z-index: -1; pointer-events: none;
   background: linear-gradient(180deg,#080b18bf 0%,transparent 17%,transparent 78%,#080b18e8 100%);
@@ -108,7 +114,10 @@
 .radar h2 { font-size: 20px; }
 .radar p:not(.eyebrow) { font-size: 12px; color: var(--muted); }
 .radar .primary { min-height: 44px; flex: none; }
-.view-actions { position: absolute; right: var(--edge); bottom: 98px; display: flex; gap: 8px; }
+.view-actions {
+  position: absolute; right: var(--edge); bottom: 98px; display: flex; gap: 8px; align-items: center;
+  flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; max-width: calc(100% - var(--edge) * 2);
+}
 .overview-back { color: var(--accent); border-color: #ffcf9970; }
 .moon-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .deck {
@@ -190,6 +199,7 @@
   .sky-note { top: max(60px, calc(env(safe-area-inset-top) + 49px)); font-size: 9px; }
   .mission:is([data-mode="overview"],[data-mode="fallback"]) .sky-note { display: none; }
   .look-hint { top: max(63px, calc(env(safe-area-inset-top) + 50px)); font-size: 10px; letter-spacing: .08em; }
+  .compare-note { top: max(86px, calc(env(safe-area-inset-top) + 73px)); font-size: 10px; letter-spacing: .03em; max-width: calc(100% - 24px); }
   .hero { top: max(71px, calc(env(safe-area-inset-top) + 60px)); right: var(--edge); }
   .hero h1 { font-size: clamp(26px, 6.3vw, 41px); margin: 6px 0 0; }
   .hero h1 br, .hero-copy { display: none; }
@@ -202,6 +212,7 @@
   .radar { inset-inline: var(--edge); max-width: none; bottom: calc(142px + env(safe-area-inset-bottom)); gap: 8px; padding: 9px 12px; }
   .radar h2 { font-size: 18px; }
   .view-actions { bottom: calc(88px + env(safe-area-inset-bottom)); }
+  .view-actions .chip { font-size: 12px; padding-inline: 9px; }
   .deck {
     grid-template-columns: minmax(0,1fr) auto; gap: 3px 7px; bottom: max(8px, env(safe-area-inset-bottom)); padding-top: 6px;
   }
@@ -220,6 +231,7 @@
 }
 @media (max-width: 360px) {
   .hero h1 { font-size: 24px; }
+  .view-actions .chip { font-size: 11px; padding-inline: 6px; }
 }
 @media (min-width: 761px) and (max-height: 610px) {
   .mission { min-height: 420px; }
