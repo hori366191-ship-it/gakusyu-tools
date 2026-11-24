@@ -1,7 +1,10 @@
 # 教室セッション（長期ログイン）設計・運用手順書
 
-状態: **実装済み・未デプロイ**（ローカル実装とテストまで。本番設定・本番デプロイは未実施）。
-本書は文書のみで、コード・構成・デプロイは変更しない。
+状態: **Cloudflare Pages 本番配信済み（2026-11-25）**。専用 Pages の production bundle を配信し、
+`classroom.hori-shota.com` の CNAME を `gakusyu-classroom.pages.dev` へ向けている。
+公式 GET で production の exact origin と D1 binding、secret 5 件、preview 空を確認済み。
+**TLS 証明書・Google ログイン・実印刷/生成は未確認**（作業時点）。
+ビルド/デプロイ手順は第 15 章を正とする（Workers custom domain は過去手順）。
 
 対象（`site-worker/`）:
 
@@ -11,9 +14,12 @@
 | `classroom-gateway.mjs` | HTML/asset 配信、`/_classroom/probe\|print\|generate\|translate` の GAS 中継 |
 | `classroom-login.mjs` | Google OIDC（PKCE）/ Cookie / refresh token 暗号化保存 |
 | `classroom-sessions.mjs` | D1 セッション寿命・延長・失効・purge の実装（正） |
+| `classroom-maintenance-worker.mjs` | cron 専用（日次 purge）。Web 入口なし・D1 binding のみ |
+| `build-classroom-pages.mjs` | Pages（advanced mode）配布物のビルド（単一 `_worker.js` を生成） |
 | `session-migrations/0001_classroom_sessions.sql` | `classroom_sessions` |
 | `session-migrations/0002_classroom_oauth.sql` | `classroom_oauth_states` / `classroom_oauth_credentials` |
-| `wrangler.classroom.toml.example` | 設定の見本（実ファイルは git に追加しない） |
+| `wrangler.classroom.toml.example` | **過去手順**（Workers custom domain）の設定見本 |
+| `wrangler.classroom-maintenance.toml.example` | cron 専用 Worker の設定見本 |
 
 関連: `AGENTS.md`（デプロイ・公開のルール、セキュリティ不変条件）、`site-worker/README.md`（既存 legacy プロキシ）。
 
@@ -59,6 +65,11 @@
 [その他教材・生徒用QR] -> 従来どおり公開 Pages（教室オリジンでは配信しない）
 ```
 
+- 公開面（現行の正）は **Pages Functions advanced mode**。`classroom.<zone>` は Pages の custom domain
+  として登録し、Squarespace 側の権威 DNS に **CNAME 1 件**を追加して Pages を指す。Workers の
+  `routes` / custom domain は使わない（過去手順は `wrangler.classroom.toml.example`）。
+  配布物は `_worker.js` 単一で静的資産を持たず、**全パスを Worker が処理**する。
+  Pages は cron を持てないため、日次 purge だけを `classroom-maintenance-worker.mjs` に分離する。
 - upstream は**定数**で固定（`https://hori366191-ship-it.github.io/gakusyu-tools/`）。任意 URL の
   プロキシにしない（SSRF / オープンプロキシ化の禁止）。GET/HEAD のみ、パスは allowlist。
 - **HTML 配信はポータル / `app2` / `app9` / `app12` のみ**（`/`, `/index.html`, `/app2(/index.html)`,
@@ -153,6 +164,9 @@
 
 **必ず `--config wrangler.classroom.toml` を付け、新専用 Worker だけを対象にする**
 （`--config` を省くと既存 `wrangler.toml` = `gakusyu-tools-proxy` 側に secret が入る）。
+→ これは Workers custom domain 時代の注意。現行の Pages では
+`npx wrangler pages secret put <NAME> --project-name gakusyu-classroom`（**production のみ**）を使い、
+preview 環境へは投入しない。`<NAME>` は第 15 章の表と同じ。
 
 **実設定ファイルは git に追加しない**: `wrangler.classroom.toml.example` をコピーして作る
 `wrangler.classroom.toml`（`.dev.vars` 等も）はコミットしない。追跡されていないことを確認する。
@@ -194,7 +208,12 @@
 ## 9. ローカル確認と本番設定・デプロイの区別
 
 **「動作確認済み」と言えるのは Node テストと Chromium 確認まで**。`wrangler dev` も remote も
-Cloudflare への設定・デプロイも未実施。
+Cloudflare への設定・デプロイも未実施（当時の記録）。
+
+> 現状（2026-11-25）は Pages 本番配信済み。TLS・Google ログイン・実印刷/生成は未確認（冒頭と第 15 章）。
+
+> 注意: 以下は Workers custom domain 時代の記録。公開面は Pages Functions へ切替済みで、
+> 現行手順は第 15 章（P4 / 手順 6 は「過去手順」として読む）。
 
 | 段階 | 内容 | 状態 |
 | --- | --- | --- |
@@ -204,7 +223,9 @@ Cloudflare への設定・デプロイも未実施。
 | P1 本番設定 | D1 作成・`migrations apply`（remote）・secret 投入・`routes` 設定 | **未実施** |
 | P2 GAS | app2 の `classroom_guard` / `require_allowed` 最小変更を既存デプロイ版更新で反映 | **未実施（手順4。Worker 公開前）** |
 | P3 Pages | マーカー切替コードの配信（URL 不変。マーカー無しは従来 UI） | コード実装済み・配信は手順5 |
-| P4 Worker | 新 Worker の限定公開（既存 legacy Worker とは別デプロイ） | **未実施（手順6）** |
+| P4 Worker | 新 Worker の限定公開（既存 legacy Worker とは別デプロイ） | **未実施（手順6・過去手順）** |
+| P4' Pages | Pages project へ build/deploy（`build-classroom-pages.mjs`）→ custom domain → DNS CNAME | **実施済み（2026-11-25）** |
+| P5 cron | `gakusyu-classroom-maintenance`（Web 入口なし・D1 のみ） | **実施済み（日次 cron）。Web/TLS/ログインは未確認** |
 
 本番手順:
 
@@ -282,17 +303,129 @@ Cloudflare への設定・デプロイも未実施。
 
 - OAuth consent screen の testing 例外（basic identity のみ）が実運用で成立するか。
   **実機で 7 日超の継続利用と失効時導線を点検**し、必要なら本番公開を検討。
-- 教室ホスト名（`classroom.<zone>`）と Cloudflare ゾーン設定、`routes` の確定。
+- 教室ホスト名は `classroom.hori-shota.com` で確定。権威 DNS は Squarespace 管理のため、
+  Pages custom domain を外部DNS **CNAME 1 件**（`gakusyu-classroom.pages.dev`）で指す（第 15 章）。
 - 90 日 cap 到達時の UX（再ログイン案内の文言・導線）。
 - 既存 Pages 内の絶対リンクの扱い（許容 or 将来的な相対化）。
 - `site/` のマーカー連動 UI は実装済み（`site/shared/classroom-session.js` ほか）。マーカーが無い
   従来 Pages では従来 UI のままで、URL・legacy Worker は不変。
 
-## 15. 参考
+## 15. 公開面の切替: Pages Functions + 外部DNS CNAME（正）
+
+`classroom.hori-shota.com` の権威 DNS は Squarespace 側で管理されており、Cloudflare 側で
+custom domain を「Workers」として持つ方式をやめ、**Pages の custom domain を外部DNS CNAME で指す**。
+既存 GitHub Pages・legacy Worker（`worker.js` / `wrangler.toml`）・GAS・OAuth 本体は変更しない。
+
+現状（2026-11-25 時点）:
+
+- 専用 Pages（`gakusyu-classroom`）の **production bundle を配信**。公式 GET で production の
+  exact origin（`CLASSROOM_ORIGIN`）と D1 binding（`CLASSROOM_DB`）、**secret 5 件**、**preview 空**を確認。
+- `*.pages.dev` と production の deployment alias は **404（`Set-Cookie` なし）**。
+- メンテ Worker（`gakusyu-classroom-maintenance`）は日次 cron で稼働（public host / preview 無効）。
+- Squarespace の権威 DNS に **`classroom` の CNAME → `gakusyu-classroom.pages.dev` を 1 件だけ追加**。
+  権威 DNS / Google / Cloudflare の解決が一致し、既存 apex の A / NS / MX は不変。
+- **未確認**: TLS 証明書の発行完了、Google ログイン、実印刷/生成（作業時点では未確認）。
+
+### 15.1 配布物（ソース複製なし・単一 `_worker.js`）
+
+```powershell
+# ビルド + オフライン検証（wrangler 未導入なら WRANGLER_JS=<wrangler/bin/wrangler.js> を指定）
+node site-worker\build-classroom-pages.mjs
+```
+
+- 出力: `site-worker/.pages-classroom/dist/_worker.js`（git 管理外）と同 `wrangler.toml`。
+- 中身は `classroom-worker.mjs` のバンドル（`export default`）をそのまま Pages advanced mode で使う。
+- **静的資産ゼロ**。`_routes.json` / `index.html` を置かず、全パスを Worker が処理する
+  （`dist` が `_worker.js` だけであることをビルドが検査）。
+- ビルドは `wrangler deploy --dry-run --outdir` で束ねる（ネットワーク不要・追加依存なし）。
+- 検証（`--no-verify` で省略可）: 設定不足 503 / pages.dev・preview・別ホスト 404 /
+  `/_classroom/login` 未設定 503、のいずれも `Set-Cookie` を返さないこと。
+- ローカル疎通（任意）: `cd site-worker\.pages-classroom` →
+  `npx wrangler pages dev dist --d1 CLASSROOM_DB --binding CLASSROOM_ORIGIN=https://classroom.hori-shota.com`
+  （localhost は exact origin guard で 404、binding 不足なら 503）。
+
+### 15.2 なぜ isolated cwd で deploy するか
+
+Wrangler 4.167 は `wrangler pages deploy --config <file>` を**明示的に拒否**する。
+`.pages-classroom/` に実名 `wrangler.toml` と `dist` を置き、そこを cwd にして deploy する。
+
+```powershell
+cd site-worker\.pages-classroom
+npx wrangler pages deploy dist --project-name gakusyu-classroom --branch master
+```
+
+- `--branch master` は production（プロジェクトの production branch）を作るため。preview を使わない。
+- **プロジェクトは既存の `gakusyu-classroom`（Pages）を使う**。新規作成しない（4.167 の
+  `pages project create` はエージェント検出時に Workers へ委譲し得る）。
+  先に `npx wrangler pages project list` で Pages プロジェクトとして存在することを確認する。
+- **deploy は生成 `wrangler.toml` を正本としてプロジェクト設定を上書きする**（実測: dashboard の
+  production `CLASSROOM_DB` / `CLASSROOM_ORIGIN` は解除され、secret 5 件だけ残った）。
+  そのため生成 config は production の var と D1 binding を明示する（15.3）。
+  deploy 直前にプロジェクト設定の snapshot を取り、deploy 後に production の
+  binding / var / secret 名を再確認する（preview が空であることも確認）。
+
+### 15.3 設定・secret は production のみ
+
+生成 `wrangler.toml` は **production の binding / var を明示**する（deploy が正本として上書きするため）。
+
+| 種別 | 名前 | 設定場所 |
+| --- | --- | --- |
+| 平文 var | `CLASSROOM_ORIGIN` = `https://classroom.hori-shota.com` | 生成 `wrangler.toml` の `[env.production.vars]`（host 固定） |
+| binding | `CLASSROOM_DB`（D1, name = `gakusyu-classroom`） | 生成 `wrangler.toml` の `[[env.production.d1_databases]]` |
+| 平文 var（任意） | `CLASSROOM_CONTEXT_PEPPER` | **今回は未使用**（推奨設定としない）。dashboard にだけ置いた値は deploy（生成 config が正本）で消えるため、使うなら生成 config 側に持たせる必要がある |
+| secret | 第 6 章の 5 つ | dashboard の暗号化 secret（**production のみ**）。生成 config には絶対に書かない |
+
+- D1 の実 UUID は **`CLASSROOM_D1_DATABASE_ID`**（環境変数）または git 管理外の
+  `site-worker/wrangler.classroom-maintenance.toml` / `wrangler.classroom.toml` の `database_id`
+  から解決する。プレースホルダー・UUID 形式不正・複数記載は拒否し、**値をログ・エラー・コミットに出さない**。
+- preview 用セクション（`[env.preview]`）は**空のまま**。preview に binding / var を設定しない。
+- D1 の migration は Web 側と maintenance 側で**同じ DB**。適用はどちらか 1 回だけ行う。
+- `wrangler pages dev` は localhost で exact origin guard により 404/503 になることしか確認できない。
+  deploy 後の **production binding / var / secret 名**は別途確認する（`pages dev` は `[env.production]`
+  を読まないため、dev の binding 表示を本番設定の確認に使わない）。
+
+### 15.4 公開順（この順を守る）
+
+1. dashboard の production secret（5 件）を確認し、プロジェクト設定の snapshot を取る
+2. `build-classroom-pages.mjs`（production の var / D1 を生成）→ `pages deploy`（production）
+3. Pages 側で custom domain `classroom.hori-shota.com` を登録（この時点で Pages が CNAME 先を提示）
+4. **既存の Squarespace の権威 DNS 管理画面**で `classroom` の **CNAME 1 件**だけを追加
+   （値は手順 3 の提示先。apex の A / NS / MX は変更しない）
+5. TLS 証明書の発行・`https://classroom.hori-shota.com/` の 200 と
+   `/_classroom/login` → callback → 印刷/生成 → logout をテストアカウント 1 件で確認
+6. 利用者へ案内（既存 Pages / legacy Worker / GAS の URL は書き換えない）
+
+- Pages の `*.pages.dev` / preview URL は**公開先にしない**。distinct origin のため
+  gateway の exact origin guard で 404、settings 不足時は 503 に倒れる（fail closed）。
+- HTML allowlist 外は GitHub Pages へ 302（クロスオリジンなので教室 Cookie は送られない）。
+
+### 15.5 cron（Pages 非対応の分離）
+
+```powershell
+Copy-Item site-worker\wrangler.classroom-maintenance.toml.example site-worker\wrangler.classroom-maintenance.toml
+# database_id を記入（git 追加しない）
+cd site-worker
+npx wrangler deploy --config wrangler.classroom-maintenance.toml
+```
+
+- `gakusyu-classroom-maintenance` は **routes なし / `workers_dev = false` / `preview_urls = false`**、
+  binding は `CLASSROOM_DB` のみ。`fetch` は常に 404（Web 入口なし）。
+- `[triggers] crons = ["0 18 * * *"]`（UTC 日次）で `classroom-sessions.mjs` の `purgeExpired()` を実行。
+
+### 15.6 ロールバック
+
+- Pages の custom domain を外す、または CNAME を戻す（DNS 1 件）。Worker 側の設定は無い。
+- D1 は保持。maintenance Worker は purge 専用なので残してよい（止めるなら deploy を削除）。
+- 既存 Pages / legacy Worker / GAS は無変更のため、そのまま動く。
+
+## 16. 参考
 
 - `site-worker/classroom-worker.mjs` — エントリ・日次 purge
 - `site-worker/classroom-gateway.mjs` — HTML allowlist・マーカー注入・GAS 中継
 - `site-worker/classroom-login.mjs` — OIDC（PKCE）/ Cookie / refresh token 暗号化
 - `site-worker/classroom-sessions.mjs` — 寿命・延長・失効・purge（正）
-- `site-worker/wrangler.classroom.toml.example` — 設定見本（実ファイルは git 追加しない）
+- `site-worker/classroom-maintenance-worker.mjs` — cron 専用（日次 purge・Web 入口なし）
+- `site-worker/build-classroom-pages.mjs` — Pages 配布物のビルド + オフライン検証
+- `site-worker/wrangler.classroom-maintenance.toml.example` — cron 専用 Worker の設定見本
+- `site-worker/wrangler.classroom.toml.example` — 過去手順（Workers custom domain）の設定見本
 - `AGENTS.md` — デプロイ・公開のルール、セキュリティ不変条件

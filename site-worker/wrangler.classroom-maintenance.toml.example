@@ -1,0 +1,39 @@
+# 教室セッション D1 の日次 purge 専用 Worker（例）
+#
+# 目的:
+#   Cloudflare Pages は Cron Trigger を持てないため、purge だけを別 Worker に置く。
+#   Web 入口は一切持たせない（no route / no workers.dev / no preview）。
+#
+# 使い方:
+#   1. このファイルを site-worker/wrangler.classroom-maintenance.toml にコピーする
+#      （実ファイルは git に追加しない）
+#   2. database_id を教室 D1 の実 ID にする（Web 側と同じ DB）
+#   3. wrangler deploy --config wrangler.classroom-maintenance.toml
+#
+# 注意:
+#   - routes / workers_dev / preview_urls を有効にしないこと（Web 入口を作らない）。
+#   - secret は不要。CLASSROOM_DB 以外の binding も付けない。
+#   - 既存 site-worker/wrangler.toml（gakusyu-tools-proxy）は変更しない。
+#   - 教室の公開面は Pages Functions（site-worker/build-classroom-pages.mjs）側。
+
+name = "gakusyu-classroom-maintenance"
+main = "classroom-maintenance-worker.mjs"
+compatibility_date = "2024-08-01"
+workers_dev = false
+preview_urls = false
+# routes は定義しない（Web 入口なし。fetch は常に 404 を返す）
+
+[observability]
+enabled = false
+
+# UTC 日次: 期限切れ / 失効済みセッションを物理削除する。
+# classroom_oauth_credentials は FK の ON DELETE CASCADE で同時に消える。
+[triggers]
+crons = ["0 18 * * *"]
+
+[[d1_databases]]
+binding = "CLASSROOM_DB"
+database_name = "gakusyu-classroom"
+database_id = "<D1_DATABASE_ID>"
+# migrations は Web 側（Pages）と同一 DB を共有する。適用は 1 か所だけ行う。
+migrations_dir = "session-migrations"

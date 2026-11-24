@@ -1,4 +1,10 @@
-# 教室タブレット用 同一オリジン Worker（例）
+# 【過去手順】教室タブレット用 同一オリジン Workers（custom domain 版）の設定例
+#
+# 現在の公開面は Pages Functions（advanced mode）に切り替え済みで、
+# ビルド/デプロイは site-worker/build-classroom-pages.mjs と
+# site-worker/.pages-classroom/wrangler.toml（生成物）を使う。
+# このファイルは当時の手順の記録として残す（新規に使用しない）。
+# cron（日次 purge）は site-worker/wrangler.classroom-maintenance.toml.example を参照。
 #
 # 使い方:
 #   1. このファイルを site-worker/wrangler.classroom.toml にコピーする
