@@ -1,12 +1,9 @@
 # 教室セッション（長期ログイン）設計・運用手順書
 
-状態: **`classroom.hori-shota.com` は閉鎖済み（2026-11-25）**。専用 Pages の custom domain を解除し、
-Squarespace に追加した CNAME 1 件を削除済み（Google 系権威 4 台すべて NXDOMAIN、apex A/NS/MX 不変）。
-閉鎖前の production bundle 配信・exact origin/D1・secret 5 件・preview 空の確認は §15 に履歴として残す。
-**閉鎖前の専用ホスト HTTPS は復旧確認済み**（portal / app2 / app9 / app12 / shared JS が 200、app1 は
-公開 Pages へ 302、Google アカウント選択画面まで到達）。**未確認は Google サインイン完了・ログアウト・
-実印刷/生成**。過去の試験・既存 URL を保つ形での再検討は**未実装**。
-ビルド/デプロイ手順は第 15 章を正とする（Workers custom domain は過去手順）。
+状態: **現行（本番稼働）は §16 の認証専用 API + 任意オプトイン方式**。学習面は既存 GitHub Pages の
+URL のみを使う（新サイトなし）。`classroom.hori-shota.com` は閉鎖済みで今後使わない（§15 は履歴）。
+閉鎖前の Pages 配信・HTTPS 復旧・アカウント選択到達の記録、未確認事項は §15 を参照。
+ビルド/デプロイ手順は §15（過去手順）に残す。
 
 対象（`site-worker/`）:
 
@@ -16,6 +13,8 @@ Squarespace に追加した CNAME 1 件を削除済み（Google 系権威 4 台�
 | `classroom-gateway.mjs` | HTML/asset 配信、`/_classroom/probe\|print\|generate\|translate` の GAS 中継 |
 | `classroom-login.mjs` | Google OIDC（PKCE）/ Cookie / refresh token 暗号化保存 |
 | `classroom-sessions.mjs` | D1 セッション寿命・延長・失効・purge の実装（正） |
+| `classroom-auth-api.mjs` | **現行（本番稼働）** 認証専用 API。workers.dev のみ・preview 無効・routes なし |
+| `wrangler.classroom-auth.toml.example` | 上記の設定見本（実ファイルは git 管理外） |
 | `classroom-maintenance-worker.mjs` | cron 専用（日次 purge）。Web 入口なし・D1 binding のみ |
 | `build-classroom-pages.mjs` | Pages（advanced mode）配布物のビルド（単一 `_worker.js` を生成） |
 | `session-migrations/0001_classroom_sessions.sql` | `classroom_sessions` |
@@ -313,7 +312,9 @@ Cloudflare への設定・デプロイも未実施（当時の記録）。
 - `site/` のマーカー連動 UI は実装済み（`site/shared/classroom-session.js` ほか）。マーカーが無い
   従来 Pages では従来 UI のままで、URL・legacy Worker は不変。
 
-## 15. 公開面の切替: Pages Functions + 外部DNS CNAME（正）
+## 15. 公開面の切替: Pages Functions + 外部DNS CNAME（**閉鎖済み・履歴**）
+
+> 本節は閉鎖済みの記録。現行の本番方式は §16。
 
 `classroom.hori-shota.com` の権威 DNS は Squarespace 側で管理されており、Cloudflare 側で
 custom domain を「Workers」として持つ方式をやめ、**Pages の custom domain を外部DNS CNAME で指す**。
@@ -427,12 +428,69 @@ npx wrangler deploy --config wrangler.classroom-maintenance.toml
 - D1 は保持。maintenance Worker は purge 専用なので残してよい（止めるなら deploy を削除）。
 - 既存 Pages / legacy Worker / GAS は無変更のため、そのまま動く。
 
-## 16. 参考
+## 16. 現行方式（本番稼働）: 認証専用 API + 任意オプトイン
+
+学習面は**既存 GitHub Pages の URL のみ**（新サイトは作らない）。`classroom.hori-shota.com`（§15）は
+閉鎖済みで今後使わない。認証だけを専用 API に分離し、既存 GIS / 匿名の挙動は変えない。
+
+### 16.1 認証専用 API
+
+- エンドポイント: `https://gakusyu-classroom-auth.hori-shota.workers.dev`
+- 実装: `classroom-auth-api.mjs` / `wrangler.classroom-auth.toml`（実ファイルは git 管理外）
+- Workerd は **workers.dev のみ**（preview 無効・routes なし・observability 無効）。
+- 許可パスは `popup-exchange` / `status` / `logout` / `probe` / `print` / `generate` / `translate` のみ。
+  それ以外は 404。
+
+### 16.2 ブラウザ境界
+
+- 既存 GIS `initCodeClient`（popup, scope `openid email`）が返す **`code` だけ**を POST（トークンは受け取らない）。
+- `Origin` は `https://hori366191-ship-it.github.io` の**完全一致**＋`X-Requested-With: XmlHttpRequest` 必須。
+  JSON POST のみ。CORS は exact origin + credentials。
+- OAuth の `redirect_uri` は同オリジン固定（Google Cloud の承認済みリダイレクト URI に追加。既存設定は維持）。
+
+### 16.3 セッション
+
+- Cookie `__Host-gakusyu_session`（Secure / HttpOnly / SameSite=None / Partitioned / Path=/、Max-Age 90日）。
+  **寿命判定は D1 が権威**。
+- id_token / refresh_token / セッションハンドルは **JS へ返さない**。
+- Google ID token は **JWKS（RS256）署名検証**（iss / aud / exp / iat / email_verified / sub / email）を行い、
+  その後に**既存 GAS probe の許可が必須**。
+- refresh token は AES-GCM で暗号化保存。
+
+### 16.4 寿命・延長・失効
+
+- 30日 idle / 90日 absolute。延長は信頼できる成功操作のみ（`print` / `generate`。`translate` は延長なし）。
+- 失効は subject 単位・端末単位。日次 purge は既存 maintenance Worker（§15.5）。
+
+### 16.5 UI・運用
+
+- **教室の共用タブレット専用の任意オプトイン**。個人端末では登録しない（案内文に明記）。
+- オプトイン端末だけが `status` → `probe` を使う。未オプトインは従来 GIS / 匿名のまま（**追加通信なし**）。
+
+### 16.6 実測（2026-11-25）
+
+- 登録 → セッション 1 / 資格情報 1、30日・90日の期限、再読み込み後も保持。
+- 保持経由の教室印刷 **200**。成功で idle 延長・absolute 不変。解除で live 0 / credentials 0。
+- 匿名 3 アプリは新 API 通信 **0**。
+
+### 16.7 実装上の注意
+
+- Workers は `RequestInit.cache` と `redirect: 'error'` を未実装のため使わない
+  （`redirect: 'manual'` ＋ 自前の 3xx 判定）。
+
+### 16.8 未確認
+
+- Safari 26.2 未満は保持不可（従来ログインに戻る）。iPad 実機、複数端末同時、
+  90日超の長期挙動、管理者失効 UI（CLI / SQL 運用）。
+
+## 17. 参考
 
 - `site-worker/classroom-worker.mjs` — エントリ・日次 purge
 - `site-worker/classroom-gateway.mjs` — HTML allowlist・マーカー注入・GAS 中継
 - `site-worker/classroom-login.mjs` — OIDC（PKCE）/ Cookie / refresh token 暗号化
 - `site-worker/classroom-sessions.mjs` — 寿命・延長・失効・purge（正）
+- `site-worker/classroom-auth-api.mjs` — **現行** 認証専用 API（workers.dev のみ）
+- `site-worker/wrangler.classroom-auth.toml.example` — 上記の設定見本
 - `site-worker/classroom-maintenance-worker.mjs` — cron 専用（日次 purge・Web 入口なし）
 - `site-worker/build-classroom-pages.mjs` — Pages 配布物のビルド + オフライン検証
 - `site-worker/wrangler.classroom-maintenance.toml.example` — cron 専用 Worker の設定見本
