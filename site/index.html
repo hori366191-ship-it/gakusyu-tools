@@ -800,7 +800,13 @@
               persistActive = !!(res && res.ok && (res.active === true || res.authenticated === true));
               if (!persistActive) {
                 // 既知コードだけを短い理由へ写像（生値は表示しない）
-                persistMessage = '保持できませんでした。' + persistFailureReason(res);
+                var reason = '保持できませんでした。' + persistFailureReason(res);
+                var code = res && res.error;
+                // 未知のコードでも、安全な形（小文字と_のみ・40字以内）なら理由として併記する
+                if (typeof code === 'string' && /^[a-z_]{1,40}$/.test(code)) {
+                  reason += '（理由: ' + code + '）';
+                }
+                persistMessage = reason;
               }
               renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
             }, function () {
