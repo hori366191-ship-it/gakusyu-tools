@@ -370,16 +370,20 @@ test('index.html: marker 時だけ教室セッション UI を有効にし、app
   assert.equal(/localStorage|sessionStorage/.test(block), false, 'storage を使わない');
 });
 
-test('index.html: 教室資格確認済み(renderOk)にだけ「この端末でログインを保持」を出し、匿名は無通信', () => {
-  // 追加APIは専用originのオプトイン専用。匿名（renderOk以外）には出さない。
-  const start = INDEX.indexOf('function renderOk(');
-  const end = INDEX.indexOf('function renderLogin(', start);
-  assert.ok(start > 0 && end > start);
-  const block = INDEX.slice(start, end);
-  assert.ok(block.includes('appendPersistControl()'), 'renderOk でだけ保持導線を出す');
-  assert.ok(block.includes('ensurePersistState()'), 'opt-in端末だけ readonly status を確認する');
-  assert.ok(INDEX.includes('window.GakusyuClassroomApi'), '専用APIを任意機能として読み込む');
-  assert.ok(INDEX.includes('popupLogin()'), 'user gesture から popup を開始する');
+test('index.html: バナーは専用API基準・1回のポップアップで保持・オプトイン無しは status だけ', () => {
+  assert.ok(INDEX.includes('window.GakusyuClassroomApi'), '専用APIを使う');
+  assert.ok(INDEX.includes('CS.popupLogin()'), 'ログインボタンで popup を開始する');
+  assert.ok(INDEX.includes('CS.status()'), '読み込み時は status を使う');
+  assert.ok(INDEX.includes("CS.probe('app2')") && INDEX.includes("CS.probe('pdfdrop')"), '権限は probe で確認');
+  assert.ok(INDEX.includes('isOwner === true'), '先生判定は probe の isOwner');
+  // 二段階（GISログイン→保持）の導線・文言は撤去
+  assert.equal(INDEX.includes('この端末でログインを保持'), false);
+  assert.equal(INDEX.includes('保持を解除'), false);
+  assert.equal(INDEX.includes('initGis('), false);
+  assert.equal(INDEX.includes('waitForGis('), false);
+  // オプトイン無しでも status 以外の通信をしない（probe は active の時だけ）
+  const block = INDEX.slice(INDEX.indexOf('教室タブレットのバナー'), INDEX.indexOf('教室セッション（Worker'));
+  assert.ok(block.indexOf('CS.hasOptIn && CS.hasOptIn()') < block.indexOf('checkActive(true)'));
   // 非機密の opt-in boolean 以外（context/code/credential）を保存しない
   assert.equal(/localStorage[^\n]*(context|code|credential|id_token)/i.test(INDEX), false);
   assert.ok(!/gakusyu-classroom-persist[^\n]*(context|code|credential)/i.test(INDEX));
@@ -392,10 +396,12 @@ test('index.html: 保持中のログアウトは合言葉入力・入力値を�
   assert.ok(INDEX.includes("input.setAttribute('autocapitalize', 'off')"));
   assert.ok(INDEX.includes('input.spellcheck = false'));
   assert.ok(INDEX.includes('ログアウトする') && INDEX.includes('やめる'));
-  assert.ok(INDEX.includes('CS_API.logout(value)'), '入力値をその場で渡す');
+  assert.ok(INDEX.includes('CS.logout(value)'), '入力値をその場で渡す');
   assert.ok(INDEX.includes('入力値は保持しない'));
-  assert.ok(INDEX.includes("persistPassphraseRequired === false"), '未設定時はログアウト無効化');
-  assert.ok(INDEX.includes("if (!persistActive) banner.appendChild(redo);"), '保持中はログインし直しを出さない');
+  assert.ok(INDEX.includes('passphraseRequired === false'), '未設定時はログアウト無効化');
+  // 保持中の表示は「ログイン中」＋ログアウトだけ（古い二重導線なし）
+  assert.ok(INDEX.includes("'教室タブレットとしてログイン中'"));
+  assert.equal(INDEX.includes('appendPersistControl'), false);
   // 入力値を storage / URL へ保存しない
   assert.equal(/localStorage[^\n]*passphrase/i.test(INDEX), false);
   assert.equal(/sessionStorage[^\n]*passphrase/i.test(INDEX), false);

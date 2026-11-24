@@ -682,52 +682,43 @@
   <script>
     var GIS_CLIENT_ID = '920000857743-91jfqq1q45hmnas1b25ebg0dqafo846i.apps.googleusercontent.com';
   </script>
-  <script>
-    /* ---- 認証プローブ（仕様書_移行案.md 3.4）site-app2-backendで判定し is_owner で教室/先生を区別。
-       JSONP/POST/iframe の順序・timeout・後始末は site/shared/transport.js に集約（postMessageはrid/origin/source検証） ---- */
+    <script>
+    /* ---- 教室タブレットのバナー（専用API基準）。
+       公開Pagesのみ。教室Pagesのマーカーページは下の教室セッションブロックに任せる。
+       二段階ログインは廃止し、ポップアップ1回で「保持中」にする（共有タブレット専用）。 ---- */
     (function () {
       'use strict';
-      // 教室セッションモード（Worker が meta マーカーを挿したページ）では、GIS と GAS 直 probe の
-      // バナーは使わず教室セッション用スクリプトに任せる。マーカーが無い公開 Pages は従来どおり。
       if (window.GakusyuClassroomSession) return;
-      var T = window.GakusyuTransport;
       var banner = document.getElementById('auth-banner-inner');
-      if (!T || !banner) return;
-      var WORKER_BASE = 'https://gakusyu-tools-proxy.hori-shota.workers.dev';
-      var DIRECT_PROBE_URL = 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbxj8qyLzCLC_13B4kKDPZSX2rtdHjjOd2l8DTNisFbBb0xmPzQ0QyVCyYGIuTl6u75i/exec';
-      var WORKER_READY = !!(WORKER_BASE && WORKER_BASE.indexOf('REPLACE')===-1 && WORKER_BASE.indexOf('workers.dev')!==-1);
-      var PROBE_URL_WORKER = WORKER_READY ? WORKER_BASE.replace(/\/+$/,'') + '/app2' : '';
-      var PROBE_URL = PROBE_URL_WORKER || DIRECT_PROBE_URL;
-      // 印刷用(pdfdrop)は別デプロイ。app2 が ok でもこちらが落ちていれば印刷だけ失敗する
-      var DIRECT_PDFDROP_URL = 'https://script.google.com/a/macros/hori-shota.com/s/AKfycbwj7qTaMDmKGa-KTEEwa2jcP7wtZ8xh_rVMANzfwKapz5u8tThqjxc2pQsbN-lAWU5L7Q/exec';
-      var PDFDROP_URL_WORKER = WORKER_READY ? WORKER_BASE.replace(/\/+$/,'') + '/pdfdrop' : '';
-      var PROBE_TOKEN = 'e6135dfd707ab9a6916635fa';
-      T.configure({ origins: [WORKER_BASE] });
+      var CS = window.GakusyuClassroomApi;
+      if (!banner || !CS || CS.published !== true) return;
 
-      var probeSeq = 0;
-      var lastProbeAt = 0;
-      var lastProbeToken = null;
-      var lastLoginState = 'is-warn';
-      var gisPending = false;
+      var view = 'checking';
+      var owner = false;
+      var busy = false;
+      var expired = false;
+      var message = '';
+      var promptOpen = false;
+      var promptError = '';
+      var submitting = false;
+      var localEscape = false;
+      var passphraseRequired;
 
-      // ── 任意の「この端末でログインを保持」（専用API・オプトインのみ）──
-      // 教室資格が確認できた renderOk にだけ出す。匿名・未確認ユーザーには UI も通信も増やさない。
-      var CS_API = window.GakusyuClassroomApi;
-      var persistChecked = false;
-      var persistBusy = false;
-      var persistActive = false;
-      var persistMessage = '';
-      var persistPromptOpen = false;
-      var persistPromptError = '';
-      var persistSubmitting = false;
-      var persistLocalEscape = false;
-      var persistPassphraseRequired;
-      var lastOk = null;
-      function persistUsable() {
-        return !!(CS_API && CS_API.published && typeof CS_API.popupLogin === 'function');
+      function makeEl(tag, cls, text) {
+        var node = document.createElement(tag);
+        if (cls) node.className = cls;
+        if (text !== undefined) node.textContent = text;
+        return node;
       }
-      // 失敗理由は既知のコードだけを短い日本語へ写像する（生値・URL・credentialは出さない）
-      function persistFailureReason(res) {
+      function clearEl(node) {
+        while (node.firstChild) node.removeChild(node.firstChild);
+      }
+      function setState(kind) {
+        banner.className = 'auth-banner__inner' + (kind === 'ok' ? ' is-ok' : '');
+        banner.setAttribute('data-auth-state', kind);
+      }
+      // 失敗理由は既知コードだけを短い日本語へ写像する（生値・URL・credentialは出さない）
+      function failureReason(res) {
         var err = res && res.error;
         var fallback = res && res.fallback;
         if (err === 'unsupported') return 'この端末は非対応です';
@@ -741,49 +732,105 @@
           err === 'bad_request' || err === 'payload_too_large') {
           return '設定の確認が必要です';
         }
-        if (err === 'not_active') return '保持を確認できませんでした';
-        return '通信または設定の確認が必要です';
-      }
-      function renderPersist() {
-        renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
-      }
-      function persistLogoutFailureText(res) {
-        var err = res && res.error;
         if (err === 'passphrase_invalid') return '合言葉が違います';
         if (err === 'too_many_attempts') return '回数が多すぎます。しばらく待ってください';
         if (err === 'logout_disabled') return 'この端末では合言葉が未設定です。管理者に連絡してください';
         if (err === 'passphrase_required') return '合言葉を入力してください';
-        var reason = persistFailureReason(res);
-        var code = res && res.error;
-        if (typeof code === 'string' && /^[a-z_]{1,40}$/.test(code)) reason += '（理由: ' + code + '）';
-        return reason;
+        if (err === 'not_active') return '保持を確認できませんでした';
+        return '通信または設定の確認が必要です';
       }
-      function persistServerUnavailable(res) {
+      function failureText(res) {
+        var text = failureReason(res);
+        var code = res && res.error;
+        if (typeof code === 'string' && /^[a-z_]{1,40}$/.test(code)) text += '（理由: ' + code + '）';
+        return text;
+      }
+      function serverUnavailable(res) {
         var err = res && res.error;
-        if (err === 'logout_disabled') return true;
-        if (err === 'auth_unavailable' || err === 'session_store_unavailable' || err === 'internal_error') return true;
+        if (err === 'logout_disabled' || err === 'auth_unavailable' ||
+          err === 'session_store_unavailable' || err === 'internal_error') return true;
         if (err === 'network' || err === 'timeout' || err === 'read_failed' || err === 'invalid_json') return true;
         return !!(res && Number(res.status) >= 500);
       }
-      function openPersistPrompt() {
-        if (persistBusy || persistSubmitting) return;
-        persistPromptOpen = true;
-        persistPromptError = '';
-        persistLocalEscape = false;
-        renderPersist();
+      function renderLogin() {
+        view = 'login';
+        expired = false;
+        promptOpen = false;
+        setState('login');
+        clearEl(banner);
+        banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
+        var login = makeEl('button', 'auth-banner__btn', '教室タブレットとしてログイン');
+        login.type = 'button';
+        login.disabled = busy;
+        login.addEventListener('click', doLogin);
+        banner.appendChild(login);
+        if (message) banner.appendChild(makeEl('span', 'classroom-persist__note', message));
       }
-      function clearPersistLocally() {
-        if (!CS_API.setOptIn) return;
-        CS_API.setOptIn(false);
-        persistChecked = true;
-        persistPromptOpen = false;
-        persistPromptError = '';
-        persistLocalEscape = false;
-        persistActive = false;
-        persistMessage = '端末の表示だけ解除しました。サーバー側の失効は別途必要です';
-        renderPersist();
+      function renderActive() {
+        view = 'ok';
+        expired = false;
+        setState('ok');
+        clearEl(banner);
+        banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
+        banner.appendChild(makeEl('span', '', '教室タブレットとしてログイン中' + (owner ? '（先生アカウント）' : '')));
+        if (passphraseRequired === false) {
+          var offDisabled = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'ログアウト');
+          offDisabled.type = 'button';
+          offDisabled.disabled = true;
+          banner.appendChild(offDisabled);
+          banner.appendChild(makeEl('span', 'classroom-persist__note', '合言葉が未設定'));
+        } else {
+          var off = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'ログアウト');
+          off.type = 'button';
+          off.disabled = submitting;
+          off.addEventListener('click', function () {
+            if (submitting) return;
+            promptOpen = true;
+            promptError = '';
+            localEscape = false;
+            renderActive();
+          });
+          banner.appendChild(off);
+        }
+        if (promptOpen && passphraseRequired !== false) appendPrompt();
+        if (message) banner.appendChild(makeEl('span', 'classroom-persist__note', message));
+        focusPrompt();
       }
-      function appendLogoutPrompt(wrap, expired) {
+      function renderExpired() {
+        view = 'expired';
+        expired = true;
+        setState('login');
+        clearEl(banner);
+        banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
+        banner.appendChild(makeEl('span', '', '保持の期限が切れています（ログインし直してください）'));
+        var login = makeEl('button', 'auth-banner__btn', '教室タブレットとしてログイン');
+        login.type = 'button';
+        login.disabled = busy;
+        login.addEventListener('click', doLogin);
+        banner.appendChild(login);
+        if (passphraseRequired === false) {
+          var offDisabled = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'ログアウト');
+          offDisabled.type = 'button';
+          offDisabled.disabled = true;
+          banner.appendChild(offDisabled);
+          banner.appendChild(makeEl('span', 'classroom-persist__note', '合言葉が未設定'));
+        } else {
+          var off = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'ログアウト');
+          off.type = 'button';
+          off.disabled = submitting;
+          off.addEventListener('click', function () {
+            if (submitting) return;
+            promptOpen = true;
+            promptError = '';
+            localEscape = false;
+            renderExpired();
+          });
+          banner.appendChild(off);
+        }
+        if (promptOpen && passphraseRequired !== false) appendPrompt();
+        focusPrompt();
+      }
+      function appendPrompt() {
         var form = makeEl('form', 'classroom-persist__prompt', '');
         form.setAttribute('data-classroom-persist-prompt', 'logout');
         var label = makeEl('label', 'classroom-persist__label', '合言葉');
@@ -792,47 +839,49 @@
         input.setAttribute('autocomplete', 'off');
         input.spellcheck = false;
         input.setAttribute('autocapitalize', 'off');
-        input.disabled = persistSubmitting;
+        input.disabled = submitting;
         label.appendChild(input);
         form.appendChild(label);
 
         function cancel() {
-          if (persistSubmitting) return;
-          persistPromptOpen = false;
-          persistPromptError = '';
-          persistLocalEscape = false;
-          renderPersist();
+          if (submitting) return;
+          promptOpen = false;
+          promptError = '';
+          localEscape = false;
+          if (expired) renderExpired(); else renderActive();
         }
         function submit() {
-          if (persistSubmitting) return;
+          if (submitting) return;
           var value = String(input.value || '');
           input.value = ''; // 入力値は保持しない
           if (!value) {
-            persistPromptError = '合言葉を入力してください';
-            renderPersist();
+            promptError = '合言葉を入力してください';
+            renderActive();
             return;
           }
-          persistSubmitting = true;
-          persistPromptError = '';
-          renderPersist();
-          Promise.resolve(CS_API.logout(value)).then(function (res) {
-            persistSubmitting = false;
+          submitting = true;
+          promptError = '';
+          renderActive();
+          Promise.resolve(CS.logout(value)).then(function (res) {
+            submitting = false;
             if (res && res.ok === true) {
-              persistPromptOpen = false;
-              persistActive = false;
-              persistMessage = '';
-              persistLocalEscape = false;
-              renderPersist();
+              promptOpen = false;
+              promptError = '';
+              localEscape = false;
+              owner = false;
+              message = '';
+              passphraseRequired = undefined;
+              renderLogin();
               return;
             }
-            persistPromptError = persistLogoutFailureText(res);
-            if (expired && persistServerUnavailable(res)) persistLocalEscape = true;
-            renderPersist();
+            promptError = failureText(res);
+            if (serverUnavailable(res)) localEscape = true;
+            if (expired) renderExpired(); else renderActive();
           }, function () {
-            persistSubmitting = false;
-            persistPromptError = '通信または設定の確認が必要です';
-            if (expired) persistLocalEscape = true;
-            renderPersist();
+            submitting = false;
+            promptError = '通信または設定の確認が必要です';
+            localEscape = true;
+            if (expired) renderExpired(); else renderActive();
           });
         }
         form.addEventListener('submit', function (e) {
@@ -847,290 +896,106 @@
         });
         var submitBtn = makeEl('button', 'auth-banner__btn', 'ログアウトする');
         submitBtn.type = 'submit';
-        submitBtn.disabled = persistSubmitting;
+        submitBtn.disabled = submitting;
         var cancelBtn = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'やめる');
         cancelBtn.type = 'button';
-        cancelBtn.disabled = persistSubmitting;
+        cancelBtn.disabled = submitting;
         cancelBtn.addEventListener('click', cancel);
         form.appendChild(submitBtn);
         form.appendChild(cancelBtn);
-        if (persistPromptError) form.appendChild(makeEl('span', 'classroom-persist__error', persistPromptError));
-        if (persistLocalEscape) {
+        if (promptError) form.appendChild(makeEl('span', 'classroom-persist__error', promptError));
+        if (localEscape && CS.setOptIn) {
           var local = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', '端末の表示だけ解除');
           local.type = 'button';
-          local.disabled = persistSubmitting;
-          local.addEventListener('click', clearPersistLocally);
+          local.disabled = submitting;
+          local.addEventListener('click', function () {
+            CS.setOptIn(false);
+            promptOpen = false;
+            promptError = '';
+            localEscape = false;
+            owner = false;
+            message = '端末の表示だけ解除しました。サーバー側の失効は別途必要です';
+            renderLogin();
+          });
           form.appendChild(local);
         }
-        wrap.appendChild(form);
+        banner.appendChild(form);
       }
-      function appendPersistControl() {
-        if (!persistUsable()) return;
-        var wrap = makeEl('span', 'classroom-persist', '');
-        if (persistBusy || (!persistChecked && CS_API.hasOptIn && CS_API.hasOptIn())) {
-          wrap.appendChild(makeEl('span', '', '保持を確認中…'));
-          banner.appendChild(wrap);
-          return;
-        }
-        if (persistActive) {
-          wrap.appendChild(makeEl('span', '', 'この端末でログインを保持中'));
-          if (persistPassphraseRequired === false) {
-            var offDisabled = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'ログアウト');
-            offDisabled.type = 'button';
-            offDisabled.disabled = true;
-            wrap.appendChild(offDisabled);
-            wrap.appendChild(makeEl('span', 'classroom-persist__note', '合言葉が未設定'));
-          } else {
-            var off = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'ログアウト');
-            off.type = 'button';
-            off.addEventListener('click', openPersistPrompt);
-            wrap.appendChild(off);
-            if (persistPromptOpen) appendLogoutPrompt(wrap, false);
-          }
-        } else if (CS_API.hasOptIn && CS_API.hasOptIn()) {
-          // 事前 status が noauth/期限切れ: いつもの GIS ログインはそのまま使える
-          wrap.appendChild(makeEl('span', '', '保持の期限が切れています（いつものログインはそのまま使えます）'));
-          if (persistPassphraseRequired === false) {
-            var localOnly = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', '端末の表示だけ解除');
-            localOnly.type = 'button';
-            localOnly.addEventListener('click', function () { clearPersistLocally(); });
-            wrap.appendChild(localOnly);
-            wrap.appendChild(makeEl('span', 'classroom-persist__note', '合言葉が未設定（サーバー側の失効は別途必要です）'));
-          } else {
-            var clear = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'ログアウト');
-            clear.type = 'button';
-            clear.addEventListener('click', openPersistPrompt);
-            wrap.appendChild(clear);
-            if (persistPromptOpen) appendLogoutPrompt(wrap, true);
-          }
-        } else {
-          var keep = makeEl('button', 'auth-banner__btn', 'この端末を教室タブレットとして保持');
-          keep.type = 'button';
-          keep.title = '教室の共用タブレット専用です。個人の端末では登録しないでください。教室の印刷と英語長文の生成だけを長く保持します。';
-          keep.addEventListener('click', function () {
-            if (persistBusy) return;
-            persistBusy = true;
-            persistMessage = '';
-            renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
-            CS_API.popupLogin().then(function (res) {
-              persistBusy = false;
-              persistChecked = true;
-              persistActive = !!(res && res.ok && (res.active === true || res.authenticated === true));
-              if (persistActive && res && res.passphraseRequired === false) persistPassphraseRequired = false;
-              if (!persistActive) {
-                // 既知コードだけを短い理由へ写像（生値は表示しない）
-                var reason = '保持できませんでした。' + persistFailureReason(res);
-                var code = res && res.error;
-                // 未知のコードでも、安全な形（小文字と_のみ・40字以内）なら理由として併記する
-                if (typeof code === 'string' && /^[a-z_]{1,40}$/.test(code)) {
-                  reason += '（理由: ' + code + '）';
-                }
-                persistMessage = reason;
-              }
-              renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
-            }, function () {
-              persistBusy = false;
-              persistChecked = true;
-              persistMessage = '保持できませんでした。通信または設定の確認が必要です';
-              renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
-            });
-          });
-          wrap.appendChild(keep);
-          wrap.appendChild(makeEl('span', 'classroom-persist__note', '教室の共用タブレット専用です。個人の端末では登録しないでください。'));
-        }
-        if (persistMessage) wrap.appendChild(makeEl('span', 'classroom-persist__note', persistMessage));
-        banner.appendChild(wrap);
-        if (persistPromptOpen && !persistSubmitting && typeof wrap.querySelector === 'function') {
-          var field = wrap.querySelector('.classroom-persist__input');
-          if (field && typeof field.focus === 'function') {
-            setTimeout(function () { try { field.focus(); } catch (e) {} }, 0);
-          }
+      function focusPrompt() {
+        if (!promptOpen || submitting) return;
+        var field = banner.querySelector ? banner.querySelector('.classroom-persist__input') : null;
+        if (field && typeof field.focus === 'function') {
+          setTimeout(function () { try { field.focus(); } catch (e) {} }, 0);
         }
       }
-      function ensurePersistState() {
-        if (!persistUsable() || persistChecked || persistBusy) return;
-        if (!(CS_API.hasOptIn && CS_API.hasOptIn())) { persistChecked = true; return; }
-        persistBusy = true;
-        renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
-        Promise.resolve(CS_API.statusOnce ? CS_API.statusOnce() : CS_API.status()).then(function (st) {
-          persistBusy = false;
-          persistChecked = true;
-          persistActive = !!(st && st.ok === true && st.active === true);
-          if (st && st.passphraseRequired === false) persistPassphraseRequired = false;
-          else if (st && st.passphraseRequired === true) persistPassphraseRequired = true;
-          if (!persistActive) persistMessage = '保持の期限が切れています';
-          renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
+      function applyStatus(st) {
+        passphraseRequired = (st && (st.passphraseRequired === true || st.passphraseRequired === false))
+          ? st.passphraseRequired : undefined;
+      }
+      function probeOwner() {
+        if (typeof CS.probe !== 'function') return Promise.resolve(false);
+        return Promise.all([CS.probe('app2'), CS.probe('pdfdrop')]).then(function (list) {
+          owner = (list || []).some(function (r) { return r && r.isOwner === true; });
+          return owner;
+        }, function () { return false; });
+      }
+      function checkActive(showChecking) {
+        if (showChecking) {
+          setState('checking');
+          clearEl(banner);
+          banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
+          banner.appendChild(makeEl('span', '', '確認中…'));
+        }
+        return Promise.resolve(CS.status()).then(function (st) {
+          if (!st || st.ok !== true || st.active !== true) {
+            applyStatus(st);
+            renderExpired();
+            return;
+          }
+          if (CS.hasOptIn && !CS.hasOptIn() && CS.setOptIn) CS.setOptIn(true);
+          applyStatus(st);
+          return probeOwner().then(function () { message = ''; renderActive(); });
         }, function () {
-          persistBusy = false;
-          persistChecked = true;
-          persistMessage = '保持の状態を確認できませんでした';
-          renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
+          if (showChecking) renderLogin();
+        });
+      }
+      function doLogin() {
+        if (busy) return;
+        busy = true;
+        message = '';
+        promptOpen = false;
+        renderLogin();
+        CS.popupLogin().then(function (res) {
+          busy = false;
+          if (res && res.ok && (res.active === true || res.authenticated === true)) {
+            if (res.passphraseRequired === true || res.passphraseRequired === false) {
+              passphraseRequired = res.passphraseRequired;
+            }
+            if (CS.setOptIn) CS.setOptIn(true);
+            probeOwner().then(function () { message = ''; renderActive(); });
+            return;
+          }
+          message = 'ログインできませんでした。' + failureText(res);
+          renderLogin();
+        }, function () {
+          busy = false;
+          message = 'ログインできませんでした。通信または設定の確認が必要です';
+          renderLogin();
         });
       }
 
-      function makeEl(tag, cls, text) {
-        var el = document.createElement(tag);
-        if (cls) el.className = cls;
-        if (text !== undefined) el.textContent = text;
-        return el;
+      renderLogin();
+      if (CS.hasOptIn && CS.hasOptIn()) {
+        checkActive(true);
+      } else {
+        // オプトインが無ければログイン表示。通信は status だけで、probe はしない（匿名でも可）。
+        Promise.resolve(CS.status()).then(function () {
+          renderLogin();
+        }, function () { renderLogin(); });
       }
-      function clearEl(node) {
-        while (node.firstChild) node.removeChild(node.firstChild);
-      }
-      function setState(state, authState) {
-        banner.className = 'auth-banner__inner' + (state ? ' ' + state : '');
-        banner.setAttribute('data-auth-state', authState || state || 'checking');
-      }
-      function renderChecking() {
-        setState('', 'checking');
-        clearEl(banner);
-        banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
-        banner.appendChild(makeEl('span', '', '確認中…'));
-      }
-      function renderOk(isOwner, pdfOk) {
-        lastOk = { isOwner: !!isOwner, pdfOk: pdfOk };
-        setState('is-ok', 'ok');
-        clearEl(banner);
-        banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
-        var base = isOwner ? '先生アカウントでログイン中' : '教室タブレットとしてログイン中';
-        // pdfOk===false のときだけ印刷の要確認を添える（ログイン状態は落とさない）
-        var okText = makeEl('span', '', pdfOk === false ? base + '（印刷は要確認）' : base + ' \u2705');
-        okText.title = '印刷アプリ（原稿用紙・学習プリント）は別に認証を確認します';
-        banner.appendChild(okText);
-        var redo = makeEl('button', 'auth-banner__btn', 'ログインし直す');
-        redo.type = 'button';
-        redo.addEventListener('click', function () {
-          redo.disabled = true;
-          if (typeof T.clearIdToken === 'function') T.clearIdToken();
-          // clearIdToken の authchange でも走るが、トークンが無い場合も GIS ボタンへ戻す
-          runProbe();
-        });
-        // 保持中は id_token を使わないため「ログインし直す」は出さない
-        if (!persistActive) banner.appendChild(redo);
-        appendPersistControl();
-        ensurePersistState();
-      }
-      function renderLogin(state, opts) {
-        opts = opts || {};
-        var gisFailed = !!opts.gisFailed;
-        var unreachable = !!opts.unreachable;
-        if (!gisFailed) lastLoginState = state;
-        setState(gisFailed || unreachable ? 'is-warn' : state, state === 'is-out' ? 'notallowed' : (gisFailed ? 'login-error' : (unreachable ? 'unreachable' : 'login')));
-        clearEl(banner);
-        banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
-        var label = '教室用ログイン';
-        if (state === 'is-out') label = '教室外アカウントです';
-        else if (gisFailed) label = 'Googleログインを読み込めませんでした';
-        else if (unreachable) label = '接続を確認できませんでした';
-        banner.appendChild(makeEl('span', '', label));
-        var gisMissing = GIS_CLIENT_ID.indexOf('REPLACE') === 0;
-        if (gisMissing || gisFailed) {
-          var link = makeEl('a', 'auth-banner__btn', '教室用ログイン \u2197');
-          link.href = PROBE_URL;
-          link.target = '_blank';
-          link.rel = 'noopener';
-          banner.appendChild(link);
-          if (gisFailed) {
-            var retry = makeEl('button', 'auth-banner__btn', '再試行');
-            retry.type = 'button';
-            retry.addEventListener('click', function () {
-              retry.disabled = true;
-              initGis();
-            });
-            banner.appendChild(retry);
-          }
-        }
-        // GIS/再試行の描画先は常に作り直して確保する（失敗表示で削除されても復旧できる）
-        var host = makeEl('span', '', '');
-        host.id = 'gis-btn';
-        host.style.marginLeft = 'auto';
-        banner.appendChild(host);
-        if (!opts.skipInit && !gisFailed && !gisMissing) initGis();
-      }
-      function initGis() {
-        if (gisPending) return;
-        gisPending = true;
-        T.waitForGis({ timeoutMs: 8000, intervalMs: 300 }).then(function (ok) {
-          gisPending = false;
-          if (!ok) {
-            renderLogin(lastLoginState, { gisFailed: true });
-            return;
-          }
-          try {
-            // 失敗表示で消えた #gis-btn を作り直してから描画する
-            renderLogin(lastLoginState, { skipInit: true });
-            google.accounts.id.initialize({
-              client_id: GIS_CLIENT_ID,
-              callback: function (resp) {
-                if (!resp || !resp.credential) return;
-                T.setIdToken(resp.credential);
-                runProbe();
-              },
-              auto_select: false,
-              cancel_on_tap_outside: true
-            });
-            var btn = document.getElementById('gis-btn');
-            if (btn) google.accounts.id.renderButton(btn, { theme: 'outline', size: 'small', text: 'signin_with', shape: 'pill' });
-          } catch (e) {
-            renderLogin(lastLoginState, { gisFailed: true });
-          }
-        });
-      }
-      // app2 が ok のときだけ pdfdrop も probe する（匿名時は通信を増やさない）。
-      // id_token 付きで呼ぶので、pdfdrop 側の LAST_PROBE に失敗理由が残る。
-      function probePdfdrop(seq, isOwner) {
-        T.probeAuth({
-          workerUrl: PDFDROP_URL_WORKER,
-          directUrl: DIRECT_PDFDROP_URL,
-          token: PROBE_TOKEN,
-          totalMs: 12000
-        }).then(function (res) {
-          if (seq !== probeSeq) return;
-          renderOk(isOwner, !!res && res.status === 'ok');
-        }, function () {
-          if (seq !== probeSeq) return;
-          renderOk(isOwner, false);
-        });
-      }
-      function runProbe() {
-        var token = T.getIdToken();
-        var t = Date.now();
-        // 同一トークンの連続呼び出しだけ間引く（トークン変更時は必ず再probeする）
-        if (probeSeq > 0 && token === lastProbeToken && t - lastProbeAt < 400) return;
-        lastProbeToken = token;
-        lastProbeAt = t;
-        var seq = ++probeSeq;
-        renderChecking();
-        T.probeAuth({
-          workerUrl: PROBE_URL_WORKER,
-          directUrl: DIRECT_PROBE_URL,
-          token: PROBE_TOKEN,
-          totalMs: 22000
-        }).then(function (res) {
-          if (seq !== probeSeq) return;
-          // app2 の時点で従来表示へ戻し、pdfdrop の応答待ち（最大12秒）で「確認中…」を残さない
-          if (res.status === 'ok') { renderOk(!!res.isOwner); probePdfdrop(seq, !!res.isOwner); return; }
-          if (res.status === 'notallowed') { renderLogin('is-out'); return; }
-          if (res.status === 'noauth') { renderLogin('is-warn'); return; }
-          renderLogin('is-warn', { unreachable: true });
-        });
-      }
-      // 復帰時の再確認は前回probeから60秒以上経ったときだけ（連打・往復での連続probeを避ける）
-      var PROBE_STALE_MS = 60000;
-      function probeIfStale() {
-        if (Date.now() - lastProbeAt < PROBE_STALE_MS) return;
-        runProbe();
-      }
-      document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState && document.visibilityState !== 'visible') return;
-        probeIfStale();
-      });
-      if (typeof window.addEventListener === 'function') window.addEventListener('focus', probeIfStale);
-      T.onAuthChange(function () { runProbe(); });
-      runProbe();
     })();
   </script>
-  <script>
+<script>
     /* ---- 教室セッション（Worker が meta gakusyu-classroom-session を挿したページのみ）。
        公開Pagesでは GakusyuClassroomSession が未定義なのでこのブロックは即 return する。
        app2（英語長文）と pdfdrop（印刷）は別々に probe し、片方だけ許可でも利用可能として扱う。
