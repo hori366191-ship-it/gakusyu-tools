@@ -54,6 +54,15 @@
  */
 
 import { classroomSessions } from './classroom-sessions.mjs';
+import {
+  MAX_PASSPHRASE_LENGTH,
+  clearLogoutFailures,
+  delayAfterLogoutFailure,
+  logoutThrottleBlocked,
+  parseLogoutPassphraseHash,
+  recordLogoutFailure,
+  verifyLogoutPassphrase,
+} from './classroom-logout.mjs';
 
 export const ROUTES = Object.freeze({
   login: '/_classroom/login',
@@ -290,7 +299,16 @@ function readConfig(env) {
   if (typeof clientSecret !== 'string' || clientSecret === '') return null;
   const keyBytes = encryptionKey(env.CLASSROOM_ENCRYPTION_KEY);
   if (!keyBytes) return null;
-  return { db, origin, clientId, clientSecret, keyBytes, redirectUri: origin + ROUTES.callback };
+  const logoutPassphrase = parseLogoutPassphraseHash(env.CLASSROOM_LOGOUT_PASSPHRASE_HASH);
+  return {
+    db,
+    origin,
+    clientId,
+    clientSecret,
+    keyBytes,
+    redirectUri: origin + ROUTES.callback,
+    logoutPassphrase,
+  };
 }
 
 function normalizeAllowlist(list) {
@@ -832,6 +850,7 @@ export function createClassroomLogin(
     returnToAllowlist,
     sessionCookieName,
     popupRedirectUri,
+    logoutDelayMs = 500,
   } = {},
 ) {
   const config = readConfig(env);
@@ -1039,8 +1058,46 @@ export function createClassroomLogin(
     if (!isCanonicalRequest(request, config.origin)) return errorResponse(403, 'host_rejected');
     if (!isSameOrigin(request, config.origin)) return errorResponse(403, 'origin_rejected');
 
-    const form = await readForm(request);
-    const returnTo = pickReturnTo(form, allowlist);
+    // 合言葉が未設定・不正ならログアウト自体を無効化する（セッションは消さない）。
+    if (!config.logoutPassphrase) return errorResponse(403, 'logout_disabled');
+
+    const ip = request.headers.get('cf-connecting-ip') || '';
+    if (logoutThrottleBlocked(ip)) return errorResponse(429, 'too_many_attempts');
+
+    // 現行 API は JSON。同一オリジンの従来フォームも互換のため受け付ける。
+    const contentType = String(request.headers.get('content-type') || '').toLowerCase();
+    let form = null;
+    let passphrase;
+    if (/^application\/json(?:\s*;.*)?$/.test(contentType.trim())) {
+      let payload;
+      try {
+        payload = await request.json();
+      } catch {
+        return errorResponse(400, 'bad_request');
+      }
+      if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+        return errorResponse(400, 'bad_request');
+      }
+      passphrase = payload.passphrase;
+    } else {
+      form = await readForm(request);
+      passphrase = form.get('passphrase');
+    }
+    if (
+      typeof passphrase !== 'string' ||
+      passphrase.length === 0 ||
+      passphrase.length > MAX_PASSPHRASE_LENGTH
+    ) {
+      return errorResponse(400, 'bad_request');
+    }
+    if (!(await verifyLogoutPassphrase(passphrase, config.logoutPassphrase))) {
+      recordLogoutFailure(ip);
+      await delayAfterLogoutFailure(logoutDelayMs);
+      return errorResponse(403, 'passphrase_invalid');
+    }
+    clearLogoutFailures(ip);
+
+    const returnTo = form ? pickReturnTo(form, allowlist) : '/';
     const handle = cookieValue(request, cookieName);
     if (handle && handle.length <= MAX_HANDLE_LENGTH) {
       // ログアウトでは OAuth 資格情報そのものを削除し、将来の refresh を不可能にする

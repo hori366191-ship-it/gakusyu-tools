@@ -272,6 +272,18 @@ test('status: authenticated boolean を active として正規化する（active
   assert.equal(st2.ok, true);
 });
 
+test('status: passphraseRequired boolean をそのまま返す（false でログアウト無効化に使う）', async () => {
+  const offState = harness({
+    responder: () => jsonResponse(200, { ok: true, authenticated: true, passphraseRequired: false })
+  });
+  const st = await offState.api.status();
+  assert.equal(st.passphraseRequired, false);
+
+  const unknown = harness({ responder: () => jsonResponse(200, { ok: true, authenticated: true }) });
+  const st2 = await unknown.api.status();
+  assert.equal(st2.passphraseRequired, undefined);
+});
+
 test('popupLogin: refresh_token_missing は fallback=legacy_gis を返し、旧経路へ自動送信しない', async () => {
   const storage = memoryStorage();
   const { api, calls } = harness({
@@ -302,13 +314,27 @@ test('logout: {} を送り、サーバ成功時だけ opt-in と有効状態を�
   });
   await api.statusOnce();
   assert.equal(win.__GakusyuClassroomActive, api);
-  const res = await api.logout();
+  const res = await api.logout('secret-phrase');
   assert.equal(res.ok, true);
   const last = calls[calls.length - 1];
   assert.equal(last.url, API_ORIGIN + '/_classroom/logout');
-  assert.deepEqual(last.body, {});
+  assert.deepEqual(last.body, { passphrase: 'secret-phrase' });
   assert.equal(storage.getItem('gakusyu-classroom-persist'), null);
   assert.equal(win.__GakusyuClassroomActive, null);
+});
+
+test('logout: 合言葉が無ければ通信ゼロで predispatch(passphrase_required)', async () => {
+  const storage = memoryStorage({ 'gakusyu-classroom-persist': '1' });
+  const { api, calls } = harness({
+    storage,
+    responder: () => jsonResponse(200, { ok: true, authenticated: true })
+  });
+  const res = await api.logout();
+  assert.equal(res.ok, false);
+  assert.equal(res.error, 'passphrase_required');
+  assert.equal(res.predispatch, true);
+  assert.equal(calls.length, 0, '合言葉未指定は送信しない');
+  assert.equal(storage.getItem('gakusyu-classroom-persist'), '1');
 });
 
 test('logout: サーバ失敗では opt-in と有効状態を残す（成功に見せない）', async () => {
@@ -321,7 +347,7 @@ test('logout: サーバ失敗では opt-in と有効状態を残す（成功に�
     }
   });
   await api.statusOnce();
-  const res = await api.logout();
+  const res = await api.logout('secret-phrase');
   assert.equal(res.ok, false);
   assert.equal(storage.getItem('gakusyu-classroom-persist'), '1');
   assert.equal(win.__GakusyuClassroomActive, api);

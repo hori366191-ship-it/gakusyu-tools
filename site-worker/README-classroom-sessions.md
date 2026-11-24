@@ -13,6 +13,7 @@ URL のみを使う（新サイトなし）。`classroom.hori-shota.com` は閉�
 | `classroom-gateway.mjs` | HTML/asset 配信、`/_classroom/probe\|print\|generate\|translate` の GAS 中継 |
 | `classroom-login.mjs` | Google OIDC（PKCE）/ Cookie / refresh token 暗号化保存 |
 | `classroom-sessions.mjs` | D1 セッション寿命・延長・失効・purge の実装（正） |
+| `classroom-logout.mjs` | ログアウト合言葉（PBKDF2）検証・失敗スロットル |
 | `classroom-auth-api.mjs` | **現行（本番稼働）** 認証専用 API。workers.dev のみ・preview 無効・routes なし |
 | `wrangler.classroom-auth.toml.example` | 上記の設定見本（実ファイルは git 管理外） |
 | `classroom-maintenance-worker.mjs` | cron 専用（日次 purge）。Web 入口なし・D1 binding のみ |
@@ -115,6 +116,17 @@ URL のみを使う（新サイトなし）。`classroom.hori-shota.com` は閉�
   1 台をログアウトしただけで他端末まで切る事故を避ける。
 - **端末紛失・漏洩疑い・アカウント侵害疑いのときだけ**、別途「Google アカウントの
   サードパーティ製アプリのアクセス管理から取消」を案内する（管理側の運用手順として明記）。
+
+### ログアウト合言葉（スタッフ共有パスフレーズ）
+
+- 教室ログアウトは `CLASSROOM_LOGOUT_PASSPHRASE_HASH` が設定されている場合だけ有効。
+  未設定・不正なら 403 `logout_disabled` で、セッションは消さない。
+- **合言葉はリポジトリ・チャット・issue・ログ・シェル履歴に書かない**。
+- ハッシュ生成はローカルの `node scripts/classroom-logout-passphrase.mjs` に stdin で合言葉を渡し、
+  出力 1 行を secret にだけ設定する（引数・ファイルには残さない）。
+  合言葉は4文字以上（推測されても実害が小さいため。忘れた場合は D1 で失効）。
+- 失敗スロットルは isolate 内メモリの best-effort（`cf-connecting-ip` 単位、10分で5回失敗）。
+  全 isolate 共通の保証ではない。
 
 ### Cookie
 

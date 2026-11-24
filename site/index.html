@@ -360,8 +360,13 @@
   .auth-banner__btn:hover { filter: brightness(1.08); }
   .classroom-session__form { display: inline-flex; margin: 0; }
   .classroom-session__form > button { border: 0; font-family: inherit; cursor: pointer; }
-  .classroom-persist { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; }
+  .classroom-persist { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; flex-wrap: wrap; }
   .classroom-persist__note { font-size: 10px; opacity: .72; }
+  .classroom-persist__prompt { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .classroom-persist__label { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; }
+  .classroom-persist__input { width: 106px; font: inherit; font-size: 11px; padding: 2px 4px; }
+  .classroom-persist__error { font-size: 10px; color: #b91c1c; }
+  .auth-banner__btn--secondary { background: #6b7280; font-size: 10px; padding: 2px 7px; }
   @media (max-width: 640px) { .classroom-persist__note { display: none; } }
   @media (max-width: 640px) {
     .hero__auth { top: 10px; right: 10px; max-width: 92vw; }
@@ -712,6 +717,11 @@
       var persistBusy = false;
       var persistActive = false;
       var persistMessage = '';
+      var persistPromptOpen = false;
+      var persistPromptError = '';
+      var persistSubmitting = false;
+      var persistLocalEscape = false;
+      var persistPassphraseRequired;
       var lastOk = null;
       function persistUsable() {
         return !!(CS_API && CS_API.published && typeof CS_API.popupLogin === 'function');
@@ -734,6 +744,126 @@
         if (err === 'not_active') return '保持を確認できませんでした';
         return '通信または設定の確認が必要です';
       }
+      function renderPersist() {
+        renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
+      }
+      function persistLogoutFailureText(res) {
+        var err = res && res.error;
+        if (err === 'passphrase_invalid') return '合言葉が違います';
+        if (err === 'too_many_attempts') return '回数が多すぎます。しばらく待ってください';
+        if (err === 'logout_disabled') return 'この端末では合言葉が未設定です。管理者に連絡してください';
+        if (err === 'passphrase_required') return '合言葉を入力してください';
+        var reason = persistFailureReason(res);
+        var code = res && res.error;
+        if (typeof code === 'string' && /^[a-z_]{1,40}$/.test(code)) reason += '（理由: ' + code + '）';
+        return reason;
+      }
+      function persistServerUnavailable(res) {
+        var err = res && res.error;
+        if (err === 'logout_disabled') return true;
+        if (err === 'auth_unavailable' || err === 'session_store_unavailable' || err === 'internal_error') return true;
+        if (err === 'network' || err === 'timeout' || err === 'read_failed' || err === 'invalid_json') return true;
+        return !!(res && Number(res.status) >= 500);
+      }
+      function openPersistPrompt() {
+        if (persistBusy || persistSubmitting) return;
+        persistPromptOpen = true;
+        persistPromptError = '';
+        persistLocalEscape = false;
+        renderPersist();
+      }
+      function clearPersistLocally() {
+        if (!CS_API.setOptIn) return;
+        CS_API.setOptIn(false);
+        persistChecked = true;
+        persistPromptOpen = false;
+        persistPromptError = '';
+        persistLocalEscape = false;
+        persistActive = false;
+        persistMessage = '端末の表示だけ解除しました。サーバー側の失効は別途必要です';
+        renderPersist();
+      }
+      function appendLogoutPrompt(wrap, expired) {
+        var form = makeEl('form', 'classroom-persist__prompt', '');
+        form.setAttribute('data-classroom-persist-prompt', 'logout');
+        var label = makeEl('label', 'classroom-persist__label', '合言葉');
+        var input = makeEl('input', 'classroom-persist__input', '');
+        input.type = 'password';
+        input.setAttribute('autocomplete', 'off');
+        input.spellcheck = false;
+        input.setAttribute('autocapitalize', 'off');
+        input.disabled = persistSubmitting;
+        label.appendChild(input);
+        form.appendChild(label);
+
+        function cancel() {
+          if (persistSubmitting) return;
+          persistPromptOpen = false;
+          persistPromptError = '';
+          persistLocalEscape = false;
+          renderPersist();
+        }
+        function submit() {
+          if (persistSubmitting) return;
+          var value = String(input.value || '');
+          input.value = ''; // 入力値は保持しない
+          if (!value) {
+            persistPromptError = '合言葉を入力してください';
+            renderPersist();
+            return;
+          }
+          persistSubmitting = true;
+          persistPromptError = '';
+          renderPersist();
+          Promise.resolve(CS_API.logout(value)).then(function (res) {
+            persistSubmitting = false;
+            if (res && res.ok === true) {
+              persistPromptOpen = false;
+              persistActive = false;
+              persistMessage = '';
+              persistLocalEscape = false;
+              renderPersist();
+              return;
+            }
+            persistPromptError = persistLogoutFailureText(res);
+            if (expired && persistServerUnavailable(res)) persistLocalEscape = true;
+            renderPersist();
+          }, function () {
+            persistSubmitting = false;
+            persistPromptError = '通信または設定の確認が必要です';
+            if (expired) persistLocalEscape = true;
+            renderPersist();
+          });
+        }
+        form.addEventListener('submit', function (e) {
+          if (e && e.preventDefault) e.preventDefault();
+          submit();
+        });
+        input.addEventListener('keydown', function (e) {
+          if (e && e.key === 'Escape') {
+            if (e.preventDefault) e.preventDefault();
+            cancel();
+          }
+        });
+        var submitBtn = makeEl('button', 'auth-banner__btn', 'ログアウトする');
+        submitBtn.type = 'submit';
+        submitBtn.disabled = persistSubmitting;
+        var cancelBtn = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'やめる');
+        cancelBtn.type = 'button';
+        cancelBtn.disabled = persistSubmitting;
+        cancelBtn.addEventListener('click', cancel);
+        form.appendChild(submitBtn);
+        form.appendChild(cancelBtn);
+        if (persistPromptError) form.appendChild(makeEl('span', 'classroom-persist__error', persistPromptError));
+        if (persistLocalEscape) {
+          var local = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', '端末の表示だけ解除');
+          local.type = 'button';
+          local.disabled = persistSubmitting;
+          local.addEventListener('click', clearPersistLocally);
+          form.appendChild(local);
+        }
+        wrap.appendChild(form);
+      }
       function appendPersistControl() {
         if (!persistUsable()) return;
         var wrap = makeEl('span', 'classroom-persist', '');
@@ -744,47 +874,35 @@
         }
         if (persistActive) {
           wrap.appendChild(makeEl('span', '', 'この端末でログインを保持中'));
-          var off = makeEl('button', 'auth-banner__btn', '保持を解除');
-          off.type = 'button';
-          off.addEventListener('click', function () {
-            if (persistBusy) return;
-            persistBusy = true;
-            persistMessage = '';
-            renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
-            Promise.resolve(CS_API.logout()).then(function (res) {
-              persistBusy = false;
-              persistChecked = true;
-              // サーバの失効が成功した時だけ「解除した」と表示する（失敗を成功に見せない）
-              if (res && res.ok === true) {
-                persistActive = false;
-                persistMessage = '';
-              } else {
-                persistActive = true;
-                persistMessage = 'ログアウトできませんでした。通信状態を確認して再試行してください';
-              }
-              renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
-            }, function () {
-              persistBusy = false;
-              persistChecked = true;
-              persistActive = true;
-              persistMessage = 'ログアウトできませんでした。通信状態を確認して再試行してください';
-              renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
-            });
-          });
-          wrap.appendChild(off);
+          if (persistPassphraseRequired === false) {
+            var offDisabled = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'ログアウト');
+            offDisabled.type = 'button';
+            offDisabled.disabled = true;
+            wrap.appendChild(offDisabled);
+            wrap.appendChild(makeEl('span', 'classroom-persist__note', '合言葉が未設定'));
+          } else {
+            var off = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', 'ログアウト');
+            off.type = 'button';
+            off.addEventListener('click', openPersistPrompt);
+            wrap.appendChild(off);
+            if (persistPromptOpen) appendLogoutPrompt(wrap, false);
+          }
         } else if (CS_API.hasOptIn && CS_API.hasOptIn()) {
-          // 事前 status が noauth/期限切れ: いつもの GIS ログインはそのまま使える（保持だけ解除できる）
+          // 事前 status が noauth/期限切れ: いつもの GIS ログインはそのまま使える
           wrap.appendChild(makeEl('span', '', '保持の期限が切れています（いつものログインはそのまま使えます）'));
-          var clear = makeEl('button', 'auth-banner__btn', '保持を解除');
-          clear.type = 'button';
-          clear.addEventListener('click', function () {
-            if (!CS_API.setOptIn) return;
-            CS_API.setOptIn(false);
-            persistChecked = true;
-            persistMessage = '';
-            renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
-          });
-          wrap.appendChild(clear);
+          if (persistPassphraseRequired === false) {
+            var localOnly = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', '端末の表示だけ解除');
+            localOnly.type = 'button';
+            localOnly.addEventListener('click', function () { clearPersistLocally(); });
+            wrap.appendChild(localOnly);
+            wrap.appendChild(makeEl('span', 'classroom-persist__note', '合言葉が未設定（サーバー側の失効は別途必要です）'));
+          } else {
+            var clear = makeEl('button', 'auth-banner__btn auth-banner__btn--secondary', '保持を解除');
+            clear.type = 'button';
+            clear.addEventListener('click', openPersistPrompt);
+            wrap.appendChild(clear);
+            if (persistPromptOpen) appendLogoutPrompt(wrap, true);
+          }
         } else {
           var keep = makeEl('button', 'auth-banner__btn', 'この端末を教室タブレットとして保持');
           keep.type = 'button';
@@ -798,6 +916,7 @@
               persistBusy = false;
               persistChecked = true;
               persistActive = !!(res && res.ok && (res.active === true || res.authenticated === true));
+              if (persistActive && res && res.passphraseRequired === false) persistPassphraseRequired = false;
               if (!persistActive) {
                 // 既知コードだけを短い理由へ写像（生値は表示しない）
                 var reason = '保持できませんでした。' + persistFailureReason(res);
@@ -821,6 +940,12 @@
         }
         if (persistMessage) wrap.appendChild(makeEl('span', 'classroom-persist__note', persistMessage));
         banner.appendChild(wrap);
+        if (persistPromptOpen && !persistSubmitting && typeof wrap.querySelector === 'function') {
+          var field = wrap.querySelector('.classroom-persist__input');
+          if (field && typeof field.focus === 'function') {
+            setTimeout(function () { try { field.focus(); } catch (e) {} }, 0);
+          }
+        }
       }
       function ensurePersistState() {
         if (!persistUsable() || persistChecked || persistBusy) return;
@@ -831,6 +956,8 @@
           persistBusy = false;
           persistChecked = true;
           persistActive = !!(st && st.ok === true && st.active === true);
+          if (st && st.passphraseRequired === false) persistPassphraseRequired = false;
+          else if (st && st.passphraseRequired === true) persistPassphraseRequired = true;
           if (!persistActive) persistMessage = '保持の期限が切れています';
           renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
         }, function () {
@@ -878,7 +1005,8 @@
           // clearIdToken の authchange でも走るが、トークンが無い場合も GIS ボタンへ戻す
           runProbe();
         });
-        banner.appendChild(redo);
+        // 保持中は id_token を使わないため「ログインし直す」は出さない
+        if (!persistActive) banner.appendChild(redo);
         appendPersistControl();
         ensurePersistState();
       }

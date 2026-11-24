@@ -25,6 +25,8 @@
 #   CLASSROOM_APP2_TOKEN          site-app2-backend の共通トークン
 #   CLASSROOM_PDFDROP_TOKEN       site-pdfdrop の共通トークン
 #   CLASSROOM_CONTEXT_PEPPER      任意（context の SHA-256 に混ぜる固定文字列）
+#   CLASSROOM_LOGOUT_PASSPHRASE_HASH  ログアウト合言葉の PBKDF2 ハッシュ
+#                                      （未設定なら logout は 403 fail closed）
 
 name = "gakusyu-classroom-auth"
 main = "classroom-auth-api.mjs"

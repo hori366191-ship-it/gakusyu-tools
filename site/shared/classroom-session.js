@@ -535,10 +535,14 @@
         var d = r.data || {};
         // 契約: { ok:true, authenticated:boolean }（active ではない）
         var authenticated = d.authenticated === true;
+        var passphraseRequired;
+        if (d.passphraseRequired === true) passphraseRequired = true;
+        else if (d.passphraseRequired === false) passphraseRequired = false;
         return {
           ok: d.ok === true,
           active: authenticated,
           authenticated: authenticated,
+          passphraseRequired: passphraseRequired,
           known: d.ok === true,
           unknown: false,
           status: r.status
@@ -630,7 +634,11 @@
           return statusOnce().then(function (st) {
             if (st.ok === true && st.active === true) {
               setOptIn(true);
-              return { ok: true, active: true };
+              var out = { ok: true, active: true };
+              if (st.passphraseRequired === true || st.passphraseRequired === false) {
+                out.passphraseRequired = st.passphraseRequired;
+              }
+              return out;
             }
             return { ok: false, active: false, error: 'not_active', unknown: st.unknown === true };
           });
@@ -697,9 +705,18 @@
       status: readStatus,
       statusOnce: statusOnce,
       popupLogin: popupLogin,
-      logout: function () {
-        return postOnce(API_PATHS.logout, {}, PROBE_TIMEOUT_MS).then(function (r) {
-          var ok = r.ok && r.data && r.data.ok === true;
+      /**
+       * 合言葉つきログアウト。合言葉は引数で受け取り、保存・ログ・URL・例外へ出さない。
+       * 未指定は送信前に既知失敗（predispatch）にする。
+       */
+      logout: function (passphrase) {
+        var value = typeof passphrase === 'string' ? passphrase : '';
+        if (!value) {
+          return Promise.resolve({ ok: false, error: 'passphrase_required', unknown: false, predispatch: true });
+        }
+        return postOnce(API_PATHS.logout, { passphrase: value }, PROBE_TIMEOUT_MS).then(function (r) {
+          var d = (r.data && typeof r.data === 'object') ? r.data : null;
+          var ok = r.ok && d && d.ok === true;
           if (ok) {
             setOptIn(false);
             activation = null;
@@ -707,7 +724,12 @@
             markActive(false);
             return { ok: true, unknown: false };
           }
-          return { ok: false, unknown: r.unknown === true, error: (r.data && r.data.error) || r.error };
+          return {
+            ok: false,
+            unknown: r.unknown === true,
+            error: (d && d.error) || r.error,
+            status: r.status
+          };
         });
       },
       probe: function (target, opts) {

@@ -10,6 +10,7 @@ const { DatabaseSync } = require('node:sqlite');
 
 const loginModule = import('../../site-worker/classroom-login.mjs');
 const sessionsModule = import('../../site-worker/classroom-sessions.mjs');
+const logoutModule = import('../../site-worker/classroom-logout.mjs');
 
 const ORIGIN = 'https://tools.example';
 const CLIENT_ID = 'client-123.apps.googleusercontent.com';
@@ -18,6 +19,11 @@ const KEY = Buffer.alloc(32, 7).toString('base64url');
 const T0 = 1_700_000_000;
 const T0_MS = T0 * 1000;
 const DAY = 24 * 60 * 60;
+const LOGOUT_PASSPHRASE = 'staff-passphrase-123';
+const LOGOUT_SALT = Buffer.alloc(16, 3);
+const LOGOUT_HASH = crypto.pbkdf2Sync(LOGOUT_PASSPHRASE, LOGOUT_SALT, 1000, 32, 'sha256');
+const LOGOUT_HASH_VALUE =
+  `pbkdf2-sha256$1000$${LOGOUT_SALT.toString('base64url')}$${LOGOUT_HASH.toString('base64url')}`;
 
 /* ------------------------------------------------------------------ *
  * DB / 環境
@@ -68,6 +74,7 @@ function baseEnv(db) {
     CLASSROOM_GOOGLE_CLIENT_ID: CLIENT_ID,
     CLASSROOM_GOOGLE_CLIENT_SECRET: CLIENT_SECRET,
     CLASSROOM_ENCRYPTION_KEY: KEY,
+    CLASSROOM_LOGOUT_PASSPHRASE_HASH: LOGOUT_HASH_VALUE,
   };
 }
 
@@ -184,6 +191,8 @@ function createGoogleDouble() {
 
 async function setup({ authorize, envOverrides } = {}) {
   const { createClassroomLogin } = await loginModule;
+  const { resetLogoutThrottleForTests } = await logoutModule;
+  resetLogoutThrottleForTests();
   const sqlite = new DatabaseSync(':memory:');
   loadSchema(sqlite);
   const { db, sessions } = d1(sqlite);
@@ -198,6 +207,7 @@ async function setup({ authorize, envOverrides } = {}) {
     } : authorize,
     fetchImpl: google.fetch,
     now: () => clockMs,
+    logoutDelayMs: 0,
   });
   return {
     sqlite,
@@ -301,12 +311,19 @@ async function assertUnavailable(promise) {
   });
 }
 
-function logoutRequest(ctx, cookie, { origin = ORIGIN } = {}) {
+function logoutRequest(
+  ctx,
+  cookie,
+  { origin = ORIGIN, passphrase = LOGOUT_PASSPHRASE, ip = '203.0.113.1' } = {},
+) {
   const headers = { 'content-type': 'application/x-www-form-urlencoded' };
   if (origin !== null) headers.origin = origin;
   if (cookie) headers.cookie = cookie;
+  if (ip) headers['cf-connecting-ip'] = ip;
+  const body = new URLSearchParams({ return_to: '/' });
+  if (passphrase !== undefined && passphrase !== null) body.set('passphrase', passphrase);
   return ctx.login.handle(
-    new Request(`${ORIGIN}/_classroom/logout`, { method: 'POST', headers, body: 'return_to=%2F' }),
+    new Request(`${ORIGIN}/_classroom/logout`, { method: 'POST', headers, body: body.toString() }),
   );
 }
 
@@ -1025,6 +1042,100 @@ test('logout is same-origin only, deletes the OAuth credentials and clears the s
   const again = await logoutRequest(ctx, cookie);
   assert.equal(again.status, 303);
   assert.equal(ctx.count('classroom_oauth_credentials'), 0);
+});
+
+test('logout is disabled when the passphrase secret is absent and keeps the session', async () => {
+  const ctx = await setup({ envOverrides: { CLASSROOM_LOGOUT_PASSPHRASE_HASH: undefined } });
+  const { sessionCookie } = await fullLogin(ctx);
+  const cookie = cookiePair(sessionCookie);
+
+  const res = await logoutRequest(ctx, cookie, { passphrase: LOGOUT_PASSPHRASE });
+  assert.equal(res.status, 403);
+  assert.equal((await res.json()).error, 'logout_disabled');
+  assert.equal(ctx.count('classroom_oauth_credentials'), 1);
+  assert.ok(await ctx.login.authenticate(authRequest(cookie)));
+});
+
+test('logout requires the exact passphrase, rejects bad shapes, and never logs the value', async () => {
+  const ctx = await setup();
+  const { sessionCookie } = await fullLogin(ctx);
+  const cookie = cookiePair(sessionCookie);
+  const wrong = 'wrong-passphrase-123';
+  const captured = [];
+  const original = { log: console.log, error: console.error, warn: console.warn };
+  console.log = (...args) => captured.push(args.map(String).join(' '));
+  console.error = (...args) => captured.push(args.map(String).join(' '));
+  console.warn = (...args) => captured.push(args.map(String).join(' '));
+
+  try {
+    const invalid = await logoutRequest(ctx, cookie, { passphrase: wrong });
+    assert.equal(invalid.status, 403);
+    assert.equal((await invalid.json()).error, 'passphrase_invalid');
+
+    for (const passphrase of [null, '', 'x'.repeat(257)]) {
+      const badShape = await logoutRequest(ctx, cookie, { passphrase });
+      assert.equal(badShape.status, 400, String(passphrase));
+      assert.equal((await badShape.json()).error, 'bad_request');
+    }
+  } finally {
+    console.log = original.log;
+    console.error = original.error;
+    console.warn = original.warn;
+  }
+
+  assert.ok(!captured.join('\n').includes(wrong));
+  assert.ok(!captured.join('\n').includes(LOGOUT_PASSPHRASE));
+  assert.equal(ctx.count('classroom_oauth_credentials'), 1);
+  assert.ok(await ctx.login.authenticate(authRequest(cookie)));
+});
+
+test('logout throttles 5 failures per IP (best-effort) without deleting the session', async () => {
+  const ctx = await setup();
+  const { sessionCookie } = await fullLogin(ctx);
+  const cookie = cookiePair(sessionCookie);
+  const ip = '198.51.100.7';
+
+  for (let i = 0; i < 5; i += 1) {
+    const res = await logoutRequest(ctx, cookie, { passphrase: 'wrong-' + i, ip });
+    assert.equal(res.status, 403, 'failure ' + i);
+  }
+  const blocked = await logoutRequest(ctx, cookie, { passphrase: LOGOUT_PASSPHRASE, ip });
+  assert.equal(blocked.status, 429);
+  assert.equal((await blocked.json()).error, 'too_many_attempts');
+  assert.equal(ctx.count('classroom_oauth_credentials'), 1);
+  assert.ok(await ctx.login.authenticate(authRequest(cookie)));
+});
+
+test('successful logout clears the failure counter for that IP', async () => {
+  const ctx = await setup();
+  const { sessionCookie } = await fullLogin(ctx);
+  const cookie = cookiePair(sessionCookie);
+  const ip = '198.51.100.8';
+
+  for (let i = 0; i < 4; i += 1) {
+    assert.equal((await logoutRequest(ctx, cookie, { passphrase: 'wrong-' + i, ip })).status, 403);
+  }
+  const ok = await logoutRequest(ctx, cookie, { passphrase: LOGOUT_PASSPHRASE, ip });
+  assert.equal(ok.status, 303);
+  assert.equal(ctx.count('classroom_oauth_credentials'), 0);
+
+  const second = await fullLogin(ctx);
+  const secondCookie = cookiePair(second.sessionCookie);
+  for (let i = 0; i < 4; i += 1) {
+    assert.equal(
+      (await logoutRequest(ctx, secondCookie, { passphrase: 'again-' + i, ip })).status,
+      403,
+      'counter must be cleared after success',
+    );
+  }
+});
+
+test('constantTimeEqualBytes compares equal, differing and length-mismatched bytes', async () => {
+  const { constantTimeEqualBytes } = await logoutModule;
+  assert.equal(constantTimeEqualBytes(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])), true);
+  assert.equal(constantTimeEqualBytes(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 4])), false);
+  assert.equal(constantTimeEqualBytes(new Uint8Array([1, 2]), new Uint8Array([1, 2, 3])), false);
+  assert.equal(constantTimeEqualBytes('abc', new Uint8Array([1, 2, 3])), false);
 });
 
 test('manual revocation via revokeForSubject or row delete invalidates login and cascades credentials', async () => {

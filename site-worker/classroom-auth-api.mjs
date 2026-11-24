@@ -37,6 +37,15 @@ import {
   revokeClassroomSession,
 } from './classroom-login.mjs';
 import { LIMITS, createClassroomGateway } from './classroom-gateway.mjs';
+import {
+  MAX_PASSPHRASE_LENGTH,
+  clearLogoutFailures,
+  delayAfterLogoutFailure,
+  logoutThrottleBlocked,
+  parseLogoutPassphraseHash,
+  recordLogoutFailure,
+  verifyLogoutPassphrase,
+} from './classroom-logout.mjs';
 
 export const API_ORIGIN = 'https://gakusyu-classroom-auth.hori-shota.workers.dev';
 export const SITE_ORIGIN = 'https://hori366191-ship-it.github.io';
@@ -251,6 +260,9 @@ export function createClassroomAuthApi(env, deps = {}) {
 
   const loginEnv = { ...settings, CLASSROOM_ORIGIN: API_ORIGIN };
   const store = hasDb ? classroomSessions(db, { now }) : null;
+  const logoutPassphrase = parseLogoutPassphraseHash(settings.CLASSROOM_LOGOUT_PASSPHRASE_HASH);
+  const logoutDelayMs =
+    typeof deps.logoutDelayMs === 'number' && deps.logoutDelayMs >= 0 ? deps.logoutDelayMs : 500;
   let gateway = null;
 
   const login = createClassroomLogin(loginEnv, {
@@ -311,10 +323,11 @@ export function createClassroomAuthApi(env, deps = {}) {
   async function handleStatus(request) {
     const { duplicate, handle } = readHandles(request);
     if (duplicate) return jsonResponse({ ok: false, error: 'duplicate_session_cookie' }, 400);
-    if (!handle) return jsonResponse({ ok: true, authenticated: false }, 200);
+    const passphraseRequired = Boolean(logoutPassphrase);
+    if (!handle) return jsonResponse({ ok: true, authenticated: false, passphraseRequired }, 200);
     if (!store) return jsonResponse({ ok: false, error: 'session_store_unavailable' }, 503);
     if (handle.length > MAX_HANDLE_LENGTH) {
-      return jsonResponse({ ok: true, authenticated: false }, 200);
+      return jsonResponse({ ok: true, authenticated: false, passphraseRequired }, 200);
     }
 
     let session;
@@ -325,12 +338,35 @@ export function createClassroomAuthApi(env, deps = {}) {
       return jsonResponse({ ok: false, error: 'session_store_unavailable' }, 503);
     }
     // refresh しない・延長しない。保存された正当なセッションの有無だけを返す。
-    return jsonResponse({ ok: true, authenticated: Boolean(session) }, 200);
+    return jsonResponse({ ok: true, authenticated: Boolean(session), passphraseRequired }, 200);
   }
 
-  async function handleLogout(request) {
+  async function handleLogout(request, body) {
     const { duplicate, handle } = readHandles(request);
     if (duplicate) return jsonResponse({ ok: false, error: 'duplicate_session_cookie' }, 400);
+
+    // 合言葉が未設定・不正ならログアウト自体を無効化する（セッションは消さない）。
+    if (!logoutPassphrase) return jsonResponse({ ok: false, error: 'logout_disabled' }, 403);
+
+    const ip = request.headers.get('cf-connecting-ip') || '';
+    if (logoutThrottleBlocked(ip)) {
+      return jsonResponse({ ok: false, error: 'too_many_attempts' }, 429);
+    }
+
+    const passphrase = body && typeof body === 'object' ? body.passphrase : undefined;
+    if (
+      typeof passphrase !== 'string' ||
+      passphrase.length === 0 ||
+      passphrase.length > MAX_PASSPHRASE_LENGTH
+    ) {
+      return jsonResponse({ ok: false, error: 'bad_request' }, 400);
+    }
+    if (!(await verifyLogoutPassphrase(passphrase, logoutPassphrase))) {
+      recordLogoutFailure(ip);
+      await delayAfterLogoutFailure(logoutDelayMs);
+      return jsonResponse({ ok: false, error: 'passphrase_invalid' }, 403);
+    }
+    clearLogoutFailures(ip);
 
     if (handle && handle.length <= MAX_HANDLE_LENGTH && store) {
       try {
@@ -427,12 +463,16 @@ export function createClassroomAuthApi(env, deps = {}) {
       if (url.pathname === API_PATHS.status) {
         return await handleStatus(request);
       }
-      if (url.pathname === API_PATHS.logout) {
-        return await handleLogout(request);
+      if (url.pathname === API_PATHS.logout && !logoutPassphrase) {
+        return jsonResponse({ ok: false, error: 'logout_disabled' }, 403);
       }
 
       const parsed = parseJsonObject(bounded.text);
       if (parsed.bad) return jsonResponse({ ok: false, error: 'bad_request' }, 400);
+
+      if (url.pathname === API_PATHS.logout) {
+        return await handleLogout(request, parsed.value);
+      }
 
       if (url.pathname === API_PATHS.popupExchange) {
         return await handlePopupExchange(request, parsed.value);

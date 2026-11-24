@@ -25,13 +25,20 @@ const PDFDROP_TOKEN = 'synthetic-pdfdrop-token';
 const T0 = 1_700_000_000;
 const T0_MS = T0 * 1000;
 const DAY = 24 * 60 * 60;
+const LOGOUT_PASSPHRASE = 'staff-passphrase-123';
+const LOGOUT_SALT = Buffer.alloc(16, 5);
+const LOGOUT_HASH = crypto.pbkdf2Sync(LOGOUT_PASSPHRASE, LOGOUT_SALT, 1000, 32, 'sha256');
+const LOGOUT_HASH_VALUE =
+  `pbkdf2-sha256$1000$${LOGOUT_SALT.toString('base64url')}$${LOGOUT_HASH.toString('base64url')}`;
 
 let apiModule;
 let gatewayModule;
+let logoutModule;
 
 test.before(async () => {
   apiModule = await import('../../site-worker/classroom-auth-api.mjs');
   gatewayModule = await import('../../site-worker/classroom-gateway.mjs');
+  logoutModule = await import('../../site-worker/classroom-logout.mjs');
 });
 
 /* ------------------------------------------------------------------ *
@@ -189,6 +196,7 @@ function createUpstreamDouble() {
  * ------------------------------------------------------------------ */
 
 async function setup(overrides = {}) {
+  logoutModule.resetLogoutThrottleForTests();
   const sqlite = new DatabaseSync(':memory:');
   loadSchema(sqlite);
   const db = d1(sqlite);
@@ -215,12 +223,14 @@ async function setup(overrides = {}) {
     CLASSROOM_APP2_TOKEN: APP2_TOKEN,
     CLASSROOM_PDFDROP_TOKEN: PDFDROP_TOKEN,
     CLASSROOM_CONTEXT_PEPPER: 'pepper',
+    CLASSROOM_LOGOUT_PASSPHRASE_HASH: LOGOUT_HASH_VALUE,
     ...overrides,
   };
 
   const api = apiModule.createClassroomAuthApi(env, {
     fetchImpl: upstream.fetch,
     now: () => clockMs,
+    logoutDelayMs: 0,
   });
 
   return {
@@ -575,7 +585,11 @@ test('status reports only the stored session, never refreshes or extends it', as
   const ctx = await setup();
   const before = await post(ctx.api, '/_classroom/status', {});
   assert.equal(before.status, 200);
-  assert.deepEqual(await bodyOf(before), { ok: true, authenticated: false });
+  assert.deepEqual(await bodyOf(before), {
+    ok: true,
+    authenticated: false,
+    passphraseRequired: true,
+  });
   assert.equal(findCookie(before, COOKIE), null);
 
   const { pair } = await login(ctx);
@@ -584,7 +598,11 @@ test('status reports only the stored session, never refreshes or extends it', as
 
   const after = await post(ctx.api, '/_classroom/status', {}, { headers: { cookie: pair } });
   assert.equal(after.status, 200);
-  assert.deepEqual(await bodyOf(after), { ok: true, authenticated: true });
+  assert.deepEqual(await bodyOf(after), {
+    ok: true,
+    authenticated: true,
+    passphraseRequired: true,
+  });
   assert.equal(findCookie(after, COOKIE), null);
   assert.equal(ctx.upstream.calls.length, tokenCalls);
   assert.equal(
@@ -601,7 +619,12 @@ test('logout deletes OAuth credentials, revokes the session and clears the parti
   const ctx = await setup();
   const { pair } = await login(ctx);
 
-  const response = await post(ctx.api, '/_classroom/logout', {}, { headers: { cookie: pair } });
+  const response = await post(
+    ctx.api,
+    '/_classroom/logout',
+    { passphrase: LOGOUT_PASSPHRASE },
+    { headers: { cookie: pair, 'cf-connecting-ip': '203.0.113.10' } },
+  );
   assert.equal(response.status, 200);
   assert.deepEqual(await bodyOf(response), { ok: true, authenticated: false });
   const cookie = findCookie(response, COOKIE);
@@ -615,7 +638,74 @@ test('logout deletes OAuth credentials, revokes the session and clears the parti
   assert.ok(Number(session.revoked_at) > 0);
 
   const status = await post(ctx.api, '/_classroom/status', {}, { headers: { cookie: pair } });
-  assert.deepEqual(await bodyOf(status), { ok: true, authenticated: false });
+  assert.deepEqual(await bodyOf(status), {
+    ok: true,
+    authenticated: false,
+    passphraseRequired: true,
+  });
+});
+
+test('logout is disabled with 403 when the passphrase secret is absent and keeps the session', async () => {
+  const ctx = await setup({ CLASSROOM_LOGOUT_PASSPHRASE_HASH: undefined });
+  const { pair } = await login(ctx);
+
+  const status = await post(ctx.api, '/_classroom/status', {}, { headers: { cookie: pair } });
+  assert.equal((await bodyOf(status)).passphraseRequired, false);
+
+  const response = await post(
+    ctx.api,
+    '/_classroom/logout',
+    { passphrase: LOGOUT_PASSPHRASE },
+    { headers: { cookie: pair } },
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await bodyOf(response)).error, 'logout_disabled');
+  assert.equal(ctx.count('classroom_oauth_credentials'), 1);
+  assert.equal(ctx.sqliteRows('SELECT revoked_at FROM classroom_sessions')[0].revoked_at, null);
+});
+
+test('logout rejects wrong/empty/oversized passphrases without revoking the session', async () => {
+  const ctx = await setup();
+  const { pair } = await login(ctx);
+  const headers = { cookie: pair, 'cf-connecting-ip': '203.0.113.11' };
+
+  const wrong = await post(ctx.api, '/_classroom/logout', { passphrase: 'wrong-passphrase-123' }, { headers });
+  assert.equal(wrong.status, 403);
+  assert.equal((await bodyOf(wrong)).error, 'passphrase_invalid');
+
+  for (const passphrase of [undefined, '', 123, 'x'.repeat(257)]) {
+    const response = await post(ctx.api, '/_classroom/logout', { passphrase }, { headers });
+    assert.equal(response.status, 400, String(passphrase));
+    assert.equal((await bodyOf(response)).error, 'bad_request');
+  }
+
+  assert.equal(ctx.count('classroom_oauth_credentials'), 1);
+  assert.equal(ctx.sqliteRows('SELECT revoked_at FROM classroom_sessions')[0].revoked_at, null);
+});
+
+test('logout throttles 5 failures per IP and returns 429 before verification', async () => {
+  const ctx = await setup();
+  const { pair } = await login(ctx);
+  const headers = { cookie: pair, 'cf-connecting-ip': '203.0.113.12' };
+
+  for (let i = 0; i < 5; i += 1) {
+    const response = await post(
+      ctx.api,
+      '/_classroom/logout',
+      { passphrase: 'wrong-' + i },
+      { headers },
+    );
+    assert.equal(response.status, 403, 'failure ' + i);
+  }
+  const blocked = await post(
+    ctx.api,
+    '/_classroom/logout',
+    { passphrase: LOGOUT_PASSPHRASE },
+    { headers },
+  );
+  assert.equal(blocked.status, 429);
+  assert.equal((await bodyOf(blocked)).error, 'too_many_attempts');
+  assert.equal(ctx.count('classroom_oauth_credentials'), 1);
 });
 
 /* ------------------------------------------------------------------ *

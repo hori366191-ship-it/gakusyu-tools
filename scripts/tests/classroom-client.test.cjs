@@ -385,6 +385,23 @@ test('index.html: 教室資格確認済み(renderOk)にだけ「この端末で�
   assert.ok(!/gakusyu-classroom-persist[^\n]*(context|code|credential)/i.test(INDEX));
 });
 
+test('index.html: 保持中のログアウトは合言葉入力・入力値を保存しない・未設定は無効化', () => {
+  assert.ok(INDEX.includes("'合言葉'"), '合言葉ラベル');
+  assert.ok(INDEX.includes("input.type = 'password'"), 'password入力');
+  assert.ok(INDEX.includes("input.setAttribute('autocomplete', 'off')"));
+  assert.ok(INDEX.includes("input.setAttribute('autocapitalize', 'off')"));
+  assert.ok(INDEX.includes('input.spellcheck = false'));
+  assert.ok(INDEX.includes('ログアウトする') && INDEX.includes('やめる'));
+  assert.ok(INDEX.includes('CS_API.logout(value)'), '入力値をその場で渡す');
+  assert.ok(INDEX.includes('入力値は保持しない'));
+  assert.ok(INDEX.includes("persistPassphraseRequired === false"), '未設定時はログアウト無効化');
+  assert.ok(INDEX.includes("if (!persistActive) banner.appendChild(redo);"), '保持中はログインし直しを出さない');
+  // 入力値を storage / URL へ保存しない
+  assert.equal(/localStorage[^\n]*passphrase/i.test(INDEX), false);
+  assert.equal(/sessionStorage[^\n]*passphrase/i.test(INDEX), false);
+  assert.equal(/location\.[a-z]+\s*=[^\n]*passphrase/i.test(INDEX), false);
+});
+
 // ---- index.html の教室セッション UI を fake DOM で実行する ----
 
 function miniDom() {
