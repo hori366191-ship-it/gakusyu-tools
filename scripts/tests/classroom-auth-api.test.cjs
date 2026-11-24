@@ -30,6 +30,8 @@ const LOGOUT_SALT = Buffer.alloc(16, 5);
 const LOGOUT_HASH = crypto.pbkdf2Sync(LOGOUT_PASSPHRASE, LOGOUT_SALT, 1000, 32, 'sha256');
 const LOGOUT_HASH_VALUE =
   `pbkdf2-sha256$1000$${LOGOUT_SALT.toString('base64url')}$${LOGOUT_HASH.toString('base64url')}`;
+const LOGOUT_SHA256_VALUE =
+  'sha256$' + crypto.createHash('sha256').update(LOGOUT_PASSPHRASE, 'utf8').digest('hex');
 
 let apiModule;
 let gatewayModule;
@@ -671,16 +673,37 @@ test('logout rejects wrong/empty/oversized passphrases without revoking the sess
 
   const wrong = await post(ctx.api, '/_classroom/logout', { passphrase: 'wrong-passphrase-123' }, { headers });
   assert.equal(wrong.status, 403);
-  assert.equal((await bodyOf(wrong)).error, 'passphrase_invalid');
+  const wrongBody = await bodyOf(wrong);
+  assert.equal(wrongBody.error, 'passphrase_invalid');
+  assert.equal(wrongBody.diag, undefined);
+  assert.ok(!JSON.stringify(wrongBody).includes('wrong-passphrase-123'));
+  assert.ok(!JSON.stringify(wrongBody).includes(LOGOUT_PASSPHRASE));
 
   for (const passphrase of [undefined, '', 123, 'x'.repeat(257)]) {
     const response = await post(ctx.api, '/_classroom/logout', { passphrase }, { headers });
     assert.equal(response.status, 400, String(passphrase));
-    assert.equal((await bodyOf(response)).error, 'bad_request');
+    const body = await bodyOf(response);
+    assert.equal(body.error, 'bad_request');
+    assert.equal(body.diag, undefined);
   }
 
   assert.equal(ctx.count('classroom_oauth_credentials'), 1);
   assert.equal(ctx.sqliteRows('SELECT revoked_at FROM classroom_sessions')[0].revoked_at, null);
+});
+
+test('logout accepts the sha256 saved format', async () => {
+  const ctx = await setup({ CLASSROOM_LOGOUT_PASSPHRASE_HASH: LOGOUT_SHA256_VALUE });
+  const { pair } = await login(ctx);
+
+  const response = await post(
+    ctx.api,
+    '/_classroom/logout',
+    { passphrase: LOGOUT_PASSPHRASE },
+    { headers: { cookie: pair, 'cf-connecting-ip': '203.0.113.13' } },
+  );
+  assert.equal(response.status, 200);
+  assert.equal(ctx.count('classroom_oauth_credentials'), 0);
+  assert.ok(Number(ctx.sqliteRows('SELECT revoked_at FROM classroom_sessions')[0].revoked_at) > 0);
 });
 
 test('logout throttles 5 failures per IP and returns 429 before verification', async () => {

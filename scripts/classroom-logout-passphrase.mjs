@@ -4,21 +4,18 @@
  *
  * 使い方:
  *   node scripts/classroom-logout-passphrase.mjs
- *   （プロンプトで合言葉を入力し、Ctrl+Z / Ctrl+D で終了）
+ *   （合言葉を stdin で入力し、Ctrl+Z / Ctrl+D で終了）
  *
- * 出力: pbkdf2-sha256$210000$<saltBase64url>$<hashBase64url>
+ * 出力: sha256$<hex64>
  * - 合言葉は stdin からだけ読む（引数・ファイル・ログへ出さない）。
- * - 4 文字未満・制御文字・256 文字超は拒否。salt は 16 byte 乱数。
- * - 出力値は環境 secret `CLASSROOM_LOGOUT_PASSPHRASE_HASH` にだけ設定する。
+ * - 4 文字未満・制御文字・256 文字超は拒否。
+ * - PBKDF2 は使わない（現行の保存形式は SHA-256）。
  */
 
-import { pbkdf2Sync, randomBytes } from 'node:crypto';
+import { createHash } from 'node:crypto';
 
 const MIN_LENGTH = 4;
 const MAX_LENGTH = 256;
-const ITERATIONS = 210000;
-const SALT_BYTES = 16;
-const HASH_BYTES = 32;
 
 async function readStdin() {
   let value = '';
@@ -41,11 +38,8 @@ async function main() {
     return;
   }
 
-  const salt = randomBytes(SALT_BYTES);
-  const hash = pbkdf2Sync(passphrase, salt, ITERATIONS, HASH_BYTES, 'sha256');
-  process.stdout.write(
-    `pbkdf2-sha256$${ITERATIONS}$${salt.toString('base64url')}$${hash.toString('base64url')}\n`,
-  );
+  const hash = createHash('sha256').update(passphrase, 'utf8').digest('hex');
+  process.stdout.write(`sha256$${hash}\n`);
 }
 
 main().catch(() => {

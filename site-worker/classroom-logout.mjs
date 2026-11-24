@@ -1,9 +1,10 @@
 /**
  * 教室ログアウトの合言葉（スタッフ共有パスフレーズ）検証。
  *
- * - 保存形式: `pbkdf2-sha256$<iterations>$<saltBase64url>$<hashBase64url>`
- * - PBKDF2-SHA256。iterations は保存値（上限 1,000,000）。
- * - salt / hash は base64url 厳格デコード。比較は定数時間。
+ * - 現行の保存形式: `sha256$<hex64>`（合言葉の UTF-8 を SHA-256、hex 小文字）。
+ * - 互換のため旧 `pbkdf2-sha256$<iterations>$<saltBase64url>$<hashBase64url>` も
+ *   パース・検証できるが、Workers の deriveBits 実行差で動作しなかったため非推奨。
+ * - salt / hash は厳格デコード。比較は定数時間。
  * - 合言葉・導出値はログ・応答・例外へ出さない。
  * - 失敗スロットルは isolate 内メモリの best-effort（`cf-connecting-ip` 単位）。
  *   10分で5回失敗したら次の試行を 429 にする。成功で解除。
@@ -48,11 +49,23 @@ function decodeBase64urlStrict(value) {
 }
 
 /**
- * 保存文字列を検証して { iterations, salt, hash } を返す。不正・未設定は null。
+ * 保存文字列を検証して種別付きで返す。不正・未設定は null。
+ * - 現行: `sha256$<hex64>`（合言葉の UTF-8 を SHA-256、hex 小文字）
+ * - 旧互換（非推奨）: `pbkdf2-sha256$<iterations>$<saltBase64url>$<hashBase64url>`
  */
 export function parseLogoutPassphraseHash(value) {
   if (typeof value !== 'string') return null;
   const parts = value.trim().split('$');
+
+  if (parts[0] === 'sha256') {
+    if (parts.length !== 2 || !/^[0-9a-f]{64}$/.test(parts[1])) return null;
+    const hash = new Uint8Array(32);
+    for (let i = 0; i < 32; i += 1) {
+      hash[i] = parseInt(parts[1].slice(i * 2, i * 2 + 2), 16);
+    }
+    return { kind: 'sha256', hash };
+  }
+
   if (parts.length !== 4 || parts[0] !== 'pbkdf2-sha256') return null;
   if (!/^[0-9]+$/.test(parts[1])) return null;
   const iterations = Number(parts[1]);
@@ -61,7 +74,7 @@ export function parseLogoutPassphraseHash(value) {
   const salt = decodeBase64urlStrict(parts[2]);
   const hash = decodeBase64urlStrict(parts[3]);
   if (!salt || salt.length === 0 || !hash || hash.length === 0) return null;
-  return { iterations, salt, hash };
+  return { kind: 'pbkdf2', iterations, salt, hash };
 }
 
 export function isLogoutPassphraseConfigured(value) {
@@ -79,51 +92,59 @@ export function constantTimeEqualBytes(a, b) {
   return diff === 0;
 }
 
-/**
- * 合言葉を PBKDF2-SHA256 で導出し、定数時間で比較する。
- * parsed は parseLogoutPassphraseHash の戻り値。例外・導出失敗は false（fail closed）。
- */
-export async function verifyLogoutPassphrase(passphrase, parsed) {
+/** 合言葉を保存形式に応じたバイト列へ導出する。失敗は null。 */
+export async function deriveLogoutPassphraseBytes(passphrase, parsed) {
   if (
     typeof passphrase !== 'string' ||
     passphrase.length === 0 ||
     passphrase.length > MAX_PASSPHRASE_LENGTH
   ) {
-    return false;
+    return null;
   }
-  if (
-    !parsed ||
-    !(parsed.salt instanceof Uint8Array) ||
-    !(parsed.hash instanceof Uint8Array) ||
-    parsed.hash.length === 0
-  ) {
-    return false;
+  if (!parsed || !(parsed.hash instanceof Uint8Array) || parsed.hash.length === 0) {
+    return null;
   }
 
   try {
-    const material = await crypto.subtle.importKey(
-      'raw',
-      new TextEncoder().encode(passphrase),
-      'PBKDF2',
-      false,
-      ['deriveBits'],
-    );
-    const derived = new Uint8Array(
-      await crypto.subtle.deriveBits(
-        {
-          name: 'PBKDF2',
-          hash: 'SHA-256',
-          salt: parsed.salt,
-          iterations: parsed.iterations,
-        },
-        material,
-        parsed.hash.length * 8,
-      ),
-    );
-    return constantTimeEqualBytes(derived, parsed.hash);
+    const encoded = new TextEncoder().encode(passphrase);
+    if (parsed.kind === 'sha256') {
+      return new Uint8Array(await crypto.subtle.digest('SHA-256', encoded));
+    }
+    if (parsed.kind === 'pbkdf2') {
+      if (!(parsed.salt instanceof Uint8Array)) return null;
+      const material = await crypto.subtle.importKey('raw', encoded, 'PBKDF2', false, [
+        'deriveBits',
+      ]);
+      return new Uint8Array(
+        await crypto.subtle.deriveBits(
+          {
+            name: 'PBKDF2',
+            hash: 'SHA-256',
+            salt: parsed.salt,
+            iterations: parsed.iterations,
+          },
+          material,
+          parsed.hash.length * 8,
+        ),
+      );
+    }
+    return null;
   } catch {
+    return null;
+  }
+}
+
+/**
+ * 合言葉を保存形式に応じて導出し、定数時間で比較する。
+ * parsed は parseLogoutPassphraseHash の戻り値。例外・導出失敗は false（fail closed）。
+ */
+export async function verifyLogoutPassphrase(passphrase, parsed) {
+  if (!parsed || !(parsed.hash instanceof Uint8Array) || parsed.hash.length === 0) {
     return false;
   }
+  const derived = await deriveLogoutPassphraseBytes(passphrase, parsed);
+  if (!derived) return false;
+  return constantTimeEqualBytes(derived, parsed.hash);
 }
 
 function throttleKey(ip) {

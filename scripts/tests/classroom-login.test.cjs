@@ -6,6 +6,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const { spawnSync } = require('node:child_process');
 const { DatabaseSync } = require('node:sqlite');
 
 const loginModule = import('../../site-worker/classroom-login.mjs');
@@ -24,6 +25,8 @@ const LOGOUT_SALT = Buffer.alloc(16, 3);
 const LOGOUT_HASH = crypto.pbkdf2Sync(LOGOUT_PASSPHRASE, LOGOUT_SALT, 1000, 32, 'sha256');
 const LOGOUT_HASH_VALUE =
   `pbkdf2-sha256$1000$${LOGOUT_SALT.toString('base64url')}$${LOGOUT_HASH.toString('base64url')}`;
+const LOGOUT_SHA256_VALUE =
+  'sha256$' + crypto.createHash('sha256').update(LOGOUT_PASSPHRASE, 'utf8').digest('hex');
 
 /* ------------------------------------------------------------------ *
  * DB / 環境
@@ -1127,6 +1130,56 @@ test('successful logout clears the failure counter for that IP', async () => {
       403,
       'counter must be cleared after success',
     );
+  }
+});
+
+test('logout accepts sha256 format and rejects invalid saved formats', async () => {
+  const ctx = await setup({
+    envOverrides: { CLASSROOM_LOGOUT_PASSPHRASE_HASH: LOGOUT_SHA256_VALUE },
+  });
+  const { sessionCookie } = await fullLogin(ctx);
+  const res = await logoutRequest(ctx, cookiePair(sessionCookie));
+  assert.equal(res.status, 303);
+  assert.equal(ctx.count('classroom_oauth_credentials'), 0);
+
+  const { parseLogoutPassphraseHash, isLogoutPassphraseConfigured, verifyLogoutPassphrase } =
+    await logoutModule;
+  const parsed = parseLogoutPassphraseHash(LOGOUT_SHA256_VALUE);
+  assert.equal(parsed.kind, 'sha256');
+  assert.equal(isLogoutPassphraseConfigured(LOGOUT_SHA256_VALUE), true);
+  assert.equal(await verifyLogoutPassphrase(LOGOUT_PASSPHRASE, parsed), true);
+  assert.equal(await verifyLogoutPassphrase('wrong-passphrase', parsed), false);
+
+  for (const value of [
+    'sha256$' + 'A'.repeat(64),
+    'sha256$' + 'a'.repeat(63),
+    'sha256$' + 'g'.repeat(64),
+    'pbkdf2-sha256$0$AAAA$AAAA',
+    'pbkdf2-sha256$1000001$AAAA$AAAA',
+    'unknown$abc',
+  ]) {
+    assert.equal(parseLogoutPassphraseHash(value), null, value);
+    assert.equal(isLogoutPassphraseConfigured(value), false, value);
+  }
+  assert.equal(parseLogoutPassphraseHash(LOGOUT_HASH_VALUE).kind, 'pbkdf2');
+});
+
+test('passphrase generator outputs sha256 format from stdin and rejects invalid input', () => {
+  const script = path.join(__dirname, '../../scripts/classroom-logout-passphrase.mjs');
+  const passphrase = 'staff-passphrase-123';
+  const result = spawnSync(process.execPath, [script], { input: passphrase, encoding: 'utf8' });
+  assert.equal(result.status, 0);
+  assert.equal(result.stderr, '');
+  assert.match(result.stdout, /^sha256\$[0-9a-f]{64}\n$/);
+  const expected = crypto.createHash('sha256').update(passphrase, 'utf8').digest('hex');
+  assert.equal(result.stdout.trim(), 'sha256$' + expected);
+  assert.ok(!result.stdout.includes(passphrase));
+
+  for (const input of ['abc', 'abcd\u0001', 'x'.repeat(257)]) {
+    const rejected = spawnSync(process.execPath, [script], { input, encoding: 'utf8' });
+    assert.equal(rejected.status, 1, JSON.stringify(input));
+    assert.equal(rejected.stdout, '');
+    assert.ok(!rejected.stderr.includes(input));
   }
 });
 

@@ -13,7 +13,7 @@ URL のみを使う（新サイトなし）。`classroom.hori-shota.com` は閉�
 | `classroom-gateway.mjs` | HTML/asset 配信、`/_classroom/probe\|print\|generate\|translate` の GAS 中継 |
 | `classroom-login.mjs` | Google OIDC（PKCE）/ Cookie / refresh token 暗号化保存 |
 | `classroom-sessions.mjs` | D1 セッション寿命・延長・失効・purge の実装（正） |
-| `classroom-logout.mjs` | ログアウト合言葉（PBKDF2）検証・失敗スロットル |
+| `classroom-logout.mjs` | ログアウト合言葉（現行 SHA-256 / 旧 PBKDF2 互換）検証・失敗スロットル |
 | `classroom-auth-api.mjs` | **現行（本番稼働）** 認証専用 API。workers.dev のみ・preview 無効・routes なし |
 | `wrangler.classroom-auth.toml.example` | 上記の設定見本（実ファイルは git 管理外） |
 | `classroom-maintenance-worker.mjs` | cron 専用（日次 purge）。Web 入口なし・D1 binding のみ |
@@ -123,8 +123,11 @@ URL のみを使う（新サイトなし）。`classroom.hori-shota.com` は閉�
   未設定・不正なら 403 `logout_disabled` で、セッションは消さない。
 - **合言葉はリポジトリ・チャット・issue・ログ・シェル履歴に書かない**。
 - ハッシュ生成はローカルの `node scripts/classroom-logout-passphrase.mjs` に stdin で合言葉を渡し、
-  出力 1 行を secret にだけ設定する（引数・ファイルには残さない）。
-  合言葉は4文字以上（推測されても実害が小さいため。忘れた場合は D1 で失効）。
+  出力 1 行 `sha256$<hex64>` を secret `CLASSROOM_LOGOUT_PASSPHRASE_HASH` にだけ設定する
+  （引数・ファイルには残さない）。現行の保存形式は SHA-256。
+- 旧 `pbkdf2-sha256$...` は互換のためパースだけ残しているが、Workers の `deriveBits` 実行差で
+  動作しなかったため**非推奨**。新規設定・再設定は必ず `sha256$...` を使う。
+- 合言葉は4文字以上（推測されても実害が小さいため。忘れた場合は D1 で失効）。
 - 失敗スロットルは isolate 内メモリの best-effort（`cf-connecting-ip` 単位、10分で5回失敗）。
   全 isolate 共通の保証ではない。
 
