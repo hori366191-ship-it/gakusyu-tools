@@ -1200,14 +1200,16 @@ test('[auth] pdfdropのnoauthは保存トークンの状態で文言を分け、
 
   // 起動時probe・送信前probeの両経路が原因別の文言を使う
   const js = read('site/app12/app.js');
-  assert.equal(count(js, 'showAuthHelp(noauthHelpMessage(T))'), 2, '起動時と送信前の両方');
+  assert.equal(count(js, 'noauthMessage: noauthHelpMessage(T)'), 1, '起動時probeの文言');
+  assert.equal(count(js, 'showAuthHelp(noauthHelpMessage(T))'), 1, '送信前probeの文言');
   assert.equal(js.includes("showAuthHelp('Google にログインされていない可能性があります。')"), false);
 
   // app9（原稿用紙）も同じ判定・文言に揃える
   const app9 = read('site/app9/index.html');
-  assert.equal(count(app9, 'showAuthHelp(noauthHelpMessage())'), 2, 'app9も起動時と送信前の両方');
+  assert.equal(count(app9, 'noauthMessage: noauthHelpMessage()'), 1, 'app9 起動時probeの文言');
+  assert.equal(count(app9, 'showAuthHelp(noauthHelpMessage())'), 1, 'app9 送信前probeの文言');
   assert.ok(app9.includes('印刷先の認証を確認できませんでした'));
-  assert.equal(app9.indexOf('function noauthHelpMessage()') < app9.indexOf('showAuthHelp(noauthHelpMessage())'), true);
+  assert.equal(app9.indexOf('function noauthHelpMessage()') < app9.indexOf('noauthMessage: noauthHelpMessage()'), true);
 });
 
 test('[portal] ツールに「学習プリント」カードをapp9の直後に追加', () => {
@@ -1454,4 +1456,269 @@ test('[credits] html2canvas/jsPDFの用途に学習プリントを併記（版�
   assert.ok(credits.includes('原稿用紙メーカー・学習プリント（2.5.2 / jsDelivr）'));
   assert.ok(credits.includes('html2canvas.hertzen.com'));
   assert.ok(credits.includes('github.com/parallax/jsPDF'));
+});
+
+// ---------------------------------------------------------------- 長期セッション統合（shared/classroom-session.js）
+function makeGateway(over) {
+  over = over || {};
+  const calls = { probe: [], mutate: [] };
+  const gw = {
+    probe: function (target) {
+      calls.probe.push(target);
+      if (over.probe) return over.probe(target);
+      return Promise.resolve({ status: 'ok', context: 'ctx-1' });
+    },
+    mutate: function (target, payload, opts) {
+      calls.mutate.push({ target: target, payload: payload, opts: opts });
+      if (over.mutate) return over.mutate(target, payload, opts);
+      return Promise.resolve({ ok: true, data: { ok: true, name: payload.name } });
+    }
+  };
+  if (over.loginForm) gw.loginForm = over.loginForm;
+  return { gw: gw, calls: calls };
+}
+
+async function runGatewaySend(options) {
+  options = options || {};
+  const storage = new Map();
+  const posts = [];
+  const polls = [];
+  const probes = [];
+  const gateway = makeGateway(options);
+  const transport = {
+    messages: { unknownResult: 'UNKNOWN-RESULT' },
+    newRequestId: function () { return 'request-id-abcdefg1'; },
+    newNonce: function () { return 'nonce-abcdefghijklmnop'; },
+    isRequestId: function (v) { return /^[A-Za-z0-9_-]{16,128}$/.test(String(v || '')); },
+    // ゲートウェイ経路では id_token を使わない（cookieはJSに出さない）
+    getIdToken: function () { return ''; },
+    postForm: function (o) { posts.push(o); return Promise.resolve({ ok: true, data: { ok: true } }); },
+    jsonp: function (u) { polls.push(u); return Promise.resolve({ ok: false, error: 'timeout' }); }
+  };
+  const sender = app.createPdfSender({
+    transport: transport,
+    workerUrl: 'https://proxy.example/pdfdrop',
+    directUrl: 'https://script.google.com/exec',
+    token: 'test-token',
+    storage: {
+      getItem: function (k) { return storage.has(k) ? storage.get(k) : null; },
+      setItem: function (k, v) { storage.set(k, String(v)); }
+    },
+    getSession: function () { return gateway.gw; },
+    onStatus: function () {},
+    getIdToken: function () { return ''; },
+    setTimeout: function () { return 0; },
+    clearTimeout: function () {},
+    now: function () { return 1000; }
+  });
+  if (options.probeFirst) {
+    await new Promise(function (resolve) {
+      sender.probe(function (pr) { probes.push(pr); resolve(); });
+    });
+    for (let i = 0; i < 4; i += 1) await flush();
+  }
+  const results = [];
+  sender.send('JVBERi0xLjQK', 'gakusyu-print_x.pdf', 'request-id-abcdefg1', function (res) { results.push(res); }, { expectToken: '' });
+  for (let i = 0; i < 10 && !results.length; i += 1) await flush();
+  return { results, calls: gateway.calls, posts, polls, probes, storage, sender };
+}
+
+test('[gateway] sessionが無ければ従来どおりWorker/Direct POSTで送る', async () => {
+  const run = await runSend({
+    post: function () { return Promise.resolve({ ok: true, data: { ok: true, name: 'gakusyu-print_x.pdf' } }); }
+  });
+  assert.equal(run.results[0].ok, true);
+  assert.ok(run.posts.length >= 1, '公開Pagesは既存経路のまま');
+});
+
+test('[gateway] probeでstatusを見て、mutate(print)を1回だけ送る（旧POST/pollへfallbackしない）', async () => {
+  const run = await runGatewaySend({ probeFirst: true });
+  assert.equal(run.probes.length, 1);
+  assert.equal(run.probes[0].state, 'ok');
+  assert.deepEqual(plain(run.calls.probe), ['pdfdrop'], 'probe対象はpdfdrop');
+  assert.equal(run.results.length, 1);
+  assert.equal(run.results[0].ok, true);
+  assert.equal(run.calls.mutate.length, 1, '1回だけ送る（再送なし）');
+  assert.equal(run.calls.mutate[0].target, 'print');
+  assert.equal(plain(run.calls.mutate[0].payload).request_id, 'request-id-abcdefg1', '既存のrequest_idをそのまま使う');
+  assert.equal(plain(run.calls.mutate[0].payload).name, 'gakusyu-print_x.pdf');
+  assert.ok(plain(run.calls.mutate[0].payload).b64);
+  assert.equal(plain(run.calls.mutate[0].opts).timeoutMs, 30000);
+  assert.ok(plain(run.calls.mutate[0].opts).rid, 'ridを渡す');
+  assert.equal(run.posts.length, 0, '旧POSTを呼ばない');
+  assert.equal(run.polls.length, 0, '旧pollを呼ばない');
+  assert.equal(run.storage.get('gakusyuPrint:pdfPendingUnknown'), '0');
+});
+
+test('[gateway] probeで確定したcontextをPDF生成後のmutateへ渡す', async () => {
+  const run = await runGatewaySend({
+    probeFirst: true,
+    probe: function () { return Promise.resolve({ status: 'ok', context: 'ctx-abc' }); }
+  });
+  assert.equal(plain(run.calls.mutate[0].opts).context, 'ctx-abc');
+  assert.equal(plain(run.sender.getContext()), 'ctx-abc');
+});
+
+test('[gateway] 結果不明はunknownで終了し、cooldown/pendingを永続化する（再送・旧経路なし）', async () => {
+  const run = await runGatewaySend({
+    mutate: function () { return Promise.resolve({ ok: false, error: 'read_failed', unknown: true }); }
+  });
+  assert.equal(run.results.length, 1);
+  assert.equal(run.results[0].ok, false);
+  assert.equal(run.results[0].unknown, true);
+  assert.equal(run.calls.mutate.length, 1, '同じrequest_idで送り直さない');
+  assert.equal(run.posts.length, 0);
+  assert.equal(run.storage.get('gakusyuPrint:pdfPendingUnknown'), '1');
+  assert.ok(Number(run.storage.get('gakusyuPrint:pdfPendingUntil')) > 1000);
+});
+
+test('[gateway] サーバがunknownを返した場合も成功にしない（二重印刷を残さない）', async () => {
+  const run = await runGatewaySend({
+    mutate: function () {
+      return Promise.resolve({ ok: true, unknown: true, data: { ok: true, name: 'x.pdf', unknown: true } });
+    }
+  });
+  assert.equal(run.results[0].ok, false);
+  assert.equal(run.results[0].unknown, true);
+});
+
+test('[gateway] アカウント切替/権限（context不一致）はauthとして返し、再送しない', async () => {
+  const run = await runGatewaySend({
+    mutate: function () {
+      return Promise.resolve({
+        ok: false,
+        error: 'server_error',
+        unknown: false,
+        data: { ok: false, error: 'context mismatch', code: 'not_allowed' }
+      });
+    }
+  });
+  assert.equal(run.results.length, 1);
+  assert.equal(run.results[0].auth, true);
+  assert.equal(run.results[0].unknown, undefined);
+  assert.equal(run.calls.mutate.length, 1);
+});
+
+test('[gateway] 送信前の失敗（contextなし）はauthで返し、cooldownを残さない', async () => {
+  const run = await runGatewaySend({
+    mutate: function () {
+      return Promise.resolve({ ok: false, error: 'context_required', unknown: false, predispatch: true });
+    }
+  });
+  assert.equal(run.results[0].auth, true);
+  assert.notEqual(run.results[0].unknown, true);
+  assert.equal(run.storage.has('gakusyuPrint:pdfPendingUnknown'), false, '保存されていないのでcooldownを残さない');
+});
+
+test('[gateway] probeのnoauth/notallowed/unreachableは送信せず従来UI状態に写像する', async () => {
+  const cases = [
+    [{ status: 'noauth' }, 'noauth'],
+    [{ status: 'notallowed', masked: 's***@example.com' }, 'notallowed'],
+    [{ status: 'unreachable' }, 'unreachable']
+  ];
+  for (const pair of cases) {
+    const gateway = makeGateway({ probe: function () { return Promise.resolve(pair[0]); } });
+    const sender = app.createPdfSender({
+      transport: {
+        messages: { unknownResult: 'UNKNOWN-RESULT' },
+        newRequestId: function () { return 'request-id-abcdefg1'; },
+        newNonce: function () { return 'nonce-abcdefghijklmnop'; },
+        isRequestId: function () { return true; },
+        getIdToken: function () { return ''; },
+        postForm: function () { return Promise.resolve({ ok: false }); },
+        jsonp: function () { return Promise.resolve({ ok: false }); }
+      },
+      getSession: function () { return gateway.gw; },
+      storage: null,
+      onStatus: function () {}
+    });
+    const pr = await new Promise(function (resolve) { sender.probe(resolve); });
+    assert.equal(pr.state, pair[1]);
+    assert.equal(gateway.calls.mutate.length, 0);
+  }
+});
+
+test('[gateway] 未読込の公開Pagesは従来挙動・有効時は旧経路へfallbackしない（app12）', () => {
+  const js = read('site/app12/app.js');
+  assert.ok(/function classroomSession\(\)[\s\S]{0,400}GakusyuClassroomSession/.test(js), '無ければnullを返す');
+  assert.ok(js.includes('if (gw) { sendViaGateway(gw); return; }'));
+  assert.ok(js.indexOf('if (gw) { sendViaGateway(gw); return; }') < js.indexOf('startPostAttempts();'), '旧POSTより前に分岐する');
+  assert.ok(js.includes("gw.probe('pdfdrop')"));
+  assert.ok(js.includes("gw.mutate('print', payload, opts)"));
+  assert.ok(js.includes('timeoutMs: 30000'));
+  assert.equal(/localStorage\.(get|set|remove)Item/.test(js), false, '認証情報をlocalStorageに保存しない');
+  assert.equal(/document\.cookie/.test(js), false, 'cookieをJSで扱わない');
+  assert.ok(js.includes("var LOGIN_PATH = '/app12/'"));
+  assert.ok(js.includes('gw.loginForm(LOGIN_PATH, LOGIN_LABEL)'), 'ログインガイドはloginFormを使う');
+  assert.ok(js.indexOf('if (appendLoginForm(msg)) return;') > 0, 'loginForm優先・従来文言はfallback');
+  assert.ok(js.indexOf('T.probeAuth(') > 0, '未読込時は従来probeを維持');
+
+  const html = read('site/app12/index.html');
+  assert.ok(html.includes('shared/classroom-session.js'), 'transportの後に読み込む');
+  assert.ok(html.indexOf('shared/transport.js') < html.indexOf('shared/classroom-session.js'));
+  assert.ok(html.indexOf('shared/classroom-session.js') < html.indexOf('./app.js'));
+});
+
+test('[gateway] app9も同じ契約（transport後に読込・loginFormは/app9/・旧経路fallbackなし）', () => {
+  const js = read('site/app9/index.html');
+  assert.ok(js.includes("var LOGIN_PATH = '/app9/'"));
+  assert.ok(js.includes("gw.probe('pdfdrop')"));
+  assert.ok(js.includes("gw.mutate('print', payload, opts)"));
+  assert.ok(js.includes('if (gwSession) { sendPdfViaGateway(gwSession); return; }'));
+  assert.ok(js.indexOf('if (gwSession) { sendPdfViaGateway(gwSession); return; }') < js.indexOf('startPostAttempts();'), '旧POSTより前に分岐する');
+  assert.ok(js.includes('if (appendLoginForm(msg)) return;'), 'ログインガイドはloginFormを使う');
+  assert.equal(/document\.cookie/.test(js), false, 'cookieをJSで扱わない');
+  assert.equal(/pdfProbeContext[\s\S]{0,60}(localStorage|sessionStorage)/.test(js), false, 'contextを保存しない');
+  assert.ok(js.indexOf('shared/transport.js') < js.indexOf('shared/classroom-session.js'));
+});
+
+test('[gateway] 長期originのnoauthは毎回ログインフォームを出す（公開Pagesは従来どおり）', () => {
+  const MSG = 'NOAUTH-MSG';
+
+  // 長期origin: localStorageにid_tokenが無くても案内を消さない
+  const longTerm = app.classroomVisibility({ state: 'noauth' }, { longTerm: true, hadToken: false, authExpiredNotice: false, noauthMessage: MSG });
+  assert.equal(longTerm.hidden, true);
+  assert.equal(longTerm.help, MSG, 'ログインフォームを出す');
+  assert.equal(longTerm.authExpired, true);
+
+  // 公開Pages: 未ログインの初回は従来どおり黙って非表示（挙動を変えない）
+  const publicNoToken = app.classroomVisibility({ state: 'noauth' }, { longTerm: false, hadToken: false, authExpiredNotice: false, noauthMessage: MSG });
+  assert.equal(publicNoToken.help, null, '案内を出さない');
+  assert.equal(publicNoToken.status, '');
+
+  // 公開Pages: 期限切れ（トークンあり）は従来どおり案内
+  const expired = app.classroomVisibility({ state: 'noauth' }, { longTerm: false, hadToken: true, noauthMessage: MSG });
+  assert.equal(expired.help, MSG);
+
+  // 公開Pages: 一度出した案内は次のprobeで消さない
+  const again = app.classroomVisibility({ state: 'noauth' }, { longTerm: false, hadToken: false, authExpiredNotice: true, noauthMessage: MSG });
+  assert.equal(again.help, MSG);
+
+  const ok = app.classroomVisibility({ state: 'ok' }, { longTerm: true, hadToken: false, noauthMessage: MSG });
+  assert.equal(ok.hidden, false);
+  assert.equal(ok.status, '');
+  assert.equal(ok.help, null);
+  assert.equal(ok.authExpired, false, 'ログインできたら期限切れ表示を消す');
+
+  const notAllowed = app.classroomVisibility({ state: 'notallowed' }, { longTerm: false });
+  assert.equal(notAllowed.status, '教室外アカウントでは印刷できません');
+  assert.equal(notAllowed.help, null);
+
+  // 長期originでは切替のためログインフォームも添える
+  const notAllowedLong = app.classroomVisibility({ state: 'notallowed' }, { longTerm: true });
+  assert.equal(notAllowedLong.help, '教室外アカウントでは印刷できません。');
+
+  // 誤判定（hadTokenだけで判定）をUI側に残さない
+  const js = read('site/app12/app.js');
+  assert.equal(js.includes("pr.state === 'noauth' && (hadToken || authExpiredNotice)"), false);
+  assert.ok(js.includes('var longTerm = !!classroomSession();'));
+});
+
+test('[gateway] app9の起動時判定も長期originのnoauthで案内を消さない', () => {
+  const js = read('site/app9/index.html');
+  assert.ok(js.includes('function classroomVisibility(pr, opts)'), 'app12と同じ判定を使う');
+  assert.ok(js.includes('var longTerm = !!classroomSession();'));
+  assert.ok(js.includes('if (longTerm || opts.hadToken || opts.authExpiredNotice)'));
+  assert.ok(/classroomVisibility\(pr, \{[\s\S]{0,220}longTerm: longTerm/.test(js), '起動時probeにlongTermを渡す');
+  assert.equal(js.includes("pr.state === 'noauth' && (hadToken || authExpiredNotice)"), false, '誤判定を残さない');
 });

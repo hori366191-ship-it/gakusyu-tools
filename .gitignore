@@ -7,6 +7,8 @@ backup-*.bundle
 # Wrangler のローカルキャッシュ
 site-worker/.wrangler/
 site-worker/.dev.vars
+# 教室タブレット用の実デプロイ設定（実オリジン/D1 ID 等を含む・.example のみ追跡）
+site-worker/wrangler.classroom.toml
 
 # app11 の開発時だけ使う NetworkX 環境（再現手順は scripts/app11/planarity/requirements.txt）
 .venv-app11/

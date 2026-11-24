@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="./themes/forest.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="./shared/transport.js"></script>
+<script src="./shared/classroom-session.js"></script>
 <style>
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
@@ -357,6 +358,8 @@
     gap: 3px;
   }
   .auth-banner__btn:hover { filter: brightness(1.08); }
+  .classroom-session__form { display: inline-flex; margin: 0; }
+  .classroom-session__form > button { border: 0; font-family: inherit; cursor: pointer; }
   @media (max-width: 640px) {
     .hero__auth { top: 10px; right: 10px; max-width: 92vw; }
     .auth-banner__inner { font-size: 10px; padding: 5px 8px; }
@@ -676,6 +679,9 @@
        JSONP/POST/iframe の順序・timeout・後始末は site/shared/transport.js に集約（postMessageはrid/origin/source検証） ---- */
     (function () {
       'use strict';
+      // 教室セッションモード（Worker が meta マーカーを挿したページ）では、GIS と GAS 直 probe の
+      // バナーは使わず教室セッション用スクリプトに任せる。マーカーが無い公開 Pages は従来どおり。
+      if (window.GakusyuClassroomSession) return;
       var T = window.GakusyuTransport;
       var banner = document.getElementById('auth-banner-inner');
       if (!T || !banner) return;
@@ -851,6 +857,142 @@
       });
       if (typeof window.addEventListener === 'function') window.addEventListener('focus', probeIfStale);
       T.onAuthChange(function () { runProbe(); });
+      runProbe();
+    })();
+  </script>
+  <script>
+    /* ---- 教室セッション（Worker が meta gakusyu-classroom-session を挿したページのみ）。
+       公開Pagesでは GakusyuClassroomSession が未定義なのでこのブロックは即 return する。
+       app2（英語長文）と pdfdrop（印刷）は別々に probe し、片方だけ許可でも利用可能として扱う。
+       probe は表示専用で、期限は延長しない。 */
+    (function () {
+      'use strict';
+      var C = window.GakusyuClassroomSession;
+      var banner = document.getElementById('auth-banner-inner');
+      if (!C || !banner) return;
+
+      var TARGET_LABEL = { app2: '英語長文', pdfdrop: '印刷' };
+      var TARGETS = ['app2', 'pdfdrop'];
+      var seq = 0;
+      var busy = false;
+
+      function makeEl(tag, cls, text) {
+        var el = document.createElement(tag);
+        if (cls) el.className = cls;
+        if (text !== undefined) el.textContent = text;
+        return el;
+      }
+      function clearEl(node) {
+        while (node.firstChild) node.removeChild(node.firstChild);
+      }
+      function setState(state, authState) {
+        banner.className = 'auth-banner__inner' + (state ? ' ' + state : '');
+        banner.setAttribute('data-auth-state', authState || 'checking');
+      }
+      function renderChecking() {
+        setState('', 'checking');
+        clearEl(banner);
+        banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
+        banner.appendChild(makeEl('span', '', '教室のログインを確認中…'));
+      }
+      function appendRetry() {
+        var retry = makeEl('button', 'auth-banner__btn', '再確認');
+        retry.type = 'button';
+        retry.addEventListener('click', function () {
+          if (retry.disabled) return;
+          retry.disabled = true;
+          runProbe();
+        });
+        banner.appendChild(retry);
+      }
+      // 利用できる対象だけを文言にする（片方だけ許可でも利用可能と伝える）
+      function okTargetsOf(results) {
+        return TARGETS.filter(function (t) {
+          return results[t] && results[t].status === 'ok';
+        });
+      }
+      function renderResults(results) {
+        var okTargets = okTargetsOf(results);
+        var allowed = okTargets.map(function (t) { return TARGET_LABEL[t]; });
+        var denied = TARGETS.filter(function (t) {
+          return results[t] && results[t].status === 'notallowed';
+        });
+        var unreachable = TARGETS.filter(function (t) {
+          return !results[t] || results[t].status === 'unreachable';
+        });
+        var isOwner = okTargets.some(function (t) { return results[t].isOwner === true; });
+
+        clearEl(banner);
+        banner.appendChild(makeEl('span', 'auth-banner__dot', ''));
+
+        if (allowed.length) {
+          setState('is-ok', 'ok');
+          var who = isOwner ? '先生アカウントでログイン中' : '教室タブレットとしてログイン中';
+          var text = who + '（' + allowed.join('・') + '）';
+          if (denied.length || unreachable.length) {
+            var rest = denied.concat(unreachable).map(function (t) { return TARGET_LABEL[t]; });
+            text += '／' + rest.join('・') + 'は要確認';
+          }
+          var okText = makeEl('span', '', text);
+          okText.title = '英語長文と印刷は別々に認証を確認します。片方だけ使える場合は、その旨を表示します。';
+          banner.appendChild(okText);
+          var logout = C.logoutForm('ログアウト');
+          if (logout) banner.appendChild(logout);
+          appendRetry();
+          return;
+        }
+
+        // ここから下は「利用できる対象が無い」状態
+        if (denied.length) {
+          setState('is-warn', 'notallowed');
+          banner.appendChild(makeEl('span', '', '教室外のアカウントです'));
+          var relogin = C.loginForm('/', 'ログインし直す');
+          if (relogin) banner.appendChild(relogin);
+          appendRetry();
+          return;
+        }
+        if (unreachable.length === TARGETS.length) {
+          setState('is-warn', 'unreachable');
+          var failText = makeEl('span', '', '接続を確認できませんでした');
+          failText.title = '通信が不安定か、時間切れの可能性があります。しばらく待ってから「再確認」を押してください。';
+          banner.appendChild(failText);
+        } else {
+          setState('is-warn', 'login');
+          banner.appendChild(makeEl('span', '', '教室用ログイン'));
+        }
+        var login = C.loginForm('/', '教室用ログイン');
+        if (login) banner.appendChild(login);
+        appendRetry();
+      }
+
+      // probe は app2 / pdfdrop を並列に 1 回ずつ。どちらか片方の応答だけで判断しない。
+      function runProbe() {
+        if (busy) return;
+        busy = true;
+        var run = ++seq;
+        renderChecking();
+        Promise.all(TARGETS.map(function (t) {
+          return C.probe(t);
+        })).then(function (list) {
+          var results = {};
+          TARGETS.forEach(function (t, i) {
+            results[t] = list[i] || { status: 'unreachable', isOwner: false, open: false, context: null };
+          });
+          if (run !== seq) return;
+          busy = false;
+          renderResults(results);
+        }, function () {
+          if (run !== seq) return;
+          busy = false;
+          var results = {};
+          TARGETS.forEach(function (t) {
+            results[t] = { status: 'unreachable', isOwner: false, open: false, context: null };
+          });
+          renderResults(results);
+        });
+      }
+
+      // 復帰時の自動再確認はしない（probe の連打と期限への誤解を避ける。手動「再確認」のみ）。
       runProbe();
     })();
   </script>

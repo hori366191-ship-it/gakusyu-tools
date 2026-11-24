@@ -1043,7 +1043,10 @@ function handleProbe_(p) {
         masked: maskEmail_(auth.email),
         allowed: isAllowed_(auth.email),
         is_owner: isOwnerForEmail_(auth.email),
-        open: isOpenGenerate_()
+        open: isOpenGenerate_(),
+        // 教室セッション用: require_allowed:true を ALLOWED_EMAILS 判定より前に
+        // 優先できる実装であることの目印（Worker はこれが無い GAS へ生成を投げない）
+        classroom_guard: true
       };
     }
   }
@@ -1166,6 +1169,19 @@ function handleGenerateRequest_(body, auth, rid) {
   }
   if (!getZenKey_()) {
     return jsonOut_({ ok: false, error: ZEN_KEY_PROP + ' が設定されていません', code: 'api_key_missing', rid: rid });
+  }
+
+  // 教室セッション経由の呼出（Worker が require_allowed:true を付与）は、
+  // OPEN_GENERATE の匿名フォールバックより先に ALLOWED_EMAILS を必須にする。
+  // require_allowed を送らない既存クライアントの挙動は変えない。
+  if (body.require_allowed === true && !(auth && auth.ok && isAllowed_(auth.email))) {
+    return jsonOut_({
+      ok: false,
+      error: 'not allowed (classroom session requires allowlisted account)',
+      code: 'not_allowed',
+      request_id: requestId,
+      rid: rid
+    });
   }
 
   var allowedUser = !!(auth && auth.ok && isAllowed_(auth.email));
@@ -1406,6 +1422,16 @@ function handleTranslateRequest_(body, auth, rid) {
   }
   if (!getZenKey_()) {
     return jsonOut_({ ok: false, error: ZEN_KEY_PROP + ' が設定されていません', code: 'api_key_missing', rid: rid });
+  }
+  // 教室セッション経由の translate create も ALLOWED_EMAILS を必須にする。
+  if (body.require_allowed === true && !allowedUser) {
+    return jsonOut_({
+      ok: false,
+      error: 'not allowed (classroom session requires allowlisted account)',
+      code: 'not_allowed',
+      request_id: requestId,
+      rid: rid
+    });
   }
   var deviceId = '';
   if (!allowedUser) {

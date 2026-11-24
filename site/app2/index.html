@@ -14,6 +14,8 @@
   <script src="https://unpkg.com/compromise@13.11.3/builds/compromise.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="../shared/transport.js"></script>
+  <!-- 教室の長期セッション（任意）。transport の後に読み込む。読めない環境では従来挙動のまま -->
+  <script src="../shared/classroom-session.js"></script>
   <style>
     html,
     body {
@@ -909,6 +911,18 @@
     <ul id="savedList"></ul>
     <button id="loadMoreBtn" style="display:none; width:100%; margin-top:8px; padding:8px; font-family:'Kiwi Maru'; background:#ffffff; color:#007700; border:1px solid #00ff00; border-radius:4px; cursor:pointer;">もっと読む（20件ずつ）</button>
 
+    <!-- 削除前のGoogle本人確認（メモリ5分・1回の削除で使い捨て。長期セッションのcookieは本人確認に使わない） -->
+    <div id="delete-verify" style="display:none;margin:8px 0;padding:8px;border:1px solid #ffcc00;border-radius:4px;font-size:0.8em;line-height:1.6;background:#fffdf0;">
+      <div id="delete-verify-text">削除の前にGoogleで本人確認をしてください（5分間有効・1回の削除で使い捨て）。</div>
+      <div id="delete-gis-wrap" style="display:none;margin-top:6px"></div>
+      <button id="delete-verify-cancel" type="button" style="margin-top:6px;padding:4px 10px;font-family:'Kiwi Maru';background:#ffffff;color:#666666;border:1px solid #cccccc;border-radius:4px;cursor:pointer;">キャンセル</button>
+    </div>
+    <!-- 長期セッション中は同一人物をサーバーで照合できないため、この画面からは削除しない -->
+    <div id="delete-guidance" style="display:none;margin:8px 0;padding:8px;border:1px solid #cccccc;border-radius:4px;font-size:0.8em;line-height:1.6;background:#fafafa;">
+      <div id="delete-guidance-text"></div>
+      <a id="delete-guidance-link" href="#" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;padding:4px 10px;font-family:'Kiwi Maru';background:#ffffff;color:#007700;border:1px solid #00ff00;border-radius:4px;text-decoration:none;">公式ページで削除する</a>
+    </div>
+
     <div id="credit">
       This app uses:<br>
       - compromise.js by Spencer Kelly (MIT License) → <a href="https://github.com/spencermountain/compromise" target="_blank">source</a><br>
@@ -1248,6 +1262,19 @@
 
       async function probeBackend() {
         if (location.protocol === 'file:') return { state: 'file' };
+        // 長期セッションがある環境では gateway の probe だけを使う（T.probeAuth へは落とさない）
+        if (csState.enabled && csState.module) {
+          let pr = null;
+          try { pr = await csState.module.probe('app2'); } catch (e) { pr = null; }
+          const mapped = csMapProbe(pr);
+          csState.probe = mapped;
+          csState.context = mapped.session ? (mapped.context || null) : null;
+          csState.mode = csResolveMode(mapped, true);
+          csState.accountKey = csCurrentAccountKey();
+          // 保留操作の actor は context に結び付ける（id_token が無い長期セッションでも別人を区別する）
+          csState.pendingActor = csState.context ? await csPendingActorHash(csState.context) : '';
+          return mapped;
+        }
         const res = await T.probeAuth({
           workerUrl: WORKER_BACKEND_URL,
           directUrl: DIRECT_BACKEND_URL,
@@ -1309,6 +1336,222 @@
         return new Error((r && (r.detail || r.error)) || (label + 'に失敗しました'));
       }
       // TESTABLE-OPERROR-END
+      // TESTABLE-CLASSROOM-SESSION-START
+      // ── 教室の長期セッション（shared/classroom-session.js）連携の判定だけを持つ ──
+      // ・モジュールが無い public Pages は従来どおり（legacy: GIS + 既存トークン経路）
+      // ・長期セッション時は「生成」と「対訳の作成」だけ gateway（mutate）を使う
+      // ・gateway の失敗を匿名/legacy へ自動フォールバックしない（fail closed）
+      // ・セッション資格情報（context）はメモリのみ。保存しない
+      // ・長期モードでは削除を実行しない（長期contextとGoogle本人確認の同一人物を
+      //   サーバーで照合する契約が無いため。公式ページへ案内する）
+      const CS_DELETE_VERIFY_MAX_MS = 5 * 60 * 1000;
+      // 長期モードの削除案内の遷移先（公式Pages。通常のGoogleログインで本人確認して削除する）
+      const CS_PUBLIC_APP2_URL = 'https://hori366191-ship-it.github.io/gakusyu-tools/app2/';
+
+      /** 長期セッションモジュール。契約を満たさなければ null（=従来挙動） */
+      function csReadModule(win) {
+        const m = win && win.GakusyuClassroomSession;
+        if (!m || typeof m.probe !== 'function' || typeof m.mutate !== 'function') return null;
+        return m;
+      }
+
+      /** probe 応答を既存UIの state 形へ写す（未知の status は unreachable） */
+      function csMapProbe(pr) {
+        const status = String((pr && pr.status) || '');
+        const open = !!(pr && pr.open);
+        if (status === 'ok') {
+          return { state: 'ok', isOwner: !!(pr && pr.isOwner), open: open, session: true, context: (pr && pr.context) || null };
+        }
+        if (status === 'noauth') return { state: 'noauth', isOwner: false, open: open, session: false, context: null };
+        if (status === 'notallowed') return { state: 'notallowed', isOwner: false, open: open, session: false, context: null };
+        return { state: 'unreachable', isOwner: false, open: false, session: false, context: null };
+      }
+
+      /**
+       * 生成／対訳createの経路を決める。
+       *  session … 長期セッションの gateway のみ（失敗しても匿名へ落とさない）
+       *  trial   … probe が明示 noauth/notallowed で、既存仕様が匿名利用を許可（open）している
+       *  legacy  … モジュール無し（従来の認証経路）
+       *  denied  … 判定不能・壊れた応答。実行しない（旧認証へ落とさない）
+       */
+      function csResolveMode(probe, hasModule) {
+        if (!hasModule) return 'legacy';
+        if (!probe) return 'denied';
+        if (probe.state === 'file') return 'legacy';
+        // session なのに context が無い＝壊れた応答。legacy へ読み替えず実行しない
+        if (probe.session) return probe.context ? 'session' : 'denied';
+        if ((probe.state === 'noauth' || probe.state === 'notallowed') && probe.open) return 'trial';
+        return 'denied';
+      }
+
+      /** 冪等操作のactor識別（UX用。サーバー認証の代用ではない） */
+      function csAccountKey(transport, idToken, deviceId) {
+        try {
+          if (transport && typeof transport.actorKey === 'function') {
+            return String(transport.actorKey(idToken || '', deviceId || ''));
+          }
+        } catch (e) {}
+        return '';
+      }
+
+      /** mutate の応答を T.fetchJson 互換へ正規化する（不明は不明のまま残す） */
+      function csNormalizeMutateResult(r) {
+        if (!r || typeof r !== 'object' || Array.isArray(r)) {
+          return { ok: false, unknown: true, error: 'invalid_mutate_result', data: null };
+        }
+        if (r.ok === true) return { ok: true, data: r.data };
+        return { ok: false, unknown: r.unknown === true, error: String(r.error || 'error'), data: r.data };
+      }
+
+      /** セッション起因の認証エラーか（probe やり直しの判断にだけ使う） */
+      function csIsSessionAuthError(r) {
+        const text = String((r && r.error) || '') + ' ' +
+          String((r && r.data && (r.data.error || r.data.code)) || '');
+        return /noauth|notallowed|not_allowed|session|expired|unauthor|login/i.test(text);
+      }
+
+      /**
+       * 長期セッションを読み込んだページでは削除しない（同一人物の照合契約が無いため）。
+       * probe の一時状態（unreachable / notallowed）に依存させず、ページの構成で決める。
+       */
+      function csDeleteAllowedOnPage(hasModule) {
+        return !hasModule;
+      }
+
+      /**
+       * 直近のGoogle本人確認（メモリのみ・既定5分）が使えるか。
+       * 長期cookieは本人確認に使わない。currentSub が分かる場合は同一人物だけ許可する。
+       */
+      function csDeleteVerifyFresh(rec, nowMs, currentSub) {
+        if (!rec || !rec.token || !rec.sub) return false;
+        const at = Number(rec.at);
+        if (!(at > 0)) return false;
+        const age = Number(nowMs) - at;
+        if (!(age >= 0) || age > CS_DELETE_VERIFY_MAX_MS) return false;
+        if (currentSub && rec.sub !== String(currentSub)) return false;
+        return true;
+      }
+
+      /** 1回の削除で使い捨てる（成功・失敗を問わず消費する） */
+      function csTakeDeleteToken(rec) {
+        if (!rec || !rec.token) return '';
+        const token = String(rec.token);
+        rec.token = '';
+        rec.at = 0;
+        rec.sub = '';
+        return token;
+      }
+      /**
+       * 保留操作（生成・対訳作成）の actor 識別を context に結び付ける一方向ハッシュ。
+       * context そのものは保存しない（pendingGenerate / pendingTranslate には この文字列だけを置く）。
+       * 長期セッションでは JS の id_token が無いため、端末IDだけでは全アカウントが同一 actor になる。
+       */
+      function csPendingActorHash(context, subtle) {
+        const ctx = String(context || '');
+        if (!ctx) return Promise.resolve('');
+        const input = 'pending-actor\u0000' + ctx;
+        let s = subtle;
+        if (s === undefined) {
+          try { s = (typeof crypto !== 'undefined' && crypto && crypto.subtle) || null; } catch (e) { s = null; }
+        }
+        if (s && typeof s.digest === 'function' && typeof TextEncoder === 'function') {
+          try {
+            const bytes = new TextEncoder().encode(input);
+            return Promise.resolve(s.digest('SHA-256', bytes)).then(function (buf) {
+              const view = new Uint8Array(buf);
+              let hex = '';
+              for (let i = 0; i < view.length; i++) hex += ('0' + view[i].toString(16)).slice(-2);
+              return 's256:' + hex;
+            }, function () { return csFallbackActorHash(input); });
+          } catch (e) {}
+        }
+        return Promise.resolve(csFallbackActorHash(input));
+      }
+      /** WebCrypto が無い環境の代替（非暗号・決定的）。context の平文は残さない */
+      function csFallbackActorHash(input) {
+        let h1 = 2166136261;
+        let h2 = 0x9e3779b9;
+        for (let i = 0; i < input.length; i++) {
+          const c = input.charCodeAt(i);
+          h1 ^= c; h1 = Math.imul(h1, 16777619);
+          h2 = (Math.imul(h2 ^ c, 16777619) + i) >>> 0;
+        }
+        return 'fnv:' + ('00000000' + (h1 >>> 0).toString(16)).slice(-8) + ('00000000' + h2.toString(16)).slice(-8);
+      }
+      // TESTABLE-CLASSROOM-SESSION-END
+
+      // ── 長期セッションの状態（context はメモリのみ・localStorage 等へ保存しない） ──
+      const csState = { enabled: false, module: null, probe: null, context: null, accountKey: '', mode: 'legacy', pendingActor: '' };
+      const csDeleteAuth = { token: '', at: 0, sub: '' };
+      let gisCredentialRoute = '';
+      function csInit() {
+        csState.module = csReadModule(window);
+        csState.enabled = !!csState.module;
+        csState.mode = csState.enabled ? 'denied' : 'legacy';
+        return csState.enabled;
+      }
+      function csCurrentAccountKey() { return csAccountKey(T, getIdToken(), getDeviceId()); }
+      function csCurrentSubject() {
+        const st = T.inspectToken(getIdToken());
+        return st.valid ? String(st.payload.sub || st.email || '') : '';
+      }
+      function csResetSession() {
+        csState.context = null;
+        csState.probe = null;
+        csState.mode = csState.enabled ? 'denied' : 'legacy';
+        csState.pendingActor = '';
+        csDeleteAuth.token = '';
+        csDeleteAuth.at = 0;
+        csDeleteAuth.sub = '';
+      }
+      /**
+       * アカウントが切り替わったら、前のセッションの資格情報（context）と本人確認を捨てる。
+       * 保留中の receipt（request_id）は消さない: 消すと新しいIDで生成できてしまうため、
+       * actor の不一致による確認（履歴確認）で扱う。
+       */
+      function csOnAccountChange() {
+        const key = csCurrentAccountKey();
+        const changed = !!csState.accountKey && !!key && key !== csState.accountKey;
+        if (changed) {
+          csResetSession();
+          showToast('アカウントが切り替わりました。保留中の操作は履歴を確認してから実行してください。', 8000);
+        }
+        csState.accountKey = key;
+      }
+      /** 保留操作の actor。長期セッションでは context 由来の一方向ハッシュ（context自体は保存しない） */
+      async function currentPendingActorHash() {
+        if (csState.enabled && csState.mode === 'session' && csState.pendingActor) return csState.pendingActor;
+        return settingsHash({ a: T.actorKey(getIdToken(), getDeviceId()) });
+      }
+
+      /** 長期セッションの gateway 呼び出し（T.fetchJson 互換の結果だけ返す） */
+      async function csMutateSession(kind, body, timeoutMs) {
+        const m = csState.module;
+        if (!m || !csState.enabled) throw new Error('教室セッションを利用できません。ページを再読み込みしてください。');
+        if (csCurrentAccountKey() !== csState.accountKey) {
+          csResetSession();
+          throw new Error('アカウントが切り替わったため実行できません。ページを再読み込みしてログインし直してください。');
+        }
+        if (!csState.context) {
+          csState.mode = 'denied';
+          throw new Error('教室セッションを確認できていません。ログインし直してください。');
+        }
+        const rid = T.newNonce();
+        let r;
+        try {
+          r = await m.mutate(kind, body, { context: csState.context, rid: rid, timeoutMs: timeoutMs });
+        } catch (e) {
+          r = { ok: false, unknown: true, error: 'mutate_exception', detail: String((e && e.message) || e) };
+        }
+        return csNormalizeMutateResult(r);
+      }
+      function csModeNow() {
+        if (!csState.enabled) return 'legacy';
+        return csState.mode;
+      }
+      function csDeniedMessage() {
+        return '教室セッションを確認できていません。通信状態を確認してページを再読み込みしてください。';
+      }
       function unwrapResult(r, label, mutating) {
         const err = operationError(label, r, mutating);
         if (err) throw err;
@@ -1323,6 +1566,14 @@
         const idt = getIdToken();
         if (name === 'generateText') {
           const requestId = T.isRequestId(requestIdArg) ? requestIdArg : T.newRequestId();
+          const createMode = csModeNow();
+          if (createMode === 'session') {
+            // 長期セッション: gateway のみ。失敗しても匿名/legacy へは落とさない
+            const res = await csMutateSession('generate', { request_id: requestId, settings: payload || {} }, 90000);
+            if (!res.ok && csIsSessionAuthError(res)) { authUi.lastAt = 0; setTimeout(applyProbeToUI, 0); }
+            return unwrapResult(res, '生成', true);
+          }
+          if (createMode === 'denied') throw new Error(csDeniedMessage());
           const genBody = { action: name, token: SITE_BACKEND_TOKEN, settings: payload || {}, device_id: getDeviceId(), request_id: requestId };
           if (idt) genBody.id_token = idt;
           const res = await T.fetchJson({
@@ -1339,8 +1590,13 @@
         }
         if (name === 'deleteText') {
           const requestId = T.isRequestId(requestIdArg) ? requestIdArg : T.newRequestId();
+          // 長期セッションのページでは削除しない（同一人物の照合契約が無い）。既存のGoogleトークン経路のみ
+          if (!csDeleteAllowedOnPage(csState.enabled)) throw new Error('長期セッション中はこの画面から削除できません。');
+          // 直近のGoogle本人確認（メモリ）を1回だけ使う。localStorage には保存しない
+          const delToken = csTakeDeleteToken(csDeleteAuth);
+          if (!delToken) throw new Error('削除の前にGoogleで本人確認してください。');
           const delBody = Object.assign({ action: name, token: SITE_BACKEND_TOKEN, request_id: requestId }, payload || {});
-          if (idt) delBody.id_token = idt;
+          delBody.id_token = delToken;
           const res = await T.fetchJson({
             urls: WORKER_BACKEND_URL ? [WORKER_BACKEND_URL, DIRECT_BACKEND_URL] : [DIRECT_BACKEND_URL],
             method: 'POST',
@@ -1356,6 +1612,16 @@
         if (name === 'translateText') {
           const mode = (payload && payload.mode) === 'create' ? 'create' : 'get';
           const requestId = T.isRequestId(requestIdArg) ? requestIdArg : T.newRequestId();
+          if (mode === 'create') {
+            const createMode = csModeNow();
+            if (createMode === 'session') {
+              const body = { request_id: requestId, record_id: String((payload && payload.record_id) || '') };
+              const res = await csMutateSession('translate', body, 90000);
+              if (!res.ok && csIsSessionAuthError(res)) { authUi.lastAt = 0; setTimeout(applyProbeToUI, 0); }
+              return unwrapResult(res, '翻訳の作成', true);
+            }
+            if (createMode === 'denied') throw new Error(csDeniedMessage());
+          }
           const trBody = { action: name, token: SITE_BACKEND_TOKEN, record_id: String((payload && payload.record_id) || ''), mode: mode };
           if (mode === 'create') {
             trBody.request_id = requestId;
@@ -1987,6 +2253,7 @@
       }
 
       // 作成中の request_id は結果不明時に同じIDで確認する（セッション内で保持）
+      // 各 receipt は作成時の actor（長期セッションは context 由来の一方向ハッシュ）を持つ
       const pendingTranslate = (function () {
         const out = Object.create(null);
         try {
@@ -1995,7 +2262,9 @@
             const obj = JSON.parse(raw);
             if (obj && typeof obj === 'object') {
               Object.keys(obj).forEach(function (k) {
-                if (T.isRequestId(obj[k])) out[k] = obj[k];
+                const v = obj[k];
+                if (T.isRequestId(v)) out[k] = { id: v, actor: '' }; // 旧形式（actor 未記録）
+                else if (v && T.isRequestId(v.id)) out[k] = { id: v.id, actor: String(v.actor || '') };
               });
             }
           }
@@ -2010,11 +2279,16 @@
           else sessionStorage.removeItem('tadoku_pending_translate');
         } catch (e) {}
       }
-      function takeTranslateRequestId(recordId) {
+      /** 保留中の receipt（request_id と作成時の actor）。無ければ null */
+      function peekTranslateRequestId(recordId) {
         const cur = pendingTranslate[recordId];
-        if (T.isRequestId(cur)) return cur;
+        return cur && T.isRequestId(cur.id) ? cur : null;
+      }
+      function takeTranslateRequestId(recordId, actor) {
+        const cur = peekTranslateRequestId(recordId);
+        if (cur) return cur.id;
         const created = T.newRequestId();
-        pendingTranslate[recordId] = created;
+        pendingTranslate[recordId] = { id: created, actor: String(actor || '') };
         savePendingTranslate();
         return created;
       }
@@ -2182,7 +2456,18 @@
                 showToast('この教材の訳はまだありません。訳の作成は教室アカウントで行えます。', 7000);
                 return;
               }
-              const requestId = takeTranslateRequestId(rec.id);
+              // 未確定の receipt が別 actor（アカウント切替）のものなら、履歴確認なしに新IDで作り直さない
+              const txActor = await currentPendingActorHash();
+              const pendingTx = peekTranslateRequestId(rec.id);
+              if (pendingTx && pendingTx.actor && pendingTx.actor !== txActor) {
+                const ok = window.confirm('前回の翻訳結果が未確定のまま、アカウントまたは端末が変わりました。\n履歴を確認しましたか？確認できた場合のみ「OK」で新しく作成します。');
+                if (!ok) {
+                  setTranslateButton('対訳を表示', false, false, '翻訳の作成を見送りました');
+                  return;
+                }
+                clearTranslateRequestId(rec.id);
+              }
+              const requestId = takeTranslateRequestId(rec.id, txActor);
               setTranslateButton('作成中…', true, false, '翻訳を作成しています。少し時間がかかります…');
               res = await callServer('translateText', { record_id: rec.id, mode: 'create' }, requestId);
               clearTranslateRequestId(rec.id);
@@ -2868,7 +3153,8 @@
         if (genBtn) genBtn.disabled = true;
         const settings = readForm();
         const settingsKey = settingsHash(settings);
-        const actorHash = settingsHash({ a: T.actorKey(getIdToken(), getDeviceId()) });
+        // 長期セッションでは context 由来の一方向ハッシュ（JS token が無くても別人を区別する）
+        const actorHash = await currentPendingActorHash();
         const decision = decidePendingGenerate(pendingGenerate, settingsKey, actorHash);
         const resolution = resolvePendingGenerateAction(decision, window.confirm);
         let requestId;
@@ -2974,6 +3260,16 @@
         let requestId = '';
         try {
           if (!window.confirm('この生成物を削除しますか？')) return;
+          // 長期セッションのページではこの画面から削除しない（公式ページへ案内するだけ）
+          if (!csDeleteAllowedOnPage(csState.enabled)) {
+            showDeleteGuidance();
+            return;
+          }
+          // 明示的な操作に加えて、直近（メモリ5分）のGoogle本人確認を要求する
+          if (!csDeleteVerifyFresh(csDeleteAuth, Date.now(), csCurrentSubject())) {
+            showDeleteVerify();
+            return;
+          }
           performed = true;
           // 結果不明の同じ削除操作は同じrequest_idで確認する（新IDで無条件再送しない）
           requestId = pendingDeletes[id];
@@ -3333,31 +3629,81 @@
         const el = document.getElementById('auth-help-text');
         if (el) el.textContent = text || '';
       }
+      function authHelpTextFor(kind) {
+        if (kind === 'gis-failed') return 'Googleログインの読み込みに失敗しました。通信状態を確認して再試行してください。';
+        if (kind === 'notallowed') return '教室外アカウントでは生成できません。教室用アカウントでログインし直してください。';
+        if (kind === 'unreachable') return '認証サーバーに接続できませんでした。通信状態を確認して再試行してください。';
+        if (kind === 'optional') return 'ログインすると教室アカウントとして利用できます（試験運用中のため未ログインでも生成できます）。';
+        return 'この端末のGoogleログインが必要です。下のボタンでログインすると生成できます。';
+      }
       function showAuthHelp(kind) {
         const box = document.getElementById('auth-help');
         const retry = document.getElementById('auth-retry');
         if (!box) return;
         box.style.display = 'block';
-        if (kind === 'gis-failed') setAuthHelpText('Googleログインの読み込みに失敗しました。通信状態を確認して再試行してください。');
-        else if (kind === 'notallowed') setAuthHelpText('教室外アカウントでは生成できません。教室用アカウントでログインし直してください。');
-        else if (kind === 'unreachable') setAuthHelpText('認証サーバーに接続できませんでした。通信状態を確認して再試行してください。');
-        else if (kind === 'optional') setAuthHelpText('ログインすると教室アカウントとして利用できます（試験運用中のため未ログインでも生成できます）。');
-        else setAuthHelpText('この端末のGoogleログインが必要です。下のボタンでログインすると生成できます。');
+        setAuthHelpText(authHelpTextFor(kind));
         if (retry) retry.style.display = (kind === 'gis-failed' || kind === 'unreachable') ? 'inline-block' : 'none';
+        if (csState.enabled) {
+          // 長期セッションのページは GIS を使わない（GIS では長期cookieを作れない）。
+          // ログイン導線は loginForm を第一・唯一の選択にする。
+          const ok = renderClassroomLogin();
+          if (ok) setAuthHelpText('教室用アカウントでログインしてください。下のボタンからログインできます。');
+          else setAuthHelpText('教室用ログインを読み込めませんでした。ページを再読み込みしてください。');
+          return;
+        }
         // gis-failed は自動リトライしない（再試行ボタンで1回だけ試す）
         if (kind !== 'gis-failed') initGisApp2();
         const wrap = document.getElementById('gis-wrap');
         if (wrap && authUi.gisInitDone) wrap.style.display = 'block';
+      }
+      /** 長期セッションのログインフォーム（長期ページの唯一のログイン導線） */
+      function renderClassroomLogin() {
+        const w = document.getElementById('gis-wrap');
+        const m = csState.module;
+        if (!w || !m || typeof m.loginForm !== 'function') return false;
+        if (w.getAttribute('data-classroom-login') === '1') { w.style.display = 'block'; return true; }
+        try {
+          const node = m.loginForm('/app2/', '教室用ログイン');
+          if (node && node.nodeType === 1) {
+            w.appendChild(node);
+            w.setAttribute('data-classroom-login', '1');
+            w.style.display = 'block';
+            return true;
+          }
+        } catch (e) {}
+        return false;
       }
       function hideAuthHelp() {
         const box = document.getElementById('auth-help');
         if (box) box.style.display = 'none';
         const wrap = document.getElementById('gis-wrap');
         if (wrap) wrap.style.display = 'none';
+        // 通常のログイン導線に戻ったら、削除専用の本人確認ルートは解除する
+        gisCredentialRoute = '';
+      }
+      function renderGisButton(containerId, kind) {
+        const w = document.getElementById(containerId);
+        if (!w || !authUi.gisInitDone) return false;
+        if (w.getAttribute('data-gis-rendered') === '1') { w.style.display = 'block'; return true; }
+        try {
+          google.accounts.id.renderButton(w, {
+            theme: 'outline', size: 'medium',
+            text: kind === 'delete' ? 'continue_with' : 'signin_with',
+            shape: 'pill'
+          });
+          w.setAttribute('data-gis-rendered', '1');
+          w.style.display = 'block';
+          return true;
+        } catch (e) {
+          return false;
+        }
       }
       function initGisApp2() {
+        // 長期セッションのページでは GIS を使わない（ログインは loginForm、削除も実行しない）
+        if (csState.enabled) return;
         if (GIS_CLIENT_ID.indexOf('REPLACE') === 0) return;
-        if (authUi.gisInitDone || authUi.gisStarting) return;
+        if (authUi.gisStarting) return;
+        if (authUi.gisInitDone) { renderGisButton('gis-wrap'); return; }
         authUi.gisStarting = true;
         T.waitForGis({ timeoutMs: 8000, intervalMs: 300 }).then(function (ok) {
           authUi.gisStarting = false;
@@ -3367,30 +3713,87 @@
               client_id: GIS_CLIENT_ID,
               callback: function (resp) {
                 if (!resp || !resp.credential) return;
+                // 削除専用の本人確認はメモリだけに置く（localStorage へは保存しない）
+                if (gisCredentialRoute === 'delete') { acceptDeleteVerify(resp.credential); return; }
                 // トークン更新は onAuthChange 経由で probe される（同値なら再probe不要）
                 setIdToken(resp.credential);
               },
               auto_select: false,
               cancel_on_tap_outside: true
             });
-            const w = document.getElementById('gis-wrap');
-            if (w) {
-              w.style.display = 'block';
-              google.accounts.id.renderButton(w, { theme: 'outline', size: 'medium', text: 'signin_with', shape: 'pill' });
-            }
             authUi.gisInitDone = true;
+            renderGisButton('gis-wrap');
           } catch (e) {
             authUi.gisInitDone = false;
             showAuthHelp('gis-failed');
           }
         });
       }
+
+      function renderGisButtonWhenReady(containerId, kind, deadline) {
+        if (authUi.gisInitDone) return renderGisButton(containerId, kind);
+        if (Date.now() > deadline) return false;
+        setTimeout(function () { renderGisButtonWhenReady(containerId, kind, deadline); }, 200);
+        return false;
+      }
+
+      // ── 削除の本人確認（明示操作 + 直近のGoogle ID。長期cookieは使わない） ──
+      function showDeleteVerify() {
+        hideDeleteGuidance();
+        const box = document.getElementById('delete-verify');
+        if (!box) return;
+        box.style.display = 'block';
+        gisCredentialRoute = 'delete';
+        const wrap = document.getElementById('delete-gis-wrap');
+        if (wrap) wrap.style.display = 'none';
+        initGisApp2();
+        // 承認ボタンは本人の明示操作で押してもらう（自動サインインはしない）
+        renderGisButtonWhenReady('delete-gis-wrap', 'delete', Date.now() + 9000);
+      }
+      function hideDeleteVerify() {
+        const box = document.getElementById('delete-verify');
+        if (box) box.style.display = 'none';
+        gisCredentialRoute = '';
+      }
+      function acceptDeleteVerify(credential) {
+        const st = T.inspectToken(credential);
+        if (!st.valid) {
+          showToast('本人確認に失敗しました。もう一度お試しください。', 6000);
+          return;
+        }
+        csDeleteAuth.token = String(credential);
+        csDeleteAuth.at = Date.now();
+        csDeleteAuth.sub = String(st.payload.sub || st.email || '');
+        gisCredentialRoute = '';
+        hideDeleteVerify();
+        showToast('本人確認ができました。削除ボタンをもう一度押してください。', 7000);
+      }
+      function showDeleteGuidance() {
+        hideDeleteVerify();
+        const box = document.getElementById('delete-guidance');
+        const text = document.getElementById('delete-guidance-text');
+        const link = document.getElementById('delete-guidance-link');
+        if (!box) return;
+        if (text) {
+          text.textContent = 'この画面は教室の長期セッションで利用中です。長期セッションとGoogle本人確認の同一人物を照合できないため、ここからは削除できません。公式ページ（通常のGoogleログイン）で本人確認のうえ削除してください。';
+        }
+        if (link) link.setAttribute('href', CS_PUBLIC_APP2_URL);
+        box.style.display = 'block';
+      }
+      function hideDeleteGuidance() {
+        const box = document.getElementById('delete-guidance');
+        if (box) box.style.display = 'none';
+      }
+      const deleteVerifyCancel = document.getElementById('delete-verify-cancel');
+      if (deleteVerifyCancel) deleteVerifyCancel.addEventListener('click', function () { gisCredentialRoute = ''; hideDeleteVerify(); });
       const authRetryBtn = document.getElementById('auth-retry');
       if (authRetryBtn) authRetryBtn.addEventListener('click', function () { authUi.lastAt = 0; applyProbeToUI(); });
       async function applyProbeToUI() {
         const t = Date.now();
         if (authUi.seq > 0 && t - authUi.lastAt < 400) return;
         authUi.lastAt = t;
+        // アカウントが切り替わったら、前のセッションの資格情報と操作IDは使わない
+        csOnAccountChange();
         const seq = ++authUi.seq;
         const genSection = document.getElementById('genSection');
         const textArea = document.getElementById('textContentArea');
@@ -3432,6 +3835,8 @@
       document.getElementById('loadMoreBtn').addEventListener('click', () => loadSavedList({ append: true }));
 
       applyZoom();
+      // 長期セッション（shared/classroom-session.js）の有無を先に決める。無ければ従来挙動のまま
+      csInit();
       T.onAuthChange(function () { authUi.lastAt = 0; applyProbeToUI(); });
       applyProbeToUI();
       Promise.all([loadFormMap(), loadInvert()]).then(function () {

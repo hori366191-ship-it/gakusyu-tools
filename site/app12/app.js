@@ -31,6 +31,20 @@
     token: 'e6135dfd707ab9a6916635fa'
   };
 
+  // 長期セッション統合（../shared/classroom-session.js）が読み込まれている時だけ使うゲートウェイ。
+  // 公開Pages等で未読み込み（window.GakusyuClassroomSession が無い）場合は、
+  // 従来の id_token + Worker/Direct 経路・従来の文言・従来のprobeをそのまま使う（挙動を変えない）。
+  // ゲートウェイ経路が有効なときは旧経路へは絶対にfallbackしない（二重印刷を防ぐ）。
+  var LOGIN_PATH = '/app12/';
+  var LOGIN_LABEL = '教室用アカウントでログイン';
+  function classroomSession() {
+    var w = win();
+    var s = w && w.GakusyuClassroomSession;
+    if (!s || typeof s !== 'object') return null;
+    if (typeof s.probe !== 'function' || typeof s.mutate !== 'function') return null;
+    return s;
+  }
+
   // 時間軸SVGの座標系（12行すべて共通。現在は常に中央）。
   var TL = {
     w: 220,
@@ -63,6 +77,8 @@
   // サーバの内部文字列（bad token等）は出さず、保存トークンの状態だけで文言を選ぶ。
   var MSG_PDFDROP_NOAUTH = '印刷先の認証を確認できませんでした。少し待って再試行するか、教室用アカウントでログインし直してください。';
   function noauthHelpMessage(T) {
+    // 長期セッション統合（cookie認証）では、ローカルのid_tokenの状態で文言を決めない
+    if (classroomSession()) return MSG_PDFDROP_NOAUTH;
     var raw = (T && typeof T.peekIdToken === 'function') ? T.peekIdToken() : '';
     var st = null;
     try { st = (T && typeof T.inspectToken === 'function') ? T.inspectToken(raw) : null; } catch (e) { st = null; }
@@ -630,6 +646,18 @@
       ? cfg.clearTimeout
       : function (id) { return clearTimeout(id); };
     var nowFn = typeof cfg.now === 'function' ? cfg.now : function () { return Date.now(); };
+    // 長期セッション統合が有効かは送信のたびに解決する（無ければ従来経路）
+    var getSession = typeof cfg.getSession === 'function'
+      ? cfg.getSession
+      : function () { return cfg.session || null; };
+    function resolveGateway() {
+      var gw = null;
+      try { gw = getSession(); } catch (e) { gw = null; }
+      if (!gw || typeof gw.mutate !== 'function' || typeof gw.probe !== 'function') return null;
+      return gw;
+    }
+    // 直前にprobeで確定した context（メモリのみ。localStorage/sessionStorageには保存しない）
+    var probeContext = null;
 
     var pendingUntil = readPendingNumber(storage, KEY_PENDING_UNTIL);
     var pendingUnknown = readPendingFlag(storage, KEY_PENDING_UNKNOWN);
@@ -650,6 +678,10 @@
       if (!T) { cb({ ok: false, error: '通信ヘルパーが読み込まれていません' }); return; }
       if (!requestId) requestId = T.newRequestId();
       if (!T.isRequestId(requestId)) { cb({ ok: false, error: '内部エラー: request_id が不正です' }); return; }
+      // ゲートウェイ（長期セッション統合）が有効なら、旧POST/poll経路へは一切流さない。
+      // 旧経路へのfallbackは二重印刷になるため禁止（1回だけ送る）。
+      var gw = resolveGateway();
+      if (gw) { sendViaGateway(gw); return; }
       // クリック時に確定した認証トークンの文脈でだけ送る（別アカウントのトークンで同ジョブを送らない）
       var nowToken = getIdToken() || '';
       if (!nowToken || (expectToken && nowToken !== expectToken)) {
@@ -688,6 +720,83 @@
         var idt = getIdToken();
         if (idt) payload.id_token = idt;
         return payload;
+      }
+      // ゲートウェイ送信（shared/classroom-session.js）。
+      //  - 1リクエストだけ送る（再送なし）。応答不明は unknown として終了し、pollも旧経路も使わない。
+      //  - 認証はセッション側の cookie が持ち、JS/localStorage には保存しない。
+      //  - context は「PDF生成直前のprobe」で確定した値をそのまま渡し、Worker側で照合させる。
+      function sendViaGateway(gw) {
+        var rid = '';
+        try { rid = (typeof gw.newRid === 'function') ? gw.newRid() : T.newNonce(); } catch (e) { rid = ''; }
+        var opts = { rid: rid, timeoutMs: 30000 };
+        var ctx = (sendOpts.context !== undefined) ? sendOpts.context : probeContext;
+        if (ctx !== undefined && ctx !== null) opts.context = ctx;
+        var payload = { b64: b64, name: name, request_id: requestId };
+        var promise = null;
+        onStatus('送信中…');
+        try { promise = gw.mutate('print', payload, opts); } catch (e) { promise = null; }
+        if (!promise || typeof promise.then !== 'function') {
+          finish({ ok: false, unknown: true, error: T.messages.unknownResult });
+          return;
+        }
+        promise.then(applyGatewayResult, function () {
+          finish({ ok: false, unknown: true, error: T.messages.unknownResult });
+        });
+      }
+
+      // classroom-session.js の戻り値（T.fetchJson互換）を既存の finish 形へ写像する。
+      //  - unknown:true   → 適用されたかもしれない（cooldown/pending を残す）
+      //  - predispatch    → 送信前に判明した失敗（保存されていない。cooldownを残さない）
+      function applyGatewayResult(res) {
+        if (!res || typeof res !== 'object') {
+          finish({ ok: false, unknown: true, error: T.messages.unknownResult });
+          return;
+        }
+        var data = (res.data && typeof res.data === 'object') ? res.data : null;
+        var msg = String(res.error || (data && data.error) || '');
+        var code = String((data && data.code) || '');
+        var tags = msg + ' ' + code;
+        if (res.predispatch === true) {
+          // context不足など送信前の失敗。保存はされていないので二重印刷の心配はない。
+          if (/context|auth|session|login/i.test(tags)) {
+            finish({ ok: false, auth: true, error: msg || 'ログインが必要です。ログインし直してください。' });
+            return;
+          }
+          finish({ ok: false, error: msg || '送信に失敗しました' });
+          return;
+        }
+        // 結果不明（timeout/5xx/解析失敗/rid・request_id不一致/サーバがunknownを返した）
+        if (res.unknown === true || (data && data.unknown === true)) {
+          finish({ ok: false, unknown: true, error: T.messages.unknownResult });
+          return;
+        }
+        if (res.ok === true && data && data.ok === true) {
+          finish({ ok: true, name: data.name || name });
+          return;
+        }
+        if (data && data.ok === false) {
+          if (/pending|processing|処理中|in_flight|unknown/i.test(tags) || /pending_unknown|in_flight|ledger_unavailable/i.test(code)) {
+            finish({ ok: false, unknown: true, error: T.messages.unknownResult });
+            return;
+          }
+          // アカウント切替/権限は Worker 側の context 照合で拒否される
+          if (/bad token|not allowed|not_allowed|strict verification|auth|context|session/i.test(tags)) {
+            finish({ ok: false, auth: true, error: msg || '保存先の認証に失敗しました。ログインし直してください。' });
+            return;
+          }
+          finish({ ok: false, error: msg || '送信に失敗しました' });
+          return;
+        }
+        // HTTPエラー等（4xxはサーバが「適用していない」と返した既知失敗）
+        if (res.ok === false) {
+          if (/bad token|not allowed|not_allowed|auth|context|session/i.test(tags)) {
+            finish({ ok: false, auth: true, error: msg || '保存先の認証に失敗しました。ログインし直してください。' });
+            return;
+          }
+          finish({ ok: false, error: msg || '送信に失敗しました' });
+          return;
+        }
+        finish({ ok: false, unknown: true, error: T.messages.unknownResult });
       }
       function postOnce(url, timeoutMs) {
         return T.postForm({
@@ -836,6 +945,8 @@
 
     function probe(cb) {
       if (!T) { cb({ state: 'noauth' }); return; }
+      var gw = resolveGateway();
+      if (gw) { probeViaGateway(gw, cb); return; }
       T.probeAuth({
         workerUrl: workerUrl,
         directUrl: directUrl,
@@ -850,6 +961,24 @@
       });
     }
 
+    // ゲートウェイの probe は status だけを返し、context はセッションモジュールのメモリに残る。
+    // ここでは「PDF生成直前に確定した文脈」だけを覚えておく（保存はしない）。
+    function probeViaGateway(gw, cb) {
+      var promise = null;
+      try { promise = gw.probe('pdfdrop'); } catch (e) { promise = null; }
+      if (!promise || typeof promise.then !== 'function') { cb({ state: 'unreachable' }); return; }
+      promise.then(function (res) {
+        if (res && res.context !== undefined) probeContext = res.context;
+        else if (res && res.ctx !== undefined) probeContext = res.ctx;
+        var status = res && res.status;
+        if (status === 'ok') { cb({ state: 'ok', isOwner: !!(res && res.isOwner) }); return; }
+        if (status === 'notallowed') { cb({ state: 'notallowed', masked: res && res.masked }); return; }
+        if (status === 'noauth') { cb({ state: 'noauth' }); return; }
+        if (status === 'error') { cb({ state: 'error', message: res && res.message }); return; }
+        cb({ state: 'unreachable' });
+      }, function () { cb({ state: 'unreachable' }); });
+    }
+
     return {
       send: send,
       probe: probe,
@@ -858,6 +987,8 @@
       hasUnknown: function () { return pendingUnknown; },
       pendingUntil: function () { return pendingUntil; },
       clearPending: function () { pendingUnknown = false; pendingUntil = 0; persist(); },
+      // probeで確定した文脈（メモリのみ）
+      getContext: function () { return probeContext; },
       // テストからのみ参照する（本番UIには出さない）
       _state: function () { return { pendingUntil: pendingUntil, pendingUnknown: pendingUnknown }; }
     };
@@ -880,6 +1011,33 @@
     }
     merged.materials = data.materials.concat([history]);
     return merged;
+  }
+
+  // 教室ボタンの表示判定（純粋関数。UIとテストで共有する）。
+  // 長期セッション統合の同一オリジンでは localStorage に id_token を持たないため、
+  // hadToken では noauth を判定できない。長期originは noauth なら常にログインフォームを出す。
+  // 戻り値: { hidden, status（null=触らない）, help（null=触らない）, authExpired（true/false/undefined=触らない） }
+  var NOTALLOWED_TEXT = '教室外アカウントでは印刷できません';
+  function classroomVisibility(pr, opts) {
+    opts = opts || {};
+    var longTerm = !!opts.longTerm;
+    var noauthMessage = opts.noauthMessage !== undefined ? opts.noauthMessage : '';
+    var state = pr && pr.state;
+    if (state === 'ok') return { hidden: false, status: '', help: null, authExpired: false };
+    if (state === 'notallowed') {
+      // 長期originでは、アカウント切替のための同一オリジンログインフォームも一緒に出す
+      if (longTerm) return { hidden: true, status: null, help: NOTALLOWED_TEXT + '。', authExpired: undefined };
+      return { hidden: true, status: NOTALLOWED_TEXT, help: null, authExpired: undefined };
+    }
+    if (state === 'error') return { hidden: true, status: null, help: 'ログイン情報を確認できませんでした。', authExpired: undefined };
+    if (state === 'noauth') {
+      if (longTerm || opts.hadToken || opts.authExpiredNotice) {
+        return { hidden: true, status: null, help: noauthMessage, authExpired: true };
+      }
+      return { hidden: true, status: '', help: null, authExpired: undefined };
+    }
+    if (!opts.authExpiredNotice) return { hidden: true, status: '', help: null, authExpired: undefined };
+    return { hidden: true, status: null, help: null, authExpired: undefined };
   }
 
   function mount(opts) {
@@ -964,8 +1122,33 @@
     }
 
     // 認証ヘルプ（外部文字列を innerHTML に入れない）
+    // 長期セッション統合が有効なら shared/classroom-session.js のログインフォームを使う。
+    function appendLoginForm(msg) {
+      if (!statusEl) return false;
+      var gw = classroomSession();
+      if (!gw || typeof gw.loginForm !== 'function') return false;
+      var form = null;
+      try { form = gw.loginForm(LOGIN_PATH, LOGIN_LABEL); } catch (e) { form = null; }
+      if (!form) return false;
+      var nodes = [];
+      if (form.nodeType) nodes = [form];
+      else if (typeof form !== 'string' && typeof form.length === 'number') {
+        for (var i = 0; i < form.length; i += 1) { if (form[i] && form[i].nodeType) nodes.push(form[i]); }
+      }
+      if (!nodes.length && typeof form !== 'string') return false;
+      statusEl.textContent = '';
+      if (msg) {
+        statusEl.appendChild(doc.createTextNode(msg));
+        statusEl.appendChild(doc.createTextNode(' '));
+      }
+      if (typeof form === 'string') statusEl.appendChild(doc.createTextNode(form));
+      nodes.forEach(function (node) { statusEl.appendChild(node); });
+      return true;
+    }
+
     function showAuthHelp(msg) {
       if (!statusEl) return;
+      if (appendLoginForm(msg)) return;
       statusEl.textContent = '';
       statusEl.appendChild(doc.createTextNode(msg || 'Google にログインされていない可能性があります。'));
       statusEl.appendChild(doc.createTextNode(' '));
@@ -984,6 +1167,7 @@
       directUrl: DIRECT_PDFDROP_URL,
       token: CLASSROOM.token,
       storage: storage,
+      getSession: classroomSession,
       onStatus: setStatus,
       getIdToken: function () { return T ? T.getIdToken() : ''; }
     });
@@ -997,28 +1181,23 @@
       if (!classroomBtn) return;
       if (!CLASSROOM.url || !CLASSROOM.token) { classroomBtn.hidden = true; return; }
       if (w && w.location && w.location.protocol === 'file:') { classroomBtn.hidden = true; return; }
-      if (!T || !T.probeAuth) { classroomBtn.hidden = true; return; }
+      if (!T || (!T.probeAuth && !classroomSession())) { classroomBtn.hidden = true; return; }
       var hadToken = !!(T.peekIdToken && T.peekIdToken());
+      // 長期セッション統合の同一オリジンでは id_token を localStorage に持たない
+      var longTerm = !!classroomSession();
       sender.probe(function (pr) {
         if (seq !== visibilitySeq) return; // 新しい判定が始まっている
-        if (pr.state === 'ok') {
-          authExpiredNotice = false;
-          classroomBtn.hidden = false;
-          setStatus('');
-        } else if (pr.state === 'notallowed') {
-          classroomBtn.hidden = true;
-          setStatus('教室外アカウントでは印刷できません');
-        } else if (pr.state === 'error') {
-          classroomBtn.hidden = true;
-          showAuthHelp('ログイン情報を確認できませんでした。');
-        } else if (pr.state === 'noauth' && (hadToken || authExpiredNotice)) {
-          authExpiredNotice = true;
-          classroomBtn.hidden = true;
-          showAuthHelp(noauthHelpMessage(T));
-        } else if (!authExpiredNotice) {
-          classroomBtn.hidden = true;
-          setStatus('');
-        }
+        var view = classroomVisibility(pr, {
+          longTerm: longTerm,
+          hadToken: hadToken,
+          authExpiredNotice: authExpiredNotice,
+          noauthMessage: noauthHelpMessage(T)
+        });
+        classroomBtn.hidden = view.hidden;
+        if (view.authExpired === true) authExpiredNotice = true;
+        else if (view.authExpired === false) authExpiredNotice = false;
+        if (view.status !== null) setStatus(view.status);
+        if (view.help !== null) showAuthHelp(view.help);
       });
     }
 
@@ -1061,9 +1240,14 @@
             else setStatus('送信失敗: ' + (pr.message || '不明なエラー'));
             return;
           }
-          // 以降の送信は「クリック時に認証が通ったトークン」でのみ行う
-          var clickToken = T.getIdToken() || '';
-          if (!clickToken) { setBusy(false); showAuthHelp(MSG_TOKEN_EXPIRED); return; }
+          // 以降の送信は「クリック時に認証が通ったトークン」でのみ行う。
+          // 長期セッション統合が有効なときは cookie 認証（id_token を JS に持たない）ので比較しない。
+          var gw = classroomSession();
+          var clickToken = '';
+          if (!gw) {
+            clickToken = T.getIdToken() || '';
+            if (!clickToken) { setBusy(false); showAuthHelp(MSG_TOKEN_EXPIRED); return; }
+          }
           // 生成中にタブが切り替わっても別教材を送らないよう、ここで教材とシートを確定する
           var material = materials[activeIndex];
           var sheets = sheetsOf(activeIndex).slice();
@@ -1072,9 +1256,11 @@
           setStatus('PDFを生成中…');
           makePdf(sheets, function (err, pdf) {
             if (err) { release('PDF生成に失敗しました'); return; }
-            if ((T.getIdToken() || '') !== clickToken) {
-              release('ログインが切り替わったため送信を中止しました。ポータルからログインし直してください。');
-              return;
+            if (!gw) {
+              if ((T.getIdToken() || '') !== clickToken) {
+                release('ログインが切り替わったため送信を中止しました。ポータルからログインし直してください。');
+                return;
+              }
             }
             var b64 = '';
             try { b64 = String(pdf.output('datauristring') || '').split(',')[1] || ''; }
@@ -1162,6 +1348,7 @@
     isPdfTooLarge: isPdfTooLarge,
     PDF_MAX_BYTES: PDF_MAX_BYTES,
     noauthHelpMessage: noauthHelpMessage,
+    classroomVisibility: classroomVisibility,
     loadScriptOnce: loadScriptOnce,
     ensurePdfLibs: ensurePdfLibs,
     makePdf: makePdf,

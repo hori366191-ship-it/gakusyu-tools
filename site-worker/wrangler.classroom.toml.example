@@ -1,0 +1,41 @@
+# 教室タブレット用 同一オリジン Worker（例）
+#
+# 使い方:
+#   1. このファイルを site-worker/wrangler.classroom.toml にコピーする
+#   2. CLASSROOM_ORIGIN を実際の専用オリジン（https://host のみ・パス無し）にする
+#   3. D1 を作成し database_id を埋める
+#   4. 秘密は wrangler secret put で設定する（このファイルに書かない）
+#
+# 既存の site-worker/wrangler.toml（gakusyu-tools-proxy）は変更しない。
+
+name = "gakusyu-classroom"
+main = "classroom-worker.mjs"
+compatibility_date = "2024-08-01"
+workers_dev = false
+preview_urls = false
+routes = [{ pattern = "classroom.example.edu", custom_domain = true }]
+
+[vars]
+# 完全一致の https origin（末尾スラッシュ・パス・ポート無し）
+CLASSROOM_ORIGIN = "https://classroom.example.edu"
+# 任意。context（非認証識別子）の SHA-256 に混ぜる固定文字列。
+# CLASSROOM_CONTEXT_PEPPER = "replace-me"
+
+# --- secrets（wrangler secret put で設定） ---
+# CLASSROOM_APP2_TOKEN        site-app2-backend の共通トークン
+# CLASSROOM_PDFDROP_TOKEN     site-pdfdrop の共通トークン
+# CLASSROOM_GOOGLE_CLIENT_ID  GIS と同じ OAuth クライアント ID
+# CLASSROOM_GOOGLE_CLIENT_SECRET
+# CLASSROOM_ENCRYPTION_KEY    32 byte を base64url で表現した AES-GCM 鍵
+
+[[d1_databases]]
+binding = "CLASSROOM_DB"
+database_name = "gakusyu-classroom"
+database_id = "<D1_DATABASE_ID>"
+migrations_dir = "session-migrations"
+
+# UTC 日次: 期限切れ / 失効済みセッションを物理削除する。
+# classroom_oauth_credentials は FK の ON DELETE CASCADE で同時に消える。
+# OAuth state の期限切れ掃除はログイン開始時（classroom-login.mjs）に行う。
+[triggers]
+crons = ["0 18 * * *"]

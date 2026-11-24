@@ -1861,6 +1861,14 @@ test('app2 delete handler: 連打で1操作だけ・finally解除・結果不明
     loadSavedList: () => { reloads++; },
     authUi: { lastAt: 1 },
     applyProbeToUI: () => { probes++; },
+    // 長期セッション連携（削除前ゲート）。抽出ブロック外の依存なので契約だけを模す
+    csState: { enabled: false },
+    csDeleteAuth: { token: 'cred-test', at: 1, sub: 'sub-test' },
+    csCurrentSubject: () => 'sub-test',
+    csDeleteVerifyFresh: () => true,
+    csDeleteAllowedOnPage: (enabled) => !enabled,
+    showDeleteVerify: () => {},
+    showDeleteGuidance: () => {},
     console,
     Promise,
     Object,
@@ -1914,6 +1922,13 @@ test('app2 delete handler: 連打で1操作だけ・finally解除・結果不明
   assert.strictEqual(calls.length, beforeCancel);
   assert.strictEqual(cancelBtn.disabled, false);
   assert.strictEqual(state.deleteBusy.isBusy('tadoku-4'), false);
+
+  // 長期セッションのページでは削除要求を送らない（ゲートは probe の一時状態ではなくページ構成）
+  const beforeLong = calls.length;
+  ctx.csState.enabled = true;
+  await fn({ id: 'tadoku-7' }, { disabled: false });
+  assert.strictEqual(calls.length, beforeLong, '長期ページは削除を送らない');
+  ctx.csState.enabled = false;
 
   // 別itemは並行可能、例外でもbusy解除
   handler = () => Promise.reject(new Error('boom'));
