@@ -247,7 +247,7 @@ test('保留 operation の actor は context 由来の一方向ハッシュ（co
 test('generate は長期セッションの actor を context ハッシュで決め、receipt は消さない', () => {
   assert.match(PAGE_SRC, /const actorHash = await currentPendingActorHash\(\)/);
   assert.match(PAGE_SRC, /async function currentPendingActorHash\(\)/);
-  assert.match(PAGE_SRC, /if \(csState\.enabled && csState\.mode === 'session' && csState\.pendingActor\) return csState\.pendingActor/);
+  assert.match(PAGE_SRC, /if \(\(\(csState\.enabled && csState\.mode === 'session'\) \|\| csState\.apiActive\) && csState\.pendingActor\) return csState\.pendingActor/);
   // アカウント切替で pending の receipt を消して新規生成させない
   const start = PAGE_SRC.indexOf('function csOnAccountChange()');
   const end = PAGE_SRC.indexOf('async function currentPendingActorHash()');
@@ -294,6 +294,19 @@ test('生成と対訳createだけが gateway を通る', () => {
   // get（閲覧）は従来の read 経路のまま
   assert.ok(/mode === 'create'/.test(tail));
   assert.ok(!/csMutateSession[^\n]*'get'/.test(tail));
+});
+
+test('専用API（任意オプトイン）はマーカー方式を置き換えず、匿名trial・削除・GISを維持する', () => {
+  // オプトインが無ければ activate を呼ばない（匿名は UI も追加通信もなし）
+  assert.match(PAGE_SRC, /if \(typeof api\.hasOptIn !== 'function' \|\| !api\.hasOptIn\(\)\) return;/);
+  // マーカーモジュールだけが enabled を立てる（APIモードは enabled=false のまま）
+  assert.match(PAGE_SRC, /csState\.enabled = !!csState\.module/);
+  assert.match(PAGE_SRC, /csState\.apiActive = true;[\s\S]{0,220}csState\.context = r\.context/);
+  // 削除は従来どおり enabled=false（APIモード）で許可され、GIS本人確認が使える
+  assert.match(PAGE_SRC, /if \(!csDeleteAllowedOnPage\(csState\.enabled\)\)/);
+  assert.match(PAGE_SRC, /if \(csState\.enabled\) return;/, 'APIモードでは GIS を止めない');
+  // 生成の gateway 切替は「確認済みの時だけ」
+  assert.match(PAGE_SRC, /function csModeNow\(\) \{\s*if \(csState\.apiActive && csState\.mode === 'session'\) return 'session';/);
 });
 
 test('抽出ブロックは ES5 相当の構文で評価できる（vmで実行済み）', () => {

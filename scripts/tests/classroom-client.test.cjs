@@ -331,12 +331,15 @@ test('forms: login の return_to は許可パスだけ・logout は値を送ら�
   assert.equal(logout.children[logout.children.length - 1].textContent, 'ログアウト');
 });
 
-test('source: セッション識別子を storage / Cookie / URL へ保存しない', () => {
+test('source: セッション識別子を storage / Cookie / URL へ保存しない（非機密opt-inのみ許可）', () => {
   // コメントは仕様説明なので除外し、実行コードだけを見る
   const code = SRC.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
-  for (const forbidden of ['localStorage', 'sessionStorage', 'document.cookie', 'history.pushState', 'history.replaceState']) {
+  for (const forbidden of ['sessionStorage', 'document.cookie', 'history.pushState', 'history.replaceState']) {
     assert.equal(code.indexOf(forbidden), -1, 'classroom-session.js が ' + forbidden + ' を使わない');
   }
+  // localStorage は「保持する」非機密boolean（OPT_IN_KEY）だけ。credential/context/code は置かない。
+  assert.equal(/localStorage\s*\.\s*setItem\(\s*['"]/.test(code), false, '直接キー文字列で保存しない');
+  assert.equal(/localStorage[^\n]*(context|credential|code|id_token)/i.test(code), false);
   assert.equal(/location\.(href|search|hash)\s*=/.test(code), false);
 });
 
@@ -365,6 +368,21 @@ test('index.html: marker 時だけ教室セッション UI を有効にし、app
   assert.ok(block.includes('再確認'), '失敗・時限の案内として再確認を出す');
   assert.equal(/C\.mutate\(/.test(block), false, '表示だけで変更系は送らない（期限延長なし）');
   assert.equal(/localStorage|sessionStorage/.test(block), false, 'storage を使わない');
+});
+
+test('index.html: 教室資格確認済み(renderOk)にだけ「この端末でログインを保持」を出し、匿名は無通信', () => {
+  // 追加APIは専用originのオプトイン専用。匿名（renderOk以外）には出さない。
+  const start = INDEX.indexOf('function renderOk(');
+  const end = INDEX.indexOf('function renderLogin(', start);
+  assert.ok(start > 0 && end > start);
+  const block = INDEX.slice(start, end);
+  assert.ok(block.includes('appendPersistControl()'), 'renderOk でだけ保持導線を出す');
+  assert.ok(block.includes('ensurePersistState()'), 'opt-in端末だけ readonly status を確認する');
+  assert.ok(INDEX.includes('window.GakusyuClassroomApi'), '専用APIを任意機能として読み込む');
+  assert.ok(INDEX.includes('popupLogin()'), 'user gesture から popup を開始する');
+  // 非機密の opt-in boolean 以外（context/code/credential）を保存しない
+  assert.equal(/localStorage[^\n]*(context|code|credential|id_token)/i.test(INDEX), false);
+  assert.ok(!/gakusyu-classroom-persist[^\n]*(context|code|credential)/i.test(INDEX));
 });
 
 // ---- index.html の教室セッション UI を fake DOM で実行する ----

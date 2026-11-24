@@ -1,0 +1,44 @@
+# 教室ログイン専用 API Worker（例）
+#
+# 目的:
+#   GitHub Pages（https://hori366191-ship-it.github.io）からの GIS popup code model
+#   だけを受け付ける、認証専用 API。既存の同一オリジン Worker / Pages は変更しない。
+#
+# 使い方:
+#   1. このファイルを site-worker/wrangler.classroom-auth.toml にコピーする
+#      （実ファイルは git に追加しない）
+#   2. database_id を教室 D1 の実 ID にする（Web 側と同一 DB）
+#   3. wrangler secret put で秘密を設定する（このファイルに書かない）
+#   4. wrangler deploy --config wrangler.classroom-auth.toml
+#
+# 不変条件:
+#   - API origin は classroom-auth-api.mjs の API_ORIGIN 固定。
+#   - routes は定義しない（独自ドメインを付けない）。
+#   - workers_dev は有効（固定の workers.dev 名だけを公開面にする）。
+#   - preview_urls は無効。observability も無効（code をログに残さない）。
+#   - cron は不要（日次 purge は既存の classroom-maintenance Worker を再利用する）。
+#
+# secrets:
+#   CLASSROOM_GOOGLE_CLIENT_ID
+#   CLASSROOM_GOOGLE_CLIENT_SECRET
+#   CLASSROOM_ENCRYPTION_KEY      32 byte を base64url で表現した AES-GCM 鍵
+#   CLASSROOM_APP2_TOKEN          site-app2-backend の共通トークン
+#   CLASSROOM_PDFDROP_TOKEN       site-pdfdrop の共通トークン
+#   CLASSROOM_CONTEXT_PEPPER      任意（context の SHA-256 に混ぜる固定文字列）
+
+name = "gakusyu-classroom-auth"
+main = "classroom-auth-api.mjs"
+compatibility_date = "2024-08-01"
+workers_dev = true
+preview_urls = false
+# routes は定義しない（独自ドメイン・Pages のパスに紐付けない）
+
+[observability]
+enabled = false
+
+[[d1_databases]]
+binding = "CLASSROOM_DB"
+database_name = "gakusyu-classroom"
+# placeholder: 実 ID はローカルの wrangler.classroom-auth.toml にだけ書く
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "session-migrations"

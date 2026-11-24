@@ -81,6 +81,7 @@ const STATE_BYTES = 32;
 const NONCE_BYTES = 32;
 const VERIFIER_BYTES = 32;
 const MAX_HANDLE_LENGTH = 512;
+const MAX_AUTHORIZATION_CODE_LENGTH = 4096;
 const MAX_SUBJECT_LENGTH = 512;
 const MAX_EMAIL_LENGTH = 320;
 const CREDENTIAL_AAD_PREFIX = 'classroom-oauth-credentials:';
@@ -88,7 +89,7 @@ const STATE_AAD_PREFIX = 'classroom-oauth-state:';
 const ID_TOKEN_SKEW_SECONDS = 60;
 export const VERIFICATION_TIMEOUT_MS = 10_000;
 
-class LoginError extends Error {
+export class ClassroomLoginError extends Error {
   constructor(status, code, unavailable = false) {
     super(code);
     this.name = 'ClassroomLoginError';
@@ -98,6 +99,8 @@ class LoginError extends Error {
     this.unavailable = unavailable;
   }
 }
+
+const LoginError = ClassroomLoginError;
 
 /**
  * `authenticate` が「cookie はあるが確認できない」場合に投げる安全なエラー。
@@ -327,12 +330,12 @@ function callbackErrorResponse(code) {
   return redirectResponse('/?login_error=' + encodeURIComponent(code), [clearOauthCookie()]);
 }
 
-function sessionCookie(handle) {
-  return `${SESSION_COOKIE}=${handle}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_MAX_AGE}`;
+function sessionCookie(cookieName, handle) {
+  return `${cookieName}=${handle}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_MAX_AGE}`;
 }
 
-function clearSessionCookie() {
-  return `${SESSION_COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`;
+function clearSessionCookie(cookieName) {
+  return `${cookieName}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`;
 }
 
 function oauthCookie(state, nonce) {
@@ -348,7 +351,7 @@ function cookieValue(request, name) {
   return values.length > 0 ? values[0] || null : null;
 }
 
-function cookieValues(request, name) {
+function cookieValues(request, name, { includeEmpty = false } = {}) {
   const header = request.headers.get('cookie');
   const values = [];
   if (!header) return values;
@@ -357,7 +360,9 @@ function cookieValues(request, name) {
     if (index < 0) continue;
     if (part.slice(0, index).trim() === name) {
       const value = part.slice(index + 1).trim();
-      if (value) values.push(value);
+      // 既定（cookieValue 等）は従来どおり空値を無視する。
+      // 重複判定だけは includeEmpty: true で空値も 1 個として数える。
+      if (value || includeEmpty) values.push(value);
     }
   }
   return values;
@@ -495,15 +500,24 @@ async function verifyIdToken(config, idToken, fetchImpl, nowMs) {
   return { sub, email, exp };
 }
 
-async function exchangeAuthorizationCode(config, { code, verifier }, fetchImpl) {
-  const response = await postTokenEndpoint(fetchImpl, {
+/** GIS popup code model からも同じ tokeninfo 全 claim 検証を使う。 */
+export const verifyGoogleIdToken = verifyIdToken;
+
+/**
+ * authorization code を token endpoint で交換する。
+ * - 既存 callback は redirect_uri = CLASSROOM_ORIGIN + /_classroom/callback と PKCE verifier を渡す。
+ * - GIS popup code model は redirect_uri に呼び出しページの origin を固定し、verifier は使わない。
+ */
+export async function exchangeAuthorizationCode(config, { code, verifier, redirectUri }, fetchImpl) {
+  const params = {
     code,
     client_id: config.clientId,
     client_secret: config.clientSecret,
-    redirect_uri: config.redirectUri,
+    redirect_uri: redirectUri || config.redirectUri,
     grant_type: 'authorization_code',
-    code_verifier: verifier,
-  });
+  };
+  if (verifier) params.code_verifier = verifier;
+  const response = await postTokenEndpoint(fetchImpl, params);
   if (!response || response.status !== 200) throw new LoginError(401, 'code_exchange_failed');
   const body = await readJsonBody(response);
   if (!body || typeof body.id_token !== 'string' || body.id_token === '') {
@@ -538,16 +552,116 @@ const CREDENTIAL_COLUMNS =
   'refresh_token_cipher, refresh_token_iv, refresh_token_tag';
 
 /* ------------------------------------------------------------------ *
+ * セッション + OAuth 資格情報の発行 / 失効（callback と popup で共用）
+ * ------------------------------------------------------------------ */
+
+/**
+ * 検証済み subject に対してセッションを作成し、id_token / refresh_token を
+ * サーバー側だけで暗号化保存する。refresh_token が無ければ fail closed。
+ * 資格情報の保存に失敗した場合はセッションを revoke して例外を投げる。
+ */
+export async function issueClassroomSession({
+  db,
+  store,
+  key,
+  subject,
+  idToken,
+  refreshToken,
+  scope = null,
+  idTokenExpiresAt,
+  nowSeconds,
+}) {
+  if (!db || !store) throw new LoginError(503, 'session_store_unavailable', true);
+  if (typeof subject !== 'string' || subject === '' || subject.length > MAX_SUBJECT_LENGTH) {
+    throw new LoginError(401, 'sub_invalid');
+  }
+  if (typeof idToken !== 'string' || idToken === '') throw new LoginError(401, 'id_token_missing');
+  if (typeof refreshToken !== 'string' || refreshToken === '') {
+    throw new LoginError(401, 'refresh_token_missing');
+  }
+  const expiresAt = Number(idTokenExpiresAt);
+  if (!Number.isFinite(expiresAt) || expiresAt <= nowSeconds) {
+    throw new LoginError(401, 'token_expired');
+  }
+
+  const session = await store.createForVerifiedSubject(subject);
+  const aad = CREDENTIAL_AAD_PREFIX + subject;
+  const sealedIdToken = await encryptSecret(key, idToken, aad);
+  const sealedRefresh = await encryptSecret(key, refreshToken, aad);
+
+  try {
+    const result = await primary(db)
+      .prepare(
+        `INSERT INTO classroom_oauth_credentials
+           (handle_hash, subject,
+            id_token_cipher, id_token_iv, id_token_tag, id_token_expires_at,
+            refresh_token_cipher, refresh_token_iv, refresh_token_tag,
+            scope, created_at, updated_at, revoked_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
+      )
+      .bind(
+        await sha256Hex(session.handle),
+        subject,
+        sealedIdToken.ciphertext,
+        sealedIdToken.iv,
+        sealedIdToken.tag,
+        expiresAt,
+        sealedRefresh.ciphertext,
+        sealedRefresh.iv,
+        sealedRefresh.tag,
+        scope,
+        nowSeconds,
+        nowSeconds,
+      )
+      .run();
+    if (!result || result.success === false) throw new Error('credential insert failed');
+  } catch (error) {
+    // セッションだけ残さない（fail closed）
+    await store.revoke(session.handle).catch(() => {});
+    throw new LoginError(503, 'credential_store_failed');
+  }
+
+  return session;
+}
+
+/**
+ * ログアウト: OAuth 資格情報（refresh token の暗号文）を削除してから
+ * セッションを tombstone 失効させる。DB 障害は例外（呼び出し側が fail closed）。
+ */
+export async function revokeClassroomSession({ db, store, handle }) {
+  if (!db || !store) throw new LoginError(503, 'session_store_unavailable', true);
+  if (typeof handle !== 'string' || handle === '' || handle.length > MAX_HANDLE_LENGTH) return false;
+  const handleHash = await sha256Hex(handle);
+  await primary(db)
+    .prepare('DELETE FROM classroom_oauth_credentials WHERE handle_hash = ?')
+    .bind(handleHash)
+    .run();
+  return store.revoke(handle);
+}
+
+/* ------------------------------------------------------------------ *
  * 本体
  * ------------------------------------------------------------------ */
 
 export function createClassroomLogin(
   env,
-  { authorize, fetchImpl = globalThis.fetch, now = Date.now, returnToAllowlist } = {},
+  {
+    authorize,
+    fetchImpl = globalThis.fetch,
+    now = Date.now,
+    returnToAllowlist,
+    sessionCookieName,
+    popupRedirectUri,
+  } = {},
 ) {
   const config = readConfig(env);
   const allowlist = normalizeAllowlist(returnToAllowlist);
   const store = config ? classroomSessions(config.db, { now }) : null;
+  const cookieName =
+    typeof sessionCookieName === 'string' && /^__Host-[A-Za-z0-9_-]+$/.test(sessionCookieName)
+      ? sessionCookieName
+      : SESSION_COOKIE;
+  const popupRedirect = normalizeOrigin(popupRedirectUri);
   let keyPromise = null;
 
   if (typeof fetchImpl !== 'function') throw new TypeError('fetchImpl must be a function');
@@ -715,51 +829,20 @@ export function createClassroomLogin(
     }
     if (!permitted) return redirectResponseError('not_authorized', [clearCookie]);
 
-    const session = await store.createForVerifiedSubject(claims.sub);
-    const key = await getAesKey();
-    const aad = CREDENTIAL_AAD_PREFIX + claims.sub;
-    const sealedIdToken = await encryptSecret(key, tokens.idToken, aad);
-    const sealedRefresh = await encryptSecret(key, tokens.refreshToken, aad);
-    const idTokenExpiresAt = Number(payload.exp);
-    if (!Number.isFinite(idTokenExpiresAt) || idTokenExpiresAt <= nowSeconds) {
-      await store.revoke(session.handle);
-      return redirectResponseError('token_expired', [clearCookie]);
-    }
-
-    try {
-      const result = await primary(config.db)
-        .prepare(
-          `INSERT INTO classroom_oauth_credentials
-             (handle_hash, subject,
-              id_token_cipher, id_token_iv, id_token_tag, id_token_expires_at,
-              refresh_token_cipher, refresh_token_iv, refresh_token_tag,
-              scope, created_at, updated_at, revoked_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
-        )
-        .bind(
-          await sha256Hex(session.handle),
-          claims.sub,
-          sealedIdToken.ciphertext,
-          sealedIdToken.iv,
-          sealedIdToken.tag,
-          idTokenExpiresAt,
-          sealedRefresh.ciphertext,
-          sealedRefresh.iv,
-          sealedRefresh.tag,
-          tokens.scope,
-          nowSeconds,
-          nowSeconds,
-        )
-        .run();
-      if (!result || result.success === false) throw new Error('credential insert failed');
-    } catch (error) {
-      // セッションだけ残さない（fail closed）
-      await store.revoke(session.handle).catch(() => {});
-      throw new LoginError(503, 'credential_store_failed');
-    }
+    const session = await issueClassroomSession({
+      db: config.db,
+      store,
+      key: await getAesKey(),
+      subject: claims.sub,
+      idToken: tokens.idToken,
+      refreshToken: tokens.refreshToken,
+      scope: tokens.scope,
+      idTokenExpiresAt: Number(payload.exp),
+      nowSeconds,
+    });
 
     return redirectResponse(String(row.return_to || '/'), [
-      sessionCookie(session.handle),
+      sessionCookie(cookieName, session.handle),
       clearCookie,
     ]);
   }
@@ -778,18 +861,13 @@ export function createClassroomLogin(
 
     const form = await readForm(request);
     const returnTo = pickReturnTo(form, allowlist);
-    const handle = cookieValue(request, SESSION_COOKIE);
+    const handle = cookieValue(request, cookieName);
     if (handle && handle.length <= MAX_HANDLE_LENGTH) {
-      const handleHash = await sha256Hex(handle);
       // ログアウトでは OAuth 資格情報そのものを削除し、将来の refresh を不可能にする
       // （refresh token の暗号文・id_token を残さない）。セッションは tombstone で失効。
-      await primary(config.db)
-        .prepare('DELETE FROM classroom_oauth_credentials WHERE handle_hash = ?')
-        .bind(handleHash)
-        .run();
-      await store.revoke(handle);
+      await revokeClassroomSession({ db: config.db, store, handle });
     }
-    return redirectResponse(returnTo, [clearSessionCookie()]);
+    return redirectResponse(returnTo, [clearSessionCookie(cookieName)]);
   }
 
   /* ------------------------ 認証 -------------------------- */
@@ -895,7 +973,8 @@ export function createClassroomLogin(
    *    → ClassroomAuthUnavailableError（gateway は 503 fail closed。匿名へ倒さない）
    */
   async function authenticate(request) {
-    const handles = cookieValues(request, SESSION_COOKIE);
+    // 空値も重複として数える（同名 cookie の注入を曖昧にしない）。戻り値の既定は不変。
+    const handles = cookieValues(request, cookieName, { includeEmpty: true });
     if (handles.length === 0) return null;
     if (handles.length > 1) {
       // 同名 cookie の重複はどれが正か決められない（注入の可能性）ため不確定扱い
@@ -981,6 +1060,72 @@ export function createClassroomLogin(
     return store.extendAfterSuccess(session.handle, session.subject, operation, result);
   }
 
+  /* -------------------- GIS popup code model ---------------- */
+
+  /**
+   * Google Identity Services の popup code model から受け取った code だけを交換する。
+   * - 入力は code のみ。redirect_uri は呼び出しページの origin（固定）を使う。
+   * - state/nonce は使わない（popup は公式の exact Origin + X-Requested-With で CSRF 防御）。
+   * - 既存 callback と同じ tokeninfo 全 claim 検証と GAS probe 許可を必須にする。
+   * - refresh token が無ければ LoginError('refresh_token_missing') を投げ、
+   *   呼び出し側が従来 GIS へ安全に戻せるようにする。
+   * 返却は { handle, subject } のみ（id_token / refresh token は返さない）。
+   */
+  async function exchangePopupCode(code) {
+    if (!config || !store) throw new ClassroomAuthUnavailableError();
+    if (!popupRedirect) throw new LoginError(503, 'popup_not_configured', true);
+
+    const value = typeof code === 'string' ? code : '';
+    if (
+      value === '' ||
+      value.length > MAX_AUTHORIZATION_CODE_LENGTH ||
+      /[\u0000-\u0020\u007f]/.test(value)
+    ) {
+      throw new LoginError(400, 'code_invalid');
+    }
+
+    const tokens = await exchangeAuthorizationCode(
+      config,
+      { code: value, redirectUri: popupRedirect },
+      fetchImpl,
+    );
+    const nowMs = now();
+    const claims = await verifyIdToken(config, tokens.idToken, fetchImpl, nowMs);
+    const payload = decodeJwtPayload(tokens.idToken);
+    if (!payload || String(payload.sub || '') !== claims.sub) {
+      throw new LoginError(401, 'sub_mismatch');
+    }
+    const nowSeconds = Math.floor(nowMs / 1000);
+    const idTokenExpiresAt = Number(payload.exp);
+    if (!Number.isFinite(idTokenExpiresAt) || idTokenExpiresAt <= nowSeconds) {
+      throw new LoginError(401, 'token_expired');
+    }
+
+    let permitted = false;
+    if (typeof authorize === 'function') {
+      try {
+        permitted =
+          (await authorize({ idToken: tokens.idToken, subject: claims.sub, email: claims.email })) === true;
+      } catch {
+        permitted = false;
+      }
+    }
+    if (!permitted) throw new LoginError(403, 'not_authorized');
+
+    const session = await issueClassroomSession({
+      db: config.db,
+      store,
+      key: await getAesKey(),
+      subject: claims.sub,
+      idToken: tokens.idToken,
+      refreshToken: tokens.refreshToken,
+      scope: tokens.scope,
+      idTokenExpiresAt,
+      nowSeconds,
+    });
+    return { handle: session.handle, subject: session.subject };
+  }
+
   /* ------------------------- handle ------------------------ */
 
   async function handle(request) {
@@ -1007,7 +1152,7 @@ export function createClassroomLogin(
     }
   }
 
-  return { handle, authenticate, extendAfterSuccess, isCurrent };
+  return { handle, authenticate, extendAfterSuccess, isCurrent, exchangePopupCode };
 }
 
 export default createClassroomLogin;

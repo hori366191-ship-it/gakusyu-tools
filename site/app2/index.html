@@ -1481,14 +1481,39 @@
       // TESTABLE-CLASSROOM-SESSION-END
 
       // ── 長期セッションの状態（context はメモリのみ・localStorage 等へ保存しない） ──
-      const csState = { enabled: false, module: null, probe: null, context: null, accountKey: '', mode: 'legacy', pendingActor: '' };
+      const csState = {
+        enabled: false, module: null, probe: null, context: null, accountKey: '', mode: 'legacy', pendingActor: '',
+        // 専用API（任意オプトイン）は既存のマーカー方式を置き換えない。有効と確認できた時だけ
+        // 生成・対訳create を gateway に切り替える（匿名trial・削除・通常印刷は従来のまま）。
+        apiMode: false, apiActive: false, apiModule: null
+      };
       const csDeleteAuth = { token: '', at: 0, sub: '' };
       let gisCredentialRoute = '';
       function csInit() {
         csState.module = csReadModule(window);
         csState.enabled = !!csState.module;
         csState.mode = csState.enabled ? 'denied' : 'legacy';
+        csInitApi();
         return csState.enabled;
+      }
+      /** 専用API: 「保持」を選んだ端末だけ、status→probe を確認してから gateway を使う。 */
+      function csInitApi() {
+        if (csState.enabled) return;
+        const api = window.GakusyuClassroomApi;
+        if (!api || api.published !== true || typeof api.activate !== 'function') return;
+        if (typeof api.hasOptIn !== 'function' || !api.hasOptIn()) return;
+        csState.apiModule = api;
+        api.activate('app2').then(function (r) {
+          if (!r || r.active !== true || r.session !== true || !r.context) {
+            csState.apiActive = false;
+            return;
+          }
+          csState.apiActive = true;
+          csState.context = r.context;
+          csState.mode = 'session';
+          csState.accountKey = csCurrentAccountKey();
+          return csPendingActorHash(r.context).then(function (h) { csState.pendingActor = h; });
+        }, function () { csState.apiActive = false; });
       }
       function csCurrentAccountKey() { return csAccountKey(T, getIdToken(), getDeviceId()); }
       function csCurrentSubject() {
@@ -1520,15 +1545,15 @@
       }
       /** 保留操作の actor。長期セッションでは context 由来の一方向ハッシュ（context自体は保存しない） */
       async function currentPendingActorHash() {
-        if (csState.enabled && csState.mode === 'session' && csState.pendingActor) return csState.pendingActor;
+        if (((csState.enabled && csState.mode === 'session') || csState.apiActive) && csState.pendingActor) return csState.pendingActor;
         return settingsHash({ a: T.actorKey(getIdToken(), getDeviceId()) });
       }
 
       /** 長期セッションの gateway 呼び出し（T.fetchJson 互換の結果だけ返す） */
       async function csMutateSession(kind, body, timeoutMs) {
-        const m = csState.module;
-        if (!m || !csState.enabled) throw new Error('教室セッションを利用できません。ページを再読み込みしてください。');
-        if (csCurrentAccountKey() !== csState.accountKey) {
+        const m = csState.module || csState.apiModule;
+        if (!m || (!csState.enabled && !csState.apiActive)) throw new Error('教室セッションを利用できません。ページを再読み込みしてください。');
+        if (!csState.apiActive && csCurrentAccountKey() !== csState.accountKey) {
           csResetSession();
           throw new Error('アカウントが切り替わったため実行できません。ページを再読み込みしてログインし直してください。');
         }
@@ -1546,6 +1571,7 @@
         return csNormalizeMutateResult(r);
       }
       function csModeNow() {
+        if (csState.apiActive && csState.mode === 'session') return 'session';
         if (!csState.enabled) return 'legacy';
         return csState.mode;
       }

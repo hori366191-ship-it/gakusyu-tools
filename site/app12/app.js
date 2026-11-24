@@ -39,7 +39,9 @@
   var LOGIN_LABEL = '教室用アカウントでログイン';
   function classroomSession() {
     var w = win();
-    var s = w && w.GakusyuClassroomSession;
+    // マーカー方式（教室Pages）を優先。公開Pagesでは「保持」を選び、statusで有効と
+    // 確認できた専用APIクライアントだけを使う（未オプトイン・期限切れは従来経路のまま）。
+    var s = (w && w.GakusyuClassroomSession) || (w && w.__GakusyuClassroomActive);
     if (!s || typeof s !== 'object') return null;
     if (typeof s.probe !== 'function' || typeof s.mutate !== 'function') return null;
     return s;
@@ -1291,6 +1293,10 @@
     }
 
     if (w && typeof w.addEventListener === 'function') w.addEventListener('resize', fitSheets);
+    if (w && typeof w.addEventListener === 'function') {
+      w.addEventListener('gakusyu-classroom-session-active', function () { updateClassroomVisibility(); });
+      w.addEventListener('gakusyu-classroom-session-inactive', function () { updateClassroomVisibility(); });
+    }
     if (T && typeof T.onAuthChange === 'function') T.onAuthChange(function () { updateClassroomVisibility(); });
     if (T && T.configure) T.configure({ origins: [WORKER_BASE] });
 

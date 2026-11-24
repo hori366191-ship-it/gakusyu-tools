@@ -321,7 +321,9 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
   var LOGIN_PATH = '/app9/';
   var LOGIN_LABEL = '教室用アカウントでログイン';
   function classroomSession() {
-    var s = window.GakusyuClassroomSession;
+    // マーカー方式（教室Pages）を優先。公開Pagesでは「保持」を選び status で有効と
+    // 確認できた専用APIクライアントだけを使う（未オプトイン・期限切れは従来経路のまま）。
+    var s = window.GakusyuClassroomSession || window.__GakusyuClassroomActive;
     if (!s || typeof s !== 'object') return null;
     if (typeof s.probe !== 'function' || typeof s.mutate !== 'function') return null;
     return s;
@@ -897,6 +899,8 @@ table.grid td { border: 0.25mm solid var(--line-color, #bcd0c6); padding: 0; }
     buildPdfName: buildPdfName
   };
   if (T) T.onAuthChange(function () { updateClassroomBtnVisibility(); });
+  window.addEventListener('gakusyu-classroom-session-active', function () { updateClassroomBtnVisibility(); });
+  window.addEventListener('gakusyu-classroom-session-inactive', function () { updateClassroomBtnVisibility(); });
 
   // 起動時に判定（旧 isGasEnv 表示は廃止）
   updateClassroomBtnVisibility();

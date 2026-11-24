@@ -1,9 +1,11 @@
 # 教室セッション（長期ログイン）設計・運用手順書
 
-状態: **Cloudflare Pages 本番配信済み（2026-11-25）**。専用 Pages の production bundle を配信し、
-`classroom.hori-shota.com` の CNAME を `gakusyu-classroom.pages.dev` へ向けている。
-公式 GET で production の exact origin と D1 binding、secret 5 件、preview 空を確認済み。
-**TLS 証明書・Google ログイン・実印刷/生成は未確認**（作業時点）。
+状態: **`classroom.hori-shota.com` は閉鎖済み（2026-11-25）**。専用 Pages の custom domain を解除し、
+Squarespace に追加した CNAME 1 件を削除済み（Google 系権威 4 台すべて NXDOMAIN、apex A/NS/MX 不変）。
+閉鎖前の production bundle 配信・exact origin/D1・secret 5 件・preview 空の確認は §15 に履歴として残す。
+**閉鎖前の専用ホスト HTTPS は復旧確認済み**（portal / app2 / app9 / app12 / shared JS が 200、app1 は
+公開 Pages へ 302、Google アカウント選択画面まで到達）。**未確認は Google サインイン完了・ログアウト・
+実印刷/生成**。過去の試験・既存 URL を保つ形での再検討は**未実装**。
 ビルド/デプロイ手順は第 15 章を正とする（Workers custom domain は過去手順）。
 
 対象（`site-worker/`）:
@@ -210,7 +212,8 @@ preview 環境へは投入しない。`<NAME>` は第 15 章の表と同じ。
 **「動作確認済み」と言えるのは Node テストと Chromium 確認まで**。`wrangler dev` も remote も
 Cloudflare への設定・デプロイも未実施（当時の記録）。
 
-> 現状（2026-11-25）は Pages 本番配信済み。TLS・Google ログイン・実印刷/生成は未確認（冒頭と第 15 章）。
+> 現状（2026-11-25）は Pages 本番配信ののち**閉鎖済み**。閉鎖前の HTTPS 復旧と任意閲覧は確認済みで、
+> 未確認は Google サインイン完了・ログアウト・実印刷/生成（冒頭と第 15 章）。
 
 > 注意: 以下は Workers custom domain 時代の記録。公開面は Pages Functions へ切替済みで、
 > 現行手順は第 15 章（P4 / 手順 6 は「過去手順」として読む）。
@@ -225,7 +228,7 @@ Cloudflare への設定・デプロイも未実施（当時の記録）。
 | P3 Pages | マーカー切替コードの配信（URL 不変。マーカー無しは従来 UI） | コード実装済み・配信は手順5 |
 | P4 Worker | 新 Worker の限定公開（既存 legacy Worker とは別デプロイ） | **未実施（手順6・過去手順）** |
 | P4' Pages | Pages project へ build/deploy（`build-classroom-pages.mjs`）→ custom domain → DNS CNAME | **実施済み（2026-11-25）** |
-| P5 cron | `gakusyu-classroom-maintenance`（Web 入口なし・D1 のみ） | **実施済み（日次 cron）。Web/TLS/ログインは未確認** |
+| P5 cron | `gakusyu-classroom-maintenance`（Web 入口なし・D1 のみ） | **稼働確認済み（日次 cron）。Web 入口なしは仕様で TLS 不要** |
 
 本番手順:
 
@@ -316,15 +319,21 @@ Cloudflare への設定・デプロイも未実施（当時の記録）。
 custom domain を「Workers」として持つ方式をやめ、**Pages の custom domain を外部DNS CNAME で指す**。
 既存 GitHub Pages・legacy Worker（`worker.js` / `wrangler.toml`）・GAS・OAuth 本体は変更しない。
 
-現状（2026-11-25 時点）:
+現状（2026-11-25 時点・**閉鎖済み**）:
 
-- 専用 Pages（`gakusyu-classroom`）の **production bundle を配信**。公式 GET で production の
-  exact origin（`CLASSROOM_ORIGIN`）と D1 binding（`CLASSROOM_DB`）、**secret 5 件**、**preview 空**を確認。
-- `*.pages.dev` と production の deployment alias は **404（`Set-Cookie` なし）**。
-- メンテ Worker（`gakusyu-classroom-maintenance`）は日次 cron で稼働（public host / preview 無効）。
-- Squarespace の権威 DNS に **`classroom` の CNAME → `gakusyu-classroom.pages.dev` を 1 件だけ追加**。
-  権威 DNS / Google / Cloudflare の解決が一致し、既存 apex の A / NS / MX は不変。
-- **未確認**: TLS 証明書の発行完了、Google ログイン、実印刷/生成（作業時点では未確認）。
+- 専用 Pages（`gakusyu-classroom`）の **custom domain を解除**。公式 GET の一覧は空、個別は 404。
+  外部 HTTPS で `classroom.hori-shota.com` は名前解決不可（Google 系権威 4 台すべて NXDOMAIN）。
+- Squarespace に追加した **`classroom` の CNAME 1 件だけを削除**。既存 apex の A / NS / MX は不変。
+- `*.pages.dev` の既定ホストは **404（`Set-Cookie` なし）**。
+- 既存 GitHub Pages（ポータル / `app2` / `app12`）は **HTTP 200・長期ログインマーカーなし**。
+  閉鎖前の専用ホストも HTTPS で復旧し、portal / app2 / app9 / app12 / shared JS が **200**、
+  `app1` は公開 Pages へ **302**、Google アカウント選択画面まで到達（親で確認）。
+- 既存 GAS デプロイ・GitHub Pages・旧 Worker・OAuth 設定・D1 / secret / cron は**変更していない**。
+- 閉鎖前の履歴: production bundle を配信し、公式 GET で production の exact origin（`CLASSROOM_ORIGIN`）と
+  D1 binding（`CLASSROOM_DB`）、secret 5 件、preview 空を確認。メンテ Worker は日次 cron で稼働確認済み
+  （**Web 入口なしは仕様で TLS 不要**。public host / preview 無効）。
+- **未確認のまま終了**: Google サインイン完了・ログアウト・実印刷/生成。
+- **未実装**: 過去の試験・既存 URL を保つ形での再検討（閉鎖の代替案は未着手）。
 
 ### 15.1 配布物（ソース複製なし・単一 `_worker.js`）
 
