@@ -716,6 +716,24 @@
       function persistUsable() {
         return !!(CS_API && CS_API.published && typeof CS_API.popupLogin === 'function');
       }
+      // 失敗理由は既知のコードだけを短い日本語へ写像する（生値・URL・credentialは出さない）
+      function persistFailureReason(res) {
+        var err = res && res.error;
+        var fallback = res && res.fallback;
+        if (err === 'unsupported') return 'この端末は非対応です';
+        if (fallback === 'legacy_gis' || err === 'refresh_token_missing') {
+          return 'この端末では登録できません。いつものログインはそのまま使えます';
+        }
+        if (err === 'auth_unavailable' || err === 'session_store_unavailable' || err === 'internal_error') {
+          return 'サーバーが混み合っています。時間をおいて再試行してください';
+        }
+        if (err === 'duplicate_session_cookie' || err === 'content_type_must_be_json' ||
+          err === 'bad_request' || err === 'payload_too_large') {
+          return '設定の確認が必要です';
+        }
+        if (err === 'not_active') return '保持を確認できませんでした';
+        return '通信または設定の確認が必要です';
+      }
       function appendPersistControl() {
         if (!persistUsable()) return;
         var wrap = makeEl('span', 'classroom-persist', '');
@@ -756,7 +774,7 @@
           wrap.appendChild(off);
         } else if (CS_API.hasOptIn && CS_API.hasOptIn()) {
           // 事前 status が noauth/期限切れ: いつもの GIS ログインはそのまま使える（保持だけ解除できる）
-          wrap.appendChild(makeEl('span', '', '保持の期限が切れています'));
+          wrap.appendChild(makeEl('span', '', '保持の期限が切れています（いつものログインはそのまま使えます）'));
           var clear = makeEl('button', 'auth-banner__btn', '保持を解除');
           clear.type = 'button';
           clear.addEventListener('click', function () {
@@ -768,9 +786,9 @@
           });
           wrap.appendChild(clear);
         } else {
-          var keep = makeEl('button', 'auth-banner__btn', 'この端末でログインを保持');
+          var keep = makeEl('button', 'auth-banner__btn', 'この端末を教室タブレットとして保持');
           keep.type = 'button';
-          keep.title = '共用端末では使わないでください。教室の印刷と英語長文の生成だけを長く保持します（通常の閲覧・印刷は変わりません）。';
+          keep.title = '教室の共用タブレット専用です。個人の端末では登録しないでください。教室の印刷と英語長文の生成だけを長く保持します。';
           keep.addEventListener('click', function () {
             if (persistBusy) return;
             persistBusy = true;
@@ -781,25 +799,19 @@
               persistChecked = true;
               persistActive = !!(res && res.ok && (res.active === true || res.authenticated === true));
               if (!persistActive) {
-                if (res && res.error === 'unsupported') {
-                  persistMessage = 'この端末では保持を利用できません';
-                } else if (res && (res.fallback === 'legacy_gis' || res.error === 'refresh_token_missing')) {
-                  // サーバが従来GISへ戻る印を返した場合も、自動送信はせず案内だけ出す
-                  persistMessage = 'この端末では保持できませんでした。いつものGoogleログインをそのまま使えます';
-                } else {
-                  persistMessage = '保持できませんでした。いつものログインはそのまま使えます';
-                }
+                // 既知コードだけを短い理由へ写像（生値は表示しない）
+                persistMessage = '保持できませんでした。' + persistFailureReason(res);
               }
               renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
             }, function () {
               persistBusy = false;
               persistChecked = true;
-              persistMessage = '保持できませんでした。いつものログインはそのまま使えます';
+              persistMessage = '保持できませんでした。通信または設定の確認が必要です';
               renderOk(lastOk ? lastOk.isOwner : false, lastOk ? lastOk.pdfOk : undefined);
             });
           });
           wrap.appendChild(keep);
-          wrap.appendChild(makeEl('span', 'classroom-persist__note', '共用端末では使わないでください'));
+          wrap.appendChild(makeEl('span', 'classroom-persist__note', '教室の共用タブレット専用です。個人の端末では登録しないでください。'));
         }
         if (persistMessage) wrap.appendChild(makeEl('span', 'classroom-persist__note', persistMessage));
         banner.appendChild(wrap);
