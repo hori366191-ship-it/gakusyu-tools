@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>不規則動詞 一覧（A4横・印刷用）｜design-lab</title>
+<meta name="description" content="中学校英語の不規則動詞102語（基本74・発展28）を、A4横2ページに2列で並べた参照用プリント。">
+<!-- 自己完結のfavicon（外部参照なし・/favicon.ico の404回避） -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23222'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='sans-serif' font-size='15' font-weight='700' fill='%23fff'%3EIV%3C/text%3E%3C/svg%3E">
+<!--
+  ============================================================
+  不規則動詞 一覧プリント（試作・design-lab）
+  配置: design-lab/irregular-verbs/index.html （Pages配信外）
+  自己完結: 外部CDN・外部フォント・外部画像を読み込まない。
+
+  データ源: docs/english-irregular-verbs.md
+    「3. 基本 74語」の表（74行）
+    「4. 発展 28語」の表（28行）
+  を原形・過去形・過去分詞・意味・型の5列のまま転記し、
+  末尾に lv（1=基本 / 2=発展）だけを付与している。
+  カタカナ発音（PRON）は別途与えられた目安表をそのまま転記したもので、
+  DATA の b（原形）をキーにしている。
+
+  紙面: A4横（297×210mm）・1ページ2列・全2ページ。
+    列内は table 1つ（thead は1回だけ）に tbody を並べ、
+    型グループは tbody 先頭の colspan 見出し行（グレー帯）で示す。
+  通し番号: 表示順に 1〜102（# 列。基本1〜74 / 発展75〜102）。
+  発音: 原形・過去形・過去分詞の各セル右端にカタカナ（6.75pt・目安）を右揃えで添える。
+
+  ▼ 再生成・更新時の注意
+  1. Markdown の表の内容（綴り・「/」併記・意味の「／」区切り・型）は改変しない。
+     表の行をそのまま貼り替え、lv を 1/2 で振り直す。
+  2. 型が「A-B-B / A-B-C」のように複数ある語（get）は、
+     先頭の型（A-B-B）をグループ分けに使い、表示は原資料の表記のまま。
+  3. be / do / have の原形は原資料どおり括弧付き（be (am/is/are) 等）で保持する。
+  4. PRON のキーは DATA の b と完全一致させる（語を足したら発音も足す）。
+  5. 組版はA4横（297×210mm）・2列・2ページ固定。左列→右列→次ページの順に流し込み、
+     収まらない場合は STEPS の文字サイズ・行間・余白を段階的に詰めて再構築する
+     （大きい順に試し、収まる最大の段階を採用）。
+  ============================================================
+-->
+<style>
+  :root{
+    --ink:#000;
+    --paper:#fff;
+    --font-gothic:"Yu Gothic","YuGothic","Hiragino Kaku Gothic ProN","Hiragino Sans","Meiryo",sans-serif;
+    /* 組版（JSが STEPS で上書きする。ここは初期値） */
+    --fs-form:8pt;
+    --fs-pron:6pt;
+    --fs-mean:7.5pt;
+    --fs-title:7.6pt;
+    --pad-v:0.7mm;
+    --title-pad:0.55mm;
+    --lh:1.2;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:#e9e9e9;
+    color:#1a1a1a;
+    font-family:var(--font-gothic);
+    overflow-x:hidden;
+  }
+  .sr-only{
+    position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+  }
+
+  /* ---------- ツールバー（印刷時は非表示） ---------- */
+  .toolbar{
+    position:static;
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;
+    padding:10px 16px;
+    background:#fff;
+    border-bottom:1px solid #c9c9c9;
+    font-size:13px;
+    line-height:1.5;
+  }
+  .toolbar__title{font-weight:700;font-size:14px;margin:0}
+  .toolbar__note{margin:0;color:#5a5a5a;font-size:12px}
+  .toolbar__count{margin:0;color:#3a3a3a;font-size:12px;font-variant-numeric:tabular-nums}
+  .toolbar__spacer{margin-left:auto}
+  .btn-print{
+    font-family:inherit;font-size:13px;font-weight:700;
+    padding:7px 18px;
+    color:#fff;background:#222;
+    border:1px solid #222;border-radius:3px;
+    cursor:pointer;
+  }
+  .btn-print:hover{background:#000}
+  .btn-print:focus-visible{outline:3px solid #4a90d9;outline-offset:2px}
+
+  /* ---------- 紙面（A4横 297×210mm） ---------- */
+  .doc{
+    display:flex;flex-direction:column;align-items:center;
+    gap:24px;
+    padding:24px 0 48px;
+  }
+  .sheet{
+    width:297mm;
+    height:210mm;
+    flex:0 0 auto;
+    display:flex;flex-direction:column;
+    padding:9mm 10mm 7mm;
+    background:var(--paper);
+    color:var(--ink);
+    box-shadow:0 2px 14px rgba(0,0,0,.18);
+    font-size:var(--fs-form);
+    line-height:1.2;
+    overflow:hidden;
+  }
+  .sheet__head{
+    flex:0 0 auto;
+    display:flex;align-items:baseline;justify-content:space-between;gap:8mm;
+    padding-bottom:1.4mm;
+    border-bottom:0.4mm solid var(--ink);
+  }
+  .sheet__brand{margin:0;font-size:9.5pt;font-weight:700;letter-spacing:.08em}
+  .sheet__level{margin:0;font-size:9pt;font-weight:700;letter-spacing:.1em}
+  .sheet__legend{
+    flex:0 0 auto;
+    margin:0;
+    padding-top:1.1mm;
+    font-size:6.5pt;
+    line-height:1.4;
+    letter-spacing:0;
+    color:#222;
+  }
+  .sheet__legend:empty{display:none}
+  .sheet__cols{
+    flex:1 1 auto;min-height:0;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr); /* JSが列数に合わせて上書き */
+    column-gap:3.5mm;
+    padding-top:1.6mm;
+  }
+  .col{min-width:0;min-height:0;overflow:hidden}
+  .sheet__foot{
+    flex:0 0 auto;
+    display:flex;justify-content:space-between;gap:6mm;
+    padding-top:1.1mm;
+    border-top:0.2mm solid #8a8a8a;
+    font-size:6.6pt;
+    color:#222;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- 表 ---------- */
+  .tbl{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+    font-size:var(--fs-form);
+    line-height:var(--lh);
+  }
+  .tbl th,.tbl td{
+    border:0.15mm solid var(--ink);
+    padding:var(--pad-v) 0.6mm;
+    text-align:left;
+    vertical-align:top;
+  }
+  .tbl thead th{
+    background:#e6e6e6;
+    font-size:calc(var(--fs-form) - 0.7pt);
+    font-weight:700;
+    letter-spacing:.04em;
+    padding:0.5mm 1.1mm;
+    white-space:nowrap;
+    vertical-align:middle;
+  }
+  /* 型グループ見出し行 */
+  .tbl tr.grp > th{
+    background:#e6e6e6;
+    border-left:1mm solid var(--ink);
+    font-size:var(--fs-title);
+    font-weight:700;
+    letter-spacing:.02em;
+    padding:var(--title-pad) 1.2mm;
+  }
+  .tbl tbody tr:not(.grp):nth-of-type(even){background:#f7f7f7}
+  .grp-count{font-weight:400;font-size:calc(var(--fs-title) - 0.6pt)}
+
+  /* 通し番号 */
+  .no{
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+    font-size:calc(var(--fs-form) - 1.5pt);
+    color:#333;
+    padding-right:1.3mm !important;
+    padding-left:0.4mm !important;
+  }
+
+  /* 変化形セル（語のすぐ下にカタカナ発音を右揃えで縦積み。語は折返し可） */
+  .cell{display:block}
+  .word{display:block;white-space:normal;overflow-wrap:break-word;word-break:normal}
+  .pron{
+    display:block;
+    white-space:nowrap;
+    text-align:right;
+    font-size:var(--fs-pron);
+    color:#222;
+    line-height:1.15;
+  }
+  .tbl td,.tbl th{padding-top:calc(var(--pad-v) - 0.15mm);padding-bottom:calc(var(--pad-v) - 0.15mm)}
+  .mean{
+    white-space:normal;
+    word-break:break-word;
+    font-size:var(--fs-mean);
+    line-height:1.25;
+  }
+
+  /* ---------- 実測用・画面幅 ---------- */
+  #pageProbe{position:absolute;top:0;left:-10000px;width:297mm;height:1px}
+  .measure{
+    position:absolute;top:0;left:-10000px;
+    visibility:hidden;pointer-events:none;
+    font-size:var(--fs-form);
+    line-height:var(--lh);
+  }
+
+  /* ---------- 印刷（A4横） ---------- */
+  @media print{
+    @page{size:A4 landscape;margin:0}
+    html,body{background:#fff}
+    body{overflow:visible}
+    .toolbar{display:none !important}
+    .doc{
+      display:block;
+      padding:0;
+      gap:0;
+      zoom:1 !important;
+    }
+    .sheet{
+      box-shadow:none !important;
+      margin:0;
+      width:297mm;
+      height:210mm;
+      break-inside:avoid;
+      break-after:page;
+      page-break-after:always;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+    .sheet:last-child{break-after:auto;page-break-after:auto}
+    #pageProbe,.measure{display:none !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <h1 class="toolbar__title">不規則動詞 一覧</h1>
+  <p class="toolbar__note">A4横・2ページ（1ページ2列・自動流し込み）</p>
+  <p class="toolbar__count">全102語（基本74・発展28）</p>
+  <span class="toolbar__spacer"></span>
+  <button type="button" class="btn-print" id="btnPrint" aria-label="この不規則動詞一覧を印刷する">印刷する</button>
+</div>
+
+<div id="pageProbe" aria-hidden="true"></div>
+<div class="measure" id="measure" aria-hidden="true"></div>
+
+<main class="doc" id="doc"></main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =========================================================
+     データ（docs/english-irregular-verbs.md から転記・改変禁止）
+     lv: 1 = 基本（74語）, 2 = 発展（28語）
+     ========================================================= */
+  var DATA = [
+    /* ---- 基本 74語 ---- */
+    { b: "be (am/is/are)", p: "was, were", pp: "been", m: "～である、いる", t: "その他", lv: 1 },
+    { b: "become", p: "became", pp: "become", m: "～になる", t: "A-B-A", lv: 1 },
+    { b: "begin", p: "began", pp: "begun", m: "始める", t: "A-B-C", lv: 1 },
+    { b: "break", p: "broke", pp: "broken", m: "壊す", t: "A-B-C", lv: 1 },
+    { b: "bring", p: "brought", pp: "brought", m: "持ってくる", t: "A-B-B", lv: 1 },
+    { b: "build", p: "built", pp: "built", m: "建てる", t: "A-B-B", lv: 1 },
+    { b: "buy", p: "bought", pp: "bought", m: "買う", t: "A-B-B", lv: 1 },
+    { b: "catch", p: "caught", pp: "caught", m: "捕まえる", t: "A-B-B", lv: 1 },
+    { b: "choose", p: "chose", pp: "chosen", m: "選ぶ", t: "A-B-C", lv: 1 },
+    { b: "come", p: "came", pp: "come", m: "来る", t: "A-B-A", lv: 1 },
+    { b: "cost", p: "cost", pp: "cost", m: "費用がかかる", t: "A-A-A", lv: 1 },
+    { b: "cut", p: "cut", pp: "cut", m: "切る", t: "A-A-A", lv: 1 },
+    { b: "do (does)", p: "did", pp: "done", m: "する", t: "A-B-C", lv: 1 },
+    { b: "draw", p: "drew", pp: "drawn", m: "描く", t: "A-B-C", lv: 1 },
+    { b: "drink", p: "drank", pp: "drunk", m: "飲む", t: "A-B-C", lv: 1 },
+    { b: "drive", p: "drove", pp: "driven", m: "運転する", t: "A-B-C", lv: 1 },
+    { b: "eat", p: "ate", pp: "eaten", m: "食べる", t: "A-B-C", lv: 1 },
+    { b: "fall", p: "fell", pp: "fallen", m: "落ちる", t: "A-B-C", lv: 1 },
+    { b: "feel", p: "felt", pp: "felt", m: "感じる", t: "A-B-B", lv: 1 },
+    { b: "fight", p: "fought", pp: "fought", m: "戦う", t: "A-B-B", lv: 1 },
+    { b: "find", p: "found", pp: "found", m: "見つける", t: "A-B-B", lv: 1 },
+    { b: "fly", p: "flew", pp: "flown", m: "飛ぶ", t: "A-B-C", lv: 1 },
+    { b: "forget", p: "forgot", pp: "forgotten", m: "忘れる", t: "A-B-C", lv: 1 },
+    { b: "get", p: "got", pp: "got / gotten", m: "手に入れる", t: "A-B-B / A-B-C", lv: 1 },
+    { b: "give", p: "gave", pp: "given", m: "与える", t: "A-B-C", lv: 1 },
+    { b: "go", p: "went", pp: "gone", m: "行く", t: "A-B-C", lv: 1 },
+    { b: "grow", p: "grew", pp: "grown", m: "育つ", t: "A-B-C", lv: 1 },
+    { b: "have (has)", p: "had", pp: "had", m: "持っている", t: "A-B-B", lv: 1 },
+    { b: "hear", p: "heard", pp: "heard", m: "聞こえる", t: "A-B-B", lv: 1 },
+    { b: "hide", p: "hid", pp: "hidden", m: "隠す", t: "A-B-C", lv: 1 },
+    { b: "hit", p: "hit", pp: "hit", m: "打つ", t: "A-A-A", lv: 1 },
+    { b: "hold", p: "held", pp: "held", m: "持つ", t: "A-B-B", lv: 1 },
+    { b: "hurt", p: "hurt", pp: "hurt", m: "傷つける", t: "A-A-A", lv: 1 },
+    { b: "keep", p: "kept", pp: "kept", m: "保つ", t: "A-B-B", lv: 1 },
+    { b: "know", p: "knew", pp: "known", m: "知っている", t: "A-B-C", lv: 1 },
+    { b: "leave", p: "left", pp: "left", m: "去る", t: "A-B-B", lv: 1 },
+    { b: "lend", p: "lent", pp: "lent", m: "貸す", t: "A-B-B", lv: 1 },
+    { b: "let", p: "let", pp: "let", m: "させる", t: "A-A-A", lv: 1 },
+    { b: "lose", p: "lost", pp: "lost", m: "失う", t: "A-B-B", lv: 1 },
+    { b: "make", p: "made", pp: "made", m: "作る", t: "A-B-B", lv: 1 },
+    { b: "mean", p: "meant", pp: "meant", m: "意味する", t: "A-B-B", lv: 1 },
+    { b: "meet", p: "met", pp: "met", m: "会う", t: "A-B-B", lv: 1 },
+    { b: "pay", p: "paid", pp: "paid", m: "払う", t: "A-B-B", lv: 1 },
+    { b: "put", p: "put", pp: "put", m: "置く", t: "A-A-A", lv: 1 },
+    { b: "read", p: "read", pp: "read", m: "読む", t: "A-A-A", lv: 1 },
+    { b: "ride", p: "rode", pp: "ridden", m: "乗る", t: "A-B-C", lv: 1 },
+    { b: "ring", p: "rang", pp: "rung", m: "鳴る", t: "A-B-C", lv: 1 },
+    { b: "rise", p: "rose", pp: "risen", m: "上がる", t: "A-B-C", lv: 1 },
+    { b: "run", p: "ran", pp: "run", m: "走る", t: "A-B-A", lv: 1 },
+    { b: "say", p: "said", pp: "said", m: "言う", t: "A-B-B", lv: 1 },
+    { b: "see", p: "saw", pp: "seen", m: "見る", t: "A-B-C", lv: 1 },
+    { b: "sell", p: "sold", pp: "sold", m: "売る", t: "A-B-B", lv: 1 },
+    { b: "send", p: "sent", pp: "sent", m: "送る", t: "A-B-B", lv: 1 },
+    { b: "set", p: "set", pp: "set", m: "設置する", t: "A-A-A", lv: 1 },
+    { b: "shine", p: "shone / shined", pp: "shone / shined", m: "輝く／磨く", t: "A-B-B", lv: 1 },
+    { b: "show", p: "showed", pp: "shown / showed", m: "見せる", t: "A-B-C", lv: 1 },
+    { b: "sing", p: "sang", pp: "sung", m: "歌う", t: "A-B-C", lv: 1 },
+    { b: "sit", p: "sat", pp: "sat", m: "座る", t: "A-B-B", lv: 1 },
+    { b: "sleep", p: "slept", pp: "slept", m: "眠る", t: "A-B-B", lv: 1 },
+    { b: "speak", p: "spoke", pp: "spoken", m: "話す", t: "A-B-C", lv: 1 },
+    { b: "spend", p: "spent", pp: "spent", m: "使う", t: "A-B-B", lv: 1 },
+    { b: "stand", p: "stood", pp: "stood", m: "立つ", t: "A-B-B", lv: 1 },
+    { b: "steal", p: "stole", pp: "stolen", m: "盗む", t: "A-B-C", lv: 1 },
+    { b: "swim", p: "swam", pp: "swum", m: "泳ぐ", t: "A-B-C", lv: 1 },
+    { b: "take", p: "took", pp: "taken", m: "取る", t: "A-B-C", lv: 1 },
+    { b: "teach", p: "taught", pp: "taught", m: "教える", t: "A-B-B", lv: 1 },
+    { b: "tell", p: "told", pp: "told", m: "話す", t: "A-B-B", lv: 1 },
+    { b: "think", p: "thought", pp: "thought", m: "考える", t: "A-B-B", lv: 1 },
+    { b: "throw", p: "threw", pp: "thrown", m: "投げる", t: "A-B-C", lv: 1 },
+    { b: "understand", p: "understood", pp: "understood", m: "理解する", t: "A-B-B", lv: 1 },
+    { b: "wake", p: "woke", pp: "woken", m: "目を覚ます", t: "A-B-C", lv: 1 },
+    { b: "wear", p: "wore", pp: "worn", m: "着る", t: "A-B-C", lv: 1 },
+    { b: "win", p: "won", pp: "won", m: "勝つ", t: "A-B-B", lv: 1 },
+    { b: "write", p: "wrote", pp: "written", m: "書く", t: "A-B-C", lv: 1 },
+
+    /* ---- 発展 28語 ---- */
+    { b: "beat", p: "beat", pp: "beaten", m: "打ち負かす", t: "A-A-B", lv: 2 },
+    { b: "bite", p: "bit", pp: "bitten", m: "かむ", t: "A-B-C", lv: 2 },
+    { b: "blow", p: "blew", pp: "blown", m: "吹く", t: "A-B-C", lv: 2 },
+    { b: "burn", p: "burned / burnt", pp: "burned / burnt", m: "燃える／燃やす", t: "A-B-B", lv: 2 },
+    { b: "burst", p: "burst", pp: "burst", m: "破裂する", t: "A-A-A", lv: 2 },
+    { b: "deal", p: "dealt", pp: "dealt", m: "扱う", t: "A-B-B", lv: 2 },
+    { b: "dig", p: "dug", pp: "dug", m: "掘る", t: "A-B-B", lv: 2 },
+    { b: "dream", p: "dreamed / dreamt", pp: "dreamed / dreamt", m: "夢を見る", t: "A-B-B", lv: 2 },
+    { b: "feed", p: "fed", pp: "fed", m: "餌をやる", t: "A-B-B", lv: 2 },
+    { b: "freeze", p: "froze", pp: "frozen", m: "凍る", t: "A-B-C", lv: 2 },
+    { b: "hang", p: "hung / hanged", pp: "hung / hanged", m: "掛ける／絞首刑にする", t: "A-B-B", lv: 2 },
+    { b: "lay", p: "laid", pp: "laid", m: "横たえる", t: "A-B-B", lv: 2 },
+    { b: "lead", p: "led", pp: "led", m: "導く", t: "A-B-B", lv: 2 },
+    { b: "learn", p: "learned / learnt", pp: "learned / learnt", m: "学ぶ", t: "A-B-B", lv: 2 },
+    { b: "lie", p: "lay", pp: "lain", m: "横になる", t: "A-B-C", lv: 2 },
+    { b: "light", p: "lit / lighted", pp: "lit / lighted", m: "火をつける", t: "A-B-B", lv: 2 },
+    { b: "mistake", p: "mistook", pp: "mistaken", m: "間違える", t: "A-B-C", lv: 2 },
+    { b: "quit", p: "quit", pp: "quit", m: "やめる", t: "A-A-A", lv: 2 },
+    { b: "shake", p: "shook", pp: "shaken", m: "振る", t: "A-B-C", lv: 2 },
+    { b: "shoot", p: "shot", pp: "shot", m: "撃つ", t: "A-B-B", lv: 2 },
+    { b: "shut", p: "shut", pp: "shut", m: "閉める", t: "A-A-A", lv: 2 },
+    { b: "sink", p: "sank", pp: "sunk", m: "沈む", t: "A-B-C", lv: 2 },
+    { b: "smell", p: "smelled / smelt", pp: "smelled / smelt", m: "においがする／においをかぐ", t: "A-B-B", lv: 2 },
+    { b: "spell", p: "spelled / spelt", pp: "spelled / spelt", m: "つづる", t: "A-B-B", lv: 2 },
+    { b: "spread", p: "spread", pp: "spread", m: "広げる", t: "A-A-A", lv: 2 },
+    { b: "strike", p: "struck", pp: "struck", m: "打つ", t: "A-B-B", lv: 2 },
+    { b: "sweep", p: "swept", pp: "swept", m: "掃く", t: "A-B-B", lv: 2 },
+    { b: "tear", p: "tore", pp: "torn", m: "裂く", t: "A-B-C", lv: 2 }
+  ];
+
+  /* =========================================================
+     カタカナ発音（目安）。キーは DATA の b と完全一致。
+     値は [原形, 過去形, 過去分詞]。
+     ========================================================= */
+  var PRON = {
+    "be (am/is/are)": ["ビー", "ワズ, ワー", "ビーン"],
+    "become": ["ビカム", "ビケイム", "ビカム"],
+    "begin": ["ビギン", "ビギャン", "ビガン"],
+    "break": ["ブレイク", "ブロウク", "ブロウクン"],
+    "bring": ["ブリング", "ブロート", "ブロート"],
+    "build": ["ビルド", "ビルト", "ビルト"],
+    "buy": ["バイ", "ボート", "ボート"],
+    "catch": ["キャッチ", "コート", "コート"],
+    "choose": ["チューズ", "チョウズ", "チョウズン"],
+    "come": ["カム", "ケイム", "カム"],
+    "cost": ["コスト", "コスト", "コスト"],
+    "cut": ["カット", "カット", "カット"],
+    "do (does)": ["ドゥー", "ディドゥ", "ダン"],
+    "draw": ["ドロー", "ドルー", "ドローン"],
+    "drink": ["ドリンク", "ドランク", "ドランク"],
+    "drive": ["ドライブ", "ドロウブ", "ドリブン"],
+    "eat": ["イート", "エイト", "イートゥン"],
+    "fall": ["フォール", "フェル", "フォールン"],
+    "feel": ["フィール", "フェルト", "フェルト"],
+    "fight": ["ファイト", "フォート", "フォート"],
+    "find": ["ファインド", "ファウンド", "ファウンド"],
+    "fly": ["フライ", "フルー", "フロウン"],
+    "forget": ["フォーゲット", "フォーガット", "フォーガットゥン"],
+    "get": ["ゲット", "ガット", "ガット"],
+    "give": ["ギブ", "ゲイブ", "ギブン"],
+    "go": ["ゴー", "ウェント", "ゴーン"],
+    "grow": ["グロウ", "グルー", "グロウン"],
+    "have (has)": ["ハブ", "ハッド", "ハッド"],
+    "hear": ["ヒア", "ハード", "ハード"],
+    "hide": ["ハイド", "ヒドゥ", "ヒドゥン"],
+    "hit": ["ヒット", "ヒット", "ヒット"],
+    "hold": ["ホールド", "ヘルド", "ヘルド"],
+    "hurt": ["ハート", "ハート", "ハート"],
+    "keep": ["キープ", "ケプト", "ケプト"],
+    "know": ["ノウ", "ニュー", "ノウン"],
+    "leave": ["リーブ", "レフト", "レフト"],
+    "lend": ["レンド", "レント", "レント"],
+    "let": ["レット", "レット", "レット"],
+    "lose": ["ルーズ", "ロスト", "ロスト"],
+    "make": ["メイク", "メイド", "メイド"],
+    "mean": ["ミーン", "メント", "メント"],
+    "meet": ["ミート", "メット", "メット"],
+    "pay": ["ペイ", "ペイド", "ペイド"],
+    "put": ["プット", "プット", "プット"],
+    "read": ["リード", "レッド", "レッド"],
+    "ride": ["ライド", "ロウド", "リドゥン"],
+    "ring": ["リング", "ラング", "ラング"],
+    "rise": ["ライズ", "ロウズ", "リズン"],
+    "run": ["ラン", "ラン", "ラン"],
+    "say": ["セイ", "セド", "セド"],
+    "see": ["シー", "ソー", "シーン"],
+    "sell": ["セル", "ソールド", "ソールド"],
+    "send": ["センド", "セント", "セント"],
+    "set": ["セット", "セット", "セット"],
+    "shine": ["シャイン", "ショウン", "ショウン"],
+    "show": ["ショウ", "ショウド", "ショウン"],
+    "sing": ["シング", "サング", "サング"],
+    "sit": ["シット", "サット", "サット"],
+    "sleep": ["スリープ", "スレプト", "スレプト"],
+    "speak": ["スピーク", "スポウク", "スポウクン"],
+    "spend": ["スペンド", "スペント", "スペント"],
+    "stand": ["スタンド", "ストゥッド", "ストゥッド"],
+    "steal": ["スティール", "ストウル", "ストウルン"],
+    "swim": ["スイム", "スワム", "スワム"],
+    "take": ["テイク", "トゥック", "テイクン"],
+    "teach": ["ティーチ", "トート", "トート"],
+    "tell": ["テル", "トールド", "トールド"],
+    "think": ["シンク", "ソート", "ソート"],
+    "throw": ["スロウ", "スルー", "スロウン"],
+    "understand": ["アンダスタンド", "アンダストゥッド", "アンダストゥッド"],
+    "wake": ["ウェイク", "ウォウク", "ウォウクン"],
+    "wear": ["ウェア", "ウォア", "ウォーン"],
+    "win": ["ウィン", "ワン", "ワン"],
+    "write": ["ライト", "ロウト", "リトゥン"],
+    "beat": ["ビート", "ビート", "ビートゥン"],
+    "bite": ["バイト", "ビット", "ビットゥン"],
+    "blow": ["ブロウ", "ブルー", "ブロウン"],
+    "burn": ["バーン", "バーンド", "バーント"],
+    "burst": ["バースト", "バースト", "バースト"],
+    "deal": ["ディール", "デルト", "デルト"],
+    "dig": ["ディグ", "ダグ", "ダグ"],
+    "dream": ["ドリーム", "ドリームド", "ドリームト"],
+    "feed": ["フィード", "フェド", "フェド"],
+    "freeze": ["フリーズ", "フロウズ", "フロウズン"],
+    "hang": ["ハング", "ハング", "ハング"],
+    "lay": ["レイ", "レイド", "レイド"],
+    "lead": ["リード", "レッド", "レッド"],
+    "learn": ["ラーン", "ラーンド", "ラーント"],
+    "lie": ["ライ", "レイ", "レイン"],
+    "light": ["ライト", "リット", "リット"],
+    "mistake": ["ミステイク", "ミストゥック", "ミステイクン"],
+    "quit": ["クイット", "クイット", "クイット"],
+    "shake": ["シェイク", "シュック", "シェイクン"],
+    "shoot": ["シュート", "ショット", "ショット"],
+    "shut": ["シャット", "シャット", "シャット"],
+    "sink": ["シンク", "サンク", "サンク"],
+    "smell": ["スメル", "スメルド", "スメルト"],
+    "spell": ["スペル", "スペルド", "スペルト"],
+    "spread": ["スプレッド", "スプレッド", "スプレッド"],
+    "strike": ["ストライク", "ストゥラック", "ストゥラック"],
+    "sweep": ["スウィープ", "スウェプト", "スウェプト"],
+    "tear": ["ティア", "トア", "トーン"]
+  };
+
+  /* 型の並び順と説明 */
+  var TYPE_ORDER = ["A-A-A", "A-B-A", "A-B-B", "A-B-C", "A-A-B", "その他"];
+  var TYPE_DESC = {
+    "A-A-A": "3形同じ",
+    "A-B-A": "原形＝過去分詞",
+    "A-B-B": "過去形＝過去分詞",
+    "A-B-C": "3形すべて異なる",
+    "A-A-B": "原形＝過去形",
+    "その他": "型に当てはまらない"
+  };
+  var LEVELS = [{ id: 1, name: "基本" }, { id: 2, name: "発展" }];
+
+  /* ---- 試作モード（?mode=4x5 / 4x4 / 3x5）---- */
+  var MODE_CFG = {
+    "4x5": { cols: 4, mean: true },
+    "4x4": { cols: 4, mean: false },
+    "3x5": { cols: 3, mean: true }
+  };
+  var modeParam = "";
+  try { modeParam = new URLSearchParams(location.search).get("mode") || ""; } catch (e) { modeParam = ""; }
+  var MODE = MODE_CFG[modeParam] ? modeParam : "4x5";
+  var CFG = MODE_CFG[MODE];
+  var PAGE_COUNT = 2;
+  var COLS_PER_PAGE = CFG.cols;
+  var HAS_MEAN = CFG.mean;
+
+  /* 組版の段階（大きい順に試し、2ページに収まった最大の段階を採用）
+     4表レイアウト用: 原形は最大8pt、発音は最大6pt、意味は最大7pt。
+     発音 6pt で見切れが出たら 5.5pt の段階に落とす。 */
+  var STEPS = [
+    { form: 8.0, pron: 6.0, mean: 7.0, title: 8.0, pad: 0.75, tpad: 0.6, lh: 1.22 },
+    { form: 8.0, pron: 5.5, mean: 7.0, title: 8.0, pad: 0.75, tpad: 0.6, lh: 1.22 },
+    { form: 7.8, pron: 5.9, mean: 6.9, title: 7.9, pad: 0.7, tpad: 0.55, lh: 1.22 },
+    { form: 7.8, pron: 5.5, mean: 6.9, title: 7.9, pad: 0.7, tpad: 0.55, lh: 1.22 },
+    { form: 7.6, pron: 5.8, mean: 6.8, title: 7.8, pad: 0.68, tpad: 0.5, lh: 1.2 },
+    { form: 7.6, pron: 5.5, mean: 6.8, title: 7.8, pad: 0.68, tpad: 0.5, lh: 1.2 },
+    { form: 7.4, pron: 5.7, mean: 6.6, title: 7.6, pad: 0.62, tpad: 0.45, lh: 1.2 },
+    { form: 7.4, pron: 5.5, mean: 6.6, title: 7.6, pad: 0.62, tpad: 0.45, lh: 1.2 },
+    { form: 7.2, pron: 5.6, mean: 6.4, title: 7.4, pad: 0.58, tpad: 0.4, lh: 1.2 },
+    { form: 7.2, pron: 5.5, mean: 6.4, title: 7.4, pad: 0.58, tpad: 0.4, lh: 1.2 },
+    { form: 7.0, pron: 5.5, mean: 6.2, title: 7.2, pad: 0.52, tpad: 0.35, lh: 1.2 }
+  ];
+
+  var doc = document.getElementById("doc");
+  var measure = document.getElementById("measure");
+  var probe = document.getElementById("pageProbe");
+  var rootStyle = document.documentElement.style;
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function groupKey(item) {
+    return item.t.split("/")[0].trim();
+  }
+  function byBase(a, b) {
+    return a.b.localeCompare(b.b, "en");
+  }
+  function measureH(html) {
+    measure.innerHTML = html;
+    var el = measure.firstElementChild;
+    var h = el ? el.getBoundingClientRect().height : 0;
+    measure.innerHTML = "";
+    return h;
+  }
+
+  /* ---- 表示順（レベル → 型 → アルファベット）と通し番号 ---- */
+  var ORDER = [];
+  LEVELS.forEach(function (lv) {
+    var items = DATA.filter(function (d) { return d.lv === lv.id; });
+    TYPE_ORDER.forEach(function (type) {
+      var g = items.filter(function (d) { return groupKey(d) === type; }).sort(byBase);
+      if (g.length) ORDER.push({ level: lv, type: type, items: g });
+    });
+  });
+  var seq = 0;
+  ORDER.forEach(function (g) {
+    g.items.forEach(function (it) { seq += 1; it.no = seq; });
+  });
+
+  /* ---- 表の部品（モードで列構成を切り替える） ---- */
+  function colgroupHTML() {
+    if (!HAS_MEAN) {
+      return '<colgroup><col style="width:6%"><col style="width:31.3%">'
+        + '<col style="width:31.3%"><col style="width:31.4%"></colgroup>';
+    }
+    if (CFG.cols === 3) {
+      return '<colgroup><col style="width:5%"><col style="width:24.5%"><col style="width:24.5%">'
+        + '<col style="width:24.5%"><col style="width:21.5%"></colgroup>';
+    }
+    /* 4表×5列: #4mm / 原形・過去形・過去分詞 各約17.6mm / 意味 約10.3mm（合計約66.7mm） */
+    return '<colgroup><col style="width:6%"><col style="width:26.4%"><col style="width:26.4%">'
+      + '<col style="width:26.4%"><col style="width:14.8%"></colgroup>';
+  }
+
+  function theadHTML() {
+    return "<thead><tr>"
+      + '<th scope="col">#</th>'
+      + '<th scope="col">原形</th>'
+      + '<th scope="col">過去形</th>'
+      + '<th scope="col">過去分詞</th>'
+      + (HAS_MEAN ? '<th scope="col">意味</th>' : "")
+      + "</tr></thead>";
+  }
+
+  function cellHTML(word, pron) {
+    return '<span class="cell"><span class="word">' + esc(word) + "</span>"
+      + (pron ? '<span class="pron">' + esc(pron) + "</span>" : "")
+      + "</span>";
+  }
+
+  function rowHTML(it) {
+    var pr = PRON[it.b] || ["", "", ""];
+    return "<tr>"
+      + '<td class="no">' + it.no + "</td>"
+      + '<th scope="row">' + cellHTML(it.b, pr[0]) + "</th>"
+      + "<td>" + cellHTML(it.p, pr[1]) + "</td>"
+      + "<td>" + cellHTML(it.pp, pr[2]) + "</td>"
+      + (HAS_MEAN ? '<td class="mean">' + esc(it.m) + "</td>" : "")
+      + "</tr>";
+  }
+
+  function groupLabel(g, cont, partText) {
+    var head = esc(g.level.name) + " ／ " + esc(g.type)
+      + (TYPE_DESC[g.type] ? "　" + esc(TYPE_DESC[g.type]) : "");
+    return head + '<span class="grp-count">' + partText + "</span>";
+  }
+
+  function tbodyHTML(g, from, to, cont) {
+    var rows = "";
+    for (var i = from; i < to; i += 1) rows += rowHTML(g.items[i]);
+    var partText = cont ? "（続き）" : "（" + g.items.length + "語）";
+    var span = HAS_MEAN ? 5 : 4;
+    return '<tbody data-group="' + esc(g.level.name + "|" + g.type) + '" data-total="' + g.items.length + '">'
+      + '<tr class="grp"><th colspan="' + span + '" scope="colgroup">' + groupLabel(g, cont, partText) + "</th></tr>"
+      + rows
+      + "</tbody>";
+  }
+
+  function tblHTML(tbodies, caption) {
+    return '<table class="tbl">' + colgroupHTML()
+      + '<caption class="sr-only">' + esc(caption) + "</caption>"
+      + theadHTML() + tbodies.join("") + "</table>";
+  }
+
+  var LEGEND = '型　A-A-A=3形同じ／A-B-A=原形＝過去分詞／A-B-B=過去形＝過去分詞'
+    + '／A-B-C=3形すべて異なる／A-A-B=原形＝過去形／その他=型に当てはまらない'
+    + '　｜　カタカナは代表的な発音の目安（併記形は一方のみ／実際の発音と異なる場合あり）';
+
+  function createSheet() {
+    var el = document.createElement("article");
+    el.className = "sheet";
+    el.innerHTML =
+      '<header class="sheet__head">'
+      + '<h2 class="sheet__brand">不規則動詞</h2>'
+      + '<p class="sheet__level"></p>'
+      + "</header>"
+      + '<p class="sheet__legend"></p>'
+      + '<div class="sheet__cols"></div>'
+      + '<footer class="sheet__foot"><span>学習プリント</span>'
+      + '<span class="sheet__pageno"></span></footer>';
+    doc.appendChild(el);
+
+    var colsEl = el.querySelector(".sheet__cols");
+    colsEl.style.gridTemplateColumns = "repeat(" + COLS_PER_PAGE + ", 1fr)";
+    colsEl.style.columnGap = "3.5mm";
+    var colHtml = "";
+    for (var ci = 0; ci < COLS_PER_PAGE; ci += 1) colHtml += '<div class="col"></div>';
+    colsEl.innerHTML = colHtml;
+
+    return {
+      el: el,
+      level: el.querySelector(".sheet__level"),
+      legend: el.querySelector(".sheet__legend"),
+      cols: [].slice.call(colsEl.querySelectorAll(".col")),
+      pageno: el.querySelector(".sheet__pageno")
+    };
+  }
+
+  function applyStep(step) {
+    rootStyle.setProperty("--fs-form", step.form + "pt");
+    rootStyle.setProperty("--fs-pron", Math.min(step.pron, 6) + "pt");
+    rootStyle.setProperty("--fs-mean", step.mean + "pt");
+    rootStyle.setProperty("--fs-title", step.title + "pt");
+    rootStyle.setProperty("--pad-v", step.pad + "mm");
+    rootStyle.setProperty("--title-pad", step.tpad + "mm");
+    rootStyle.setProperty("--lh", String(step.lh));
+  }
+
+  /* ---- 2ページ×N列へ流し込む ---- */
+  function build(step) {
+    applyStep(step);
+    doc.setAttribute("data-step", String(step.form));
+    document.body.setAttribute("data-mode", MODE);
+    doc.innerHTML = "";
+    measure.innerHTML = "";
+    measure.style.width = "";
+
+    var pages = [];
+    for (var p = 0; p < PAGE_COUNT; p += 1) pages.push(createSheet());
+    pages[0].legend.textContent = LEGEND;
+
+    var cols = [];
+    pages.forEach(function (pg) { cols = cols.concat(pg.cols); });
+
+    /* 実測の幅を列幅に合わせる */
+    if (cols[0]) measure.style.width = cols[0].clientWidth + "px";
+
+    /* 1列あたりの行数目安（なるべく均等に） */
+    var totalRows = 0;
+    ORDER.forEach(function (g) { totalRows += g.items.length; });
+    var quotas = [];
+    var baseQ = Math.floor(totalRows / cols.length);
+    var extraQ = totalRows - baseQ * cols.length;
+    for (var qi = 0; qi < cols.length; qi += 1) {
+      quotas.push(baseQ + (qi < extraQ ? 1 : 0));
+    }
+
+    var gi = 0;
+    var ii = 0;
+
+    for (var c = 0; c < cols.length; c += 1) {
+      var col = cols[c];
+      var avail = col.clientHeight;
+      var quota = quotas[c];
+      var usedRows = 0;
+      var tbodies = [];
+      var caption = "不規則動詞の一覧";
+
+      while (gi < ORDER.length) {
+        var g = ORDER[gi];
+        var cont = ii > 0;
+        var rowsLeft = g.items.length - ii;
+        var quotaRoom = quota - usedRows;
+
+        /* 行数目安を使い切ったら次の列へ */
+        if (quotaRoom <= 0 && usedRows > 0) break;
+
+        /* 列の高さに収まる最大行数（実測＋二分探索） */
+        var lo = 1;
+        var hi = rowsLeft;
+        var capK = 0;
+        while (lo <= hi) {
+          var mid = (lo + hi) >> 1;
+          if (measureH(tblHTML(tbodies.concat([tbodyHTML(g, ii, ii + mid, cont)]), caption)) <= avail) {
+            capK = mid;
+            lo = mid + 1;
+          } else {
+            hi = mid - 1;
+          }
+        }
+        /* 見出しすら入らない → 次の列へ（空の列なら1行だけ置いて前進） */
+        if (capK === 0) {
+          if (tbodies.length) break;
+          capK = 1;
+        }
+
+        var k = Math.min(capK, quotaRoom > 0 ? quotaRoom : capK);
+
+        /* グループ末尾に1行だけ残さない */
+        if (rowsLeft - k === 1 && k + 1 <= capK) k += 1;
+
+        /* 列末に1行だけの断片を置かない */
+        if (k < 2 && k < rowsLeft && tbodies.length > 0) break;
+
+        /* 見出し＋1行だけの塊を作らない */
+        if (ii === 0 && rowsLeft > 1 && k < 2) {
+          if (tbodies.length && k + 1 > capK) break;
+          if (k + 1 <= capK) k = 2;
+        }
+
+        tbodies.push(tbodyHTML(g, ii, ii + k, cont));
+        usedRows += k;
+        ii += k;
+        if (ii >= g.items.length) {
+          gi += 1;
+          ii = 0;
+        }
+      }
+
+      if (tbodies.length) col.innerHTML = tblHTML(tbodies, caption);
+    }
+
+    var fits = gi >= ORDER.length;
+
+    /* 列をまたぐグループの見出しに「全n語・i/N」を付ける */
+    var tbs = [].slice.call(doc.querySelectorAll("tbody[data-group]"));
+    var bi = 0;
+    while (bi < tbs.length) {
+      var key = tbs[bi].getAttribute("data-group");
+      var bj = bi;
+      while (bj + 1 < tbs.length && tbs[bj + 1].getAttribute("data-group") === key) bj += 1;
+      var parts = bj - bi + 1;
+      if (parts > 1) {
+        var gTotal = tbs[bi].getAttribute("data-total");
+        for (var bk = bi; bk <= bj; bk += 1) {
+          var sp = tbs[bk].querySelector(".grp-count");
+          if (!sp) continue;
+          var partNo = bk - bi + 1;
+          sp.textContent = partNo === 1
+            ? "（全" + gTotal + "語・1/" + parts + "）"
+            : "（続き・" + partNo + "/" + parts + "）";
+        }
+      }
+      bi = bj + 1;
+    }
+
+    /* ページ見出し（そのページに含まれるレベル）とページ番号 */
+    pages.forEach(function (pg, idx) {
+      var seen = [];
+      [].forEach.call(pg.el.querySelectorAll("tbody[data-group]"), function (tb) {
+        var lvName = tb.getAttribute("data-group").split("|")[0];
+        if (seen.indexOf(lvName) < 0) seen.push(lvName);
+      });
+      pg.level.textContent = seen.join("・");
+      pg.pageno.textContent = (idx + 1) + " / " + pages.length;
+    });
+
+    /* はみ出し検査（縦） */
+    var overflow = 0;
+    cols.forEach(function (col) {
+      if (col.scrollHeight > col.clientHeight + 1) overflow += 1;
+    });
+
+    /* 見切れ検査（横）: 語・発音・意味がセル幅を超えていないか */
+    var clipped = 0;
+    [].forEach.call(doc.querySelectorAll(".word, .pron, .mean"), function (el) {
+      if (el.scrollWidth > el.clientWidth + 1) clipped += 1;
+    });
+
+    return { pages: pages, fits: fits, overflow: overflow, clipped: clipped };
+  }
+
+  /* 収まるまで段階的に詰める（縦はみ出し・横の見切れが0になる最大段階） */
+  var result = null;
+  for (var si = 0; si < STEPS.length; si += 1) {
+    result = build(STEPS[si]);
+    if (result.fits && !result.overflow && !result.clipped) break;
+  }
+  if (!result.fits || result.overflow || result.clipped) {
+    console.warn("[irregular-verbs] 2ページに収まらない/見切れあり:",
+      { fits: result.fits, overflow: result.overflow, clipped: result.clipped });
+  }
+
+  /* ---- 画面幅に合わせた縮小（印刷時は zoom:1 固定） ---- */
+  function fit() {
+    var base = probe.getBoundingClientRect().width;
+    if (!base) return;
+    var avail = document.documentElement.clientWidth - 32;
+    var z = Math.min(1, avail / base);
+    doc.style.zoom = z < 0.995 ? String(Math.round(z * 1000) / 1000) : "";
+  }
+  fit();
+  var rafId = 0;
+  window.addEventListener("resize", function () {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(fit);
+  });
+
+  /* ---- 印刷 ---- */
+  document.getElementById("btnPrint").addEventListener("click", function () {
+    window.print();
+  });
+})();
+</script>
+</body>
+</html>
