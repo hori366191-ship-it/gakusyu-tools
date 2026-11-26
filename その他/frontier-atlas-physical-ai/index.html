@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="人型・四足ロボット、センサー、政策ネットワーク、バランス制御を学ぶFRONTIER ATLASの静的3D図鑑。現状のロボティクスと将来像を区別します。">
+  <meta name="theme-color" content="#03070d">
+  <title>EMBODIED INTELLIGENCE — Physical AI・ロボット | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-panel="closed" data-mode="perception" data-briefing="closed">
+    <div id="stage" class="stage" tabindex="0" role="region" aria-label="Physical AIの3D模式図。ドラッグまたは矢印キーで周回、ホイール・ピンチ・プラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram">
+        <svg viewBox="0 0 1000 760" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">Physical AIの2D模式図</title>
+          <desc id="fallback-desc">人型ロボットと四足ロボットがセンサーで周囲を観測し、政策ネットワークが行動を計画して関節を動かします。障害物を避け、足裏の力とIMUでバランスを取ります。</desc>
+          <defs>
+            <radialGradient id="pbg"><stop stop-color="#12313b"/><stop offset="1" stop-color="#03070d"/></radialGradient>
+            <linearGradient id="shell"><stop stop-color="#728893"/><stop offset=".45" stop-color="#e0eaed"/><stop offset="1" stop-color="#526975"/></linearGradient>
+            <linearGradient id="joint"><stop stop-color="#5d442f"/><stop offset=".5" stop-color="#d99b62"/><stop offset="1" stop-color="#4d3929"/></linearGradient>
+            <filter id="pglow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <rect width="1000" height="760" fill="url(#pbg)"/>
+          <g stroke="#285261" stroke-width="1" opacity=".6"><path d="M70 610h860M70 650h860M170 580l-80 100M330 580l-40 100M500 580v100M670 580l40 100M830 580l80 100"/></g>
+          <g data-system="perception" transform="translate(380 390)" stroke-linecap="round">
+            <path d="M0-210 120-75M0-210 0 15M0-210-120-75" stroke="#7de4ee" stroke-opacity=".35" stroke-dasharray="6 9"/>
+            <path d="M0-210 160-45M0-210-160-45" stroke="#7de4ee" stroke-opacity=".16" stroke-dasharray="6 9"/>
+            <circle cy="-210" r="17" fill="#7de4ee" fill-opacity=".2" stroke="#7de4ee" filter="url(#pglow)"/>
+            <rect x="-42" y="-190" width="84" height="68" rx="18" fill="url(#shell)" stroke="#c5dbe2"/>
+            <rect x="-30" y="-172" width="60" height="24" rx="8" fill="#143b49" stroke="#7de4ee"/>
+            <rect x="-8" y="-238" width="16" height="35" rx="5" fill="url(#joint)"/>
+            <rect x="-56" y="-105" width="112" height="125" rx="22" fill="url(#shell)" stroke="#c5dbe2"/>
+            <rect x="-24" y="-90" width="48" height="55" rx="8" fill="#17303c" stroke="#7de4ee" stroke-opacity=".7"/>
+            <rect x="-45" y="28" width="90" height="35" rx="10" fill="#263b46"/>
+            <g stroke="url(#shell)" stroke-width="30"><path d="M-36 65-48 174-58 265M36 65 48 174 58 265"/></g>
+            <g fill="url(#joint)" stroke="#e3b181"><circle cx="-48" cy="174" r="17"/><circle cx="48" cy="174" r="17"/><circle cx="-58" cy="265" r="14"/><circle cx="58" cy="265" r="14"/></g>
+            <path d="M-73 282h38M35 282h38" stroke="#d7e4e8" stroke-width="22"/>
+            <g stroke="url(#shell)" stroke-width="23"><path d="M-62-82-96 8-110 88M62-82 96 8 110 88"/></g>
+            <g fill="url(#joint)"><circle cx="-96" cy="8" r="13"/><circle cx="96" cy="8" r="13"/></g>
+            <path d="M-119 96h20M99 96h20" stroke="#d7e4e8" stroke-width="18"/>
+            <ellipse cy="300" rx="104" ry="20" fill="#7de4ee" fill-opacity=".08" stroke="#7de4ee" stroke-opacity=".4"/>
+            <text x="0" y="342" text-anchor="middle" fill="#c8dce4" font-size="14">人型ロボット</text>
+          </g>
+          <g data-system="learning" transform="translate(725 300)">
+            <rect x="-125" y="-100" width="250" height="200" rx="14" fill="#081923" stroke="#7de4ee" stroke-opacity=".6"/>
+            <g fill="#7de4ee" filter="url(#pglow)"><circle cx="-85" cy="-55" r="7"/><circle cx="-85" cy="0" r="7"/><circle cx="-85" cy="55" r="7"/><circle cx="-25" cy="-70" r="7"/><circle cx="-25" cy="-25" r="7"/><circle cx="-25" cy="25" r="7"/><circle cx="-25" cy="70" r="7"/><circle cx="35" cy="-55" r="7"/><circle cx="35" cy="0" r="7"/><circle cx="35" cy="55" r="7"/><circle cx="95" cy="-25" r="7"/><circle cx="95" cy="25" r="7"/></g>
+            <g stroke="#6aa8bd" stroke-opacity=".5"><path d="M-85-55-25-70M-85-55-25-25M-85 0-25-25M-85 0-25 25M-85 55-25 25M-85 55-25 70M-25-70 35-55M-25-25 35-55M-25-25 35 0M-25 25 35 0M-25 25 35 55M-25 70 35 55M35-55 95-25M35 0 95-25M35 0 95 25M35 55 95 25"/></g>
+            <text x="0" y="132" text-anchor="middle" fill="#c8dce4" font-size="14">政策ネットワーク（概念図）</text>
+          </g>
+          <g data-system="planning" transform="translate(150 520)">
+            <rect x="-65" y="-25" width="130" height="55" rx="12" fill="url(#shell)" stroke="#c5dbe2"/>
+            <circle cx="45" cy="-38" r="13" fill="#173b49" stroke="#7de4ee"/>
+            <g stroke="url(#shell)" stroke-width="15"><path d="M-42 10-55 55-70 82M42 10 55 55 70 82"/></g>
+            <g fill="url(#joint)"><circle cx="-55" cy="55" r="10"/><circle cx="55" cy="55" r="10"/></g>
+            <text x="0" y="118" text-anchor="middle" fill="#c8dce4" font-size="14">四足ロボット</text>
+          </g>
+          <g data-system="planning" transform="translate(580 555)">
+            <path d="M0 40Q70-45 150 0" fill="none" stroke="#7de4ee" stroke-width="3" stroke-dasharray="8 8"/>
+            <rect x="105" y="-50" width="52" height="50" fill="#405563" stroke="#8ba1ad"/><rect x="112" y="-102" width="38" height="50" fill="#536b77" stroke="#8ba1ad"/>
+            <text x="55" y="70" text-anchor="middle" fill="#c8dce4" font-size="14">障害物と再計画</text>
+          </g>
+          <g data-system="actuation" fill="none" stroke="#ffc56e" stroke-width="2"><path d="M730 370h95v190"/><path d="M730 410h55"/></g>
+          <text x="742" y="590" fill="#ffdc9d" font-size="14">関節指令と安全制御</text>
+        </svg>
+        <figcaption id="fallback-stage-caption">2D模式図 · 知覚</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS ロボット図鑑">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/><ellipse cx="20" cy="20" rx="18" ry="7" fill="none" stroke="currentColor" stroke-width="1.3" transform="rotate(-28 20 20)"/><rect x="13" y="14" width="14" height="12" rx="3" fill="none" stroke="currentColor"/><path d="M17 14v-4m6 4v-4M13 20H9m18 0h4" stroke="currentColor"/><circle cx="31" cy="10" r="2" fill="currentColor"/></svg>
+        <div><strong>FRONTIER ATLAS</strong><span>ロボット図鑑 <b id="catalog-count">04 / 05</b></span></div>
+      </div>
+      <div class="top-actions"><span class="live-badge"><i aria-hidden="true"></i>製品・研究・将来像を分離</span><button id="briefing-toggle" class="icon-button briefing-toggle" type="button" aria-label="比較・研究段階・基本構成を開く" aria-expanded="false" aria-controls="briefing-rail">☰</button><button id="help-open" class="icon-button" type="button" aria-label="操作ガイドと模型の注意点を開く" aria-haspopup="dialog">?</button></div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title"><p class="eyebrow">ENTRY 04 <span>/</span> EMBODIED AI</p><h1 id="entry-title">EMBODIED INTELLIGENCE</h1><p>Physical AI・ロボット</p></section>
+    <nav class="view-dock" aria-label="Physical AIの解説モード"><div class="view-buttons" role="group" aria-label="モードを選ぶ">
+      <button class="view-button" type="button" data-view="perception" aria-pressed="true">知覚</button><button class="view-button" type="button" data-view="planning" aria-pressed="false">計画</button><button class="view-button" type="button" data-view="actuation" aria-pressed="false">運動制御</button><button class="view-button" type="button" data-view="balance" aria-pressed="false">バランス</button><button class="view-button" type="button" data-view="learning" aria-pressed="false">学習</button>
+    </div></nav>
+    <p id="flow-caption" class="flow-caption">センサー → ノイズ除去 → 環境表現 → 政策へ</p>
+
+    <aside id="briefing-rail" class="briefing-rail" aria-labelledby="briefing-title">
+      <div class="rail-heading"><p class="eyebrow">QUICK BRIEFING</p><h2 id="briefing-title">まず押さえる3点</h2></div>
+      <section class="brief-card" aria-labelledby="comparison-title"><h3 id="comparison-title">画面AI / Physical AI</h3><div class="comparison-head" aria-hidden="true"><span>項目</span><span>画面</span><span>物理</span></div><dl id="comparison-list" class="comparison-list"></dl></section>
+      <section class="brief-card research-brief" aria-labelledby="research-brief-title"><h3 id="research-brief-title">研究段階</h3><div id="research-list" class="research-list"></div></section>
+      <section class="brief-card" aria-labelledby="architecture-title"><h3 id="architecture-title">基本構成</h3><ol id="architecture-list" class="architecture-list"></ol></section>
+      <p class="rail-note">歩行・点群・政策・報酬は教育用近似です。実機の制御プログラムや安全性保証を再現していません。</p>
+    </aside>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="mode-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content"><span><small id="panel-mode-english">PERCEPTION</small><strong id="panel-mode-title">センサーから環境の状態をつくる</strong></span><span id="panel-toggle-label">解説を開く</span></button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="mode-title"><p id="mode-kicker" class="eyebrow">01 / PERCEPTION</p><h2 id="mode-title">センサーから環境の状態をつくる</h2><p id="mode-description">深度カメラ、LiDAR、関節エンコーダ、IMU、力センサーなどから、物体の位置、床の傾き、自己の姿勢を推定します。</p><p id="mode-study" class="study-note">点群・走査線は生成された教育用データです。実機のセンサー値を再現していません。</p></section>
+        <section aria-labelledby="flow-title"><h3 id="flow-title" class="section-title">知覚から行動まで <span>CONTROL LOOP</span></h3><ol id="flow-list" class="flow-list"></ol></section>
+        <section class="research-card" aria-labelledby="research-title"><h3 id="research-title" class="section-title">研究段階の境界 <span>AS OF 2025 ANNOUNCEMENTS</span></h3><div id="research-detail-list" class="research-detail-list"></div></section>
+        <section id="focus-card" class="focus-card" aria-live="polite"><p id="focus-kicker" class="eyebrow">EXPLORE THE MODEL</p><h3 id="focus-title">5つの部位にフォーカス</h3><p id="focus-description">モデルのラベルを選ぶと、該当部分を拡大して基本仕様と研究上の位置づけを解説します。</p><dl id="focus-specs" class="focus-specs" hidden></dl></section>
+        <details class="principles" open><summary>利点と課題</summary><div class="pro-con"><div><h4>可能性</h4><ul id="benefit-list"></ul></div><div><h4>課題</h4><ul id="challenge-list"></ul></div></div></details>
+        <details class="principles"><summary>基本構成・用語</summary><dl id="spec-list" class="spec-list"></dl><p class="fine-print">VLAはVision-Language-Actionの略です。企業のデモ動画、研究ベンチマーク、限定製品、普遍的な家庭作業の実現は別の証拠水準です。</p></details>
+        <section class="sources" aria-labelledby="source-title"><h3 id="source-title" class="section-title">出典</h3><div id="source-list"><a href="https://deepmind.google/discover/blog/gemini-robotics-15-brings-ai-agents-into-the-physical-world/" target="_blank" rel="noopener noreferrer">Google DeepMind — Gemini Robotics 1.5 <span aria-hidden="true">↗</span></a><a href="https://www.unitree.com/g1" target="_blank" rel="noopener noreferrer">Unitree — G1 <span aria-hidden="true">↗</span></a><a href="https://www.unitree.com/go2" target="_blank" rel="noopener noreferrer">Unitree — Go2 <span aria-hidden="true">↗</span></a></div><p>企業・研究機関の発表を教育用に要約しています。承認・推奨を示しません。</p></section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="モデルのホットスポット"><button type="button" class="hotspot" data-hotspot="sensors" hidden><span aria-hidden="true"></span>センサー群</button><button type="button" class="hotspot" data-hotspot="joints" hidden><span aria-hidden="true"></span>関節</button><button type="button" class="hotspot" data-hotspot="policy" hidden><span aria-hidden="true"></span>政策ネットワーク</button><button type="button" class="hotspot" data-hotspot="obstacle" hidden><span aria-hidden="true"></span>障害物・経路</button><button type="button" class="hotspot" data-hotspot="balance" hidden><span aria-hidden="true"></span>足裏・バランス</button></div>
+    <div class="viewport-readout" aria-hidden="true"><span id="orbit-time">T+ 00:00</span><span id="model-stats">主役モデル</span><span id="render-quality">描画準備中</span></div>
+    <p class="look-hint">ドラッグで周回 <span>·</span> ピンチ / ホイールでズーム <span>·</span> Spaceで再生 / 停止</p>
+    <section class="transport" aria-label="アニメーション再生コントロール"><div class="transport-main">
+      <button id="play-toggle" class="play-button" type="button" aria-label="再生" aria-pressed="false"><svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg><svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button>
+      <div class="speed-control" role="group" aria-label="再生速度"><button type="button" data-rate="0.5" aria-pressed="false">0.5×</button><button type="button" data-rate="1" aria-pressed="true">1×</button><button type="button" data-rate="2" aria-pressed="false">2×</button></div>
+      <div class="timeline"><label class="sr-only" for="orbit-timeline">教育用アニメーションのタイムライン</label><input id="orbit-timeline" type="range" min="0" max="40" step="0.05" value="0" aria-valuetext="T+ 00:00 知覚"><div class="timeline-labels" aria-hidden="true"><span>知覚・計画・制御・学習の模式ループ</span><span>00:40 LOOP</span></div></div>
+      <button id="reset-view" class="reset-button" type="button" aria-label="時刻・速度・視点・モードをリセット" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>リセット</span></button>
+    </div></section>
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため3Dと再生操作は使えませんが、2D模式図と基本解説を読めます。</p></noscript>
+  </main>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head"><div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">操作と模型の見方</h2></div><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></div>
+    <div class="help-content"><h3>操作方法</h3><ul id="guide-list"></ul><h3>現状と将来像</h3><p>歩行ロボットやVLA研究は実在しますが、限定されたタスク・環境と、あらゆる家庭や職場で自律する汎用ロボットは別です。安全性、データ、sim-to-real、消費電力、人間との共存が課題です。</p><h3>実測・実装・研究の区別</h3><p>Google DeepMindは2025年9月、Gemini Robotics 1.5を選定パートナー向け、Gemini Robotics-ER 1.5を開発者向けに提供したと発表しました。Unitree G1・Go2の仕様は企業公表値で、この模型の寸法・関節角・速度は実測値ではありません。</p><h3>出典</h3><p><a href="https://deepmind.google/discover/blog/gemini-robotics-15-brings-ai-agents-into-the-physical-world/" target="_blank" rel="noopener noreferrer">Google DeepMind — Gemini Robotics 1.5 ↗</a><br><a href="https://www.unitree.com/g1" target="_blank" rel="noopener noreferrer">Unitree — G1 ↗</a><br><a href="https://www.unitree.com/go2" target="_blank" rel="noopener noreferrer">Unitree — Go2 ↗</a></p><p class="endorsement-note">本ページは企業・研究機関の承認・推奨を示しません。</p></div>
+  </dialog>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="公開PDB構造とAI構造予測の考え方を、実測・研究・教育用近似に分けて学ぶ3D展示です。">
+  <meta name="theme-color" content="#040a12">
+  <title>AIタンパク質構造予測 — アミノ酸から形を読む | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-mode="sequence" data-panel="open" data-representation="experimental">
+    <div id="space-stage" class="space-stage" tabindex="0" role="region" aria-label="AIタンパク質構造予測の3D模式図。ドラッグまたは矢印キーで周回、ホイール・ピンチ・プラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram" data-mode="sequence" data-representation="experimental">
+        <svg viewBox="0 0 480 480" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">タンパク質構造予測の2D模式図</title>
+          <desc id="fallback-desc">アミノ酸鎖が拡散ノイズから折りたたみ、αヘリックス、βシート、リガンド、DNA相互作用へ進みます。実測PDBと教育用の予測プロキシを区別して表示します。</desc>
+          <defs>
+            <radialGradient id="protein-halo">
+              <stop offset="0" stop-color="#245b62" stop-opacity=".38"/>
+              <stop offset="1" stop-color="#071019" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="dna-gradient" x1="0" x2="1">
+              <stop stop-color="#8d7cff"/><stop offset="1" stop-color="#59d9de"/>
+            </linearGradient>
+          </defs>
+          <circle cx="240" cy="238" r="205" fill="url(#protein-halo)"/>
+          <circle cx="240" cy="238" r="184" fill="none" stroke="#31505c" stroke-width="1" stroke-dasharray="2 10"/>
+          <circle id="fallback-progress" cx="240" cy="238" r="49" fill="none" stroke="#62ded2" stroke-width="2" stroke-dasharray="307.88" stroke-dashoffset="307.88" transform="rotate(-90 240 238)" opacity=".7"/>
+          <g class="f-noise" fill="#77e8df" opacity=".65">
+            <circle cx="104" cy="112" r="3"/><circle cx="373" cy="104" r="2"/><circle cx="403" cy="296" r="3"/>
+            <circle cx="87" cy="337" r="2"/><circle cx="319" cy="397" r="3"/><circle cx="174" cy="75" r="2"/>
+            <circle cx="427" cy="201" r="2"/><circle cx="54" cy="221" r="2"/>
+          </g>
+          <g data-fallback-mode="fold" class="f-secondary">
+            <path d="M169 181c22-41 66-52 96-24 23 21 5 50-22 49-31-1-42-37-16-52" fill="none" stroke="#ffca78" stroke-width="9" stroke-linecap="round" opacity=".7"/>
+            <path d="m183 291 46-18m-31 34 53-20m-25 35 45-18" fill="none" stroke="#ffca78" stroke-width="8" stroke-linecap="round"/>
+            <path d="m224 270 8 7-9 4m24-6 8 7-9 4m15 6 8 7-9 4" fill="none" stroke="#ffe2ae" stroke-width="2"/>
+          </g>
+          <polyline id="fallback-chain-line" class="f-chain-line" points="66,238 414,238" fill="none" stroke="#9cece4" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+          <g id="fallback-residues" class="f-residues" fill="#75d9d1"></g>
+          <g data-fallback-mode="docking" class="f-ligand">
+            <path d="m324 154 17-12 18 11 3 22-18 13-20-10Z" fill="#ffab64" fill-opacity=".18" stroke="#ffb374" stroke-width="2"/>
+            <circle cx="324" cy="154" r="5" fill="#ffb374"/><circle cx="341" cy="142" r="5" fill="#ffb374"/><circle cx="359" cy="153" r="5" fill="#ffb374"/>
+            <circle cx="362" cy="175" r="5" fill="#ffb374"/><circle cx="344" cy="188" r="5" fill="#ffb374"/><circle cx="324" cy="178" r="5" fill="#ffb374"/>
+            <path d="M309 198c-18 18-22 41-12 61" fill="none" stroke="#ffb374" stroke-width="2" stroke-dasharray="4 7"/>
+          </g>
+          <g data-fallback-mode="interaction" class="f-dna">
+            <path d="M373 105c-52 32 52 65 0 97s52 65 0 97 52 65 0 76" fill="none" stroke="url(#dna-gradient)" stroke-width="5" stroke-linecap="round"/>
+            <path d="M397 105c52 32-52 65 0 97s-52 65 0 97-52 65 0 76" fill="none" stroke="url(#dna-gradient)" stroke-width="5" stroke-linecap="round" opacity=".75"/>
+            <g stroke="#e9dca9" stroke-width="3" opacity=".8">
+              <path d="m381 118 8 0m-4 24 15 0m-19 24 8 0m-4 24 15 0m-19 24 8 0m-4 24 15 0m-19 24 8 0"/>
+            </g>
+            <path d="m310 213 46 18m-46 12 57 17m-57 12 48 17" fill="none" stroke="#ffcf83" stroke-width="1.5" stroke-dasharray="4 5"/>
+          </g>
+          <g class="f-labels" fill="#b9cbd4" font-size="12" font-family="system-ui, sans-serif">
+            <text x="66" y="221">N</text><text x="414" y="221">C</text>
+            <text x="240" y="452" text-anchor="middle" id="fallback-progress-label">配列 0%</text>
+          </g>
+        </svg>
+        <figcaption id="fallback-caption">2D模式図 · 1CRN / アミノ酸配列</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+      <noscript><p class="noscript-note">JavaScriptを有効にすると3Dと解説の切替を利用できます。現在は静的な2D模式図を表示しています。</p></noscript>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS AI図鑑">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M20 5 33 13v14L20 35 7 27V13Z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          <path d="m20 11 8 5v8l-8 5-8-5v-8Z M12 16l16 8m0-8L12 24" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+        <div><strong>FRONTIER ATLAS</strong><span>AI図鑑 <b>PROTEIN / 02</b></span></div>
+      </div>
+      <div class="top-actions">
+        <span class="evidence-badge"><i aria-hidden="true"></i>実測と予測を分離</span>
+        <button id="help-open" class="icon-button" type="button" aria-label="操作ガイドと近似モデルの注意点を開く" aria-haspopup="dialog">?</button>
+      </div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title">
+      <p class="eyebrow">ENTRY 02 <span>/</span> PROTEIN STRUCTURE AI</p>
+      <h1 id="entry-title">AIタンパク質<br>構造予測</h1>
+      <p>アミノ酸から形を読む — 実測PDBと生成モデルのあいだ</p>
+    </section>
+
+    <div id="stage-label" class="structure-label" role="status" aria-live="polite">INPUT · SEQUENCE</div>
+
+    <nav class="mode-rail" aria-labelledby="mode-list-title">
+      <div class="rail-heading"><p class="eyebrow">FIVE STATES</p><h2 id="mode-list-title">予測の5段階</h2></div>
+      <ol class="mode-list">
+        <li><button type="button" class="mode-button" data-mode="sequence" aria-pressed="true"><span class="mode-number">01</span><span><strong>配列</strong><small>SEQUENCE</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="mode-button" data-mode="denoise" aria-pressed="false"><span class="mode-number">02</span><span><strong>ノイズ除去</strong><small>DENOISE</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="mode-button" data-mode="fold" aria-pressed="false"><span class="mode-number">03</span><span><strong>折りたたみ</strong><small>FOLD</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="mode-button" data-mode="docking" aria-pressed="false"><span class="mode-number">04</span><span><strong>リガンド</strong><small>DOCKING</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="mode-button" data-mode="interaction" aria-pressed="false"><span class="mode-number">05</span><span><strong>DNA相互作用</strong><small>INTERACTION</small></span><i aria-hidden="true"></i></button></li>
+      </ol>
+      <p class="rail-note">モードは概念の順序です。実際の実験手順や計算パイプラインを再現するものではありません。</p>
+    </nav>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="panel-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="true" aria-controls="info-content">
+        <span><small id="panel-kicker">MODE 01 / 05</small><strong id="panel-handle-title">配列から始める</strong></span>
+        <span id="panel-toggle-label">解説を閉じる</span>
+      </button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="panel-title">
+          <p id="panel-english" class="eyebrow">PRIMARY SEQUENCE</p>
+          <h2 id="panel-title">アミノ酸配列</h2>
+          <p id="panel-summary">20種類のアミノ酸が並ぶ一次配列が、折りたたみの出発点です。</p>
+          <p id="panel-detail">この展示ではPDB 1CRN（46残基）と1UBQ（76残基）の実測座標を使い、まず鎖を伸ばした状態で配列と側鎖を表示します。原子の色は元素の慣例色です。</p>
+          <div class="status-line"><span id="status-label">実測データを可視化</span><small>EDUCATIONAL APPROXIMATION</small></div>
+        </section>
+
+        <section class="data-controls" aria-label="構造と表現の選択">
+          <div class="control-heading"><h3>公開実験構造</h3><span>RCSB PDB</span></div>
+          <div class="segmented two">
+            <button type="button" data-specimen="1crn" aria-pressed="true">1CRN · クランビン</button>
+            <button type="button" data-specimen="1ubq" aria-pressed="false">1UBQ · ユビキチン</button>
+          </div>
+          <p id="specimen-name" class="control-value">1CRN · クランビン</p>
+          <p id="specimen-meta" class="control-note">46残基 / 1.5 Å / 1981</p>
+          <div class="control-heading representation-heading"><h3>実験と予測の表示</h3><span>比較用</span></div>
+          <div class="segmented three">
+            <button type="button" data-representation="experimental" aria-pressed="true">実験</button>
+            <button type="button" data-representation="proxy" aria-pressed="false">予測プロキシ</button>
+            <button type="button" data-representation="compare" aria-pressed="false">重ねる</button>
+          </div>
+          <p id="representation-note" class="control-note">PDBの実測座標をそのまま表示</p>
+          <label class="check-control"><input id="confidence-toggle" type="checkbox" checked><span>疑似信頼度カラーを表示<small>実測pLDDTではありません</small></span></label>
+        </section>
+
+        <section class="evidence-grid" aria-label="根拠の区分">
+          <div class="evidence observed"><h3><span aria-hidden="true">✓</span> 実測・確認できること</h3><ul id="observed-list"></ul></div>
+          <div class="evidence research"><h3><span aria-hidden="true">R</span> 研究・論文の報告</h3><ul id="research-list"></ul></div>
+          <div class="evidence conceptual"><h3><span aria-hidden="true">≈</span> 教育用の近似・構想</h3><ul id="conceptual-list"></ul></div>
+        </section>
+
+        <section id="selected-card" class="selected-card" aria-labelledby="selected-title" hidden>
+          <p id="selected-english" class="eyebrow">HOTSPOT</p>
+          <h3 id="selected-title">アミノ酸鎖</h3>
+          <p id="selected-role" class="selected-role">主鎖</p>
+          <p id="selected-current"></p>
+          <div class="selected-evidence"><small>根拠</small><p id="selected-evidence"></p></div>
+          <div class="selected-caveat"><small>限界</small><p id="selected-caveat"></p></div>
+        </section>
+
+        <section class="spec-card" aria-labelledby="spec-title">
+          <div class="card-heading"><h3 id="spec-title">基本仕様</h3><span>THIS EXHIBIT</span></div>
+          <ul id="spec-list" class="compact-list"></ul>
+          <dl class="stats-grid">
+            <div><dt>残基</dt><dd id="stat-residues">—</dd></div>
+            <div><dt>重原子</dt><dd id="stat-atoms">—</dd></div>
+            <div><dt>Instanced</dt><dd id="stat-instanced">—</dd></div>
+            <div><dt>LOD</dt><dd id="stat-lod">—</dd></div>
+          </dl>
+          <p id="model-stats-note" class="model-notice">モデル統計は3D初期化後に表示します。</p>
+        </section>
+
+        <details class="details-block" open>
+          <summary>予測と実験構造の違い</summary>
+          <div class="table-wrap"><table><thead><tr><th>観点</th><th>実験構造</th><th>予測構造</th></tr></thead><tbody id="comparison-body"></tbody></table></div>
+          <p class="boundary-note">「予測プロキシ」は実測座標を滑らかにした教育用モデルです。実際のAlphaFold予測との一致・精度を示しません。</p>
+        </details>
+
+        <details class="details-block">
+          <summary>主な課題</summary>
+          <ol id="challenge-list" class="challenge-list"></ol>
+        </details>
+
+        <details class="details-block">
+          <summary>証拠の見方</summary>
+          <ul id="legend-list" class="legend-list"></ul>
+        </details>
+
+        <section class="sources" aria-labelledby="source-title">
+          <h3 id="source-title">出典・データ</h3>
+          <ul id="source-list" class="source-list"></ul>
+          <p>PDB座標はRCSB PDBの公開データをローカルに保存し、表示時にのみ読み込みます。Three.jsはCDNから読み込みます。</p>
+          <p>本ページは企業・研究機関の承認・推奨を示しません。</p>
+        </section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="タンパク質モデルのホットスポット">
+      <button type="button" class="hotspot" data-hotspot="chain" aria-pressed="false" hidden><span aria-hidden="true"></span>アミノ酸鎖</button>
+      <button type="button" class="hotspot" data-hotspot="helix" aria-pressed="false" hidden><span aria-hidden="true"></span>αヘリックス</button>
+      <button type="button" class="hotspot" data-hotspot="sheet" aria-pressed="false" hidden><span aria-hidden="true"></span>βシート</button>
+      <button type="button" class="hotspot" data-hotspot="diffusion" aria-pressed="false" hidden><span aria-hidden="true"></span>拡散ノイズ</button>
+      <button type="button" class="hotspot" data-hotspot="interaction" aria-pressed="false" hidden><span aria-hidden="true"></span>相互作用</button>
+    </div>
+
+    <div class="viewport-readout" aria-hidden="true"><span id="render-quality">描画準備中</span><span id="confidence-value">—</span></div>
+    <p class="look-hint">ドラッグで周回 <span>·</span> ホイール / ピンチでズーム <span>·</span> 1–5でモード</p>
+
+    <section class="control-dock" aria-label="構造アニメーションの再生">
+      <div class="transport-row">
+        <div class="playback-group">
+          <button id="play-toggle" class="play-button" type="button" aria-label="一時停止" aria-pressed="true">
+            <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>
+            <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>
+          </button>
+          <div class="speed-control" role="group" aria-label="再生速度">
+            <button type="button" data-rate="0.5" aria-pressed="false">0.5×</button>
+            <button type="button" data-rate="1" aria-pressed="true">1×</button>
+            <button type="button" data-rate="2" aria-pressed="false">2×</button>
+          </div>
+        </div>
+        <div class="transport-status"><span id="phase-label">アミノ酸配列 · 0%</span><small id="confidence-note">教育用の疑似pLDDTカラー</small></div>
+        <div class="view-controls" role="group" aria-label="3D視点操作">
+          <button id="zoom-out" class="tool-button" type="button" aria-label="ズームアウト" disabled>−</button>
+          <button id="zoom-in" class="tool-button" type="button" aria-label="ズームイン" disabled>＋</button>
+          <button id="reset-view" class="reset-button" type="button" aria-label="視点を初期位置に戻す" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>視点</span></button>
+          <button id="reset-sim" class="reset-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>リセット</span></button>
+        </div>
+      </div>
+      <div class="progress-row"><span>STATE PROGRESS</span><div class="progress-track" role="progressbar" aria-label="現在モードの再生進行" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="progress-bar"></i></div><output id="progress-value">0%</output></div>
+      <p id="mode-guidance" class="dock-note">配列は構造の入力です。機能や折りたたみ経路を直接断定するものではありません。</p>
+    </section>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+
+    <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+      <div class="dialog-head"><div><p class="eyebrow">OPERATING GUIDE</p><h2 id="help-title">操作と読み解き方</h2></div><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></div>
+      <div class="help-content">
+        <h3>操作</h3><ul id="guide-list"></ul>
+        <h3>教育用近似について</h3>
+        <p id="model-note">教育用の近似です。AF3やAlphaFoldの推論、ドッキング、結合エネルギー計算は行っていません。信頼度カラーも実測pLDDTではありません。</p>
+        <p>公開PDB 1CRN / 1UBQは実測構造です。予測プロキシ、リガンド、DNA配置、拡散粒子は、仕組みを説明するために自作した模式表現です。</p>
+        <h3>WebGL・CDNが使えない場合</h3>
+        <p>自動的に2D模式図へ切り替わり、5モードと解説は引き続き操作できます。Three.js 0.180.0はjsDelivrから読み込むため、オフラインでは3Dのみ利用できません。</p>
+        <p class="endorsement-note">本ページは企業・研究機関の承認・推奨を示しません。</p>
+      </div>
+    </dialog>
+  </main>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

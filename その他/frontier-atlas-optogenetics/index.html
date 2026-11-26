@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="光遺伝学の仕組みを、ニューロン、ChR2、光パルス、イオン流入、活動電位の3D模式図で学ぶ教育用展示です。">
+  <meta name="theme-color" content="#030810">
+  <title>光遺伝学 — 光で神経を操る | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-mode="off" data-panel="closed">
+    <div id="space-stage" class="space-stage" tabindex="0" role="region" aria-label="光遺伝学ニューロンの3D模式図。ドラッグまたは矢印キーで周回、ホイール・ピンチ・プラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram" data-mode="off">
+        <svg viewBox="0 0 720 560" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">光遺伝学の2Dニューロン模式図</title>
+          <desc id="fallback-desc">左上の樹状突起、中央のソーマ、右へ延びる髄鞘に覆われた軸索、軸索終端を示します。上から光ファイバーが青色光を当て、ChR2チャネルから陽イオンが流入し、活動電位が軸索を伝わります。</desc>
+          <defs>
+            <radialGradient id="o-soma"><stop offset="0" stop-color="#805dc7" stop-opacity=".8"/><stop offset=".58" stop-color="#285b78" stop-opacity=".64"/><stop offset="1" stop-color="#63e6ff" stop-opacity=".12"/></radialGradient>
+            <linearGradient id="o-axon"><stop stop-color="#63e6ff"/><stop offset="1" stop-color="#ffd27a"/></linearGradient>
+            <radialGradient id="o-light"><stop stop-color="#b7d5ff" stop-opacity=".6"/><stop offset="1" stop-color="#63e6ff" stop-opacity="0"/></radialGradient>
+            <marker id="o-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 10 5 0 10Z" fill="currentColor"/></marker>
+          </defs>
+          <g class="o-grid" stroke="#4b8295" stroke-opacity=".16" fill="none">
+            <path d="M40 90h640M40 180h640M40 270h640M40 360h640M40 450h640M110 40v480M220 40v480M330 40v480M440 40v480M550 40v480M660 40v480"/>
+          </g>
+          <g class="o-dendrites" fill="none" stroke="#4c9ab1" stroke-width="9" stroke-linecap="round">
+            <path d="M238 278C190 250 168 215 126 191M239 295C180 282 144 275 95 260M240 316C181 326 142 345 91 356M245 333C198 365 174 402 129 432M260 345C242 398 232 435 218 482"/>
+            <path d="M128 191 91 151M127 192 78 205M144 275 111 235M95 260 52 281M91 356 52 383M129 432 87 468M232 435 192 471M218 482 245 516" stroke-width="5"/>
+          </g>
+          <g class="o-soma" data-fallback-node="soma" transform="translate(260 285)">
+            <circle r="70" fill="url(#o-soma)" stroke="#63e6ff" stroke-width="2"/>
+            <ellipse cx="-7" cy="2" rx="30" ry="35" fill="#68459d" stroke="#b394e8" stroke-opacity=".55"/>
+            <circle cx="4" cy="12" r="10" fill="#e2a96c" opacity=".8"/>
+            <g fill="#e2a96c" opacity=".65"><ellipse cx="38" cy="-25" rx="9" ry="4" transform="rotate(35 38 -25)"/><ellipse cx="-40" cy="24" rx="9" ry="4" transform="rotate(-25 -40 24)"/><ellipse cx="22" cy="44" rx="8" ry="4"/></g>
+            <text y="102" text-anchor="middle">ソーマ</text>
+          </g>
+          <g class="o-channels" data-fallback-node="channel" fill="none" stroke="#63e6ff" stroke-width="3">
+            <path d="M197 265v-19m0 8-8-7m8 7 8-7M205 312v19m0-8-8 7m8-7 8 7M314 267v19m0-8-8 7m8-7 8 7M306 229v-19m0 8-8-7m8 7 8-7"/>
+            <circle cx="197" cy="254" r="3" fill="#ffd27a"/><circle cx="205" cy="322" r="3" fill="#ffd27a"/>
+          </g>
+          <path class="o-axon-line" d="M323 287C403 274 467 302 531 287S616 275 667 291" fill="none" stroke="url(#o-axon)" stroke-width="12" stroke-linecap="round"/>
+          <g class="o-myelin" data-fallback-node="axon" fill="#b8d9df" fill-opacity=".72" stroke="#dff8ff" stroke-opacity=".5">
+            <rect x="355" y="271" width="48" height="31" rx="15" transform="rotate(-5 355 271)"/>
+            <rect x="414" y="277" width="48" height="31" rx="15" transform="rotate(5 414 277)"/>
+            <rect x="473" y="278" width="48" height="31" rx="15" transform="rotate(7 473 278)"/>
+            <rect x="532" y="273" width="48" height="31" rx="15" transform="rotate(-5 532 273)"/>
+            <rect x="591" y="266" width="48" height="31" rx="15" transform="rotate(-4 591 266)"/>
+            <text x="487" y="339" text-anchor="middle">軸索・髄鞘</text>
+          </g>
+          <g class="o-terminal" data-fallback-node="terminal" fill="none" stroke="#d2a6ff" stroke-width="7" stroke-linecap="round">
+            <path d="M664 291q32-42 55-35M664 291q35-8 58 11M664 291q30 28 53 41"/>
+            <g fill="#d2a6ff" stroke="none"><circle cx="718" cy="254" r="5"/><circle cx="724" cy="303" r="5"/><circle cx="718" cy="334" r="5"/><circle cx="707" cy="266" r="4"/></g>
+            <text x="650" y="378" text-anchor="middle">軸索終端</text>
+          </g>
+          <g class="o-fiber" data-fallback-node="fiber">
+            <path d="M270 28 262 164 254 218" fill="none" stroke="#758aab" stroke-width="17" stroke-linecap="round"/>
+            <path d="M270 28 262 164 254 218" fill="none" stroke="#a9c6ff" stroke-width="6" stroke-linecap="round"/>
+            <rect x="243" y="207" width="24" height="25" rx="5" fill="#758aab"/>
+            <path class="o-beam" d="m245 225-53 85h108Z" fill="url(#o-light)"/>
+            <text x="290" y="80">光ファイバー</text>
+          </g>
+          <g id="fallback-light" class="o-light-particles" fill="#b7d5ff"><circle r="6"/><circle r="4"/><circle r="5"/></g>
+          <g id="fallback-ions" class="o-ion-particles" fill="#63e6ff"><circle r="5"/><circle r="4"/><circle r="5"/><circle r="4"/><circle r="5"/><circle r="4"/></g>
+          <g id="fallback-potential" class="o-potential-particles" fill="#ffd27a"><circle r="7"/><circle r="5"/><circle r="7"/><circle r="5"/></g>
+          <g class="o-legend" fill="#bdd0dc" font-size="12">
+            <circle cx="72" cy="502" r="5" fill="#63e6ff"/><text x="84" y="506">Na⁺</text>
+            <circle cx="142" cy="502" r="5" fill="#9cf1cc"/><text x="154" y="506">Ca²⁺</text>
+            <circle cx="225" cy="502" r="5" fill="#ffd27a"/><text x="237" y="506">活動電位</text>
+            <text x="390" y="506">教育用近似 · 実測値ではありません</text>
+          </g>
+        </svg>
+        <figcaption id="fallback-stage-caption">2D模式図 · 光OFF / チャネル閉鎖</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS 生命科学図鑑">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 33 13v14L20 35 7 27V13Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M13 14h14M13 20h10M13 26h14" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="27" cy="20" r="2" fill="currentColor"/></svg>
+        <div><strong>FRONTIER ATLAS</strong><span>生命科学図鑑 <b>LS / 01</b></span></div>
+      </div>
+      <div class="top-actions">
+        <span class="evidence-badge"><i aria-hidden="true"></i>実装・研究・構想を分離</span>
+        <button id="help-open" class="icon-button" type="button" aria-label="操作ガイドと模型の注意点を開く" aria-haspopup="dialog">?</button>
+      </div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title">
+      <p class="eyebrow">ENTRY LS–01 <span>/</span> OPTOGENETICS</p>
+      <h1 id="entry-title">光遺伝学</h1>
+      <p>光で神経を操る — 2026年ノーベル医学賞</p>
+    </section>
+
+    <div class="mode-switch" role="group" aria-label="光遺伝学の4状態">
+      <button type="button" class="mode-button" data-mode="off" aria-pressed="true"><span class="mode-dot" aria-hidden="true"></span><span><small>01 / REST</small>光OFF</span></button>
+      <button type="button" class="mode-button" data-mode="channel" aria-pressed="false"><span class="mode-dot" aria-hidden="true"></span><span><small>02 / OPEN</small>channel open</span></button>
+      <button type="button" class="mode-button" data-mode="ions" aria-pressed="false"><span class="mode-dot" aria-hidden="true"></span><span><small>03 / INFLUX</small>ion influx</span></button>
+      <button type="button" class="mode-button" data-mode="potential" aria-pressed="false"><span class="mode-dot" aria-hidden="true"></span><span><small>04 / FIRE</small>action potential</span></button>
+    </div>
+    <div id="structure-label" class="structure-label" role="status" aria-live="polite">RESTING MEMBRANE · CHANNEL CLOSED</div>
+
+    <nav class="anatomy-rail" aria-labelledby="anatomy-title">
+      <div class="rail-heading"><p class="eyebrow">NEURON ANATOMY</p><h2 id="anatomy-title">ニューロンを構成する要素</h2></div>
+      <ol class="anatomy-list">
+        <li><button type="button" class="anatomy-button" data-node="soma" aria-pressed="false"><span class="anatomy-number">01</span><span><strong>ソーマ</strong><small>SOMA</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="anatomy-button" data-node="channel" aria-pressed="false"><span class="anatomy-number">02</span><span><strong>ChR2チャネル</strong><small>LIGHT-GATED CHANNEL</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="anatomy-button" data-node="fiber" aria-pressed="false"><span class="anatomy-number">03</span><span><strong>光ファイバー</strong><small>OPTICAL FIBER</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="anatomy-button" data-node="axon" aria-pressed="false"><span class="anatomy-number">04</span><span><strong>軸索と髄鞘</strong><small>AXON / MYELIN</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="anatomy-button" data-node="terminal" aria-pressed="false"><span class="anatomy-number">05</span><span><strong>軸索終端</strong><small>AXON TERMINAL</small></span><i aria-hidden="true"></i></button></li>
+      </ol>
+      <p class="rail-note">樹状突起→ソーマ→軸索→終端の順に、光刺激が神経活動へ変わる仕組みを追います。</p>
+    </nav>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="panel-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content"><span><small id="panel-kicker">MODE 01</small><strong id="panel-handle-title">光OFF</strong></span><span id="panel-toggle-label">解説を開く</span></button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="panel-title">
+          <p id="panel-english" class="eyebrow">LIGHT OFF</p>
+          <h2 id="panel-title">光OFF</h2>
+          <p id="panel-summary">光ファイバーは待機し、channelrhodopsin（ChR2）のチャネルは閉じています。</p>
+          <p id="panel-structure-note" class="structure-note">青色光がないため、ChR2の開口・陽イオン流入・活動電位は起こりません。</p>
+          <details class="mode-details"><summary>詳しい仕組み</summary><p id="panel-detail">ChR2はアルガーの細胞膜に見いだされた光作動性陽イオンチャネルです。青色光がない状態では開口せず、模型でもイオン流入と活動電位を止めています。</p></details>
+          <p id="panel-boundary" class="boundary-note">教育用の模式図です。細胞の大きさ、イオン数、応答時間、治療効果を再現するものではありません。</p>
+        </section>
+
+        <section class="research-stage" aria-labelledby="research-title"><h3 id="research-title">研究段階</h3><strong id="research-status">研究実装は確立 / 治療は用途別に研究中</strong><p id="research-detail">基礎研究のツールとしては広く使われます。視覚回復などのヒト研究は進みますが、承認・有効性・安全性は断定しません。</p></section>
+
+        <section class="evidence-grid" aria-label="実装・研究・構想の区別">
+          <div class="evidence implementation"><h3><span aria-hidden="true">✓</span> 実装・実測</h3><ul id="implementation-list"></ul></div>
+          <div class="evidence research"><h3><span aria-hidden="true">→</span> 研究中</h3><ul id="research-list"></ul></div>
+          <div class="evidence concept"><h3><span aria-hidden="true">?</span> 構想・未確立</h3><ul id="concept-list"></ul></div>
+        </section>
+
+        <section id="selected-node-card" class="selected-node-card" aria-labelledby="node-title" hidden>
+          <p id="node-english" class="eyebrow">NEURON COMPONENT</p><h3 id="node-title">ソーマ</h3><p id="node-role">細胞体・情報統合</p><p id="node-description"></p>
+          <dl id="node-specs" class="node-specs"></dl>
+        </section>
+
+        <details class="mode-details mechanism-details"><summary>この状態で起きること</summary><ol id="flow-list" class="flow-list"></ol><p id="panel-study" class="study-note"></p></details>
+
+        <section class="spec-card" aria-labelledby="spec-title"><h3 id="spec-title">基本仕様</h3><dl id="spec-list" class="spec-list"></dl></section>
+        <details class="challenges"><summary>主な課題</summary><ol id="challenge-list" class="challenge-list"></ol></details>
+
+        <section class="sources" aria-labelledby="source-title"><h3 id="source-title" class="section-title">出典 <span>PRIMARY SOURCE</span></h3><div id="source-list"></div><p>2026年ノーベル医学賞の一次情報を参照しています。</p><p class="endorsement-note">本ページはノーベル財団・研究機関の承認・推奨を示しません。</p></section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="3Dニューロンの構成要素">
+      <button type="button" class="hotspot" data-node="soma" aria-pressed="false" hidden><span aria-hidden="true"></span>ソーマ</button>
+      <button type="button" class="hotspot" data-node="channel" aria-pressed="false" hidden><span aria-hidden="true"></span>ChR2チャネル</button>
+      <button type="button" class="hotspot" data-node="fiber" aria-pressed="false" hidden><span aria-hidden="true"></span>光ファイバー</button>
+      <button type="button" class="hotspot" data-node="axon" aria-pressed="false" hidden><span aria-hidden="true"></span>軸索・髄鞘</button>
+      <button type="button" class="hotspot" data-node="terminal" aria-pressed="false" hidden><span aria-hidden="true"></span>軸索終端</button>
+    </div>
+
+    <div class="viewport-readout" aria-hidden="true"><span id="phase-readout">01 / 04 · 光OFF</span><span id="render-quality">描画準備中</span></div>
+    <p class="look-hint">ドラッグで周回 <span>·</span> ホイール / ピンチでズーム</p>
+
+    <section class="control-dock" aria-label="光遺伝学アニメーションの再生">
+      <div class="transport-row">
+        <div class="playback-group">
+          <button id="play-toggle" class="play-button" type="button" aria-label="一時停止" aria-pressed="true"><svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg><svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button>
+          <div class="speed-control" role="group" aria-label="再生速度"><button type="button" data-rate="0.5" aria-pressed="false">0.5×</button><button type="button" data-rate="1" aria-pressed="true">1×</button><button type="button" data-rate="2" aria-pressed="false">2×</button></div>
+        </div>
+        <div class="transport-status"><span id="phase-label">光OFF · チャネル閉鎖</span><small id="time-label">0.0 / 20.0 s · 教育用ループ</small></div>
+        <div class="view-controls" role="group" aria-label="3D視点操作"><button id="zoom-out" class="tool-button" type="button" aria-label="ズームアウト" disabled>−</button><button id="zoom-in" class="tool-button" type="button" aria-label="ズームイン" disabled>＋</button><button id="reset-view" class="reset-button" type="button" aria-label="視点を初期位置に戻す" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>視点を戻す</span></button></div>
+      </div>
+      <div class="timeline-row"><label for="phase-timeline">再生位置</label><input id="phase-timeline" type="range" min="0" max="1000" step="1" value="0" aria-describedby="model-note"><output id="timeline-value" for="phase-timeline">0%</output></div>
+      <div class="slider-grid">
+        <div class="slider-control"><div class="slider-label"><label for="light-intensity">光強度（教育用）</label><output id="light-value" for="light-intensity">72%</output></div><input id="light-intensity" type="range" min="0" max="100" step="1" value="72" aria-describedby="model-note"><small>0%では光依存の反応を起こしません</small></div>
+        <p id="model-note" class="dock-note">20秒のループ・粒子数・光強度は教育用近似です。実測の膜電位、イオン濃度、治療効果ではありません。</p>
+        <button id="reset-all" class="reset-all" type="button">すべてリセット</button>
+      </div>
+    </section>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため、3D・再生・操作は使えません。2D模式図と出典付きの解説は読めます。</p></noscript>
+  </main>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head"><div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">操作と模型の見方</h2></div><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></div>
+    <div class="help-content"><h3>操作方法</h3><ul id="guide-list"></ul><h3>何を学ぶページか</h3><p>光遺伝学は、光に反応するイオンチャネルを特定の細胞へ導入し、光で活動を制御する研究手法です。2026年ノーベル医学賞は、channelrhodopsinの発見と神経細胞への応用を評価しました。</p><p>研究ツールとしての実装と、視覚回復などの治療応用を分けて考えます。ヒトで安全・有効に使える範囲は、個々の研究の証拠と規制に依存します。</p><h3>模型の限界</h3><p>ニューロンの形、ChR2の7本のらせん、髄鞘、光ビーム、イオン・活動電位の粒子は教育用に簡略化しています。実際の分子構造、電気生理、遺伝子導入、光デリバリー、治療成績を再現しません。</p><h3>出典</h3><p><a href="https://www.nobelprize.org/prizes/medicine/2026/press-release/" target="_blank" rel="noopener noreferrer">NobelPrize.org — The Nobel Prize in Physiology or Medicine 2026, Press release ↗</a><br>2026年10月5日。</p><p class="endorsement-note">本ページはノーベル財団・研究機関の承認・推奨を示しません。</p></div>
+  </dialog>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

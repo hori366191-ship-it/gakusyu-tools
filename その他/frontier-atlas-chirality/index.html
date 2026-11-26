@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="鏡像異性体、キラル触媒、不斉合成、Soaiの自己触媒を学ぶFRONTIER ATLASの静的3D図鑑。2026年ノーベル化学賞の発表を研究・実用化と分けて解説します。">
+  <meta name="theme-color" content="#03070d">
+  <title>MIRROR CHEMISTRY — キラリティ・鏡像化学 | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-panel="closed" data-mode="achiral" data-briefing="closed">
+    <div id="stage" class="stage" tabindex="0" role="region" aria-label="キラリティの3D模式図。ドラッグまたは矢印キーで周回、ホイール・ピンチ・プラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram">
+        <svg viewBox="0 0 1000 760" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">キラル触媒と鏡像異性体の2D模式図</title>
+          <desc id="fallback-desc">右手型と左手型の原料がキラル触媒に結合します。異なる反応経路を通り、片側の鏡像体が多く生成されます。Soai型の自己触媒では小さな偏りが増幅されます。</desc>
+          <defs>
+            <radialGradient id="cbg"><stop stop-color="#30213e"/><stop offset="1" stop-color="#03070d"/></radialGradient>
+            <linearGradient id="cat"><stop stop-color="#3e5360"/><stop offset=".5" stop-color="#b5c6cd"/><stop offset="1" stop-color="#344853"/></linearGradient>
+            <filter id="cglow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <rect width="1000" height="760" fill="url(#cbg)"/>
+          <g opacity=".55" fill="#b393ff"><circle cx="80" cy="90" r="1.4"/><circle cx="915" cy="110" r="1.2"/><circle cx="860" cy="630" r="1.5"/><circle cx="135" cy="650" r="1"/></g>
+          <g data-system="achiral" transform="translate(500 355)">
+            <rect x="-360" y="-260" width="720" height="520" fill="#7dc9e8" fill-opacity=".018" stroke="#7dc9e8" stroke-opacity=".16"/>
+            <text x="0" y="-225" text-anchor="middle" fill="#9cc9dc" font-size="14">鏡像面（概念）</text>
+          </g>
+          <g data-system="achiral" transform="translate(210 205)">
+            <g stroke="#8fa9b4" stroke-width="7" stroke-linecap="round"><path d="M0 0 45-32M0 0-48-25M0 0 30 48M0 0-28 42"/></g>
+            <circle r="18" fill="#d8f3ff"/><circle cx="45" cy="-32" r="15" fill="#7de4ee"/><circle cx="-48" cy="-25" r="15" fill="#ffc56e"/><circle cx="30" cy="48" r="15" fill="#b393ff"/><circle cx="-28" cy="42" r="15" fill="#91e2be"/>
+            <text x="0" y="98" text-anchor="middle" fill="#c8dce4" font-size="14">右手型 A</text>
+          </g>
+          <g data-system="achiral" transform="translate(790 205) scale(-1 1)">
+            <g stroke="#8fa9b4" stroke-width="7" stroke-linecap="round"><path d="M0 0 45-32M0 0-48-25M0 0 30 48M0 0-28 42"/></g>
+            <circle r="18" fill="#d8f3ff"/><circle cx="45" cy="-32" r="15" fill="#7de4ee"/><circle cx="-48" cy="-25" r="15" fill="#ffc56e"/><circle cx="30" cy="48" r="15" fill="#b393ff"/><circle cx="-28" cy="42" r="15" fill="#91e2be"/>
+            <text x="0" y="98" text-anchor="middle" fill="#c8dce4" font-size="14" transform="scale(-1 1)">左手型 B</text>
+          </g>
+          <g data-system="binding" transform="translate(500 540)">
+            <path d="M-270-65h540l-45 95h-450Z" fill="url(#cat)" stroke="#9db5bf" stroke-width="2"/>
+            <g fill="#79dbe6" stroke="#b5e7ed" stroke-width="2">
+              <circle cx="-210" cy="-50" r="15"/><circle cx="-140" cy="-50" r="15"/><circle cx="-70" cy="-50" r="15"/><circle cx="0" cy="-50" r="15"/><circle cx="70" cy="-50" r="15"/><circle cx="140" cy="-50" r="15"/><circle cx="210" cy="-50" r="15"/>
+              <circle cx="-175" cy="-15" r="15"/><circle cx="-105" cy="-15" r="15"/><circle cx="-35" cy="-15" r="15"/><circle cx="35" cy="-15" r="15"/><circle cx="105" cy="-15" r="15"/><circle cx="175" cy="-15" r="15"/>
+            </g>
+            <g stroke="#b393ff" stroke-width="8" stroke-linecap="round"><path d="M-115-5v-60m0 0-25-22m25 22 27-20M95-5v-60m0 0-27-20m27 20 25-22"/></g>
+            <g fill="#d6b46e"><circle cx="-115" cy="-5" r="13"/><circle cx="95" cy="-5" r="13"/></g>
+            <text x="0" y="142" text-anchor="middle" fill="#d9cef7" font-size="14">キラル触媒表面（模式図）</text>
+          </g>
+          <g data-system="reaction" fill="none" stroke-linecap="round">
+            <path d="M240 240Q320 305 405 480" stroke="#7de4ee" stroke-width="4" stroke-dasharray="8 8" filter="url(#cglow)"/>
+            <path d="M760 240Q680 305 595 480" stroke="#ffad75" stroke-width="4" stroke-dasharray="8 8"/>
+            <path d="M405 480Q500 350 595 480" stroke="#91e2be" stroke-width="4"/>
+          </g>
+          <g data-system="reaction" transform="translate(500 320)">
+            <path d="M-95 170Q-50-80 0-110Q50-80 95 170" fill="none" stroke="#91e2be" stroke-width="5" filter="url(#cglow)"/>
+            <path d="M-45 170Q-20-40 30-65Q75 20 80 170" fill="none" stroke="#ff8f70" stroke-width="4"/>
+            <text x="0" y="-145" text-anchor="middle" fill="#c8dce4" font-size="14">異なる遷移状態の障壁</text>
+          </g>
+          <g data-system="product" transform="translate(500 660)">
+            <ellipse rx="175" ry="25" fill="#b393ff" fill-opacity=".06" stroke="#b393ff" stroke-opacity=".35"/>
+            <text x="0" y="5" text-anchor="middle" fill="#d9cef7" font-size="14">片側選択生成・自己触媒による増幅</text>
+          </g>
+          <g font-family="system-ui,sans-serif" font-size="14"><text x="85" y="385" fill="#91a5b3">非キラルなら約1:1</text><text x="700" y="385" fill="#91a5b3">キラル環境では偏り</text></g>
+        </svg>
+        <figcaption id="fallback-stage-caption">2D模式図 · 非キラル</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS 化学図鑑">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/><ellipse cx="20" cy="20" rx="18" ry="7" fill="none" stroke="currentColor" stroke-width="1.3" transform="rotate(-28 20 20)"/><path d="m14 15 6-4 6 4v10l-6 4-6-4Z" fill="none" stroke="currentColor"/><path d="M14 15v10m12-10v10M20 11v18" stroke="currentColor" stroke-opacity=".6"/><circle cx="31" cy="10" r="2" fill="currentColor"/></svg>
+        <div><strong>FRONTIER ATLAS</strong><span>化学図鑑 <b id="catalog-count">05 / 05</b></span></div>
+      </div>
+      <div class="top-actions"><span class="live-badge"><i aria-hidden="true"></i>実用化・基礎研究・仮説を分離</span><button id="briefing-toggle" class="icon-button briefing-toggle" type="button" aria-label="比較・研究段階・基本構成を開く" aria-expanded="false" aria-controls="briefing-rail">☰</button><button id="help-open" class="icon-button" type="button" aria-label="操作ガイドと模型の注意点を開く" aria-haspopup="dialog">?</button></div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title"><p class="eyebrow">ENTRY 05 <span>/</span> ASYMMETRIC CHEMISTRY</p><h1 id="entry-title">MIRROR CHEMISTRY</h1><p>キラリティ・鏡像化学</p></section>
+    <nav class="view-dock" aria-label="キラリティの解説モード"><div class="view-buttons" role="group" aria-label="モードを選ぶ">
+      <button class="view-button" type="button" data-view="achiral" aria-pressed="true">非キラル</button><button class="view-button" type="button" data-view="binding" aria-pressed="false">触媒結合</button><button class="view-button" type="button" data-view="reaction" aria-pressed="false">選択反応</button><button class="view-button" type="button" data-view="product" aria-pressed="false">キラル生成物</button>
+    </div></nav>
+    <p id="flow-caption" class="flow-caption">非キラル環境 → 等価な経路 → 右手 / 左手が約1:1</p>
+
+    <aside id="briefing-rail" class="briefing-rail" aria-labelledby="briefing-title">
+      <div class="rail-heading"><p class="eyebrow">QUICK BRIEFING</p><h2 id="briefing-title">まず押さえる3点</h2></div>
+      <section class="brief-card" aria-labelledby="comparison-title"><h3 id="comparison-title">非キラル / キラル環境</h3><div class="comparison-head" aria-hidden="true"><span>項目</span><span>非キラル</span><span>キラル</span></div><dl id="comparison-list" class="comparison-list"></dl></section>
+      <section class="brief-card research-brief" aria-labelledby="research-brief-title"><h3 id="research-brief-title">研究段階</h3><div id="research-list" class="research-list"></div></section>
+      <section class="brief-card" aria-labelledby="architecture-title"><h3 id="architecture-title">基本構成</h3><ol id="architecture-list" class="architecture-list"></ol></section>
+      <p class="rail-note">触媒表面・分子・経路・eeは教育用近似です。特定反応の遷移状態や実測値を再現していません。</p>
+    </aside>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="mode-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content"><span><small id="panel-mode-english">ACHIRAL ENVIRONMENT</small><strong id="panel-mode-title">鏡に映る2種類が同じ割合でできる</strong></span><span id="panel-toggle-label">解説を開く</span></button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="mode-title"><p id="mode-kicker" class="eyebrow">01 / ACHIRAL ENVIRONMENT</p><h2 id="mode-title">鏡に映る2種類が同じ割合でできる</h2><p id="mode-description">キラルな生成物は、互いに鏡像となる異性体として現れます。触媒や環境がキラルでなければ、エネルギー的に等価な経路からほぼ1:1で生成されることが基本です。</p><p id="mode-study" class="study-note">1:1は理想化された説明です。不純物や後処理によってわずかな偏りが生じることもあります。</p></section>
+        <section aria-labelledby="flow-title"><h3 id="flow-title" class="section-title">分子と反応の流れ <span>REACTION CYCLE</span></h3><ol id="flow-list" class="flow-list"></ol></section>
+        <section class="research-card" aria-labelledby="research-title"><h3 id="research-title" class="section-title">2026年ノーベル化学賞 <span>RESEARCH BOUNDARY</span></h3><div id="research-detail-list" class="research-detail-list"></div></section>
+        <section id="focus-card" class="focus-card" aria-live="polite"><p id="focus-kicker" class="eyebrow">EXPLORE THE MODEL</p><h3 id="focus-title">5つの部位にフォーカス</h3><p id="focus-description">モデルのラベルを選ぶと、該当部分を拡大して基本仕様と研究上の位置づけを解説します。</p><dl id="focus-specs" class="focus-specs" hidden></dl></section>
+        <details class="principles" open><summary>利点と課題</summary><div class="pro-con"><div><h4>可能性</h4><ul id="benefit-list"></ul></div><div><h4>課題</h4><ul id="challenge-list"></ul></div></div></details>
+        <details class="principles"><summary>基本構成・用語</summary><dl id="spec-list" class="spec-list"></dl><p class="fine-print">色は右手・左手を区別する教育用の記号で、CIPのR/S判定そのものではありません。キラル触媒の模式図はSoai反応の実構造そのものではありません。</p></details>
+        <section class="sources" aria-labelledby="source-title"><h3 id="source-title" class="section-title">出典</h3><div id="source-list"><a href="https://www.nobelprize.org/prizes/chemistry/2026/press-release/" target="_blank" rel="noopener noreferrer">NobelPrize.org — Chemistry 2026 press release <span aria-hidden="true">↗</span></a><a href="https://www.nobelprize.org/prizes/chemistry/2026/advanced-information/" target="_blank" rel="noopener noreferrer">NobelPrize.org — Advanced information <span aria-hidden="true">↗</span></a></div><p>2026年10月7日発表。企業・研究機関の承認・推奨を示しません。</p></section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="モデルのホットスポット"><button type="button" class="hotspot" data-hotspot="mirror" hidden><span aria-hidden="true"></span>鏡像異性体</button><button type="button" class="hotspot" data-hotspot="catalyst" hidden><span aria-hidden="true"></span>キラル触媒表面</button><button type="button" class="hotspot" data-hotspot="ligand" hidden><span aria-hidden="true"></span>キラルリガンド</button><button type="button" class="hotspot" data-hotspot="pathway" hidden><span aria-hidden="true"></span>反応経路</button><button type="button" class="hotspot" data-hotspot="product" hidden><span aria-hidden="true"></span>片側選択生成</button></div>
+    <div class="viewport-readout" aria-hidden="true"><span id="orbit-time">T+ 00:00</span><span id="model-stats">主役モデル</span><span id="render-quality">描画準備中</span></div>
+    <p class="look-hint">ドラッグで周回 <span>·</span> ピンチ / ホイールでズーム <span>·</span> Spaceで再生 / 停止</p>
+    <section class="transport" aria-label="アニメーション再生コントロール"><div class="transport-main">
+      <button id="play-toggle" class="play-button" type="button" aria-label="再生" aria-pressed="false"><svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg><svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button>
+      <div class="speed-control" role="group" aria-label="再生速度"><button type="button" data-rate="0.5" aria-pressed="false">0.5×</button><button type="button" data-rate="1" aria-pressed="true">1×</button><button type="button" data-rate="2" aria-pressed="false">2×</button></div>
+      <div class="timeline"><label class="sr-only" for="orbit-timeline">教育用アニメーションのタイムライン</label><input id="orbit-timeline" type="range" min="0" max="40" step="0.05" value="0" aria-valuetext="T+ 00:00 非キラル"><div class="timeline-labels" aria-hidden="true"><span>結合・選択反応・増幅の模式ループ</span><span>00:40 LOOP</span></div></div>
+      <button id="reset-view" class="reset-button" type="button" aria-label="時刻・速度・視点・モードをリセット" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>リセット</span></button>
+    </div></section>
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため3Dと再生操作は使えませんが、2D模式図と基本解説を読めます。</p></noscript>
+  </main>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head"><div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">操作と模型の見方</h2></div><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></div>
+    <div class="help-content"><h3>操作方法</h3><ul id="guide-list"></ul><h3>キラリティと実用化</h3><p>鏡像異性体は同じ原子・結合を持ちながら空間配置が鏡像として異なります。キラル触媒は反応経路に差を作り、目的の鏡像体を優先的に生成します。医薬品などの実用化学と、生命起源の研究は分けて考えます。</p><h3>2026年ノーベル化学賞</h3><p>受賞対象は「不斉有機合成における非線形効果と自己触媒」です。Kaganは1986年に非線形効果を発見し、Soaiは1995年に自己触媒反応の可能性を報告、2003年にきわめて強い鏡像選択性を実現しました。これは生命起源の普遍機構の証明ではありません。</p><h3>正確さと出典</h3><p>分子、触媒表面、障壁、ee、時間は教育用近似です。特定反応の構造・速度・エネルギー・実測値を再現していません。</p><p><a href="https://www.nobelprize.org/prizes/chemistry/2026/press-release/" target="_blank" rel="noopener noreferrer">NobelPrize.org — Chemistry 2026 press release ↗</a><br><a href="https://www.nobelprize.org/prizes/chemistry/2026/advanced-information/" target="_blank" rel="noopener noreferrer">NobelPrize.org — Advanced information ↗</a></p><p class="endorsement-note">本ページはノーベル賞・研究機関の承認・推奨を示しません。</p></div>
+  </dialog>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

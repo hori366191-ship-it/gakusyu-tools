@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Starshipの構造・ホットステージング・再使用を、独自の3D模式図と短いモンタージュで学ぶ宇宙図鑑。">
+  <meta name="theme-color" content="#050810">
+  <title>STARSHIP — 宇宙への巨大な輸送機関 | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-panel="closed">
+    <div id="space-stage" class="space-stage" tabindex="0" role="region" aria-label="Starshipの3D模式図。ドラッグまたは矢印キーで周回、ホイールまたはプラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram">
+        <svg viewBox="0 0 360 650" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">Starshipの2段式ロケットの模式図</title>
+          <desc id="fallback-desc">下部のSuper Heavyに33基、上部のStarshipに6基のエンジンを置いた教育用の侧面図。黒い耐熱タイル、フラップ、ホットステージリングを示します。</desc>
+          <defs>
+            <linearGradient id="steel" x1="0" x2="1">
+              <stop offset="0" stop-color="#59636d">
+              <stop offset=".28" stop-color="#c5cdd2">
+              <stop offset=".58" stop-color="#78838c">
+              <stop offset="1" stop-color="#303a44">
+            </linearGradient>
+            <linearGradient id="flame" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#dff8ff"/>
+              <stop offset=".3" stop-color="#69c9ff"/>
+              <stop offset="1" stop-color="#ff9a54" stop-opacity="0"/>
+            </linearGradient>
+            <pattern id="tiles" width="12" height="10" patternUnits="userSpaceOnUse">
+              <path d="M3 0 6 2.4 3 4.8 0 2.4Z M9 5 12 7.4 9 9.8 6 7.4Z" fill="#121820" stroke="#303945" stroke-width=".7"/>
+            </pattern>
+            <radialGradient id="planet">
+              <stop offset="0" stop-color="#1c5e78"/>
+              <stop offset="1" stop-color="#07131e"/>
+            </radialGradient>
+          </defs>
+          <g fill="#b8d9ef">
+            <circle cx="48" cy="92" r="1.2"/><circle cx="302" cy="68" r="1"/><circle cx="318" cy="210" r="1.5"/>
+            <circle cx="38" cy="330" r="1"/><circle cx="284" cy="392" r="1.2"/><circle cx="70" cy="510" r="1"/>
+          </g>
+          <path d="M-40 650 A250 250 0 0 1 400 650Z" fill="url(#planet)" opacity=".7"/>
+          <g stroke-linejoin="round">
+            <path d="M145 141 Q180 129 215 141 L215 410 Q180 422 145 410Z" fill="url(#steel)" stroke="#d3dce1" stroke-width="1.4"/>
+            <path d="M145 158 Q180 150 215 158 L215 395 Q180 404 145 395Z" fill="url(#tiles)" opacity=".94"/>
+            <path d="M145 141 Q180 108 180 49 Q180 108 215 141Z" fill="url(#steel)" stroke="#d3dce1" stroke-width="1.4"/>
+            <path d="M151 132 Q180 107 180 62 Q180 105 209 132Z" fill="url(#tiles)"/>
+            <path d="M140 410 Q180 418 220 410 L218 426 Q180 434 142 426Z" fill="#222c35" stroke="#aab7bf"/>
+            <path d="M135 426 Q180 436 225 426 L221 442 Q180 452 139 442Z" fill="url(#steel)" stroke="#c3cdd3"/>
+            <path d="M148 146 139 179 148 191Z M212 146 221 179 212 191Z" fill="#151c24" stroke="#83919b"/>
+            <path d="M145 356 133 392 146 410Z M215 356 227 392 214 410Z" fill="#151c24" stroke="#83919b"/>
+            <g fill="#39434c" stroke="#a6b1b8" stroke-width="1">
+              <path d="M154 442 160 442 158 469 151 469Z"/><path d="M166 442 172 442 172 469 165 469Z"/>
+              <path d="M178 442 184 442 185 469 178 469Z"/><path d="M190 442 196 442 196 469 189 469Z"/>
+              <path d="M202 442 208 442 211 469 204 469Z"/>
+            </g>
+            <g fill="url(#flame)">
+              <path d="M151 469 158 469 154 514Z"/><path d="M165 469 172 469 169 526Z"/>
+              <path d="M178 469 185 469 181 532Z"/><path d="M189 469 196 469 193 520Z"/>
+              <path d="M204 469 211 469 207 508Z"/>
+            </g>
+            <g stroke="#727f89" stroke-width="2" fill="none">
+              <path d="M145 206h35M145 246h35M145 286h35M145 326h35M145 366h35"/>
+              <path d="M139 228h21v18h-21zM139 231l21 12m0-12-21 12M220 228h21v18h-21zM220 231l21 12m0-12-21 12"/>
+            </g>
+          </g>
+          <g fill="#dcebf4" font-family="system-ui, sans-serif" font-size="12">
+            <text x="238" y="188">耐熱タイル</text><text x="238" y="369">前方 / 後方フラップ</text>
+            <text x="238" y="423">ホットステージリング</text><text x="24" y="455">Super Heavy</text>
+          </g>
+          <g stroke="#6fd7e8" stroke-width="1" opacity=".75">
+            <path d="M231 184h-18M231 365h-18M231 419h13M120 451h28"/>
+          </g>
+        </svg>
+        <figcaption id="fallback-stage-caption">2D模式図 · 発進</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS 宇宙図鑑">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M20 4 31 29 20 24 9 29Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M5 32c8-5 22-5 30 0M20 24v11" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <div><strong>FRONTIER ATLAS</strong><span>宇宙図鑑 <b id="catalog-count">01 / 01</b></span></div>
+      </div>
+      <div class="top-actions">
+        <span class="live-badge"><i aria-hidden="true"></i>開発・飛行試験中</span>
+        <button id="observation-open" class="observation-open" type="button" aria-expanded="false" aria-controls="observation-drawer">観察</button>
+        <button id="help-open" class="icon-button" type="button" aria-label="操作ガイドと模型の注意点を開く" aria-haspopup="dialog">?</button>
+      </div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title">
+      <p class="eyebrow">ENTRY 01 <span aria-hidden="true">/</span> REUSABLE SPACECRAFT</p>
+      <h1 id="entry-title">STARSHIP</h1>
+      <p>宇宙への巨大な輸送機関</p>
+    </section>
+
+    <section id="observation-drawer" class="observation-drawer" aria-labelledby="observation-title" hidden>
+      <div class="drawer-head">
+        <div><p class="eyebrow">OBSERVATION TOOLS</p><h2 id="observation-title">観察ツール</h2></div>
+        <button id="observation-close" class="icon-button" type="button" aria-label="観察ツールを閉じる">×</button>
+      </div>
+      <div class="view-buttons" role="group" aria-label="視点を選ぶ">
+        <button class="view-button" type="button" data-view="overall" aria-pressed="true">全体</button>
+        <button class="view-button" type="button" data-view="engines" aria-pressed="false">エンジン</button>
+        <button class="view-button" type="button" data-view="hotstage" aria-pressed="false">ホットステージング</button>
+        <button class="view-button" type="button" data-view="flaps" aria-pressed="false">フラップ</button>
+      </div>
+      <div class="display-buttons" role="group" aria-label="構造の表示">
+        <button id="section-toggle" class="tool-button" type="button" aria-pressed="false" disabled>断面</button>
+        <button id="explode-toggle" class="tool-button" type="button" aria-pressed="false" disabled>分解</button>
+        <button id="reset-view" class="tool-button" type="button" disabled>視点を戻す</button>
+      </div>
+      <p class="drawer-note">ドラッグで周回、ホイールでズーム。構造ラベルからも説明へ移動できます。</p>
+    </section>
+
+    <aside class="mission-rail" aria-labelledby="mission-list-title">
+      <div class="rail-heading"><p class="eyebrow">MISSION SEQUENCE</p><h2 id="mission-list-title">ミッション段階</h2></div>
+      <ol id="stage-list" class="stage-list">
+        <li><button type="button" class="stage-button is-current" data-stage-index="0" aria-current="step"><span class="stage-number">01</span><span><strong>発進</strong><small>LIFTOFF</small></span></button></li>
+        <li><button type="button" class="stage-button" data-stage-index="1"><span class="stage-number">02</span><span><strong>上昇 / Max-Q</strong><small>ASCENT</small></span></button></li>
+        <li><button type="button" class="stage-button" data-stage-index="2"><span class="stage-number">03</span><span><strong>ホットステージング</strong><small>STAGE SEPARATION</small></span></button></li>
+        <li><button type="button" class="stage-button" data-stage-index="3"><span class="stage-number">04</span><span><strong>ブースター帰還 / キャッチ</strong><small>BOOSTER RETURN</small></span></button></li>
+        <li><button type="button" class="stage-button" data-stage-index="4"><span class="stage-number">05</span><span><strong>軌道</strong><small>ORBIT / BEYOND</small></span></button></li>
+        <li><button type="button" class="stage-button" data-stage-index="5"><span class="stage-number">06</span><span><strong>上段帰還 / キャッチ</strong><small>SHIP RETURN · CONCEPT</small></span></button></li>
+      </ol>
+      <p class="rail-note">時刻・高度・軌道は学習用に短縮しています。</p>
+    </aside>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="phase-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content">
+        <span><small id="panel-phase-number">PHASE 01</small><strong id="panel-phase-title">発進</strong></span>
+        <span id="panel-toggle-label">解説を開く</span>
+      </button>
+      <div id="info-content" class="info-content">
+        <section class="phase-copy" aria-labelledby="phase-title">
+          <p id="phase-kicker" class="eyebrow">01 / LIFTOFF</p>
+          <h2 id="phase-title">発進</h2>
+          <p id="phase-description">Super Heavyの33基とStarshipの6基、合計39基のRaptorが燃焼を開始します。押し上げる力が機体の重さを上回ると、発射台を離れます。</p>
+          <p id="phase-study" class="study-note">推力と重量の差が、発進の決め手です。</p>
+        </section>
+
+        <section class="status-card" aria-label="現在の研究段階">
+          <span class="status-dot" aria-hidden="true"></span>
+          <div><small>CURRENT STATUS</small><strong>開発・飛行試験中</strong></div>
+        </section>
+
+        <section aria-labelledby="spec-title">
+          <h3 id="spec-title" class="section-title">基本仕様 <span>REFERENCE MODEL</span></h3>
+          <dl id="spec-list" class="spec-list">
+            <div><dt>全高</dt><dd>約121m<small>構成・世代で変動</small></dd></div>
+            <div><dt>直径</dt><dd>約9m<small>胴体の公称値</small></dd></div>
+            <div><dt>エンジン</dt><dd>33 + 6基<small>Raptorを目安に配置</small></dd></div>
+            <div><dt>推進剤</dt><dd>メタン / 酸素<small>液体メタン＋液体酸素</small></dd></div>
+            <div><dt>構成</dt><dd>2段式<small>Super Heavy + Starship</small></dd></div>
+          </dl>
+          <p class="fine-print">全高約121m・直径約9mを基準にした独自の教育用模式図です。実機のCADではなく、構成・エンジン数・形状は世代や仕様で変わります。</p>
+        </section>
+
+        <section id="focus-card" class="focus-card" aria-live="polite">
+          <p id="focus-kicker" class="eyebrow">EXPLORE THE MODEL</p>
+          <h3 id="focus-title">構造を拡大して見る</h3>
+          <p id="focus-description">3Dのラベル、上部の「観察」ドロワー、「断面」「分解」を組み合わせると、エンジン・タンク・分離部・フラップ・ペイロードを読み解けます。</p>
+          <dl id="focus-specs" class="focus-specs" hidden></dl>
+        </section>
+
+        <section class="evidence-grid" aria-label="確認済みと計画の区別">
+          <div class="evidence confirmed">
+            <h3><span aria-hidden="true">✓</span> 飛行試験で確認されたこと</h3>
+            <ul id="confirmed-list"><li>統合機体の発進・上昇</li><li>多基エンジンの同時燃焼</li></ul>
+          </div>
+          <div class="evidence planned">
+            <h3><span aria-hidden="true">→</span> 計画・構想</h3>
+            <ul id="planned-list"><li>安定した再利用への反復</li><li>より短いターンアラウンド</li></ul>
+          </div>
+        </section>
+
+        <details class="principles">
+          <summary>設計のキーワード</summary>
+          <dl id="principle-list">
+            <div><dt>再使用</dt><dd>回収した機体を点検・再整備して繰り返し使う設計。</dd></div>
+            <div><dt>アームキャッチ</dt><dd>地面着陸ではなく塔のアームで機体を挟む構想。上段は開発・構想です。</dd></div>
+            <div><dt>ホットステージング</dt><dd>上段の分離と点火を重ねる試み。</dd></div>
+            <div><dt>メタンと酸素</dt><dd>液体メタンと液体酸素を推進剤に使う設計。</dd></div>
+            <div><dt>月・火星へ</dt><dd>大きな貨物や多人の輸送を見込んだ構想。</dd></div>
+          </dl>
+        </details>
+
+        <section class="sources" aria-labelledby="source-title">
+          <h3 id="source-title" class="section-title">公式出典</h3>
+          <a href="https://www.spacex.com/vehicles/starship" target="_blank" rel="noopener noreferrer">SpaceX — Starship <span aria-hidden="true">↗</span></a>
+          <a href="https://www.spacex.com/updates" target="_blank" rel="noopener noreferrer">SpaceX — Updates <span aria-hidden="true">↗</span></a>
+          <p>動きは現実の軌道・流体・重力計算ではなく、順序を学ぶための短い教育用モンタージュです。本ページは企業の承認・推奨を示しません。</p>
+        </section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="構造のホットスポット">
+      <button type="button" class="hotspot" data-hotspot="engines" hidden><span aria-hidden="true"></span>エンジン</button>
+      <button type="button" class="hotspot" data-hotspot="tanks" hidden><span aria-hidden="true"></span>タンク</button>
+      <button type="button" class="hotspot" data-hotspot="hotstage" hidden><span aria-hidden="true"></span>分離リング</button>
+      <button type="button" class="hotspot" data-hotspot="flaps" hidden><span aria-hidden="true"></span>フラップ</button>
+      <button type="button" class="hotspot" data-hotspot="payload" hidden><span aria-hidden="true"></span>ペイロード</button>
+    </div>
+
+    <div class="viewport-readout" aria-hidden="true">
+      <span id="mission-time">T+ 00:00</span>
+      <span id="render-quality">描画準備中</span>
+    </div>
+    <p id="look-hint" class="look-hint">ドラッグで周回 <span>·</span> ホイールでズーム</p>
+
+    <section class="transport" aria-label="ミッション再生コントロール">
+      <div class="transport-main">
+        <button id="play-toggle" class="play-button" type="button" aria-label="再生" aria-pressed="false">
+          <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>
+          <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>
+        </button>
+        <div class="speed-control" role="group" aria-label="再生速度">
+          <button type="button" data-rate="0.5" aria-pressed="false">0.5×</button>
+          <button type="button" data-rate="1" aria-pressed="true">1×</button>
+          <button type="button" data-rate="2" aria-pressed="false">2×</button>
+        </div>
+        <div class="timeline">
+          <label class="sr-only" for="mission-timeline">ミッションタイムライン</label>
+          <input id="mission-timeline" type="range" min="0" max="70" step="0.05" value="0" aria-valuetext="T+ 00:00 発進">
+          <div id="timeline-stages" class="timeline-stages" aria-label="段階へ移動">
+            <button type="button" data-stage-index="0" class="is-current" aria-label="発進 T+ 00:00"><span>01</span><small>発進</small></button>
+            <button type="button" data-stage-index="1" aria-label="上昇 T+ 00:10"><span>02</span><small>上昇</small></button>
+            <button type="button" data-stage-index="2" aria-label="ホットステージング T+ 00:22"><span>03</span><small>分離</small></button>
+            <button type="button" data-stage-index="3" aria-label="ブースター帰還 T+ 00:30"><span>04</span><small>帰還</small></button>
+            <button type="button" data-stage-index="4" aria-label="軌道 T+ 00:44"><span>05</span><small>軌道</small></button>
+            <button type="button" data-stage-index="5" aria-label="上段帰還・アームキャッチ T+ 00:54"><span>06</span><small>上段帰還</small></button>
+          </div>
+        </div>
+        <button id="reset-mission" class="reset-button" type="button" aria-label="ミッションを最初からリセット">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg>
+          <span>リセット</span>
+        </button>
+      </div>
+      <div id="tracking-control" class="tracking-control">
+        <div class="tracking-buttons" role="group" aria-label="分離後の追跡対象">
+          <button type="button" data-track="auto" aria-pressed="true" disabled>自動</button>
+          <button type="button" data-track="both" aria-pressed="false" disabled>両方</button>
+          <button type="button" data-track="ship" aria-pressed="false" disabled>上段</button>
+          <button type="button" data-track="booster" aria-pressed="false" disabled>下段</button>
+        </div>
+        <span id="tracking-status" role="status">分離後に選択できます</span>
+      </div>
+    </section>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため、3Dと再生操作は使えません。上の2D模式図と説明は読めます。</p></noscript>
+  </main>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head">
+      <div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">操作と模型の見方</h2></div>
+      <button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button>
+    </div>
+    <div class="help-content">
+      <h3>操作方法</h3>
+      <ul id="guide-list">
+        <li>ドラッグまたは矢印キーで周回し、ホイールまたは + / - キーでズームします。</li>
+        <li>上部の「観察」ボタンで視点・断面・分解ツールを開きます。閉じるボタンまたはEscで閉じられます。</li>
+        <li>「視点を戻す」はカメラだけを初期位置へ戻します。ミッション時刻は変わりません。</li>
+        <li>段階名を選ぶと、その段階の開始時刻へ移動して一時停止し、追跡は「自動」に戻ります。</li>
+        <li>分離後は下部transport内の「自動 / 両方 / 上段 / 下段」で追跡先を選べます。手動選択は自動へ戻すかリセットするまで保持されます。</li>
+        <li>「断面」は胴体を半透明にしてタンクやペイロードを見せます。「分解」は内部を少し左右へ広げます。</li>
+        <li>帰還は横移動・直立・垂直降下・アーム閉鎖・エンジン停止の順です。上段キャッチと最終的な上下段保持は開発・構想として描画します。</li>
+        <li>再生速度とタイムラインは教育用の短いモンタージュです。実際の飛行時間・高度・軌道ではありません。</li>
+      </ul>
+      <h3>正確さと出典</h3>
+      <p>全高約121m・直径約9mを基準にした独自の教育用模式図です。SpaceXの画像・CAD・ロゴは使っていません。フラップは後方2枚（左右・180°間隔）＋前方2枚（20°と160°・140°間隔）の計4枚とし、黒い耐熱タイルは風前面の半球だけに配置しています。ペイロードは軌道stageでのみ展開します。グリッドフィン・PEZディスペンサー・放電ワイヤなども教育用の近似で、実機のCAD・厳密な流体・軌道計算ではありません。</p>
+      <p>分離高度320〜360モデル単位は、発射台と地球の曲線を見せるための圧縮表現です。実際の高度・時間・軌道をそのまま表すものではありません。</p>
+      <p>「飛行試験で確認されたこと」と「計画・構想」を分けて表示しています。下段のアームキャッチには飛行試験例がありますが、上段の帰還・アームキャッチと最終的な上下段保持は開発・構想です。最新の個別飛行結果は公式Updatesで確認してください。</p>
+      <p>発射台の地形は地球球面へ滑らかにつながるよう生成しています。機体の回転を考慮した最下端を地面の安全余裕より上に保ち、教育用モンタージュでも地面を貫通しないようにしています。</p>
+      <p>地球画像は <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map#july" target="_blank" rel="noopener noreferrer">NASA Blue Marble: Next Generation, July 2004</a>（NASA Earth Observatory、Reto Stöckli / NASA Goddard Space Flight Center）です。<a href="../../site/app13/" target="_blank" rel="noopener noreferrer">site/app13</a> のクレジットに基づき、4096px版と2048px版をコピーして品質に応じて使い分けています。地球は静止した教育用の巨大球として描いています。</p>
+      <p><a href="https://www.spacex.com/vehicles/starship" target="_blank" rel="noopener noreferrer">SpaceX — Starship ↗</a><br><a href="https://www.spacex.com/updates" target="_blank" rel="noopener noreferrer">SpaceX — Updates ↗</a></p>
+      <p class="endorsement-note">本ページは企業の承認・推奨を示しません。</p>
+    </div>
+  </dialog>
+
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

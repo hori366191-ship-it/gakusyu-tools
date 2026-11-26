@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="現在のThree.jsプロシージラルStarshipと、Blenderで制作したStarshipを同じカメラで比較するローカル学習ページ。">
+  <meta name="theme-color" content="#070b12">
+  <title>STARSHIP — Procedural / Blender比較 | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main class="lab">
+    <header class="lab-header">
+      <div class="title-block">
+        <p class="eyebrow">FRONTIER ATLAS <span aria-hidden="true">/</span> MODEL LAB 01</p>
+        <h1>STARSHIP <small>モデル比較</small></h1>
+        <p class="lead">同じ尺度・同じ視点で、プロシージラル生成とBlenderモデリングの違いを観察します。</p>
+      </div>
+      <div class="model-notice" aria-label="モデルの位置づけ">
+        <span>教育用モデル</span>
+        <strong>実機CADではありません</strong>
+      </div>
+    </header>
+
+    <section class="toolbar" aria-label="比較ビューの操作">
+      <div class="view-buttons" role="group" aria-label="表示範囲">
+        <button class="view-button" type="button" data-view="overall" aria-pressed="true" disabled>全体</button>
+        <button class="view-button" type="button" data-view="flaps" aria-pressed="false" disabled>フラップ</button>
+        <button class="view-button" type="button" data-view="engines" aria-pressed="false" disabled>エンジン</button>
+        <button class="view-button" type="button" data-view="side" aria-pressed="false" disabled>側面</button>
+      </div>
+      <div class="camera-tools">
+        <button id="sync-toggle" class="sync-button" type="button" role="switch" aria-checked="true" disabled>
+          <span class="switch-dot" aria-hidden="true"></span>
+          <span id="sync-label">カメラ同期 ON</span>
+        </button>
+        <button id="reset-view" class="reset-button" type="button" disabled>視点を戻す</button>
+      </div>
+      <p id="camera-hint" class="camera-hint">ドラッグで周回・ホイールでズーム・2本指でピンチ。同期ONなら片方の操作が両方に反映されます。</p>
+    </section>
+
+    <section class="comparison-grid" aria-label="2つのStarshipモデル">
+      <article class="viewer-panel" aria-labelledby="procedural-title">
+        <header class="panel-header">
+          <div>
+            <p class="panel-kicker">LEFT / GENERATIVE</p>
+            <h2 id="procedural-title">現在のプロシージラルモデル</h2>
+          </div>
+          <span class="scale-badge">全高121m</span>
+        </header>
+        <div id="procedural-viewport" class="viewport" tabindex="0" role="region" aria-label="プロシージラルStarship。ドラッグまたは矢印キーで周回、ホイールまたはプラス・マイナスキーでズームできます。" data-state="loading">
+          <p id="procedural-status" class="panel-status" role="status">Three.jsモデルを準備中…</p>
+          <div id="procedural-error" class="error-panel" role="alert" hidden>
+            <strong>プロシージラルモデルを表示できません</strong>
+            <p id="procedural-error-message"></p>
+          </div>
+        </div>
+        <dl class="model-stats" aria-label="プロシージラルモデルの情報">
+          <div><dt>三角形</dt><dd id="procedural-triangles">—</dd></div>
+          <div><dt>メッシュ</dt><dd id="procedural-meshes">—</dd></div>
+          <div><dt>材質</dt><dd id="procedural-materials">—</dd></div>
+          <div><dt>生成元サイズ</dt><dd id="procedural-size">—</dd></div>
+        </dl>
+        <p class="panel-caption">既存の <code>createStarshipModel()</code> を変更せず使用。エンジンは無火の静止状態で比較します。</p>
+      </article>
+
+      <article class="viewer-panel" aria-labelledby="blender-title">
+        <header class="panel-header">
+          <div>
+            <p class="panel-kicker">RIGHT / BLENDER 5.3</p>
+            <h2 id="blender-title">Blender製Starship</h2>
+          </div>
+          <span class="scale-badge">全高121m</span>
+        </header>
+        <div id="blender-viewport" class="viewport" tabindex="0" role="region" aria-label="Blender製Starship。ドラッグまたは矢印キーで周回、ホイールまたはプラス・マイナスキーでズームできます。" data-state="loading">
+          <p id="blender-status" class="panel-status" role="status">Blender版GLBを読み込み中…</p>
+          <div id="blender-error" class="error-panel" role="alert" hidden>
+            <strong>Blender版GLBを読み込めません</strong>
+            <p id="blender-error-message"></p>
+            <p class="error-help">リポジトリルートで <code>scripts/blender/build_starship.py</code> を実行し、<code>その他/frontier-atlas-blender/models/starship-blender.glb</code> を生成してください。</p>
+          </div>
+        </div>
+        <dl class="model-stats" aria-label="Blenderモデルの情報">
+          <div><dt>三角形</dt><dd id="blender-triangles">—</dd></div>
+          <div><dt>メッシュ</dt><dd id="blender-meshes">—</dd></div>
+          <div><dt>材質</dt><dd id="blender-materials">—</dd></div>
+          <div><dt>GLBサイズ</dt><dd id="blender-size">—</dd></div>
+        </dl>
+        <p class="panel-caption">Blenderで制作した外形モデル。PBR材質・UV・安定したオブジェクト名をglTFへ出力します。</p>
+      </article>
+    </section>
+
+    <section class="lab-notes" aria-labelledby="notes-title">
+      <div>
+        <p class="eyebrow">COMPARISON NOTES</p>
+        <h2 id="notes-title">比較の見方</h2>
+      </div>
+      <ul>
+        <li>Super Heavyは半径4.5m・高さ71m、Starship上段は半径4.5m・全高50m。2段を重ねた全高は121mです。</li>
+        <li>後方フラップは±Xへ180°間隔、前方フラップは20°と160°へ140°間隔で配置し、前方のヒンジ軸を傾けています。</li>
+        <li>黒タイルは風前面の半球だけ。Blender版はHexタイルをインスタンス化してから1メッシュへマージします。</li>
+        <li>三角形数は表示メッシュの実描画分（現在版のInstancedMeshを含む）を数えます。左のサイズはモデル本体と仕様ファイルのJS合計で、右はGLBファイルそのものです。</li>
+      </ul>
+    </section>
+
+    <footer class="lab-footer">
+      <p>本ページは構造比較のための教育用モデルです。実機のCAD・設計図・承認済み形状ではなく、エンジン数や形状は世代・仕様によって変わります。</p>
+      <p>Three.js 0.180.0 / Blender 5.3.0 / glTF 2.0</p>
+    </footer>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため、3D比較は利用できません。上の仕様説明は読めます。</p></noscript>
+  </main>
+
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

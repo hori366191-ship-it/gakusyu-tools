@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="AIがAIの開発を改善する再帰ループを、現在の実装と未実証の仮説に分けて学ぶ、プロシージャル3Dの教育用展示です。">
+  <meta name="theme-color" content="#03060d">
+  <title>RSI — 再帰的自己改善 | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-mode="assisted" data-panel="closed">
+    <div id="space-stage" class="space-stage" tabindex="0" role="region" aria-label="再帰的自己改善ループの3D模式図。ドラッグまたは矢印キーで周回、ホイール・ピンチ・プラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram" data-mode="assisted">
+        <svg viewBox="0 0 480 480" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">再帰的自己改善ループの2D模式図</title>
+          <desc id="fallback-desc">中央のAIコアからコード生成、実験、評価、モデル改善へ粒子が進みます。現在のAI支援は人間レビューを挟む開ループ、完全自律RSIは内側の再帰リングを持つ閉ループです。放射粒子のシアンはコアへ向かう流れ、紫はコアからノードへ向かう流れを表します。</desc>
+          <defs>
+            <radialGradient id="f-core">
+              <stop offset="0" stop-color="#d8fbff"/>
+              <stop offset=".35" stop-color="#57cbdc"/>
+              <stop offset="1" stop-color="#123044"/>
+            </radialGradient>
+            <radialGradient id="f-halo">
+              <stop offset="0" stop-color="#72e4ed" stop-opacity=".25"/>
+              <stop offset="1" stop-color="#72e4ed" stop-opacity="0"/>
+            </radialGradient>
+            <marker id="f-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M0 0 10 5 0 10Z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g class="f-stars" fill="#9fc6da">
+            <circle cx="42" cy="73" r="1"/><circle cx="426" cy="62" r="1.4"/><circle cx="453" cy="240" r="1"/>
+            <circle cx="58" cy="397" r="1.2"/><circle cx="369" cy="449" r="1"/><circle cx="221" cy="32" r="1"/>
+          </g>
+          <circle class="f-safety-ring" cx="240" cy="240" r="190" fill="none" stroke-width="2" stroke-dasharray="3 10"/>
+          <circle cx="240" cy="240" r="177" fill="none" stroke-width="1" opacity=".28"/>
+          <g class="f-safety-labels" fill="currentColor" font-size="10" letter-spacing="2">
+            <text x="240" y="35" text-anchor="middle">HUMAN OVERSIGHT</text>
+            <text x="240" y="463" text-anchor="middle">EVALUATION · SAFETY</text>
+          </g>
+          <path class="f-loop f-loop-open" d="M94 240A146 146 0 1 1 240 386" fill="none" stroke-width="2" stroke-dasharray="7 8"/>
+          <circle class="f-loop f-loop-closed" cx="240" cy="240" r="146" fill="none" stroke-width="2" stroke-dasharray="7 8"/>
+          <g class="f-flow-arrows" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M94 254v-20m-5 5 5-5 5 5"/>
+            <path d="M220 94h20m-5-5 5 5-5 5"/>
+            <path d="M386 226v20m-5-5 5 5 5-5"/>
+          </g>
+          <path class="f-closed-arrow" d="M220 386h-20m5-5-5 5 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <g class="f-radials" fill="none" stroke-width="1" stroke-dasharray="3 6" opacity=".6">
+            <path d="M240 184 96 240M304 240 384 240M240 296v92"/>
+          </g>
+          <g class="f-node" data-fallback-node="code" transform="translate(96 240)">
+            <circle r="34" fill="#081622" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M-13-9-22 0l9 9M13-9l9 9-9 9M4-16-4 16" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <text y="57" text-anchor="middle">コード生成</text>
+          </g>
+          <g class="f-node" data-fallback-node="experiment" transform="translate(240 94)">
+            <circle r="34" fill="#081622" stroke="currentColor" stroke-width="1.5"/>
+            <ellipse rx="19" ry="8" fill="none" stroke="currentColor" stroke-width="1.5" transform="rotate(-25)"/>
+            <circle cx="8" cy="-9" r="3" fill="currentColor"/>
+            <text y="57" text-anchor="middle">実験</text>
+          </g>
+          <g class="f-node" data-fallback-node="evaluation" transform="translate(384 240)">
+            <circle r="34" fill="#081622" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M-17 13V-3M0 13V-13M17 13V-7" fill="none" stroke="currentColor" stroke-width="5"/>
+            <text y="57" text-anchor="middle">評価</text>
+          </g>
+          <g class="f-human-gate" data-fallback-gate transform="translate(343 343)">
+            <path d="M-17 18v-36h34v36M-11 18v-25h22v25" fill="rgba(131,226,181,.08)" stroke="#83e2b5" stroke-width="2"/>
+            <path d="m0-9 5 6v7l-5 4-5-4v-7Z" fill="none" stroke="#83e2b5" stroke-width="1.5"/>
+            <text y="42" text-anchor="middle">人間レビュー</text>
+          </g>
+          <g class="f-node" data-fallback-node="model" transform="translate(240 386)">
+            <circle r="34" fill="#081622" stroke="currentColor" stroke-width="1.5"/>
+            <path d="m0-20 17 10v20L0 20-17 10v-20Z M-17-10 17 10M17-10-17 10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text y="57" text-anchor="middle">モデル改善</text>
+          </g>
+          <g class="f-inner-loop">
+            <circle cx="240" cy="240" r="83" fill="none" stroke="#c39cff" stroke-width="2" stroke-dasharray="4 6"/>
+            <g fill="#c39cff">
+              <circle cx="157" cy="240" r="5"/><circle cx="240" cy="157" r="6"/><circle cx="323" cy="240" r="7"/><circle cx="240" cy="323" r="8"/>
+            </g>
+            <text x="240" y="214" text-anchor="middle">生成N → 生成N+1</text>
+          </g>
+          <circle cx="240" cy="240" r="101" fill="url(#f-halo)"/>
+          <g class="f-core">
+            <circle cx="240" cy="240" r="57" fill="url(#f-core)" stroke="currentColor" stroke-width="2"/>
+            <path d="M240 43v34M240 403v34M43 240h34M403 240h34" opacity=".3"/>
+            <path d="m240 199 35 20v41l-35 21-35-21v-41Z M205 240h70M240 199v82" fill="none" stroke="#d9fbff" stroke-width="1.5" opacity=".8"/>
+            <circle cx="240" cy="240" r="13" fill="#e8feff"/>
+            <text x="240" y="304" text-anchor="middle" fill="#dffbff" font-size="13" font-weight="700" letter-spacing="3">AI CORE</text>
+          </g>
+          <circle id="fallback-particle" class="f-particle" cx="386" cy="240" r="5" fill="#e8feff"/>
+          <circle id="fallback-radial-out" class="f-radial-particle" cx="180" cy="240" r="4" fill="#72e4ed"/>
+          <circle id="fallback-radial-in" class="f-radial-particle" cx="300" cy="240" r="4" fill="#c39cff"/>
+        </svg>
+        <figcaption id="fallback-stage-caption">2D模式図 · 現在のAI支援</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS AI図鑑">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M20 5 33 13v14L20 35 7 27V13Z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          <path d="m20 11 8 5v8l-8 5-8-5v-8Z M12 16l16 8m0-8L12 24" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+        <div><strong>FRONTIER ATLAS</strong><span>AI図鑑 <b>RSI / 01</b></span></div>
+      </div>
+      <div class="top-actions">
+        <span class="evidence-badge"><i aria-hidden="true"></i>実装と仮説を分離</span>
+        <button id="help-open" class="icon-button" type="button" aria-label="操作ガイドと概念モデルの注意点を開く" aria-haspopup="dialog">?</button>
+      </div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title">
+      <p class="eyebrow">ENTRY 01 <span aria-hidden="true">/</span> RECURSIVE SELF-IMPROVEMENT</p>
+      <h1 id="entry-title">RSI</h1>
+      <p>再帰的自己改善 — AIが次のAI開発を変える</p>
+    </section>
+
+    <div class="mode-switch" role="group" aria-label="実装と仮説の表示モード">
+      <button type="button" class="mode-button" data-mode="assisted" aria-pressed="true">
+        <span class="mode-dot" aria-hidden="true"></span>
+        <span><small>OBSERVED PRACTICE</small>現在のAI支援</span>
+      </button>
+      <button type="button" class="mode-button" data-mode="hypothesis" aria-pressed="false">
+        <span class="mode-dot" aria-hidden="true"></span>
+        <span><small>UNVERIFIED HYPOTHESIS</small>完全自律RSI（仮説）</span>
+      </button>
+    </div>
+
+    <div id="structure-label" class="structure-label" role="status" aria-live="polite">HUMAN IN THE LOOP · OPEN LOOP</div>
+
+    <nav class="loop-rail" aria-labelledby="loop-list-title">
+      <div class="rail-heading"><p class="eyebrow">IMPROVEMENT LOOP</p><h2 id="loop-list-title">ループの構成要素</h2></div>
+      <ol class="loop-list">
+        <li><button type="button" class="loop-button" data-node="code" aria-pressed="false"><span class="loop-number">01</span><span><strong>コード生成</strong><small>CODE GENERATION</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="loop-button" data-node="experiment" aria-pressed="false"><span class="loop-number">02</span><span><strong>実験</strong><small>EXPERIMENT</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="loop-button" data-node="evaluation" aria-pressed="false"><span class="loop-number">03</span><span><strong>評価</strong><small>EVALUATION</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="loop-button" data-node="model" aria-pressed="false"><span class="loop-number">04</span><span><strong>モデル改善</strong><small>MODEL IMPROVEMENT</small></span><i aria-hidden="true"></i></button></li>
+      </ol>
+      <p class="rail-note">外周のリングは、人間による評価・監督・安全装置を表します。</p>
+    </nav>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="panel-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content">
+        <span><small id="panel-kicker">MODE 01</small><strong id="panel-handle-title">現在のAI支援</strong></span>
+        <span id="panel-toggle-label">解説を開く</span>
+      </button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="panel-title">
+          <p id="panel-english" class="eyebrow">CURRENT AI ASSISTANCE</p>
+          <h2 id="panel-title">現在のAI支援</h2>
+          <p id="panel-summary">AIが研究・開発を支援し、人が目的と承認を担う形です。</p>
+          <p id="panel-structure-note" class="structure-note">評価の後に人間レビューを挟み、承認されてからモデル改善へ進みます。</p>
+          <details class="mode-details">
+            <summary>詳細な説明</summary>
+            <p id="panel-detail">AIはコード生成、プロンプト改善、実験提案、データ分析、モデル評価など、AI研究・開発の有意義な部分をすでに支援しています。</p>
+          </details>
+          <p id="panel-boundary" class="boundary-note">公開情報では、自分の研究アジェンダを設定したり後継モデルを設計したりするシステムは確認されていません。</p>
+        </section>
+
+        <section class="evidence-grid" aria-label="現在の実装と未実証の仮説">
+          <div class="evidence confirmed">
+            <h3><span aria-hidden="true">✓</span> 現在の実装・知見</h3>
+            <ul id="observed-list"></ul>
+          </div>
+          <div class="evidence hypothetical">
+            <h3><span aria-hidden="true">?</span> 未実証の仮説</h3>
+            <ul id="unverified-list"></ul>
+          </div>
+        </section>
+
+        <section id="selected-node-card" class="selected-node-card" aria-labelledby="node-title" hidden>
+          <p id="node-english" class="eyebrow">LOOP COMPONENT</p>
+          <h3 id="node-title">コード生成</h3>
+          <p id="node-role">提案・実装・修正</p>
+          <div class="node-evidence"><small>現在</small><p id="node-current"></p></div>
+          <div class="node-evidence is-hypothesis"><small>仮説モード</small><p id="node-hypothesis"></p></div>
+        </section>
+
+        <section id="risk-card" class="risk-card" aria-labelledby="risk-title">
+          <div class="risk-heading"><h3 id="risk-title">概念上のリスク</h3><output id="risk-value" for="automation evaluation oversight">8 / 100</output></div>
+          <div id="risk-bar" class="risk-bar" role="img" aria-label="概念上のリスク 8 / 100"><span></span></div>
+          <p id="risk-guidance">評価と監督が自動化を支える設定です。</p>
+          <p class="model-notice">教育用の概念モデルです。実際の事故確率や未来予測ではありません。</p>
+        </section>
+
+        <details class="challenges">
+          <summary>主な課題と安全装置</summary>
+          <ol id="challenge-list" class="challenge-list"></ol>
+          <h4>安全装置の例</h4>
+          <ul id="safeguard-list" class="safeguard-list"></ul>
+        </details>
+
+        <section class="sources" aria-labelledby="source-title">
+          <h3 id="source-title" class="section-title">出典 <span>RAND / 2026</span></h3>
+          <a href="https://www.rand.org/pubs/perspectives/PEA5068-1.html" target="_blank" rel="noopener noreferrer">RAND — Recursive Self-Improvement and Automated AI Research and Development <span aria-hidden="true">↗</span></a>
+          <p>RAND, Recursive Self-Improvement and Automated AI Research and Development, 2026.</p>
+          <p>本ページは企業・研究機関の承認・推奨を示しません。</p>
+        </section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="3Dループの構成要素">
+      <button type="button" class="hotspot" data-node="code" aria-pressed="false" hidden><span aria-hidden="true"></span>コード生成</button>
+      <button type="button" class="hotspot" data-node="experiment" aria-pressed="false" hidden><span aria-hidden="true"></span>実験</button>
+      <button type="button" class="hotspot" data-node="evaluation" aria-pressed="false" hidden><span aria-hidden="true"></span>評価</button>
+      <button type="button" class="hotspot" data-node="model" aria-pressed="false" hidden><span aria-hidden="true"></span>モデル改善</button>
+      <div id="gate-label" class="world-label" aria-hidden="true" hidden>HUMAN APPROVAL GATE</div>
+      <div id="generation-label" class="world-label world-label--generation" aria-hidden="true" hidden>生成N → 生成N+1</div>
+    </div>
+
+    <div class="viewport-readout" aria-hidden="true">
+      <span id="loop-readout">LOOP 01 / 05 · コード生成</span>
+      <span id="render-quality">描画準備中</span>
+    </div>
+    <p class="look-hint">ドラッグで周回 <span>·</span> ホイール / ピンチでズーム</p>
+
+    <section class="control-dock" aria-label="ループの再生と概念モデルの調整">
+      <div class="transport-row">
+        <div class="playback-group">
+          <button id="play-toggle" class="play-button" type="button" aria-label="一時停止" aria-pressed="true">
+            <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>
+            <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>
+          </button>
+          <div class="speed-control" role="group" aria-label="再生速度">
+            <button type="button" data-rate="0.5" aria-pressed="false">0.5×</button>
+            <button type="button" data-rate="1" aria-pressed="true">1×</button>
+            <button type="button" data-rate="2" aria-pressed="false">2×</button>
+          </div>
+        </div>
+        <div class="transport-status">
+          <span id="phase-label">コード生成 → 実験</span>
+          <small>粒子の流れは改善の順序を模式化したものです</small>
+        </div>
+        <div class="view-controls" role="group" aria-label="3D視点操作">
+          <button id="zoom-out" class="tool-button" type="button" aria-label="ズームアウト" disabled>−</button>
+          <button id="zoom-in" class="tool-button" type="button" aria-label="ズームイン" disabled>＋</button>
+          <button id="reset-view" class="reset-button" type="button" aria-label="視点を初期位置に戻す" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>視点を戻す</span>
+          </button>
+        </div>
+      </div>
+      <div class="slider-grid" role="group" aria-label="自動化・評価・監督の設定。教育用概念モデル">
+        <div class="slider-control">
+          <div class="slider-label"><label for="automation">自動化の範囲</label><output id="automation-value" for="automation">45%</output></div>
+          <input id="automation" type="range" min="0" max="100" step="5" value="45" aria-describedby="model-note">
+          <small>AIに任せる作業の広さ</small>
+        </div>
+        <div class="slider-control">
+          <div class="slider-label"><label for="evaluation">評価の信頼性</label><output id="evaluation-value" for="evaluation">70%</output></div>
+          <input id="evaluation" type="range" min="0" max="100" step="5" value="70" aria-describedby="model-note">
+          <small>独立した検証の強さ</small>
+        </div>
+        <div class="slider-control">
+          <div class="slider-label"><label for="oversight">人間の監督</label><output id="oversight-value" for="oversight">65%</output></div>
+          <input id="oversight" type="range" min="0" max="100" step="5" value="65" aria-describedby="model-note">
+          <small>レビュー・停止・承認</small>
+        </div>
+      </div>
+      <p id="model-note" class="dock-note">数値は教育用の概念モデルです。自動化が評価・監督を上回ると、模式上のリスクが増えます。</p>
+    </section>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため、3D・再生・スライダーは使えません。2D模式図と出典付きの解説は読めます。</p></noscript>
+  </main>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head">
+      <div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">操作とモデルの見方</h2></div>
+      <form method="dialog"><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></form>
+    </div>
+    <div class="help-content">
+      <h3>操作方法</h3>
+      <ul id="guide-list"></ul>
+      <h3>何を学ぶページか</h3>
+      <p>RSIは、AIが自らの改善に寄与し、その改善が次のAI開発へつながる考え方です。現在のAI支援と、自己目標設定・自己 redesign・知能爆発を含む未実証の仮説を分けて表示しています。</p>
+      <p>中央のコアから4つのノードへ粒子が往復し、外周を別の粒子が同じ方向で巡ります。シアンはコアからノードへ、紫はノードからコアへ戻る放射粒子です。現在のAI支援は人間承認ゲート付きの開ループ、仮説モードは内側の再帰リングを持つ閉ループです。</p>
+      <p>スライダーの出力は、教育上の因果関係を体験するための概念モデルです。実際の事故確率、知能の測定値、将来予測、安全性の実証ではありません。</p>
+      <h3>出典</h3>
+      <p><a href="https://www.rand.org/pubs/perspectives/PEA5068-1.html" target="_blank" rel="noopener noreferrer">RAND — Recursive Self-Improvement and Automated AI Research and Development ↗</a><br>RAND, Recursive Self-Improvement and Automated AI Research and Development, 2026.</p>
+      <p class="endorsement-note">本ページは企業・研究機関の承認・推奨を示しません。</p>
+    </div>
+  </dialog>
+
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

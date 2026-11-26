@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Starshipの打ち上げから火星遷移・突入・着陸・ISRU・居住構想までを学ぶ、FRONTIER ATLASの静的3D図鑑。">
+  <meta name="theme-color" content="#100b0d">
+  <title>BEYOND EARTH — 地球から火星へ | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}
+  </script>
+</head>
+<body>
+<main id="exhibit" class="exhibit" data-panel="closed" data-mode="launch">
+  <div id="space-stage" class="space-stage" tabindex="0" role="region" aria-label="地球から火星への3D模式図。ドラッグまたは矢印キーで周回、ホイールまたはプラス・マイナスキーでズームできます。">
+    <div id="webgl-host" class="webgl-host" aria-hidden="true"></div>
+    <figure id="fallback-diagram" class="fallback-diagram">
+      <svg viewBox="0 0 1000 760" role="img" aria-labelledby="fallback-title fallback-desc">
+        <title id="fallback-title">地球から火星への2D模式図</title>
+        <desc id="fallback-desc">地球を離れるStarship、地球と火星の間の遷移、火星大気への突入、着陸、ISRU設備、居住棟と植物工場。企業構想、NASAの探査実績、未実現の定住を分けて学びます。</desc>
+        <defs>
+          <radialGradient id="space" cx="50%" cy="40%" r="72%"><stop stop-color="#2c1820"/><stop offset="1" stop-color="#100b0d"/></radialGradient>
+          <radialGradient id="earth"><stop stop-color="#68b8d9"/><stop offset=".55" stop-color="#245d87"/><stop offset="1" stop-color="#0c233c"/></radialGradient>
+          <radialGradient id="mars"><stop stop-color="#d8865c"/><stop offset=".55" stop-color="#9b4b32"/><stop offset="1" stop-color="#3b1c1b"/></radialGradient>
+          <linearGradient id="steel" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#67747e"/><stop offset=".45" stop-color="#e5edf0"/><stop offset=".7" stop-color="#9caab2"/><stop offset="1" stop-color="#4e5c66"/></linearGradient>
+          <linearGradient id="flame"><stop stop-color="#e8fbff"/><stop offset=".35" stop-color="#79cfff"/><stop offset="1" stop-color="#ff7b35" stop-opacity="0"/></linearGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect width="1000" height="760" fill="url(#space)"/>
+        <g fill="#e9d7cf" opacity=".65"><circle cx="78" cy="82" r="1.3"/><circle cx="185" cy="160" r="1"/><circle cx="834" cy="86" r="1.5"/><circle cx="924" cy="246" r="1"/><circle cx="109" cy="564" r="1.3"/><circle cx="874" cy="631" r="1.4"/><circle cx="693" cy="690" r="1"/></g>
+        <g id="fallback-earth" transform="translate(230 335)"><circle r="78" fill="url(#earth)"/><path d="M-55-30q30-28 49-5t-5 31-37 8-22 31-28-19 10-34Z M25-57q38 0 38 24t-27 18-25-10Z" fill="#5c865b" opacity=".85"/><path d="M-66 15q66 23 132 0" fill="none" stroke="#c3e8ed" stroke-opacity=".45" stroke-width="4"/></g>
+        <g id="fallback-mars" transform="translate(783 400)"><circle r="104" fill="url(#mars)"/><path d="M-78-25q35-20 58 4t-8 34-45 7-37 28-27-25 20-39Z M29-73q38 5 42 35t-29 22-31-20Z" fill="#713326" opacity=".5"/><path d="M-94 44q94 28 188 0" fill="none" stroke="#e5a077" stroke-opacity=".35" stroke-width="5"/></g>
+        <path d="M308 335Q500 120 679 400" fill="none" stroke="#e1a274" stroke-width="2" stroke-dasharray="8 10" opacity=".55"/>
+        <g id="fallback-ship" transform="translate(690 520) scale(.8)">
+          <path d="M0-96-17-66V62l17 20 17-20V-66Z" fill="url(#steel)" stroke="#edf4f6" stroke-width="1.5"/>
+          <path d="M-18 30h36v26h-36Z" fill="#1d2228"/>
+          <path d="m-17-66-32 44 31-8m35-36 32 44-31-8M-18 35l-30 31 29-5m37-26 30 31-29-5" fill="#7b8b95" stroke="#c6d2d8"/>
+          <path id="fallback-flame" d="M-11 86Q0 170 11 86Z" fill="url(#flame)" filter="url(#glow)"/>
+        </g>
+        <g id="fallback-dust" transform="translate(783 565)" fill="#d68d62" opacity="0"><ellipse rx="95" ry="22"/><circle cx="-72" cy="-15" r="9"/><circle cx="52" cy="-25" r="12"/><circle cx="80" cy="8" r="7"/></g>
+        <g transform="translate(744 596)" fill="#b9c4c9" stroke="#596a74" stroke-width="2"><rect x="-80" y="-20" width="160" height="40" rx="20"/><rect x="-35" y="-56" width="70" height="36" rx="18"/><path d="M0-56v-30" stroke-width="5"/><circle cx="0" cy="-92" r="10" fill="#73929d"/></g>
+        <g transform="translate(855 608)" fill="#253a31" stroke="#789783" stroke-width="2"><rect x="-48" y="-42" width="96" height="84" rx="4" fill="#77a7ae" fill-opacity=".22"/><path d="M-20-15v35M0-22v48M20-12v32" stroke="#69a66b" stroke-width="6"/></g>
+        <g font-family="system-ui,sans-serif" font-size="15" fill="#f0ded4"><text x="174" y="229">地球</text><text x="756" y="260">火星</text><text x="600" y="176">構想上の遷移</text><text x="618" y="704">居住・植物工場は未実現の構想</text></g>
+        <g transform="translate(355 690)"><rect x="-205" y="-19" width="410" height="38" rx="19" fill="#160f13" fill-opacity=".9" stroke="#c58b68" stroke-opacity=".4"/><text x="0" y="5" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" fill="#e2c7b8">探査実績 ≠ 有人移住の実現</text></g>
+      </svg>
+      <figcaption id="fallback-stage-caption">2D模式図 · 打ち上げ</figcaption>
+    </figure>
+    <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+  </div>
+
+  <header class="topbar">
+    <div class="brand" aria-label="FRONTIER ATLAS 宇宙図鑑"><svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/><ellipse cx="20" cy="20" rx="18" ry="7" fill="none" stroke="currentColor" stroke-width="1.3" transform="rotate(-28 20 20)"/><circle cx="20" cy="20" r="3" fill="currentColor"/><circle cx="31" cy="10" r="2" fill="currentColor"/></svg><div><strong>FRONTIER ATLAS</strong><span>宇宙図鑑 <b id="catalog-count">05 / 05</b></span></div></div>
+    <div class="top-actions"><span class="live-badge"><i aria-hidden="true"></i>実績と構想を分離</span><button id="help-open" class="icon-button" type="button" aria-label="操作ガイドと模型の注意点を開く" aria-haspopup="dialog">?</button></div>
+  </header>
+  <section class="exhibit-title" aria-labelledby="entry-title"><p class="eyebrow">ENTRY 05 <span>/</span> INTERPLANETARY EXPLORATION</p><h1 id="entry-title">BEYOND EARTH</h1><p>地球から火星へ</p></section>
+  <nav class="view-dock" aria-label="火星移住構想の解説モード"><div id="view-buttons" class="view-buttons" role="group" aria-label="モードを選ぶ"><button class="view-button" type="button" data-view="launch" aria-pressed="true">打ち上げ</button><button class="view-button" type="button" data-view="transit" aria-pressed="false">遷移</button><button class="view-button" type="button" data-view="entry" aria-pressed="false">大気突入</button><button class="view-button" type="button" data-view="landing" aria-pressed="false">着陸</button><button class="view-button" type="button" data-view="isru" aria-pressed="false">ISRU</button><button class="view-button" type="button" data-view="settlement" aria-pressed="false">居住棟</button></div></nav>
+  <p id="flow-caption" class="flow-caption">打ち上げ → 遷移 → 大気突入 → 着陸 → ISRU → 居住構想</p>
+
+  <aside id="info-panel" class="info-panel" aria-labelledby="mode-title">
+    <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content"><span><small id="panel-mode-english">LAUNCH</small><strong id="panel-mode-title">地球を離れる最初の関門</strong></span><span id="panel-toggle-label">解説を開く</span></button>
+    <div id="info-content" class="info-content">
+      <section class="mode-copy"><p id="mode-kicker" class="eyebrow">01 / LAUNCH</p><h2 id="mode-title">地球を離れる最初の関門</h2><p id="mode-description">Starshipの構想を模式化し、打ち上げから段分離までを学びます。</p><p id="mode-study" class="study-note">模型は教育用です。実現時期や完成した運用実績を断定しません。</p></section>
+      <section aria-labelledby="flow-title"><h3 id="flow-title" class="section-title">移住構想の流れ <span>MISSION FLOW</span></h3><ol id="flow-list" class="flow-list"></ol></section>
+      <section aria-labelledby="research-title"><h3 id="research-title" class="section-title">研究段階の境界 <span>EVIDENCE / CONCEPT</span></h3><div id="research-list" class="research-list"></div></section>
+      <section id="focus-card" class="focus-card" aria-live="polite"><p class="eyebrow">EXPLORE THE MODEL</p><h3 id="focus-title">5つの部位にフォーカス</h3><p id="focus-description">ラベルを選ぶと、各部の仕組みと課題を表示します。</p><dl id="focus-specs" class="focus-specs" hidden></dl></section>
+      <details class="principles" open><summary>基本仕様・課題</summary><dl id="spec-list" class="spec-list"></dl><h4>実現に向けた課題</h4><ul id="challenge-list" class="challenge-list"></ul><p class="fine-print">MOXIEの小規模実証、SpaceX構想、有人定住の実現を分けて考えます。</p></details>
+      <details class="principles"><summary>なぜ火星へ</summary><ul id="benefit-list" class="benefit-list"></ul></details>
+      <section class="sources" aria-labelledby="source-title"><h3 id="source-title" class="section-title">出典</h3><div id="source-list"></div><p>SpaceX・NASAの公式ページに基づきます。承認・推奨を示しません。</p></section>
+    </div>
+  </aside>
+
+  <div id="hotspot-layer" class="hotspot-layer" aria-label="モデルのホットスポット"><button type="button" class="hotspot" data-hotspot="starship" hidden><span aria-hidden="true"></span>Starship</button><button type="button" class="hotspot" data-hotspot="heatshield" hidden><span aria-hidden="true"></span>熱シールド</button><button type="button" class="hotspot" data-hotspot="mars" hidden><span aria-hidden="true"></span>火星環境</button><button type="button" class="hotspot" data-hotspot="isru" hidden><span aria-hidden="true"></span>ISRU</button><button type="button" class="hotspot" data-hotspot="settlement" hidden><span aria-hidden="true"></span>居住棟</button></div>
+  <div class="viewport-readout" aria-hidden="true"><span id="orbit-time">T+ 00:00</span><span id="render-quality">描画準備中</span></div>
+  <p class="look-hint">ドラッグで周回 <span>·</span> ホイールでズーム <span>·</span> Spaceで再生 / 停止</p>
+  <section class="transport" aria-label="アニメーション再生コントロール"><div class="transport-main"><button id="play-toggle" class="play-button" type="button" aria-label="再生" aria-pressed="false"><svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg><svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button><div class="speed-control" role="group" aria-label="再生速度"><button type="button" data-rate="0.5" aria-pressed="false">0.5×</button><button type="button" data-rate="1" aria-pressed="true">1×</button><button type="button" data-rate="2" aria-pressed="false">2×</button></div><div class="timeline"><label class="sr-only" for="orbit-timeline">教育用アニメーションのタイムライン</label><input id="orbit-timeline" type="range" min="0" max="48" step="0.05" value="0" aria-valuetext="T+ 00:00"><div class="timeline-labels" aria-hidden="true"><span>教育用ループ</span><span>00:48</span></div></div><div class="camera-controls"><button id="zoom-out" class="tool-button" type="button" aria-label="ズームアウト">−</button><button id="zoom-in" class="tool-button" type="button" aria-label="ズームイン">＋</button></div><button id="reset-view" class="reset-button" type="button" aria-label="アニメーションと視点をリセット"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>リセット</span></button></div></section>
+  <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+  <noscript><p class="noscript-note">JavaScriptを無効にしているため再生操作は使えませんが、2D模式図と下の解説を読めます。</p></noscript>
+</main>
+<dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title"><div class="dialog-head"><div><p class="eyebrow">MISSION GUIDE</p><h2 id="help-title">操作と模型の見方</h2></div><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></div><div class="help-content"><h3>操作方法</h3><ul id="guide-list"></ul><h3>実績と構想を分ける</h3><p>火星の無人探査・着陸・MOXIEによる酸素生成の実証は実績です。Starshipによる有人火星移住・定住は企業構想であり、本ページは実現時期を断定しません。NASA Artemisは月探査プログラムで、月と火星の環境は同一ではありません。</p><h3>教育用近似</h3><p>距離・時間・速度・熱・推力・塵・資源量を誇張しています。模型は公式CADではなく、植物工場の閉鎖循環や長期居住を完全にはシミュレーションしていません。</p><p><a href="https://www.spacex.com/humansspaceflight/mars" target="_blank" rel="noopener noreferrer">SpaceX Mars ↗</a><br><a href="https://www.nasa.gov/humans-in-space/artemis/" target="_blank" rel="noopener noreferrer">NASA Artemis ↗</a><br><a href="https://science.nasa.gov/mission/mars-2020-perseverance/" target="_blank" rel="noopener noreferrer">NASA Perseverance / MOXIE ↗</a></p><p class="endorsement-note">本ページはSpaceX・NASAの承認・推奨を示しません。</p></div></dialog>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>

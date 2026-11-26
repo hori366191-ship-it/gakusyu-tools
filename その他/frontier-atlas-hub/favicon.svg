@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">FRONTIER ATLAS</title>
+  <desc id="desc">16のフロンティアを巡る六角形の索引マーク</desc>
+  <rect width="64" height="64" rx="14" fill="#07111a"/>
+  <circle cx="32" cy="32" r="24" fill="none" stroke="#80f0df" stroke-opacity=".25" stroke-dasharray="2 5"/>
+  <path d="M32 9 51.7 20.5v23L32 55 12.3 43.5v-23Z" fill="none" stroke="#80f0df" stroke-width="2"/>
+  <path d="m32 19 10 5.8v11.6L32 42.2 22 36.4V24.8Z" fill="none" stroke="#80f0df" stroke-width="1.5"/>
+  <path d="m22 24.8 10 5.8 10-5.8M32 30.6v11.6" fill="none" stroke="#80f0df" stroke-width="1.5"/>
+  <circle cx="32" cy="32" r="3" fill="#ffc477"/>
+</svg>

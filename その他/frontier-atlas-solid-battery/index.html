@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="全固体電池の分解セル、Liイオン移動、電子回路、デンドライト成長と抑制を公開論文に基づいて学ぶ教育用3D展示です。">
+  <meta name="theme-color" content="#030a12">
+  <title>全固体電池 — 分解セル | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-mode="charge" data-panel="closed">
+    <div id="space-stage" class="space-stage" tabindex="0" role="region" aria-label="全固体電池の分解3D模式図。ドラッグまたは矢印キーで周回、ホイール・ピンチ・プラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram" data-mode="charge">
+        <svg viewBox="0 0 560 480" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">全固体電池の2D分解模式図</title>
+          <desc id="fallback-desc">中央に正極、固体電解質、リチウム金属負極、集電体を分解表示し、青いLiイオンとオレンジの電子を別経路で示します。右にはデンドライトが成長しやすい条件と界面を制御した条件を並べています。</desc>
+          <defs>
+            <linearGradient id="battery-metal" x2="0" y2="1"><stop stop-color="#d7edf1"/><stop offset="1" stop-color="#547180"/></linearGradient>
+            <linearGradient id="battery-electrolyte" x2="1" y2="1"><stop stop-color="#76f4e9" stop-opacity=".8"/><stop offset="1" stop-color="#265b78" stop-opacity=".55"/></linearGradient>
+            <filter id="battery-glow"><feGaussianBlur stdDeviation="3"/></filter>
+            <marker id="battery-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#ffb263"/></marker>
+          </defs>
+          <g fill="none" stroke="#25495b" opacity=".6"><path d="M45 420h470M45 60h470" stroke-dasharray="3 8"/></g>
+          <g data-fallback-component="collectors">
+            <path d="m115 126 224 37 108-48-224-38Z" fill="url(#battery-metal)" stroke="#d4e7ed"/>
+            <path d="m115 126 224 37v24l-224-37Z" fill="#5f7b87"/><path d="m339 163 108-48v24l-108 48Z" fill="#7894a0"/>
+            <path d="m115 351 224 37 108-48-224-38Z" fill="url(#battery-metal)" stroke="#d4e7ed"/>
+            <path d="m115 351 224 37v24l-224-37Z" fill="#5f7b87"/><path d="m339 388 108-48v24l-108 48Z" fill="#7894a0"/>
+            <path d="M115 145H67V369h48" fill="none" stroke="#b4c8d0" stroke-width="4"/>
+            <rect x="38" y="233" width="58" height="50" rx="7" fill="#162d3c" stroke="#ffb263"/>
+            <path d="M67 249v18m-9-9h18" stroke="#ffb263" stroke-width="4"/>
+            <path d="M68 257H116" stroke="#ffb263" stroke-width="3" marker-end="url(#battery-arrow)"/>
+          </g>
+          <g data-fallback-component="cathode">
+            <path d="m125 184 203 34 104-46-204-34Z" fill="#3f7fac" stroke="#8cc9ff"/>
+            <path d="m125 184 203 34v51l-203-34Z" fill="#285678"/><path d="m328 218 104-46v51l-104 46Z" fill="#326488"/>
+            <g fill="#9cd8ff"><circle cx="183" cy="190" r="4"/><circle cx="229" cy="200" r="4"/><circle cx="278" cy="210" r="4"/><circle cx="365" cy="188" r="4"/></g>
+          </g>
+          <g data-fallback-component="electrolyte">
+            <path d="m125 258 203 34 104-46-204-34Z" fill="url(#battery-electrolyte)" stroke="#75eee5"/>
+            <path d="m125 258 203 34v46l-203-34Z" fill="#236b75" fill-opacity=".7"/><path d="m328 292 104-46v46l-104 46Z" fill="#28576d" fill-opacity=".7"/>
+            <g fill="#9cfff6"><circle cx="175" cy="271" r="3"/><circle cx="222" cy="280" r="3"/><circle cx="270" cy="289" r="3"/><circle cx="370" cy="265" r="3"/></g>
+          </g>
+          <g data-fallback-component="anode">
+            <path d="m125 327 203 34 104-46-204-34Z" fill="#aabcc5" stroke="#e0edf1"/>
+            <path d="m125 327 203 34v18l-203-34Z" fill="#6f838d"/><path d="m328 361 104-46v18l-104 46Z" fill="#82959e"/>
+          </g>
+          <circle id="fallback-ion" class="fallback-ion" cx="270" cy="230" r="6" fill="#74fff3" filter="url(#battery-glow)"/>
+          <g data-fallback-component="dendrite">
+            <g transform="translate(433 174)">
+              <rect x="0" y="0" width="34" height="168" rx="5" fill="#16313f" stroke="#496978"/>
+              <rect x="4" y="13" width="26" height="35" fill="#3c6e91"/><rect x="4" y="58" width="26" height="58" fill="#28777a" fill-opacity=".7"/><rect x="4" y="126" width="26" height="30" fill="#9bacb4"/>
+              <path d="M17 127v-25l-8-15 3-19m8 34 10-17-2-21m-12 38-9-12" fill="none" stroke="#e6eef1" stroke-width="4" stroke-linecap="round"/>
+              <text x="17" y="190" text-anchor="middle" fill="#ffb4c3" font-size="12">脆弱な条件</text>
+            </g>
+            <g transform="translate(498 174)">
+              <rect x="0" y="0" width="34" height="168" rx="5" fill="#16313f" stroke="#496978"/>
+              <rect x="4" y="13" width="26" height="35" fill="#3c6e91"/><rect x="4" y="58" width="26" height="58" fill="#28777a" fill-opacity=".7"/><rect x="4" y="126" width="26" height="30" fill="#9bacb4"/>
+              <g fill="#d5e4e8"><circle cx="10" cy="124" r="3"/><circle cx="17" cy="122" r="3"/><circle cx="24" cy="125" r="3"/></g>
+              <text x="17" y="190" text-anchor="middle" fill="#9be8d7" font-size="12">界面を制御</text>
+            </g>
+          </g>
+          <g fill="#c9dbe3" font-family="system-ui,sans-serif" font-size="13">
+            <text x="218" y="77" text-anchor="middle">EXPLODED CELL / Li+ ≠ ELECTRON PATH</text>
+            <text x="218" y="443" text-anchor="middle" fill="#8da8b5">層厚・粒子・成長は教育用の模式表現</text>
+          </g>
+        </svg>
+        <figcaption id="fallback-stage-caption">2D模式図 · 充電</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS エネルギー・材料図鑑">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 33 13v14L20 35 7 27V13Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m20 11 8 5v8l-8 5-8-5v-8Z M12 16l16 8m0-8L12 24" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+        <div><strong>FRONTIER ATLAS</strong><span>エネルギー・材料 <b>BATTERY / 02</b></span></div>
+      </div>
+      <div class="top-actions"><span class="evidence-badge"><i aria-hidden="true"></i>一次論文 / 研究段階を明記</span><button id="help-open" class="icon-button" type="button" aria-label="操作ガイドとモデルの注意点を開く" aria-haspopup="dialog">?</button></div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title"><p class="eyebrow">ENTRY 02 <span>/</span> SOLID-STATE LITHIUM BATTERY</p><h1 id="entry-title">全固体電池</h1><p>分解セル — イオンと電子の道をたどる</p></section>
+
+    <div class="mode-switch" role="group" aria-label="全固体電池の4つのプロセス">
+      <button type="button" class="mode-button" data-mode="charge" aria-pressed="true"><span class="mode-dot"></span><span><small>01 / CHARGE</small>充電</span></button>
+      <button type="button" class="mode-button" data-mode="migration" aria-pressed="false"><span class="mode-dot"></span><span><small>02 / TRANSPORT</small>イオン移動</span></button>
+      <button type="button" class="mode-button" data-mode="discharge" aria-pressed="false"><span class="mode-dot"></span><span><small>03 / DISCHARGE</small>放電</span></button>
+      <button type="button" class="mode-button" data-mode="dendrite" aria-pressed="false"><span class="mode-dot"></span><span><small>04 / FAILURE</small>デンドライト比較</span></button>
+    </div>
+    <div id="structure-label" class="structure-label" role="status" aria-live="polite">Li+ THROUGH ELECTROLYTE · ELECTRONS THROUGH EXTERNAL CIRCUIT</div>
+
+    <nav class="component-rail" aria-labelledby="component-list-title">
+      <div class="rail-heading"><p class="eyebrow">CELL ANATOMY</p><h2 id="component-list-title">セルの構成要素</h2></div>
+      <div class="component-list">
+        <button type="button" class="component-button" data-component="cathode" aria-pressed="false"><span>01</span><strong>正極</strong><small>CATHODE</small></button>
+        <button type="button" class="component-button" data-component="electrolyte" aria-pressed="false"><span>02</span><strong>固体電解質</strong><small>SOLID ELECTROLYTE</small></button>
+        <button type="button" class="component-button" data-component="anode" aria-pressed="false"><span>03</span><strong>Li金属負極</strong><small>Li-METAL ANODE</small></button>
+        <button type="button" class="component-button" data-component="collectors" aria-pressed="false"><span>04</span><strong>集電体</strong><small>CURRENT COLLECTORS</small></button>
+        <button type="button" class="component-button" data-component="dendrite" aria-pressed="false"><span>05</span><strong>デンドライト</strong><small>INTERPHASE / Li FILAMENT</small></button>
+      </div>
+      <p class="rail-note flow-note">青はLiイオン、オレンジは電子。右の2セルは条件比較で、安全保証ではありません。</p>
+    </nav>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="panel-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content"><span><small id="panel-kicker">MODE 01</small><strong id="panel-handle-title">充電</strong></span><span id="panel-toggle-label">解説を開く</span></button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="panel-title"><p id="panel-english" class="eyebrow">CHARGING / Li PLATING</p><h2 id="panel-title">充電</h2><p id="panel-summary"></p><p id="panel-focus" class="focus-note"></p><p id="panel-boundary" class="boundary-note"></p></section>
+        <section class="distinction-card" aria-labelledby="distinction-title"><h3 id="distinction-title">イオンと電子は別経路</h3><p id="distinction-copy" class="description"></p></section>
+        <section class="metric-card" aria-labelledby="metric-title">
+          <div class="metric-heading"><h3 id="metric-title">教育換算の状態</h3><span>ILLUSTRATIVE / NOT MEASURED</span></div>
+          <div class="metric-grid">
+            <div><small>電流密度</small><output id="current-value">—</output><span>mA/cm²・模式値</span></div>
+            <div><small>イオン伝導度</small><output id="conductivity-value">—</output><span>0–1の正規化値</span></div>
+            <div><small>デンドライト指数</small><output id="risk-value">—</output><span>0–100・確率ではない</span></div>
+            <div><small>Liイオンの向き</small><output id="direction-value">—</output><span>セル内の移動方向</span></div>
+          </div>
+          <p id="metric-guidance" class="metric-guidance"></p>
+        </section>
+        <section id="selected-component-card" class="selected-component-card" aria-labelledby="component-title" hidden><p id="component-english" class="eyebrow">COMPONENT</p><h3 id="component-title"></h3><p id="component-role" class="component-role"></p><p id="component-text"></p></section>
+        <details class="details-block study"><summary>基本仕様と研究段階</summary><dl id="spec-list" class="spec-list"></dl><h4>証拠のラベル</h4><dl id="evidence-list" class="evidence-list evidence"></dl></details>
+        <details class="details-block challenges"><summary>主な課題</summary><ol id="challenge-list" class="challenge-list"></ol></details>
+        <section class="sources" aria-labelledby="source-title"><h3 id="source-title" class="section-title">出典 <span>PEER-REVIEWED PRIMARY PAPERS</span></h3><div id="source-list">
+          <a href="https://www.nature.com/articles/s41560-023-01231-w" target="_blank" rel="noopener noreferrer">Nature Energy — Critical interphase overpotential…<small>一次論文・2023</small></a>
+          <a href="https://www.nature.com/articles/s41467-024-45030-7" target="_blank" rel="noopener noreferrer">Nature Communications — Effect of solid-electrolyte pellet density…<small>一次論文・2024</small></a>
+          <a href="https://www.nature.com/articles/s41467-022-29531-x" target="_blank" rel="noopener noreferrer">Nature Communications — High-energy and durable lithium metal batteries…<small>一次論文・2022</small></a>
+        </div><p class="source-note">企業発表は企業発表として明記し、査読論文の特定条件での実測結果と同一視しません。</p></section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="全固体電池の構成要素">
+      <button type="button" class="hotspot" data-component="cathode" aria-pressed="false" hidden><span></span>正極</button>
+      <button type="button" class="hotspot" data-component="electrolyte" aria-pressed="false" hidden><span></span>固体電解質</button>
+      <button type="button" class="hotspot" data-component="anode" aria-pressed="false" hidden><span></span>Li金属負極</button>
+      <button type="button" class="hotspot" data-component="collectors" aria-pressed="false" hidden><span></span>集電体</button>
+      <button type="button" class="hotspot" data-component="dendrite" aria-pressed="false" hidden><span></span>デンドライト</button>
+    </div>
+
+    <div class="viewport-readout" aria-hidden="true"><span id="phase-readout">PROCESS 01 / 04 · 充電</span><span id="render-quality">描画準備中</span></div>
+    <p class="look-hint">ドラッグで周回 <span>·</span> ホイール / ピンチでズーム</p>
+
+    <section class="control-dock" aria-label="プロセスの再生と教育用パラメータ">
+      <div class="transport-row">
+        <div class="playback-group"><button id="play-toggle" class="play-button" type="button" aria-label="一時停止" aria-pressed="true"><svg class="play-icon" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></svg><svg class="pause-icon" viewBox="0 0 24 24"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button><div class="speed-control" role="group" aria-label="再生速度"><button type="button" data-rate="0.5" aria-pressed="false">0.5×</button><button type="button" data-rate="1" aria-pressed="true">1×</button><button type="button" data-rate="2" aria-pressed="false">2×</button></div></div>
+        <div class="transport-status"><span id="phase-label">充電 → イオン移動</span><small id="transport-note">粒子の動きは教育用の模式表現です</small></div>
+        <div class="view-controls" role="group" aria-label="3D視点操作"><button id="zoom-out" class="tool-button" type="button" aria-label="ズームアウト" disabled>−</button><button id="zoom-in" class="tool-button" type="button" aria-label="ズームイン" disabled>＋</button><button id="reset-view" class="reset-button" type="button" aria-label="すべてを初期状態に戻す" disabled><svg viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>すべてリセット</span></button></div>
+      </div>
+      <div class="slider-grid" role="group" aria-label="教育用のセル条件">
+        <div class="slider-control"><div class="slider-label"><label for="current">電流密度</label><output id="current-slider-value" for="current">60%</output></div><input id="current" type="range" min="0" max="100" step="5" value="60" aria-describedby="model-note"><small>局所的な析出を増やす条件</small></div>
+        <div class="slider-control"><div class="slider-label"><label for="density">電解質の相対密度</label><output id="density-value" for="density">88%</output></div><input id="density" type="range" min="0" max="100" step="1" value="88" aria-describedby="model-note"><small>細孔ネットワークに影響</small></div>
+        <div class="slider-control"><div class="slider-label"><label for="interface">界面品質</label><output id="interface-value" for="interface">75%</output></div><input id="interface" type="range" min="0" max="100" step="5" value="75" aria-describedby="model-note"><small>接触・反応層の模式評価</small></div>
+      </div>
+      <p id="model-note" class="dock-note">電流・伝導度・デンドライト指数は教育用の模式値です。短絡確率・寿命・製品性能の予測ではありません。</p>
+    </section>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため、3D・再生・スライダーは使えません。2D模式図と出典付きの解説は読めます。</p></noscript>
+  </main>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head"><div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">操作とモデルの見方</h2></div><form method="dialog"><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></form></div>
+    <div class="help-content"><h3>操作方法</h3><ul id="guide-list"></ul><h3>何を学ぶページか</h3>
+      <p>全固体電池では、Liイオンは固体電解質を、電子は外部回路を通ります。イオン伝導度と電子伝導度は別の性質です。</p>
+      <p>固体電解質が硬いからといって、デンドライトが必ず止まるわけではありません。Liは細孔、粒界、割れ、界面反応、電子漏れ、応力集中などを通って成長し、短絡につながる可能性があります。</p>
+      <p>2024年のLPS電解質論文では、約95%を境に連結細孔が閉じ、低電流密度の条件下で短絡が見られなかった領域が報告されています。これは特定材料・条件の知見であり、普遍的な安全保証ではありません。</p>
+      <p>積層、層厚、粒子、イオン数、デンドライトの形、リスク指数は教育用の近似です。実際の材料選定、セル設計、寿命、安全性を計算しません。</p>
+      <h3>出典</h3><div id="help-sources"></div><p class="endorsement-note">企業発表は企業発表として扱います。本ページは承認・推奨を示しません。</p>
+    </div>
+  </dialog>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="詳細トカマクの加熱、磁場閉じ込め、融合反応、ブランケット熱、将来発電を研究・実用化・構想に分けて学ぶ教育用3D展示です。">
+  <meta name="theme-color" content="#03080f">
+  <title>核融合 — 詳細トカマク | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-mode="heating" data-panel="closed">
+    <div id="space-stage" class="space-stage" tabindex="0" role="region" aria-label="詳細トカマクの3D模式図。ドラッグまたは矢印キーで周回、ホイール・ピンチ・プラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram" data-mode="heating">
+        <svg viewBox="0 0 560 480" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">詳細トカマクの2D模式図</title>
+          <desc id="fallback-desc">中央の円環プラズマを磁場コイルと真空容器が囲み、下にダイバータ、外側にブランケットがあります。白い粒子は中性子、青い粒子は磁場の向き、オレンジの粒子は熱を表します。</desc>
+          <defs>
+            <radialGradient id="fusion-plasma"><stop stop-color="#fff0cb"/><stop offset=".4" stop-color="#ff9c63"/><stop offset="1" stop-color="#9a3e57" stop-opacity=".2"/></radialGradient>
+            <linearGradient id="fusion-steel"><stop stop-color="#a6d4e3"/><stop offset="1" stop-color="#385768"/></linearGradient>
+            <filter id="fusion-glow"><feGaussianBlur stdDeviation="4"/></filter>
+            <marker id="fusion-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#79e7ff"/></marker>
+          </defs>
+          <g fill="none" stroke="#225269" opacity=".55">
+            <ellipse cx="280" cy="225" rx="218" ry="158"/><ellipse cx="280" cy="225" rx="190" ry="133"/>
+            <path d="M67 225h426M280 62v326" stroke-dasharray="3 8"/>
+          </g>
+          <g fill="none" stroke="#d58d5b" stroke-width="4">
+            <ellipse cx="280" cy="225" rx="170" ry="112"/><ellipse cx="280" cy="225" rx="143" ry="91"/>
+          </g>
+          <g data-fallback-component="coils" fill="none" stroke="#efaa73" stroke-width="7">
+            <ellipse cx="280" cy="225" rx="87" ry="65"/><ellipse cx="280" cy="225" rx="109" ry="77"/>
+            <path d="M180 153 135 103M380 153l45-50M180 297l-45 50M380 297l45 50"/>
+          </g>
+          <g data-fallback-component="vessel" fill="none" stroke="url(#fusion-steel)" stroke-width="14" opacity=".75">
+            <ellipse cx="280" cy="225" rx="125" ry="87"/>
+          </g>
+          <g data-fallback-component="plasma">
+            <ellipse cx="280" cy="225" rx="101" ry="63" fill="url(#fusion-plasma)" opacity=".45" filter="url(#fusion-glow)"/>
+            <ellipse cx="280" cy="225" rx="101" ry="63" fill="none" stroke="#ffb07a" stroke-width="15" opacity=".65"/>
+            <ellipse cx="280" cy="225" rx="101" ry="63" fill="none" stroke="#ffe0ad" stroke-width="3" stroke-dasharray="5 12"/>
+          </g>
+          <g data-fallback-component="blanket" fill="#527d89" stroke="#a4cbd3" stroke-width="2">
+            <rect x="249" y="99" width="62" height="28" rx="4"/><rect x="382" y="197" width="28" height="62" rx="4"/>
+            <rect x="249" y="323" width="62" height="28" rx="4"/><rect x="150" y="197" width="28" height="62" rx="4"/>
+          </g>
+          <g data-fallback-component="divertor" fill="#344f5b" stroke="#ff9a63" stroke-width="2">
+            <path d="M238 320h84l-14 33h-56Z"/><path d="M224 357h112" stroke="#ffba7d" stroke-width="6"/>
+          </g>
+          <g fill="#83eaff">
+            <circle cx="119" cy="137" r="5"/><circle cx="441" cy="137" r="5"/><circle cx="119" cy="313" r="5"/><circle cx="441" cy="313" r="5"/>
+          </g>
+          <g fill="none" stroke="#79e7ff" stroke-width="2" marker-end="url(#fusion-arrow)" opacity=".8">
+            <path d="M115 153c46-38 81-53 111-58M445 153c-46-38-81-53-111-58"/>
+          </g>
+          <g fill="none" stroke="#ffac72" stroke-width="2" stroke-dasharray="4 7">
+            <path d="M280 158v-37M337 181l58-33M280 292v37M223 269l-58 33"/>
+          </g>
+          <circle id="fallback-neutron" class="fallback-neutron" cx="375" cy="225" r="5" fill="#effcff"/>
+          <g fill="#c9dbe3" font-family="system-ui,sans-serif" font-size="13">
+            <text x="280" y="44" text-anchor="middle">TOROIDAL / POLOIDAL MAGNETIC FIELD</text>
+            <text x="280" y="421" text-anchor="middle">D + T → He + n + energy</text>
+            <text x="280" y="447" text-anchor="middle" fill="#8da8b5">教育用の形状・割合。ITERの工学的モデルではありません</text>
+          </g>
+        </svg>
+        <figcaption id="fallback-stage-caption">2D模式図 · 加熱</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS エネルギー・材料図鑑">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 33 13v14L20 35 7 27V13Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m20 11 8 5v8l-8 5-8-5v-8Z M12 16l16 8m0-8L12 24" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+        <div><strong>FRONTIER ATLAS</strong><span>エネルギー・材料 <b>FUSION / 01</b></span></div>
+      </div>
+      <div class="top-actions">
+        <span class="evidence-badge"><i aria-hidden="true"></i>実測 / 研究 / 実用化 / 構想を分離</span>
+        <button id="help-open" class="icon-button" type="button" aria-label="操作ガイドとモデルの注意点を開く" aria-haspopup="dialog">?</button>
+      </div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title">
+      <p class="eyebrow">ENTRY 01 <span>/</span> MAGNETIC CONFINEMENT FUSION</p>
+      <h1 id="entry-title">核融合</h1>
+      <p>詳細トカマク — 星のエネルギーを地上で</p>
+    </section>
+
+    <div class="mode-switch" role="group" aria-label="核融合の5つのプロセス">
+      <button type="button" class="mode-button" data-mode="heating" aria-pressed="true"><span class="mode-dot"></span><span><small>01 / HEATING</small>加熱</span></button>
+      <button type="button" class="mode-button" data-mode="confinement" aria-pressed="false"><span class="mode-dot"></span><span><small>02 / CONFINEMENT</small>磁場閉じ込め</span></button>
+      <button type="button" class="mode-button" data-mode="reaction" aria-pressed="false"><span class="mode-dot"></span><span><small>03 / REACTION</small>融合反応</span></button>
+      <button type="button" class="mode-button" data-mode="blanket" aria-pressed="false"><span class="mode-dot"></span><span><small>04 / HEAT CAPTURE</small>ブランケット熱</span></button>
+      <button type="button" class="mode-button" data-mode="power" aria-pressed="false"><span class="mode-dot"></span><span><small>05 / CONCEPT</small>発電への構想</span></button>
+    </div>
+
+    <div id="structure-label" class="structure-label" role="status" aria-live="polite">ITER · RESEARCH DEVICE / NOT A POWER PLANT</div>
+
+    <nav class="component-rail" aria-labelledby="component-list-title">
+      <div class="rail-heading"><p class="eyebrow">TOKAMAK ANATOMY</p><h2 id="component-list-title">装置の構成要素</h2></div>
+      <div class="component-list">
+        <button type="button" class="component-button" data-component="vessel" aria-pressed="false"><span>01</span><strong>真空容器</strong><small>VACUUM VESSEL</small></button>
+        <button type="button" class="component-button" data-component="coils" aria-pressed="false"><span>02</span><strong>磁場コイル</strong><small>TF / PF COILS</small></button>
+        <button type="button" class="component-button" data-component="plasma" aria-pressed="false"><span>03</span><strong>プラズマ</strong><small>PLASMA TORUS</small></button>
+        <button type="button" class="component-button" data-component="divertor" aria-pressed="false"><span>04</span><strong>ダイバータ</strong><small>HEAT EXHAUST</small></button>
+        <button type="button" class="component-button" data-component="blanket" aria-pressed="false"><span>05</span><strong>ブランケット</strong><small>HEAT / BREEDING</small></button>
+      </div>
+      <p class="rail-note flow-note">半透明の外殻の内側に、プラズマ・コイル・熱回収系があります。</p>
+    </nav>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="panel-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content"><span><small id="panel-kicker">MODE 01</small><strong id="panel-handle-title">加熱</strong></span><span id="panel-toggle-label">解説を開く</span></button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="panel-title">
+          <p id="panel-english" class="eyebrow">PLASMA HEATING</p>
+          <h2 id="panel-title">加熱</h2>
+          <p id="panel-summary"></p>
+          <p id="panel-focus" class="focus-note"></p>
+          <p id="panel-boundary" class="boundary-note"></p>
+        </section>
+
+        <section class="distinction-card" aria-labelledby="distinction-title">
+          <h3 id="distinction-title">温度と発電は別の話</h3>
+          <p id="distinction-copy" class="description"></p>
+        </section>
+
+        <section class="metric-card" aria-labelledby="metric-title">
+          <div class="metric-heading"><h3 id="metric-title">教育換算の状態</h3><span>SIMULATION / NOT MEASURED</span></div>
+          <div class="metric-grid">
+            <div><small>プラズマ温度</small><output id="temperature-value">—</output><span>百万 °C・模式値</span></div>
+            <div><small>融合出力</small><output id="fusion-value">—</output><span>MW・教育換算</span></div>
+            <div><small>プラズマQ</small><output id="q-value">—</output><span>電力量比ではない</span></div>
+            <div><small>ITER実測発電</small><output id="grid-value">0 MW</output><span>タービンなし</span></div>
+          </div>
+          <p id="metric-guidance" class="metric-guidance"></p>
+        </section>
+
+        <section id="selected-component-card" class="selected-component-card" aria-labelledby="component-title" hidden>
+          <p id="component-english" class="eyebrow">COMPONENT</p>
+          <h3 id="component-title"></h3>
+          <p id="component-role" class="component-role"></p>
+          <p id="component-text"></p>
+        </section>
+
+        <details class="details-block study">
+          <summary>基本仕様と研究段階</summary>
+          <dl id="spec-list" class="spec-list"></dl>
+          <h4>証拠のラベル</h4>
+          <dl id="evidence-list" class="evidence-list evidence"></dl>
+        </details>
+
+        <details class="details-block challenges">
+          <summary>主な課題</summary>
+          <ol id="challenge-list" class="challenge-list"></ol>
+        </details>
+
+        <section class="sources" aria-labelledby="source-title">
+          <h3 id="source-title" class="section-title">出典 <span>ITER OFFICIAL</span></h3>
+          <div id="source-list">
+            <a href="https://www.iter.org/project/road-iter" target="_blank" rel="noopener noreferrer">ITER — On The Road to ITER ↗<small>公式・プロジェクト行程</small></a>
+            <a href="https://www.iter.org/fusion-energy/making-it-work" target="_blank" rel="noopener noreferrer">ITER — Making it work ↗<small>公式・物理と課題</small></a>
+          </div>
+          <p class="source-note">ITERの設計目標を実測値として扱わず、ITERでの熱排出と将来発電所の構想を分けています。</p>
+        </section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="トカマクの構成要素">
+      <button type="button" class="hotspot" data-component="vessel" aria-pressed="false" hidden><span></span>真空容器</button>
+      <button type="button" class="hotspot" data-component="coils" aria-pressed="false" hidden><span></span>磁場コイル</button>
+      <button type="button" class="hotspot" data-component="plasma" aria-pressed="false" hidden><span></span>プラズマ</button>
+      <button type="button" class="hotspot" data-component="divertor" aria-pressed="false" hidden><span></span>ダイバータ</button>
+      <button type="button" class="hotspot" data-component="blanket" aria-pressed="false" hidden><span></span>ブランケット</button>
+    </div>
+
+    <div class="viewport-readout" aria-hidden="true"><span id="phase-readout">PROCESS 01 / 05 · 加熱</span><span id="render-quality">描画準備中</span></div>
+    <p class="look-hint">ドラッグで周回 <span>·</span> ホイール / ピンチでズーム</p>
+
+    <section class="control-dock" aria-label="プロセスの再生と教育用パラメータ">
+      <div class="transport-row">
+        <div class="playback-group">
+          <button id="play-toggle" class="play-button" type="button" aria-label="一時停止" aria-pressed="true"><svg class="play-icon" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></svg><svg class="pause-icon" viewBox="0 0 24 24"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button>
+          <div class="speed-control" role="group" aria-label="再生速度"><button type="button" data-rate="0.5" aria-pressed="false">0.5×</button><button type="button" data-rate="1" aria-pressed="true">1×</button><button type="button" data-rate="2" aria-pressed="false">2×</button></div>
+        </div>
+        <div class="transport-status"><span id="phase-label">加熱 → 磁場閉じ込め</span><small id="transport-note">粒子の動きは教育用の模式表現です</small></div>
+        <div class="view-controls" role="group" aria-label="3D視点操作"><button id="zoom-out" class="tool-button" type="button" aria-label="ズームアウト" disabled>−</button><button id="zoom-in" class="tool-button" type="button" aria-label="ズームイン" disabled>＋</button><button id="reset-view" class="reset-button" type="button" aria-label="すべてを初期状態に戻す" disabled><svg viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>すべてリセット</span></button></div>
+      </div>
+      <div class="slider-grid" role="group" aria-label="教育用のプラズマ条件">
+        <div class="slider-control"><div class="slider-label"><label for="heating">加熱入力</label><output id="heating-value" for="heating">50%</output></div><input id="heating" type="range" min="0" max="100" step="5" value="50" aria-describedby="model-note"><small>外部からのエネルギー投入</small></div>
+        <div class="slider-control"><div class="slider-label"><label for="density">プラズマ密度</label><output id="density-value" for="density">65%</output></div><input id="density" type="range" min="0" max="100" step="5" value="65" aria-describedby="model-note"><small>単位体積あたりの粒子数</small></div>
+        <div class="slider-control"><div class="slider-label"><label for="confinement">閉じ込め時間</label><output id="confinement-value" for="confinement">70%</output></div><input id="confinement" type="range" min="0" max="100" step="5" value="70" aria-describedby="model-note"><small>熱エネルギーを保持する時間</small></div>
+      </div>
+      <p id="model-note" class="dock-note">温度・Q・出力は教育用の模式値です。実際のITERの運転・測定・将来予測ではありません。</p>
+    </section>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため、3D・再生・スライダーは使えません。2D模式図と出典付きの解説は読めます。</p></noscript>
+  </main>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head"><div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">操作とモデルの見方</h2></div><form method="dialog"><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></form></div>
+    <div class="help-content">
+      <h3>操作方法</h3><ul id="guide-list"></ul>
+      <h3>何を学ぶページか</h3>
+      <p>核融合には、高温・十分な密度・十分な閉じ込め時間が必要です。磁場は荷電粒子を閉じ込めますが、中性子は磁場の影響を受けず、周囲の壁で熱に変わります。</p>
+      <p>ITERは燃焼プラズマと熱除去を研究する装置で、捕捉した熱は冷却系へ排出します。蒸気・タービン・発電機による発電は、将来の融合発電所の構想です。</p>
+      <p>Q=10は融合出力をプラズマ加熱入力で割った値です。施設全体の消費電力や発電効率を含みません。プラズマが高温でも、電気が直接取り出されるわけではありません。</p>
+      <p>形状、コイル数、粒子の数、色、スライダー出力は教育用の近似です。実際の熱流束、材料寿命、トリチウム増殖率、建設日程、経済性を計算しません。</p>
+      <h3>出典</h3><div id="help-sources"></div>
+      <p class="endorsement-note">本ページはITERの承認・推奨を示しません。</p>
+    </div>
+  </dialog>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="仮説から実験、測定、解析、次の設計へつなぐ自律型AIラボを、現状の部分的自動化と完全自律の構想に分けて学ぶ3D展示です。">
+  <meta name="theme-color" content="#050912">
+  <title>自律型AIラボ — 仮説から実験へ | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-mode="hypothesis" data-panel="open" data-loop="open">
+    <div id="space-stage" class="space-stage" tabindex="0" role="region" aria-label="自律型AIラボの3D模式図。ドラッグまたは矢印キーで周回、ホイール・ピンチ・プラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram" data-mode="hypothesis" data-loop="open">
+        <svg viewBox="0 0 480 480" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">自律型AIラボの2D模式図</title>
+          <desc id="fallback-desc">AIコア、ロボットアーム、96ウェルのプレート、顕微鏡が実験フローでつながります。自律度80%未満は人間レビューを挟む開ループ、80%以上は未実証の完全自律構想です。</desc>
+          <defs>
+            <radialGradient id="lab-halo"><stop stop-color="#273c64" stop-opacity=".42"/><stop offset="1" stop-color="#071019" stop-opacity="0"/></radialGradient>
+            <linearGradient id="flow-gradient"><stop stop-color="#6ce1d5"/><stop offset="1" stop-color="#9b86ff"/></linearGradient>
+          </defs>
+          <circle cx="240" cy="242" r="210" fill="url(#lab-halo)"/>
+          <circle cx="240" cy="242" r="186" fill="none" stroke="#31465d" stroke-dasharray="2 11"/>
+          <path d="M55 383h370l-18 24H73Z" fill="#101e2a" stroke="#496473"/>
+          <path d="M76 407h328" stroke="#304c59" stroke-width="2"/>
+          <g data-fallback-mode="hypothesis" class="f-plan-cards">
+            <rect x="98" y="118" width="62" height="38" rx="5" fill="#13343b" stroke="#6ce1d5"/>
+            <rect x="115" y="91" width="62" height="38" rx="5" fill="#13343b" stroke="#6ce1d5" opacity=".75"/>
+            <path d="M108 131h39m-39 9h27m7-41h39m-39 9h27" stroke="#84e9dc" stroke-width="2"/>
+          </g>
+          <g class="f-ai-core">
+            <circle cx="142" cy="241" r="58" fill="#0b2029" stroke="#5fd9ce" stroke-width="2"/>
+            <circle cx="142" cy="241" r="42" fill="none" stroke="#3b827f" stroke-dasharray="4 6"/>
+            <path d="m142 208 29 17v33l-29 17-29-17v-33Z M113 225l58 33m0-33-58 33" fill="none" stroke="#8df4e7" stroke-width="2"/>
+            <circle cx="142" cy="241" r="10" fill="#9af8e9"/>
+            <text x="142" y="316" text-anchor="middle" fill="#bcd4dc" font-size="12">AI CORE</text>
+          </g>
+          <g class="f-robot">
+            <circle cx="157" cy="353" r="23" fill="#263d48" stroke="#8ba4ad"/>
+            <path id="fallback-arm-outline" d="M151 330 133 265 197 295" fill="none" stroke="#b4c4c8" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+            <path id="fallback-arm" d="M151 330 133 265 197 295" fill="none" stroke="#5fd9ce" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <line id="fallback-pipette" x1="197" y1="295" x2="197" y2="325" stroke="#d3dfe1" stroke-width="5" stroke-linecap="round"/>
+            <circle id="fallback-drop" cx="197" cy="337" r="4" fill="#77e9df" opacity="0"/>
+          </g>
+          <g class="f-plate">
+            <rect x="224" y="297" width="132" height="82" rx="8" fill="#16313b" fill-opacity=".65" stroke="#77b6ba"/>
+            <g id="fallback-wells"></g>
+            <text x="290" y="395" text-anchor="middle" fill="#bcd4dc" font-size="12">96 WELLS</text>
+          </g>
+          <g class="f-microscope">
+            <path d="M379 353h54v24h-54Z" fill="#263d48" stroke="#8ba4ad"/>
+            <path d="M414 355v-90h-34v-26h-37" fill="none" stroke="#b4c4c8" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M332 232h-25" stroke="#77d9dd" stroke-width="11" stroke-linecap="round"/>
+            <rect x="369" y="315" width="65" height="10" rx="3" fill="#45646e"/>
+            <line id="fallback-scan" x1="274" y1="303" x2="274" y2="371" stroke="#8dfff1" stroke-width="2" opacity="0"/>
+          </g>
+          <g data-fallback-mode="analysis" class="f-analysis">
+            <rect x="291" y="113" width="111" height="79" rx="7" fill="#171c38" fill-opacity=".62" stroke="#8d7cff"/>
+            <g id="fallback-bars"></g>
+          </g>
+          <path id="fallback-flow" d="M194 224C232 174 299 178 345 225s40 116 3 127-141-12-154-69 92-64 154-15" fill="none" stroke="url(#flow-gradient)" stroke-width="2" stroke-dasharray="5 7" opacity=".7"/>
+          <circle id="fallback-flow-particle" cx="382" cy="225" r="4" fill="#b6fff4"/>
+          <g id="fallback-gate" class="f-human-gate">
+            <path d="M222 375v-38h33v38m-27-38v-25h21v25" fill="#83d7b3" fill-opacity=".06" stroke="#83d7b3" stroke-width="2"/>
+            <circle cx="238" cy="352" r="6" fill="none" stroke="#83d7b3"/>
+            <text x="238" y="400" text-anchor="middle" fill="#9ed8bf" font-size="11">HUMAN REVIEW</text>
+          </g>
+          <g fill="#bcd4dc" font-size="12" font-family="system-ui, sans-serif">
+            <text x="240" y="457" text-anchor="middle" id="fallback-progress-label">仮説から実験計画へ 0%</text>
+          </g>
+        </svg>
+        <figcaption id="fallback-caption">2D模式図 · 仮説から実験計画へ / 人間レビュー併用</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+      <noscript><p class="noscript-note">JavaScriptを有効にすると3Dと解説の切替を利用できます。現在は静的な2D模式図を表示しています。</p></noscript>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS AI図鑑">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M20 5 33 13v14L20 35 7 27V13Z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          <path d="m20 11 8 5v8l-8 5-8-5v-8Z M12 16l16 8m0-8L12 24" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+        <div><strong>FRONTIER ATLAS</strong><span>AI図鑑 <b>AUTONOMOUS LAB / 03</b></span></div>
+      </div>
+      <div class="top-actions">
+        <span class="evidence-badge"><i aria-hidden="true"></i>部分自動化と構想を分離</span>
+        <button id="help-open" class="icon-button" type="button" aria-label="操作ガイドと自律モデルの注意点を開く" aria-haspopup="dialog">?</button>
+      </div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title">
+      <p class="eyebrow">ENTRY 03 <span>/</span> AUTONOMOUS BIOMEDICAL LAB</p>
+      <h1 id="entry-title">自律型AIラボ</h1>
+      <p>仮説から実験へ — 研究をめぐる閉ループ</p>
+    </section>
+
+    <div id="stage-label" class="structure-label" role="status" aria-live="polite">PLAN · HYPOTHESIS</div>
+
+    <nav class="mode-rail" aria-labelledby="mode-list-title">
+      <div class="rail-heading"><p class="eyebrow">FIVE STATES</p><h2 id="mode-list-title">研究ループの5工程</h2></div>
+      <ol class="mode-list">
+        <li><button type="button" class="mode-button" data-mode="hypothesis" aria-pressed="true"><span class="mode-number">01</span><span><strong>仮説・計画</strong><small>HYPOTHESIS</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="mode-button" data-mode="experiment" aria-pressed="false"><span class="mode-number">02</span><span><strong>実験実行</strong><small>EXPERIMENT</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="mode-button" data-mode="measurement" aria-pressed="false"><span class="mode-number">03</span><span><strong>測定</strong><small>MEASUREMENT</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="mode-button" data-mode="analysis" aria-pressed="false"><span class="mode-number">04</span><span><strong>解析</strong><small>ANALYSIS</small></span><i aria-hidden="true"></i></button></li>
+        <li><button type="button" class="mode-button" data-mode="next-design" aria-pressed="false"><span class="mode-number">05</span><span><strong>次の設計</strong><small>NEXT DESIGN</small></span><i aria-hidden="true"></i></button></li>
+      </ol>
+      <p class="rail-note">工程の境界は自動化の成熟度と同じではありません。各段階に人間の判断と独立した検証が必要です。</p>
+    </nav>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="panel-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="true" aria-controls="info-content">
+        <span><small id="panel-kicker">MODE 01 / 05</small><strong id="panel-handle-title">問いを計画に変える</strong></span>
+        <span id="panel-toggle-label">解説を閉じる</span>
+      </button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="panel-title">
+          <p id="panel-english" class="eyebrow">HYPOTHESIS & PLAN</p>
+          <h2 id="panel-title">仮説から実験計画へ</h2>
+          <p id="panel-summary">研究者の問いを受け取り、文献・ツール・データを組み合わせて実行可能な計画を組み立てます。</p>
+          <p id="panel-detail">Biomniは言語モデルの推論、検索拡張計画、コード実行を組み合わせた汎用エージェントとして報告されています。この展示のカードとAIコアは、計画・記憶・ツール選択の流れを模式化したものです。</p>
+          <div class="status-line"><span id="status-label">研究・一部自動化</span><small>RESEARCH STAGE</small></div>
+        </section>
+
+        <section class="automation-card" aria-label="自律度と研究段階">
+          <div class="card-heading"><h3>現状と構想の境界</h3><span>CONCEPT CONTROL</span></div>
+          <div class="automation-readout"><strong id="automation-label">複数工程の自動化</strong><span id="automation-evidence">研究・部分的自動化</span></div>
+          <div class="loop-badge"><i aria-hidden="true"></i><span id="loop-label">OPEN LOOP · HUMAN REVIEW</span></div>
+          <p id="autonomy-warning" class="control-note">人間レビューを挟む開ループです。現状の部分的自動化を表しています。</p>
+          <p class="model-notice">自律度は展示用の概念パラメータです。実システムの性能・安全性・倫理水準を測定しません。</p>
+        </section>
+
+        <section class="evidence-grid" aria-label="根拠の区分">
+          <div class="evidence observed"><h3><span aria-hidden="true">✓</span> 実測・論文で報告された成果</h3><ul id="observed-list"></ul></div>
+          <div class="evidence research"><h3><span aria-hidden="true">R</span> 研究・現在の課題</h3><ul id="research-list"></ul></div>
+          <div class="evidence conceptual"><h3><span aria-hidden="true">?</span> 未実証・教育用構想</h3><ul id="conceptual-list"></ul></div>
+        </section>
+
+        <section id="selected-card" class="selected-card" aria-labelledby="selected-title" hidden>
+          <p id="selected-english" class="eyebrow">HOTSPOT</p>
+          <h3 id="selected-title">AIコア</h3>
+          <p id="selected-role" class="selected-role">計画・記憶・推論</p>
+          <p id="selected-current"></p>
+          <div class="selected-evidence"><small>根拠</small><p id="selected-evidence"></p></div>
+          <div class="selected-caveat"><small>限界</small><p id="selected-caveat"></p></div>
+        </section>
+
+        <section class="spec-card" aria-labelledby="spec-title">
+          <div class="card-heading"><h3 id="spec-title">基本仕様</h3><span>THIS EXHIBIT</span></div>
+          <ul id="spec-list" class="compact-list"></ul>
+          <dl class="stats-grid">
+            <div><dt>部品</dt><dd id="stat-parts">—</dd></div>
+            <div><dt>Instanced</dt><dd id="stat-instanced">—</dd></div>
+            <div><dt>粒子</dt><dd id="stat-particles">—</dd></div>
+            <div><dt>PBR</dt><dd id="stat-pbr">—</dd></div>
+          </dl>
+          <p id="model-stats-note" class="model-notice">モデル統計は3D初期化後に表示します。</p>
+        </section>
+
+        <details class="details-block">
+          <summary>主な課題</summary>
+          <ol id="challenge-list" class="challenge-list"></ol>
+        </details>
+
+        <details class="details-block">
+          <summary>証拠の見方</summary>
+          <ul id="legend-list" class="legend-list"></ul>
+        </details>
+
+        <section class="sources" aria-labelledby="source-title">
+          <h3 id="source-title">出典</h3>
+          <ul id="source-list" class="source-list"></ul>
+          <p>Biomniの論文は、AIエージェントによるバイオ医学研究の計画・解析・プロトコル生成などを報告しています。ロボットや顕微鏡の完全自律運営を一般に実証したものではありません。</p>
+          <p>本ページは企業・研究機関の承認・推奨を示しません。</p>
+        </section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="自律型AIラボのホットスポット">
+      <button type="button" class="hotspot" data-hotspot="ai-core" aria-pressed="false" hidden><span aria-hidden="true"></span>AIコア</button>
+      <button type="button" class="hotspot" data-hotspot="robot-arm" aria-pressed="false" hidden><span aria-hidden="true"></span>ロボットアーム</button>
+      <button type="button" class="hotspot" data-hotspot="microplate" aria-pressed="false" hidden><span aria-hidden="true"></span>96ウェル</button>
+      <button type="button" class="hotspot" data-hotspot="microscope" aria-pressed="false" hidden><span aria-hidden="true"></span>顕微鏡</button>
+      <button type="button" class="hotspot" data-hotspot="human-gate" aria-pressed="false" hidden><span aria-hidden="true"></span>人間レビュー</button>
+    </div>
+
+    <div class="viewport-readout" aria-hidden="true"><span id="iteration-label">ITERATION 01</span><span id="render-quality">描画準備中</span></div>
+    <p class="look-hint">ドラッグで周回 <span>·</span> ホイール / ピンチでズーム <span>·</span> 1–5で工程</p>
+
+    <section class="control-dock" aria-label="自律ラボの再生と自律度">
+      <div class="transport-row">
+        <div class="playback-group">
+          <button id="play-toggle" class="play-button" type="button" aria-label="一時停止" aria-pressed="true">
+            <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>
+            <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>
+          </button>
+          <div class="speed-control" role="group" aria-label="再生速度">
+            <button type="button" data-rate="0.5" aria-pressed="false">0.5×</button>
+            <button type="button" data-rate="1" aria-pressed="true">1×</button>
+            <button type="button" data-rate="2" aria-pressed="false">2×</button>
+          </div>
+        </div>
+        <div class="transport-status"><span id="phase-label">仮説から実験計画へ · 0%</span><small id="transport-loop-label">OPEN LOOP · HUMAN REVIEW</small></div>
+        <div class="view-controls" role="group" aria-label="3D視点操作">
+          <button id="zoom-out" class="tool-button" type="button" aria-label="ズームアウト" disabled>−</button>
+          <button id="zoom-in" class="tool-button" type="button" aria-label="ズームイン" disabled>＋</button>
+          <button id="reset-view" class="reset-button" type="button" aria-label="視点を初期位置に戻す" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>視点</span></button>
+          <button id="reset-sim" class="reset-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>リセット</span></button>
+        </div>
+      </div>
+      <div class="autonomy-row">
+        <label for="autonomy">自律度<small>表示用の概念パラメータ</small></label>
+        <input id="autonomy" type="range" min="0" max="100" step="5" value="45" aria-describedby="autonomy-warning">
+        <output id="autonomy-value" for="autonomy">45%</output>
+      </div>
+      <div class="progress-row"><span id="progress-iteration-label">ITERATION 01</span><div class="progress-track" role="progressbar" aria-label="現在工程の再生進行" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="progress-bar"></i></div><output id="progress-value">0%</output></div>
+      <p id="mode-guidance" class="dock-note">計画は自動化できますが、問いの設定や優先順位は研究者が判断します。</p>
+    </section>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+
+    <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+      <div class="dialog-head"><div><p class="eyebrow">OPERATING GUIDE</p><h2 id="help-title">操作と読み解き方</h2></div><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></div>
+      <div class="help-content">
+        <h3>操作</h3><ul id="guide-list"></ul>
+        <h3>現状と完全自律の違い</h3>
+        <p id="model-note">教育用の近似です。実際のAIエージェント、ロボット制御、顕微鏡、統計解析は動作していません。自律度は表示用の概念パラメータです。</p>
+        <p>現状のAIエージェントは、計画、コード生成、データ解析、プロトコル作成、装置連携の一部を自動化できます。しかし、問いの設定、安全判断、結果の解釈、創造的な飛躍までを完全に委ねる自律ラボは、この展示では未実証の構想として扱います。</p>
+        <h3>WebGL・CDNが使えない場合</h3>
+        <p>自動的に2D模式図へ切り替わり、5工程・自律度・解説は引き続き操作できます。Three.js 0.180.0はjsDelivrから読み込むため、オフラインでは3Dのみ利用できません。</p>
+        <p class="endorsement-note">本ページは企業・研究機関の承認・推奨を示しません。</p>
+      </div>
+    </dialog>
+  </main>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

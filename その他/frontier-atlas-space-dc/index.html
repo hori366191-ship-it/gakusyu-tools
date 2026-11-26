@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="太陽光発電、AI計算、光通信、赤外線放熱で宇宙データセンターを学ぶ、FRONTIER ATLASの静的3D図鑑。">
+  <meta name="theme-color" content="#03060d">
+  <title>ORBITAL COMPUTE — 宇宙データセンター | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-panel="closed" data-mode="overall" data-briefing="closed">
+    <div id="space-stage" class="space-stage" tabindex="0" role="region" aria-label="宇宙データセンターの3D模式図。ドラッグまたは矢印キーで周回、ホイールまたはプラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram">
+        <svg viewBox="0 0 1000 760" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">宇宙データセンターの2D模式図</title>
+          <desc id="fallback-desc">太陽光パネル、AI計算モジュール、光通信ターミナル、放熱ラジエーターを持つ衛星群。太陽光を電力に変え、衛星間を光で結び、地球局へ結果を送り、熱は赤外線で宇宙へ放出します。</desc>
+          <defs>
+            <radialGradient id="space" cx="52%" cy="38%" r="70%"><stop stop-color="#11283c"/><stop offset="1" stop-color="#03060d"/></radialGradient>
+            <radialGradient id="earth" cx="37%" cy="25%" r="75%"><stop stop-color="#337b91"/><stop offset=".5" stop-color="#16445e"/><stop offset="1" stop-color="#06111f"/></radialGradient>
+            <radialGradient id="sun"><stop stop-color="#fff8d0"/><stop offset=".45" stop-color="#ffd47a"/><stop offset="1" stop-color="#f29a38" stop-opacity="0"/></radialGradient>
+            <linearGradient id="metal" x1="0" x2="1"><stop stop-color="#536975"/><stop offset=".35" stop-color="#d2dde0"/><stop offset=".7" stop-color="#81959f"/><stop offset="1" stop-color="#354752"/></linearGradient>
+            <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#80501f"/><stop offset=".35" stop-color="#d9ae55"/><stop offset=".7" stop-color="#916025"/><stop offset="1" stop-color="#e3bb68"/></linearGradient>
+            <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1d5a83"/><stop offset=".5" stop-color="#0a2448"/><stop offset="1" stop-color="#236c94"/></linearGradient>
+            <linearGradient id="radiator" x1="0" x2="1"><stop stop-color="#768a94"/><stop offset=".5" stop-color="#e4ecec"/><stop offset="1" stop-color="#8b9fa8"/></linearGradient>
+            <pattern id="cells" width="34" height="28" patternUnits="userSpaceOnUse"><rect width="34" height="28" fill="url(#panel)"/><path d="M34 0H0v28" fill="none" stroke="#8ac9e6" stroke-opacity=".58"/><path d="M17 0v28" stroke="#6bb1d2" stroke-opacity=".2"/></pattern>
+            <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <marker id="arrowHeat" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#ff9d63"/></marker>
+          </defs>
+          <rect width="1000" height="760" fill="url(#space)"/>
+          <g fill="#b9d6e7" opacity=".75"><circle cx="58" cy="60" r="1.4"/><circle cx="188" cy="164" r="1"/><circle cx="338" cy="70" r="1.2"/><circle cx="721" cy="76" r="1.5"/><circle cx="910" cy="148" r="1.1"/><circle cx="854" cy="352" r="1.3"/><circle cx="84" cy="436" r="1"/><circle cx="226" cy="520" r="1.4"/><circle cx="940" cy="572" r="1.2"/></g>
+          <circle cx="111" cy="112" r="71" fill="url(#sun)" opacity=".65"/><circle cx="111" cy="112" r="27" fill="#ffe6a1" filter="url(#glow)"/>
+          <g fill="none" stroke-linecap="round">
+            <ellipse cx="501" cy="424" rx="365" ry="126" stroke="#7ac9e5" stroke-opacity=".15" stroke-dasharray="5 10" transform="rotate(-8 501 424)"/>
+            <ellipse cx="501" cy="430" rx="307" ry="93" stroke="#7ac9e5" stroke-opacity=".1" transform="rotate(9 501 430)"/>
+          </g>
+          <g data-system="power" fill="none" stroke="#ffd17a" stroke-linecap="round">
+            <path d="M140 112 316 281" stroke-width="3" stroke-opacity=".32" filter="url(#glow)"/>
+            <path d="M140 112 748 281" stroke-width="2" stroke-opacity=".18" filter="url(#glow)"/>
+            <path d="M140 112 316 281" stroke-width="1.5" stroke-dasharray="4 15"/>
+            <circle cx="229" cy="199" r="4" fill="#ffe5a4" stroke="none"/><circle cx="408" cy="196" r="3" fill="#ffe5a4" stroke="none"/>
+          </g>
+          <g transform="translate(-106 -76) scale(1.2)">
+            <circle cx="505" cy="663" r="247" fill="url(#earth)"/>
+            <path d="M311 560q46-52 91-25t28 58-45 47-29 71-59-15-38-75Z M549 475q54-31 90 12t-4 55-58 11-35 57-38-22 9-69Z M677 568q48-26 76 18t-15 55-60 2-22-42Z" fill="#4b735c" opacity=".8"/>
+            <path d="M278 616q228-62 456 2" fill="none" stroke="#83d5f2" stroke-opacity=".42" stroke-width="4"/>
+          </g>
+          <g data-system="link" fill="none" stroke="#7be9ff" stroke-width="2" stroke-dasharray="8 8" opacity=".8">
+            <path d="M535 320 260 230"/><path d="M535 320 790 196"/><path d="M535 320 835 410"/>
+          </g>
+          <path data-system="link" d="M541 342 650 540" fill="none" stroke="#a7c5ff" stroke-width="2.5" stroke-dasharray="7 8" filter="url(#glow)"/>
+          <g data-system="cooling" fill="none" stroke="#ff9d63" stroke-width="2" marker-end="url(#arrowHeat)" opacity=".8">
+            <path d="M450 275q-18-27 0-52t0-45"/><path d="M474 272q-14-24 0-43"/><path d="M574 274q17-27 0-52t0-44"/><path d="M596 273q13-23 0-44"/>
+          </g>
+          <g transform="translate(532 320) scale(.72)" stroke-linejoin="round">
+            <g data-system="power">
+              <path d="M-74-12h-228v56h228Z" fill="url(#cells)" stroke="#8ccbe6" stroke-width="2"/>
+              <path d="M74-12h228v56h-228Z" fill="url(#cells)" stroke="#8ccbe6" stroke-width="2"/>
+              <path d="M-304-14v60M-250-14v60M-196-14v60M304-14v60M250-14v60M196-14v60" stroke="#c3dbe4" stroke-opacity=".55"/>
+              <path d="M-74 0h-32M74 0h32M-300 44h600" stroke="#d1a75b" stroke-width="4"/>
+            </g>
+            <g data-system="cooling">
+              <path d="M-87-66h174v-45H-87Z" fill="url(#radiator)" stroke="#f2a06e" stroke-width="2"/>
+              <path d="M-87 66h174v45H-87Z" fill="url(#radiator)" stroke="#f2a06e" stroke-width="2"/>
+              <path d="M-67-108v40M-42-108v40M-17-108v40M8-108v40M33-108v40M58-108v40M-67 68v40M-42 68v40M-17 68v40M8 68v40M33 68v40M58 68v40" stroke="#6e828c" stroke-width="3"/>
+            </g>
+            <rect x="-77" y="-60" width="154" height="120" rx="8" fill="url(#foil)" stroke="url(#metal)" stroke-width="4"/>
+            <path d="M-77-42h154M-77 42h154M-56-60v120M56-60v120" stroke="#f0d18d" stroke-opacity=".55"/>
+            <g data-system="compute">
+              <rect x="-58" y="-35" width="116" height="70" rx="4" fill="#0a1b27" stroke="#68e7f7" stroke-width="2"/>
+              <g fill="#173c49" stroke="#6ceaff" stroke-width="1.2">
+                <rect x="-47" y="-24" width="16" height="15"/><rect x="-23" y="-24" width="16" height="15"/><rect x="1" y="-24" width="16" height="15"/><rect x="25" y="-24" width="16" height="15"/>
+                <rect x="-47" y="-2" width="16" height="15"/><rect x="-23" y="-2" width="16" height="15"/><rect x="1" y="-2" width="16" height="15"/><rect x="25" y="-2" width="16" height="15"/>
+                <rect x="-47" y="20" width="16" height="10"/><rect x="-23" y="20" width="16" height="10"/><rect x="1" y="20" width="16" height="10"/><rect x="25" y="20" width="16" height="10"/>
+              </g>
+              <path d="M-47 8h88M-47 16h88" stroke="#b47a42" stroke-width="1"/>
+            </g>
+            <g data-system="link" filter="url(#glow)">
+              <rect x="-54" y="-82" width="25" height="22" rx="4" fill="url(#metal)"/><circle cx="-41" cy="-82" r="8" fill="#9cf5ff"/>
+              <rect x="29" y="-82" width="25" height="22" rx="4" fill="url(#metal)"/><circle cx="41" cy="-82" r="8" fill="#9cf5ff"/>
+            </g>
+          </g>
+          <g fill="url(#cells)" stroke="#8bc8dd" stroke-width="1.5">
+            <g transform="translate(242 220) rotate(-14)"><rect x="-55" y="-13" width="40" height="26"/><rect x="40" y="-13" width="40" height="26"/><rect x="-12" y="-20" width="24" height="40" fill="url(#foil)"/></g>
+            <g transform="translate(805 190) rotate(12)"><rect x="-55" y="-13" width="40" height="26"/><rect x="40" y="-13" width="40" height="26"/><rect x="-12" y="-20" width="24" height="40" fill="url(#foil)"/></g>
+            <g transform="translate(844 414) rotate(-8)"><rect x="-55" y="-13" width="40" height="26"/><rect x="40" y="-13" width="40" height="26"/><rect x="-12" y="-20" width="24" height="40" fill="url(#foil)"/></g>
+            <g transform="translate(272 459) rotate(16)"><rect x="-55" y="-13" width="40" height="26"/><rect x="40" y="-13" width="40" height="26"/><rect x="-12" y="-20" width="24" height="40" fill="url(#foil)"/></g>
+          </g>
+          <g transform="translate(650 540)" stroke="#a8c4cf" stroke-width="2">
+            <ellipse cx="0" cy="18" rx="37" ry="12" fill="#152735"/>
+            <path d="M0 15V-16" stroke-width="5"/>
+            <path d="M-25-13q25-36 50 0Z" fill="url(#metal)"/>
+            <path d="M0-28v-25" stroke-width="2"/><circle cx="0" cy="-55" r="5" fill="#9deeff" stroke="none" filter="url(#glow)"/>
+          </g>
+          <g fill="#d8e9f1" font-family="system-ui,sans-serif" font-size="15">
+            <text x="158" y="70" fill="#ffe1a0">太陽光</text>
+            <text x="350" y="167">太陽光パネル</text><text x="424" y="367">AI計算モジュール</text>
+            <text x="621" y="284">光通信</text><text x="619" y="171">放熱ラジエーター</text>
+            <text x="675" y="555">地球側受信</text><text x="115" y="407">衛星群</text>
+          </g>
+          <g stroke="#8db5c5" stroke-opacity=".6"><path d="M404 174h-40l-35 70"/><path d="M451 375h-46l32 54"/><path d="M634 280h-50l-37 39"/><path d="M658 181h-52l-31-63"/><path d="M686 548h-28l-15-29"/></g>
+          <g transform="translate(465 447)" font-family="system-ui,sans-serif" font-size="13" fill="#b6ccd8">
+            <rect x="-105" y="-17" width="270" height="34" rx="17" fill="#06111c" fill-opacity=".82" stroke="#77cde2" stroke-opacity=".25"/>
+            <text x="30" y="4" text-anchor="middle">真空では空冷不可 → 赤外線で放熱</text>
+          </g>
+        </svg>
+        <figcaption id="fallback-stage-caption">2D模式図 · 全体</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS 宇宙図鑑">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="20" r="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/>
+          <ellipse cx="20" cy="20" rx="18" ry="7" fill="none" stroke="currentColor" stroke-width="1.3" transform="rotate(-28 20 20)"/>
+          <path d="M15 16h10v9H15zM11 18h4v5h-4m14-5h4v5h-4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="31" cy="10" r="2" fill="currentColor"/>
+        </svg>
+        <div><strong>FRONTIER ATLAS</strong><span>宇宙図鑑 <b id="catalog-count">02 / 02</b></span></div>
+      </div>
+      <div class="top-actions">
+        <span class="live-badge"><i aria-hidden="true"></i>実証と構想を分けて表示</span>
+        <button id="briefing-toggle" class="icon-button briefing-toggle" type="button" aria-label="比較・研究段階・基本構成を開く" aria-expanded="false" aria-controls="briefing-rail">☰</button>
+        <button id="help-open" class="icon-button" type="button" aria-label="操作ガイドと模型の注意点を開く" aria-haspopup="dialog">?</button>
+      </div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title">
+      <p class="eyebrow">ENTRY 02 <span aria-hidden="true">/</span> SPACE INFRASTRUCTURE</p>
+      <h1 id="entry-title">ORBITAL COMPUTE</h1>
+      <p>宇宙データセンター</p>
+    </section>
+
+    <nav class="view-dock" aria-label="宇宙データセンターの解説モード">
+      <div class="view-buttons" role="group" aria-label="モードを選ぶ">
+        <button class="view-button" type="button" data-view="overall" aria-pressed="true">全体</button>
+        <button class="view-button" type="button" data-view="power" aria-pressed="false">発電</button>
+        <button class="view-button" type="button" data-view="link" aria-pressed="false">光通信</button>
+        <button class="view-button" type="button" data-view="cooling" aria-pressed="false">放熱</button>
+        <button class="view-button" type="button" data-view="compute" aria-pressed="false">軌道上処理</button>
+      </div>
+    </nav>
+
+    <p id="flow-caption" class="flow-caption">太陽光 → AI計算 → 光通信 → 地球 / 熱は赤外線で放熱</p>
+
+    <aside id="briefing-rail" class="briefing-rail" aria-labelledby="briefing-title">
+      <div class="rail-heading"><p class="eyebrow">QUICK BRIEFING</p><h2 id="briefing-title">まず押さえる3点</h2></div>
+      <section class="brief-card" aria-labelledby="comparison-title">
+        <h3 id="comparison-title">地上との比較</h3>
+        <div class="comparison-head" aria-hidden="true"><span>項目</span><span>地上</span><span>宇宙</span></div>
+        <dl id="comparison-list" class="comparison-list">
+          <div><dt>電力</dt><dd>送電網</dd><dd>太陽光</dd></div>
+          <div><dt>冷却</dt><dd>空冷・水冷</dd><dd>赤外線</dd></div>
+          <div><dt>データ</dt><dd>集中処理</dd><dd>軌道上処理</dd></div>
+        </dl>
+      </section>
+      <section class="brief-card research-brief" aria-labelledby="research-brief-title">
+        <h3 id="research-brief-title">研究段階</h3>
+        <div class="status-line demonstrated"><span aria-hidden="true"></span><p><strong>軌道上計算</strong><small>実証段階</small></p></div>
+        <div class="status-line concept"><span aria-hidden="true"></span><p><strong>大規模宇宙DC</strong><small>研究・構想</small></p></div>
+      </section>
+      <section class="brief-card" aria-labelledby="architecture-title">
+        <h3 id="architecture-title">基本構成</h3>
+        <ol class="architecture-list">
+          <li><b>01</b><span>太陽光発電</span></li>
+          <li><b>02</b><span>AI / TPU</span></li>
+          <li><b>03</b><span>衛星間光通信</span></li>
+          <li><b>04</b><span>地球側受信</span></li>
+        </ol>
+      </section>
+      <p class="rail-note">教育用の模式図です。時間・距離・温度は実際の設計値ではありません。</p>
+    </aside>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="mode-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content">
+        <span><small id="panel-mode-english">SYSTEM OVERVIEW</small><strong id="panel-mode-title">宇宙で計算する仕組み</strong></span>
+        <span id="panel-toggle-label">解説を開く</span>
+      </button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="mode-title">
+          <p id="mode-kicker" class="eyebrow">01 / SYSTEM OVERVIEW</p>
+          <h2 id="mode-title">宇宙で計算する仕組み</h2>
+          <p id="mode-description">太陽光発電、AI計算、衛星間の光通信、赤外線による放熱を組み合わせ、処理結果を地球へ送ります。どこか一つだけの技術ではなく、系全体の設計が重要です。</p>
+          <p id="mode-study" class="study-note">まずは地上データセンターの完全な代替ではなく、宇宙で集まるデータを近くで処理する軌道上エッジ処理が現実的です。</p>
+        </section>
+
+        <section aria-labelledby="flow-title">
+          <h3 id="flow-title" class="section-title">データとエネルギーの流れ <span>SYSTEM FLOW</span></h3>
+          <ol id="flow-list" class="flow-list">
+            <li><span>01</span><p><strong>太陽光を集める</strong><small>広い太陽電池で電力を確保</small></p></li>
+            <li><span>02</span><p><strong>軌道上で計算</strong><small>AIアクセラレータがデータを処理</small></p></li>
+            <li><span>03</span><p><strong>光でつなぐ</strong><small>衛星間でデータを中継</small></p></li>
+            <li><span>04</span><p><strong>地球へ返す</strong><small>必要な結果だけを地上局へ送信</small></p></li>
+          </ol>
+        </section>
+
+        <section class="research-card" aria-labelledby="research-title">
+          <h3 id="research-title" class="section-title">研究段階の境界 <span>AS OF 2025 ANNOUNCEMENTS</span></h3>
+          <div class="research-row demonstrated"><span class="research-state">実証段階</span><div><strong>軌道上計算</strong><p>2025年11月にH100を搭載して打ち上げ、2025年12月に小型LLMの推論・学習を実施したとStarcloudが発表。</p></div></div>
+          <div class="research-row concept"><span class="research-state">研究・構想</span><div><strong>大規模宇宙データセンター</strong><p>Google Project Suncatcherのような衛星群の構想。Starcloud-1の実証だけで大規模DCの完成を示すものではありません。</p></div></div>
+        </section>
+
+        <section id="focus-card" class="focus-card" aria-live="polite">
+          <p id="focus-kicker" class="eyebrow">EXPLORE THE MODEL</p>
+          <h3 id="focus-title">5つの機器にフォーカス</h3>
+          <p id="focus-description">太陽光パネル、AIチップ、光通信、ラジエーター、地球局のラベルを選ぶと、該当部分を拡大して解説します。</p>
+          <dl id="focus-specs" class="focus-specs" hidden></dl>
+        </section>
+
+        <details class="principles" open>
+          <summary>利点と課題</summary>
+          <div class="pro-con">
+            <div><h4>可能性</h4><ul id="benefit-list"></ul></div>
+            <div><h4>課題</h4><ul id="challenge-list"></ul></div>
+          </div>
+        </details>
+
+        <details class="principles">
+          <summary>基本構成・用語</summary>
+          <dl id="spec-list" class="spec-list"></dl>
+          <p class="fine-print">Google構想は太陽光発電衛星群、TPU、自由空間光通信を組み合わせた研究構想です。Starcloud-1はH100を搭載した小型の実証衛星です。</p>
+        </details>
+
+        <section class="sources" aria-labelledby="source-title">
+          <h3 id="source-title" class="section-title">出典</h3>
+          <a href="https://research.google/blog/exploring-a-space-based-scalable-ai-infrastructure-system-design/" target="_blank" rel="noopener noreferrer">Google Research — Project Suncatcher <span aria-hidden="true">↗</span></a>
+          <a href="https://www.starcloud.com/starcloud-1" target="_blank" rel="noopener noreferrer">Starcloud — Starcloud-1 <span aria-hidden="true">↗</span></a>
+          <a href="https://www.axiomspace.com/orbital-data-center" target="_blank" rel="noopener noreferrer">Axiom Space — Orbital Data Center <span aria-hidden="true">↗</span></a>
+          <p>企業・研究機関の承認・推奨を示しません。Starcloud-1の日付と実験内容は企業発表に基づきます。</p>
+        </section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="機器のホットスポット">
+      <button type="button" class="hotspot" data-hotspot="solar" hidden><span aria-hidden="true"></span>太陽光パネル</button>
+      <button type="button" class="hotspot" data-hotspot="chip" hidden><span aria-hidden="true"></span>AIチップ</button>
+      <button type="button" class="hotspot" data-hotspot="optical" hidden><span aria-hidden="true"></span>光通信</button>
+      <button type="button" class="hotspot" data-hotspot="radiator" hidden><span aria-hidden="true"></span>ラジエーター</button>
+      <button type="button" class="hotspot" data-hotspot="ground" hidden><span aria-hidden="true"></span>地球側受信</button>
+    </div>
+
+    <div class="viewport-readout" aria-hidden="true"><span id="orbit-time">T+ 00:00</span><span id="render-quality">描画準備中</span></div>
+    <p id="look-hint" class="look-hint">ドラッグで周回 <span>·</span> ホイールでズーム <span>·</span> Spaceで再生 / 停止</p>
+
+    <section class="transport" aria-label="アニメーション再生コントロール">
+      <div class="transport-main">
+        <button id="play-toggle" class="play-button" type="button" aria-label="再生" aria-pressed="false">
+          <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>
+          <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>
+        </button>
+        <div class="speed-control" role="group" aria-label="再生速度">
+          <button type="button" data-rate="0.5" aria-pressed="false">0.5×</button>
+          <button type="button" data-rate="1" aria-pressed="true">1×</button>
+          <button type="button" data-rate="2" aria-pressed="false">2×</button>
+        </div>
+        <div class="timeline">
+          <label class="sr-only" for="orbit-timeline">教育用アニメーションのタイムライン</label>
+          <input id="orbit-timeline" type="range" min="0" max="48" step="0.05" value="0" aria-valuetext="T+ 00:00 全体">
+          <div class="timeline-labels" aria-hidden="true"><span>太陽光・データ・熱の流れ</span><span>00:48 LOOP</span></div>
+        </div>
+        <button id="reset-view" class="reset-button" type="button" aria-label="カメラの視点を全体表示に戻す" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>視点を戻す</span>
+        </button>
+      </div>
+    </section>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため3Dと再生操作は使えませんが、2D模式図と解説は読めます。</p></noscript>
+  </main>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head">
+      <div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">操作と模型の見方</h2></div>
+      <button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button>
+    </div>
+    <div class="help-content">
+      <h3>操作方法</h3>
+      <ul id="guide-list"></ul>
+      <h3>実証と構想を区別する</h3>
+      <p>Starcloud-1は2025年11月にH100を搭載して打ち上げられ、2025年12月に小型LLMの推論・学習を実施したと企業が発表しました。これは大規模宇宙データセンターの完成ではなく、軌道上計算の小さな実証です。</p>
+      <p>Google Project Suncatcherは、太陽光発電衛星群、TPU、自由空間光通信を使うスケーラブルなAIインフラの研究構想です。地上データセンターを完全に置き換えるものではなく、まず軌道上エッジ処理が現実的な用途です。</p>
+      <h3>正確さと出典</h3>
+      <p>地球表面はapp13のNASA Blue Marble: Next Generation（2004年7月）テクスチャを使い、回転を停止しています。雲・大気・衛星・地球局はコード生成の教育用模式図です。軌道・通信速度・温度・時間は実際の設計値を再現していません。</p>
+      <p><a href="https://research.google/blog/exploring-a-space-based-scalable-ai-infrastructure-system-design/" target="_blank" rel="noopener noreferrer">Google Research — Project Suncatcher ↗</a><br><a href="https://www.starcloud.com/starcloud-1" target="_blank" rel="noopener noreferrer">Starcloud — Starcloud-1 ↗</a><br><a href="https://www.axiomspace.com/orbital-data-center" target="_blank" rel="noopener noreferrer">Axiom Space — Orbital Data Center ↗</a><br><a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map#july" target="_blank" rel="noopener noreferrer">NASA Earth Observatory — Blue Marble, July 2004 ↗</a></p>
+      <p class="endorsement-note">地球テクスチャ：NASA Earth Observatory（Reto Stöckli / NASA Goddard Space Flight Center）。app13用に縮小・WebP化したものを同梱しています。本ページは企業・研究機関の承認・推奨を示しません。</p>
+    </div>
+  </dialog>
+
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

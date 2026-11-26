@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="CRISPR-Cas9切断とベース編集の違いを、DNA、guide RNA、編集酵素、修復、配列の3D模式図で学ぶ教育用展示です。">
+  <meta name="theme-color" content="#030811">
+  <title>CRISPR / ベース編集 — 遺伝子を精密に書き換える | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit exhibit--crispr" data-mode="recognition" data-mechanism="base" data-panel="closed">
+    <div id="space-stage" class="space-stage" tabindex="0" role="region" aria-label="CRISPRとDNAの3D模式図。ドラッグまたは矢印キーで周回、ホイール・ピンチ・プラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram" data-mode="recognition" data-mechanism="base">
+        <svg viewBox="0 0 680 580" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">CRISPR切断とベース編集の2D模式図</title>
+          <desc id="fallback-desc">中央にDNA二重らせん、右にCas9、その下にguide RNAと脱アミナーゼを示します。Cas9切断は二本鎖を切り、ベース編集は二本鎖切断を起こさずA・TをG・Cへ変換します。</desc>
+          <defs>
+            <linearGradient id="c-strand-a"><stop stop-color="#63e6ff"/><stop offset="1" stop-color="#9cf1cc"/></linearGradient>
+            <linearGradient id="c-strand-b"><stop stop-color="#ffc07a"/><stop offset="1" stop-color="#d2a6ff"/></linearGradient>
+            <radialGradient id="c-protein"><stop stop-color="#8db7ee"/><stop offset="1" stop-color="#294975"/></radialGradient>
+            <radialGradient id="c-target"><stop stop-color="#ffd27a" stop-opacity=".4"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
+          </defs>
+          <g class="c-grid" stroke="#6178a5" stroke-opacity=".14" fill="none"><path d="M40 80h600M40 160h600M40 240h600M40 320h600M40 400h600M40 480h600M100 40v500M200 40v500M300 40v500M400 40v500M500 40v500M600 40v500"/></g>
+          <g id="fallback-helix" class="c-helix" data-fallback-node="helix">
+            <path d="M282 48C410 98 410 148 282 198S154 298 282 348 410 448 282 498 154 548 282 570" fill="none" stroke="url(#c-strand-a)" stroke-width="12" stroke-linecap="round"/>
+            <path d="M398 48C270 98 270 148 398 198S526 298 398 348 270 448 398 498 526 548 398 570" fill="none" stroke="url(#c-strand-b)" stroke-width="12" stroke-linecap="round"/>
+            <g class="c-bases" stroke-width="8" stroke-linecap="round"><path d="M290 74h100" stroke="#63e6ff"/><path d="M320 97h60" stroke="#ffc07a"/><path d="M365 122h50" stroke="#9cf1cc"/><path d="M382 148h40" stroke="#d2a6ff"/><path d="M365 174h52" stroke="#63e6ff"/><path d="M320 199h60" stroke="#ffc07a"/><path d="M290 224h100" stroke="#9cf1cc"/><path d="M268 249h110" stroke="#d2a6ff"/><path d="M283 274h92" stroke="#63e6ff"/><path d="M320 299h60" stroke="#ffc07a"/><path d="M365 324h50" stroke="#9cf1cc"/><path d="M382 349h40" stroke="#d2a6ff"/><path d="M365 374h52" stroke="#63e6ff"/><path d="M320 399h60" stroke="#ffc07a"/><path d="M290 424h100" stroke="#9cf1cc"/><path d="M268 449h110" stroke="#d2a6ff"/><path d="M283 474h92" stroke="#63e6ff"/><path d="M320 499h60" stroke="#ffc07a"/></g>
+            <text x="154" y="305">DNA二重らせん</text>
+          </g>
+          <g id="fallback-target" class="c-target" data-fallback-node="repair"><circle cx="340" cy="274" r="62" fill="url(#c-target)"/><circle cx="340" cy="274" r="45" fill="none" stroke="#ffd27a" stroke-width="2" stroke-dasharray="4 6"/><text x="340" y="366" text-anchor="middle">標的 A·T</text></g>
+          <g class="c-guide" data-fallback-node="guide" fill="none" stroke="#9cf1cc" stroke-width="5" stroke-linecap="round"><path d="M484 192C456 201 430 224 398 245"/><path d="M491 184q33 4 31 31t-31 27"/><g fill="#9cf1cc" stroke="none"><circle cx="475" cy="196" r="5"/><circle cx="461" cy="202" r="5"/><circle cx="447" cy="210" r="5"/><circle cx="433" cy="220" r="5"/><circle cx="419" cy="231" r="5"/><circle cx="405" cy="242" r="5"/></g><text x="488" y="154">guide RNA</text></g>
+          <g class="c-cas9" data-fallback-node="cas9" transform="translate(478 286)"><path d="M-67-54C-28-94 37-83 66-42 96-1 73 59 29 74-13 90-69 65-82 23-91-8-87-31-67-54Z" fill="url(#c-protein)" stroke="#a9c6ff" stroke-width="2"/><path d="M-61-25q42-38 86-5M-61 30q44 33 85-2" fill="none" stroke="#345986" stroke-width="12" stroke-linecap="round"/><circle cx="-50" cy="10" r="18" fill="#ff8b78" fill-opacity=".78"/><circle cx="-14" cy="54" r="18" fill="#ff8b78" fill-opacity=".78"/><text x="0" y="118" text-anchor="middle">Cas9</text></g>
+          <g class="c-deaminase" data-fallback-node="deaminase" transform="translate(422 333)"><circle r="32" fill="#ffc07a" fill-opacity=".78" stroke="#ffe0ad" stroke-width="2"/><circle cx="-14" cy="-5" r="11" fill="#ff8fbd" fill-opacity=".8"/><text y="54" text-anchor="middle">脱アミナーゼ</text></g>
+          <g id="fallback-repair" class="c-repair" fill="#d2a6ff"><circle cx="320" cy="235" r="5"/><circle cx="370" cy="235" r="5"/><circle cx="315" cy="315" r="5"/><circle cx="375" cy="315" r="5"/></g>
+          <g id="fallback-cut" class="c-cut" stroke="#ff8b78" stroke-width="4"><path d="m324 250-16 24 20 24M356 250l16 24-20 24"/></g>
+          <g class="c-pam" fill="#bdd0dc" font-size="12"><text x="277" y="36">PAM: AGG</text><text x="454" y="444">A · T → G · C</text></g>
+        </svg>
+        <figcaption id="fallback-stage-caption">2D模式図 · 標的認識 / ベース編集</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS 生命科学図鑑"><svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 33 13v14L20 35 7 27V13Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M13 13c12 0 2 14 14 14M13 27c12 0 2-14 14-14" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><div><strong>FRONTIER ATLAS</strong><span>生命科学図鑑 <b>LS / 02</b></span></div></div>
+      <div class="top-actions"><span class="evidence-badge"><i aria-hidden="true"></i>実装・研究・構想を分離</span><button id="help-open" class="icon-button" type="button" aria-label="操作ガイドと模型の注意点を開く" aria-haspopup="dialog">?</button></div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title"><p class="eyebrow">ENTRY LS–02 <span>/</span> GENOME EDITING</p><h1 id="entry-title">CRISPR</h1><p>ベース編集 — 遺伝子を精密に書き換える</p></section>
+
+    <div class="mode-switch" role="group" aria-label="CRISPRの4状態">
+      <button type="button" class="mode-button" data-mode="recognition" aria-pressed="true"><span class="mode-dot" aria-hidden="true"></span><span><small>01 / FIND</small>target recognition</span></button>
+      <button type="button" class="mode-button" data-mode="edit" aria-pressed="false"><span class="mode-dot" aria-hidden="true"></span><span><small>02 / EDIT</small>cut vs base edit</span></button>
+      <button type="button" class="mode-button" data-mode="repair" aria-pressed="false"><span class="mode-dot" aria-hidden="true"></span><span><small>03 / REPAIR</small>repair</span></button>
+      <button type="button" class="mode-button" data-mode="edited" aria-pressed="false"><span class="mode-dot" aria-hidden="true"></span><span><small>04 / VERIFY</small>edited sequence</span></button>
+    </div>
+    <div id="structure-label" class="structure-label" role="status" aria-live="polite">BASE EDITING / NO DOUBLE-STRAND BREAK</div>
+
+    <nav class="mechanism-rail" aria-labelledby="mechanism-title">
+      <div class="rail-heading"><p class="eyebrow">EDITING MECHANISM</p><h2 id="mechanism-title">2つの編集経路を比較</h2></div>
+      <div class="mechanism-switch" role="group" aria-label="Cas9切断とベース編集の切り替え">
+        <button type="button" class="mechanism-button" data-mechanism="cut" aria-pressed="false"><span class="mechanism-icon" aria-hidden="true">✂</span><span><strong>Cas9切断</strong><small>DOUBLE-STRAND BREAK</small></span><i aria-hidden="true"></i></button>
+        <button type="button" class="mechanism-button" data-mechanism="base" aria-pressed="true"><span class="mechanism-icon" aria-hidden="true">A→G</span><span><strong>ベース編集</strong><small>BASE EDITING · NO DSB</small></span><i aria-hidden="true"></i></button>
+      </div>
+      <div class="mechanism-summary"><span id="mechanism-badge">DSBをつくらない</span><h3 id="mechanism-name">一塩基の化学変換</h3><p id="mechanism-description">不活性化Cas9と脱アミナーゼで標的AをIを経てGへ変換します。DNA複製・修復で相補鎖もCに変わり、A·T→G·Cが固定されます。</p><p id="mechanism-change">例：A·T → G·C（9番目の塩基対）</p></div>
+      <div class="molecule-picker"><p class="eyebrow">MOLECULAR COMPONENTS</p><div class="molecule-list" role="group" aria-label="CRISPRの分子構成要素">
+        <button type="button" class="molecule-button" data-node="helix" aria-pressed="false">DNA</button>
+        <button type="button" class="molecule-button" data-node="guide" aria-pressed="false">guide RNA</button>
+        <button type="button" class="molecule-button" data-node="cas9" aria-pressed="false">Cas9</button>
+        <button type="button" class="molecule-button" data-node="deaminase" aria-pressed="false">脱アミナーゼ</button>
+        <button type="button" class="molecule-button" data-node="repair" aria-pressed="false">修復・検証</button>
+      </div></div>
+      <p class="rail-note">切断は2本に傷を付け、修復を利用します。ベース編集は二本鎖切断なしで一塩基を変換します。</p>
+    </nav>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="panel-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content"><span><small id="panel-kicker">MODE 01</small><strong id="panel-handle-title">target recognition</strong></span><span id="panel-toggle-label">解説を開く</span></button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="panel-title"><p id="panel-english" class="eyebrow">GUIDE RNA / PAM RECOGNITION</p><h2 id="panel-title">target recognition</h2><p id="panel-summary">guide RNAのspacer配列がDNAと相補的に結合し、Cas9が隣接するPAMを認識します。</p><p id="panel-structure-note" class="structure-note">標的配列とPAMの両方が、編集ツールの設計に重要です。</p><details class="mode-details"><summary>詳しい仕組み</summary><p id="panel-detail">SpCas9の代表的なPAMはNGGです。模型の配列は教学用の任意配列で、特定の疾患遺伝子ではありません。</p></details><p id="panel-boundary" class="boundary-note">教育用の模式図です。分子の形、配列、編集効率、治療成績を再現するものではありません。</p></section>
+
+        <section class="sequence-card" aria-labelledby="sequence-title"><h3 id="sequence-title">教学用20塩基配列</h3><div class="sequence-line"><small>編集前 5′</small><code id="sequence-original">GCTAACGTACGTTAGCTAGC</code><small>3′</small></div><div class="sequence-line"><small>編集後 5′</small><code id="sequence-edited">GCTAACGTGCGTTAGCTAGC</code><small>3′</small></div><p id="sequence-note">9番目を強調：A·T → G·C。任意の教学配列で、疾患遺伝子ではありません。</p></section>
+
+        <section class="research-stage" aria-labelledby="research-title"><h3 id="research-title">研究段階</h3><strong id="research-status">研究・臨床開発 / 用途ごとに段階が異なる</strong><p id="research-detail">基礎研究の編集ツールとして実装されています。治療応用は対象疾患、デリバリー、臨床試験、地域の規制によって段階が異なります。</p></section>
+
+        <section class="evidence-grid" aria-label="実装・研究・構想の区別"><div class="evidence implementation"><h3><span aria-hidden="true">✓</span> 実装・実測</h3><ul id="implementation-list"></ul></div><div class="evidence research"><h3><span aria-hidden="true">→</span> 研究中</h3><ul id="research-list"></ul></div><div class="evidence concept"><h3><span aria-hidden="true">?</span> 構想・未確立</h3><ul id="concept-list"></ul></div></section>
+
+        <section id="selected-node-card" class="selected-node-card" aria-labelledby="node-title" hidden><p id="node-english" class="eyebrow">MOLECULAR COMPONENT</p><h3 id="node-title">DNA二重らせん</h3><p id="node-role">32塩基対の教学用配列</p><p id="node-description"></p><dl id="node-specs" class="node-specs"></dl></section>
+
+        <details class="mode-details mechanism-details"><summary>この状態で起きること</summary><ol id="flow-list" class="flow-list"></ol><p id="panel-study" class="study-note"></p></details>
+        <section class="spec-card" aria-labelledby="spec-title"><h3 id="spec-title">基本仕様</h3><dl id="spec-list" class="spec-list"></dl></section>
+        <details class="challenges"><summary>主な課題</summary><ol id="challenge-list" class="challenge-list"></ol></details>
+        <section class="sources" aria-labelledby="source-title"><h3 id="source-title" class="section-title">出典 <span>PRIMARY RESEARCH</span></h3><div id="source-list"></div><p>2026年のOptiPrime論文はプライム編集の研究です。ベース編集の実測値としては扱いません。</p><p class="endorsement-note">本ページは研究機関の承認・推奨を示しません。</p></section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="3D分子の構成要素"><button type="button" class="hotspot" data-node="helix" aria-pressed="false" hidden><span aria-hidden="true"></span>DNA二重らせん</button><button type="button" class="hotspot" data-node="guide" aria-pressed="false" hidden><span aria-hidden="true"></span>guide RNA</button><button type="button" class="hotspot" data-node="cas9" aria-pressed="false" hidden><span aria-hidden="true"></span>Cas9</button><button type="button" class="hotspot" data-node="deaminase" aria-pressed="false" hidden><span aria-hidden="true"></span>脱アミナーゼ</button><button type="button" class="hotspot" data-node="repair" aria-pressed="false" hidden><span aria-hidden="true"></span>修復・検証</button></div>
+
+    <div class="viewport-readout" aria-hidden="true"><span id="phase-readout">01 / 04 · 標的認識</span><span id="render-quality">描画準備中</span></div>
+    <p class="look-hint">ドラッグで周回 <span>·</span> ホイール / ピンチでズーム</p>
+
+    <section class="control-dock" aria-label="CRISPRアニメーションの再生">
+      <div class="transport-row"><div class="playback-group"><button id="play-toggle" class="play-button" type="button" aria-label="一時停止" aria-pressed="true"><svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg><svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button><div class="speed-control" role="group" aria-label="再生速度"><button type="button" data-rate="0.5" aria-pressed="false">0.5×</button><button type="button" data-rate="1" aria-pressed="true">1×</button><button type="button" data-rate="2" aria-pressed="false">2×</button></div></div><div class="transport-status"><span id="phase-label">target recognition · 標的認識</span><small id="time-label">0.0 / 24.0 s · 教育用ループ</small></div><div class="view-controls" role="group" aria-label="3D視点操作"><button id="zoom-out" class="tool-button" type="button" aria-label="ズームアウト" disabled>−</button><button id="zoom-in" class="tool-button" type="button" aria-label="ズームイン" disabled>＋</button><button id="reset-view" class="reset-button" type="button" aria-label="視点を初期位置に戻す" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>視点を戻す</span></button></div></div>
+      <div class="timeline-row"><label for="phase-timeline">再生位置</label><input id="phase-timeline" type="range" min="0" max="1000" step="1" value="0" aria-describedby="model-note"><output id="timeline-value" for="phase-timeline">0%</output></div>
+      <div class="comparison-strip"><div><small>CAS9切断</small><strong>DSBあり</strong><span>修復でIndelが生じる可能性</span></div><div><small>ベース編集</small><strong>DSBなし</strong><span>A·T→G·Cなどの一塩基変換</span></div><button id="reset-all" class="reset-all" type="button">すべてリセット</button></div>
+      <p id="model-note" class="dock-note">24秒のループ・分子の形・修復粒子は教育用近似です。編集効率、オフターゲット頻度、治療成績の実測値ではありません。</p>
+    </section>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため、3D・再生・操作は使えません。2D模式図と出典付きの解説は読めます。</p></noscript>
+  </main>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title"><div class="dialog-head"><div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">操作と模型の見方</h2></div><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></div><div class="help-content"><h3>操作方法</h3><ul id="guide-list"></ul><h3>何を学ぶページか</h3><p>CRISPR-Cas9はguide RNAに誘導されてDNA配列を認識します。活性Cas9の切断は二本鎖切断を作り、細胞修復を利用します。ベース編集は二本鎖切断を起こさず、標的の一塩基を別の塩基へ化学変換します。</p><p>切断経路では小さな挿入・欠失、ベース編集ではbystander編集やオフターゲット編集などの課題があります。どちらも配列だけでなく、細胞機能と安全性の検証が必要です。</p><h3>模型と出典の限界</h3><p>DNA、Cas9、guide RNA、脱アミナーゼ、修復因子の形は教育用に簡略化しています。2026年のOptiPrime論文はプライム編集の効率予測に関する研究で、ベース編集の実測値を示すものではありません。</p><h3>出典</h3><p><a href="https://www.nature.com/articles/s41467-025-63609-6" target="_blank" rel="noopener noreferrer">Nature Communications (2025) — A streamlined base editor engineering strategy to reduce bystander editing ↗</a></p><p><a href="https://www.nature.com/articles/s41587-026-03261-7" target="_blank" rel="noopener noreferrer">Nature Biotechnology (2026) — Mechanistic machine learning for prediction of prime editing outcomes ↗</a></p><p class="endorsement-note">本ページは研究機関の承認・推奨を示しません。</p></div></dialog>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

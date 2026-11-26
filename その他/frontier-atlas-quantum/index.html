@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="超伝導量子ビット、表面コード、希釈冷凍機を学ぶFRONTIER ATLASの静的3D図鑑。物理量子ビットと論理量子ビットを区別します。">
+  <meta name="theme-color" content="#03070d">
+  <title>WILLOW / QEC — 超伝導量子コンピュータ | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-panel="closed" data-mode="superposition" data-briefing="closed">
+    <div id="stage" class="stage" tabindex="0" role="region" aria-label="超伝導量子コンピュータの3D模式図。ドラッグまたは矢印キーで周回、ホイール・ピンチ・プラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram">
+        <svg viewBox="0 0 1000 760" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">超伝導量子コンピュータの2D模式図</title>
+          <desc id="fallback-desc">希釈冷凍機の内部に、データ量子ビットと測定量子ビットを並べた超伝導チップがあります。共鳴器で状態を読み、症例を古典復号器へ送り、論理量子ビットを保護します。</desc>
+          <defs>
+            <radialGradient id="qbg"><stop stop-color="#102b38"/><stop offset="1" stop-color="#03070d"/></radialGradient>
+            <linearGradient id="metal"><stop stop-color="#536b77"/><stop offset=".45" stop-color="#d4e1e5"/><stop offset="1" stop-color="#3c515e"/></linearGradient>
+            <linearGradient id="gold"><stop stop-color="#725023"/><stop offset=".5" stop-color="#e4bd6d"/><stop offset="1" stop-color="#8b622b"/></linearGradient>
+            <radialGradient id="bloch"><stop stop-color="#73e4ee" stop-opacity=".24"/><stop offset="1" stop-color="#73e4ee" stop-opacity="0"/></radialGradient>
+            <filter id="qglow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <pattern id="qgrid" width="40" height="38" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="6" fill="#79e7f2"/><circle cx="30" cy="29" r="6" fill="#c08cff"/><path d="M10 10h20v19" fill="none" stroke="#d9b366" stroke-opacity=".45"/></pattern>
+          </defs>
+          <rect width="1000" height="760" fill="url(#qbg)"/>
+          <g opacity=".5" fill="#9bc6d8"><circle cx="72" cy="82" r="1.4"/><circle cx="900" cy="96" r="1.2"/><circle cx="827" cy="604" r="1.5"/><circle cx="148" cy="650" r="1"/></g>
+          <g data-system="superposition" transform="translate(150 215)">
+            <circle r="82" fill="url(#bloch)" stroke="#73e4ee" stroke-opacity=".35"/>
+            <ellipse rx="82" ry="29" fill="none" stroke="#73e4ee" stroke-opacity=".45"/>
+            <ellipse rx="29" ry="82" fill="none" stroke="#73e4ee" stroke-opacity=".45"/>
+            <path d="M0 72 52-48" stroke="#c8f8ff" stroke-width="3" filter="url(#qglow)"/>
+            <circle cx="52" cy="-48" r="7" fill="#c8f8ff"/>
+            <text x="0" y="112" text-anchor="middle" fill="#c1d8e2" font-size="14">Bloch球（数学的表現）</text>
+          </g>
+          <g data-system="error" transform="translate(500 392)">
+            <path d="M-214-238h428v448h-428Z" fill="url(#metal)" fill-opacity=".18" stroke="#9cb5c1" stroke-width="3"/>
+            <ellipse cy="-238" rx="214" ry="48" fill="url(#metal)" stroke="#bfd1d8" stroke-width="2"/>
+            <ellipse cy="210" rx="214" ry="48" fill="#162631" stroke="#91a9b4" stroke-width="2"/>
+            <path d="M-184-185h368M-184-90h368M-184 25h368M-184 135h368" stroke="#c7854c" stroke-width="12" stroke-opacity=".55"/>
+            <path d="M-172-220v390M172-220v390" stroke="#79dce9" stroke-opacity=".3" stroke-width="2"/>
+            <g transform="translate(0 -45)">
+              <rect x="-158" y="-145" width="316" height="290" rx="5" fill="#0a1b27" stroke="#7de4ee" stroke-width="2"/>
+              <rect x="-145" y="-125" width="290" height="250" fill="url(#qgrid)"/>
+              <path d="M-158-120h316M-158 120h316" stroke="#d9b366" stroke-width="3" stroke-opacity=".65"/>
+              <text x="0" y="181" text-anchor="middle" fill="#d5e4ea" font-size="14">超伝導チップ · 49サイト</text>
+            </g>
+            <text x="0" y="258" text-anchor="middle" fill="#c1d8e2" font-size="14">希釈冷凍機（断面模式図）</text>
+          </g>
+          <g data-system="syndrome" fill="none" stroke="#7de4ee" stroke-width="2">
+            <path d="M650 320h96v-82h105" stroke-dasharray="7 7"/>
+            <path d="M650 392h126v62h75" stroke-dasharray="7 7"/>
+          </g>
+          <g data-system="syndrome" transform="translate(815 202)">
+            <rect x="-72" y="-42" width="144" height="100" rx="9" fill="#0a1b27" stroke="#7de4ee"/>
+            <g fill="#ffc56e"><rect x="-48" y="-12" width="20" height="28"/><rect x="27" y="-12" width="20" height="28"/></g>
+            <g fill="#31424f"><rect x="-14" y="-12" width="20" height="28"/><rect x="4" y="-12" width="20" height="28"/></g>
+            <text x="0" y="88" text-anchor="middle" fill="#c1d8e2" font-size="14">症例 → 古典復号</text>
+          </g>
+          <g data-system="logical" transform="translate(812 445)">
+            <circle r="66" fill="none" stroke="#b393ff" stroke-width="3" stroke-dasharray="5 7"/>
+            <g fill="#79e7f2"><circle cx="-22" cy="-15" r="8"/><circle cx="20" cy="-15" r="8"/><circle cx="0" cy="23" r="8"/></g>
+            <text x="0" y="98" text-anchor="middle" fill="#d9cef7" font-size="14">論理量子ビット ≠ 物理1個</text>
+          </g>
+          <g font-family="system-ui,sans-serif" font-size="14">
+            <text x="270" y="105" fill="#73e4ee">重ね合わせ</text><text x="270" y="130" fill="#91a5b3">振幅と位相を持つ状態</text>
+            <text x="686" y="575" fill="#ffc56e">誤り・症例・訂正</text><text x="686" y="600" fill="#91a5b3">論理状態を直接読まない</text>
+          </g>
+        </svg>
+        <figcaption id="fallback-stage-caption">2D模式図 · 重ね合わせ</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS 量子図鑑">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/><ellipse cx="20" cy="20" rx="18" ry="7" fill="none" stroke="currentColor" stroke-width="1.3" transform="rotate(-28 20 20)"/><circle cx="14" cy="17" r="3" fill="none" stroke="currentColor"/><circle cx="26" cy="23" r="3" fill="none" stroke="currentColor"/><circle cx="31" cy="10" r="2" fill="currentColor"/></svg>
+        <div><strong>FRONTIER ATLAS</strong><span>量子図鑑 <b id="catalog-count">03 / 05</b></span></div>
+      </div>
+      <div class="top-actions">
+        <span class="live-badge"><i aria-hidden="true"></i>実測・研究・構想を分離</span>
+        <button id="briefing-toggle" class="icon-button briefing-toggle" type="button" aria-label="比較・研究段階・基本構成を開く" aria-expanded="false" aria-controls="briefing-rail">☰</button>
+        <button id="help-open" class="icon-button" type="button" aria-label="操作ガイドと模型の注意点を開く" aria-haspopup="dialog">?</button>
+      </div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title">
+      <p class="eyebrow">ENTRY 03 <span>/</span> QUANTUM INFORMATION</p>
+      <h1 id="entry-title">WILLOW / QEC</h1>
+      <p>超伝導量子コンピュータ</p>
+    </section>
+
+    <nav class="view-dock" aria-label="量子コンピュータの解説モード">
+      <div class="view-buttons" role="group" aria-label="モードを選ぶ">
+        <button class="view-button" type="button" data-view="superposition" aria-pressed="true">重ね合わせ</button>
+        <button class="view-button" type="button" data-view="error" aria-pressed="false">誤り注入</button>
+        <button class="view-button" type="button" data-view="syndrome" aria-pressed="false">症例検出</button>
+        <button class="view-button" type="button" data-view="correction" aria-pressed="false">訂正</button>
+        <button class="view-button" type="button" data-view="logical" aria-pressed="false">論理量子ビット</button>
+      </div>
+    </nav>
+    <p id="flow-caption" class="flow-caption">極低温 → マイクロ波ゲート → 共鳴器 → 測定</p>
+
+    <aside id="briefing-rail" class="briefing-rail" aria-labelledby="briefing-title">
+      <div class="rail-heading"><p class="eyebrow">QUICK BRIEFING</p><h2 id="briefing-title">まず押さえる3点</h2></div>
+      <section class="brief-card" aria-labelledby="comparison-title">
+        <h3 id="comparison-title">古典 / 量子の違い</h3>
+        <div class="comparison-head" aria-hidden="true"><span>項目</span><span>古典</span><span>量子</span></div>
+        <dl id="comparison-list" class="comparison-list"></dl>
+      </section>
+      <section class="brief-card research-brief" aria-labelledby="research-brief-title">
+        <h3 id="research-brief-title">研究段階</h3>
+        <div id="research-list" class="research-list"></div>
+      </section>
+      <section class="brief-card" aria-labelledby="architecture-title">
+        <h3 id="architecture-title">基本構成</h3>
+        <ol id="architecture-list" class="architecture-list"></ol>
+      </section>
+      <p class="rail-note">49サイトの配置・Bloch球・誤り率は教育用近似です。Willowの実チップや測定値そのものではありません。</p>
+    </aside>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="mode-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content">
+        <span><small id="panel-mode-english">SUPERPOSITION</small><strong id="panel-mode-title">物理量子ビットの重ね合わせ</strong></span>
+        <span id="panel-toggle-label">解説を開く</span>
+      </button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="mode-title">
+          <p id="mode-kicker" class="eyebrow">01 / SUPERPOSITION</p>
+          <h2 id="mode-title">物理量子ビットの重ね合わせ</h2>
+          <p id="mode-description">超伝導回路を極低温に保ち、マイクロ波で操作します。|0〉と|1〉の振幅と位相を持つ量子状態を模式化しています。</p>
+          <p id="mode-study" class="study-note">Bloch球は状態を説明する数学的な表現で、量子ビット内部を直接撮影した姿ではありません。</p>
+        </section>
+        <section aria-labelledby="flow-title">
+          <h3 id="flow-title" class="section-title">状態と信号の流れ <span>SYSTEM FLOW</span></h3>
+          <ol id="flow-list" class="flow-list"></ol>
+        </section>
+        <section class="research-card" aria-labelledby="research-title">
+          <h3 id="research-title" class="section-title">研究段階の境界 <span>EVIDENCE LEVELS</span></h3>
+          <div id="research-detail-list" class="research-detail-list"></div>
+        </section>
+        <section id="focus-card" class="focus-card" aria-live="polite">
+          <p id="focus-kicker" class="eyebrow">EXPLORE THE MODEL</p>
+          <h3 id="focus-title">5つの部位にフォーカス</h3>
+          <p id="focus-description">モデルのラベルを選ぶと、該当部分を拡大して基本仕様と研究上の位置づけを解説します。</p>
+          <dl id="focus-specs" class="focus-specs" hidden></dl>
+        </section>
+        <details class="principles" open>
+          <summary>利点と課題</summary>
+          <div class="pro-con"><div><h4>可能性</h4><ul id="benefit-list"></ul></div><div><h4>課題</h4><ul id="challenge-list"></ul></div></div>
+        </details>
+        <details class="principles">
+          <summary>基本構成・用語</summary>
+          <dl id="spec-list" class="spec-list"></dl>
+          <p class="fine-print">物理量子ビットは実ハードウェアの単位、論理量子ビットは符号で保護された情報の単位です。RCSベンチマークの結果は、実用的な商用用途の実証とは別です。</p>
+        </details>
+        <section class="sources" aria-labelledby="source-title">
+          <h3 id="source-title" class="section-title">出典</h3>
+          <div id="source-list">
+            <a href="https://blog.google/technology/research/google-willow-quantum-chip/" target="_blank" rel="noopener noreferrer">Google — Meet Willow <span aria-hidden="true">↗</span></a>
+            <a href="https://www.nature.com/articles/s41586-024-08449-y" target="_blank" rel="noopener noreferrer">Nature — Quantum error correction below threshold <span aria-hidden="true">↗</span></a>
+          </div>
+          <p>企業・論文の発表内容を教育用に要約しています。承認・推奨を示しません。</p>
+        </section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="モデルのホットスポット">
+      <button type="button" class="hotspot" data-hotspot="chip" hidden><span aria-hidden="true"></span>超伝導チップ</button>
+      <button type="button" class="hotspot" data-hotspot="qubit" hidden><span aria-hidden="true"></span>物理量子ビット</button>
+      <button type="button" class="hotspot" data-hotspot="resonator" hidden><span aria-hidden="true"></span>共鳴器</button>
+      <button type="button" class="hotspot" data-hotspot="code" hidden><span aria-hidden="true"></span>表面コード</button>
+      <button type="button" class="hotspot" data-hotspot="cryostat" hidden><span aria-hidden="true"></span>希釈冷凍機</button>
+    </div>
+
+    <div class="viewport-readout" aria-hidden="true"><span id="orbit-time">T+ 00:00</span><span id="model-stats">主役モデル</span><span id="render-quality">描画準備中</span></div>
+    <p class="look-hint">ドラッグで周回 <span>·</span> ピンチ / ホイールでズーム <span>·</span> Spaceで再生 / 停止</p>
+
+    <section class="transport" aria-label="アニメーション再生コントロール">
+      <div class="transport-main">
+        <button id="play-toggle" class="play-button" type="button" aria-label="再生" aria-pressed="false">
+          <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>
+          <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>
+        </button>
+        <div class="speed-control" role="group" aria-label="再生速度"><button type="button" data-rate="0.5" aria-pressed="false">0.5×</button><button type="button" data-rate="1" aria-pressed="true">1×</button><button type="button" data-rate="2" aria-pressed="false">2×</button></div>
+        <div class="timeline">
+          <label class="sr-only" for="orbit-timeline">教育用アニメーションのタイムライン</label>
+          <input id="orbit-timeline" type="range" min="0" max="40" step="0.05" value="0" aria-valuetext="T+ 00:00 重ね合わせ">
+          <div class="timeline-labels" aria-hidden="true"><span>量子状態・誤り・訂正の模式ループ</span><span>00:40 LOOP</span></div>
+        </div>
+        <button id="reset-view" class="reset-button" type="button" aria-label="時刻・速度・視点・モードをリセット" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>リセット</span></button>
+      </div>
+    </section>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため3Dと再生操作は使えませんが、2D模式図と基本解説を読めます。</p></noscript>
+  </main>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head"><div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">操作と模型の見方</h2></div><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></div>
+    <div class="help-content">
+      <h3>操作方法</h3><ul id="guide-list"></ul>
+      <h3>物理量子ビットと論理量子ビット</h3>
+      <p>物理量子ビットはチップ上の実回路です。論理量子ビットは、複数の物理量子ビットと反復的な誤り訂正で保護された情報の単位です。数え方を混同しないことが重要です。</p>
+      <h3>実測・研究・構想の区別</h3>
+      <p>Googleは2024年12月、105物理量子ビットのWillowと、3×3から7×7の符号量子ビット配列で論理誤りを低減した結果を発表しました。RCSはベンチマークであり、既知の実用的な商用用途の実証とは別です。</p>
+      <h3>正確さと出典</h3>
+      <p>49サイト、共鳴器、配線、Bloch球、誤り率、時間は教育用近似です。実チップの完全な回路図や、フォールトトレラント量子コンピュータの実装を再現していません。</p>
+      <p><a href="https://blog.google/technology/research/google-willow-quantum-chip/" target="_blank" rel="noopener noreferrer">Google — Meet Willow ↗</a><br><a href="https://www.nature.com/articles/s41586-024-08449-y" target="_blank" rel="noopener noreferrer">Nature — Quantum error correction below the surface code threshold ↗</a></p>
+      <p class="endorsement-note">本ページは企業・研究機関の承認・推奨を示しません。</p>
+    </div>
+  </dialog>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

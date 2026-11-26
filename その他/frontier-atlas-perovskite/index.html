@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="ペロブスカイト／シリコンタンデム太陽電池の光吸収、電荷分離、電流抽出、安定性と劣化を研究段階と実用化の違いとともに学ぶ教育用3D展示です。">
+  <meta name="theme-color" content="#080b16">
+  <title>タンデム太陽電池 — ペロブスカイト／シリコン | FRONTIER ATLAS</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="exhibit" class="exhibit" data-mode="absorption" data-panel="closed">
+    <div id="space-stage" class="space-stage" tabindex="0" role="region" aria-label="ペロブスカイト／シリコンタンデム太陽電池の3D模式図。ドラッグまたは矢印キーで周回、ホイール・ピンチ・プラス・マイナスキーでズームできます。">
+      <figure id="fallback-diagram" class="fallback-diagram" data-mode="absorption">
+        <svg viewBox="0 0 560 480" role="img" aria-labelledby="fallback-title fallback-desc">
+          <title id="fallback-title">タンデム太陽電池の2D模式図</title>
+          <desc id="fallback-desc">中央の多層セルを上から分解表示し、可視光をペロブスカイト層、透過した長波長光をシリコン層が吸収します。左は模式バンド図、右はABX3結晶、電子と正孔は別の輸送層へ分かれます。</desc>
+          <defs>
+            <linearGradient id="tandem-perovskite" x2="1" y2="1"><stop stop-color="#ffc878"/><stop offset="1" stop-color="#a95275"/></linearGradient>
+            <linearGradient id="tandem-silicon" x2="0" y2="1"><stop stop-color="#477fae"/><stop offset="1" stop-color="#152c50"/></linearGradient>
+            <linearGradient id="tandem-glass" x2="0" y2="1"><stop stop-color="#c5f3ff" stop-opacity=".55"/><stop offset="1" stop-color="#5a91aa" stop-opacity=".12"/></linearGradient>
+            <filter id="tandem-glow"><feGaussianBlur stdDeviation="3"/></filter>
+          </defs>
+          <g fill="none" stroke="#27384d" opacity=".55"><path d="M35 65h490M35 418h490" stroke-dasharray="3 8"/></g>
+          <g data-fallback-component="stability">
+            <path d="m125 92 238 38 110-48-238-38Z" fill="url(#tandem-glass)" stroke="#b8e5ef"/>
+            <path d="m125 92 238 38v10l-238-38Z" fill="#547d8b"/><path d="m363 130 110-48v10l-110 48Z" fill="#7296a2"/>
+            <path d="M139 94v253M462 57v253" stroke="#354d5d" stroke-width="5" stroke-dasharray="8 7"/>
+          </g>
+          <g data-fallback-component="transport">
+            <path d="m125 129 238 38 110-48-238-38Z" fill="#aabcc5" stroke="#e1edf1"/>
+            <path d="m125 129 238 38v9l-238-38Z" fill="#657d88"/><path d="m363 167 110-48v9l-110 48Z" fill="#8499a3"/>
+            <path d="m125 159 238 38 110-48-238-38Z" fill="#73c7b4" stroke="#a0ead9"/>
+            <path d="m125 159 238 38v10l-238-38Z" fill="#407b70"/><path d="m363 197 110-48v10l-110 48Z" fill="#569988"/>
+            <path d="m125 250 238 38 110-48-238-38Z" fill="#8166a8" stroke="#b99cde"/>
+            <path d="m125 250 238 38v11l-238-38Z" fill="#4b386a"/><path d="m363 288 110-48v11l-110 48Z" fill="#695087"/>
+            <path d="m125 282 238 38 110-48-238-38Z" fill="#91aeb9" stroke="#d9e7eb"/>
+          </g>
+          <g data-fallback-component="perovskite">
+            <path d="m125 192 238 38 110-48-238-38Z" fill="url(#tandem-perovskite)" stroke="#ffd69a"/>
+            <path d="m125 192 238 38v48l-238-38Z" fill="#a6536e"/><path d="m363 230 110-48v48l-110 48Z" fill="#82445f"/>
+            <g fill="#ffe1a5" opacity=".65"><circle cx="181" cy="198" r="4"/><circle cx="235" cy="209" r="5"/><circle cx="289" cy="220" r="4"/><circle cx="400" cy="190" r="5"/></g>
+          </g>
+          <g data-fallback-component="silicon">
+            <path d="m125 315 238 38 110-48-238-38Z" fill="url(#tandem-silicon)" stroke="#7eb8e5"/>
+            <path d="m125 315 238 38v34l-238-38Z" fill="#183657"/><path d="m363 353 110-48v34l-110 48Z" fill="#25486c"/>
+            <g stroke="#72a7d1" opacity=".65"><path d="m163 315 238 38m-204-51 238 38m-204-51 238 38m-204-51 238 38"/></g>
+          </g>
+          <g data-fallback-component="transport" transform="translate(20 188)">
+            <path d="M20 0v155" stroke="#b8c8d4" stroke-width="2"/><path d="m15 8 5-10 5 10" fill="none" stroke="#b8c8d4" stroke-width="2"/>
+            <path d="M34 24h63" stroke="#ffbd66" stroke-width="7"/><path d="M34 73h63" stroke="#a77bc5" stroke-width="7"/>
+            <path d="M34 112h70" stroke="#74b9ed" stroke-width="7"/><path d="M34 145h70" stroke="#4c6f9c" stroke-width="7"/>
+            <path d="M55 73V24m-5 7 5-7 5 7M82 112V73m-5 7 5-7 5 7" fill="none" stroke="#8defff" stroke-width="2"/>
+            <text x="20" y="176" fill="#9db2c2" font-size="12">BAND DIAGRAM</text>
+          </g>
+          <g data-fallback-component="lattice" transform="translate(455 182)">
+            <g stroke="#607e91" stroke-width="1" opacity=".6"><path d="m0 35 35-20 35 20-35 20Zm0 0v72l35 20 35-20V35M35 55v72M0 71l35 20 35-20M0 107l35 20 35-20"/></g>
+            <g fill="#71dfd7"><circle cx="17" cy="44" r="6"/><circle cx="52" cy="24" r="6"/><circle cx="52" cy="96" r="6"/><circle cx="17" cy="116" r="6"/></g>
+            <g fill="#ffc46b"><circle cx="35" cy="35" r="8"/><circle cx="35" cy="107" r="8"/></g>
+            <g fill="#c9a2ff"><circle cx="2" cy="62" r="4"/><circle cx="34" cy="72" r="4"/><circle cx="68" cy="52" r="4"/><circle cx="2" cy="98" r="4"/><circle cx="68" cy="88" r="4"/></g>
+            <text x="35" y="161" text-anchor="middle" fill="#9db2c2" font-size="12">ABX3 LATTICE</text>
+          </g>
+          <g stroke-width="5" stroke-linecap="round" filter="url(#tandem-glow)"><path d="M220 22v55" stroke="#79aaff"/><path d="M282 22v55" stroke="#83efba"/><path d="M344 22v80" stroke="#ff8f7a"/></g>
+          <circle id="fallback-photon" class="fallback-photon" cx="282" cy="28" r="6" fill="#baffdc" filter="url(#tandem-glow)"/>
+          <g fill="#85edff"><circle cx="192" cy="236" r="4"/><circle cx="246" cy="246" r="4"/><circle cx="300" cy="256" r="4"/></g>
+          <g fill="#ff9ddd"><circle cx="211" cy="268" r="4"/><circle cx="265" cy="278" r="4"/><circle cx="319" cy="288" r="4"/></g>
+          <g fill="#c9dbe3" font-family="system-ui,sans-serif" font-size="13"><text x="260" y="450" text-anchor="middle">PEROVSKITE TOP CELL + SILICON BOTTOM CELL</text><text x="260" y="470" text-anchor="middle" fill="#8da8b5">層厚・粒子・エネルギー軸は教育用の模式表現</text></g>
+        </svg>
+        <figcaption id="fallback-stage-caption">2D模式図 · 光の吸収</figcaption>
+      </figure>
+      <p id="load-status" class="load-status" role="status">3Dを準備中…</p>
+    </div>
+
+    <div class="screen-shade" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand" aria-label="FRONTIER ATLAS エネルギー・材料図鑑"><svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 33 13v14L20 35 7 27V13Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m20 11 8 5v8l-8 5-8-5v-8Z M12 16l16 8m0-8L12 24" fill="none" stroke="currentColor" stroke-width="1.2"/></svg><div><strong>FRONTIER ATLAS</strong><span>エネルギー・材料 <b>SOLAR / 03</b></span></div></div>
+      <div class="top-actions"><span class="evidence-badge"><i aria-hidden="true"></i>研究セル / モジュール / 実用化を分離</span><button id="help-open" class="icon-button" type="button" aria-label="操作ガイドとモデルの注意点を開く" aria-haspopup="dialog">?</button></div>
+    </header>
+
+    <section class="exhibit-title" aria-labelledby="entry-title"><p class="eyebrow">ENTRY 03 <span>/</span> PEROVSKITE–SILICON TANDEM</p><h1 id="entry-title">タンデム太陽電池</h1><p>ペロブスカイト＋シリコン — 光を2段で使う</p></section>
+
+    <div class="mode-switch" role="group" aria-label="タンデム太陽電池の4つのプロセス">
+      <button type="button" class="mode-button" data-mode="absorption" aria-pressed="true"><span class="mode-dot"></span><span><small>01 / ABSORPTION</small>光の吸収</span></button>
+      <button type="button" class="mode-button" data-mode="separation" aria-pressed="false"><span class="mode-dot"></span><span><small>02 / SEPARATION</small>電荷分離</span></button>
+      <button type="button" class="mode-button" data-mode="extraction" aria-pressed="false"><span class="mode-dot"></span><span><small>03 / EXTRACTION</small>電流抽出</span></button>
+      <button type="button" class="mode-button" data-mode="degradation" aria-pressed="false"><span class="mode-dot"></span><span><small>04 / DEGRADATION</small>安定性と劣化</span></button>
+    </div>
+    <div id="structure-label" class="structure-label" role="status" aria-live="polite">RESEARCH TANDEM CELL · NOT A MODULE LIFETIME FORECAST</div>
+
+    <nav class="component-rail" aria-labelledby="component-list-title">
+      <div class="rail-heading"><p class="eyebrow">TANDEM ANATOMY</p><h2 id="component-list-title">電池の構成要素</h2></div>
+      <div class="component-list">
+        <button type="button" class="component-button" data-component="perovskite" aria-pressed="false"><span>01</span><strong>ペロブスカイト</strong><small>TOP ABSORBER</small></button>
+        <button type="button" class="component-button" data-component="silicon" aria-pressed="false"><span>02</span><strong>シリコン</strong><small>BOTTOM SUBCELL</small></button>
+        <button type="button" class="component-button" data-component="lattice" aria-pressed="false"><span>03</span><strong>ABX3結晶</strong><small>CRYSTAL LATTICE</small></button>
+        <button type="button" class="component-button" data-component="transport" aria-pressed="false"><span>04</span><strong>輸送層・接続</strong><small>ETL / HTL</small></button>
+        <button type="button" class="component-button" data-component="stability" aria-pressed="false"><span>05</span><strong>封止・界面</strong><small>ENCAPSULATION</small></button>
+      </div>
+      <p class="rail-note flow-note">上は可視〜短波長、下は透過した長波長を主に吸収します。</p>
+    </nav>
+
+    <aside id="info-panel" class="info-panel" aria-labelledby="panel-title">
+      <button id="info-toggle" class="panel-handle" type="button" aria-expanded="false" aria-controls="info-content"><span><small id="panel-kicker">MODE 01</small><strong id="panel-handle-title">光の吸収</strong></span><span id="panel-toggle-label">解説を開く</span></button>
+      <div id="info-content" class="info-content">
+        <section class="mode-copy" aria-labelledby="panel-title"><p id="panel-english" class="eyebrow">ABSORPTION / SPECTRAL SPLIT</p><h2 id="panel-title">光の吸収</h2><p id="panel-summary"></p><p id="panel-focus" class="focus-note"></p><p id="panel-boundary" class="boundary-note"></p></section>
+        <section class="distinction-card" aria-labelledby="distinction-title"><h3 id="distinction-title">研究効率と実用化は別</h3><p id="distinction-copy" class="description"></p></section>
+        <section class="metric-card" aria-labelledby="metric-title">
+          <div class="metric-heading"><h3 id="metric-title">教育換算の状態</h3><span>ILLUSTRATIVE / NOT MEASURED</span></div>
+          <div class="metric-grid">
+            <div><small>吸収率</small><output id="absorption-value">—</output><span>0–1・模式値</span></div>
+            <div><small>キャリア回収</small><output id="collection-value">—</output><span>0–1・模式値</span></div>
+            <div><small>教育換算PCE</small><output id="pce-value">—</output><span>%・実測PCEではない</span></div>
+            <div><small>出力保持</small><output id="retained-value">—</output><span>0–1・寿命予測ではない</span></div>
+          </div>
+          <p id="metric-guidance" class="metric-guidance"></p>
+        </section>
+        <section id="selected-component-card" class="selected-component-card" aria-labelledby="component-title" hidden><p id="component-english" class="eyebrow">COMPONENT</p><h3 id="component-title"></h3><p id="component-role" class="component-role"></p><p id="component-text"></p></section>
+        <details class="details-block study"><summary>基本仕様と研究段階</summary><dl id="spec-list" class="spec-list"></dl><h4>証拠のラベル</h4><dl id="evidence-list" class="evidence-list evidence"></dl></details>
+        <details class="details-block challenges"><summary>主な課題</summary><ol id="challenge-list" class="challenge-list"></ol></details>
+        <section class="sources" aria-labelledby="source-title"><h3 id="source-title" class="section-title">出典 <span>NREL / MIT / NATURE ENERGY</span></h3><div id="source-list">
+          <a href="https://nrel.gov/pv/perovskite-solar-cells.html" target="_blank" rel="noopener noreferrer">NREL — Perovskite Solar Cells<small>公式研究機関</small></a>
+          <a href="https://news.mit.edu/2022/perovskites-solar-cells-explained-0715" target="_blank" rel="noopener noreferrer">MIT News — Why perovskites could take solar cells to new heights<small>研究機関の解説・2022</small></a>
+          <a href="https://news.mit.edu/2024/study-unlocks-nanoscale-secrets-tuning-perovskites-0228" target="_blank" rel="noopener noreferrer">MIT News — Study unlocks nanoscale secrets…<small>研究機関の解説・2024</small></a>
+          <a href="https://www.nature.com/articles/s41560-024-01470-5" target="_blank" rel="noopener noreferrer">Nature Energy — Reduced recombination via tunable surface fields…<small>一次論文・2024</small></a>
+        </div><p class="source-note">小型研究セルの記録、モジュールの歩留まり、長期安定性、実発電量は別の指標です。</p></section>
+      </div>
+    </aside>
+
+    <div id="hotspot-layer" class="hotspot-layer" aria-label="タンデム太陽電池の構成要素">
+      <button type="button" class="hotspot" data-component="perovskite" aria-pressed="false" hidden><span></span>ペロブスカイト</button>
+      <button type="button" class="hotspot" data-component="silicon" aria-pressed="false" hidden><span></span>シリコン</button>
+      <button type="button" class="hotspot" data-component="lattice" aria-pressed="false" hidden><span></span>ABX3結晶</button>
+      <button type="button" class="hotspot" data-component="transport" aria-pressed="false" hidden><span></span>輸送層・接続</button>
+      <button type="button" class="hotspot" data-component="stability" aria-pressed="false" hidden><span></span>封止・界面</button>
+    </div>
+
+    <div class="viewport-readout" aria-hidden="true"><span id="phase-readout">PROCESS 01 / 04 · 光の吸収</span><span id="render-quality">描画準備中</span></div>
+    <p class="look-hint">ドラッグで周回 <span>·</span> ホイール / ピンチでズーム</p>
+
+    <section class="control-dock" aria-label="プロセスの再生と教育用パラメータ">
+      <div class="transport-row">
+        <div class="playback-group"><button id="play-toggle" class="play-button" type="button" aria-label="一時停止" aria-pressed="true"><svg class="play-icon" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></svg><svg class="pause-icon" viewBox="0 0 24 24"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button><div class="speed-control" role="group" aria-label="再生速度"><button type="button" data-rate="0.5" aria-pressed="false">0.5×</button><button type="button" data-rate="1" aria-pressed="true">1×</button><button type="button" data-rate="2" aria-pressed="false">2×</button></div></div>
+        <div class="transport-status"><span id="phase-label">光の吸収 → 電荷分離</span><small id="transport-note">光子とキャリアは教育用の模式表現です</small></div>
+        <div class="view-controls" role="group" aria-label="3D視点操作"><button id="zoom-out" class="tool-button" type="button" aria-label="ズームアウト" disabled>−</button><button id="zoom-in" class="tool-button" type="button" aria-label="ズームイン" disabled>＋</button><button id="reset-view" class="reset-button" type="button" aria-label="すべてを初期状態に戻す" disabled><svg viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>すべてリセット</span></button></div>
+      </div>
+      <div class="slider-grid" role="group" aria-label="教育用の太陽電池条件">
+        <div class="slider-control"><div class="slider-label"><label for="photons">光子フラックス</label><output id="photons-slider-value" for="photons">70%</output></div><input id="photons" type="range" min="0" max="100" step="5" value="70" aria-describedby="model-note"><small>入射光の模式強度</small></div>
+        <div class="slider-control"><div class="slider-label"><label for="interface">界面品質</label><output id="interface-value" for="interface">75%</output></div><input id="interface" type="range" min="0" max="100" step="5" value="75" aria-describedby="model-note"><small>欠陥・再結合の模式評価</small></div>
+        <div class="slider-control"><div class="slider-label"><label for="encapsulation">封止・安定性</label><output id="encapsulation-value" for="encapsulation">60%</output></div><input id="encapsulation" type="range" min="0" max="100" step="5" value="60" aria-describedby="model-note"><small>環境劣化を抑える方策</small></div>
+      </div>
+      <p id="model-note" class="dock-note">吸収・回収・PCE・劣化は教育用の模式値です。実測効率・モジュール寿命・発電量予測ではありません。</p>
+    </section>
+
+    <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="noscript-note">JavaScriptを無効にしているため、3D・再生・スライダーは使えません。2D模式図と出典付きの解説は読めます。</p></noscript>
+  </main>
+
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head"><div><p class="eyebrow">OBSERVATION GUIDE</p><h2 id="help-title">操作とモデルの見方</h2></div><form method="dialog"><button id="help-close" class="icon-button" type="button" aria-label="操作ガイドを閉じる">×</button></form></div>
+    <div class="help-content"><h3>操作方法</h3><ul id="guide-list"></ul><h3>何を学ぶページか</h3>
+      <p>タンデムは、吸収波長の異なる2つの太陽電池を重ねます。上側のwide-bandgapペロブスカイトと下側のシリコンが、光のスペクトルを分担します。</p>
+      <p>光子がelectron-hole pairを作り、電子は上側の電子輸送層、正孔は下側の正孔輸送層へ分かれます。2端子構成では、相互接続を通じて上下のサブセルの電流が直列に取り出されます。</p>
+      <p>研究セルの高効率は、モジュール面積での歩留まり、長期安定性、実発電量と同じではありません。MIT Newsは、耐久性と大面積性能を主要な課題として説明しています。</p>
+      <p>層厚、結晶サイト、光子、キャリア、バンド図、効率、劣化は教育用の近似です。材料設計、デバイスシミュレーション、寿命予測、発電量予測をしません。鉛を含む材料の環境管理にも触れています。</p>
+      <h3>出典</h3><div id="help-sources"></div><p class="endorsement-note">企業の商用化発表は企業発表として区別します。本ページは承認・推奨を示しません。</p>
+    </div>
+  </dialog>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
