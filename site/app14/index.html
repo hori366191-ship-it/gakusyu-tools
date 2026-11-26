@@ -1,0 +1,2814 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F7F4EC">
+<meta name="description" content="車のスピードメーターと距離のグラフから、「平均の速さ」と「今の速さ」の違いを体験する微分の入門アプリ（Phase 1）。">
+<title>微分：今の速さを切り取る｜数学活用ビジュアル解説</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F7F4EC'/%3E%3Cpath d='M5 25 Q16 23 27 7' fill='none' stroke='%23222' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M8 20 L24 14' stroke='%23D94E41' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --cream:#F7F4EC; --paper:#EFECE2; --ink:#222222; --light:#8C8980;
+  --verm:#D94E41; --indigo:#2B5B84; --hair:rgba(34,34,34,.16);
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;padding:0}
+body{
+  min-height:100vh; min-height:100dvh; overflow-x:hidden;
+  background:
+    radial-gradient(120% 70% at 50% -10%, #FCFAF3 0%, #F7F4EC 55%, #F1EDE2 100%);
+  color:var(--ink);
+  font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic","Noto Sans JP",system-ui,sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+.app{
+  max-width:1280px; margin:0 auto; padding:12px clamp(12px,3vw,32px) 16px;
+  min-height:100vh; min-height:100dvh;
+  display:flex; flex-direction:column; gap:10px;
+}
+.top{display:flex; align-items:flex-end; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.eyebrow{margin:0; font-size:11px; letter-spacing:.16em; color:var(--light)}
+.title{margin:2px 0 0; font-size:clamp(16px,2.1vw,21px); line-height:1.35; font-weight:700; letter-spacing:.01em}
+.title span{font-weight:500; color:#5b5850; font-size:.82em}
+.stage-wrap{flex:1 1 auto; display:flex; align-items:center; justify-content:center; min-height:0}
+.stage{
+  position:relative; width:min(100%, max(300px, calc((100vh - 240px) * 16 / 9)));
+  aspect-ratio:16/9; border-radius:14px; overflow:hidden;
+  background:var(--cream);
+  border:1px solid var(--hair);
+  box-shadow:0 10px 30px -22px rgba(34,34,34,.5);
+}
+@supports (height:100dvh){
+  .stage{width:min(100%, max(300px, calc((100dvh - 240px) * 16 / 9)))}
+}
+#stage{position:absolute; left:0; top:0; display:block; width:100%; height:auto; aspect-ratio:16/9; touch-action:auto}
+.stage.overlay-open{min-height:min(380px, 68vh)}
+#stage.draggable{touch-action:none; cursor:grab}
+#stage.draggable:active{cursor:grabbing}
+
+/* ---- ステージ右下のフローティング再生（下部の #play と同じ操作） ---- */
+.stage-play{
+  position:absolute; right:8px; bottom:8px; z-index:3;
+  width:clamp(40px,9vw,46px); height:clamp(40px,9vw,46px);
+  display:grid; place-items:center; padding:0;
+  border-radius:50%; border:1px solid var(--hair);
+  background:rgba(247,244,236,.82); color:var(--ink);
+  box-shadow:0 2px 10px -6px rgba(34,34,34,.55);
+  -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+  opacity:.72; cursor:pointer; touch-action:manipulation;
+  transition:opacity .18s, background .18s;
+}
+.stage-play:hover{opacity:1; background:rgba(247,244,236,.96)}
+.stage-play:active{opacity:1}
+.stage-play:focus-visible{opacity:1; outline:2px solid var(--indigo); outline-offset:2px}
+.stage-play svg{width:56%; height:56%; display:block; pointer-events:none}
+@media (hover:none){ .stage-play{opacity:.8} }
+
+/* ---- overlays ---- */
+.overlay{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  padding:clamp(14px,4%,32px); text-align:center;
+  background:rgba(247,244,236,.95);
+  backdrop-filter:blur(1.5px);
+  overflow:auto; overscroll-behavior:contain;
+}
+.overlay__card{max-width:34em; display:flex; flex-direction:column; align-items:center; gap:8px}
+.overlay h2{margin:2px 0; font-size:clamp(16px,2.3vw,24px); line-height:1.4}
+.overlay p{margin:0; font-size:clamp(12px,1.35vw,15px); line-height:1.75; color:#4a473f}
+.overlay__actions{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:6px}
+.overlay__note{font-size:11px !important; color:var(--light) !important}
+
+/* ---- buttons ---- */
+.btn{
+  font:inherit; font-size:clamp(12px,1.3vw,15px); line-height:1.2;
+  color:var(--ink); background:var(--paper);
+  border:1px solid var(--hair); border-radius:10px;
+  padding:9px 15px; cursor:pointer;
+  transition:background .18s, transform .18s, border-color .18s;
+  touch-action:manipulation;
+}
+.btn:hover{background:#F5F2E7; border-color:rgba(34,34,34,.28)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+.btn--primary{background:var(--indigo); border-color:#22496B; color:#FBF8F0}
+.btn--primary:hover{background:#24507A}
+.btn[disabled]{opacity:.45; cursor:default}
+
+/* ---- subtitle ---- */
+.subtitle{
+  min-height:58px; display:flex; align-items:center;
+  background:var(--paper); border:1px solid var(--hair); border-radius:12px;
+  padding:10px 16px;
+}
+.subtitle p{margin:0; font-size:clamp(13.5px,1.5vw,18px); line-height:1.65; letter-spacing:.01em}
+
+/* ---- seek ---- */
+.seek{display:flex; align-items:center; gap:10px; padding:0 2px}
+.seek input[type=range]{
+  flex:1 1 auto; min-width:0; height:28px; margin:0;
+  accent-color:var(--indigo); background:transparent;
+}
+.seek input[type=range]:focus-visible{outline:2px solid var(--indigo); outline-offset:3px; border-radius:6px}
+.seek__time{
+  font-family:"Times New Roman",serif; font-size:clamp(11.5px,1.2vw,13.5px);
+  color:#5b5850; white-space:nowrap; font-variant-numeric:tabular-nums;
+}
+
+/* ---- prompt ---- */
+.prompt{
+  background:var(--paper); border:1px solid rgba(43,91,132,.28); border-radius:12px;
+  padding:10px 14px 12px; display:flex; flex-direction:column; gap:8px;
+}
+.prompt__head{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.prompt__title{margin:0; font-size:clamp(12px,1.3vw,14px); font-weight:700; color:var(--indigo)}
+.prompt__readout{margin:0; font-family:"Times New Roman",serif; font-size:clamp(13px,1.4vw,16px); color:var(--ink)}
+.prompt__row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.prompt__label{font-size:clamp(12px,1.3vw,14px); color:#4a473f; white-space:nowrap}
+.prompt__row input[type=range]{
+  flex:1 1 160px; min-width:140px; height:28px; margin:0;
+  accent-color:var(--indigo); background:transparent;
+}
+.prompt__row input[type=range]:focus-visible{outline:2px solid var(--indigo); outline-offset:3px; border-radius:6px}
+.prompt__row .btn{margin-left:auto}
+.prompt__hint{margin:0; font-size:clamp(11px,1.15vw,12.5px); color:#6d6a61; line-height:1.6}
+
+/* ---- controls ---- */
+.controls{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.controls .spacer{flex:1 1 8px}
+.ctrl{
+  font:inherit; font-size:13px; color:var(--ink); background:var(--paper);
+  border:1px solid var(--hair); border-radius:9px; padding:8px 13px; cursor:pointer;
+  transition:background .18s;
+}
+.ctrl:hover{background:#F5F2E7}
+.ctrl:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+#play{min-width:7.2em}
+.scene-label{font-size:12px; color:var(--light); letter-spacing:.04em}
+.voice{display:flex; align-items:center; gap:6px; font-size:12.5px; color:#4a473f; cursor:pointer}
+.voice input{width:16px; height:16px; accent-color:var(--indigo)}
+.voice-note{font-size:11px; color:var(--light)}
+/* ---- narration samples ---- */
+.narration{font-size:12px; color:#4a473f}
+.narration summary{cursor:pointer; width:max-content; max-width:100%; font-size:12.5px; color:var(--indigo)}
+.narration summary:focus-visible{outline:2px solid var(--indigo); outline-offset:2px; border-radius:6px}
+.narration__body{display:flex; flex-direction:column; gap:8px; padding:8px 2px 2px}
+.narration__lead{margin:0; font-size:11.5px; color:var(--light)}
+.narration__item{display:flex; flex-direction:column; gap:2px; min-width:0}
+.narration__label{margin:0; font-size:12px}
+.narration audio{width:100%; max-width:340px; height:34px; min-width:0}
+.narration__credit{margin:0; font-size:11px; color:var(--light); line-height:1.6}
+.narration__credit a{color:var(--indigo)}
+.keyhint{font-size:11px; color:var(--light); line-height:1.5}
+@media (max-width:640px){
+  .app{gap:8px}
+  .keyhint{display:none}
+  .title span{display:none}
+  .subtitle{min-height:52px; padding:9px 12px}
+  .prompt__row .btn{width:100%; margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){
+  .btn,.ctrl,.stage-play{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <p class="eyebrow">数学活用ビジュアル解説</p>
+      <h1 class="title">微分 <span>— 今の速さを切り取る</span></h1>
+    </div>
+    <p class="keyhint">Space：再生／一時停止　←→：シーン移動</p>
+  </header>
+
+  <main class="stage-wrap">
+    <div class="stage" id="stageBox">
+      <canvas id="stage" role="img" aria-label="紙に描いた手描き風のアニメーション。車とスピードメーター、時間と距離のグラフ、放物線の接線を表示します。"></canvas>
+
+      <button id="stagePlay" class="stage-play" type="button" aria-label="再生" hidden>
+        <svg id="stagePlayIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"></svg>
+      </button>
+
+      <div id="start" class="overlay">
+        <div class="overlay__card">
+          <p class="eyebrow">数学活用ビジュアル解説 ・ Phase 1</p>
+          <h2>微分 — 「今の速さ」を切り取る</h2>
+          <p>車の短い走行を、時間と距離のグラフに。止まる・進むの変化から、その瞬間の速さを読み取ります。</p>
+          <div class="overlay__actions">
+            <button id="startVoice" class="btn btn--primary" type="button">音声ありではじめる</button>
+            <button id="startSilent" class="btn" type="button">読み上げなしではじめる</button>
+          </div>
+          <p class="overlay__note">音声が使えない環境でも、字幕で最後まで進みます。</p>
+        </div>
+      </div>
+
+      <div id="end" class="overlay" hidden>
+        <div class="overlay__card">
+          <p class="eyebrow">Scene 1・2 プロトタイプ</p>
+          <h2>接線の傾き＝その瞬間の勢い</h2>
+          <p>止まっていた区間は水平、発進すると傾きが立ち上がる。区間を0に近づけた傾きが、その瞬間の速さです。</p>
+          <div class="overlay__actions">
+            <button id="again" class="btn btn--primary" type="button">もう一度見る</button>
+            <button id="againScene2" class="btn" type="button">Scene 2 から見る</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <section class="subtitle" aria-live="polite" aria-atomic="true">
+    <p id="sub">「はじめる」を押すと、解説が始まります。</p>
+  </section>
+
+  <section class="seek" aria-label="再生位置">
+    <input id="seekRange" type="range" min="0" max="120" step="0.1" value="0" aria-label="再生位置">
+    <span id="seekTime" class="seek__time">0:00 / 0:00</span>
+  </section>
+
+  <section id="prompt" class="prompt" hidden aria-labelledby="promptTitle">
+    <div class="prompt__head">
+      <p id="promptTitle" class="prompt__title">自分で動かしてみよう</p>
+      <p id="readout" class="prompt__readout">x = 1.00 ／ 傾き 2.0</p>
+    </div>
+    <div class="prompt__row">
+      <label class="prompt__label" for="xRange">点の位置 x</label>
+      <input id="xRange" type="range" min="-1.6" max="1.6" step="0.05" value="1" aria-describedby="promptHint">
+      <button id="continue" class="btn btn--primary" type="button">解説を続ける</button>
+    </div>
+    <p id="promptHint" class="prompt__hint">赤い点をドラッグするか、スライダーで左右に動かせます。ここは車の距離ではなく、数学のグラフ y = x² です。</p>
+  </section>
+
+  <footer class="controls">
+    <button id="prev" class="ctrl" type="button" aria-label="前のシーンへ">◀ 前へ</button>
+    <button id="play" class="ctrl" type="button" aria-pressed="false">はじめる</button>
+    <button id="next" class="ctrl" type="button" aria-label="次のシーンへ">次へ ▶</button>
+    <span id="sceneLabel" class="scene-label">Scene 1 / 2</span>
+    <span class="spacer"></span>
+    <label class="voice" for="voiceToggle">
+      <input id="voiceToggle" type="checkbox" checked>
+      読み上げ
+    </label>
+    <span id="voiceNote" class="voice-note"></span>
+  </footer>
+
+  <details class="narration">
+    <summary>ナレーションを聞き比べる</summary>
+    <div class="narration__body">
+      <p class="narration__lead">同じ3文を2つの合成音声で試聴できます。</p>
+      <div class="narration__item">
+        <p class="narration__label" id="narrNemoLabel">VOICEVOX Nemo（女声1）</p>
+        <audio controls preload="none" src="./audio/preview-nemo.mp3" aria-labelledby="narrNemoLabel"></audio>
+      </div>
+      <div class="narration__item">
+        <p class="narration__label" id="narrAivisLabel">AivisSpeech：まお（おちつき）</p>
+        <audio controls preload="none" src="./audio/preview-aivis.mp3" aria-labelledby="narrAivisLabel"></audio>
+      </div>
+      <p class="narration__credit">本編ナレーション：VOICEVOX Nemo（女声1）／<a href="https://voicevox.hiroshiba.jp/nemo/" target="_blank" rel="noopener">VOICEVOX Nemo</a>・<a href="https://voicevox.hiroshiba.jp/nemo/term/" target="_blank" rel="noopener">利用規約</a></p>
+      <p class="narration__credit">試聴：AivisSpeech「まお（おちつき）」／<a href="https://hub.aivis-project.com/aivm-models/a59cb814-0083-4369-8542-f51a29e72af7" target="_blank" rel="noopener">モデルページ</a>・ACML 1.0</p>
+    </div>
+  </details>
+  <noscript><p>この解説の表示には JavaScript が必要です。</p></noscript>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------ */
+  /* 定数・小道具                                                        */
+  /* ------------------------------------------------------------------ */
+  var C = {
+    cream: '#F7F4EC', paper: '#EFECE2', ink: '#222222',
+    light: '#8C8980', verm: '#D94E41', indigo: '#2B5B84'
+  };
+  var FONT = '"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic","Noto Sans JP",system-ui,sans-serif';
+  var MATH_FONT = '"Times New Roman","KaTeX_Main",serif';
+  var REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var FADE_MS = 220;              /* 場面・色のクロスフェードの時定数（ms） */
+  var LIMIT_CUE = 10600;          /* s1-limit：朱の接線を引く時刻（ステップ内ms） */
+  var METER_CUE = 5160;           /* s1-limit：メーターで答えを出す時刻（ステップ内ms） */
+  /* s1-triangle-1：直角三角形を描く時刻（ステップ内ms＝音声ローカルms） */
+  var TRI_BASE_FROM = 1250, TRI_BASE_TO = 2500;
+  var TRI_BASE_LAB = 5000;
+  var TRI_H_FROM = 8650, TRI_H_TO = 9800;
+  var TRI_H_LAB = 11550;
+  /* s1-triangle-2：分数の式カードを段階表示する時刻 */
+  var CARD_SKEL = 1600, CARD_NUM = 5900, CARD_RES = 8800;
+  /* s1-shrink：終点Qを近づける区間 */
+  var SHRINK_FROM = 3200, SHRINK_TO = 9000;
+
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function rnd(i) { var x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+
+  /* ------------------------------------------------------------------ */
+  /* DOM                                                                 */
+  /* ------------------------------------------------------------------ */
+  var canvas = document.getElementById('stage');
+  var stageBox = document.getElementById('stageBox');
+  var ctx = canvas.getContext('2d');
+  var subEl = document.getElementById('sub');
+  var sceneEl = document.getElementById('sceneLabel');
+  var playBtn = document.getElementById('play');
+  var stagePlay = document.getElementById('stagePlay');
+  var stagePlayIcon = document.getElementById('stagePlayIcon');
+  var prevBtn = document.getElementById('prev');
+  var nextBtn = document.getElementById('next');
+  var voiceToggle = document.getElementById('voiceToggle');
+  var voiceNote = document.getElementById('voiceNote');
+  var startOverlay = document.getElementById('start');
+  var endOverlay = document.getElementById('end');
+  var promptEl = document.getElementById('prompt');
+  var xRange = document.getElementById('xRange');
+  var readoutEl = document.getElementById('readout');
+  var continueBtn = document.getElementById('continue');
+  var seekRange = document.getElementById('seekRange');
+  var seekTime = document.getElementById('seekTime');
+
+  var W = 0, H = 0, DPR = 1, paperTex = null;
+
+  var carImg = new Image();
+  var carReady = false;
+  carImg.onload = function () { carReady = true; };
+  carImg.src = 'car.svg';
+
+  /* ------------------------------------------------------------------ */
+  /* 状態                                                                */
+  /* ------------------------------------------------------------------ */
+  var S = {
+    now: 0,
+    carA: 1, carAT: 1, graphA: 0, graphAT: 0, parA: 0, parAT: 0,
+    driveT: 0, revealT: 0, needleV: 0,
+    secA: 0, secAT: 0, limitA: 0, limitAT: 0,
+    pA: 0, pAT: 0, qA: 0, qAT: 0, qT: 30,
+    meterA: 0, meterAT: 0, meterQ: 0, meterQT: 0,
+    parReveal: 0, tanA: 0, tanAT: 0, slopeA: 0, slopeAT: 0,
+    /* 平均の速さの理由（直角三角形・式カード） */
+    triA: 0, triAT: 0, cardA: 0, cardAT: 0,
+    triBase: 0, triHeight: 0, baseLab: 0, heightLab: 0, triLeg: 0, cardMs: 0,
+    x: 1, zoom: 1, zoomT: 1, cx: 0.2, cy: 2, cxT: 0.2, cyT: 2
+  };
+
+  var mode = 'idle';     // idle | playing | paused | waiting | ended
+  var idx = 0;
+  var elapsed = 0;
+  var stepNoVoice = 6000;
+  var stepLimit = 12000;
+  var speechToken = 0;
+  var speechDone = true;
+  var speechStarted = false;
+  var speechError = false;
+  var voiceOn = true;
+  /* voiceAt（音声の開始キュー）待ちの間 true。時間が来たら一度だけ鳴らす */
+  var narrationArmed = false;
+
+  /* 事前生成 MP3 を 1 つの HTMLAudioElement で使い回す（iOS の自動次ステップ対策） */
+  var narrationAudio = null;
+  try { narrationAudio = new Audio(); } catch (e) { narrationAudio = null; }
+  var speechSupported = !!(narrationAudio && typeof narrationAudio.play === 'function');
+  if (narrationAudio) {
+    narrationAudio.preload = 'auto';
+    narrationAudio.playsInline = true;
+    narrationAudio.setAttribute('playsinline', '');
+  }
+  var previewAudios = [];
+
+  function updateVoiceNote() {
+    if (!speechSupported) {
+      voiceNote.textContent = 'この端末は音声再生に対応していません（字幕で進みます）';
+      voiceToggle.disabled = true;
+      voiceToggle.checked = false;
+      return;
+    }
+    voiceToggle.disabled = false;
+    voiceNote.textContent = '';
+  }
+
+  function stopNarrationAudio() {
+    if (!narrationAudio) return;
+    narrationAudio.onended = null;
+    narrationAudio.onerror = null;
+    narrationAudio.onplaying = null;
+    try { narrationAudio.pause(); } catch (e) { /* noop */ }
+    try { narrationAudio.currentTime = 0; } catch (e) { /* noop */ }
+  }
+
+  function cancelSpeech() {
+    speechToken++;
+    speechDone = true;
+    speechStarted = false;
+    speechError = false;
+    narrationArmed = false;
+    releaseAudioPending();
+    stopNarrationAudio();
+  }
+
+  function pausePreviewAudios(except) {
+    for (var i = 0; i < previewAudios.length; i++) {
+      if (previewAudios[i] !== except) {
+        try { previewAudios[i].pause(); } catch (e) { /* noop */ }
+      }
+    }
+  }
+
+  function bindPreviewAudios() {
+    var list = document.querySelectorAll('.narration audio');
+    for (var i = 0; i < list.length; i++) {
+      previewAudios.push(list[i]);
+      list[i].addEventListener('play', function () {
+        if (mode === 'playing') pausePlayback();
+        cancelSpeech();
+        pausePreviewAudios(this);
+      });
+    }
+    var details = document.querySelector('.narration');
+    if (details) {
+      details.addEventListener('toggle', function () {
+        if (!details.open) pausePreviewAudios(null);
+      });
+    }
+  }
+
+  /* MP3 を差し替えた端末が force-cache で旧音声を掴まないよう、
+     音声URLは必ずこの1か所で作る。既存 AUDIO_MS の実測長を版として付ける
+     （差し替えた ID は長さが変わるので別URLになり、状態は増やさない） */
+  function narrationSrc(id) {
+    return './audio/nemo/' + id + '.mp3?v=' + (AUDIO_MS[id] || 0);
+  }
+
+  /* 非Rangeサーバー（Python SimpleHTTP等）では直接のシークが0秒に戻るため、
+     ステップ音声を fetch して blob URL にし、単一プレイヤーへ割り当てる */
+  var audioBlobUrls = {};
+  var audioFetching = {};
+  function seekableSrcFor(id) {
+    if (audioBlobUrls[id]) return Promise.resolve(audioBlobUrls[id]);
+    if (audioFetching[id]) return audioFetching[id];
+    if (typeof fetch !== 'function' || typeof URL === 'undefined' || !URL.createObjectURL) {
+      return Promise.reject(new Error('unsupported'));
+    }
+    var pr = fetch(narrationSrc(id), { cache: 'force-cache' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('fetch failed');
+        return res.blob();
+      })
+      .then(function (blob) {
+        var objUrl = URL.createObjectURL(blob);
+        audioBlobUrls[id] = objUrl;
+        delete audioFetching[id];
+        return objUrl;
+      })
+      .catch(function (err) {
+        delete audioFetching[id];
+        throw err;
+      });
+    audioFetching[id] = pr;
+    return pr;
+  }
+  function warmAudio(id) {
+    if (!id || typeof fetch !== 'function') return;
+    seekableSrcFor(id).catch(function () { /* noop */ });
+  }
+
+  /* シーク再開時：音声が実際に動き出すまで動画時計を止める。
+     遅延・ロード失敗・音声が早く終わる場合でも、必ず解除される上限を持つ */
+  var audioPending = false;
+  var audioPendingFrom = 0;
+  var AUDIO_PENDING_LIMIT = 5000;
+  function nowMs() {
+    if (typeof performance !== 'undefined' && performance.now) return performance.now();
+    return Date.now();
+  }
+  function beginAudioPending() {
+    audioPending = true;
+    audioPendingFrom = nowMs();
+  }
+  function releaseAudioPending() {
+    audioPending = false;
+  }
+
+  function playNarration(st, offsetMs) {
+    var token = ++speechToken;
+    var offset = Math.max(0, offsetMs || 0);
+    speechDone = true;
+    speechError = false;
+    speechStarted = false;
+    if (!voiceOn || !speechSupported) { releaseAudioPending(); return; }
+
+    if (!st || !st.id) { speechError = true; releaseAudioPending(); return; }
+
+    pausePreviewAudios(null);
+
+    var a = narrationAudio;
+    if (!a) { speechError = true; releaseAudioPending(); return; }
+
+    /* 途中からの再開は、音声が動き出すまで時計を保持する */
+    if (offset > 0) beginAudioPending();
+    else releaseAudioPending();
+
+    var src = narrationSrc(st.id);
+    var fail = function () {
+      if (token !== speechToken) return;
+      speechDone = true;
+      speechStarted = false;
+      speechError = true;
+      releaseAudioPending();
+      try { a.pause(); } catch (e) { /* noop */ }
+    };
+
+    speechDone = false;
+    a.onended = function () {
+      if (token !== speechToken) return;
+      speechDone = true;
+      releaseAudioPending();
+    };
+    a.onerror = fail;
+    a.onplaying = function () {
+      if (token !== speechToken) return;
+      speechStarted = true;
+      releaseAudioPending();
+    };
+
+    var playIt = function (sec) {
+      try { a.currentTime = Math.max(0, sec); } catch (e2) { /* noop */ }
+      var p;
+      try {
+        p = a.play();
+      } catch (e3) {
+        fail();
+        return;
+      }
+      if (p && typeof p.then === 'function') {
+        p.then(function () {
+          if (token !== speechToken) return;
+          speechStarted = true;
+          releaseAudioPending();
+        }, fail);
+      }
+    };
+    var setSource = function (source, reload) {
+      try {
+        a.pause();
+        if (a.getAttribute('src') !== source) a.setAttribute('src', source);
+        else if (reload) a.load();
+      } catch (e) {
+        fail();
+        return false;
+      }
+      return true;
+    };
+    var playFromZero = function (source) {
+      if (token !== speechToken) return;
+      if (!setSource(source, true)) return;
+      /* 先頭からは今まで通りその場で再生開始（Safariのユーザー操作要件を保つ） */
+      playIt(0);
+    };
+    var playFromOffset = function (source, immediate) {
+      if (token !== speechToken) return;
+      if (!setSource(source, true)) return;
+      var sec = offset / 1000;
+      if (immediate) {
+        /* 取得済み blob ならユーザー操作内で同期再生（metadata 前の currentTime 指定に依存） */
+        playIt(sec);
+        return;
+      }
+      /* metadata 前でも currentTime 指定は再生開始位置として扱われる（実装差あり） */
+      try { a.currentTime = sec; } catch (e) { /* noop */ }
+      var applyOffset = function () {
+        if (token !== speechToken) return;
+        var dur = (isFinite(a.duration) && a.duration > 0) ? a.duration : 0;
+        if (dur && sec >= dur - 0.05) { speechDone = true; releaseAudioPending(); return; }
+        playIt(sec);
+      };
+      if (a.readyState >= 1) applyOffset();
+      else a.addEventListener('loadedmetadata', applyOffset, { once: true });
+    };
+
+    if (offset > 0) {
+      var cachedUrl = audioBlobUrls[st.id];
+      if (cachedUrl) {
+        playFromOffset(cachedUrl, true);
+      } else if (typeof fetch === 'function') {
+        seekableSrcFor(st.id).then(function (objUrl) {
+          if (token !== speechToken) return;
+          playFromOffset(objUrl, false);
+        }, function () {
+          if (token !== speechToken) return;
+          playFromOffset(src, false);
+        });
+      } else {
+        playFromOffset(src, false);
+      }
+    } else {
+      playFromZero(src);
+    }
+
+    /* 自動再生ブロックや読み込み停滞で開始しない場合の保険 */
+    window.setTimeout(function () {
+      if (token !== speechToken) return;
+      if (!speechStarted && !speechDone) fail();
+    }, 6000);
+  }
+
+  /* 音声の開始キュー（voiceAt 秒）。映像の時刻を主にして、無音の間も再生バーに含める */
+  function cueMs(st) { return (st && st.voiceAt) ? st.voiceAt * 1000 : 0; }
+  function armNarration(st, localMs) {
+    narrationArmed = false;
+    if (!voiceOn || !speechSupported) { releaseAudioPending(); return; }
+    var cue = cueMs(st);
+    if (localMs + 1 < cue) { narrationArmed = true; releaseAudioPending(); return; }
+    playNarration(st, localMs - cue);
+  }
+  /* ---- 字幕は音声（speech）だけを正本にする ----------------------------
+     ・句点で文に分け、長い文は読点で表示用に分ける。順に連結すると speech と
+       一字一句同じになる（言い換えや補足は字幕に混ぜない）。
+     ・切り替え時刻は音声の先頭からの実測キュー subCues（voiceAt は再生時に足す）。
+       未計測の文は文字数比で音声の実測長に配分する。
+     ・スライダーで間や文の途中に飛んでも、同じ時刻なら同じ字幕になる。 */
+  var SUB_MAX = 30;      /* 1回の表示に収める目安の文字数（超えたら読点で分ける） */
+
+  function sentencesOf(str) {
+    var out = [], buf = '';
+    for (var i = 0; i < str.length; i++) {
+      buf += str.charAt(i);
+      if (str.charAt(i) === '。') { out.push(buf); buf = ''; }
+    }
+    if (buf) out.push(buf);
+    return out;
+  }
+
+  function piecesOf(sent) {
+    if (sent.length <= SUB_MAX) return [sent];
+    var raw = [], buf = '';
+    for (var i = 0; i < sent.length; i++) {
+      buf += sent.charAt(i);
+      if (sent.charAt(i) === '、') { raw.push(buf); buf = ''; }
+    }
+    if (buf) raw.push(buf);
+    var out = [], cur = '';
+    for (var j = 0; j < raw.length; j++) {
+      if (cur && (cur + raw[j]).length > SUB_MAX) { out.push(cur); cur = raw[j]; }
+      else cur += raw[j];
+    }
+    if (cur) out.push(cur);
+    return out;
+  }
+
+  function buildSubs(st) {
+    var sents = sentencesOf(st.speech || '');
+    if (!sents.length) return [];
+    var audioDur = AUDIO_MS[st.id] || Math.max(0, (st.dur || 0) - (st.voiceAt || 0) * 1000);
+    var cues = st.subCues || [];
+    var i, j, n = sents.length;
+
+    /* 文の開始時刻（音声の先頭から）。既定は文字数比、実測キューがあれば上書き */
+    var totalCh = 0;
+    for (i = 0; i < n; i++) totalCh += sents[i].length;
+    var starts = [], acc = 0;
+    for (i = 0; i < n; i++) {
+      starts[i] = audioDur * (totalCh ? acc / totalCh : 0);
+      acc += sents[i].length;
+    }
+    for (i = 1; i < n; i++) {
+      if (typeof cues[i - 1] === 'number') starts[i] = cues[i - 1];
+    }
+
+    var subs = [];
+    for (i = 0; i < n; i++) {
+      var ps = piecesOf(sents[i]);
+      var a0 = starts[i];
+      var a1 = (i + 1 < n) ? Math.max(a0, starts[i + 1]) : Math.max(a0, audioDur);
+      if (ps.length === 1) { subs.push({ t: a0, text: ps[0] }); continue; }
+      var tot = 0;
+      for (j = 0; j < ps.length; j++) tot += ps[j].length;
+      var cum = 0;
+      for (j = 0; j < ps.length; j++) {
+        subs.push({ t: a0 + (a1 - a0) * (tot ? cum / tot : 0), text: ps[j] });
+        cum += ps[j].length;
+      }
+    }
+    return subs;
+  }
+
+  function subtitleFor(st, localMs) {
+    if (!st || !st.subs || !st.subs.length) return '';
+    var t = localMs - (st.voiceAt || 0) * 1000;
+    var out = st.subs[0].text;
+    for (var i = 0; i < st.subs.length; i++) {
+      if (t >= st.subs[i].t - 1) out = st.subs[i].text;
+      else break;
+    }
+    return out;
+  }
+
+  /* ステップの時間枠から待ち時間を統一（音声の実測長を含む slot 基準） */
+  function refreshStepTimers(st) {
+    var slot = slotOf(st);
+    stepNoVoice = slot;
+    stepLimit = slot + 5000;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 手描き風ヘルパー                                                     */
+  /* ------------------------------------------------------------------ */
+  function fx() { return clamp(W / 1000, 0.8, 1.4); }
+  /* 吹き出し専用：小さい画面同士でも伸縮が分かる緩やかな連続スケール */
+  function pillScale() { return clamp(0.9 + W / 2850, 0.9, 1.35); }
+
+  function inkPts(pts, opt) {
+    if (!pts || pts.length < 2) return;
+    opt = opt || {};
+    var color = opt.color || C.ink;
+    var width = opt.width == null ? 2 : opt.width;
+    var jitter = opt.jitter == null ? 0.5 : opt.jitter;
+    var seed = opt.seed == null ? 3 : opt.seed;
+    var alpha = opt.alpha == null ? 1 : opt.alpha;
+    if (alpha <= 0.01) return;
+    if (REDUCED) jitter = 0;
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    if (opt.dash) ctx.setLineDash(opt.dash);
+    ctx.beginPath();
+    for (var i = 0; i < pts.length; i++) {
+      var jx = jitter ? (rnd(seed + i * 1.7) - 0.5) * jitter * 2 : 0;
+      var jy = jitter ? (rnd(seed + i * 3.3 + 11) - 0.5) * jitter * 2 : 0;
+      var px = pts[i][0] + jx, py = pts[i][1] + jy;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function partial(pts, frac) {
+    var f = clamp(frac, 0, 1);
+    if (f >= 1) return pts;
+    if (f <= 0) return [];
+    var last = pts.length - 1;
+    var fIdx = f * last;
+    var i = Math.floor(fIdx);
+    var out = pts.slice(0, i + 1);
+    if (i < last) {
+      var t = fIdx - i;
+      out.push([lerp(pts[i][0], pts[i + 1][0], t), lerp(pts[i][1], pts[i + 1][1], t)]);
+    }
+    return out;
+  }
+
+  function text(str, x, y, opt) {
+    opt = opt || {};
+    var size = opt.size == null ? 13 : opt.size;
+    ctx.save();
+    ctx.globalAlpha = opt.alpha == null ? 1 : opt.alpha;
+    ctx.fillStyle = opt.color || C.ink;
+    ctx.font = (opt.weight || 600) + ' ' + size + 'px ' + (opt.family || FONT);
+    ctx.textAlign = opt.align || 'center';
+    ctx.textBaseline = opt.baseline || 'middle';
+    if (opt.maxWidth) ctx.fillText(str, x, y, opt.maxWidth);
+    else ctx.fillText(str, x, y);
+    ctx.restore();
+  }
+
+  function roundRectPath(x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function pill(lines, x, y, opt) {
+    opt = opt || {};
+    var u = pillScale();                            /* 吹き出し専用の連続スケール */
+    var size = Math.max(10, (opt.size == null ? 12 : opt.size) * u);
+    var weight = opt.weight || 600;
+    var padX = Math.max(5, (opt.padX == null ? 9 : opt.padX) * u);
+    var padY = Math.max(4, (opt.padY == null ? 6 : opt.padY) * u);
+    var alpha = opt.alpha == null ? 1 : opt.alpha;
+    if (alpha <= 0.02) return;
+    var color = opt.color || C.ink;
+    var bg = opt.bg || C.cream;
+    var align = opt.align || 'center';
+    var lineH = size * 1.34;                        /* 行間も文字と同じ比率 */
+    var maxW = opt.maxW == null ? W * 0.46 : opt.maxW;
+
+    ctx.save();
+    ctx.font = weight + ' ' + size.toFixed(2) + 'px ' + FONT;
+    var rendered = [];
+    var maxLineW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var str = String(lines[i]);
+      var wpx = ctx.measureText(str).width;
+      /* 狭い画面で重要部分を覆わないよう、広すぎるときは2行に折り返す */
+      if (wpx + padX * 2 > maxW && str.length > 4) {
+        var cut = Math.ceil(str.length / 2);
+        var a1 = str.slice(0, cut), a2 = str.slice(cut);
+        rendered.push(a1, a2);
+        wpx = Math.max(ctx.measureText(a1).width, ctx.measureText(a2).width);
+      } else {
+        rendered.push(str);
+      }
+      maxLineW = Math.max(maxLineW, wpx);
+    }
+    var bw = Math.min(maxLineW + padX * 2, maxW);
+    var bh = lineH * rendered.length + padY * 2;
+    var bx = x - bw / 2;
+    if (align === 'left') bx = x;
+    if (align === 'right') bx = x - bw;
+    bx = clamp(bx, 4, Math.max(4, W - bw - 4));
+    var by = y - bh / 2;
+    by = clamp(by, 4, Math.max(4, H - bh - 4));
+    roundRectPath(bx, by, bw, bh, Math.min(9 * clamp(u, 0.9, 1.3), bh / 2));
+    ctx.globalAlpha = alpha * 0.95;
+    ctx.fillStyle = bg;
+    ctx.fill();
+    if (opt.border) {
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = opt.border;
+      ctx.lineWidth = Math.max(1, 0.9 * u);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (var k = 0; k < rendered.length; k++) {
+      ctx.fillText(rendered[k], bx + bw / 2, by + padY + lineH / 2 + k * lineH, bw - padX * 2);
+    }
+    ctx.restore();
+  }
+
+  /* 線分を矩形の内側に切り取る（Liang–Barsky）。割線・接線が軸の外へ
+     飛び出しすぎないようにするためだけに使う */
+  function clipSegment(x1, y1, x2, y2, box) {
+    var dx = x2 - x1, dy = y2 - y1;
+    var t0 = 0, t1 = 1;
+    var p = [-dx, dx, -dy, dy];
+    var q = [x1 - box.x0, box.x1 - x1, y1 - box.yT, box.yB - y1];
+    for (var i = 0; i < 4; i++) {
+      if (Math.abs(p[i]) < 1e-9) {
+        if (q[i] < 0) return null;
+        continue;
+      }
+      var rr = q[i] / p[i];
+      if (p[i] < 0) {
+        if (rr > t1) return null;
+        if (rr > t0) t0 = rr;
+      } else {
+        if (rr < t0) return null;
+        if (rr < t1) t1 = rr;
+      }
+    }
+    return [[x1 + t0 * dx, y1 + t0 * dy], [x1 + t1 * dx, y1 + t1 * dy]];
+  }
+
+  function lineWithArrow(x1, y1, x2, y2, color, width, alpha) {    inkPts([[x1, y1], [x2, y2]], { color: color, width: width, jitter: 0.3, seed: 5, alpha: alpha });
+    var ang = Math.atan2(y2 - y1, x2 - x1), s = 8;
+    inkPts([[x2, y2], [x2 - Math.cos(ang - 0.42) * s, y2 - Math.sin(ang - 0.42) * s]],
+      { color: color, width: width * 0.9, jitter: 0.15, seed: 6, alpha: alpha });
+    inkPts([[x2, y2], [x2 - Math.cos(ang + 0.42) * s, y2 - Math.sin(ang + 0.42) * s]],
+      { color: color, width: width * 0.9, jitter: 0.15, seed: 7, alpha: alpha });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* キャンバス計測・紙の質感                                             */
+  /* ------------------------------------------------------------------ */
+  function makePaper() {
+    var c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(W * DPR));
+    c.height = Math.max(1, Math.round(H * DPR));
+    var g = c.getContext('2d');
+    g.scale(DPR, DPR);
+    var n = Math.round((W * H) / 2400);
+    for (var i = 0; i < n; i++) {
+      var x = rnd(i * 3.1 + 0.7) * W;
+      var y = rnd(i * 7.7 + 5.3) * H;
+      var r = 0.35 + rnd(i * 1.7 + 2.1) * 0.9;
+      g.fillStyle = 'rgba(120,112,96,' + (0.025 + rnd(i * 2.3) * 0.045).toFixed(3) + ')';
+      g.beginPath();
+      g.arc(x, y, r, 0, Math.PI * 2);
+      g.fill();
+    }
+    return c;
+  }
+
+  function measure() {
+    var rect = canvas.getBoundingClientRect();
+    var nw = Math.max(1, Math.round(rect.width));
+    var nh = Math.max(1, Math.round(rect.height));
+    var ndpr = Math.min(window.devicePixelRatio || 1, 2.4);
+    if (nw === W && nh === H && ndpr === DPR && paperTex) return;
+    W = nw; H = nh; DPR = ndpr;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    paperTex = makePaper();
+  }
+
+  var resizeQueued = false;
+  function onResize() {
+    if (resizeQueued) return;
+    resizeQueued = true;
+    window.requestAnimationFrame(function () { resizeQueued = false; measure(); });
+  }
+  if (typeof window.ResizeObserver === 'function') {
+    new window.ResizeObserver(onResize).observe(canvas);
+  }
+  window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', onResize);
+
+  /* ------------------------------------------------------------------ */
+  /* 走行モデル：distanceAt / speedAt を一つの連続した式で持つ             */
+  /* ------------------------------------------------------------------ */
+  var KMH = 3.6;                  // 1 m/s = 3.6 km/h
+  var DRIVE_END = 44;             // 記録する走行の長さ（秒）
+  var P_TIME = 33;                // 始点P：再発進の途中33秒（この瞬間の速さはちょうど20km/h）
+  var Q_START = 42;               // 終点Q：最初に置く位置（秒）
+  var SPEED_MAX = 80;             // メーターの目盛りの最大（km/h）
+
+  /* 速度は km/h で設計し、内部では m/s に直して同じ式で積分する。
+     前半（0〜30秒）は発進・減速・停車の区間モデル。
+     33秒（再発進の途中）でちょうど 20km/h になるようにしてある。 */
+  var SEG = (function () {
+    var defs = [                 // [開始秒, 終了秒, 開始km/h, 終了km/h]
+      [0, 6, 0, 17],             // ゆっくり発進
+      [6, 16, 17, 33],           // なだらかに加速
+      [16, 23, 33, 0],           // 赤信号へ減速
+      [23, 30, 0, 0]             // 停車
+    ];
+    var out = [], d = 0;
+    for (var i = 0; i < defs.length; i++) {
+      var f = defs[i];
+      var v0 = f[2] / KMH, v1 = f[3] / KMH;
+      out.push({ t0: f[0], t1: f[1], v0: v0, v1: v1, d0: d });
+      d += (v0 + v1) / 2 * (f[1] - f[0]);
+    }
+    return out;
+  }());
+
+  /* 再発進（30〜44秒）は一続きの式で持つ：
+       v(u) = V * (1 - e^(-b u))^2   （u = t - 30、km/h）
+     発進直後は加速度0から自然に立ち上がり、そのまま増え続ける（途中で失速しない）。
+     30秒の時点で速さも加速度も0なので、停車からの継ぎ目が跳ねない。
+     33秒で 20km/h、44秒で約55km/h。距離は同じ式の解析積分で、速度と整合する。 */
+  var LAUNCH_T0 = 30;
+  var LAUNCH_B = 0.30;
+  var LAUNCH_V = 20 / Math.pow(1 - Math.exp(-LAUNCH_B * (P_TIME - LAUNCH_T0)), 2);
+
+  function launchSpeed(u) {                   // m/s
+    var k = 1 - Math.exp(-LAUNCH_B * u);
+    return (LAUNCH_V / KMH) * k * k;
+  }
+  function launchDist(u) {                    // m（launchSpeed の解析積分）
+    var b = LAUNCH_B;
+    return (LAUNCH_V / KMH) * (u - 2 * (1 - Math.exp(-b * u)) / b +
+      (1 - Math.exp(-2 * b * u)) / (2 * b));
+  }
+
+  function smoothstep(u) { u = clamp(u, 0, 1); return u * u * (3 - 2 * u); }
+
+  function segAt(t) {
+    t = clamp(t, 0, LAUNCH_T0);
+    for (var i = 0; i < SEG.length; i++) {
+      if (t <= SEG[i].t1 || i === SEG.length - 1) return SEG[i];
+    }
+    return SEG[SEG.length - 1];
+  }
+
+  function speedAt(t) {                       // m/s
+    t = clamp(t, 0, DRIVE_END);
+    if (t >= LAUNCH_T0) return launchSpeed(t - LAUNCH_T0);
+    var g = segAt(t);
+    var T = g.t1 - g.t0 || 1;
+    var u = clamp((t - g.t0) / T, 0, 1);
+    return g.v0 + (g.v1 - g.v0) * smoothstep(u);
+  }
+
+  function distanceAt(t) {                    // m
+    t = clamp(t, 0, DRIVE_END);
+    if (t >= LAUNCH_T0) {
+      var gl = SEG[SEG.length - 1];
+      return gl.d0 + launchDist(t - LAUNCH_T0);
+    }
+    var g = segAt(t);
+    var T = g.t1 - g.t0 || 1;
+    var u = clamp((t - g.t0) / T, 0, 1);
+    return g.d0 + g.v0 * (t - g.t0) + (g.v1 - g.v0) * T * (u * u * u - u * u * u * u / 2);
+  }
+
+  function speedKmh(t) { return speedAt(t) * KMH; }
+
+  /* ------------------------------------------------------------------ */
+  /* 車（car.svg）とスピードメーター                                      */
+  /* ------------------------------------------------------------------ */
+  var CAR_W = 200, CAR_H = 84, CAR_WHEEL_Y = 64, CAR_WHEEL_R = 16;
+  var CAR_PATH_D = 'M196 62 L170.5 62 A18.5 18.5 0 0 0 133.5 62 L70.5 62 A18.5 18.5 0 0 0 33.5 62 L7 62 C4.5 62 3.5 59 4.5 55 L6.5 50.5 C9 47.6 14 46.2 20 45.4 L33 43.8 C41 42.8 44 40.2 47 35.6 L60.5 20.5 C64.5 18.1 70 17 78 16.8 L108 16.8 C117 16.8 123 17.8 127.5 20.8 L143 36.2 C146.5 39.8 153 41.6 160 42.8 L178 44.4 C187 45.4 192.5 47.2 194.5 50.8 C196.2 53.8 196.5 58 196 62 Z';
+  var CAR_PATH = (typeof Path2D === 'function') ? new Path2D(CAR_PATH_D) : null;
+
+  function carGeom() {
+    var groundY = H * 0.735;
+    var w = Math.min(W * 0.44, H * 0.80);
+    var h = w * CAR_H / CAR_W;
+    var x = W * 0.055;
+    var y = groundY - h * 80 / CAR_H;
+    return { groundY: groundY, x: x, y: y, w: w, h: h, s: w / CAR_W };
+  }
+
+  function drawWheel(cx, cy, R, angle, a) {
+    if (R < 2) return;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = C.paper;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = C.ink;
+    ctx.lineWidth = Math.max(2, R * 0.26);
+    ctx.beginPath();
+    ctx.arc(cx, cy, R * 0.86, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.lineWidth = Math.max(1, R * 0.06);
+    ctx.beginPath();
+    ctx.arc(cx, cy, R * 0.62, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.lineWidth = Math.max(1, R * 0.05);
+    for (var k = 0; k < 5; k++) {
+      var an = angle + k * Math.PI * 2 / 5;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(an) * R * 0.18, cy + Math.sin(an) * R * 0.18);
+      ctx.lineTo(cx + Math.cos(an) * R * 0.58, cy + Math.sin(an) * R * 0.58);
+      ctx.stroke();
+    }
+    ctx.fillStyle = C.ink;
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.max(1.4, R * 0.11), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawCar(a) {
+    var g = carGeom();
+    var dist = distanceAt(S.driveT);
+    var ang = dist / 0.75;
+    var cx = g.x + g.w / 2;
+
+    /* 影 */
+    ctx.save();
+    ctx.globalAlpha = a * 0.5;
+    ctx.fillStyle = 'rgba(34,34,34,0.08)';
+    ctx.beginPath();
+    ctx.ellipse(cx, g.groundY + g.h * 0.02, g.w * 0.46, g.h * 0.055, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    /* 車輪（車体の下に描く） */
+    var sH = g.h / CAR_H;
+    drawWheel(g.x + 52 * g.s, g.y + CAR_WHEEL_Y * sH, CAR_WHEEL_R * g.s, ang, a);
+    drawWheel(g.x + 152 * g.s, g.y + CAR_WHEEL_Y * sH, CAR_WHEEL_R * g.s, ang, a);
+
+    /* 車体 */
+    ctx.save();
+    ctx.globalAlpha = a;
+    if (carReady) {
+      ctx.drawImage(carImg, g.x, g.y, g.w, g.h);
+    } else if (CAR_PATH) {
+      ctx.translate(g.x, g.y);
+      ctx.scale(g.s, g.s);
+      ctx.fillStyle = '#F3EFE3';
+      ctx.strokeStyle = C.ink;
+      ctx.lineWidth = 1.8;
+      ctx.fill(CAR_PATH);
+      ctx.stroke(CAR_PATH);
+    }
+    ctx.restore();
+  }
+
+  function drawSignal(a) {
+    var groundY = H * 0.735;
+    var x = W * 0.585;
+    var headW = clamp(H * 0.07, 12, 34);
+    var headH = headW * 2.7;
+    var headY = groundY - H * 0.30 - headH;
+    var poleTop = headY + headH;
+
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.strokeStyle = C.ink;
+    ctx.lineWidth = Math.max(1.6, headW * 0.08);
+    ctx.beginPath();
+    ctx.moveTo(x, groundY);
+    ctx.lineTo(x, poleTop);
+    ctx.stroke();
+    ctx.restore();
+
+    roundRectPath(x - headW / 2, headY, headW, headH, headW * 0.28);
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = C.paper;
+    ctx.fill();
+    ctx.strokeStyle = C.ink;
+    ctx.lineWidth = Math.max(1.2, headW * 0.07);
+    ctx.stroke();
+    ctx.restore();
+
+    var redOn = (S.driveT >= 15.2 && S.driveT < 30.1);
+    var lampR = headW * 0.24;
+    var top = headY + headH * 0.30;
+    var bot = headY + headH * 0.70;
+
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.beginPath();
+    ctx.arc(x, top, lampR, 0, Math.PI * 2);
+    ctx.fillStyle = redOn ? C.verm : 'rgba(34,34,34,0.06)';
+    ctx.fill();
+    ctx.strokeStyle = redOn ? C.verm : 'rgba(34,34,34,0.22)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    if (redOn) {
+      ctx.globalAlpha = a * 0.18;
+      ctx.fillStyle = C.verm;
+      ctx.beginPath();
+      ctx.arc(x, top, lampR * 1.9, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = a;
+    ctx.beginPath();
+    ctx.arc(x, bot, lampR, 0, Math.PI * 2);
+    ctx.fillStyle = redOn ? 'rgba(34,34,34,0.06)' : C.indigo;
+    ctx.fill();
+    ctx.strokeStyle = redOn ? 'rgba(34,34,34,0.22)' : C.indigo;
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    if (!redOn) {
+      ctx.globalAlpha = a * 0.16;
+      ctx.fillStyle = C.indigo;
+      ctx.beginPath();
+      ctx.arc(x, bot, lampR * 1.9, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawCarScene(a) {
+    if (a <= 0.01) return;
+    var g = carGeom();
+    var dist = distanceAt(S.driveT);
+    var f = fx();
+
+    /* 路面 */
+    ctx.save();
+    ctx.globalAlpha = a * 0.5;
+    ctx.strokeStyle = C.light;
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([26, 26]);
+    ctx.lineDashOffset = -(dist * 3.2) % 52;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.03, g.groundY);
+    ctx.lineTo(W * 0.97, g.groundY);
+    ctx.stroke();
+    ctx.restore();
+
+    drawSignal(a);
+    drawCar(a);
+
+    text('走った距離', W * 0.075, H * 0.135, { size: 11 * f, color: C.light, align: 'left', alpha: a });
+    text(Math.round(dist) + ' m', W * 0.075, H * 0.135 + 23 * f,
+      { size: 23 * f, weight: 700, align: 'left', alpha: a });
+  }
+
+  function drawSpeedometer(cx, cy, r, a, compact) {
+    if (a <= 0.01 || r < 10) return;
+    /* グラフと同じ時刻の速さを直接描く（補間で遅らせない = シーク/再生で一致） */
+    var val = clamp(speedKmh(S.driveT), 0, SPEED_MAX);
+    function angOf(v) { return (135 + 270 * clamp(v, 0, SPEED_MAX) / SPEED_MAX) * Math.PI / 180; }
+
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.strokeStyle = C.ink;
+    ctx.lineWidth = Math.max(1.5, r * 0.03);
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 135 * Math.PI / 180, 405 * Math.PI / 180);
+    ctx.stroke();
+    ctx.restore();
+
+    /* 目盛り */
+    for (var v = 0; v <= SPEED_MAX; v += 20) {
+      var aa = angOf(v);
+      var major = (v % 40 === 0);
+      inkPts([
+        [cx + Math.cos(aa) * r * (major ? 0.82 : 0.88), cy + Math.sin(aa) * r * (major ? 0.82 : 0.88)],
+        [cx + Math.cos(aa) * r * 0.95, cy + Math.sin(aa) * r * 0.95]
+      ], { color: C.ink, width: major ? 1.6 : 1.1, jitter: 0.15, seed: 120 + v, alpha: a });
+      if (major) {
+        text(String(v), cx + Math.cos(aa) * r * 0.66, cy + Math.sin(aa) * r * 0.66,
+          { size: Math.max(8, r * 0.105), color: C.light, alpha: a });
+      }
+    }
+
+    /* 針（答えを伏せている間は薄く） */
+    var an = angOf(val);
+    inkPts([
+      [cx - Math.cos(an) * r * 0.07, cy - Math.sin(an) * r * 0.07],
+      [cx + Math.cos(an) * r * 0.82, cy + Math.sin(an) * r * 0.82]
+    ], { color: C.verm, width: Math.max(1.8, r * 0.022), jitter: 0.2, seed: 133, alpha: a * (1 - S.meterQ) });
+
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = C.ink;
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.max(2.4, r * 0.028), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    text(S.meterQ > 0.5 ? '?' : String(Math.round(val)), cx, cy + r * 0.32, {
+      size: Math.max(14, r * 0.20), weight: 700, alpha: a
+    });
+    text('km/h', cx, cy + r * 0.56, { size: Math.max(8, r * 0.082), color: C.light, alpha: a });
+    text(S.meterQ > 0.5 ? 'この瞬間の速さは？' : '今の速さ', cx, cy - r * 1.12, {
+      size: Math.max(8, r * 0.085), weight: 700, color: C.verm, alpha: a * 0.9,
+      maxWidth: r * 3.4
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Scene 1：時間と距離のグラフ（同じ走行を記録したもの）                 */
+  /* ------------------------------------------------------------------ */
+  function gRect() { return { x0: W * 0.105, x1: W * 0.68, yT: H * 0.16, yB: H * 0.80 }; }
+  var G_TMAX = 44, G_DMAX = 280;
+  function gx(t) { var r = gRect(); return r.x0 + clamp(t, 0, G_TMAX) / G_TMAX * (r.x1 - r.x0); }
+  function gy(d) { var r = gRect(); return r.yB - clamp(d, 0, G_DMAX) / G_DMAX * (r.yB - r.yT); }
+
+  /* 直角三角形の端に付ける増加方向の矢印 */
+  function triArrow(x, y, ang, color, alpha, size) {
+    if (alpha <= 0.02) return;
+    inkPts([[x, y], [x - Math.cos(ang - 0.42) * size, y - Math.sin(ang - 0.42) * size]],
+      { color: color, width: 1.5, jitter: 0.15, seed: 91, alpha: alpha });
+    inkPts([[x, y], [x - Math.cos(ang + 0.42) * size, y - Math.sin(ang + 0.42) * size]],
+      { color: color, width: 1.5, jitter: 0.15, seed: 92, alpha: alpha });
+  }
+
+  /* 平均の速さの理由を、直角三角形と分数の式カードで示す。
+     三角形の頂点は P と Q（藍の割線の両端）にそのまま沿う。
+     表示の進行（底辺・高さ・ラベルの reveal、カードの段階表示）は
+     すべてステップ内の時刻から決まるので、途中シークでも同じ絵になる。 */
+  function drawSecantTriangle(a, px, py, qx, qy, dP, dQ, tq, gap, r, f) {
+    var tri = a * S.triA;
+    var leg = S.triLeg;
+    if (tri > 0.02 && leg > 0.02) {
+      var col = 'rgba(43,91,132,0.55)';
+      var w = 1.6;
+      var colA = tri * leg;
+
+      /* 底辺：P →（Qの時刻, Pの距離） */
+      var bpts = partial([[px, py], [qx, py]], S.triBase);
+      if (bpts.length > 1) inkPts(bpts, { color: col, width: w, jitter: 0.25, seed: 93, alpha: colA });
+      /* 高さ：（Qの時刻, Pの距離）→ Q */
+      var hpts = partial([[qx, py], [qx, qy]], S.triHeight);
+      if (hpts.length > 1) inkPts(hpts, { color: col, width: w, jitter: 0.25, seed: 94, alpha: colA });
+
+      /* 増加方向の矢印（底辺は右へ、高さは上へ） */
+      var asz = Math.max(6, 8 * f);
+      if (S.triBase > 0.9) triArrow(qx, py, 0, col, colA, asz);
+      if (S.triHeight > 0.9) triArrow(qx, qy, qy < py ? -Math.PI / 2 : Math.PI / 2, col, colA, asz);
+
+      /* 直角マーク（高さが出たあとに出す） */
+      var ra = colA * clamp((S.triHeight - 0.9) / 0.1, 0, 1);
+      if (ra > 0.02) {
+        var s = Math.max(5, 9 * f);
+        var dir = qy < py ? -1 : 1;
+        inkPts([[qx - s, py], [qx - s, py + dir * s], [qx, py + dir * s]],
+          { color: col, width: 1.3, jitter: 0.2, seed: 95, alpha: ra });
+      }
+
+      /* ラベル：底辺は下、高さは縦線の左（Qラベルと重ならない側） */
+      var bl = tri * S.triLeg * S.baseLab;
+      if (bl > 0.02) {
+        pill(['Xの増加量＝経過時間'], (px + qx) / 2, py + (20 + 6 * f), {
+          color: C.indigo, alpha: bl, size: 10, padX: 5, padY: 3,
+          border: 'rgba(43,91,132,.3)', maxW: Math.max(96, W * 0.5)
+        });
+      }
+      var hl = tri * leg * S.heightLab;
+      if (hl > 0.02) {
+        pill(['Yの増加量＝走行距離'], qx - (8 + 3 * f), (py + qy) / 2, {
+          color: C.indigo, alpha: hl, size: 10, padX: 5, padY: 3, align: 'right',
+          border: 'rgba(43,91,132,.3)', maxW: Math.max(96, W * 0.5)
+        });
+      }
+    }
+
+    drawSlopeCard(a, r, f, dP, dQ, tq, gap);
+  }
+
+  /* 式カード（分数＋結果）。グラフ左上の空きに置き、pill と同じ余白・角丸・枠。
+     数値はすべて Q（qT）と distanceAt から計算するので、縮小中も追従する。 */
+  function drawSlopeCard(a, r, f, dP, dQ, tq, gap) {
+    if (S.cardA <= 0.02) return;
+    var ms = S.cardMs || 0;
+    var c1 = clamp((ms - CARD_SKEL) / 420, 0, 1);   /* 分数の骨格 */
+    var c2 = clamp((ms - CARD_NUM) / 420, 0, 1);    /* 数値への置き換え */
+    var c3 = clamp((ms - CARD_RES) / 420, 0, 1);    /* 結果と平均の速さ */
+    if (c1 <= 0.01) return;
+
+    var u = pillScale();
+    var fsN = Math.max(10, 10.6 * u);
+    var fsR = Math.max(12, fsN * 1.2);
+    var fsS = Math.max(10, fsN * 0.86);
+
+    var dtS = Math.max(0, tq - P_TIME);
+    var dd = Math.max(0, dQ - dP);
+    var v = dtS > 0.0001 ? dd / dtS : speedAt(P_TIME);
+    var kmh = v * KMH;
+
+    var numSk = 'Yの増加量', denSk = 'Xの増加量';
+    var numVal = '走行距離 ' + dd.toFixed(1) + 'm';
+    var denVal = '経過時間 ' + dtS.toFixed(1) + '秒';
+    var resStr = '＝' + v.toFixed(1) + 'm/s';
+    /* 狭い画面では最終行を2行に分け、カード内（左右4px以上）に必ず収める */
+    var smallLines = (W < 560)
+      ? ['（時速' + kmh.toFixed(1) + 'km）', '＝平均の速さ']
+      : ['（時速' + kmh.toFixed(1) + 'km）＝平均の速さ'];
+
+    function meas(str, size, weight) {
+      ctx.save();
+      ctx.font = (weight || 600) + ' ' + size.toFixed(2) + 'px ' + FONT;
+      var wpx = ctx.measureText(str).width;
+      ctx.restore();
+      return wpx;
+    }
+
+    var fracW = Math.max(meas(numSk, fsN), meas(numVal, fsN),
+      meas(denSk, fsN), meas(denVal, fsN)) + 6;
+    var resW = meas(resStr, fsR, 700);
+    var smallW = 0;
+    for (var li = 0; li < smallLines.length; li++) {
+      smallW = Math.max(smallW, meas(smallLines[li], fsS, 600));
+    }
+    var gapX = Math.max(6, 8 * u);
+    var padX = Math.max(6, 9 * u);
+    var padY = Math.max(5, 7 * u);
+    var barGap = Math.max(3, 4 * u);
+    var smallGap = Math.max(2, 3 * u);
+    /* 狭い画面はカードを上へ逃がすぶん、余白を詰めてPラベルと重ねない */
+    if (W < 560) { padY = Math.max(3.5, 4 * u); barGap = 3; smallGap = 2; }
+    var rowW = fracW + gapX + resW;
+    var contentW = Math.max(rowW, smallW);
+    var maxW = Math.min(W - 12, r.x1 - r.x0 - 8);
+    var cw = Math.min(contentW + padX * 2, Math.max(60, maxW));
+    cw = Math.min(cw, W - 8);
+
+    var lineN = fsN * 1.28;
+    var fracH = lineN * 2 + barGap * 2 + 1.5;
+    var smallLineH = fsS * 1.34;
+    var smallH = smallLineH * smallLines.length;
+    var ch = padY * 2 + fracH + smallGap + smallH;
+
+    /* グラフ左上の空き。狭い画面ではPラベルと重なるため、グラフの上へ逃がす */
+    var cx0 = r.x0 + 8;
+    var cy0 = r.yT + 8 * f;
+    if (W < 560) cy0 = Math.max(3, r.yT - ch - 2);
+    cx0 = clamp(cx0, 4, Math.max(4, W - cw - 4));
+    cy0 = clamp(cy0, 3, Math.max(3, H - ch - 3));
+
+    var baseA = a * S.cardA;
+    ctx.save();
+    ctx.globalAlpha = baseA * c1 * 0.96;
+    roundRectPath(cx0, cy0, cw, ch, Math.min(9 * clamp(u, 0.9, 1.3), ch / 2));
+    ctx.fillStyle = C.cream;
+    ctx.fill();
+    ctx.globalAlpha = baseA * c1;
+    ctx.strokeStyle = 'rgba(34,34,34,.22)';
+    ctx.lineWidth = Math.max(1, 0.9 * u);
+    ctx.stroke();
+    ctx.restore();
+
+    var fx0 = cx0 + padX;
+    var barW = Math.max(16, Math.min(fracW - 6, cw - padX * 2 - gapX));
+    var barY = cy0 + padY + lineN + barGap;
+    var numY = cy0 + padY + lineN / 2;
+    var denY = barY + barGap + lineN / 2;
+    var mid = fx0 + barW / 2;
+
+    /* 1行目＝上（Yの増加量）、下段＝下（Xの増加量）。c2 で数値に置き換わる */
+    var skelA = baseA * c1 * (1 - c2);
+    var numA = baseA * c1 * c2;
+    if (skelA > 0.02) {
+      text(numSk, mid, numY, { size: fsN, alpha: skelA, maxWidth: barW });
+      text(denSk, mid, denY, { size: fsN, alpha: skelA, maxWidth: barW });
+    }
+    if (numA > 0.02) {
+      text(numVal, mid, numY, { size: fsN, weight: 700, color: C.indigo, alpha: numA, maxWidth: barW });
+      text(denVal, mid, denY, { size: fsN, weight: 700, color: C.indigo, alpha: numA, maxWidth: barW });
+    }
+
+    inkPts([[fx0, barY], [fx0 + barW, barY]],
+      { color: C.ink, width: 1.4, jitter: 0.2, seed: 96, alpha: baseA * c1 });
+
+    var rx = fx0 + barW + gapX;
+    var rowCy = cy0 + padY + fracH / 2;
+    var rw = Math.max(20, cx0 + cw - padX - rx);
+    if (c3 > 0.02) {
+      text(resStr, rx, rowCy - fsS * 0.12, {
+        size: fsR, weight: 700, color: C.indigo, align: 'left',
+        alpha: baseA * c3, maxWidth: rw
+      });
+      var smallMaxW = cw - padX * 2;
+      var smallTop = cy0 + padY + fracH + smallGap;
+      var smallX = (smallLines.length > 1) ? cx0 + cw / 2 : fx0;
+      var smallAlign = (smallLines.length > 1) ? 'center' : 'left';
+      for (var li2 = 0; li2 < smallLines.length; li2++) {
+        text(smallLines[li2], smallX, smallTop + smallLineH * (li2 + 0.5), {
+          size: fsS, color: C.light, align: smallAlign,
+          alpha: baseA * c3, maxWidth: smallMaxW
+        });
+      }
+    }
+  }
+
+  function drawGraph1(a) {
+    if (a <= 0.01) return;
+    var r = gRect();
+    var f = fx();
+    var tNow = clamp(S.revealT, 0, DRIVE_END);
+    var dNow = distanceAt(tNow);
+    var dP = distanceAt(P_TIME);
+    var px = gx(P_TIME), py = gy(dP);
+
+    ctx.save();
+    ctx.globalAlpha = a;
+
+    /* 目盛りの補助線 */
+    [100, 200].forEach(function (dv) {
+      ctx.save();
+      ctx.globalAlpha = a * 0.32;
+      ctx.strokeStyle = C.light;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 7]);
+      ctx.beginPath();
+      ctx.moveTo(r.x0, gy(dv));
+      ctx.lineTo(r.x1, gy(dv));
+      ctx.stroke();
+      ctx.restore();
+      text(String(dv), r.x0 - 8, gy(dv), { size: 10 * f, color: C.light, align: 'right', alpha: a });
+    });
+    [10, 20, 30, 40].forEach(function (tv) {
+      ctx.save();
+      ctx.globalAlpha = a * 0.25;
+      ctx.strokeStyle = C.light;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 7]);
+      ctx.beginPath();
+      ctx.moveTo(gx(tv), r.yB);
+      ctx.lineTo(gx(tv), r.yT);
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    /* 軸 */
+    lineWithArrow(r.x0 - 10, r.yB, r.x1 + 18, r.yB, C.ink, 1.8, a);
+    lineWithArrow(gx(0), r.yB + 12, gx(0), r.yT - 14, C.ink, 1.8, a);
+    text('距離（m）', gx(0) + 7, r.yT - 8, { size: 10.5 * f, color: C.light, align: 'left', alpha: a });
+    text('時間（秒）', r.x1 + 18, r.yB - 13, { size: 10.5 * f, color: C.light, align: 'right', alpha: a });
+
+    [0, 10, 20, 30, 40].forEach(function (tv) {
+      var x = gx(tv);
+      inkPts([[x, r.yB], [x, r.yB + 5]], { color: C.ink, width: 1.3, jitter: 0.15, seed: 40, alpha: a });
+      text(String(tv), x, r.yB + 15, { size: 10 * f, color: C.light, alpha: a });
+    });
+
+    /* 走行の曲線（記録の先端まで） */
+    if (tNow > 0.02) {
+      var n = Math.max(2, Math.ceil(tNow / 0.08));
+      var pts = [];
+      for (var i = 0; i <= n; i++) {
+        var tt = tNow * i / n;
+        pts.push([gx(tt), gy(distanceAt(tt))]);
+      }
+      inkPts(pts, { color: C.ink, width: 2.4, jitter: 0.3, seed: 41, alpha: a });
+    }
+
+    /* 停車中の注記（水平部分の距離は走行モデルから求める） */
+    if (S.pA < 0.5 && tNow > 27.6 && tNow < 31.4) {
+      var fa = a * clamp((tNow - 27.6) / 2.2, 0, 1) * clamp((31.4 - tNow) / 1.0, 0, 1) * (1 - clamp(S.secA * 2, 0, 1));
+      if (fa > 0.02) {
+        var dStop = distanceAt(23);
+        pill(['停車中', '距離は増えない'], (gx(23) + gx(30)) / 2, gy(dStop) + 27 * f, {
+          size: 10, color: C.light, alpha: fa, padX: 7, padY: 4,
+          border: 'rgba(140,137,128,.35)'
+        });
+      }
+    }
+
+    /* 記録の先端（いま） */
+    if (tNow > 0.15 && S.pA < 0.5) {
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.fillStyle = C.cream;
+      ctx.beginPath();
+      ctx.arc(gx(tNow), gy(dNow), Math.max(5, 5.5 * f), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = C.ink;
+      ctx.beginPath();
+      ctx.arc(gx(tNow), gy(dNow), Math.max(2.6, 3 * f), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    /* 区間の平均（藍の割線）：始点Pは固定、終点Qだけが動く */
+    var tq = clamp(S.qT, P_TIME, DRIVE_END);
+    var gap = tq - P_TIME;
+    var dQ = distanceAt(tq);
+    var avg = gap > 0.0001 ? (dQ - dP) / gap : speedAt(P_TIME);
+    var qx = gx(tq), qy = gy(dQ);
+
+    /* 線を伸ばすときの枠（軸や目盛りラベルの外へは出さない）と最小長 */
+    var lineBox = { x0: r.x0 - 10, x1: r.x1 + 12, yT: r.yT - 12, yB: r.yB + 4 };
+    var minLen = (r.x1 - r.x0) * 0.4;
+
+    if (S.secA > 0.02) {
+      var x1 = px, y1 = py, x2 = qx, y2 = qy;
+      var dx = x2 - x1, dy = y2 - y1;
+      var len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var ux = dx / len, uy = dy / len;
+      /* Q が P に重なっても向きと見える長さを保つ：グラフ幅の約0.4を最小長にして
+         両側へ伸ばす（P/Q を通る直線のまま）。長すぎる分は枠で切る */
+      var ext = Math.max(8, 14 * f, (minLen - len) / 2);
+      if (gap > 0.12) {
+        ctx.save();
+        ctx.globalAlpha = a * S.secA * 0.85;
+        ctx.strokeStyle = C.indigo;
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(x1, r.yB - 4);
+        ctx.lineTo(x1, r.yB - 11);
+        ctx.moveTo(x2, r.yB - 4);
+        ctx.lineTo(x2, r.yB - 11);
+        ctx.moveTo(x1, r.yB - 8);
+        ctx.lineTo(x2, r.yB - 8);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      /* s1-limit では朱の接線が出るのに合わせて交差フェード（急に消さない） */
+      var secSeg = clipSegment(x1 - ux * ext, y1 - uy * ext,
+        x2 + ux * ext, y2 + uy * ext, lineBox);
+      if (secSeg) {
+        inkPts(secSeg, {
+          color: C.indigo, width: 2.1, jitter: 0.3, seed: 43,
+          alpha: a * S.secA * (1 - S.limitA)
+        });
+      }
+
+      /* ラベルはグラフ左上の空き（曲線より上）に固定し、点や線を覆わない */
+      var bx = r.x0 + 70 * f;
+      var by = r.yT + 42 * f;
+      if (S.limitA < 0.5 && S.cardA < 0.05) {
+        pill(['区間の平均', (avg * KMH).toFixed(1) + ' km/h'],
+          bx, by, {
+            color: C.indigo, alpha: a * S.secA, size: 10.5,
+            padX: 7, padY: 4, border: 'rgba(43,91,132,.3)', maxW: Math.max(90, r.x1 - r.x0 - 20)
+          });
+      }
+    }
+
+    /* 平均の速さの理由：直角三角形と式カード（P/Q の点より下に描く） */
+    if (S.triA > 0.02 || S.cardA > 0.02) {
+      drawSecantTriangle(a, px, py, qx, qy, dP, dQ, tq, gap, r, f);
+    }
+
+    /* 終点Q（藍・ひし形・動く） */
+    if (S.qA > 0.02) {
+      var qa = a * S.qA;
+      ctx.save();
+      ctx.globalAlpha = qa * 0.75;
+      ctx.strokeStyle = C.indigo;
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      ctx.arc(qx, qy, Math.max(8, 9 * f), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      ctx.globalAlpha = qa;
+      ctx.translate(qx, qy);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = C.indigo;
+      var qr = Math.max(3.2, 3.6 * f);
+      ctx.fillRect(-qr, -qr, qr * 2, qr * 2);
+      ctx.restore();
+      if (S.limitA < 0.5 && S.triA < 0.06) {
+        /* Q ラベルは P ラベルと重ならない側へ（上→下→さらに上、の3段で逃がす） */
+        var hh = 10.7 * pillScale();
+        var pOff = 16 + 6 * f;
+        var qUp = 14 + 6 * f;
+        var qDn = 16 + 8 * f;
+        var qLabY;
+        if (qy < py - pOff - 2 * hh + qUp) qLabY = qy - qUp;
+        else if (qy > py - pOff - qDn + 2 * hh) qLabY = qy + qDn;
+        else qLabY = qy - qUp - 2 * hh - 6;
+        pill([W >= 760 ? 'Q 動く終点' : 'Q 動く'],
+          qx + (14 + 4 * f), qLabY, {
+            color: C.indigo, alpha: qa, size: 10,
+            padX: 5, padY: 3, border: 'rgba(43,91,132,.35)', maxW: Math.max(80, W * 0.4)
+          });
+      }
+    }
+
+    /* 注目する瞬間 P（朱・固定） */
+    if (S.pA > 0.02) {
+      var pulse = REDUCED ? 1 : (0.92 + 0.08 * Math.sin(S.now * 0.005));
+      ctx.save();
+      ctx.globalAlpha = a * S.pA;
+      ctx.fillStyle = C.cream;
+      ctx.beginPath();
+      ctx.arc(px, py, Math.max(7, 8 * f) * pulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = C.verm;
+      ctx.beginPath();
+      ctx.arc(px, py, Math.max(4, 4.6 * f), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      /* 接線のステップでは P ラベルを点の下に置き、傾きラベルと重ねない */
+      var pLabY = S.limitA < 0.5 ? (py - (16 + 6 * f)) : (py + (16 + 6 * f));
+      pill([W >= 760 ? 'P 固定の始点' : 'P 固定'],
+        px - (14 + 4 * f), pLabY, {
+          color: C.verm, alpha: a * S.pA, size: 10,
+          padX: 5, padY: 3, border: 'rgba(217,78,65,.35)', maxW: Math.max(80, W * 0.4)
+        });
+
+      /* 「何キロ？」は問いのステップだけ（縮小中は平均ラベルに譲る） */
+      if (S.qA > 0.02 && S.secA < 0.05 && S.limitA < 0.5) {
+        pill(['この瞬間、何キロ？'], (r.x0 + r.x1) / 2, r.yT + 6 * f, {
+          color: C.ink, alpha: a * S.qA, size: 10.5,
+          padX: 8, padY: 5, border: 'rgba(34,34,34,.25)', maxW: Math.max(90, r.x1 - r.x0)
+        });
+      }
+    }
+
+    /* 瞬間の傾き（朱の接線）。藍の割線と同程度の見える長さで重ね、
+       同じ枠で切って交差フェードする（急に消さない） */
+    if (S.limitA > 0.03) {
+      var m = speedAt(P_TIME);
+      var tl = P_TIME - 1.35, tr = P_TIME + 1.35;
+      var tax = gx(tl), tay = gy(dP + m * (tl - P_TIME));
+      var tbx = gx(tr), tby = gy(dP + m * (tr - P_TIME));
+      var tdx = tbx - tax, tdy = tby - tay;
+      var tlen = Math.sqrt(tdx * tdx + tdy * tdy) || 1;
+      var tux = tdx / tlen, tuy = tdy / tlen;
+      var thalf = Math.max(tlen / 2, minLen / 2);
+      var tanSeg = clipSegment(px - tux * thalf, py - tuy * thalf,
+        px + tux * thalf, py + tuy * thalf, lineBox);
+      if (tanSeg) {
+        inkPts(tanSeg, { color: C.verm, width: 2.3, jitter: 0.3, seed: 47, alpha: a * S.limitA });
+      }
+
+      pill(['この瞬間の傾き  ' + m.toFixed(1) + ' m/s', '＝ 時速' + Math.round(m * KMH) + 'km'],
+        r.x0 + 66, r.yT + 26 * f, {
+          color: C.verm, alpha: a * S.limitA, size: 10.5,
+          padX: 7, padY: 4, border: 'rgba(217,78,65,.3)', maxW: r.x1 - r.x0
+        });
+    }
+
+    ctx.restore();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Scene 2：放物線・ズーム・接線                                         */
+  /* ------------------------------------------------------------------ */
+  function pBase() { return Math.min(W / 6.4, H / 4.6); }
+
+  function pickStep(ppm) {
+    var cands = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10];
+    for (var i = 0; i < cands.length; i++) {
+      if (cands[i] * ppm >= 52) return cands[i];
+    }
+    return 20;
+  }
+  function fmtNum(v, step) {
+    if (Math.abs(v) < step * 0.001) return '0';
+    if (step < 0.1) return v.toFixed(2);
+    if (step < 1) return v.toFixed(1);
+    return String(Math.round(v));
+  }
+
+  function drawScene2(a) {
+    if (a <= 0.01) return;
+    var ppm = pBase() * S.zoom;
+    var f = fx();
+    function X(x) { return W / 2 + (x - S.cx) * ppm; }
+    function Y(y) { return H / 2 - (y - S.cy) * ppm; }
+
+    ctx.save();
+    ctx.globalAlpha = a;
+
+    var step = pickStep(ppm);
+    var halfW = (W / 2) / ppm;
+    var halfH = (H / 2) / ppm;
+
+    /* 薄いグリッド */
+    ctx.save();
+    ctx.strokeStyle = C.light;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 7]);
+    ctx.globalAlpha = a * 0.4;
+    var x0g = Math.ceil((S.cx - halfW) / step) * step;
+    for (var gx1 = x0g; gx1 <= S.cx + halfW; gx1 += step) {
+      ctx.beginPath();
+      ctx.moveTo(X(gx1), 0);
+      ctx.lineTo(X(gx1), H);
+      ctx.stroke();
+    }
+    var y0g = Math.ceil((S.cy - halfH) / step) * step;
+    for (var gy1 = y0g; gy1 <= S.cy + halfH; gy1 += step) {
+      ctx.beginPath();
+      ctx.moveTo(0, Y(gy1));
+      ctx.lineTo(W, Y(gy1));
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    /* 軸 */
+    var yAxisY = Y(0), xAxisX = X(0);
+    var xVisible = (yAxisY > -2 && yAxisY < H + 2);
+    var yVisible = (xAxisX > -2 && xAxisX < W + 2);
+    ctx.save();
+    ctx.globalAlpha = a * 0.9;
+    ctx.strokeStyle = C.ink;
+    ctx.lineWidth = 1.5;
+    if (xVisible) {
+      ctx.beginPath();
+      ctx.moveTo(0, yAxisY);
+      ctx.lineTo(W, yAxisY);
+      ctx.stroke();
+    }
+    if (yVisible) {
+      ctx.beginPath();
+      ctx.moveTo(xAxisX, 0);
+      ctx.lineTo(xAxisX, H);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    if (xVisible) {
+      for (var tx = x0g; tx <= S.cx + halfW; tx += step) {
+        var sx = X(tx);
+        inkPts([[sx, yAxisY], [sx, yAxisY + 4]], { color: C.ink, width: 1.2, jitter: 0.15, seed: 60, alpha: a * 0.9 });
+        text(fmtNum(tx, step), sx, yAxisY + 15, {
+          size: 10 * f, color: C.light, alpha: a,
+          align: tx > S.cx + halfW * 0.5 ? 'right' : 'center'
+        });
+      }
+      text('x', W - 8, yAxisY - 12, { size: 12 * f, color: C.ink, align: 'right', alpha: a });
+    }
+    if (yVisible) {
+      for (var ty = y0g; ty <= S.cy + halfH; ty += step) {
+        var sy = Y(ty);
+        inkPts([[xAxisX, sy], [xAxisX - 4, sy]], { color: C.ink, width: 1.2, jitter: 0.15, seed: 70, alpha: a * 0.9 });
+        if (Math.abs(ty) > step * 0.001) {
+          text(fmtNum(ty, step), xAxisX - 9, sy, { size: 10 * f, color: C.light, align: 'right', alpha: a });
+        }
+      }
+      text('y', xAxisX + 12, 14, { size: 12 * f, color: C.ink, alpha: a });
+    }
+
+    /* タイトル */
+    text('y = x²', 16, 22, { size: 13 * f, family: MATH_FONT, color: C.light, align: 'left', alpha: a });
+
+    /* 放物線 */
+    var xa = S.cx - halfW * 1.2, xb = S.cx + halfW * 1.2;
+    xa = clamp(xa, -12, 12);
+    xb = clamp(xb, -12, 12);
+    var pts = [];
+    var N = 180;
+    for (var i = 0; i <= N; i++) {
+      var xv = lerp(xa, xb, i / N);
+      pts.push([X(xv), Y(xv * xv)]);
+    }
+    inkPts(partial(pts, S.parReveal), { color: C.ink, width: 2.4, jitter: 0.3, seed: 81, alpha: a });
+
+    /* 接線 */
+    var m = 2 * S.x;
+    var py0 = S.x * S.x;
+    if (S.tanA > 0.03) {
+      var lenW = Math.min(2.4, halfW * 1.35) * S.tanA;
+      var x1 = S.x - lenW, x2 = S.x + lenW;
+      inkPts([
+        [X(x1), Y(py0 + m * (x1 - S.x))],
+        [X(x2), Y(py0 + m * (x2 - S.x))]
+      ], { color: C.verm, width: 2.3, jitter: 0.3, seed: 83, alpha: a });
+    }
+
+    /* 点 */
+    var px = X(S.x), py = Y(py0);
+    if (mode === 'waiting' && S.parA > 0.5) {
+      var pulse = REDUCED ? 1 : (0.9 + 0.1 * Math.sin(S.now * 0.004));
+      ctx.save();
+      ctx.globalAlpha = a * 0.3;
+      ctx.strokeStyle = C.verm;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(px, py, 12 * pulse, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = C.cream;
+    ctx.beginPath();
+    ctx.arc(px, py, 8.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = C.verm;
+    ctx.beginPath();
+    ctx.arc(px, py, 5.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    /* 接線の傾きラベルは、接線が上る側とは逆の上隅へ（接線と点を覆わない） */
+    if (S.slopeA > 0.03) {
+      var lx1 = m >= 0 ? W * 0.22 : W * 0.78;
+      var ly1 = H * 0.28;
+      pill(['接線の傾き', m.toFixed(1)], lx1, ly1, {
+        color: C.verm, alpha: a * S.slopeA, size: 11.5, padX: 9, padY: 5,
+        border: 'rgba(217,78,65,.3)', maxW: W * 0.42
+      });
+      text('(' + S.x.toFixed(1) + ', ' + py0.toFixed(1) + ')', px + 14, py + 20,
+        { size: 10 * f, color: C.light, align: 'left', alpha: a * S.slopeA });
+    }
+
+    ctx.restore();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 描画ループ                                                          */
+  /* ------------------------------------------------------------------ */
+  function draw() {
+    if (!W || !H) return;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = C.cream;
+    ctx.fillRect(0, 0, W, H);
+    if (paperTex) ctx.drawImage(paperTex, 0, 0, W, H);
+
+    if (S.carA > 0.01) drawCarScene(S.carA);
+    if (S.graphA > 0.01) drawGraph1(S.graphA);
+    if (S.parA > 0.01) drawScene2(S.parA);
+
+    /* メーターは車の場面とグラフの場面で同じ位置に置き、同じ走行としてつなぐ */
+    var meterA = Math.max(S.carA, S.meterA);
+    if (meterA > 0.01) {
+      drawSpeedometer(W * 0.83, H * 0.42, Math.min(W * 0.13, H * 0.25), meterA, S.meterA > 0.5);
+    }
+
+    if (mode === 'waiting' && !promptEl.hidden) {
+      var val = 'x = ' + S.x.toFixed(2) + ' ／ 傾き ' + (2 * S.x).toFixed(1);
+      if (readoutEl.textContent !== val) readoutEl.textContent = val;
+    }
+  }
+
+  function smoothAll(dt) {
+    var k = 1 - Math.exp(-dt / FADE_MS);
+    S.carA += (S.carAT - S.carA) * k;
+    S.graphA += (S.graphAT - S.graphA) * k;
+    S.parA += (S.parAT - S.parA) * k;
+    S.needleV += (speedKmh(S.driveT) - S.needleV) * k;
+    S.secA += (S.secAT - S.secA) * k;
+    S.limitA += (S.limitAT - S.limitA) * k;
+    S.pA += (S.pAT - S.pA) * k;
+    S.qA += (S.qAT - S.qA) * k;
+    S.meterA += (S.meterAT - S.meterA) * k;
+    S.meterQ += (S.meterQT - S.meterQ) * k;
+    S.tanA += (S.tanAT - S.tanA) * k;
+    S.slopeA += (S.slopeAT - S.slopeA) * k;
+    S.triA += (S.triAT - S.triA) * k;
+    S.cardA += (S.cardAT - S.cardA) * k;
+    S.cx += (S.cxT - S.cx) * k;
+    S.cy += (S.cyT - S.cy) * k;
+    var kz = 1 - Math.exp(-dt / 650);
+    S.zoom = Math.exp(Math.log(S.zoom) + (Math.log(S.zoomT) - Math.log(S.zoom)) * kz);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* シナリオ（Phase 1：Scene 1〜2）                                      */
+  /* ------------------------------------------------------------------ */
+  var SCENE_TITLES = { 1: '同じ走行から、今の速さ', 2: '拡大すると直線になる' };
+
+  /* Scene 2：赤点（x=1）を画面の同じ位置に残したままズームするためのカメラ補正。
+     zooom 倍率 z に対し、元の全体表示での画面位置を保つ中心を返す。 */
+  var S2_PX = 1, S2_PY = 1;            /* 赤点（y = x² 上の x=1） */
+  var S2_CX0 = 0.2, S2_CY0 = 2.0;      /* 全体表示のカメラ中心 */
+  function s2CamFor(z) {
+    return {
+      cx: S2_PX - (S2_PX - S2_CX0) / z,
+      cy: S2_PY + (S2_CY0 - S2_PY) / z
+    };
+  }
+
+  var STEPS = [
+    {
+      id: 's1-drive', scene: 1, dur: 6800,
+      speech: '車が走り出しました。メーターの針が、すっと上がります。',
+      subCues: [2370],
+      enter: function () {
+        S.carAT = 1; S.graphAT = 0; S.meterAT = 0;
+        S.driveT = 0; S.revealT = 0; S.needleV = 0;
+        S.secA = 0; S.secAT = 0; S.limitA = 0; S.limitAT = 0;
+        S.pA = 0; S.pAT = 0; S.qA = 0; S.qAT = 0; S.qT = Q_START;
+        S.meterQ = 0; S.meterQT = 0;
+      },
+      tick: function (p) { S.driveT = 16 * clamp(p * 1.04, 0, 1); }
+    },
+    {
+      id: 's1-stop', scene: 1, dur: 7600,
+      speech: '赤信号です。車はゆっくり減速して、止まりました。',
+      subCues: [1840],
+      enter: function () {
+        S.carAT = 1; S.graphAT = 0; S.meterAT = 0;
+        S.driveT = 16; S.revealT = 0;
+        S.secA = 0; S.secAT = 0; S.limitA = 0; S.limitAT = 0;
+        S.pA = 0; S.pAT = 0; S.qA = 0; S.qAT = 0; S.qT = Q_START;
+        S.meterQ = 0; S.meterQT = 0;
+      },
+      tick: function (p) { S.driveT = lerp(16, 30, clamp(p * 1.06, 0, 1)); }
+    },
+    {
+      id: 's1-go', scene: 1, dur: 7600,
+      speech: '青信号です。車は再び走り出します。',
+      subCues: [1800],
+      enter: function () {
+        S.carAT = 1; S.graphAT = 0; S.meterAT = 1;
+        S.driveT = 30; S.revealT = 0;
+        S.secA = 0; S.secAT = 0; S.limitA = 0; S.limitAT = 0;
+        S.pA = 0; S.pAT = 0; S.qA = 0; S.qAT = 0; S.qT = Q_START;
+        S.meterQ = 0; S.meterQT = 0;
+      },
+      tick: function (p) { S.driveT = lerp(30, DRIVE_END, clamp(p * 1.06, 0, 1)); }
+    },
+    {
+      id: 's1-record', scene: 1, dur: 11400, voiceAt: 0.9, cut: true,
+      speech: '同じ走行を、時間と距離のグラフにしてみます。止まっていた間は、距離が増えないので、線は水平になります。',
+      subCues: [4510],
+      /* 車からグラフへ切り替わった直後は、原点とメーター0のまま約1秒静止してから描く */
+      enter: function () {
+        S.carAT = 0; S.graphAT = 1; S.meterAT = 1;
+        S.driveT = 0; S.revealT = 0;
+        S.secA = 0; S.secAT = 0; S.limitA = 0; S.limitAT = 0;
+        S.pA = 0; S.pAT = 0; S.qA = 0; S.qAT = 0; S.qT = Q_START;
+        S.meterQ = 0; S.meterQT = 0;
+      },
+      tick: function (p, ms) {
+        var t = ms == null ? 0 : ms;
+        var rt;
+        if (t < 1000) rt = 0;                              /* 無音で静止（一拍） */
+        else if (t < 6500) rt = lerp(0, 23, (t - 1000) / 5500);
+        else if (t < 9800) rt = lerp(23, 30, (t - 6500) / 3300);  /* 水平部分をスロー */
+        else rt = 30;                                      /* 停止フレームで一拍 */
+        S.driveT = rt; S.revealT = rt;
+      }
+    },
+    {
+      id: 's1-graph-go', scene: 1, dur: 8600, voiceAt: 0.5,
+      speech: '青信号です。発進すると、グラフはだんだん急になり、メーターの針も上がっていきます。',
+      subCues: [1790],
+      enter: function () {
+        S.carAT = 0; S.graphAT = 1; S.meterAT = 1;
+        S.driveT = 30; S.revealT = 30;
+        S.secA = 0; S.secAT = 0; S.limitA = 0; S.limitAT = 0;
+        S.pA = 0; S.pAT = 0; S.qA = 0; S.qAT = 0; S.qT = Q_START;
+        S.meterQ = 0; S.meterQT = 0;
+      },
+      tick: function (p, ms) {
+        /* 先頭の「青信号です。」（約0.08〜1.0秒）を聞き、一拍おいて「発進」（1.38秒）から動かす。
+           voiceAt 0.5秒 + 1.4秒 = 1.9秒までは、水平な線を t=30 のまま見せる */
+        var t = ms == null ? 0 : ms;
+        var rt;
+        if (t < 1900) rt = 30;
+        else if (t < 7600) rt = lerp(30, DRIVE_END, easeInOutCubic((t - 1900) / 5700));
+        else rt = DRIVE_END;
+        S.driveT = rt; S.revealT = rt;
+      }
+    },
+    {
+      id: 's1-point', scene: 1, dur: 9000, voiceAt: 0.3, meterSnap: true,
+      speech: '走行記録の途中、三十三秒に注目しましょう。この瞬間、車はどれくらいの速さだったのでしょう。メーターと同じ速さを、グラフの傾きから読めるでしょうか。',
+      subCues: [4970, 9470],
+      enter: function () {
+        S.carAT = 0; S.graphAT = 1; S.meterAT = 1;
+        S.driveT = P_TIME; S.revealT = DRIVE_END;
+        S.pAT = 1; S.qAT = 0;
+        S.secA = 0; S.secAT = 0; S.limitA = 0; S.limitAT = 0;
+        S.qT = Q_START;
+        S.meterQT = 1;
+      },
+      tick: function (p, ms) {
+        /* 「右の42秒を終点Q」に合わせて Q を出す（絵でも順を追う） */
+        if ((ms == null ? 0 : ms) >= 4200) S.qAT = 1;
+      }
+    },
+    {
+      id: 's1-secant', scene: 1, dur: 5600, voiceAt: 0.3,
+      speech: '二つの点を結ぶ線の傾きは、その間の平均の速さです。',
+      enter: function () {
+        S.carAT = 0; S.graphAT = 1; S.meterAT = 1;
+        S.driveT = P_TIME; S.revealT = DRIVE_END;
+        S.pAT = 1; S.qAT = 1;
+        S.secAT = 1; S.limitAT = 0;
+        S.qT = Q_START;
+        S.meterQT = 1;
+        S.triAT = 0; S.cardAT = 0;
+        S.triBase = 0; S.triHeight = 0; S.baseLab = 0; S.heightLab = 0;
+        S.triLeg = 0; S.cardMs = 0;
+      },
+      tick: function () {}
+    },
+    {
+      id: 's1-triangle-1', scene: 1, dur: 14500, voiceAt: 0.3,
+      speech: 'まず、横の増加量を見てみましょう。これは、この区間の経過時間です。次に、縦の増加量。これは、この区間の走行距離です。',
+      subCues: [3830, 7370, 10360],
+      enter: function () {
+        S.carAT = 0; S.graphAT = 1; S.meterAT = 1;
+        S.driveT = P_TIME; S.revealT = DRIVE_END;
+        S.pAT = 1; S.qAT = 1;
+        S.secAT = 1; S.limitAT = 0;
+        S.qT = Q_START;
+        S.meterQT = 1;
+        S.triAT = 1; S.cardAT = 0;
+        S.triBase = 0; S.triHeight = 0; S.baseLab = 0; S.heightLab = 0;
+        S.triLeg = 1; S.cardMs = 0;
+      },
+      tick: function (p, ms) {
+        /* 底辺 → 底辺ラベル → 高さ → 高さラベル の順（音声ローカルms） */
+        var t = ms == null ? 0 : ms;
+        S.triBase = clamp((t - TRI_BASE_FROM) / (TRI_BASE_TO - TRI_BASE_FROM), 0, 1);
+        S.baseLab = clamp((t - TRI_BASE_LAB) / 400, 0, 1);
+        S.triHeight = clamp((t - TRI_H_FROM) / (TRI_H_TO - TRI_H_FROM), 0, 1);
+        S.heightLab = clamp((t - TRI_H_LAB) / 400, 0, 1);
+        S.triLeg = 1;
+      }
+    },
+    {
+      id: 's1-triangle-2', scene: 1, dur: 12400, voiceAt: 0.3,
+      speech: '傾きは、Xの増加量分のYの増加量。つまり、経過時間分の走行距離なので、この区間の平均の速さになるんです。',
+      subCues: [4700],
+      enter: function () {
+        S.carAT = 0; S.graphAT = 1; S.meterAT = 1;
+        S.driveT = P_TIME; S.revealT = DRIVE_END;
+        S.pAT = 1; S.qAT = 1;
+        S.secAT = 1; S.limitAT = 0;
+        S.qT = Q_START;
+        S.meterQT = 1;
+        S.triAT = 1; S.cardAT = 1;
+        S.triBase = 1; S.triHeight = 1; S.baseLab = 1; S.heightLab = 1;
+        S.triLeg = 1; S.cardMs = 0;
+      },
+      tick: function (p, ms) {
+        /* 式カードは 1600 骨格 → 5900 数値 → 8800 結果（式の reveal は時刻から算出） */
+        S.cardMs = ms == null ? 0 : ms;
+      }
+    },
+    {
+      id: 's1-shrink', scene: 1, dur: 11500, voiceAt: 0.3,
+      speech: '始点はそのまま、右の終点だけを近づけてみましょう。終点を近づけると、平均の速さはその瞬間の速さに近づきます。',
+      subCues: [4920],
+      enter: function () {
+        S.carAT = 0; S.graphAT = 1; S.meterAT = 1;
+        S.driveT = P_TIME; S.revealT = DRIVE_END;
+        S.pAT = 1; S.qAT = 1;
+        S.secAT = 1; S.limitAT = 0;
+        S.qT = Q_START;
+        S.meterQT = 1;
+        S.triAT = 1; S.cardAT = 1;
+        S.triBase = 1; S.triHeight = 1; S.baseLab = 1; S.heightLab = 1;
+        S.triLeg = 1; S.cardMs = CARD_RES + 1000;
+      },
+      tick: function (p, ms) {
+        /* 約3.2秒から縮め始め、約9.0秒で P+0.06 に到達。残りは保持。
+           三角形と式の数値は Q に追従し、Δt が 0.5 秒未満で脚とラベルをフェード */
+        var t = (ms == null) ? 0 : ms;
+        var u = easeInOutCubic(clamp((t - SHRINK_FROM) / (SHRINK_TO - SHRINK_FROM), 0, 1));
+        S.qT = lerp(Q_START, P_TIME + 0.06, u);
+        var dt = S.qT - P_TIME;
+        S.triLeg = clamp((dt - 0.2) / 0.3, 0, 1);
+      }
+    },
+    {
+      id: 's1-limit', scene: 1, dur: 11400, voiceAt: 0.6, secSnap: true,
+      speech: '区間をせまくすると、平均の速さはその瞬間の速さ、時速二十キロに近づきます。メーターも同じ速さです。',
+      subCues: [7780],
+      /* 途中で切り替わる値の時刻（シークでも実再生と同じ途中の見え方にする） */
+      fadeAt: { meterQ: METER_CUE, limitA: LIMIT_CUE },
+      enter: function () {
+        S.carAT = 0; S.graphAT = 1; S.meterAT = 1;
+        S.driveT = P_TIME; S.revealT = DRIVE_END;
+        S.pAT = 1; S.qAT = 0;
+        S.secAT = 1; S.limitAT = 0;
+        S.qT = P_TIME + 0.06;
+        S.meterQT = 1;
+        S.triAT = 0; S.cardAT = 0;
+      },
+      tick: function (p, ms) {
+        /* 「時速二十キロ」に合わせてメーターで答えを出し、最後の無音で接線を引く */
+        var t = ms == null ? 0 : ms;
+        if (t >= METER_CUE) S.meterQT = 0;
+        if (t >= LIMIT_CUE) S.limitAT = 1;
+      }
+    },
+    {
+      id: 's1-meaning', scene: 1, dur: 9800, voiceAt: 0.9,
+      speech: '区間を限りなくゼロに近づけたときの接線の傾きが、その瞬間の速さ。これが微分の考え方です。',
+      subCues: [6540],
+      /* 接線の絵は s1-limit の最後からそのまま。一拍おいて定義を話す */
+      enter: function () {
+        S.carAT = 0; S.graphAT = 1; S.meterAT = 1;
+        S.driveT = P_TIME; S.revealT = DRIVE_END;
+        S.pAT = 1; S.qAT = 0;
+        S.secAT = 0; S.limitAT = 1;
+        S.qT = P_TIME + 0.06;
+        S.meterQT = 0;
+        S.triAT = 0; S.cardAT = 0;
+      },
+      tick: function () {}
+    },
+    {
+      id: 's2-intro', scene: 2, dur: 7200, voiceAt: 0.6,
+      speech: '車のグラフで見た、一点の傾き。今度は、数学のグラフ、yイコールxの二乗で確かめてみましょう。',
+      subCues: [3930],
+      enter: function () {
+        S.carAT = 0; S.graphAT = 0; S.limitAT = 0; S.secAT = 0;
+        S.meterAT = 0;
+        S.pAT = 0; S.qAT = 0;
+        S.parAT = 1; S.parReveal = 0;
+        S.tanAT = 0; S.tanA = 0; S.slopeAT = 0; S.slopeA = 0;
+        S.triAT = 0; S.cardAT = 0; S.triLeg = 0; S.cardMs = 0;
+        S.x = 1;
+        S.zoomT = 1; S.cxT = 0.2; S.cyT = 2.0;
+        S.zoom = 1; S.cx = 0.2; S.cy = 2.0;
+      },
+      tick: function (p) { S.parReveal = easeInOutCubic(clamp(p * 1.5, 0, 1)); }
+    },
+    {
+      id: 's2-zoom', scene: 2, dur: 7200, voiceAt: 0.3, directCam: true,
+      speech: 'この点の近くだけを見ると、曲がった線が、ほとんどまっすぐに見えます。',
+      enter: function () {
+        S.parAT = 1; S.parReveal = 1;
+        var c = s2CamFor(90);
+        S.zoomT = 90; S.cxT = c.cx; S.cyT = c.cy;
+      },
+      tick: function (p) {
+        /* 途中シークでも同じ絵になるよう、ズームは経過時間から直接決める。
+           赤点が元の全体表示と同じ画面位置に残るよう、カメラ中心を倍率の逆数で補正する */
+        var u = easeInOutCubic(clamp(p * 1.25, 0, 1));
+        var z = Math.exp(lerp(0, Math.log(90), u));
+        S.zoom = z;
+        var c = s2CamFor(z);
+        S.cx = c.cx; S.cy = c.cy;
+      }
+    },
+    {
+      id: 's2-tangent', scene: 2, dur: 6400, voiceAt: 0.4,
+      speech: '曲線にそっと触れる直線。これを、接線と呼びます。',
+      subCues: [2640],
+      enter: function () { S.tanAT = 1; S.slopeAT = 0; },
+      tick: function () {}
+    },
+    {
+      id: 's2-slope', scene: 2, dur: 6400,
+      speech: '接線の傾きが、その瞬間の変化の勢い。この点では、傾きは2です。',
+      subCues: [4690],
+      enter: function () { S.tanAT = 1; S.slopeAT = 1; },
+      tick: function () {}
+    },
+    {
+      id: 's2-pull', scene: 2, dur: 7000, directCam: true, minSlot: 7940,
+      speech: '少し引いて、点を動かしてみましょう。',
+      enter: function () {
+        S.zoomT = 1; S.cxT = S2_CX0; S.cyT = S2_CY0;
+        S.slopeAT = 0.4; S.tanAT = 1;
+      },
+      tick: function (p, ms) {
+        /* ズームアウトでも赤点を画面の同じ位置に残す */
+        var u = easeInOutCubic(clamp((ms == null ? 0 : ms) / 3200, 0, 1));
+        var z = Math.exp(lerp(Math.log(90), 0, u));
+        S.zoom = z;
+        var c = s2CamFor(z);
+        S.cx = c.cx; S.cy = c.cy;
+      }
+    },
+    {
+      id: 's2-drag', scene: 2, dur: 8200, interactive: true,
+      speech: '赤い点を左右に動かすと、接線と傾きが同時に変わります。確かめてみましょう。',
+      subCues: [5710],
+      enter: function () {
+        S.zoomT = 1; S.cxT = S2_CX0; S.cyT = S2_CY0;
+        S.slopeAT = 1; S.tanAT = 1; S.parReveal = 1;
+      },
+      tick: function () {}
+    },
+    {
+      id: 's2-close', scene: 2, dur: 6800,
+      speech: '一点の傾きから、一瞬の勢いが読める。これが微分の入り口です。',
+      subCues: [4350],
+      enter: function () { S.slopeAT = 1; S.tanAT = 1; S.zoomT = 1; S.cxT = S2_CX0; S.cyT = S2_CY0; },
+      tick: function () {}
+    }
+  ];
+
+  function sceneStart(scene) {
+    for (var i = 0; i < STEPS.length; i++) {
+      if (STEPS[i].scene === scene) return i;
+    }
+    return 0;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* タイムライン（連続シーク用）                                         */
+  /* ------------------------------------------------------------------ */
+  /* 各ステップ音声の実測長（ms）。音声が st.dur より長いときにステップ位置や
+     途中再生がずれないよう、スロット長 = max(st.dur, 実測 + 260ms) とする。
+     音声を作り直したら、この表の該当IDだけを更新する（更新場所はここ）。 */
+  var AUDIO_MS = {
+    's1-drive': 5304, 's1-stop': 5112, 's1-go': 3864, 's1-record': 9912,
+    's1-graph-go': 7656, 's1-point': 13872, 's1-secant': 5088,
+    's1-triangle-1': 13416, 's1-triangle-2': 11352, 's1-shrink': 10416,
+    's1-limit': 9552, 's1-meaning': 8520,
+    's2-intro': 9816, 's2-zoom': 5928, 's2-tangent': 5088, 's2-slope': 7440,
+    's2-pull': 3240, 's2-drag': 7032, 's2-close': 6096
+  };
+  function slotOf(st) {
+    var slot = Math.max(st.dur, (st.voiceAt || 0) * 1000 + (AUDIO_MS[st.id] || 0) + 260);
+    /* 音声が短くなっても、既存の間・間合いは詰めない（下限を明示） */
+    if (st.minSlot && slot < st.minSlot) slot = st.minSlot;
+    return slot;
+  }
+
+  /* 字幕の切り替え表は音声の実測長に依存するので、表の定義後に一度だけ作る */
+  for (var subIdx = 0; subIdx < STEPS.length; subIdx++) {
+    STEPS[subIdx].subs = buildSubs(STEPS[subIdx]);
+  }
+
+  var TL = { start: [], total: 0 };
+  var seekDragging = false;
+  var seekResume = false;
+
+  function buildTimeline() {
+    TL.start = [];
+    var t = 0;
+    for (var i = 0; i < STEPS.length; i++) {
+      TL.start[i] = t;
+      t += slotOf(STEPS[i]);
+    }
+    TL.total = t;
+    updateSeekUI(currentTimelineMs(), true);
+  }
+
+  function stepIndexAt(ms) {
+    for (var i = 0; i < STEPS.length; i++) {
+      if (ms < TL.start[i] + slotOf(STEPS[i])) return i;
+    }
+    return STEPS.length - 1;
+  }
+
+  function currentTimelineMs() {
+    if (mode === 'idle') return 0;
+    if (mode === 'ended') return TL.total;
+    var st = STEPS[idx];
+    if (!st) return TL.total;
+    return clamp(TL.start[idx] + Math.min(elapsed, slotOf(st)), 0, TL.total);
+  }
+
+  function fmtClock(sec) {
+    sec = Math.max(0, Math.round(sec));
+    var m = Math.floor(sec / 60), s = sec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function updateSeekUI(ms, force) {
+    if (!seekRange) return;
+    var totalSec = TL.total / 1000;
+    var sec = clamp(ms, 0, TL.total) / 1000;
+    /* 0.1秒刻みでも終端へ届くよう、最大値は切り上げる */
+    var maxSec = Math.ceil(totalSec * 10) / 10;
+    if (Math.abs(parseFloat(seekRange.max) - maxSec) > 0.001) seekRange.max = maxSec.toFixed(1);
+    var shown = (sec >= totalSec - 0.05) ? maxSec : Math.round(sec * 10) / 10;
+    if (force || !seekDragging) {
+      var cur = parseFloat(seekRange.value);
+      if (!(Math.abs(cur - shown) <= 0.051)) seekRange.value = shown.toFixed(1);
+    }
+    var txt = fmtClock(sec) + ' / ' + fmtClock(totalSec);
+    if (seekTime && seekTime.textContent !== txt) seekTime.textContent = txt;
+    if (seekRange.getAttribute('aria-valuetext') !== txt) seekRange.setAttribute('aria-valuetext', txt);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 任意時刻の状態を決定論的に作り直す（シーク用）                        */
+  /* ------------------------------------------------------------------ */
+  function resetDrawnState() {
+    S.carA = 0; S.carAT = 0; S.graphA = 0; S.graphAT = 0;
+    S.parA = 0; S.parAT = 0; S.parReveal = 0;
+    S.driveT = 0; S.revealT = 0; S.needleV = 0;
+    S.secA = 0; S.secAT = 0; S.limitA = 0; S.limitAT = 0;
+    S.pA = 0; S.pAT = 0; S.qA = 0; S.qAT = 0; S.qT = Q_START;
+    S.meterA = 0; S.meterAT = 0; S.meterQ = 0; S.meterQT = 0;
+    S.tanA = 0; S.tanAT = 0; S.slopeA = 0; S.slopeAT = 0;
+    S.triA = 0; S.triAT = 0; S.cardA = 0; S.cardAT = 0;
+    S.triBase = 0; S.triHeight = 0; S.baseLab = 0; S.heightLab = 0;
+    S.triLeg = 0; S.cardMs = 0;
+    S.x = 1; S.zoom = 1; S.zoomT = 1;
+    S.cx = 0.2; S.cy = 2; S.cxT = 0.2; S.cyT = 2;
+  }
+
+  function applyStateAt(i, localMs) {
+    resetDrawnState();
+    var slot = slotOf(STEPS[i]);
+    var p = slot > 0 ? clamp(localMs / slot, 0, 1) : 0;
+    for (var j = 0; j < i; j++) {
+      if (STEPS[j].enter) STEPS[j].enter();
+      if (STEPS[j].tick) STEPS[j].tick(1, slotOf(STEPS[j]));
+    }
+    var st = STEPS[i];
+    var prev = {
+      car: S.carAT, graph: S.graphAT, par: S.parAT, meter: S.meterAT,
+      meterQ: S.meterQT, sec: S.secAT, limit: S.limitAT,
+      p: S.pAT, q: S.qAT, tan: S.tanAT, slope: S.slopeAT,
+      tri: S.triAT, card: S.cardAT
+    };
+    if (st.enter) st.enter();
+    if (st.tick) st.tick(p, localMs);
+
+    /* 追従系は目標値へ即座に合わせる（再生と同じモデル）。
+       directCam のステップは tick がカメラを時刻から直接決めるので上書きしない */
+    S.needleV = speedKmh(S.driveT);
+    if (!st.directCam) { S.zoom = S.zoomT; S.cx = S.cxT; S.cy = S.cyT; }
+
+    /* クロスフェードは「このステップに入ってからの経過時間」から決める。
+       smoothAll と同じ指数減衰なので、再生中の途中とも一致する。
+       cut のステップは場面を重ねず、その場で切り替える。
+       途中の時刻で切り替わる値（fadeAt）は「その時刻からの経過」で減衰させ、
+       シークしても実再生と同じ途中の見え方にする */
+    var k = st.cut ? 0 : Math.exp(-Math.max(0, localMs) / FADE_MS);
+    var kAt = function (fromMs) {
+      return Math.exp(-Math.max(0, localMs - fromMs) / FADE_MS);
+    };
+    var kLimit = (st.fadeAt && typeof st.fadeAt.limitA === 'number') ? kAt(st.fadeAt.limitA) : k;
+    var kMeterQ = (st.fadeAt && typeof st.fadeAt.meterQ === 'number') ? kAt(st.fadeAt.meterQ)
+      : (st.meterSnap ? 0 : k);
+    S.carA = S.carAT + (prev.car - S.carAT) * k;
+    S.graphA = S.graphAT + (prev.graph - S.graphAT) * k;
+    S.parA = S.parAT + (prev.par - S.parAT) * k;
+    S.meterA = S.meterAT + (prev.meter - S.meterAT) * k;
+    S.meterQ = S.meterQT + (prev.meterQ - S.meterQT) * kMeterQ;
+    S.secA = S.secAT + (prev.sec - S.secAT) * (st.secSnap ? 0 : k);
+    S.limitA = S.limitAT + (prev.limit - S.limitAT) * kLimit;
+    S.pA = S.pAT + (prev.p - S.pAT) * k;
+    S.qA = S.qAT + (prev.q - S.qAT) * k;
+    S.tanA = S.tanAT + (prev.tan - S.tanAT) * k;
+    S.slopeA = S.slopeAT + (prev.slope - S.slopeAT) * k;
+    S.triA = S.triAT + (prev.tri - S.triAT) * k;
+    S.cardA = S.cardAT + (prev.card - S.cardAT) * k;
+  }
+
+  function seekTo(ms, resume) {
+    ms = clamp(ms, 0, TL.total);
+    var i = stepIndexAt(ms);
+    var st = STEPS[i];
+    var atEnd = ms >= TL.total - 1;
+    var local = atEnd ? slotOf(st) : clamp(ms - TL.start[i], 0, slotOf(st));
+    cancelSpeech();
+    idx = i;
+    elapsed = local;
+    hidePrompt();
+    startOverlay.hidden = true;
+    endOverlay.hidden = true;
+    applyStateAt(i, local);
+    setSubtitle(subtitleFor(st, local));
+    sceneEl.textContent = 'Scene ' + st.scene + ' / 2 ・ ' + SCENE_TITLES[st.scene];
+    refreshStepTimers(st);
+    if (atEnd) {
+      /* 終端（0.1秒刻みの丸めで total に届かない場合も）は End として扱う */
+      finish();
+      updateSeekUI(TL.total, true);
+      return;
+    }
+    setMode(resume ? 'playing' : 'paused');
+    updateSeekUI(ms, true);
+    warmAudio(st.id);
+    if (resume) armNarration(st, local);
+    else { narrationArmed = false; releaseAudioPending(); }
+  }
+
+  function previewSeek(ms) {
+    if (!seekDragging) {
+      seekDragging = true;
+      seekResume = (mode === 'playing');
+    }
+    var st = STEPS[stepIndexAt(ms)];
+    if (st) warmAudio(st.id);
+    seekTo(ms, false);
+  }
+
+  function commitSeek(ms) {
+    var resume = seekDragging ? seekResume : (mode === 'playing');
+    seekDragging = false;
+    seekResume = false;
+    seekTo(ms, resume);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 再生制御                                                            */
+  /* ------------------------------------------------------------------ */
+  function setSubtitle(str) {
+    if (subEl.textContent !== str) subEl.textContent = str;
+  }
+
+  function setMode(m) {
+    mode = m;
+    var label = '再開', aria = '再開';
+    if (m === 'playing') { label = '一時停止'; aria = '一時停止'; }
+    else if (m === 'waiting') { label = '続ける'; aria = '解説を続ける'; }
+    else if (m === 'ended') { label = 'もう一度'; aria = 'もう一度見る'; }
+    else if (m === 'idle') { label = 'はじめる'; aria = '解説をはじめる'; }
+    playBtn.textContent = label;
+    playBtn.setAttribute('aria-label', aria);
+    playBtn.setAttribute('aria-pressed', m === 'playing' ? 'true' : 'false');
+    syncStagePlay(m);
+    var draggable = (m === 'waiting') && !!(STEPS[idx] && STEPS[idx].interactive);
+    canvas.classList.toggle('draggable', draggable);
+    syncStageOverlay();
+  }
+
+  /* ステージ右下のフローティング再生。idle / ended は既存のオーバーレイに任せて隠す */
+  var ICON_PLAY = '<path d="M8.4 5.2 18.8 12 8.4 18.8Z" fill="currentColor"/>';
+  var ICON_PAUSE = '<rect x="7.2" y="5" width="3.5" height="14" rx="1.1" fill="currentColor"/>' +
+    '<rect x="13.3" y="5" width="3.5" height="14" rx="1.1" fill="currentColor"/>';
+  function syncStagePlay(m) {
+    if (!stagePlay) return;
+    var show = (m === 'playing' || m === 'paused' || m === 'waiting');
+    stagePlay.hidden = !show;
+    var playing = (m === 'playing');
+    var ic = playing ? 'pause' : 'play';
+    if (stagePlayIcon && stagePlayIcon.getAttribute('data-ic') !== ic) {
+      stagePlayIcon.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+      stagePlayIcon.setAttribute('data-ic', ic);
+    }
+    var lbl = playing ? '一時停止' : (m === 'waiting' ? '解説を続ける' : '再生');
+    if (stagePlay.getAttribute('aria-label') !== lbl) stagePlay.setAttribute('aria-label', lbl);
+  }
+
+  function syncStageOverlay() {
+    if (!stageBox) return;
+    var open = !startOverlay.hidden || !endOverlay.hidden;
+    if (stageBox.classList) stageBox.classList.toggle('overlay-open', open);
+  }
+
+  function showPrompt() {
+    promptEl.hidden = false;
+    xRange.value = S.x.toFixed(2);
+    readoutEl.textContent = 'x = ' + S.x.toFixed(2) + ' ／ 傾き ' + (2 * S.x).toFixed(1);
+    try { xRange.focus({ preventScroll: true }); } catch (e) { xRange.focus(); }
+  }
+
+  function hidePrompt() {
+    if (!promptEl.hidden) promptEl.hidden = true;
+  }
+
+  function goStep(i) {
+    cancelSpeech();
+    pausePreviewAudios(null);
+    if (i >= STEPS.length) { finish(); return; }
+    if (i < 0) i = 0;
+    idx = i;
+    var st = STEPS[idx];
+    elapsed = 0;
+    seekDragging = false;
+    seekResume = false;
+    hidePrompt();
+    endOverlay.hidden = true;
+    startOverlay.hidden = true;
+    /* シーンをまたぐ時に前のシーンの絵を残さない */
+    if (st.scene === 1) {
+      S.parA = 0;
+      S.parAT = 0;
+    } else {
+      S.parAT = 1;
+      S.carAT = 0;
+      S.graphAT = 0;
+      S.meterAT = 0;
+      S.secAT = 0;
+      S.limitAT = 0;
+      S.pAT = 0;
+      S.qAT = 0;
+    }
+    if (st.enter) st.enter();
+    if (st.cut || st.secSnap || st.meterSnap) {
+      /* 場面を重ねず、この瞬間に切り替える（車の残像や平均・答えの値をグラフに残さない） */
+      S.carA = S.carAT; S.graphA = S.graphAT; S.parA = S.parAT;
+      S.meterA = S.meterAT;
+      if (st.secSnap) S.secA = S.secAT;
+      if (st.meterSnap) S.meterQ = S.meterQT;
+      S.limitA = S.limitAT;
+      S.pA = S.pAT; S.qA = S.qAT; S.tanA = S.tanAT; S.slopeA = S.slopeAT;
+    }
+    setSubtitle(subtitleFor(st, 0));
+    sceneEl.textContent = 'Scene ' + st.scene + ' / 2 ・ ' + SCENE_TITLES[st.scene];
+    refreshStepTimers(st);
+    updateSeekUI(TL.start[idx], true);
+    warmAudio(st.id);
+    setMode('playing');
+    armNarration(st, 0);
+  }
+
+  function finish() {
+    cancelSpeech();
+    hidePrompt();
+    endOverlay.hidden = false;
+    setMode('ended');
+    updateSeekUI(TL.total, true);
+  }
+
+  function enterWaiting() {
+    cancelSpeech();
+    setMode('waiting');
+    showPrompt();
+  }
+
+  function begin(withVoice) {
+    voiceOn = !!withVoice;
+    voiceToggle.checked = voiceOn;
+    startOverlay.hidden = true;
+    endOverlay.hidden = true;
+    goStep(0);
+  }
+
+  function restartAll() {
+    S.carA = 1; S.carAT = 1; S.graphA = 0; S.graphAT = 0;
+    S.parA = 0; S.parAT = 0; S.parReveal = 0;
+    S.driveT = 0; S.revealT = 0; S.needleV = 0;
+    S.secA = 0; S.secAT = 0; S.limitA = 0; S.limitAT = 0;
+    S.pA = 0; S.pAT = 0; S.qA = 0; S.qAT = 0; S.qT = Q_START;
+    S.meterA = 0; S.meterAT = 0; S.meterQ = 0; S.meterQT = 0;
+    S.tanA = 0; S.tanAT = 0; S.slopeA = 0; S.slopeAT = 0;
+    S.triA = 0; S.triAT = 0; S.cardA = 0; S.cardAT = 0;
+    S.triBase = 0; S.triHeight = 0; S.baseLab = 0; S.heightLab = 0;
+    S.triLeg = 0; S.cardMs = 0;
+    S.x = 1; S.zoom = 1; S.zoomT = 1;
+    S.cx = 0.2; S.cy = 2; S.cxT = 0.2; S.cyT = 2;
+    seekDragging = false;
+    seekResume = false;
+    endOverlay.hidden = true;
+    goStep(0);
+  }
+
+  function stepDone() {
+    var st = STEPS[idx];
+    if (!st) return false;
+    var slot = slotOf(st);
+    if (!voiceOn || !speechSupported || speechError) return elapsed >= slot;
+    if (elapsed < slot) return false;
+    if (speechDone) return true;
+    return elapsed >= stepLimit;
+  }
+
+  function pausePlayback() {
+    cancelSpeech();
+    setMode('paused');
+    updateSeekUI(currentTimelineMs(), true);
+  }
+
+  function resumePlayback() {
+    var st = STEPS[idx];
+    if (!st) { finish(); return; }
+    if (elapsed >= slotOf(st)) { goStep(idx + 1); return; }
+    setMode('playing');
+    setSubtitle(subtitleFor(st, elapsed));
+    armNarration(st, elapsed);
+  }
+
+  function togglePlay() {
+    if (mode === 'idle') { begin(voiceOn); return; }
+    if (mode === 'ended') { restartAll(); return; }
+    if (mode === 'waiting') { hidePrompt(); goStep(idx + 1); return; }
+    if (mode === 'playing') { pausePlayback(); return; }
+    if (mode === 'paused') { resumePlayback(); return; }
+  }
+
+  function prevScene() {
+    if (mode === 'idle') return;
+    if (mode === 'ended') { restartAll(); return; }
+    var st = STEPS[idx];
+    if (!st) { goStep(0); return; }
+    var curStart = sceneStart(st.scene);
+    if (idx > curStart) goStep(curStart);
+    else if (st.scene > 1) goStep(sceneStart(st.scene - 1));
+    else goStep(0);
+  }
+
+  function nextScene() {
+    if (mode === 'idle') return;
+    if (mode === 'ended') { finish(); return; }
+    var st = STEPS[idx];
+    if (!st) { finish(); return; }
+    if (st.scene < 2) goStep(sceneStart(2));
+    else finish();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* イベント                                                            */
+  /* ------------------------------------------------------------------ */
+  playBtn.addEventListener('click', togglePlay);
+  if (stagePlay) stagePlay.addEventListener('click', togglePlay);
+  prevBtn.addEventListener('click', prevScene);
+  nextBtn.addEventListener('click', nextScene);
+  continueBtn.addEventListener('click', function () { hidePrompt(); goStep(idx + 1); });
+  document.getElementById('startVoice').addEventListener('click', function () { begin(true); });
+  document.getElementById('startSilent').addEventListener('click', function () { begin(false); });
+  document.getElementById('again').addEventListener('click', restartAll);
+  document.getElementById('againScene2').addEventListener('click', function () {
+    S.carA = 0; S.carAT = 0; S.graphA = 0; S.graphAT = 0;
+    S.meterA = 0; S.meterAT = 0;
+    S.secA = 0; S.secAT = 0; S.limitA = 0; S.limitAT = 0;
+    S.pA = 0; S.pAT = 0; S.qA = 0; S.qAT = 0;
+    S.parA = 1; S.parAT = 1;
+    endOverlay.hidden = true;
+    goStep(sceneStart(2));
+  });
+  bindPreviewAudios();
+
+  if (seekRange) {
+    seekRange.addEventListener('input', function () {
+      var ms = parseFloat(seekRange.value) * 1000;
+      if (!isFinite(ms)) return;
+      var tst = STEPS[stepIndexAt(ms)];
+      if (tst) warmAudio(tst.id);
+      previewSeek(ms);
+      updateSeekUI(ms, true);
+    });
+    seekRange.addEventListener('change', function () {
+      var ms = parseFloat(seekRange.value) * 1000;
+      if (!isFinite(ms)) return;
+      commitSeek(ms);
+    });
+    seekRange.addEventListener('pointerdown', function () {
+      var ms = parseFloat(seekRange.value) * 1000;
+      var tst = STEPS[stepIndexAt(ms)];
+      if (tst) warmAudio(tst.id);
+    });
+  }
+
+  voiceToggle.addEventListener('change', function () {
+    voiceOn = voiceToggle.checked;
+    if (!voiceOn) { cancelSpeech(); }
+  });
+
+  xRange.addEventListener('input', function () {
+    var v = parseFloat(xRange.value);
+    if (!isNaN(v)) S.x = clamp(v, -1.6, 1.6);
+  });
+
+  var dragging = false;
+  function worldFromPointer(ev) {
+    var rect = canvas.getBoundingClientRect();
+    var px = ev.clientX - rect.left;
+    var ppm = pBase() * S.zoom;
+    return S.cx + (px - W / 2) / ppm;
+  }
+  function canDrag() {
+    return mode === 'waiting' && !!(STEPS[idx] && STEPS[idx].interactive);
+  }
+  function movePoint(ev) {
+    if (!canDrag()) return;
+    var raw = worldFromPointer(ev);
+    S.x = clamp(Math.round(raw / 0.05) * 0.05, -1.6, 1.6);
+    xRange.value = S.x.toFixed(2);
+  }
+  canvas.addEventListener('pointerdown', function (ev) {
+    if (!canDrag()) return;
+    dragging = true;
+    try { canvas.setPointerCapture(ev.pointerId); } catch (e) { /* noop */ }
+    movePoint(ev);
+    ev.preventDefault();
+  });
+  canvas.addEventListener('pointermove', function (ev) {
+    if (!dragging) return;
+    movePoint(ev);
+    ev.preventDefault();
+  });
+  function endDrag() { dragging = false; }
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+  canvas.addEventListener('pointerleave', function () { if (dragging) endDrag(); });
+
+  window.addEventListener('keydown', function (ev) {
+    var t = ev.target;
+    var inField = !!(t && t.matches && t.matches('input,button,select,textarea,a,summary,audio,[contenteditable="true"]'));
+    if (ev.key === ' ' || ev.code === 'Space') {
+      if (inField) return;
+      ev.preventDefault();
+      togglePlay();
+    } else if (ev.key === 'ArrowLeft') {
+      if (inField) return;
+      ev.preventDefault();
+      prevScene();
+    } else if (ev.key === 'ArrowRight') {
+      if (inField) return;
+      ev.preventDefault();
+      nextScene();
+    }
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) return;
+    pausePreviewAudios(null);
+    if (mode === 'playing') pausePlayback();
+  });
+  window.addEventListener('pagehide', function () {
+    cancelSpeech();
+    pausePreviewAudios(null);
+    for (var k in audioBlobUrls) {
+      if (!Object.prototype.hasOwnProperty.call(audioBlobUrls, k)) continue;
+      try { URL.revokeObjectURL(audioBlobUrls[k]); } catch (e) { /* noop */ }
+    }
+    audioBlobUrls = {};
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* メインループ                                                        */
+  /* ------------------------------------------------------------------ */
+  var lastTs = 0;
+  function frame(ts) {
+    var now = ts || 0;
+    var dt = lastTs ? now - lastTs : 16;
+    lastTs = now;
+    dt = clamp(dt, 0, 64);
+    /* 一時停止中は時刻と補間を進めない（リサイズ時は draw のみ） */
+    if (mode === 'playing' || mode === 'waiting') {
+      S.now += dt;
+      smoothAll(dt);
+    }
+
+    if (mode === 'playing') {
+      var a = narrationAudio;
+      /* シーク再開時は音声が動き出すまで再生位置を保持（上限つき） */
+      if (audioPending) {
+        var startedAudio = !!(a && voiceOn && speechSupported && !speechError &&
+          ((!a.paused && a.currentTime > 0) || speechStarted));
+        if (startedAudio || speechError || speechDone || (nowMs() - audioPendingFrom) > AUDIO_PENDING_LIMIT) {
+          audioPending = false;
+        }
+      }
+      if (!audioPending) elapsed += dt;
+      var st = STEPS[idx];
+      if (st) {
+        var slot = slotOf(st);
+        /* voiceAt のキューに達したら（無音の間のあと）一度だけ音声を鳴らす */
+        if (narrationArmed && elapsed >= cueMs(st)) {
+          narrationArmed = false;
+          var narOff = elapsed - cueMs(st);
+          playNarration(st, narOff > 40 ? narOff : 0);
+        }
+        /* 音声が実際に進んでいる間は currentTime と同期。
+           音声の位置は「voiceAt + currentTime」で映像の時刻に戻す */
+        if (!audioPending && a && voiceOn && speechSupported && !speechError && !speechDone &&
+            !a.paused && a.readyState >= 2) {
+          var at = cueMs(st) + a.currentTime * 1000;
+          if (isFinite(at) && at > 0 && Math.abs(at - elapsed) > 140) elapsed = at;
+        }
+        if (st.tick) st.tick(clamp(elapsed / slot, 0, 1), elapsed);
+        setSubtitle(subtitleFor(st, elapsed));
+        if (st.interactive) {
+          if (elapsed >= stepNoVoice && (speechDone || speechError || elapsed >= stepLimit)) enterWaiting();
+        } else if (stepDone()) {
+          goStep(idx + 1);
+        }
+      }
+    }
+
+    if (!seekDragging) updateSeekUI(currentTimelineMs());
+    draw();
+    window.requestAnimationFrame(frame);
+  }
+
+  updateVoiceNote();
+  setMode('idle');
+  measure();
+  buildTimeline();
+  window.addEventListener('load', onResize);
+  window.requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
