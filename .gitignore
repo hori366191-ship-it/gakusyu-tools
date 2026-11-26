@@ -30,3 +30,7 @@ archive/
 
 # Pages staging output (scripts/app11/build-pages-staging.cjs)
 _pages/
+
+# Python のキャッシュ（scripts/app11/planarity の実行時生成物）
+__pycache__/
+*.pyc
