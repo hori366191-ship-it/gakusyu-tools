@@ -7,7 +7,8 @@
  *
  * 変換（決定論的）:
  *   1. site/ を丸ごとコピーする（app1 の bundle.json など、他の公開資産はそのまま）
- *   2. 公開に不要な 2D 試作用ファイルを配信物から外す
+ *   2. 公開に不要なディレクトリ（app14 など制作中のもの）を配信物から外す
+ *   3. 公開に不要な 2D 試作用ファイルを配信物から外す
  *      - app11/academic-data.js        … 2D 用の座標入り学術データ
  *      - app11/proposed-layout-data.js … 非公開の代替レイアウト案（通常表示は使わない）
  *      - app11/proposal-contract.js    … その代替レイアウトの検証モジュール
@@ -40,6 +41,9 @@ const SITE = path.join(ROOT, 'site');
 const DEFAULT_OUT = path.join(ROOT, '_pages');
 
 const facts = require('./build-3d-academic-facts.cjs');
+
+// 公開配信に含めないディレクトリ（ローカルの site/ には残す）
+const EXCLUDED_DIRS = ['app14'];
 
 // 公開配信に含めない 2D 試作用ファイル（ローカルの site/app11 には残す）
 const EXCLUDED_FILES = [
@@ -183,6 +187,18 @@ function dropExcluded(out) {
   }
 }
 
+// site/ に無い（まだ作っていない）除外ディレクトリは何もしない。
+function dropExcludedDirs(out) {
+  for (const name of EXCLUDED_DIRS) {
+    const dir = path.join(out, name);
+    const stat = lstatOrNull(dir);
+    if (!stat) continue;
+    if (!stat.isDirectory() || stat.isSymbolicLink()) fail('除外対象がディレクトリではない: ' + name);
+    fs.rmSync(dir, { recursive: true, force: true });
+    if (fs.existsSync(dir)) fail('除外ディレクトリを削除できない: ' + name);
+  }
+}
+
 function convertIndex(out) {
   const file = path.join(out, 'app11', 'index.html');
   if (!fs.existsSync(file)) fail('app11/index.html がない');
@@ -228,6 +244,11 @@ function readStaged(out, rel) {
 }
 
 function verify(out, data) {
+  // 除外したディレクトリは配信物に存在しない（ローカルの site/ には残す）。
+  for (const name of EXCLUDED_DIRS) {
+    if (fs.existsSync(path.join(out, name))) fail('配信物に ' + name + ' が残っている');
+    if (!fs.existsSync(path.join(SITE, name))) fail('ローカルの site/' + name + ' を消してしまっている');
+  }
   // 除外した 2D 試作用ファイルは配信物に存在しない（ローカルには残す）。
   for (const rel of EXCLUDED_FILES) {
     if (fs.existsSync(path.join(out, rel))) fail('配信物に ' + rel + ' が残っている');
@@ -328,6 +349,7 @@ function verify(out, data) {
 
   // 他の公開資産はそのまま
   for (const rel of [
+    ['app13', 'index.html'],
     ['app10', 'index.html'],
     ['app10', 'app.js'],
     ['app1', 'bundle.json'],
@@ -354,6 +376,7 @@ function buildStaging(out) {
   let committed = false;
   try {
     copySite(tempDir);
+    dropExcludedDirs(tempDir);
     dropExcluded(tempDir);
     convertIndex(tempDir);
     convertAppJs(tempDir);
