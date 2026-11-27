@@ -1337,7 +1337,8 @@ body{
     var u = pillScale();
     var fsN = Math.max(10, 10.6 * u);
     var fsR = Math.max(12, fsN * 1.2);
-    var fsS = Math.max(10, fsN * 0.86);
+    /* 最終行（時速と平均の速さ）も上の計算式と同じ大きさで、朱色にする */
+    var fsS = fsR;
 
     var dtS = Math.max(0, tq - P_TIME);
     var dd = Math.max(0, dQ - dP);
@@ -1372,9 +1373,9 @@ body{
     var padX = Math.max(6, 9 * u);
     var padY = Math.max(5, 7 * u);
     var barGap = Math.max(3, 4 * u);
-    var smallGap = Math.max(2, 3 * u);
+    var smallGap = Math.max(3, 4 * u);
     /* 狭い画面はカードを上へ逃がすぶん、余白を詰めてPラベルと重ねない */
-    if (W < 560) { padY = Math.max(3.5, 4 * u); barGap = 3; smallGap = 2; }
+    if (W < 560) { padY = Math.max(3.5, 4 * u); barGap = 3; smallGap = 3; }
     var rowW = fracW + gapX + resW;
     var contentW = Math.max(rowW, smallW);
     var maxW = Math.min(W - 12, r.x1 - r.x0 - 8);
@@ -1438,11 +1439,12 @@ body{
       });
       var smallMaxW = cw - padX * 2;
       var smallTop = cy0 + padY + fracH + smallGap;
-      var smallX = (smallLines.length > 1) ? cx0 + cw / 2 : fx0;
-      var smallAlign = (smallLines.length > 1) ? 'center' : 'left';
+      /* 計算式と同じ左端にそろえる（中央寄せだと狭い画面でグラフのPラベルに重なる） */
+      var smallX = fx0;
+      var smallAlign = 'left';
       for (var li2 = 0; li2 < smallLines.length; li2++) {
         text(smallLines[li2], smallX, smallTop + smallLineH * (li2 + 0.5), {
-          size: fsS, color: C.light, align: smallAlign,
+          size: fsS, color: C.verm, align: smallAlign,
           alpha: baseA * c3, maxWidth: smallMaxW
         });
       }
@@ -3122,15 +3124,32 @@ body{
     }
   }
 
-  /* 24の事例グリッド（デスクトップ6列4行、W<560 は4列6行） */
+  /* 24の事例グリッド（デスクトップ6列4行、W<560 は4列6行）
+     グリッドの上に「何でも」の見出しを置き、そのぶん下げて縮める */
   function drawS6Grid(a) {
     if (a <= 0.01) return;
     var f = fx();
     var mobile = W < 560;
     var cols = mobile ? 4 : 6, rows = mobile ? 6 : 4;
-    var gx0 = W * 0.05, gy0 = H * 0.10;
+
+    /* 見出し：墨色・10px以上。320px では2行に折り返す */
+    var hfs = Math.max(10, 11 * f);
+    var hLines = (W < 350)
+      ? ['数が連続的に、滑らかに', '変化するものなら、何でも。']
+      : ['数が連続的に、滑らかに変化するものなら、何でも。'];
+    var hLH = hfs * 1.45;
+    var headTop = H * 0.045;
+    for (var hv = 0; hv < hLines.length; hv++) {
+      text(hLines[hv], W / 2, headTop + hLH * (hv + 0.5), {
+        size: hfs, weight: 700, color: C.ink, alpha: a, maxWidth: W * 0.92
+      });
+    }
+    var headH = hLH * hLines.length;
+
+    var gx0 = W * 0.05;
+    var gy0 = headTop + headH + Math.max(2, H * 0.014);
     var cw = (W * 0.90) / cols;
-    var ch = (H * 0.82) / rows;
+    var ch = Math.max(1, (H * 0.94 - gy0) / rows);
     for (var i = 0; i < 24; i++) {
       var ap = S.s6Ex[i] || 0;
       if (ap <= 0.01) continue;
@@ -3636,6 +3655,8 @@ body{
       subCues: [7780],
       /* 途中で切り替わる値の時刻（シークでも実再生と同じ途中の見え方にする） */
       fadeAt: { meterQ: METER_CUE, limitA: LIMIT_CUE },
+      /* 前ステップの一時表示（三角形・式カード）はこのステップでは残さない */
+      clearA: ['triA', 'cardA'],
       enter: function () {
         S.carAT = 0; S.graphAT = 1; S.meterAT = 1;
         S.driveT = P_TIME; S.revealT = DRIVE_END;
@@ -3644,6 +3665,8 @@ body{
         S.qT = P_TIME + 0.06;
         S.meterQT = 1;
         S.triAT = 0; S.cardAT = 0;
+        /* 前ステップの三角形・式カードは残さない（答えの図に重ねない） */
+        S.triA = 0; S.cardA = 0;
       },
       tick: function (p, ms) {
         /* 「時速二十キロ」に合わせてメーターで答えを出し、最後の無音で接線を引く */
@@ -3657,6 +3680,7 @@ body{
       speech: '区間を限りなくゼロに近づけたときの接線の傾きが、その瞬間の速さ。これが微分の考え方です。',
       subCues: [6540],
       /* 接線の絵は s1-limit の最後からそのまま。一拍おいて定義を話す */
+      clearA: ['secA'],
       enter: function () {
         S.carAT = 0; S.graphAT = 1; S.meterAT = 1;
         S.driveT = P_TIME; S.revealT = DRIVE_END;
@@ -3665,6 +3689,9 @@ body{
         S.qT = P_TIME + 0.06;
         S.meterQT = 0;
         S.triAT = 0; S.cardAT = 0;
+        S.triA = 0; S.cardA = 0;
+        /* 前ステップの割線（平均の速さ）は残さない */
+        S.secA = 0;
       },
       tick: function () {}
     },
@@ -4144,6 +4171,9 @@ body{
        途中の時刻で切り替わる値（fadeAt）は「その時刻からの経過」で減衰させ、
        シークしても実再生と同じ途中の見え方にする */
     var k = st.cut ? 0 : Math.exp(-Math.max(0, localMs) / FADE_MS);
+    /* シーンが最初のステップに切り替わる瞬間は、前のシーンの絵を残さない
+       （再生時の goStep と同じく即時切り替え）。シークでも同じ見え方にする */
+    if (i > 0 && STEPS[i - 1].scene !== st.scene) k = 0;
     var kAt = function (fromMs) {
       return Math.exp(-Math.max(0, localMs - fromMs) / FADE_MS);
     };
@@ -4169,6 +4199,10 @@ body{
     S.s5V = S.s5VT + (prev.v5 - S.s5VT) * k;
     S.s5R = S.s5RT + (prev.r5 - S.s5RT) * k;
     S.s6A = S.s6AT + (prev.s6 - S.s6AT) * k;
+    /* そのステップで残さない一時表示（前ステップの三角形・式カード等）は即時0 */
+    if (st.clearA) {
+      for (var ci = 0; ci < st.clearA.length; ci++) S[st.clearA[ci]] = 0;
+    }
   }
 
   function seekTo(ms, resume) {
@@ -4362,6 +4396,7 @@ body{
     cancelSpeech();
     if (i >= STEPS.length) { finish(); return; }
     if (i < 0) i = 0;
+    var prevScene = (STEPS[idx] && STEPS[idx] !== STEPS[i]) ? STEPS[idx].scene : null;
     idx = i;
     var st = STEPS[idx];
     elapsed = 0;
@@ -4433,6 +4468,9 @@ body{
       S.limitA = S.limitAT;
       S.pA = S.pAT; S.qA = S.qAT; S.tanA = S.tanAT; S.slopeA = S.slopeAT;
     }
+    /* シーンが変わる瞬間は、前のシーンの絵を残さない（220ms のフェード中に
+       新しい絵と重なって「前の内容が一瞬出る」のを防ぐ）。全アルファを目標値へ即時一致 */
+    if (prevScene !== null && prevScene !== st.scene) snapVisuals();
     setSubtitle(subtitleFor(st, 0));
     sceneEl.textContent = 'Scene ' + st.scene + ' / ' + SCENE_TOTAL + ' ・ ' + SCENE_TITLES[st.scene];
     refreshStepTimers(st);
@@ -4792,11 +4830,14 @@ body{
           playNarration(st, narOff > 40 ? narOff : 0);
         }
         /* 音声が実際に進んでいる間は currentTime と同期。
-           音声の位置は「voiceAt + currentTime」で映像の時刻に戻す */
+           音声の位置は「voiceAt + currentTime」で映像の時刻に戻す。
+           ただし補正は前方向だけ。currentTime が 0 を返す瞬間（metadata 前や
+           シーク直後）に過去へ巻き戻り、前の内容が一瞬出るのを防ぐ。
+           時刻を戻せるのはシーク・ステップ移動・再開などの明示操作だけ */
         if (!audioPending && a && voiceOn && speechSupported && !speechError && !speechDone &&
             !a.paused && a.readyState >= 2) {
           var at = cueMs(st) + a.currentTime * 1000;
-          if (isFinite(at) && at > 0 && Math.abs(at - elapsed) > 140) elapsed = at;
+          if (isFinite(at) && at > 0 && at > elapsed + 140) elapsed = at;
         }
         if (st.tick) st.tick(clamp(elapsed / slot, 0, 1), elapsed);
         setSubtitle(subtitleFor(st, elapsed));
