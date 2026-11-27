@@ -3966,7 +3966,11 @@ body{
       id: 's6-kinds-1', scene: 6, dur: 17800, voiceAt: 0.3,
       speech: '微分の使い方は、大きく5つあります。1つ目は、変化の勢いを測ること。2つ目は、いちばん良い点、つまり最大や最小を探すこと。3つ目は、少し先を予測すること。',
       subCues: [4080, 7840, 13710],
-      enter: function () { enterScene6(); },
+      enter: function () {
+        enterScene6();
+        /* tick前の1フレームで前の絵（曲線＋6点）を出さない */
+        S.s6BaseA = 0; S.s6KindsA = 1; S.s6GridA = 0;
+      },
       tick: function (p, ms) {
         /* 3つの型を、ナレーションの順に朱で点灯→墨で残す */
         var t = ms == null ? 0 : ms;
@@ -3983,7 +3987,12 @@ body{
       id: 's6-kinds-2', scene: 6, dur: 13700, voiceAt: 0.3,
       speech: '4つ目は、せまい範囲では、曲線を直線とみなして計算すること。5つ目は、積み上げの逆の関係。微分の逆が、積分です。',
       subCues: [6570, 10210],
-      enter: function () { enterScene6(); },
+      enter: function () {
+        enterScene6();
+        /* tick前の1フレームで前の絵を出さない。既出の型は即表示 */
+        S.s6BaseA = 0; S.s6KindsA = 1; S.s6GridA = 0;
+        s6TypeDone(0); s6TypeDone(1); s6TypeDone(2);
+      },
       tick: function (p, ms) {
         var t = ms == null ? 0 : ms;
         S.s6BaseA = 0; S.s6KindsA = 1; S.s6GridA = 0;
@@ -3997,7 +4006,12 @@ body{
       id: 's6-many', scene: 6, dur: 26800, voiceAt: 0.3,
       speech: '数が連続的に、滑らかに変化するものなら、何でも。速さ、加速度、電流、充電、薬の濃度、感染症の広がり、人口、気温、海面、為替、金利、利益。在庫、需要、画像の輪郭、音、熱、ロボット、ドローン、自動運転、地震、水位、植物の成長、画面のスクロール。',
       subCues: [4530, 15110],
-      enter: function () { enterScene6(); },
+      enter: function () {
+        enterScene6();
+        /* tick前の1フレームで前の絵を出さない。5つの型は即表示 */
+        S.s6BaseA = 0; S.s6KindsA = 1; S.s6GridA = 0;
+        for (var k = 0; k < 5; k++) s6TypeDone(k);
+      },
       tick: function (p, ms) {
         /* 型カードを引いて、24の事例を音声の順に並べる */
         var t = ms == null ? 0 : ms;
@@ -4013,7 +4027,14 @@ body{
       id: 's6-close', scene: 6, dur: 15500, voiceAt: 0.6,
       speech: 'どの場面でも、やっていることは同じ。今の変化を読み取ることです。今の変化が分かれば、ほんの少し先の未来が見えてきます。微分は、世界を読み解くレンズなんです。',
       subCues: [1970, 3750, 8390],
-      enter: function () { enterScene6(); },
+      enter: function () {
+        enterScene6();
+        /* 前ステップ(s6-many)からの境界で1フレームだけ「曲線＋6点」が見えないよう、
+           tick直後の初期状態（base無し・グリッドと24項目・6点）に合わせる */
+        S.s6BaseA = 0; S.s6KindsA = 0; S.s6GridA = 1;
+        for (var e = 0; e < 24; e++) { S.s6Ex[e] = 1; S.s6ExLit[e] = 0; }
+        for (var i = 0; i < 6; i++) S.s6Dot[i] = 1;
+      },
       tick: function (p, ms) {
         /* 事例グリッドを引いて、曲線＋6つの点＋未来へ伸びる接線に戻す */
         var t = ms == null ? 0 : ms;
