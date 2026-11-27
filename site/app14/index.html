@@ -1375,7 +1375,7 @@ body{
     var barGap = Math.max(3, 4 * u);
     var smallGap = Math.max(3, 4 * u);
     /* 狭い画面はカードを上へ逃がすぶん、余白を詰めてPラベルと重ねない */
-    if (W < 560) { padY = Math.max(3.5, 4 * u); barGap = 3; smallGap = 3; }
+    if (W < 560) { padY = 3; barGap = 2.5; smallGap = 2; }
     var rowW = fracW + gapX + resW;
     var contentW = Math.max(rowW, smallW);
     var maxW = Math.min(W - 12, r.x1 - r.x0 - 8);
@@ -1384,7 +1384,8 @@ body{
 
     var lineN = fsN * 1.28;
     var fracH = lineN * 2 + barGap * 2 + 1.5;
-    var smallLineH = fsS * 1.34;
+    /* 狭い画面では最終行を大きめのまま2行に収めるため、行間だけ詰める */
+    var smallLineH = fsS * (W < 560 ? 1.2 : 1.34);
     var smallH = smallLineH * smallLines.length;
     var ch = padY * 2 + fracH + smallGap + smallH;
 
@@ -1655,10 +1656,14 @@ body{
       ctx.fill();
       ctx.restore();
 
-      /* 接線のステップでは P ラベルを点の下に置き、傾きラベルと重ねない */
-      var pLabY = S.limitA < 0.5 ? (py - (16 + 6 * f)) : (py + (16 + 6 * f));
+      /* 接線のステップでは P ラベルを点の下に置き、傾きラベルと重ねない。
+         式カードが出ている狭い画面では、点の右上（カードの外）へ逃がす */
+      var pAside = (W < 560 && S.cardA > 0.05);
+      var pLabY = pAside ? (py + 2)
+        : (S.limitA < 0.5 ? (py - (16 + 6 * f)) : (py + (16 + 6 * f)));
+      var pLabX = pAside ? (px + (20 + 10 * f)) : (px - (14 + 4 * f));
       pill([W >= 760 ? 'P 固定の始点' : 'P 固定'],
-        px - (14 + 4 * f), pLabY, {
+        pLabX, pLabY, {
           color: C.verm, alpha: a * S.pA, size: 10,
           padX: 5, padY: 3, border: 'rgba(217,78,65,.35)', maxW: Math.max(80, W * 0.4)
         });
