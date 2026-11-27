@@ -7,7 +7,7 @@
  *
  * 変換（決定論的）:
  *   1. site/ を丸ごとコピーする（app1 の bundle.json など、他の公開資産はそのまま）
- *   2. 公開に不要なディレクトリ（app14 など制作中のもの）を配信物から外す
+ *   2. 公開に不要なディレクトリ（EXCLUDED_DIRS に挙げたもの）を配信物から外す（現在は無し）
  *   3. 公開に不要な 2D 試作用ファイルを配信物から外す
  *      - app11/academic-data.js        … 2D 用の座標入り学術データ
  *      - app11/proposed-layout-data.js … 非公開の代替レイアウト案（通常表示は使わない）
@@ -43,7 +43,8 @@ const DEFAULT_OUT = path.join(ROOT, '_pages');
 const facts = require('./build-3d-academic-facts.cjs');
 
 // 公開配信に含めないディレクトリ（ローカルの site/ には残す）
-const EXCLUDED_DIRS = ['app14'];
+// app14 は公開対象に戻したため現在は空。
+const EXCLUDED_DIRS = [];
 
 // 公開配信に含めない 2D 試作用ファイル（ローカルの site/app11 には残す）
 const EXCLUDED_FILES = [
@@ -349,6 +350,7 @@ function verify(out, data) {
 
   // 他の公開資産はそのまま
   for (const rel of [
+    ['app14', 'index.html'],
     ['app13', 'index.html'],
     ['app10', 'index.html'],
     ['app10', 'app.js'],
