@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#F7F4EC">
 <meta name="description" content="車の速さから接線、ゲーム、最適化、AI、ロケットまで。その瞬間の傾きを読む微分を、6つのシーンで体験する入門アプリ。">
-<title>微分：今の速さを切り取る｜数学活用ビジュアル解説</title>
+<title>微分：今の速さを切り取る｜数学は世の中でどのように使われるか</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F7F4EC'/%3E%3Cpath d='M5 25 Q16 23 27 7' fill='none' stroke='%23222' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M8 20 L24 14' stroke='%23D94E41' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 :root{
@@ -66,6 +66,28 @@ body{
 .stage-play:focus-visible{opacity:1; outline:2px solid var(--indigo); outline-offset:2px}
 .stage-play svg{width:56%; height:56%; display:block; pointer-events:none}
 @media (hover:none){ .stage-play{opacity:.8} }
+
+/* ---- ステージ左下に重ねる重力スライダー（s3-play の待機中だけ） ---- */
+.stage-gravity{
+  position:absolute; left:8px; bottom:8px; z-index:3;
+  display:flex; align-items:center; gap:8px;
+  max-width:calc(100% - 76px);
+  padding:5px 10px 5px 9px; border-radius:10px;
+  border:1px solid var(--hair);
+  background:rgba(247,244,236,.9);
+  box-shadow:0 2px 10px -6px rgba(34,34,34,.55);
+  -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+}
+.stage-gravity__label{font-size:clamp(10px,1.7vw,12px); color:#4a473f; white-space:nowrap}
+.stage-gravity__value{
+  font-family:"Times New Roman",serif; font-size:clamp(10px,1.7vw,12.5px); color:var(--ink);
+  min-width:2.1em; text-align:right; font-variant-numeric:tabular-nums;
+}
+.stage-gravity input[type=range]{
+  width:clamp(64px,20vw,120px); height:24px; margin:0;
+  accent-color:var(--indigo); background:transparent;
+}
+.stage-gravity input[type=range]:focus-visible{outline:2px solid var(--indigo); outline-offset:2px; border-radius:6px}
 
 /* ---- overlays ---- */
 .overlay{
@@ -134,7 +156,7 @@ body{
   accent-color:var(--indigo); background:transparent;
 }
 .prompt__row input[type=range]:focus-visible{outline:2px solid var(--indigo); outline-offset:3px; border-radius:6px}
-.prompt__row .btn{margin-left:auto}
+.prompt__row .btn{margin-left:0}
 .prompt__hint{margin:0; font-size:clamp(11px,1.15vw,12.5px); color:#6d6a61; line-height:1.6}
 
 /* ---- controls ---- */
@@ -180,7 +202,7 @@ body{
 <div class="app">
   <header class="top">
     <div>
-      <p class="eyebrow">数学活用ビジュアル解説</p>
+      <p class="eyebrow">数学は世の中でどのように使われるか</p>
       <h1 class="title">微分 <span>— 今の速さを切り取る</span></h1>
     </div>
     <p class="keyhint">Space：再生／一時停止　←→：シーン移動</p>
@@ -190,13 +212,19 @@ body{
     <div class="stage" id="stageBox">
       <canvas id="stage" role="img" aria-label="紙に描いた手描き風のアニメーション。車とスピードメーター、時間と距離のグラフ、放物線の接線、山の頂点、AIが傾きで下る谷、ロケットの姿勢を6つのシーンで表示します。"></canvas>
 
+      <div id="stageGravity" class="stage-gravity" hidden>
+        <span id="gLabel" class="stage-gravity__label">重力</span>
+        <input id="gRange" type="range" min="6" max="12" step="0.1" value="8" aria-labelledby="gLabel">
+        <span id="gValue" class="stage-gravity__value">8.0</span>
+      </div>
+
       <button id="stagePlay" class="stage-play" type="button" aria-label="再生" hidden>
         <svg id="stagePlayIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"></svg>
       </button>
 
       <div id="start" class="overlay">
         <div class="overlay__card">
-          <p class="eyebrow">数学活用ビジュアル解説 ・ 全6シーン・約5分</p>
+          <p class="eyebrow">数学は世の中でどのように使われるか ・ 全6シーン・約5分</p>
           <h2>微分 — 「今の速さ」を切り取る</h2>
           <p>車の速さから始めて、接線、ゲーム、最適化、AI、ロケットまで。微分が世界を読む道具だと分かる6シーンです。</p>
           <div class="overlay__actions">
@@ -236,16 +264,19 @@ body{
       <p id="readout" class="prompt__readout">x = 1.00 ／ 傾き 2.0</p>
     </div>
     <div class="prompt__row">
-      <label class="prompt__label" id="xLabel" for="xRange">点の位置 x</label>
-      <input id="xRange" type="range" min="-1.6" max="1.6" step="0.05" value="1" aria-describedby="promptHint">
-      <label class="prompt__label" id="gLabel" for="gRange" hidden>重力</label>
-      <input id="gRange" type="range" min="6" max="12" step="0.1" value="8" aria-describedby="promptHint" hidden>
-      <label class="prompt__label" id="pLabel" for="pRange" hidden>値段</label>
-      <input id="pRange" type="range" min="30" max="100" step="0.5" value="40" aria-describedby="promptHint" hidden>
       <button id="continue" class="btn btn--primary" type="button">解説を続ける</button>
     </div>
-    <p id="promptHint" class="prompt__hint">赤い点をドラッグするか、スライダーで左右に動かせます。ここは車の距離ではなく、数学のグラフ y = x² です。</p>
+    <p id="promptHint" class="prompt__hint">赤い点を左右にドラッグすると、接線と傾きが同時に変わります。</p>
   </section>
+
+  <!-- 直接ドラッグに置き換えた x / 値段の値保持用（画面には出さない。
+       読み上げはキャンバス側の role=slider / aria-valuetext で伝える） -->
+  <div id="hiddenRanges" hidden>
+    <label class="prompt__label" id="xLabel" for="xRange">点の位置 x</label>
+    <input id="xRange" type="range" min="-1.6" max="1.6" step="0.05" value="1" hidden>
+    <label class="prompt__label" id="pLabel" for="pRange">値段</label>
+    <input id="pRange" type="range" min="30" max="100" step="0.5" value="40" hidden>
+  </div>
 
   <footer class="controls">
     <button id="prev" class="ctrl" type="button" aria-label="前のシーンへ">◀ 前へ</button>
@@ -335,6 +366,8 @@ body{
   var xLabel = document.getElementById('xLabel');
   var gLabel = document.getElementById('gLabel');
   var gRange = document.getElementById('gRange');
+  var gValue = document.getElementById('gValue');
+  var stageGravity = document.getElementById('stageGravity');
   var pLabel = document.getElementById('pLabel');
   var pRange = document.getElementById('pRange');
   var xRange = document.getElementById('xRange');
@@ -2398,6 +2431,11 @@ body{
       { color: C.light, width: 1.2, jitter: 0.1, seed: 262, alpha: a * 0.9 });
     text('x', r.x1 + fs * 0.8, r.yB + fs * 0.9,
       { size: Math.max(10, fs * 0.95), color: C.light, alpha: a });
+    /* 軸ラベル（横＝パラメータ、縦＝誤差） */
+    text('パラメータ', (r.x0 + r.x1) / 2, r.yB + fs * 2.0,
+      { size: Math.max(10, fs), color: C.light, alpha: a, maxWidth: (r.x1 - r.x0) * 0.7 });
+    text('誤差', r.x0 - fs * 0.5, r.yT - H * 0.055,
+      { size: Math.max(10, fs), color: C.light, align: 'right', alpha: a, maxWidth: W * 0.2 });
 
     /* 谷の曲線（墨） */
     var pts = [], N = 84;
@@ -3280,34 +3318,46 @@ body{
       }
     },
     {
-      id: 's5-ai', scene: 5, dur: 10400, voiceAt: 0.3,
-      speech: 'AIの学習では、霧に包まれた谷を下るように、足もとの傾きを確かめて、低いほうへ一歩ずつ進みます。',
-      subCues: [],
+      id: 's5-ai', scene: 5, dur: 7800, voiceAt: 0.3,
+      speech: 'AIの学習では、まず答えの間違いの大きさを数字にします。これを誤差と呼びます。',
+      subCues: [5610],
       enter: function () { enterScene5(false); },
       tick: function (p, ms) {
-        /* 1〜7歩目：足もとの傾きを見ながら誤差の谷を下る */
+        /* 1〜5歩目：誤差を数字にして、足もとの傾きを確かめる */
         var t = ms == null ? 0 : ms;
-        S.s5Walk = 7 * clamp((t - 900) / 7800, 0, 1);
+        S.s5Walk = 5 * clamp((t - 700) / 6000, 0, 1);
         S.s5Note = 0; S.s5Jet = 0;
       }
     },
     {
-      id: 's5-ai2', scene: 5, dur: 9600, voiceAt: 0.3,
-      speech: 'これを何度も繰り返すと、間違いの谷底にたどり着きます。傾きを読むことが、学習の一歩なんです。',
-      subCues: [5200],
+      id: 's5-ai2', scene: 5, dur: 11100, voiceAt: 0.3,
+      speech: '設定を少し変えると、誤差が増えるか減るかが、傾きで分かります。誤差が小さくなる向きへ、少しずつ動かします。',
+      subCues: [6500],
       enter: function () { enterScene5(false); },
       tick: function (p, ms) {
-        /* 8〜14歩目：谷底（x = 0.2）へ。着いたら「谷底」の注記 */
+        /* 6〜10歩目：傾きが教える「低くなる向き」へ少しずつ進む */
         var t = ms == null ? 0 : ms;
-        S.s5Walk = lerp(7, S5_WALKS, clamp((t - 500) / 4300, 0, 1));
-        S.s5Note = clamp((t - 5100) / 700, 0, 1);
+        S.s5Walk = lerp(5, 10, clamp((t - 700) / 8800, 0, 1));
+        S.s5Note = 0; S.s5Jet = 0;
+      }
+    },
+    {
+      id: 's5-ai3', scene: 5, dur: 10200, voiceAt: 0.3,
+      speech: 'これを何度も繰り返すと、誤差がいちばん小さい谷底に近づきます。傾きを読むことが、学習の一歩なんです。',
+      subCues: [5850],
+      enter: function () { enterScene5(false); },
+      tick: function (p, ms) {
+        /* 11〜14歩目：谷底（x = 0.2）へ。着いたら「谷底」の注記 */
+        var t = ms == null ? 0 : ms;
+        S.s5Walk = lerp(10, S5_WALKS, clamp((t - 700) / 6500, 0, 1));
+        S.s5Note = clamp((t - 7800) / 800, 0, 1);
         S.s5Jet = 0;
       }
     },
     {
-      id: 's5-rocket', scene: 5, dur: 12800, voiceAt: 0.3,
-      speech: '風で傾いたロケットは、傾きが大きくなっていくのを感じ取って、逆向きに噴射します。変化の勢いを読むから、すぐ姿勢を戻せるんです。',
-      subCues: [7900],
+      id: 's5-rocket', scene: 5, dur: 14000, voiceAt: 0.3,
+      speech: '風で傾いたロケットは、姿勢の傾きと、その変化の速さを測って、戻す向きに噴射します。変化の勢いを読むから、すぐ姿勢を戻せるんです。',
+      subCues: [9150],
       enter: function () { enterScene5(true); },
       tick: function (p, ms) {
         /* 谷はフェードアウト。θ は localMs から決める（シークでも同じ絵） */
@@ -3372,10 +3422,10 @@ body{
     's2-intro': 9816, 's2-zoom': 5928, 's2-tangent': 5088, 's2-slope': 7440,
     's2-pull': 3240, 's2-drag': 7032, 's2-close': 6096,
     /* Scene 3 */
-    's3-intro': 6984, 's3-velocity': 9384, 's3-compare': 8856, 's3-play': 5880,
+    's3-intro': 6984, 's3-velocity': 9360, 's3-compare': 8856, 's3-play': 5880,
     /* Scene 4〜6（ステップ未登録。音声のみ先に実測長を登録） */
     's4-intro': 7344, 's4-hill': 9288, 's4-slope': 8064, 's4-play': 4992,
-    's5-ai': 9528, 's5-ai2': 8736, 's5-rocket': 11928,
+    's5-ai': 7056, 's5-ai2': 10392, 's5-ai3': 9384, 's5-rocket': 13176,
     's6-recap': 13968, 's6-close': 8496
   };
   function slotOf(st) {
@@ -3588,6 +3638,7 @@ body{
     syncStagePlay(m);
     var draggable = (m === 'waiting') && stepAllowsDrag();
     canvas.classList.toggle('draggable', draggable);
+    syncCanvasA11y();
     syncStageOverlay();
   }
 
@@ -3615,47 +3666,69 @@ body{
     if (stageBox.classList) stageBox.classList.toggle('overlay-open', open);
   }
 
+  /* 直接ドラッグするシーン（x ／ 値段）では、キャンバス自体を
+     スクリーンリーダー向けのスライダーとして扱う
+     （視覚非表示の range は置かず、フォーカスの重複を作らない） */
+  var canvasBaseLabel = canvas.getAttribute('aria-label');
+  function syncCanvasA11y() {
+    var kind = (mode === 'waiting' && stepAllowsDrag()) ? promptKind() : '';
+    if (kind === 'x' || kind === 'p') {
+      canvas.setAttribute('role', 'slider');
+      canvas.setAttribute('tabindex', '0');
+      canvas.setAttribute('aria-label', kind === 'p'
+        ? '山の上の点。左右の矢印キーで値段を1円ずつ動かせます。'
+        : '赤い点。左右の矢印キーで点の位置を0.05ずつ動かせます。');
+      canvas.setAttribute('aria-valuemin', kind === 'p' ? String(S4_X_MIN) : '-1.6');
+      canvas.setAttribute('aria-valuemax', kind === 'p' ? String(S4_X_MAX) : '1.6');
+      if (kind === 'p') {
+        canvas.setAttribute('aria-valuenow', String(Math.round(S.s4X)));
+        canvas.setAttribute('aria-valuetext',
+          '値段 ' + fmtPrice(S.s4X) + '円、利益 ' + Math.round(s4Profit(S.s4X)) + '円');
+      } else {
+        canvas.setAttribute('aria-valuenow', S.x.toFixed(2));
+        canvas.setAttribute('aria-valuetext',
+          'x = ' + S.x.toFixed(2) + '、接線の傾き ' + (2 * S.x).toFixed(1));
+      }
+      return;
+    }
+    canvas.setAttribute('role', 'img');
+    canvas.removeAttribute('tabindex');
+    canvas.removeAttribute('aria-valuemin');
+    canvas.removeAttribute('aria-valuemax');
+    canvas.removeAttribute('aria-valuenow');
+    canvas.removeAttribute('aria-valuetext');
+    canvas.setAttribute('aria-label', canvasBaseLabel);
+  }
+
   function showPrompt() {
     promptEl.hidden = false;
-    if (promptKind() === 'g') {
-      promptTitleEl.textContent = '重力を変えてみよう';
-      promptHintEl.textContent = '重力を小さくすると高く長く、大きくすると低く短く跳びます。3つの絵が同時に変わります。';
-      xLabel.hidden = true;
-      xRange.hidden = true;
-      gLabel.hidden = false;
-      gRange.hidden = false;
-      pLabel.hidden = true;
-      pRange.hidden = true;
-      gRange.value = S.s3G.toFixed(1);
-      updateS3Readout();
-      try { gRange.focus({ preventScroll: true }); } catch (e) { gRange.focus(); }
-      return;
-    }
-    if (promptKind() === 'p') {
-      promptTitleEl.textContent = '値段を動かしてみよう';
-      promptHintEl.textContent = '値段を動かすと、利益と接線の傾きが同時に変わります。利益がいちばん高くなる値段を探してみましょう。';
-      xLabel.hidden = true;
-      xRange.hidden = true;
-      gLabel.hidden = true;
-      gRange.hidden = true;
-      pLabel.hidden = false;
-      pRange.hidden = false;
-      pRange.value = S.s4X.toFixed(1);
-      updateS4Readout();
-      try { pRange.focus({ preventScroll: true }); } catch (e) { pRange.focus(); }
-      return;
-    }
-    promptTitleEl.textContent = '自分で動かしてみよう';
-    promptHintEl.textContent = '赤い点をドラッグするか、スライダーで左右に動かせます。ここは車の距離ではなく、数学のグラフ y = x² です。';
-    xLabel.hidden = false;
-    xRange.hidden = false;
-    gLabel.hidden = true;
-    gRange.hidden = true;
+    /* スライダーは映像側（重力は .stage 内、x/p は直接ドラッグ）へ移した。
+       パネルには見出し・数値・説明と「解説を続ける」だけを置く */
+    xLabel.hidden = true;
+    xRange.hidden = true;
     pLabel.hidden = true;
     pRange.hidden = true;
-    xRange.value = S.x.toFixed(2);
-    readoutEl.textContent = 'x = ' + S.x.toFixed(2) + ' ／ 傾き ' + (2 * S.x).toFixed(1);
-    try { xRange.focus({ preventScroll: true }); } catch (e) { xRange.focus(); }
+    stageGravity.hidden = true;
+    var kind = promptKind();
+    if (kind === 'g') {
+      promptTitleEl.textContent = '重力を変えてみよう';
+      promptHintEl.textContent = '重力を小さくすると高く長く、大きくすると低く短く跳びます。3つの絵が同時に変わります。';
+      stageGravity.hidden = false;
+      gRange.value = S.s3G.toFixed(1);
+      updateS3Readout();
+    } else if (kind === 'p') {
+      promptTitleEl.textContent = '値段を動かしてみよう';
+      promptHintEl.textContent = '山の上の点を左右にドラッグして、利益がいちばん高い場所を探してみましょう。';
+      updateS4Readout();
+    } else {
+      promptTitleEl.textContent = '自分で動かしてみよう';
+      promptHintEl.textContent = '赤い点を左右にドラッグすると、接線と傾きが同時に変わります。';
+      xRange.value = S.x.toFixed(2);
+      updateXReadout();
+    }
+    syncCanvasA11y();
+    var target = (kind === 'g') ? gRange : canvas;
+    try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
   }
 
   function promptKind() {
@@ -3667,6 +3740,12 @@ body{
     var g = S.s3G;
     var val = '重力 ' + g.toFixed(1) + ' ／ 最高 ' + s3Peak(g).toFixed(1) + 'm・滞空 ' + s3Air(g).toFixed(1) + '秒';
     if (readoutEl.textContent !== val) readoutEl.textContent = val;
+    if (gValue && gValue.textContent !== g.toFixed(1)) gValue.textContent = g.toFixed(1);
+  }
+
+  function updateXReadout() {
+    var val = 'x = ' + S.x.toFixed(2) + ' ／ 傾き ' + (2 * S.x).toFixed(1);
+    if (readoutEl.textContent !== val) readoutEl.textContent = val;
   }
 
   function updateS4Readout() {
@@ -3677,6 +3756,7 @@ body{
 
   function hidePrompt() {
     if (!promptEl.hidden) promptEl.hidden = true;
+    if (stageGravity && !stageGravity.hidden) stageGravity.hidden = true;
   }
 
   function goStep(i) {
@@ -3976,7 +4056,9 @@ body{
   var dragging = false;
   function stepAllowsDrag() {
     var st = STEPS[idx];
-    return !!(st && st.interactive && (!st.interactiveKind || st.interactiveKind === 'x'));
+    if (!st || !st.interactive) return false;
+    var k = st.interactiveKind;
+    return !k || k === 'x' || k === 'p';
   }
   function worldFromPointer(ev) {
     var rect = canvas.getBoundingClientRect();
@@ -3984,14 +4066,35 @@ body{
     var ppm = pBase() * S.zoom;
     return S.cx + (px - W / 2) / ppm;
   }
+  /* グラフ矩形内のポインタ位置 → 値段（30〜100円にクランプ。点の近くでなくても可） */
+  function priceFromPointer(ev) {
+    var rect = canvas.getBoundingClientRect();
+    var px = ev.clientX - rect.left;
+    var r = s4Rect();
+    var bx = clamp(px, r.x0, r.x1);
+    var v = S4_AX_XMIN + (bx - r.x0) / ((r.x1 - r.x0) || 1) * (S4_AX_XMAX - S4_AX_XMIN);
+    return clamp(Math.round(v), S4_X_MIN, S4_X_MAX);
+  }
   function canDrag() {
     return mode === 'waiting' && stepAllowsDrag();
   }
+  function setPrice(v) {
+    S.s4X = clamp(Math.round(v), S4_X_MIN, S4_X_MAX);
+    S.s4Here = Math.abs(S.s4X - S4_TOP_X) <= 1 ? 1 : 0;
+    pRange.value = S.s4X.toFixed(1);
+    updateS4Readout();
+    syncCanvasA11y();
+  }
+  function setX(v) {
+    S.x = clamp(Math.round(v / 0.05) * 0.05, -1.6, 1.6);
+    xRange.value = S.x.toFixed(2);
+    updateXReadout();
+    syncCanvasA11y();
+  }
   function movePoint(ev) {
     if (!canDrag()) return;
-    var raw = worldFromPointer(ev);
-    S.x = clamp(Math.round(raw / 0.05) * 0.05, -1.6, 1.6);
-    xRange.value = S.x.toFixed(2);
+    if (promptKind() === 'p') { setPrice(priceFromPointer(ev)); return; }
+    setX(worldFromPointer(ev));
   }
   canvas.addEventListener('pointerdown', function (ev) {
     if (!canDrag()) return;
@@ -4009,6 +4112,21 @@ body{
   canvas.addEventListener('pointerup', endDrag);
   canvas.addEventListener('pointercancel', endDrag);
   canvas.addEventListener('pointerleave', function () { if (dragging) endDrag(); });
+
+  /* 待機中はキャンバスにフォーカスでき、←→で点／値段を動かせる
+     （ウィンドウ側の「シーン移動」より先に止める） */
+  canvas.addEventListener('keydown', function (ev) {
+    if (!canDrag()) return;
+    var kind = promptKind();
+    var d = 0;
+    if (ev.key === 'ArrowLeft') d = -1;
+    else if (ev.key === 'ArrowRight') d = 1;
+    else return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (kind === 'p') setPrice(S.s4X + d);
+    else setX(S.x + d * 0.05);
+  });
 
   window.addEventListener('keydown', function (ev) {
     var t = ev.target;
