@@ -215,7 +215,7 @@ body{
 
       <div id="start" class="overlay">
         <div class="overlay__card">
-          <p class="eyebrow">数学は世の中でどのように使われるか ・ 全6シーン・約5分</p>
+          <p class="eyebrow">数学は世の中でどのように使われるか ・ 全6シーン・約6分</p>
           <h2>微分 — 「今の速さ」を切り取る</h2>
           <p>数学が世の中でどのように使われるかを伝えるアプリです。現在は微分のみを収録しています。</p>
           <div class="overlay__actions">
@@ -384,7 +384,12 @@ body{
     s5A: 0, s5AT: 0, s5V: 0, s5VT: 0, s5R: 0, s5RT: 0,
     s5Walk: 0, s5Th: 0, s5Jet: 0, s5Note: 0,
     /* Scene 6：変化から未来を読む（6つの点と接線） */
-    s6A: 0, s6AT: 0, s6Dot: [0, 0, 0, 0, 0, 0], s6Cur: -1, s6Tan: 0
+    s6A: 0, s6AT: 0, s6Dot: [0, 0, 0, 0, 0, 0], s6Cur: -1, s6Tan: 0,
+    /* Scene 6 後半：5つの型（カード）と24の事例グリッド */
+    s6BaseA: 1, s6KindsA: 0, s6GridA: 0,
+    s6TypeOn: [0, 0, 0, 0, 0], s6TypeLit: [1, 1, 1, 1, 1],
+    s6Ex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    s6ExLit: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
   };
 
   var mode = 'idle';     // idle | playing | paused | waiting | ended
@@ -2583,6 +2588,583 @@ body{
   /* ------------------------------------------------------------------ */
   var S6_TIMES = [600, 1900, 3300, 4700, 6100, 7400];
 
+  /* 5つの型（カード）と24の事例（グリッド） */
+  var S6_TYPE_TITLE = ['変化の勢い', '最大・最小', '少し先を予測', '直線で近似', '積み上げの逆'];
+  var S6_TYPE_EX = ['速さ・成長', '山の頂点', '未来', 'せまい範囲', '積分'];
+  var S6_EX_LABELS = [
+    '速さ', '加速度', '電流', '充電', '薬', '感染症', '人口', '気温',
+    '海面', '為替', '金利', '利益', '在庫', '需要', '輪郭', '音',
+    '熱', 'ロボット', 'ドローン', '自動運転', '地震', '水位', '植物', 'スクロール'
+  ];
+  /* 24項目の出現時刻（音声ローカルms） */
+  var S6_EX_T = [
+    4530, 5290, 6160, 6940, 7760, 8890, 10450, 11280,
+    11990, 12830, 13630, 14340, 15110, 15840, 16560, 17820,
+    18420, 19110, 19470, 19940, 20740, 21820, 22620, 23410
+  ];
+
+  /* 型カードの点灯（since = その型の合図からの経過ms） */
+  function s6TypeSet(k, since) {
+    S.s6TypeOn[k] = clamp(since / 240, 0, 1);
+    S.s6TypeLit[k] = 1 - clamp((since - 280) / 700, 0, 1);
+  }
+  function s6TypeOff(k) { S.s6TypeOn[k] = 0; S.s6TypeLit[k] = 1; }
+  function s6TypeDone(k) { S.s6TypeOn[k] = 1; S.s6TypeLit[k] = 0; }
+  function s6ManyClear() {
+    for (var i = 0; i < 24; i++) { S.s6Ex[i] = 0; S.s6ExLit[i] = 1; }
+  }
+  function s6ManyAt(t) {
+    for (var i = 0; i < 24; i++) {
+      var since = t - S6_EX_T[i];
+      S.s6Ex[i] = clamp(since / 220, 0, 1);
+      S.s6ExLit[i] = 1 - clamp((since - 260) / 620, 0, 1);
+    }
+  }
+
+  /* 型（5つ）のアイコン：ゲージ／山と水平線／矢印と点線／曲線と接線／面積 */
+  function s6TypeGlyph(k, x, y, s, color, alpha) {
+    if (alpha <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = Math.max(1, s * 0.11);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    if (k === 0) {
+      /* ゲージ：半円の目盛りと針 */
+      ctx.beginPath();
+      ctx.arc(x, y + s * 0.18, s * 0.42, Math.PI * 1.08, Math.PI * 1.92);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y + s * 0.18);
+      ctx.lineTo(x + s * 0.26, y - s * 0.14);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y + s * 0.18, Math.max(0.9, s * 0.06), 0, Math.PI * 2);
+      ctx.fill();
+    } else if (k === 1) {
+      /* 山と水平線（頂点） */
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.44, y + s * 0.34);
+      ctx.lineTo(x - s * 0.04, y - s * 0.38);
+      ctx.lineTo(x + s * 0.18, y + s * 0.02);
+      ctx.lineTo(x + s * 0.44, y + s * 0.34);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.50, y + s * 0.34);
+      ctx.lineTo(x + s * 0.50, y + s * 0.34);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x - s * 0.04, y - s * 0.38, Math.max(1, s * 0.08), 0, Math.PI * 2);
+      ctx.fill();
+    } else if (k === 2) {
+      /* 矢印と点線（この先） */
+      ctx.setLineDash([s * 0.10, s * 0.11]);
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.44, y + s * 0.38);
+      ctx.lineTo(x - s * 0.08, y + s * 0.08);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.02, y + s * 0.02);
+      ctx.lineTo(x + s * 0.42, y - s * 0.38);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.24, y - s * 0.34);
+      ctx.lineTo(x + s * 0.42, y - s * 0.38);
+      ctx.lineTo(x + s * 0.38, y - s * 0.18);
+      ctx.stroke();
+    } else if (k === 3) {
+      /* 曲線と接線（せまい範囲で直線） */
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.44, y + s * 0.04);
+      ctx.quadraticCurveTo(x, y + s * 0.56, x + s * 0.44, y + s * 0.04);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.38, y + s * 0.32);
+      ctx.lineTo(x + s * 0.38, y + s * 0.32);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y + s * 0.32, Math.max(1, s * 0.07), 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      /* 面積（積み上げ） */
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.18;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.38, y + s * 0.28);
+      ctx.quadraticCurveTo(x - s * 0.02, y - s * 0.42, x + s * 0.40, y + s * 0.10);
+      ctx.lineTo(x + s * 0.40, y + s * 0.36);
+      ctx.lineTo(x - s * 0.38, y + s * 0.36);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.38, y - s * 0.38);
+      ctx.lineTo(x - s * 0.38, y + s * 0.36);
+      ctx.lineTo(x + s * 0.44, y + s * 0.36);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.38, y + s * 0.28);
+      ctx.quadraticCurveTo(x - s * 0.02, y - s * 0.42, x + s * 0.40, y + s * 0.10);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /* 事例24のアイコン（墨の線画・1つ6〜10本程度） */
+  function s6ExGlyph(k, x, y, s, color, alpha) {
+    if (alpha <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = Math.max(1, s * 0.12);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    if (k === 0) {
+      /* 車輪 */
+      ctx.arc(x, y, s * 0.42, 0, Math.PI * 2);
+      ctx.moveTo(x + s * 0.13, y);
+      ctx.arc(x, y, s * 0.13, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      for (var a0 = 0; a0 < 3; a0++) {
+        var aa = a0 * Math.PI / 3;
+        ctx.moveTo(x + Math.cos(aa) * s * 0.13, y + Math.sin(aa) * s * 0.13);
+        ctx.lineTo(x + Math.cos(aa) * s * 0.40, y + Math.sin(aa) * s * 0.40);
+      }
+      ctx.stroke();
+    } else if (k === 1) {
+      /* 右上矢印 */
+      ctx.moveTo(x - s * 0.40, y + s * 0.36);
+      ctx.lineTo(x + s * 0.34, y - s * 0.32);
+      ctx.moveTo(x + s * 0.10, y - s * 0.34);
+      ctx.lineTo(x + s * 0.34, y - s * 0.32);
+      ctx.lineTo(x + s * 0.32, y - s * 0.08);
+      ctx.moveTo(x - s * 0.44, y + s * 0.42);
+      ctx.lineTo(x - s * 0.14, y + s * 0.42);
+      ctx.stroke();
+    } else if (k === 2) {
+      /* 稲妻 */
+      ctx.moveTo(x + s * 0.04, y - s * 0.44);
+      ctx.lineTo(x - s * 0.26, y + s * 0.04);
+      ctx.lineTo(x + s * 0.02, y + s * 0.04);
+      ctx.lineTo(x - s * 0.06, y + s * 0.44);
+      ctx.lineTo(x + s * 0.28, y - s * 0.06);
+      ctx.lineTo(x - s * 0.00, y - s * 0.06);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (k === 3) {
+      /* 電池 */
+      roundRectPath(x - s * 0.44, y - s * 0.20, s * 0.72, s * 0.40, s * 0.08);
+      ctx.stroke();
+      ctx.beginPath();
+      roundRectPath(x + s * 0.32, y - s * 0.08, s * 0.10, s * 0.16, s * 0.04);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.globalAlpha = alpha * 0.55;
+      roundRectPath(x - s * 0.36, y - s * 0.12, s * 0.30, s * 0.24, s * 0.03);
+      ctx.fill();
+      ctx.globalAlpha = alpha;
+    } else if (k === 4) {
+      /* カプセル（薬） */
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(-Math.PI / 4);
+      roundRectPath(-s * 0.44, -s * 0.18, s * 0.88, s * 0.36, s * 0.18);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, -s * 0.18);
+      ctx.lineTo(0, s * 0.18);
+      ctx.stroke();
+      ctx.restore();
+    } else if (k === 5) {
+      /* 人と点（感染症） */
+      ctx.moveTo(x + s * 0.12, y);
+      ctx.arc(x, y, s * 0.12, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y - s * 0.26, s * 0.10, 0, Math.PI * 2);
+      ctx.moveTo(x - s * 0.22, y + s * 0.40);
+      ctx.quadraticCurveTo(x - s * 0.22, y + s * 0.06, x, y + s * 0.06);
+      ctx.quadraticCurveTo(x + s * 0.22, y + s * 0.06, x + s * 0.22, y + s * 0.40);
+      ctx.moveTo(x + s * 0.30, y - s * 0.30);
+      ctx.lineTo(x + s * 0.44, y - s * 0.22);
+      ctx.moveTo(x + s * 0.30, y - s * 0.30);
+      ctx.lineTo(x + s * 0.24, y - s * 0.44);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x - s * 0.02, y - s * 0.24, s * 0.035, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (k === 6) {
+      /* 人3つ（人口） */
+      var px3 = [-s * 0.28, 0, s * 0.28];
+      for (var q = 0; q < 3; q++) {
+        var hx = x + px3[q];
+        ctx.moveTo(hx + s * 0.075, y - s * 0.14);
+        ctx.arc(hx, y - s * 0.14, s * 0.075, 0, Math.PI * 2);
+      }
+      ctx.stroke();
+      ctx.beginPath();
+      for (var q2 = 0; q2 < 3; q2++) {
+        var hx2 = x + px3[q2];
+        ctx.moveTo(hx2 - s * 0.14, y + s * 0.40);
+        ctx.quadraticCurveTo(hx2 - s * 0.14, y + s * 0.12, hx2, y + s * 0.12);
+        ctx.quadraticCurveTo(hx2 + s * 0.14, y + s * 0.12, hx2 + s * 0.14, y + s * 0.40);
+      }
+      ctx.stroke();
+    } else if (k === 7) {
+      /* 温度計 */
+      roundRectPath(x - s * 0.09, y - s * 0.44, s * 0.18, s * 0.64, s * 0.09);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y + s * 0.30, s * 0.15, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.14, y - s * 0.28);
+      ctx.lineTo(x + s * 0.28, y - s * 0.28);
+      ctx.moveTo(x + s * 0.14, y - s * 0.10);
+      ctx.lineTo(x + s * 0.26, y - s * 0.10);
+      ctx.moveTo(x + s * 0.14, y + s * 0.08);
+      ctx.lineTo(x + s * 0.28, y + s * 0.08);
+      ctx.stroke();
+    } else if (k === 8) {
+      /* 波（海面） */
+      ctx.moveTo(x - s * 0.46, y - s * 0.10);
+      ctx.bezierCurveTo(x - s * 0.24, y - s * 0.32, x - s * 0.06, y + s * 0.12, x + s * 0.10, y - s * 0.10);
+      ctx.bezierCurveTo(x + s * 0.26, y - s * 0.32, x + s * 0.38, y + s * 0.10, x + s * 0.46, y - s * 0.02);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.46, y + s * 0.30);
+      ctx.bezierCurveTo(x - s * 0.24, y + s * 0.08, x - s * 0.06, y + s * 0.48, x + s * 0.10, y + s * 0.30);
+      ctx.bezierCurveTo(x + s * 0.26, y + s * 0.08, x + s * 0.38, y + s * 0.44, x + s * 0.46, y + s * 0.34);
+      ctx.stroke();
+    } else if (k === 9 || k === 10) {
+      /* 円と $ / % */
+      ctx.arc(x, y, s * 0.40, 0, Math.PI * 2);
+      ctx.stroke();
+      text(k === 9 ? '$' : '%', x, y + s * 0.02, {
+        size: Math.max(8, s * 0.56), color: color, alpha: alpha,
+        weight: 700, family: MATH_FONT
+      });
+    } else if (k === 11) {
+      /* 円と上矢印（利益） */
+      ctx.arc(x, y, s * 0.40, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y + s * 0.20);
+      ctx.lineTo(x, y - s * 0.18);
+      ctx.moveTo(x - s * 0.12, y - s * 0.06);
+      ctx.lineTo(x, y - s * 0.20);
+      ctx.lineTo(x + s * 0.12, y - s * 0.06);
+      ctx.stroke();
+    } else if (k === 12) {
+      /* 箱（在庫） */
+      roundRectPath(x - s * 0.38, y - s * 0.14, s * 0.62, s * 0.46, s * 0.04);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.38, y - s * 0.14);
+      ctx.lineTo(x - s * 0.22, y - s * 0.34);
+      ctx.lineTo(x + s * 0.42, y - s * 0.34);
+      ctx.lineTo(x + s * 0.24, y - s * 0.14);
+      ctx.moveTo(x + s * 0.24, y - s * 0.14);
+      ctx.lineTo(x + s * 0.24, y + s * 0.32);
+      ctx.stroke();
+    } else if (k === 13) {
+      /* かご（需要） */
+      ctx.moveTo(x - s * 0.38, y - s * 0.06);
+      ctx.lineTo(x - s * 0.26, y + s * 0.38);
+      ctx.lineTo(x + s * 0.26, y + s * 0.38);
+      ctx.lineTo(x + s * 0.38, y - s * 0.06);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y - s * 0.06, s * 0.18, Math.PI, 0);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.16, y + s * 0.08);
+      ctx.lineTo(x - s * 0.12, y + s * 0.30);
+      ctx.moveTo(x + s * 0.02, y + s * 0.08);
+      ctx.lineTo(x + s * 0.02, y + s * 0.30);
+      ctx.stroke();
+    } else if (k === 14) {
+      /* 額縁と曲線（輪郭） */
+      roundRectPath(x - s * 0.42, y - s * 0.34, s * 0.84, s * 0.68, s * 0.04);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.28, y + s * 0.16);
+      ctx.bezierCurveTo(x - s * 0.10, y - s * 0.30, x + s * 0.08, y + s * 0.24, x + s * 0.28, y - s * 0.18);
+      ctx.stroke();
+    } else if (k === 15) {
+      /* スピーカー（音） */
+      ctx.moveTo(x - s * 0.40, y - s * 0.12);
+      ctx.lineTo(x - s * 0.18, y - s * 0.12);
+      ctx.lineTo(x + s * 0.02, y - s * 0.38);
+      ctx.lineTo(x + s * 0.02, y + s * 0.38);
+      ctx.lineTo(x - s * 0.18, y + s * 0.12);
+      ctx.lineTo(x - s * 0.40, y + s * 0.12);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x + s * 0.02, y, s * 0.16, -Math.PI / 3, Math.PI / 3);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x + s * 0.02, y, s * 0.30, -Math.PI / 3, Math.PI / 3);
+      ctx.stroke();
+    } else if (k === 16) {
+      /* 炎（熱） */
+      ctx.moveTo(x, y - s * 0.44);
+      ctx.bezierCurveTo(x + s * 0.30, y - s * 0.16, x + s * 0.30, y + s * 0.10, x + s * 0.20, y + s * 0.26);
+      ctx.bezierCurveTo(x + s * 0.12, y + s * 0.40, x - s * 0.12, y + s * 0.40, x - s * 0.20, y + s * 0.26);
+      ctx.bezierCurveTo(x - s * 0.32, y + s * 0.06, x - s * 0.14, y - s * 0.12, x - s * 0.06, y - s * 0.26);
+      ctx.bezierCurveTo(x - s * 0.06, y - s * 0.06, x + s * 0.04, y + s * 0.02, x + s * 0.06, y - s * 0.14);
+      ctx.bezierCurveTo(x + s * 0.10, y - s * 0.28, x + s * 0.02, y - s * 0.34, x, y - s * 0.44);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (k === 17) {
+      /* アーム（ロボット） */
+      ctx.moveTo(x - s * 0.42, y + s * 0.36);
+      ctx.lineTo(x + s * 0.10, y + s * 0.36);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.14, y + s * 0.36);
+      ctx.lineTo(x - s * 0.02, y - s * 0.04);
+      ctx.lineTo(x + s * 0.24, y - s * 0.28);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.24, y - s * 0.28);
+      ctx.lineTo(x + s * 0.42, y - s * 0.20);
+      ctx.moveTo(x + s * 0.24, y - s * 0.28);
+      ctx.lineTo(x + s * 0.38, y - s * 0.42);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x - s * 0.02, y - s * 0.04, s * 0.05, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (k === 18) {
+      /* プロペラ（ドローン） */
+      ctx.moveTo(x - s * 0.40, y - s * 0.20);
+      ctx.lineTo(x + s * 0.40, y - s * 0.20);
+      ctx.moveTo(x - s * 0.40, y + s * 0.06);
+      ctx.lineTo(x + s * 0.40, y + s * 0.06);
+      ctx.moveTo(x, y + s * 0.30);
+      ctx.lineTo(x, y - s * 0.20);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y + s * 0.30, s * 0.07, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.30, y - s * 0.20);
+      ctx.lineTo(x - s * 0.30, y - s * 0.34);
+      ctx.moveTo(x + s * 0.30, y - s * 0.20);
+      ctx.lineTo(x + s * 0.30, y - s * 0.34);
+      ctx.stroke();
+    } else if (k === 19) {
+      /* 車と波（自動運転） */
+      roundRectPath(x - s * 0.40, y - s * 0.10, s * 0.80, s * 0.28, s * 0.09);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.24, y - s * 0.10);
+      ctx.lineTo(x - s * 0.12, y - s * 0.28);
+      ctx.lineTo(x + s * 0.14, y - s * 0.28);
+      ctx.lineTo(x + s * 0.24, y - s * 0.10);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x - s * 0.20, y + s * 0.22, s * 0.08, 0, Math.PI * 2);
+      ctx.moveTo(x + s * 0.28, y + s * 0.22);
+      ctx.arc(x + s * 0.20, y + s * 0.22, s * 0.08, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.46, y + s * 0.42);
+      ctx.bezierCurveTo(x - s * 0.28, y + s * 0.28, x - s * 0.10, y + s * 0.52, x + s * 0.08, y + s * 0.40);
+      ctx.bezierCurveTo(x + s * 0.22, y + s * 0.30, x + s * 0.34, y + s * 0.46, x + s * 0.46, y + s * 0.42);
+      ctx.stroke();
+    } else if (k === 20) {
+      /* 地震計 */
+      ctx.moveTo(x - s * 0.46, y + s * 0.22);
+      ctx.lineTo(x + s * 0.46, y + s * 0.22);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.46, y + s * 0.22);
+      ctx.lineTo(x - s * 0.28, y + s * 0.22);
+      ctx.lineTo(x - s * 0.18, y - s * 0.24);
+      ctx.lineTo(x - s * 0.06, y + s * 0.36);
+      ctx.lineTo(x + s * 0.06, y - s * 0.34);
+      ctx.lineTo(x + s * 0.18, y + s * 0.22);
+      ctx.lineTo(x + s * 0.46, y + s * 0.22);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x + s * 0.06, y - s * 0.34, s * 0.05, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (k === 21) {
+      /* しずく（水位） */
+      ctx.moveTo(x, y - s * 0.44);
+      ctx.bezierCurveTo(x + s * 0.30, y - s * 0.04, x + s * 0.26, y + s * 0.20, x, y + s * 0.20);
+      ctx.bezierCurveTo(x - s * 0.26, y + s * 0.20, x - s * 0.30, y - s * 0.04, x, y - s * 0.44);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.42, y + s * 0.38);
+      ctx.bezierCurveTo(x - s * 0.24, y + s * 0.26, x - s * 0.10, y + s * 0.46, x + s * 0.06, y + s * 0.36);
+      ctx.bezierCurveTo(x + s * 0.22, y + s * 0.26, x + s * 0.32, y + s * 0.42, x + s * 0.42, y + s * 0.38);
+      ctx.stroke();
+    } else if (k === 22) {
+      /* 芽（植物） */
+      ctx.moveTo(x - s * 0.42, y + s * 0.40);
+      ctx.lineTo(x + s * 0.42, y + s * 0.40);
+      ctx.moveTo(x, y + s * 0.40);
+      ctx.lineTo(x, y - s * 0.14);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y - s * 0.06);
+      ctx.bezierCurveTo(x - s * 0.34, y - s * 0.06, x - s * 0.34, y - s * 0.40, x - s * 0.04, y - s * 0.26);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y - s * 0.14);
+      ctx.bezierCurveTo(x + s * 0.30, y - s * 0.20, x + s * 0.34, y - s * 0.44, x + s * 0.04, y - s * 0.32);
+      ctx.stroke();
+    } else {
+      /* 画面と指（スクロール） */
+      roundRectPath(x - s * 0.38, y - s * 0.42, s * 0.76, s * 0.84, s * 0.07);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.26, y - s * 0.22);
+      ctx.lineTo(x + s * 0.26, y - s * 0.22);
+      ctx.moveTo(x - s * 0.26, y - s * 0.06);
+      ctx.lineTo(x + s * 0.10, y - s * 0.06);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.12, y + s * 0.42);
+      ctx.lineTo(x + s * 0.12, y + s * 0.06);
+      ctx.moveTo(x + s * 0.02, y + s * 0.16);
+      ctx.lineTo(x + s * 0.12, y + s * 0.04);
+      ctx.lineTo(x + s * 0.22, y + s * 0.16);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /* 型カード1枚の中身（色を変えて2回描き、朱→墨をクロスフェードさせる） */
+  function s6CardBody(i, x, y, w, h, color, alpha) {
+    if (alpha <= 0.01) return;
+    var f = fx();
+    var mobile = W < 560;
+    if (mobile) {
+      var si = Math.min(h * 0.56, w * 0.26);
+      s6TypeGlyph(i, x + w * 0.06 + si / 2, y + h / 2, si, color, alpha);
+      var tx = x + w * 0.06 + si + w * 0.05;
+      var tw = Math.max(20, w - (tx - x) - w * 0.03);
+      text(S6_TYPE_TITLE[i], tx, y + h * 0.37, {
+        size: Math.max(10, 10 * f), align: 'left', color: color, alpha: alpha, maxWidth: tw
+      });
+      text(S6_TYPE_EX[i], tx, y + h * 0.72, {
+        size: Math.max(10, 9.4 * f), align: 'left', color: color, alpha: alpha * 0.88, maxWidth: tw
+      });
+    } else {
+      var si2 = Math.min(w * 0.32, h * 0.30);
+      s6TypeGlyph(i, x + w / 2, y + h * 0.29, si2, color, alpha);
+      text(S6_TYPE_TITLE[i], x + w / 2, y + h * 0.62, {
+        size: Math.max(11, 12.2 * f), color: color, alpha: alpha, maxWidth: w * 0.92
+      });
+      text(S6_TYPE_EX[i], x + w / 2, y + h * 0.83, {
+        size: Math.max(10, 10.4 * f), color: color, alpha: alpha * 0.86, maxWidth: w * 0.92
+      });
+    }
+  }
+
+  /* 5つの型カード（デスクトップは横1列、W<560 は2列3行） */
+  function drawS6Cards(a) {
+    if (a <= 0.01) return;
+    var f = fx();
+    var mobile = W < 560;
+    var cols = mobile ? 2 : 5, rows = mobile ? 3 : 1;
+    var gapX = W * (mobile ? 0.03 : 0.018);
+    var gapY = H * (mobile ? 0.05 : 0);
+    var areaW = W * (mobile ? 0.90 : 0.92);
+    var areaH = H * (mobile ? 0.74 : 0.56);
+    var cardW = (areaW - gapX * (cols - 1)) / cols;
+    var cardH = mobile ? (areaH - gapY * (rows - 1)) / rows : areaH;
+    var x0 = (W - areaW) / 2;
+    var y0 = H * (mobile ? 0.12 : 0.22);
+    var i;
+
+    if (!mobile) {
+      text('微分の使い方 5つ', W / 2, H * 0.10, {
+        size: Math.max(11, 12 * f), color: C.ink, alpha: a * 0.62, weight: 700
+      });
+    }
+
+    for (i = 0; i < 5; i++) {
+      var cx = x0 + (i % cols) * (cardW + gapX);
+      var cy = y0 + Math.floor(i / cols) * (cardH + gapY);
+      var on = S.s6TypeOn[i] || 0;
+      var lit = (on > 0) ? (S.s6TypeLit[i] == null ? 0 : S.s6TypeLit[i]) : 0;
+
+      /* 乳白の座布団 */
+      ctx.save();
+      ctx.globalAlpha = a * (0.34 + 0.66 * on);
+      ctx.fillStyle = '#FBF9F2';
+      roundRectPath(cx, cy, cardW, cardH, Math.min(8, cardH * 0.16));
+      ctx.fill();
+      ctx.strokeStyle = (on > 0 && lit > 0.25) ? 'rgba(217,78,65,.5)' : 'rgba(34,34,34,.13)';
+      ctx.lineWidth = Math.max(1, 1.05 * f);
+      ctx.stroke();
+      ctx.restore();
+
+      if (on < 0.999) s6CardBody(i, cx, cy, cardW, cardH, C.light, a * 0.40 * (1 - on));
+      if (on > 0.001) {
+        if (lit > 0.02) s6CardBody(i, cx, cy, cardW, cardH, C.verm, a * on * lit);
+        if (lit < 0.98) s6CardBody(i, cx, cy, cardW, cardH, C.ink, a * on * (1 - lit));
+      }
+    }
+  }
+
+  /* 24の事例グリッド（デスクトップ6列4行、W<560 は4列6行） */
+  function drawS6Grid(a) {
+    if (a <= 0.01) return;
+    var f = fx();
+    var mobile = W < 560;
+    var cols = mobile ? 4 : 6, rows = mobile ? 6 : 4;
+    var gx0 = W * 0.05, gy0 = H * 0.10;
+    var cw = (W * 0.90) / cols;
+    var ch = (H * 0.82) / rows;
+    for (var i = 0; i < 24; i++) {
+      var ap = S.s6Ex[i] || 0;
+      if (ap <= 0.01) continue;
+      var lit = S.s6ExLit[i] == null ? 0 : S.s6ExLit[i];
+      var cx = gx0 + (i % cols) * cw;
+      var cy = gy0 + Math.floor(i / cols) * ch;
+      var alpha = a * ap;
+      if (mobile) {
+        var lsz = 10;
+        ctx.save();
+        ctx.font = '600 ' + lsz + 'px ' + FONT;
+        var lw = Math.min(ctx.measureText(S6_EX_LABELS[i]).width, cw - ch * 0.66 - 10);
+        ctx.restore();
+        var iconS = Math.min(ch * 0.66, 15);
+        var gw = iconS + 5 + lw;
+        var sx = cx + (cw - gw) / 2;
+        var icy = cy + ch / 2;
+        var tx = sx + iconS + 5;
+        if (lit > 0.02) s6ExGlyph(i, sx + iconS / 2, icy, iconS, C.verm, alpha * lit);
+        if (lit < 0.98) s6ExGlyph(i, sx + iconS / 2, icy, iconS, C.ink, alpha * (1 - lit));
+        if (lit > 0.02) text(S6_EX_LABELS[i], tx, icy + 0.5, { size: lsz, align: 'left', color: C.verm, alpha: alpha * lit, maxWidth: lw });
+        if (lit < 0.98) text(S6_EX_LABELS[i], tx, icy + 0.5, { size: lsz, align: 'left', color: C.ink, alpha: alpha * (1 - lit), maxWidth: lw });
+      } else {
+        var iconS2 = Math.min(cw * 0.30, ch * 0.32);
+        var icy2 = cy + ch * 0.36;
+        var lsz2 = Math.max(11, 11.6 * f);
+        if (lit > 0.02) s6ExGlyph(i, cx + cw / 2, icy2, iconS2, C.verm, alpha * lit);
+        if (lit < 0.98) s6ExGlyph(i, cx + cw / 2, icy2, iconS2, C.ink, alpha * (1 - lit));
+        if (lit > 0.02) text(S6_EX_LABELS[i], cx + cw / 2, cy + ch * 0.72, { size: lsz2, color: C.verm, alpha: alpha * lit, maxWidth: cw * 0.9 });
+        if (lit < 0.98) text(S6_EX_LABELS[i], cx + cw / 2, cy + ch * 0.72, { size: lsz2, color: C.ink, alpha: alpha * (1 - lit), maxWidth: cw * 0.9 });
+      }
+    }
+  }
+
   /* 画面を横切る緩やかな曲線（u = 0..1）。右端の接線はここから伸ばす */
   function s6Pt(u) {
     return [lerp(W * 0.07, W * 0.82, u), H * 0.655 - H * 0.10 * u - H * 0.12 * u * u];
@@ -2686,6 +3268,14 @@ body{
 
   function drawScene6(a) {
     if (a <= 0.01) return;
+    var baseA = (S.s6BaseA == null ? 1 : S.s6BaseA);
+    if (baseA > 0.01) drawScene6Base(a * baseA);
+    if (S.s6KindsA > 0.01) drawS6Cards(a * S.s6KindsA);
+    if (S.s6GridA > 0.01) drawS6Grid(a * S.s6GridA);
+  }
+
+  /* 既存の絵：曲線・6つの点・未来へ伸びる接線 */
+  function drawScene6Base(a) {
     var f = fx();
     var fs = Math.max(10, 9.6 * f);
     var i;
@@ -2750,6 +3340,10 @@ body{
     S.s6AT = 1;
     for (var i = 0; i < 6; i++) S.s6Dot[i] = 0;
     S.s6Cur = -1; S.s6Tan = 0;
+    /* 曲線＋点の絵から始め、型カード・事例グリッドは消しておく */
+    S.s6BaseA = 1; S.s6KindsA = 0; S.s6GridA = 0;
+    for (var k = 0; k < 5; k++) { S.s6TypeOn[k] = 0; S.s6TypeLit[k] = 1; }
+    s6ManyClear();
   }
 
   /* シーン6以外へ移るとき、絵と状態をすべて消す */
@@ -2757,6 +3351,9 @@ body{
     S.s6A = 0; S.s6AT = 0;
     for (var i = 0; i < 6; i++) S.s6Dot[i] = 0;
     S.s6Cur = -1; S.s6Tan = 0;
+    S.s6BaseA = 1; S.s6KindsA = 0; S.s6GridA = 0;
+    for (var k = 0; k < 5; k++) { S.s6TypeOn[k] = 0; S.s6TypeLit[k] = 1; }
+    s6ManyClear();
   }
 
   /* ------------------------------------------------------------------ */
@@ -3334,16 +3931,70 @@ body{
       }
     },
     {
-      id: 's6-close', scene: 6, dur: 9200, voiceAt: 0.6,
-      speech: '今の変化が分かれば、ほんの少し先の未来が見えてきます。微分は、世界を読み解くレンズなんです。',
-      subCues: [5240],
+      id: 's6-kinds-1', scene: 6, dur: 17800, voiceAt: 0.3,
+      speech: '微分の使い方は、大きく5つあります。1つ目は、変化の勢いを測ること。2つ目は、いちばん良い点、つまり最大や最小を探すこと。3つ目は、少し先を予測すること。',
+      subCues: [4080, 7840, 13710],
       enter: function () { enterScene6(); },
       tick: function (p, ms) {
-        /* 6つとも墨で残し、右端から接線を伸ばして「この先を読む」 */
+        /* 3つの型を、ナレーションの順に朱で点灯→墨で残す */
         var t = ms == null ? 0 : ms;
+        S.s6BaseA = 0; S.s6KindsA = 1; S.s6GridA = 0;
+        s6ManyClear();
+        s6TypeSet(0, t - 4080);
+        s6TypeSet(1, t - 7840);
+        s6TypeSet(2, t - 13710);
+        s6TypeOff(3);
+        s6TypeOff(4);
+      }
+    },
+    {
+      id: 's6-kinds-2', scene: 6, dur: 13700, voiceAt: 0.3,
+      speech: '4つ目は、せまい範囲では、曲線を直線とみなして計算すること。5つ目は、積み上げの逆の関係。微分の逆が、積分です。',
+      subCues: [6570, 10210],
+      enter: function () { enterScene6(); },
+      tick: function (p, ms) {
+        var t = ms == null ? 0 : ms;
+        S.s6BaseA = 0; S.s6KindsA = 1; S.s6GridA = 0;
+        s6ManyClear();
+        s6TypeDone(0); s6TypeDone(1); s6TypeDone(2);
+        s6TypeSet(3, t);
+        s6TypeSet(4, t - 6570);
+      }
+    },
+    {
+      id: 's6-many', scene: 6, dur: 26800, voiceAt: 0.3,
+      speech: '数が連続的に、滑らかに変化するものなら、何でも。速さ、加速度、電流、充電、薬の濃度、感染症の広がり、人口、気温、海面、為替、金利、利益。在庫、需要、画像の輪郭、音、熱、ロボット、ドローン、自動運転、地震、水位、植物の成長、画面のスクロール。',
+      subCues: [4530, 15110],
+      enter: function () { enterScene6(); },
+      tick: function (p, ms) {
+        /* 型カードを引いて、24の事例を音声の順に並べる */
+        var t = ms == null ? 0 : ms;
+        S.s6BaseA = 0;
+        S.s6KindsA = 1 - clamp((t - 3300) / 600, 0, 1);
+        S.s6GridA = clamp((t - 3600) / 600, 0, 1);
+        for (var k = 0; k < 5; k++) s6TypeDone(k);
+        s6ManyAt(t);
+        S.s6Tan = 0;
+      }
+    },
+    {
+      id: 's6-close', scene: 6, dur: 15500, voiceAt: 0.6,
+      speech: 'どの場面でも、やっていることは同じ。今の変化を読み取ることです。今の変化が分かれば、ほんの少し先の未来が見えてきます。微分は、世界を読み解くレンズなんです。',
+      subCues: [1970, 3750, 8390],
+      enter: function () { enterScene6(); },
+      tick: function (p, ms) {
+        /* 事例グリッドを引いて、曲線＋6つの点＋未来へ伸びる接線に戻す */
+        var t = ms == null ? 0 : ms;
+        S.s6BaseA = clamp((t - 480) / 620, 0, 1);
+        S.s6KindsA = 0;
+        S.s6GridA = 1 - clamp(t / 520, 0, 1);
+        /* グリッドが残っている間は、24項目すべてを墨で残したまま引く */
+        if (S.s6GridA > 0.001) {
+          for (var e = 0; e < 24; e++) { S.s6Ex[e] = 1; S.s6ExLit[e] = 0; }
+        }
         for (var i = 0; i < 6; i++) S.s6Dot[i] = 1;
         S.s6Cur = -1;
-        S.s6Tan = easeInOutCubic(clamp((t - 2400) / 3600, 0, 1));
+        S.s6Tan = easeInOutCubic(clamp((t - 8390) / 3600, 0, 1));
       }
     }
   ];
@@ -3373,7 +4024,8 @@ body{
     /* Scene 4〜6（ステップ未登録。音声のみ先に実測長を登録） */
     's4-intro': 7344, 's4-hill': 9288, 's4-slope': 8064, 's4-play': 4992,
     's5-ai': 7056, 's5-ai2': 10392, 's5-ai3': 9384, 's5-rocket': 13176,
-    's6-recap': 13968, 's6-close': 8496
+    's6-recap': 13968, 's6-kinds-1': 16848, 's6-kinds-2': 12840,
+    's6-many': 25992, 's6-close': 14592
   };
   function slotOf(st) {
     var slot = Math.max(st.dur, (st.voiceAt || 0) * 1000 + (AUDIO_MS[st.id] || 0) + 260);
