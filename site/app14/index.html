@@ -174,17 +174,8 @@ body{
 .voice{display:flex; align-items:center; gap:6px; font-size:12.5px; color:#4a473f; cursor:pointer}
 .voice input{width:16px; height:16px; accent-color:var(--indigo)}
 .voice-note{font-size:11px; color:var(--light)}
-/* ---- narration samples ---- */
-.narration{font-size:12px; color:#4a473f}
-.narration summary{cursor:pointer; width:max-content; max-width:100%; font-size:12.5px; color:var(--indigo)}
-.narration summary:focus-visible{outline:2px solid var(--indigo); outline-offset:2px; border-radius:6px}
-.narration__body{display:flex; flex-direction:column; gap:8px; padding:8px 2px 2px}
-.narration__lead{margin:0; font-size:11.5px; color:var(--light)}
-.narration__item{display:flex; flex-direction:column; gap:2px; min-width:0}
-.narration__label{margin:0; font-size:12px}
-.narration audio{width:100%; max-width:340px; height:34px; min-width:0}
-.narration__credit{margin:0; font-size:11px; color:var(--light); line-height:1.6}
-.narration__credit a{color:var(--indigo)}
+.voice-credit{font-size:11px; color:var(--light); min-width:0}
+.voice-credit a{color:var(--indigo)}
 .keyhint{font-size:11px; color:var(--light); line-height:1.5}
 @media (max-width:640px){
   .app{gap:8px}
@@ -289,24 +280,9 @@ body{
       読み上げ
     </label>
     <span id="voiceNote" class="voice-note"></span>
+    <span class="voice-credit">ナレーション：<a href="https://voicevox.hiroshiba.jp/nemo/" target="_blank" rel="noopener">VOICEVOX Nemo</a>（合成音声）</span>
   </footer>
 
-  <details class="narration">
-    <summary>ナレーションを聞き比べる</summary>
-    <div class="narration__body">
-      <p class="narration__lead">同じ3文を2つの合成音声で試聴できます。</p>
-      <div class="narration__item">
-        <p class="narration__label" id="narrNemoLabel">VOICEVOX Nemo（女声1）</p>
-        <audio controls preload="none" src="./audio/preview-nemo.mp3" aria-labelledby="narrNemoLabel"></audio>
-      </div>
-      <div class="narration__item">
-        <p class="narration__label" id="narrAivisLabel">AivisSpeech：まお（おちつき）</p>
-        <audio controls preload="none" src="./audio/preview-aivis.mp3" aria-labelledby="narrAivisLabel"></audio>
-      </div>
-      <p class="narration__credit">本編ナレーション：VOICEVOX Nemo（女声1）／<a href="https://voicevox.hiroshiba.jp/nemo/" target="_blank" rel="noopener">VOICEVOX Nemo</a>・<a href="https://voicevox.hiroshiba.jp/nemo/term/" target="_blank" rel="noopener">利用規約</a></p>
-      <p class="narration__credit">試聴：AivisSpeech「まお（おちつき）」／<a href="https://hub.aivis-project.com/aivm-models/a59cb814-0083-4369-8542-f51a29e72af7" target="_blank" rel="noopener">モデルページ</a>・ACML 1.0</p>
-    </div>
-  </details>
   <noscript><p>この解説の表示には JavaScript が必要です。</p></noscript>
 </div>
 
@@ -433,7 +409,6 @@ body{
     narrationAudio.playsInline = true;
     narrationAudio.setAttribute('playsinline', '');
   }
-  var previewAudios = [];
 
   function updateVoiceNote() {
     if (!speechSupported) {
@@ -463,32 +438,6 @@ body{
     narrationArmed = false;
     releaseAudioPending();
     stopNarrationAudio();
-  }
-
-  function pausePreviewAudios(except) {
-    for (var i = 0; i < previewAudios.length; i++) {
-      if (previewAudios[i] !== except) {
-        try { previewAudios[i].pause(); } catch (e) { /* noop */ }
-      }
-    }
-  }
-
-  function bindPreviewAudios() {
-    var list = document.querySelectorAll('.narration audio');
-    for (var i = 0; i < list.length; i++) {
-      previewAudios.push(list[i]);
-      list[i].addEventListener('play', function () {
-        if (mode === 'playing') pausePlayback();
-        cancelSpeech();
-        pausePreviewAudios(this);
-      });
-    }
-    var details = document.querySelector('.narration');
-    if (details) {
-      details.addEventListener('toggle', function () {
-        if (!details.open) pausePreviewAudios(null);
-      });
-    }
   }
 
   /* MP3 を差し替えた端末が force-cache で旧音声を掴まないよう、
@@ -557,8 +506,6 @@ body{
     if (!voiceOn || !speechSupported) { releaseAudioPending(); return; }
 
     if (!st || !st.id) { speechError = true; releaseAudioPending(); return; }
-
-    pausePreviewAudios(null);
 
     var a = narrationAudio;
     if (!a) { speechError = true; releaseAudioPending(); return; }
@@ -3761,7 +3708,6 @@ body{
 
   function goStep(i) {
     cancelSpeech();
-    pausePreviewAudios(null);
     if (i >= STEPS.length) { finish(); return; }
     if (i < 0) i = 0;
     idx = i;
@@ -4006,7 +3952,6 @@ body{
   document.getElementById('startSilent').addEventListener('click', function () { begin(false); });
   document.getElementById('again').addEventListener('click', restartAll);
   buildSceneJumps();
-  bindPreviewAudios();
 
   if (seekRange) {
     seekRange.addEventListener('input', function () {
@@ -4148,12 +4093,10 @@ body{
 
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden) return;
-    pausePreviewAudios(null);
     if (mode === 'playing') pausePlayback();
   });
   window.addEventListener('pagehide', function () {
     cancelSpeech();
-    pausePreviewAudios(null);
     for (var k in audioBlobUrls) {
       if (!Object.prototype.hasOwnProperty.call(audioBlobUrls, k)) continue;
       try { URL.revokeObjectURL(audioBlobUrls[k]); } catch (e) { /* noop */ }
