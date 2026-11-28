@@ -25,10 +25,17 @@ permissions:
 
 jobs:
   test:
+    name: test (shard ${{ matrix.shard }}/8)
     runs-on: ubuntu-latest
-    # 全 761 回帰は Windows 11 実測 11 分 6 秒。CI の 10 分上限では timeout するため 20 分へ延長する
-    # （テスト・assert・Node 版・トリガー・権限は変更しない）。
+    # 2026-11-28 の実測では全 95 ファイルを 1 ジョブで直列実行すると 12 分 24 秒かかった。
+    # scripts/tests/shard.cjs で 8 シャードへ均等配分し、matrix で別ランナー並列実行する。
+    # テスト本体・assert・Node 版・トリガー・権限は変更しない。
+    # timeout-minutes は 1 シャードあたりの保険として 20 分を維持する。
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,4 +46,4 @@ jobs:
           node-version: '22'
 
       - name: Run offline tests
-        run: node --test scripts/tests/*.test.cjs
+        run: node --test $(node scripts/tests/shard.cjs ${{ matrix.shard }} 8)
