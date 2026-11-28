@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#F7F4EC">
-<meta name="description" content="車の速さから接線、ゲーム、最適化、AI、ロケットまで。その瞬間の傾きを読む微分を、6つのシーンで体験する入門アプリ。">
-<title>微分：今の速さを切り取る｜数学は世の中でどのように使われるか</title>
+<meta name="description" content="数学が世の中でどのように使われるかを、微分と積分の2つの単元で解説するアプリです。">
+<title>微分・積分｜数学は世の中でどのように使われるか</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F7F4EC'/%3E%3Cpath d='M5 25 Q16 23 27 7' fill='none' stroke='%23222' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M8 20 L24 14' stroke='%23D94E41' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 :root{
@@ -105,6 +105,45 @@ body{
 .overlay__actions--jumps .btn{font-size:clamp(11px,1.15vw,13px); padding:7px 11px}
 .overlay__note{font-size:11px !important; color:var(--light) !important}
 
+/* ---- 単元を選ぶ（#start） ---- */
+.unit-cards{display:flex; flex-wrap:wrap; gap:10px; width:100%; justify-content:center; margin-top:4px}
+.unit-card{
+  flex:1 1 160px; min-width:0; max-width:250px;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding:13px 12px 12px; border-radius:14px;
+  background:var(--paper); border:1px solid var(--hair); color:var(--ink);
+  font:inherit; text-align:center; cursor:pointer;
+  transition:background .18s, border-color .18s, transform .18s;
+  touch-action:manipulation;
+}
+.unit-card:hover{background:#F5F2E7; border-color:rgba(34,34,34,.3)}
+.unit-card:active{transform:translateY(1px)}
+.unit-card:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+.unit-card__icon{display:block; width:clamp(64px,18vw,104px); color:var(--indigo)}
+.unit-card__icon svg{display:block; width:100%; height:auto}
+.unit-card__text{display:flex; flex-direction:column; gap:2px; min-width:0}
+.unit-card__name{font-size:clamp(15px,1.8vw,18px); font-weight:700; line-height:1.3}
+.unit-card__sub{font-size:clamp(11px,1.2vw,13px); color:#5b5850; line-height:1.4}
+.unit-card__meta{font-size:11px; color:var(--light); letter-spacing:.04em}
+.unit-novoice{display:flex; align-items:center; gap:6px; font-size:clamp(12px,1.3vw,14px); color:#4a473f; cursor:pointer}
+.unit-novoice input{width:16px; height:16px; accent-color:var(--indigo)}
+@media (max-width:560px){
+  .unit-card{flex:1 1 100%; max-width:none; flex-direction:row; align-items:center; gap:12px; text-align:left; padding:10px 12px}
+  .unit-card__icon{flex:0 0 auto; width:56px}
+}
+
+/* ---- ヘッダーの「単元を選ぶ」 ---- */
+.top__actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-left:auto}
+.back-units{
+  font:inherit; font-size:12.5px; color:var(--ink); background:var(--paper);
+  border:1px solid var(--hair); border-radius:9px; padding:7px 11px; cursor:pointer;
+  white-space:nowrap; transition:background .18s;
+}
+.back-units:hover{background:#F5F2E7}
+.back-units:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+.title #unitTitle{font-weight:700; font-size:1em; color:inherit}
+.title #unitShort{font-weight:700; font-size:1em; color:inherit; display:none}
+
 /* ---- buttons ---- */
 .btn{
   font:inherit; font-size:clamp(12px,1.3vw,15px); line-height:1.2;
@@ -180,9 +219,20 @@ body{
 @media (max-width:640px){
   .app{gap:8px}
   .keyhint{display:none}
-  .title span{display:none}
+  /* 狭幅では長い単元名の代わりに短い単元名（微分・積分）を出す。
+     単元を選ぶ前（.is-short なし）は「単元を選ぶ」をそのまま表示する */
+  .title.is-short #unitTitle{display:none}
+  .title.is-short #unitShort{display:inline}
+  /* ヘッダー：「← 単元を選ぶ」が幅に負けないよう、文字と余白を詰める */
+  .top{gap:6px 8px; align-items:flex-start}
+  .eyebrow{font-size:10.2px; letter-spacing:.07em; line-height:1.5}
+  .back-units{font-size:11.5px; padding:6px 9px; flex:0 0 auto}
   .subtitle{min-height:52px; padding:9px 12px}
   .prompt__row .btn{width:100%; margin-left:0}
+}
+/* 選択画面の見出しだけを対象に、狭幅でも「か」が孤立しない大きさへ下げる */
+@media (max-width:380px){
+  #start h2{font-size:14px}
 }
 @media (prefers-reduced-motion: reduce){
   .btn,.ctrl,.stage-play{transition:none}
@@ -194,9 +244,12 @@ body{
   <header class="top">
     <div>
       <p class="eyebrow">数学は世の中でどのように使われるか</p>
-      <h1 class="title">微分 <span>— 今の速さを切り取る</span></h1>
+      <h1 class="title" id="unitTitleBox"><span id="unitTitle">単元を選ぶ</span><span id="unitShort"></span></h1>
     </div>
-    <p class="keyhint">Space：再生／一時停止　←→：シーン移動</p>
+    <div class="top__actions">
+      <p class="keyhint">Space：再生／一時停止　←→：シーン移動</p>
+      <button id="backToUnits" class="back-units" type="button" hidden>← 単元を選ぶ</button>
+    </div>
   </header>
 
   <main class="stage-wrap">
@@ -209,19 +262,54 @@ body{
         <span id="gValue" class="stage-gravity__value">8.0</span>
       </div>
 
+      <div id="stageSlider" class="stage-gravity" hidden>
+        <span id="nLabel" class="stage-gravity__label">分割数</span>
+        <input id="nRange" type="range" min="2" max="60" step="1" value="8" aria-labelledby="nLabel">
+        <span id="nValue" class="stage-gravity__value">8</span>
+      </div>
+
       <button id="stagePlay" class="stage-play" type="button" aria-label="再生" hidden>
         <svg id="stagePlayIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"></svg>
       </button>
 
       <div id="start" class="overlay">
         <div class="overlay__card">
-          <p class="eyebrow">数学は世の中でどのように使われるか ・ 全6シーン・約6分</p>
-          <h2>微分 — 「今の速さ」を切り取る</h2>
-          <p>数学が世の中でどのように使われるかを伝えるアプリです。現在は微分のみを収録しています。</p>
-          <div class="overlay__actions">
-            <button id="startVoice" class="btn btn--primary" type="button">音声ありではじめる</button>
-            <button id="startSilent" class="btn" type="button">読み上げなしではじめる</button>
+          <h2>数学は世の中でどのように使われるか</h2>
+          <p>数学が世の中でどのように使われるかを解説するアプリです。微分と積分の2つの単元を収録しています。</p>
+          <div class="unit-cards">
+            <button class="unit-card" type="button" data-unit="diff">
+              <span class="unit-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 120 72" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 62 C 34 62 44 52 58 34 C 72 16 92 10 112 10"/>
+                  <path d="M26 66 L 92 20"/>
+                  <circle cx="58" cy="34" r="3.4" fill="currentColor" stroke="none"/>
+                </svg>
+              </span>
+              <span class="unit-card__text">
+                <span class="unit-card__name">微分</span>
+                <span class="unit-card__sub">— 今の速さを切り取る</span>
+                <span class="unit-card__meta">全6シーン・約6分</span>
+              </span>
+            </button>
+            <button class="unit-card" type="button" data-unit="integ">
+              <span class="unit-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 120 72" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 62 C 34 62 44 52 58 34 C 72 16 92 10 112 10"/>
+                  <path d="M8 62 H 112" opacity=".55"/>
+                  <path d="M22 62 V 50 M 40 62 V 43 M 58 62 V 34 M 76 62 V 25" opacity=".8"/>
+                </svg>
+              </span>
+              <span class="unit-card__text">
+                <span class="unit-card__name">積分</span>
+                <span class="unit-card__sub">— 小さな変化を積み上げる</span>
+                <span class="unit-card__meta">全6シーン・約5分</span>
+              </span>
+            </button>
           </div>
+          <label class="unit-novoice" for="startNoVoice">
+            <input id="startNoVoice" type="checkbox">
+            読み上げなしで見る
+          </label>
           <p class="overlay__note">音声が使えない環境でも、字幕で最後まで進みます。</p>
         </div>
       </div>
@@ -229,10 +317,11 @@ body{
       <div id="end" class="overlay" hidden>
         <div class="overlay__card">
           <p class="eyebrow">全 6 シーン</p>
-          <h2>傾きを読めば、ほんの少し先が見える</h2>
-          <p>速さも、接線も、山の頂点も、AIの谷も、ロケットの姿勢も。その瞬間の傾きを読み取るのが微分。今の変化から、少し先の未来が見えてきます。</p>
+          <h2 id="endTitle">傾きを読めば、ほんの少し先が見える</h2>
+          <p id="endText">速さも、接線も、山の頂点も、AIの谷も、ロケットの姿勢も。その瞬間の傾きを読み取るのが微分。今の変化から、少し先の未来が見えてきます。</p>
           <div class="overlay__actions">
             <button id="again" class="btn btn--primary" type="button">もう一度見る</button>
+            <button id="endUnits" class="btn" type="button">単元を選ぶ</button>
           </div>
           <div id="sceneJump" class="overlay__actions overlay__actions--jumps" aria-label="シーンを選んで見る"></div>
         </div>
@@ -241,10 +330,10 @@ body{
   </main>
 
   <section class="subtitle" aria-live="polite" aria-atomic="true">
-    <p id="sub">「はじめる」を押すと、解説が始まります。</p>
+    <p id="sub">単元を選ぶと、解説が始まります。</p>
   </section>
 
-  <section class="seek" aria-label="再生位置">
+  <section id="seekRow" class="seek" aria-label="再生位置" hidden>
     <input id="seekRange" type="range" min="0" max="120" step="0.1" value="0" aria-label="再生位置">
     <span id="seekTime" class="seek__time">0:00 / 0:00</span>
   </section>
@@ -270,12 +359,12 @@ body{
   </div>
 
   <footer class="controls">
-    <button id="prev" class="ctrl" type="button" aria-label="前のシーンへ">◀ 前へ</button>
-    <button id="play" class="ctrl" type="button" aria-pressed="false">はじめる</button>
-    <button id="next" class="ctrl" type="button" aria-label="次のシーンへ">次へ ▶</button>
-    <span id="sceneLabel" class="scene-label">Scene 1 / 6</span>
+    <button id="prev" class="ctrl" type="button" aria-label="前のシーンへ" hidden>◀ 前へ</button>
+    <button id="play" class="ctrl" type="button" aria-pressed="false" hidden>はじめる</button>
+    <button id="next" class="ctrl" type="button" aria-label="次のシーンへ" hidden>次へ ▶</button>
+    <span id="sceneLabel" class="scene-label" hidden>Scene 1 / 6</span>
     <span class="spacer"></span>
-    <label class="voice" for="voiceToggle">
+    <label id="voiceField" class="voice" for="voiceToggle" hidden>
       <input id="voiceToggle" type="checkbox" checked>
       読み上げ
     </label>
@@ -344,6 +433,10 @@ body{
   var gRange = document.getElementById('gRange');
   var gValue = document.getElementById('gValue');
   var stageGravity = document.getElementById('stageGravity');
+  var stageSlider = document.getElementById('stageSlider');
+  var nLabel = document.getElementById('nLabel');
+  var nRange = document.getElementById('nRange');
+  var nValue = document.getElementById('nValue');
   var pLabel = document.getElementById('pLabel');
   var pRange = document.getElementById('pRange');
   var xRange = document.getElementById('xRange');
@@ -351,6 +444,16 @@ body{
   var continueBtn = document.getElementById('continue');
   var seekRange = document.getElementById('seekRange');
   var seekTime = document.getElementById('seekTime');
+  var seekRow = document.getElementById('seekRow');
+  var voiceField = document.getElementById('voiceField');
+  var unitTitleEl = document.getElementById('unitTitle');
+  var unitShortEl = document.getElementById('unitShort');
+  var unitTitleBox = document.getElementById('unitTitleBox');
+  var backToUnitsBtn = document.getElementById('backToUnits');
+  var startNoVoiceEl = document.getElementById('startNoVoice');
+  var endUnitsBtn = document.getElementById('endUnits');
+  var endTitleEl = document.getElementById('endTitle');
+  var endTextEl = document.getElementById('endText');
 
   var W = 0, H = 0, DPR = 1, paperTex = null;
 
@@ -389,7 +492,37 @@ body{
     s6BaseA: 1, s6KindsA: 0, s6GridA: 0,
     s6TypeOn: [0, 0, 0, 0, 0], s6TypeLit: [1, 1, 1, 1, 1],
     s6Ex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    s6ExLit: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    s6ExLit: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    /* 積分：シーン別アルファ（仮描画。本描画は次フェーズで差し替える） */
+    iScene: 0, iPh: 0,
+    i1A: 0, i1AT: 0, i2A: 0, i2AT: 0, i3A: 0, i3AT: 0,
+    i4A: 0, i4AT: 0, i5A: 0, i5AT: 0, i6A: 0, i6AT: 0,
+    /* 積分 Scene 1（本描画）：ステップ内の見え方を決める値 */
+    i1Step: 0, i1T: 0, i1Reveal: 0, i1Strips: 0, i1Sum: 0,
+    i1N: 4, i1NPrev: 4, i1FineA: 1, i1FineAT: 1, i1Rev: 0, i1Ms: 0,
+    /* 積分 Scene 2（本描画）：短冊の本数・曲線・隙間・仕上げの度合い */
+    i2Step: 0, i2Ms: 0, i2Reveal: 1, i2StripA: 0, i2GapA: 0,
+    i2N: 4, i2NPrev: 4, i2NFade: 1, i2FrameA: 0, i2CloseA: 0, i2FormA: 0,
+    i2NumA: 0, i2UserN: 8,
+    /* 積分 Scene 3（本描画）：輪切りの枚数・積み上げ・3Dプリンター */
+    i3Step: 0, i3Ms: 0, i3Reveal: 0, i3DimA: 0, i3Sweep: 0, i3Pull: 0,
+    i3NoteA: 0, i3Stack: 0, i3Print: 0, i3Nozz: 0, i3NumA: 0,
+    i3N: 0, i3Sum: 0, i3UserN: 8,
+    /* 積分 Scene 4（本描画）：分布・境界・塗り */
+    i4Step: 0, i4Ms: 0, i4Bars: 0, i4CurveA: 0, i4WholeA: 0, i4WholePulse: 0,
+    i4LineA: 0, i4HatchA: 0, i4NumA: 0, i4X: 60, i4UserX: 60,
+    /* 積分 Scene 5（本描画）：CGの光の積み上げと宇宙船の2段階積分 */
+    i5Step: 0, i5Ms: 0, i5Arrows: 0,
+    i5ArrowP: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    i5Light: 0, i5SumL: 0, i5RoomA: 0, i5NoteA: 0, i5BarA: 0,
+    i5CGa: 0, i5SpaceA: 0, i5Acc: 0, i5T: 0, i5ShipA: 0,
+    /* 積分 Scene 6（本描画）：6つの場面・5つの型・24の事例・2つのレンズ */
+    i6Step: 0, i6Ms: 0, i6BaseA: 1, i6KindsA: 0, i6GridA: 0, i6CloseA: 0,
+    i6TypeOn: [0, 0, 0, 0, 0], i6TypeLit: [1, 1, 1, 1, 1],
+    i6Ex: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    i6ExLit: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    i6Dot: [0, 0, 0, 0, 0, 0], i6Cur: -1,
+    i6TanA: 0, i6AreaA: 0, i6Pulse: 0
   };
 
   var mode = 'idle';     // idle | playing | paused | waiting | ended
@@ -892,6 +1025,54 @@ body{
       { color: color, width: width * 0.9, jitter: 0.15, seed: 6, alpha: alpha });
     inkPts([[x2, y2], [x2 - Math.cos(ang + 0.42) * s, y2 - Math.sin(ang + 0.42) * s]],
       { color: color, width: width * 0.9, jitter: 0.15, seed: 7, alpha: alpha });
+  }
+
+  /* 多角形を薄く塗り、45度の細い斜線を重ねる（面積のイメージ） */
+  function hatchPoly(pts, opt) {
+    if (!pts || pts.length < 3) return;
+    opt = opt || {};
+    var alpha = opt.alpha == null ? 1 : opt.alpha;
+    if (alpha <= 0.02) return;
+    var verm = !!opt.verm;
+    var u = clamp(W / 1000, 0.8, 1.4);
+    var gap = Math.max(4, 6 * u);                 /* 狭幅でも線が潰れない間隔 */
+    var fill = verm ? 'rgba(217,78,65,0.16)' : 'rgba(43,91,132,0.10)';
+    var line = verm ? 'rgba(217,78,65,0.34)' : 'rgba(43,91,132,0.25)';
+    var x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    var i;
+    for (i = 0; i < pts.length; i++) {
+      if (pts[i][0] < x0) x0 = pts[i][0];
+      if (pts[i][0] > x1) x1 = pts[i][0];
+      if (pts[i][1] < y0) y0 = pts[i][1];
+      if (pts[i][1] > y1) y1 = pts[i][1];
+    }
+    var spanY = Math.max(1, y1 - y0);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.clip();
+    ctx.strokeStyle = line;
+    ctx.lineWidth = Math.max(0.8, 0.9 * u);
+    ctx.beginPath();
+    for (var d = x0 - spanY - gap; d < x1 + gap; d += gap) {
+      ctx.moveTo(d, y1 + 1);
+      ctx.lineTo(d + spanY + 2, y0 - 1);
+    }
+    ctx.stroke();
+    ctx.restore();
+    if (opt.stroke) {
+      var outline = pts.slice(0);
+      outline.push(pts[0]);
+      inkPts(outline, {
+        color: opt.stroke, width: opt.width == null ? Math.max(1.2, 1.4 * u) : opt.width,
+        jitter: 0.2, seed: opt.seed == null ? 8 : opt.seed, alpha: alpha
+      });
+    }
   }
 
   /* ------------------------------------------------------------------ */
@@ -3391,27 +3572,3250 @@ body{
     ctx.fillRect(0, 0, W, H);
     if (paperTex) ctx.drawImage(paperTex, 0, 0, W, H);
 
-    if (S.carA > 0.01) drawCarScene(S.carA);
-    if (S.graphA > 0.01) drawGraph1(S.graphA);
-    if (S.parA > 0.01) drawScene2(S.parA);
-    if (S.s3A > 0.01) drawScene3(S.s3A);
-    if (S.s4A > 0.01) drawScene4(S.s4A);
-    if (S.s5A > 0.01) drawScene5(S.s5A);
-    if (S.s6A > 0.01) drawScene6(S.s6A);
+    if (UNIT === 'integ') {
+      /* シーン1〜6はすべて本描画 */
+      if (S.iScene === 1) i1DrawScene(S.i1A);
+      else if (S.iScene === 2) i2DrawScene(S.i2A);
+      else if (S.iScene === 3) i3DrawScene(S.i3A);
+      else if (S.iScene === 4) i4DrawScene(S.i4A);
+      else if (S.iScene === 5) i5DrawScene(S.i5A);
+      else if (S.iScene === 6) i6DrawScene(S.i6A);
+    } else {
+      if (S.carA > 0.01) drawCarScene(S.carA);
+      if (S.graphA > 0.01) drawGraph1(S.graphA);
+      if (S.parA > 0.01) drawScene2(S.parA);
+      if (S.s3A > 0.01) drawScene3(S.s3A);
+      if (S.s4A > 0.01) drawScene4(S.s4A);
+      if (S.s5A > 0.01) drawScene5(S.s5A);
+      if (S.s6A > 0.01) drawScene6(S.s6A);
 
-    /* メーターは車の場面とグラフの場面で同じ位置に置き、同じ走行としてつなぐ */
-    var meterA = Math.max(S.carA, S.meterA);
-    if (meterA > 0.01) {
-      drawSpeedometer(W * 0.83, H * 0.42, Math.min(W * 0.13, H * 0.25), meterA, S.meterA > 0.5);
+      /* メーターは車の場面とグラフの場面で同じ位置に置き、同じ走行としてつなぐ */
+      var meterA = Math.max(S.carA, S.meterA);
+      if (meterA > 0.01) {
+        drawSpeedometer(W * 0.83, H * 0.42, Math.min(W * 0.13, H * 0.25), meterA, S.meterA > 0.5);
+      }
     }
 
     if (mode === 'waiting' && !promptEl.hidden) {
       if (promptKind() === 'g') updateS3Readout();
       else if (promptKind() === 'p') updateS4Readout();
+      else if (promptKind() === 'n') updateNiReadout();
+      else if (promptKind() === 's') updateSiReadout();
+      else if (promptKind() === 'd') updateD4Readout();
       else {
         var val = 'x = ' + S.x.toFixed(2) + ' ／ 傾き ' + (2 * S.x).toFixed(1);
         if (readoutEl.textContent !== val) readoutEl.textContent = val;
       }
+    }
+  }
+
+  /* 積分ステップの enter / tick（該当シーンのアルファを立てる） */
+  function enterInteg(n) {
+    S.iScene = n;
+    S.iPh = 0;
+    S.i1AT = (n === 1) ? 1 : 0;
+    S.i2AT = (n === 2) ? 1 : 0;
+    S.i3AT = (n === 3) ? 1 : 0;
+    S.i4AT = (n === 4) ? 1 : 0;
+    S.i5AT = (n === 5) ? 1 : 0;
+    S.i6AT = (n === 6) ? 1 : 0;
+  }
+  function tickInteg(n, p) {
+    enterInteg(n);
+    S.iPh = p;
+  }
+
+  /* ================================================================== */
+  /* 積分 Scene 1「同じ走行から、進んだ距離を読む」の本描画               */
+  /*   数値はすべて既存の speedAt / distanceAt（単一モデル）から出す       */
+  /* ================================================================== */
+  var I1_T1 = 16;                        /* 加速区間の終わり（秒） */
+
+  /* 走行モデルから [t0,t1] を N 分割した左端の短冊の合計（m） */
+  function i1StripsSum(n, t0, t1) {
+    var dt = (t1 - t0) / n, s = 0;
+    for (var k = 0; k < n; k++) s += dt * speedAt(t0 + k * dt);
+    return s;
+  }
+
+  function i1Layout() {
+    var narrow = W < 620;
+    if (narrow) {
+      return {
+        narrow: true,
+        graph: { x0: W * 0.115, x1: W * 0.82, yT: H * 0.355, yB: H * 0.80 },
+        car: { cx0: W * 0.17, cx1: W * 0.57, cy: H * 0.115, w: Math.min(W * 0.46, H * 0.52) },
+        meter: { cx: W * 0.80, cy: H * 0.115, r: Math.min(W * 0.075, H * 0.115) }
+      };
+    }
+    return {
+      narrow: false,
+      graph: { x0: W * 0.55, x1: W * 0.93, yT: H * 0.16, yB: H * 0.82 },
+      car: { cx0: W * 0.15, cx1: W * 0.29, cy: H * 0.46, w: Math.min(W * 0.25, H * 0.38) },
+      meter: { cx: W * 0.47, cy: H * 0.40, r: Math.min(W * 0.065, H * 0.16) }
+    };
+  }
+
+  /* 短冊・曲線用の広いグラフ枠（ステップ2〜4で共用） */
+  function i1GraphBox(wide) {
+    if (wide) return { x0: W * 0.10, x1: W * 0.93, yT: H * 0.21, yB: H * 0.80 };
+    return { x0: W * 0.115, x1: W * 0.82, yT: H * 0.30, yB: H * 0.78 };
+  }
+
+  /* 軸を描き、t→x / v→y の写像を返す。
+     opt.xEnd を渡すと x 軸線をその位置で止める（軸線を長方形の右端より先へ伸ばさない）。
+     opt.endA は右端の目盛りと「10秒」ラベルの不透明度（軸線が右端に届いた頃に出す） */
+  function i1Axes(g, tMax, vMax, a, opt) {
+    opt = opt || {};
+    var f = clamp(W / 1000, 0.8, 1.4);
+    var as = Math.max(8.4, 9.2 * f);
+    var xEnd = opt.xEnd == null ? g.x1 : clamp(opt.xEnd, g.x0, g.x1);
+    var endA = opt.endA == null ? 1 : clamp(opt.endA, 0, 1);
+    var X = function (t) { return g.x0 + (g.x1 - g.x0) * clamp(t / tMax, 0, 1); };
+    var Y = function (v) { return g.yB - (g.yB - g.yT) * clamp(v / vMax, 0, 1); };
+    if (xEnd > g.x0 + 1.5) {
+      inkPts([[g.x0, g.yB], [xEnd, g.yB]],
+        { color: C.ink, width: Math.max(1.4, 1.5 * f), jitter: 0.25, seed: 401, alpha: a });
+    }
+    inkPts([[g.x0, g.yB], [g.x0, g.yT - 4 * f]],
+      { color: C.ink, width: Math.max(1.4, 1.5 * f), jitter: 0.25, seed: 402, alpha: a });
+    /* t 軸の目盛り（0 と右端）と単位は右端に添える */
+    if (endA > 0.02) {
+      inkPts([[g.x1, g.yB], [g.x1, g.yB + as * 0.32]],
+        { color: C.ink, width: 1.1, jitter: 0.15, seed: 403, alpha: a * 0.7 * endA });
+    }
+    inkPts([[g.x0 - as * 0.32, g.yT], [g.x0, g.yT]],
+      { color: C.ink, width: 1.1, jitter: 0.15, seed: 404, alpha: a * 0.7 });
+    text('0', g.x0, g.yB + as * 1.02, { size: as, color: C.light, alpha: a });
+    if (endA > 0.02) {
+      text(String(tMax) + '秒', g.x1, g.yB + as * 1.02,
+        { size: as, color: C.light, align: 'right', alpha: a * endA });
+    }
+    text(String(vMax), g.x0 - as * 0.42, g.yT + as * 0.25,
+      { size: as, color: C.light, align: 'right', alpha: a });
+    text('m/s', g.x0 - as * 0.42, g.yT - as * 1.45,
+      { size: as, color: C.light, align: 'right', alpha: a });
+    return { X: X, Y: Y, fs: as };
+  }
+
+  /* 小型の車（描画位置を引数で受ける。微分の drawCar には触れない） */
+  function i1Car(cx, cy, w, a, dist) {
+    if (a <= 0.01 || w < 12) return;
+    var h = w * CAR_H / CAR_W, s = w / CAR_W;
+    var x = cx - w / 2, y = cy - h / 2;
+    ctx.save();
+    ctx.globalAlpha = a * 0.45;
+    ctx.fillStyle = 'rgba(34,34,34,0.09)';
+    ctx.beginPath();
+    ctx.ellipse(cx, y + h * 0.97, w * 0.45, Math.max(1.4, h * 0.06), 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    var ang = (dist || 0) / 0.75;
+    drawWheel(x + 52 * s, y + CAR_WHEEL_Y * s, CAR_WHEEL_R * s, ang, a);
+    drawWheel(x + 152 * s, y + CAR_WHEEL_Y * s, CAR_WHEEL_R * s, ang, a);
+    ctx.save();
+    ctx.globalAlpha = a;
+    if (carReady) {
+      ctx.drawImage(carImg, x, y, w, h);
+    } else if (CAR_PATH) {
+      ctx.translate(x, y);
+      ctx.scale(s, s);
+      ctx.fillStyle = '#F3EFE3';
+      ctx.strokeStyle = C.ink;
+      ctx.lineWidth = 1.8;
+      ctx.fill(CAR_PATH);
+      ctx.stroke(CAR_PATH);
+    }
+    ctx.restore();
+  }
+
+  /* 小型のスピードメーター（m/s 表示。微分の drawSpeedometer とは独立） */
+  function i1Speedo(cx, cy, r, val, maxVal, a) {
+    if (a <= 0.01 || r < 8) return;
+    var ang = function (v) { return (135 + 270 * clamp(v, 0, maxVal) / maxVal) * Math.PI / 180; };
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.strokeStyle = C.ink;
+    ctx.lineWidth = Math.max(1.1, r * 0.05);
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 135 * Math.PI / 180, 405 * Math.PI / 180);
+    ctx.stroke();
+    ctx.restore();
+    for (var v = 0; v <= maxVal + 1e-6; v += maxVal / 4) {
+      var aa = ang(v);
+      inkPts([
+        [cx + Math.cos(aa) * r * 0.84, cy + Math.sin(aa) * r * 0.84],
+        [cx + Math.cos(aa) * r * 0.97, cy + Math.sin(aa) * r * 0.97]
+      ], { color: C.ink, width: Math.max(1, r * 0.04), jitter: 0.1, seed: 301 + v, alpha: a });
+    }
+    var an = ang(val);
+    inkPts([
+      [cx - Math.cos(an) * r * 0.08, cy - Math.sin(an) * r * 0.08],
+      [cx + Math.cos(an) * r * 0.80, cy + Math.sin(an) * r * 0.80]
+    ], { color: C.verm, width: Math.max(1.4, r * 0.065), jitter: 0.15, seed: 333, alpha: a });
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = C.ink;
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.max(1.2, r * 0.06), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    text(String(Math.round(val)), cx, cy + r * 0.48,
+      { size: Math.max(9, r * 0.36), weight: 700, alpha: a });
+    text('m/s', cx, cy + r * 0.86, { size: Math.max(8, r * 0.22), color: C.light, alpha: a });
+  }
+
+  /* 車＋メーターを、いまの時刻の速さで描く（車は t=0→10 秒で右へ進む）。
+     v を渡すとメーターの値だけを固定する（一定の速さのステップ用） */
+  function i1CarMeter(a, t, v) {
+    var lay = i1Layout();
+    var cx = lerp(lay.car.cx0, lay.car.cx1, clamp(t / 10, 0, 1));
+    i1Car(cx, lay.car.cy, lay.car.w, a, distanceAt(t));
+    i1Speedo(lay.meter.cx, lay.meter.cy, lay.meter.r,
+      v == null ? speedAt(t) : v, 12, a);
+  }
+
+  /* 短冊を N 分割で描く（左端の高さ＝左リーマン和） */
+  function i1DrawStripsAt(m, n, alpha, accentLast) {
+    if (alpha <= 0.02 || n < 1) return;
+    var dt = I1_T1 / n;
+    for (var k = 0; k < n; k++) {
+      var xA = m.X(k * dt), xB = m.X((k + 1) * dt);
+      var h = speedAt(k * dt);
+      var yTop = m.Y(h), yb = m.Y(0);
+      if (yTop < yb - 0.6) {
+        var isLast = accentLast && (k === n - 1);
+        hatchPoly(
+          [[xA, yb], [xB, yb], [xB, yTop], [xA, yTop]],
+          { alpha: alpha, verm: isLast, seed: 451 + (k % 7) }
+        );
+      }
+    }
+  }
+
+  /* ステップ1：一定の速さ 10 m/s で 10 秒 */
+  function i1DrawConst(a) {
+    var lay = i1Layout();
+    var f = clamp(W / 1000, 0.8, 1.4);
+    var t = clamp(S.i1T, 0, 10);
+    /* このステップは「一定の速さ 10 m/s」。メーターも時刻によらず 10 を指す */
+    i1CarMeter(a, t, 10);
+    var g = lay.graph;
+    /* x 軸線は長方形の右端（t=10 で 10秒 の目盛り位置）より先へ伸ばさない。
+       縦軸の上端＝v=10 なので、長方形の上端は必ず目盛りに一致する */
+    var xEnd = g.x0 + (g.x1 - g.x0) * clamp(t / 10, 0, 1);
+    var endA = clamp((t - 8.4) / 1.2, 0, 1);
+    var m = i1Axes(g, 10, 10, a, { xEnd: xEnd, endA: endA });
+    if (t > 0.03) {
+      hatchPoly([
+        [m.X(0), m.Y(0)], [m.X(t), m.Y(0)], [m.X(t), m.Y(10)], [m.X(0), m.Y(10)]
+      ], { alpha: a, stroke: C.indigo, seed: 911 });
+    }
+    /* 高さ 10 m/s の目安線 */
+    inkPts([[g.x0, m.Y(10)], [m.X(t), m.Y(10)]],
+      { color: C.indigo, width: 1.2, jitter: 0.2, seed: 912, alpha: a * 0.55, dash: [4, 4] });
+    var pa = clamp((t - 5.5) / 1.5, 0, 1);
+    if (pa > 0.02) {
+      /* 「面積 100」と「進んだ距離 100m」は長方形の中央にまとめる */
+      pill(['面積 100', '＝ 進んだ距離 100m'], (m.X(0) + m.X(10)) / 2, m.Y(5),
+        { alpha: a * pa, size: lay.narrow ? 10.5 : 11, weight: 700, color: C.indigo,
+          border: 'rgba(43,91,132,.35)', maxW: W * (lay.narrow ? 0.74 : 0.42) });
+    }
+    /* 「一定の速さ 10 m/s」は車のすぐ下 */
+    var carH = lay.car.w * CAR_H / CAR_W;
+    var labelY = lay.narrow
+      ? Math.min(lay.car.cy + carH / 2 + Math.max(10, H * 0.075), m.Y(10) - Math.max(9, H * 0.075))
+      : lay.car.cy + carH / 2 + carH * 0.55;
+    text('一定の速さ 10 m/s', (lay.car.cx0 + lay.car.cx1) / 2, labelY,
+      { size: Math.max(8.6, 9.8 * f), color: C.light, alpha: a * 0.95, maxWidth: W * 0.5 });
+  }
+
+  /* ステップ2：速さはどんどん変わる（曲線を左から描く） */
+  function i1DrawAccel(a) {
+    var wide = W >= 620;
+    var g = i1GraphBox(wide);
+    /* 縦軸は 0〜10（速さの最大は約 9.2 m/s）。短冊のステップと同じスケールに揃える */
+    var m = i1Axes(g, 44, 10, a);
+    var f = clamp(W / 1000, 0.8, 1.4);
+    var rev = clamp(S.i1Reveal, 0, 1);
+    var pts = [], i, t;
+    for (i = 0; i <= 72; i++) {
+      t = 44 * i / 72;
+      pts.push([m.X(t), m.Y(speedAt(t))]);
+    }
+    var cur = partial(pts, rev);
+    if (cur.length > 1) {
+      inkPts(cur, { color: C.indigo, width: Math.max(2, 2.2 * f), jitter: 0.35, seed: 421, alpha: a });
+    }
+    if (rev > 0.005 && rev < 0.999 && cur.length) {
+      var tip = cur[cur.length - 1];
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.fillStyle = C.indigo;
+      ctx.beginPath();
+      ctx.arc(tip[0], tip[1], Math.max(2, 2.6 * f), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    var na = clamp((rev - 0.4) / 0.3, 0, 1);
+    if (na > 0.02) {
+      /* 縦軸を 10 にしたぶん曲線が高い位置を通るので、吹き出しは左上の空きへ */
+      var nx = wide ? m.X(6) : W * 0.55;
+      var ny = wide ? g.yT + (g.yB - g.yT) * 0.10 : H * 0.135;
+      pill(['速さはどんどん変わる'], nx, ny,
+        { alpha: a * na, size: 11, color: C.indigo, border: 'rgba(43,91,132,.35)',
+          maxW: W * (wide ? 0.34 : 0.55) });
+    }
+  }
+
+  /* ステップ3：区間 [0,16] を 8 本の短冊に */
+  function i1DrawStrips(a) {
+    var wide = W >= 620;
+    var g = i1GraphBox(wide);
+    var m = i1Axes(g, 16, 10, a);
+    var f = clamp(W / 1000, 0.8, 1.4);
+    var i, t;
+    var cpts = [];
+    for (i = 0; i <= 48; i++) {
+      t = I1_T1 * i / 48;
+      cpts.push([m.X(t), m.Y(speedAt(t))]);
+    }
+    inkPts(cpts, { color: C.ink, width: Math.max(1.4, 1.6 * f), jitter: 0.3, seed: 441, alpha: a * 0.5 });
+
+    var N = 8, dt = I1_T1 / N;
+    var cnt = clamp(S.i1Strips, 0, N);
+    var sum = 0;
+    for (var k = 0; k < N; k++) {
+      var fr = clamp(cnt - k, 0, 1);
+      if (fr <= 0) break;
+      var xA = m.X(k * dt), xB = m.X(k * dt + dt * fr);
+      var yb = m.Y(0), yTop = m.Y(speedAt(k * dt));
+      sum += fr * dt * speedAt(k * dt);
+      if (yTop < yb - 0.6) {
+        hatchPoly([[xA, yb], [xB, yb], [xB, yTop], [xA, yTop]],
+          { alpha: a, verm: fr < 1, stroke: fr < 1 ? C.verm : C.indigo, seed: 451 + k });
+      }
+    }
+    S.i1Sum = sum;
+    pill(['短冊の合計 ' + sum.toFixed(1) + 'm'], W * 0.5, wide ? H * 0.085 : H * 0.10,
+      { alpha: a, size: 11.5, weight: 700, color: C.indigo, maxW: W * 0.7 });
+    text('区切り 8本 ／ 1本 = 2秒', W * 0.5, wide ? H * 0.155 : H * 0.225,
+      { size: Math.max(8.8, 9.6 * f), color: C.light, alpha: a * 0.95, maxWidth: W * 0.9 });
+  }
+
+  /* ステップ4：分割を細かくする（4→8→16→48、段階＋短いフェード） */
+  function i1DrawFine(a) {
+    var wide = W >= 620;
+    var g = i1GraphBox(wide);
+    var m = i1Axes(g, 16, 10, a);
+    var f = clamp(W / 1000, 0.8, 1.4);
+    var i, t;
+    var cpts = [];
+    for (i = 0; i <= 48; i++) {
+      t = I1_T1 * i / 48;
+      cpts.push([m.X(t), m.Y(speedAt(t))]);
+    }
+    inkPts(cpts, { color: C.ink, width: Math.max(1.4, 1.6 * f), jitter: 0.3, seed: 442, alpha: a * 0.5 });
+
+    var n = S.i1N || 4, nPrev = S.i1NPrev || n, fa = clamp(S.i1FineA, 0, 1);
+    if (nPrev !== n && fa < 0.995) i1DrawStripsAt(m, nPrev, a * (1 - fa) * 0.9, false);
+    i1DrawStripsAt(m, n, a * (nPrev !== n ? fa : 1), false);
+
+    var sum = i1StripsSum(n, 0, I1_T1);
+    S.i1Sum = sum;
+    pill(['短冊の合計 ' + sum.toFixed(1) + 'm'], W * 0.5, wide ? H * 0.085 : H * 0.10,
+      { alpha: a, size: 11.5, weight: 700, color: C.indigo, maxW: W * 0.7 });
+    text('区切り ' + n + '本', W * 0.5, wide ? H * 0.155 : H * 0.225,
+      { size: Math.max(9, 10 * f), color: C.light, alpha: a * 0.95 });
+
+    var faEnd = clamp((S.i1Ms - 8300) / 500, 0, 1);
+    if (faEnd > 0.02) {
+      var real = distanceAt(I1_T1) - distanceAt(0);
+      pill(['曲線の下の面積＝進んだ距離（' + real.toFixed(1) + 'm）'],
+        W * 0.5, wide ? H * 0.90 : H * 0.93,
+        { alpha: a * faEnd, size: 10.5, weight: 700, maxW: W * 0.86 });
+    }
+  }
+
+  /* ステップ5：微分と積分は逆の関係 */
+  function i1DrawReverse(a) {
+    var narrow = W < 620;
+    var f = clamp(W / 1000, 0.8, 1.4);
+    var fs = Math.max(8.4, 9.6 * f);
+    var rev = clamp(S.i1Rev, 0, 1);
+    var left, right, i, t;
+    if (narrow) {
+      /* 狭幅は左右2パネル＋中央に縦向きの矢印列（要素が接触しない構成） */
+      left = { x0: W * 0.075, x1: W * 0.40, yT: H * 0.30, yB: H * 0.66 };
+      right = { x0: W * 0.60, x1: W * 0.925, yT: H * 0.30, yB: H * 0.66 };
+    } else {
+      left = { x0: W * 0.07, x1: W * 0.43, yT: H * 0.24, yB: H * 0.76 };
+      right = { x0: W * 0.57, x1: W * 0.93, yT: H * 0.24, yB: H * 0.76 };
+    }
+    var dMax = distanceAt(44) || 1;
+    var vMax = 16;
+
+    /* --- 左：距離グラフ＋朱の接線（微分） --- */
+    inkPts([[left.x0, left.yB], [left.x1, left.yB]],
+      { color: C.ink, width: 1.3, jitter: 0.2, seed: 461, alpha: a });
+    inkPts([[left.x0, left.yB], [left.x0, left.yT]],
+      { color: C.ink, width: 1.3, jitter: 0.2, seed: 462, alpha: a });
+    var LX = function (tt) { return left.x0 + (left.x1 - left.x0) * clamp(tt / 44, 0, 1); };
+    var LY = function (d) { return left.yB - (left.yB - left.yT) * clamp(d / dMax, 0, 1); };
+    var dpts = [];
+    for (i = 0; i <= 72; i++) {
+      t = 44 * i / 72;
+      dpts.push([LX(t), LY(distanceAt(t))]);
+    }
+    var dcur = dpts;
+    if (dcur.length > 1) {
+      inkPts(dcur, { color: C.ink, width: Math.max(1.6, 1.8 * f), jitter: 0.3, seed: 463, alpha: a });
+    }
+    /* 33秒の接線（朱）。曲線がその時刻まで描けてから出す */
+    var tq = P_TIME;
+    var dxd = (left.x1 - left.x0) / 44;
+    var dyd = -(left.yB - left.yT) / dMax * speedAt(tq);
+    var px = LX(tq), py = LY(distanceAt(tq));
+    var Lp = 0.22 * (left.x1 - left.x0);
+    var tanA = a * clamp((rev - 0.15) / 0.25, 0, 1);
+    inkPts([[px - Lp, py + dyd / dxd * (-Lp)], [px + Lp, py + dyd / dxd * Lp]],
+      { color: C.verm, width: Math.max(1.6, 1.9 * f), jitter: 0.25, seed: 464, alpha: tanA });
+    ctx.save();
+    ctx.globalAlpha = tanA;
+    ctx.fillStyle = C.verm;
+    ctx.beginPath();
+    ctx.arc(px, py, Math.max(2, 2.6 * f), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    /* --- 右：速さグラフ＋藍の面積（積分） --- */
+    inkPts([[right.x0, right.yB], [right.x1, right.yB]],
+      { color: C.ink, width: 1.3, jitter: 0.2, seed: 465, alpha: a });
+    inkPts([[right.x0, right.yB], [right.x0, right.yT]],
+      { color: C.ink, width: 1.3, jitter: 0.2, seed: 466, alpha: a });
+    var RX = function (tt) { return right.x0 + (right.x1 - right.x0) * clamp(tt / 44, 0, 1); };
+    var RY = function (v) { return right.yB - (right.yB - right.yT) * clamp(v / vMax, 0, 1); };
+    /* 曲線下の面積は 0〜44 秒の全域を塗る（停止区間は高さ0なので塗りなし） */
+    var area = [[RX(0), RY(0)]];
+    for (i = 0; i <= 72; i++) {
+      t = 44 * i / 72;
+      area.push([RX(t), RY(speedAt(t))]);
+    }
+    area.push([RX(44), RY(0)]);
+    hatchPoly(area, { alpha: a, stroke: C.indigo, seed: 467 });
+    var vpts = [];
+    for (i = 0; i <= 72; i++) {
+      t = 44 * i / 72;
+      vpts.push([RX(t), RY(speedAt(t))]);
+    }
+    var vcur = vpts;
+    if (vcur.length > 1) {
+      inkPts(vcur, { color: C.indigo, width: Math.max(1.6, 1.8 * f), jitter: 0.3, seed: 468, alpha: a });
+    }
+
+    /* --- 見出しと中央の矢印 --- */
+    var ttlY = narrow ? left.yT - fs * 1.2 : left.yT - fs * 1.5;
+    text('距離', left.x0, ttlY,
+      { size: Math.max(9.4, 10.8 * f), weight: 700, align: 'left', alpha: a });
+    text('速さ', right.x0, (narrow ? right.yT - fs * 1.2 : right.yT - fs * 1.5),
+      { size: Math.max(9.4, 10.8 * f), weight: 700, align: 'left', alpha: a });
+
+    var aw = clamp(rev * 1.3, 0, 1);
+    if (aw > 0.02) {
+      if (narrow) {
+        /* 中央の隙間に「微分 →」「← 積分」の横矢印を2段（意味の向きどおり）。
+           微分＝距離→速さ（右向き）、積分＝速さ→距離（左向き） */
+        var xl0 = left.x1, xr0 = right.x0;
+        var ls = Math.max(8.6, 9.6 * f);
+        var cxm = (xl0 + xr0) / 2;
+        var midY = (left.yT + left.yB) / 2;
+        var rowGap = Math.max(ls * 1.6, ls + 4);      /* 2段の間隔を2px以上に */
+        var alen = Math.max(16, Math.min(28, (xr0 - xl0) * 0.42));
+        ctx.save();
+        ctx.font = '700 ' + ls.toFixed(1) + 'px ' + FONT;
+        var lwD = ctx.measureText('微分').width;
+        var lwI = ctx.measureText('積分').width;
+        ctx.restore();
+        var rowW = Math.min(Math.max(lwD, lwI) + 6 + alen, Math.max(24, xr0 - xl0 - 6));
+        var xs = cxm - rowW / 2;
+        var yU = midY - rowGap / 2, yD = midY + rowGap / 2;
+        /* 上段：微分 →（右向き） */
+        text('微分', xs, yU,
+          { size: ls, weight: 700, color: C.indigo, align: 'left', alpha: a * aw });
+        lineWithArrow(xs + lwD + 6, yU, xs + rowW, yU, C.indigo, Math.max(1.4, 1.6 * f), a * aw);
+        /* 下段：← 積分（左向き） */
+        lineWithArrow(xs + rowW - lwI - 6, yD, xs, yD, C.verm, Math.max(1.4, 1.6 * f), a * aw);
+        text('積分', xs + rowW - lwI, yD,
+          { size: ls, weight: 700, color: C.verm, align: 'left', alpha: a * aw });
+      } else {
+        var ax = W * 0.50, aw2 = W * 0.055;
+        lineWithArrow(ax - aw2, H * 0.50, ax - W * 0.018, H * 0.50, C.indigo, Math.max(1.4, 1.7 * f), a * aw);
+        lineWithArrow(ax + aw2, H * 0.50, ax + W * 0.018, H * 0.50, C.verm, Math.max(1.4, 1.7 * f), a * aw);
+        text('微分', ax - (aw2 + W * 0.018) / 2, H * 0.44, { size: Math.max(9.4, 10.6 * f), weight: 700, color: C.indigo, alpha: a * aw });
+        text('積分', ax + (aw2 + W * 0.018) / 2, H * 0.56, { size: Math.max(9.4, 10.6 * f), weight: 700, color: C.verm, alpha: a * aw });
+      }
+    }
+  }
+
+  function i1DrawScene(a) {
+    if (a <= 0.01) return;
+    var step = S.i1Step | 0;
+    if (step === 0) i1DrawConst(a);
+    else if (step === 1) i1DrawAccel(a);
+    else if (step === 2) i1DrawStrips(a);
+    else if (step === 3) i1DrawFine(a);
+    else i1DrawReverse(a);
+  }
+
+  /* 各ステップの enter：開始時点の見え方を即時確定する */
+  function i1Enter(step) {
+    enterInteg(1);
+    S.i1Step = step;
+    S.i1T = 0; S.i1Reveal = 0; S.i1Strips = 0; S.i1Sum = 0;
+    S.i1N = 4; S.i1NPrev = 4; S.i1FineA = 1; S.i1FineAT = 1;
+    S.i1Rev = 0; S.i1Ms = 0;
+    if (step === 0) { S.i1T = 0; }
+    else if (step === 3) { S.i1N = 4; S.i1NPrev = 4; }
+  }
+
+  /* tick：ms（ステップ内ミリ秒）から決定論的に決める */
+  function i1Tick(step, ms) {
+    ms = ms == null ? 0 : ms;
+    S.i1Step = step;
+    S.i1Ms = ms;
+    if (step === 0) {
+      S.i1T = 10 * clamp(ms / 5200, 0, 1);
+    } else if (step === 1) {
+      S.i1Reveal = clamp(ms / 7000, 0, 1);
+    } else if (step === 2) {
+      S.i1Strips = clamp((ms - 1700) / 950, 0, 8);
+      var dt = I1_T1 / 8, sum = 0;
+      for (var k = 0; k < 8; k++) {
+        var fr = clamp(S.i1Strips - k, 0, 1);
+        if (fr <= 0) break;
+        sum += fr * dt * speedAt(k * dt);
+      }
+      S.i1Sum = sum;
+    } else if (step === 3) {
+      var seg = [[0, 4], [2200, 8], [4800, 16], [7400, 48]];
+      var n = 4, prev = 4, fa = 1;
+      for (var i = 0; i < seg.length; i++) {
+        if (ms >= seg[i][0]) {
+          prev = n; n = seg[i][1];
+          fa = clamp((ms - seg[i][0]) / 280, 0, 1);
+        }
+      }
+      S.i1N = n; S.i1NPrev = prev; S.i1FineAT = fa; S.i1FineA = fa;
+      S.i1Sum = i1StripsSum(n, 0, I1_T1);
+    } else {
+      S.i1Rev = clamp(ms / 7000, 0, 1);
+    }
+  }
+
+  /* ================================================================== */
+  /* 積分 Scene 2「細かく切るほど、形が見える」の本描画                   */
+  /*   f(x)=x^2、区間 [0,2]、真の面積 8/3。左端の短冊で近似する           */
+  /*   数値はすべて i2LeftSum（単一ソース）と I2_TRUE から出す             */
+  /* ================================================================== */
+  var I2_XMAX = 2, I2_YMAX = 4, I2_TRUE = 8 / 3, I2_PLAY_N = 8;
+
+  function i2F(x) { return x * x; }
+
+  /* 左端の短冊 n 本の合計（n=4→1.75、8→2.1875、16→2.42、40→2.5675） */
+  function i2LeftSum(n) {
+    n = Math.max(1, Math.round(n));
+    var dx = I2_XMAX / n, s = 0;
+    for (var k = 0; k < n; k++) s += i2F(k * dx) * dx;
+    return s;
+  }
+
+  /* i2-play の待機中だけステージ左下にスライダーが出る。
+     そのときは軸・短冊がスライダーに触れないよう、グラフの下側を空ける */
+  function i2SliderReserve() {
+    if (mode !== 'waiting' || !stageSlider || stageSlider.hidden) return 0;
+    var cr = canvas.getBoundingClientRect();
+    var sr = stageSlider.getBoundingClientRect();
+    if (cr.height < 1 || sr.height < 1) return 0;
+    return Math.max(0, cr.bottom - sr.top) + 6;
+  }
+
+  function i2Box() {
+    var narrow = W < 620;
+    var b = narrow
+      ? {
+        narrow: true, numY: H * 0.105,
+        x0: W * 0.125, x1: W * 0.80, yT: H * 0.29, yB: H * 0.755
+      }
+      : {
+        narrow: false, numY: H * 0.085,
+        x0: W * 0.15, x1: W * 0.90, yT: H * 0.22, yB: H * 0.83
+      };
+    var rs = i2SliderReserve();
+    if (rs > 0.5) {
+      var as = Math.max(8.4, 9.2 * clamp(W / 1000, 0.8, 1.4));
+      var yBmax = H - rs - as * 1.55;          /* x軸の「0」ラベルの下端まで収める */
+      if (yBmax < b.yB) {
+        var yB = yBmax;
+        var yT = Math.max(b.yT - (b.yB - yB) * 0.5, b.numY + as * 3.2);
+        if (yT > yB - as * 2.4) yT = Math.max(b.numY + as * 2.2, yB - as * 2.4);
+        b.yB = yB;
+        b.yT = yT;
+      }
+    }
+    return b;
+  }
+
+  /* 軸を描き、x→px / y→py の写像を返す（x:0〜2、y:0〜4） */
+  function i2Axes(g, a) {
+    var f = clamp(W / 1000, 0.8, 1.4);
+    var as = Math.max(8.4, 9.2 * f);
+    var X = function (x) { return g.x0 + (g.x1 - g.x0) * clamp(x / I2_XMAX, 0, 1); };
+    var Y = function (y) { return g.yB - (g.yB - g.yT) * clamp(y / I2_YMAX, 0, 1); };
+    inkPts([[g.x0, g.yB], [g.x1, g.yB]],
+      { color: C.ink, width: Math.max(1.3, 1.45 * f), jitter: 0.25, seed: 501, alpha: a });
+    inkPts([[g.x0, g.yB], [g.x0, g.yT - as * 0.4]],
+      { color: C.ink, width: Math.max(1.3, 1.45 * f), jitter: 0.25, seed: 502, alpha: a });
+    inkPts([[g.x1, g.yB], [g.x1, g.yB + as * 0.3]],
+      { color: C.ink, width: 1.1, jitter: 0.15, seed: 503, alpha: a * 0.7 });
+    inkPts([[g.x0 - as * 0.3, g.yT], [g.x0, g.yT]],
+      { color: C.ink, width: 1.1, jitter: 0.15, seed: 504, alpha: a * 0.7 });
+    text('0', g.x0 - as * 0.42, g.yB + as * 0.95,
+      { size: as, color: C.light, align: 'right', alpha: a });
+    text(String(I2_XMAX), g.x1, g.yB + as * 1.0,
+      { size: as, color: C.light, align: 'right', alpha: a });
+    text(String(I2_YMAX), g.x0 - as * 0.42, g.yT + as * 0.22,
+      { size: as, color: C.light, align: 'right', alpha: a });
+    /* 単位は軸の端に添える（右下の再生ボタンに掛からない位置） */
+    text('x', g.x1 + as * 0.35, g.yB + as * 1.0, { size: as, color: C.light, align: 'left', alpha: a });
+    text('y', g.x0 - as * 0.42, g.yT - as * 1.35,
+      { size: as, color: C.light, align: 'right', alpha: a });
+    return { X: X, Y: Y, fs: as };
+  }
+
+  function i2CurvePts(m) {
+    var pts = [], N = 64;
+    for (var i = 0; i <= N; i++) {
+      var x = I2_XMAX * i / N;
+      pts.push([m.X(x), m.Y(i2F(x))]);
+    }
+    return pts;
+  }
+
+  /* 曲線下の領域の多角形（x=0→2 の曲線＋底辺で閉じる） */
+  function i2AreaPoly(m) {
+    var poly = [[m.X(0), m.Y(0)]], N = 64;
+    for (var i = 0; i <= N; i++) {
+      var x = I2_XMAX * i / N;
+      poly.push([m.X(x), m.Y(i2F(x))]);
+    }
+    poly.push([m.X(I2_XMAX), m.Y(0)]);
+    return poly;
+  }
+
+  /* 短冊（左端の高さ）。reveal で左から立ち上がり、隙間は朱のハッチ */
+  function i2Strips(m, n, a, opt) {
+    opt = opt || {};
+    n = Math.max(1, Math.round(n));
+    if (a <= 0.02) return;
+    var dx = I2_XMAX / n;
+    var reveal = opt.reveal == null ? 1 : clamp(opt.reveal, 0, 1);
+    var gapA = opt.gapA == null ? 0 : opt.gapA;
+    var outline = opt.outline == null ? (n <= 16) : opt.outline;
+    var w = Math.max(0.9, 1.05 * clamp(W / 1000, 0.8, 1.4));
+    for (var k = 0; k < n; k++) {
+      var fr = clamp(reveal * n - k, 0, 1);
+      if (fr <= 0) break;
+      var xa = k * dx, xb = xa + dx * fr;
+      var y0 = m.Y(0), yTop = m.Y(i2F(xa));
+      if (yTop < y0 - 0.4) {
+        hatchPoly([[m.X(xa), y0], [m.X(xb), y0], [m.X(xb), yTop], [m.X(xa), yTop]],
+          { alpha: a, stroke: outline ? C.indigo : null, width: w, seed: 611 + (k % 5) });
+      }
+      /* 曲線との隙間（短冊の上端と曲線の間）を朱で強調 */
+      if (gapA > 0.02 && fr >= 0.999) {
+        var yCa = m.Y(i2F(xa)), yCb = m.Y(i2F(xb));
+        if (yTop - yCa > 0.4 || yTop - yCb > 0.4) {
+          hatchPoly([[m.X(xa), yTop], [m.X(xb), yTop], [m.X(xb), yCb], [m.X(xa), yCa]],
+            { alpha: a * clamp(gapA, 0, 1), verm: true, seed: 631 + (k % 5) });
+        }
+      }
+    }
+  }
+
+  /* ステージ上部の数値（短冊の合計／真の面積／差。小数2桁） */
+  function i2Numbers(n, a, only) {
+    if (a <= 0.02) return;
+    var g = i2Box();
+    var f = clamp(W / 1000, 0.8, 1.4);
+    var s = Math.max(10, 11.2 * f);
+    if (only === 'true') {
+      text('真の面積 ' + I2_TRUE.toFixed(2), W * 0.5, g.numY,
+        { size: s, weight: 700, alpha: a, maxWidth: W * 0.96 });
+      return;
+    }
+    var sum = i2LeftSum(n), d = I2_TRUE - sum;
+    if (g.narrow) {
+      text('短冊の合計 ' + sum.toFixed(2) + ' ／ 真の面積 ' + I2_TRUE.toFixed(2),
+        W * 0.5, g.numY, { size: s, weight: 700, alpha: a, maxWidth: W * 0.96 });
+      text('差 ' + d.toFixed(2), W * 0.5, g.numY + s * 1.55,
+        { size: s, weight: 700, color: C.verm, alpha: a, maxWidth: W * 0.96 });
+    } else {
+      text('短冊の合計 ' + sum.toFixed(2) + ' ／ 真の面積 ' + I2_TRUE.toFixed(2) +
+        ' ／ 差 ' + d.toFixed(2),
+        W * 0.5, g.numY, { size: s, weight: 700, alpha: a, maxWidth: W * 0.96 });
+    }
+  }
+
+  /* ∫₀² x² dx = 8/3 ≈ 2.67 （∫ と上下端は小さく組み、式全体を中央に置く） */
+  function i2Formula(a) {
+    if (a <= 0.02) return;
+    var g = i2Box();
+    var f = clamp(W / 1000, 0.8, 1.4);
+    var s = Math.max(10, 12.6 * f);
+    var rest = ' x\u00B2 dx = 8/3 \u2248 2.67';
+    var bigS = s * 1.45, limS = s * 0.7;
+    ctx.save();
+    ctx.font = '400 ' + bigS.toFixed(1) + 'px ' + MATH_FONT;
+    var wInt = ctx.measureText('\u222B').width;
+    ctx.font = '400 ' + limS.toFixed(1) + 'px ' + MATH_FONT;
+    var wLim = Math.max(ctx.measureText('2').width, ctx.measureText('0').width) + s * 0.08;
+    ctx.font = '600 ' + s.toFixed(1) + 'px ' + MATH_FONT;
+    var wRest = ctx.measureText(rest).width;
+    var total = wInt + wLim + wRest;
+    var x0 = W * 0.5 - total / 2, cy = g.numY;
+    if (x0 < 4) { x0 = 4; }
+    ctx.globalAlpha = a;
+    ctx.fillStyle = C.indigo;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.font = '400 ' + bigS.toFixed(1) + 'px ' + MATH_FONT;
+    ctx.fillText('\u222B', x0, cy);
+    ctx.font = '400 ' + limS.toFixed(1) + 'px ' + MATH_FONT;
+    ctx.fillText('2', x0 + wInt, cy - s * 0.55);
+    ctx.fillText('0', x0 + wInt, cy + s * 0.5);
+    ctx.font = '600 ' + s.toFixed(1) + 'px ' + MATH_FONT;
+    ctx.fillText(rest, x0 + wInt + wLim, cy);
+    ctx.restore();
+  }
+
+  function i2DrawScene(a) {
+    if (a <= 0.01) return;
+    var step = S.i2Step | 0;
+    var g = i2Box();
+    var m = i2Axes(g, a);
+    var f = clamp(W / 1000, 0.8, 1.4);
+    var curveW = Math.max(1.8, 2.1 * f);
+    var n;
+
+    if (step === 0) {
+      /* 曲線を左から描き、[0,2] の下の領域を薄い朱の枠で示す（∫ はまだ出さない） */
+      if (S.i2FrameA > 0.02) {
+        inkPts(i2AreaPoly(m).concat([[m.X(0), m.Y(0)]]),
+          { color: C.verm, width: Math.max(1.1, 1.4 * f), jitter: 0.25, seed: 521,
+            alpha: a * S.i2FrameA * 0.7 });
+      }
+      var cur = partial(i2CurvePts(m), clamp(S.i2Reveal, 0, 1));
+      if (cur.length > 1) {
+        inkPts(cur, { color: C.ink, width: curveW, jitter: 0.3, seed: 511, alpha: a });
+      }
+      i2Numbers(4, a * S.i2NumA, 'true');
+      return;
+    }
+
+    if (step === 4) {
+      /* 仕上げ：短冊の境界線が消えて、滑らかな面積になる */
+      var closeA = clamp(S.i2CloseA, 0, 1);
+      var leftA = 1 - closeA;
+      n = S.i2N || 40;
+      if (leftA > 0.02) i2Strips(m, n, a * leftA, { outline: true, gapA: leftA });
+      if (closeA > 0.02) {
+        hatchPoly(i2AreaPoly(m), { alpha: a * closeA, stroke: C.indigo, seed: 651 });
+      }
+      inkPts(i2CurvePts(m), { color: C.indigo, width: curveW, jitter: 0.3, seed: 514, alpha: a });
+      i2Numbers(n, a * (1 - closeA));
+      i2Formula(a * S.i2FormA);
+      return;
+    }
+
+    if (step === 2) {
+      /* 4 → 8 → 16 → 40（段階ごとにホールド、切替は短いフェード） */
+      n = S.i2N || 4;
+      var nPrev = S.i2NPrev || n, fa = clamp(S.i2NFade, 0, 1);
+      if (nPrev !== n && fa < 0.995) i2Strips(m, nPrev, a * (1 - fa) * 0.9, { outline: true });
+      i2Strips(m, n, a * (nPrev !== n ? fa : 1), { outline: n <= 16 });
+    } else if (step === 3) {
+      n = S.i2N || I2_PLAY_N;
+      i2Strips(m, n, a, { outline: n <= 16 });
+    } else {
+      /* n=4。短冊が左から立ち上がり、隙間が朱で残る */
+      n = 4;
+      i2Strips(m, 4, a, { reveal: S.i2StripA, gapA: S.i2GapA, outline: true });
+    }
+    inkPts(i2CurvePts(m), { color: C.ink, width: curveW, jitter: 0.3, seed: 512, alpha: a });
+    i2Numbers(n, a * S.i2NumA);
+  }
+
+  /* 各ステップの enter：開始時点の見え方を即時確定する */
+  function i2Enter(step) {
+    enterInteg(2);
+    S.i2Step = step;
+    S.i2Ms = 0;
+    S.i2Reveal = 1; S.i2StripA = 1; S.i2GapA = 1;
+    S.i2N = 4; S.i2NPrev = 4; S.i2NFade = 1;
+    S.i2FrameA = 1; S.i2CloseA = 0; S.i2FormA = 0; S.i2NumA = 1;
+    S.i2UserN = I2_PLAY_N;
+    if (step === 0) {
+      S.i2Reveal = 0; S.i2FrameA = 0; S.i2NumA = 0;
+    } else if (step === 1) {
+      /* 曲線は前のステップから続く。短冊と隙間はまだ出さない */
+      S.i2StripA = 0; S.i2GapA = 0; S.i2NumA = 0;
+    } else if (step === 2) {
+      S.i2N = 4; S.i2NPrev = 4; S.i2NFade = 1; S.i2NumA = 1;
+    } else if (step === 3) {
+      S.i2N = I2_PLAY_N; S.i2NPrev = I2_PLAY_N; S.i2NumA = 1;
+    } else {
+      S.i2N = 40; S.i2NPrev = 40; S.i2CloseA = 0; S.i2FormA = 0; S.i2NumA = 1;
+    }
+  }
+
+  /* tick：ms（ステップ内ミリ秒）から決定論的に決める */
+  function i2Tick(step, ms) {
+    ms = ms == null ? 0 : ms;
+    S.i2Step = step;
+    S.i2Ms = ms;
+    if (step === 0) {
+      S.i2Reveal = clamp((ms - 250) / 2500, 0, 1);
+      S.i2FrameA = clamp((ms - 2900) / 900, 0, 1);
+      S.i2NumA = clamp((ms - 3800) / 700, 0, 1);
+    } else if (step === 1) {
+      S.i2StripA = clamp((ms - 350) / 1500, 0, 1);
+      S.i2GapA = clamp((ms - 2400) / 900, 0, 1);
+      S.i2NumA = clamp((ms - 2600) / 800, 0, 1);
+    } else if (step === 2) {
+      var seg = [[900, 8], [3600, 16], [6300, 40]];
+      var n = 4, prev = 4, fa = 1;
+      for (var i = 0; i < seg.length; i++) {
+        if (ms >= seg[i][0]) {
+          prev = n; n = seg[i][1];
+          fa = clamp((ms - seg[i][0]) / 300, 0, 1);
+        }
+      }
+      S.i2N = n; S.i2NPrev = prev; S.i2NFade = fa; S.i2NumA = 1;
+    } else if (step === 3) {
+      S.i2N = S.i2UserN; S.i2NPrev = S.i2UserN; S.i2NFade = 1; S.i2NumA = 1;
+    } else {
+      S.i2CloseA = clamp((ms - 350) / 1500, 0, 1);
+      S.i2FormA = clamp((ms - 2000) / 900, 0, 1);
+      S.i2NumA = 1 - clamp((ms - 700) / 900, 0, 1);
+    }
+  }
+
+  /* ================================================================== */
+  /* 積分 Scene 3「輪切りを積んで、立体をつくる」の本描画                 */
+  /*   r(z) が唯一の数値モデル。体積は中点則の円板の合計で出す             */
+  /* ================================================================== */
+  var I3_ZMAX = 10;                          /* 高さ（cm） */
+  var I3_N_MIN = 4, I3_N_MAX = 40, I3_PLAY_N = 8;
+  var I3_PRINT_N = 40;                       /* 3Dプリンターの見た目の層数 */
+
+  function i3R(z) {
+    return 2.2 + 0.9 * Math.sin(Math.PI * z / 5 - 0.6) - 0.05 * (z - 5) * (z - 5);
+  }
+
+  /* 中点則：n 枚の円板の体積合計（cm³）。prog は積み上げ中の枚数（小数可） */
+  function i3VolPartial(n, prog) {
+    n = Math.max(1, Math.round(n));
+    var dz = I3_ZMAX / n;
+    var full = Math.min(n, Math.floor(prog + 1e-6));
+    var frac = clamp(prog - full, 0, 1);
+    var s = 0, k, z, r;
+    for (k = 0; k < full; k++) {
+      z = (k + 0.5) * dz; r = i3R(z);
+      s += Math.PI * r * r * dz;
+    }
+    if (full < n && frac > 0) {
+      z = (full + 0.5) * dz; r = i3R(z);
+      s += Math.PI * r * r * dz * frac;
+    }
+    return s;
+  }
+  function i3Vol(n) { return i3VolPartial(n, Math.max(1, Math.round(n))); }
+  /* 真の体積は初期化時に n=1000 の中点則で1回だけ計算して保持する */
+  var I3_TRUE = i3Vol(1000);
+
+  /* i3-play の待機中だけステージ左下にスライダーが出る。
+     そのときは花瓶の下端がスライダーに触れないよう、下側を空ける */
+  function i3SliderReserve() {
+    if (mode !== 'waiting' || !stageSlider || stageSlider.hidden) return 0;
+    var cr = canvas.getBoundingClientRect();
+    var sr = stageSlider.getBoundingClientRect();
+    if (cr.height < 1 || sr.height < 1) return 0;
+    return Math.max(0, cr.bottom - sr.top) + 6;
+  }
+
+  /* 花瓶の置き場所。狭幅でも位置がステップ間で跳ばないよう、ほぼ同じ x に置く */
+  function i3Geo(step) {
+    var narrow = W < 620;
+    var as = Math.max(8.4, 9.2 * fx());
+    var top = narrow ? H * 0.245 : H * 0.20;
+    var bot = narrow ? H * 0.875 : H * 0.885;
+    /* 3Dプリンター（step2）の狭幅は、上部の数値2行と門型フレームの上辺が
+       重ならないよう造形物の上端を下げ、下はラベルのぶんを空ける */
+    if (narrow && step === 2) {
+      top = Math.max(top, H * 0.315);
+      bot = Math.min(bot, H * 0.855);
+    }
+    /* i3-play（step3）の狭幅も、上部の数値2行と花瓶の上端（上端の楕円の
+       てっぺん）が4px以上あくよう、花瓶を少し下げる */
+    if (narrow && step === 3) {
+      top = Math.max(top, H * 0.275);
+    }
+    var cx = narrow ? W * 0.56 : W * 0.275;
+    if (!narrow && step === 2) cx = W * 0.63;
+    var rs = i3SliderReserve();
+    if (rs > 0.5) {
+      var bmax = H - rs - as * 0.5;
+      bot = Math.min(bot, Math.max(top + H * 0.26, bmax));
+    }
+    var sc = (bot - top) / I3_ZMAX;
+    /* 横だけ少し広げる。狭幅では主要オブジェクト（花瓶・積み上げ）の横幅が
+       ステージ幅の 40〜50% になるよう、横幅から逆算する（縦はそのまま収める） */
+    var hsx = narrow ? 1.12 : 1.18;
+    if (narrow) {
+      var targetHalf = W * (step === 2 ? 0.205 : 0.235);
+      hsx = targetHalf / (3.0 * sc);
+    }
+    return {
+      narrow: narrow, cx: cx, top: top, bot: bot, sc: sc, as: as,
+      y: function (z) { return bot - z * sc; },
+      hw: function (z) { return i3R(z) * sc * hsx; }
+    };
+  }
+
+  /* 楕円の弧（t=π で左、t=π/2 で上、t=0 で右）。ry に負を渡すと下側の弧 */
+  function i3EllipsePts(cx, cy, rx, ry, t0, t1, N) {
+    var out = [];
+    N = N || 24;
+    for (var i = 0; i <= N; i++) {
+      var t = t0 + (t1 - t0) * (i / N);
+      out.push([cx + rx * Math.cos(t), cy - ry * Math.sin(t)]);
+    }
+    return out;
+  }
+
+  function i3VaseSides(geo, side) {
+    var pts = [], N = 48;
+    for (var i = 0; i <= N; i++) {
+      var z = I3_ZMAX * i / N;
+      pts.push([geo.cx + side * geo.hw(z), geo.y(z)]);
+    }
+    return pts;
+  }
+
+  /* なめらかな花瓶の輪郭（reveal で左→上→右の順に描き進める） */
+  function i3DrawSilhouette(geo, a, reveal, opt) {
+    if (a <= 0.02) return;
+    opt = opt || {};
+    var f = fx();
+    var w = Math.max(1.3, 1.5 * f);
+    var hw0 = geo.hw(0), hwT = geo.hw(I3_ZMAX);
+    var ry0 = hw0 * 0.30, ryT = hwT * 0.30;
+    var rev = clamp(reveal == null ? 1 : reveal, 0, 1);
+    var r1 = clamp(rev / 0.44, 0, 1);
+    var r2 = clamp((rev - 0.42) / 0.20, 0, 1);
+    var r3 = clamp((rev - 0.60) / 0.40, 0, 1);
+    var left = i3VaseSides(geo, -1);
+    var right = i3VaseSides(geo, 1).reverse();
+    if (rev >= 0.995 && opt.fill !== false) {
+      var poly = left
+        .concat(i3EllipsePts(geo.cx, geo.y(I3_ZMAX), hwT, ryT, Math.PI, 0, 20))
+        .concat(right)
+        .concat(i3EllipsePts(geo.cx, geo.y(0), hw0, -ry0, 0, Math.PI, 20));
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(43,91,132,0.055)';
+      ctx.beginPath();
+      ctx.moveTo(poly[0][0], poly[0][1]);
+      for (var pi = 1; pi < poly.length; pi++) ctx.lineTo(poly[pi][0], poly[pi][1]);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    if (rev > 0.02) {
+      inkPts(i3EllipsePts(geo.cx, geo.y(0), hw0, -ry0, 0, Math.PI, 24),
+        { color: C.ink, width: w * 0.8, jitter: 0.25, seed: 704, alpha: a * 0.45 * clamp(rev * 2.5, 0, 1) });
+    }
+    if (r1 > 0.002) {
+      var lp = partial(left, r1);
+      if (lp.length > 1) inkPts(lp, { color: C.ink, width: w, jitter: 0.3, seed: 701, alpha: a });
+    }
+    if (r2 > 0.002) {
+      var tp = partial(i3EllipsePts(geo.cx, geo.y(I3_ZMAX), hwT, ryT, Math.PI, 0, 24), r2);
+      if (tp.length > 1) inkPts(tp, { color: C.ink, width: w * 0.9, jitter: 0.25, seed: 702, alpha: a * 0.85 });
+    }
+    if (r3 > 0.002) {
+      var rp = partial(right, r3);
+      if (rp.length > 1) inkPts(rp, { color: C.ink, width: w, jitter: 0.3, seed: 703, alpha: a });
+    }
+  }
+
+  /* 円板を下から積み上げた立体。prog=0〜n（小数可） */
+  function i3DrawStack(geo, n, prog, a) {
+    if (a <= 0.02) return;
+    n = Math.max(1, Math.round(n));
+    var dz = I3_ZMAX / n;
+    var full = Math.min(n, Math.floor(prog + 1e-6));
+    var frac = clamp(prog - full, 0, 1);
+    var partialTop = (full < n && frac > 0.004);
+    if (full <= 0 && !partialTop) return;
+    var f = fx();
+    var w = Math.max(1.1, 1.3 * f);
+    var L = [], R = [], k, hw;
+    for (k = 0; k < full; k++) {
+      hw = geo.hw((k + 0.5) * dz);
+      L.push([geo.cx - hw, geo.y(k * dz)]);
+      L.push([geo.cx - hw, geo.y((k + 1) * dz)]);
+      R.push([geo.cx + hw, geo.y(k * dz)]);
+      R.push([geo.cx + hw, geo.y((k + 1) * dz)]);
+    }
+    var topZ = full * dz, topHw = full > 0 ? geo.hw((full - 0.5) * dz) : 0;
+    if (partialTop) {
+      topZ = full * dz + frac * dz;
+      topHw = geo.hw((full + 0.5) * dz);
+      L.push([geo.cx - topHw, geo.y(full * dz)]);
+      L.push([geo.cx - topHw, geo.y(topZ)]);
+      R.push([geo.cx + topHw, geo.y(full * dz)]);
+      R.push([geo.cx + topHw, geo.y(topZ)]);
+    }
+    var ry0 = geo.hw(0) * 0.30, ryT = topHw * 0.30;
+    var poly = L.concat(i3EllipsePts(geo.cx, geo.y(topZ), topHw, ryT, Math.PI, 0, 18))
+      .concat(R.slice().reverse())
+      .concat(i3EllipsePts(geo.cx, geo.y(0), geo.hw(0), -ry0, 0, Math.PI, 18));
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = 'rgba(43,91,132,0.10)';
+    ctx.beginPath();
+    ctx.moveTo(poly[0][0], poly[0][1]);
+    for (var pi = 1; pi < poly.length; pi++) ctx.lineTo(poly[pi][0], poly[pi][1]);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    /* 輪郭は藍 */
+    inkPts(poly.concat([poly[0]]),
+      { color: C.indigo, width: w, jitter: 0.22, seed: 712, alpha: a * 0.8 });
+    /* 各層の上端楕円（層が読める間隔のときだけ） */
+    var layerH = dz * geo.sc;
+    var every = layerH >= 3.2 ? 1 : Math.ceil(3.6 / Math.max(0.6, layerH));
+    for (k = 1; k <= full; k++) {
+      if (k % every !== 0) continue;
+      var zk = k * dz;
+      if (zk >= I3_ZMAX - 0.001) continue;
+      var hk = geo.hw((k - 0.5) * dz);
+      inkPts(i3EllipsePts(geo.cx, geo.y(zk), hk, hk * 0.22, 0, Math.PI * 2, 26),
+        { color: C.indigo, width: Math.max(0.9, 1.0 * f), jitter: 0.2,
+          seed: 713 + (k % 5), alpha: a * 0.32 });
+    }
+  }
+
+  /* 1枚の円板（朱）。cy は上端の中心 */
+  function i3DrawDisc(cx, cy, rx, th, a) {
+    if (a <= 0.02 || rx <= 1) return;
+    var f = fx();
+    var w = Math.max(1.3, 1.5 * f);
+    var ry = rx * 0.30;
+    var arc = i3EllipsePts(cx, cy + th, rx, -ry, Math.PI, 0, 20);
+    var i;
+    var top = i3EllipsePts(cx, cy, rx, ry, 0, Math.PI * 2, 30);
+    /* 花瓶の上に重なるときも読めるよう、紙色の下地を敷いてから描く */
+    ctx.save();
+    ctx.globalAlpha = a * 0.94;
+    ctx.fillStyle = C.cream;
+    ctx.beginPath();
+    ctx.moveTo(cx - rx, cy);
+    ctx.lineTo(cx - rx, cy + th);
+    for (i = 0; i < arc.length; i++) ctx.lineTo(arc[i][0], arc[i][1]);
+    ctx.lineTo(cx + rx, cy);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(top[0][0], top[0][1]);
+    for (i = 1; i < top.length; i++) ctx.lineTo(top[i][0], top[i][1]);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    /* 側面 */
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = 'rgba(217,78,65,0.14)';
+    ctx.beginPath();
+    ctx.moveTo(cx - rx, cy);
+    ctx.lineTo(cx - rx, cy + th);
+    for (i = 0; i < arc.length; i++) ctx.lineTo(arc[i][0], arc[i][1]);
+    ctx.lineTo(cx + rx, cy);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    /* 上端の面 */
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = 'rgba(217,78,65,0.16)';
+    ctx.beginPath();
+    ctx.moveTo(top[0][0], top[0][1]);
+    for (i = 1; i < top.length; i++) ctx.lineTo(top[i][0], top[i][1]);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    inkPts(top, { color: C.verm, width: w, jitter: 0.25, seed: 761, alpha: a });
+    inkPts([[cx - rx, cy], [cx - rx, cy + th]], { color: C.verm, width: w, jitter: 0.2, seed: 762, alpha: a });
+    inkPts([[cx + rx, cy], [cx + rx, cy + th]], { color: C.verm, width: w, jitter: 0.2, seed: 763, alpha: a });
+    inkPts(arc, { color: C.verm, width: w * 0.9, jitter: 0.2, seed: 764, alpha: a * 0.9 });
+  }
+
+  /* 高さの寸法線（狭幅は花瓶の左、広い画面は右に置く） */
+  function i3DimX(geo) {
+    if (geo.narrow) return geo.cx - geo.hw(5) * 1.42 - 8;
+    return geo.cx + geo.hw(5) * 1.42 + (geo.narrow ? 8 : 16);
+  }
+
+  function i3DrawDim(geo, a, size) {
+    if (a <= 0.02) return;
+    var f = fx();
+    var w = Math.max(1.1, 1.2 * f);
+    var dx = i3DimX(geo);
+    var left = !!geo.narrow;
+    var y0 = geo.y(0), y1 = geo.y(I3_ZMAX);
+    var inner = left ? -1 : 1;
+    inkPts([[geo.cx + inner * geo.hw(0) * 0.75, y0], [dx - inner * 5, y0]],
+      { color: C.light, width: w * 0.9, jitter: 0.15, seed: 751, alpha: a * 0.7 });
+    inkPts([[geo.cx + inner * geo.hw(I3_ZMAX) * 0.75, y1], [dx - inner * 5, y1]],
+      { color: C.light, width: w * 0.9, jitter: 0.15, seed: 752, alpha: a * 0.7 });
+    lineWithArrow(dx, y1, dx, y0, C.indigo, w, a);
+    lineWithArrow(dx, y0, dx, y1, C.indigo, w, a);
+    text('高さ 10cm', dx + inner * 5, (y0 + y1) / 2,
+      { size: size || geo.as, color: C.indigo, align: left ? 'right' : 'left',
+        weight: 700, alpha: a, maxWidth: left ? Math.max(34, dx - 12) : W - dx - 8 });
+  }
+
+  /* ステージ上部の数値（体積・真の体積・差） */
+  function i3Numbers(n, vol, a) {
+    if (a <= 0.02) return;
+    var narrow = W < 620;
+    var f = fx();
+    var s = Math.max(10, 11.2 * f);
+    var y = narrow ? H * 0.095 : H * 0.085;
+    var d = vol - I3_TRUE;
+    var dS = '差 ' + (d < -0.05 ? '\u2212' : (d > 0.05 ? '+' : '')) + Math.abs(d).toFixed(1);
+    var volS = '体積 ' + vol.toFixed(1) + 'cm\u00B3（' + n + '枚）';
+    var trueS = '真の体積 ' + I3_TRUE.toFixed(1) + 'cm\u00B3';
+    if (narrow) {
+      text(volS, W * 0.5, y, { size: s, weight: 700, alpha: a, maxWidth: W * 0.96 });
+      text(trueS + ' ／ ' + dS, W * 0.5, y + s * 1.5,
+        { size: s, weight: 700, color: C.verm, alpha: a, maxWidth: W * 0.96 });
+    } else {
+      text(volS + ' ／ ' + trueS + ' ／ ' + dS,
+        W * 0.5, y, { size: s, weight: 700, alpha: a, maxWidth: W * 0.96 });
+    }
+  }
+
+  function i3DrawScene(a) {
+    if (a <= 0.01) return;
+    var step = S.i3Step | 0;
+    var geo = i3Geo(step);
+    var f = fx();
+    var as = geo.as;
+    var bs = Math.max(10, as);            /* 注記・寸法ラベルは狭幅でも 10px 以上 */
+    var k, zk, hk;
+
+    if (step === 0) {
+      i3DrawSilhouette(geo, a, S.i3Reveal);
+      /* 回転体であることを示す薄い水平の楕円（上下）。
+         横半径は口 r(0)・底 r(10) のスケールに合わせ、縦半径は横×0.30 */
+      var revA = a * clamp((S.i3Reveal - 0.85) / 0.15, 0, 1);
+      if (revA > 0.02) {
+        [0, I3_ZMAX].forEach(function (z) {
+          var wrx = geo.hw(z) * 1.18;
+          inkPts(i3EllipsePts(geo.cx, geo.y(z), wrx, wrx * 0.30, 0, Math.PI * 2, 34),
+            { color: C.indigo, width: 1.0, jitter: 0.2, seed: 721 + z, alpha: revA * 0.38 });
+        });
+      }
+      i3DrawDim(geo, a * S.i3DimA, bs);
+      if (S.i3NoteA > 0.02) {
+        var na0 = a * S.i3NoteA;
+        var nColor = '#5b5850';             /* 薄墨より濃く、最終状態で読める色 */
+        if (geo.narrow) {
+          /* 狭幅は花瓶の上（数値のない場所）に2行で置く */
+          text('曲がっていて、', 6, H * 0.095,
+            { size: Math.max(10.5, bs), color: nColor, align: 'left', alpha: na0, maxWidth: W - 12 });
+          text('公式では測れない', 6, H * 0.095 + Math.max(10.5, bs) * 1.7,
+            { size: Math.max(10.5, bs), color: nColor, align: 'left', alpha: na0, maxWidth: W - 12 });
+        } else {
+          var nx = i3DimX(geo) + 5;
+          var nMaxW = Math.max(bs * 6, W - nx - 4);
+          text('曲がっていて、公式では測れない', nx, geo.y(5) + bs * 2.4,
+            { size: bs, color: nColor, align: 'left', alpha: na0, maxWidth: nMaxW });
+        }
+      }
+      return;
+    }
+
+    if (step === 1) {
+      var n1 = I3_PLAY_N;
+      var dz1 = I3_ZMAX / n1;
+      var stackP = clamp(S.i3Stack, 0, 1) * n1;
+      /* 上から下へ入るスライス線 */
+      var sliceA = a * clamp(1 - stackP * 1.6, 0, 1);
+      if (sliceA > 0.02) {
+        var frontZ = I3_ZMAX * (1 - clamp(S.i3Sweep, 0, 1));
+        for (k = 1; k < n1; k++) {
+          zk = k * dz1;
+          if (zk > frontZ + 0.001) continue;
+          hk = geo.hw(zk);
+          inkPts([[geo.cx - hk - 5, geo.y(zk)], [geo.cx + hk + 5, geo.y(zk)]],
+            { color: C.indigo, width: 1.0, jitter: 0.2, seed: 731 + k,
+              alpha: sliceA * 0.45, dash: [4, 4] });
+        }
+        if (S.i3Sweep > 0.001 && S.i3Sweep < 0.999) {
+          hk = geo.hw(frontZ);
+          inkPts([[geo.cx - hk - 7, geo.y(frontZ)], [geo.cx + hk + 7, geo.y(frontZ)]],
+            { color: C.verm, width: 1.6, jitter: 0.2, seed: 749, alpha: sliceA * 0.85 });
+        }
+      }
+      /* 花瓶：積み上げが始まるまでは滑らかな輪郭 */
+      var silA = a * clamp(1 - stackP / 0.15, 0, 1);
+      if (silA > 0.02) i3DrawSilhouette(geo, silA, 1);
+      if (stackP > 0.004) i3DrawStack(geo, n1, stackP, a);
+      /* 右へ引き出した1枚（注目している円板だけ朱） */
+      var fk = 4;
+      var fz = (fk + 0.5) * dz1;
+      var fr = geo.hw(fz);
+      var pull = clamp(S.i3Pull, 0, 1);
+      if (pull > 0.01) {
+        var fromX = geo.cx + fr * 1.05;
+        var toX = geo.narrow ? W * 0.765 : geo.cx + geo.hw(5) * 1.5 + W * 0.14;
+        var dX = lerp(fromX, toX, easeInOutCubic(pull));
+        var dY = geo.y(fz);
+        var th = clamp(dz1 * geo.sc, 4, H * 0.06);
+        i3DrawDisc(dX, dY, fr, th, a * clamp(pull * 2.2, 0, 1));
+        if (S.i3NoteA > 0.02) {
+          var la = a * S.i3NoteA;
+          if (geo.narrow) {
+            text('円の面積', dX, dY - fr * 0.3 - bs * 2.6, { size: bs, weight: 700, color: C.verm, alpha: la, maxWidth: W * 0.9 });
+            text('× 厚さ', dX, dY - fr * 0.3 - bs * 1.1, { size: bs, weight: 700, color: C.verm, alpha: la, maxWidth: W * 0.9 });
+          } else {
+            text('円の面積 × 厚さ', dX, dY - fr * 0.3 - bs * 1.5,
+              { size: bs, weight: 700, color: C.verm, alpha: la, maxWidth: W * 0.34 });
+          }
+        }
+      }
+      i3Numbers(n1, i3VolPartial(n1, stackP), a * S.i3NumA);
+      return;
+    }
+
+    if (step === 2) {
+      var prog = clamp(S.i3Print, 0, 1) * I3_PRINT_N;
+      /* 目標の形（薄い線） */
+      i3DrawSilhouette(geo, a * 0.20, 1, { fill: false });
+      i3DrawStack(geo, I3_PRINT_N, prog, a);
+      /* 門型フレーム＋ノズル（フレームはオブジェクト幅に合わせる） */
+      var hwMax = geo.hw(5);
+      var postDx = hwMax * 1.30 + Math.max(5, W * (geo.narrow ? 0.012 : 0.014));
+      var beamY = geo.y(I3_ZMAX) - Math.max(4, H * (geo.narrow ? 0.026 : 0.05));
+      var floorY = geo.y(0) + Math.max(3, H * 0.018);
+      var fw = Math.max(1.3, 1.5 * f);
+      inkPts([[geo.cx - postDx, beamY], [geo.cx - postDx, floorY]],
+        { color: C.ink, width: fw, jitter: 0.25, seed: 741, alpha: a });
+      inkPts([[geo.cx + postDx, beamY], [geo.cx + postDx, floorY]],
+        { color: C.ink, width: fw, jitter: 0.25, seed: 742, alpha: a });
+      inkPts([[geo.cx - postDx - 6, beamY], [geo.cx + postDx + 6, beamY]],
+        { color: C.ink, width: fw * 1.15, jitter: 0.25, seed: 743, alpha: a });
+      /* ノズル：いま積んでいる層の幅の中で左右に往復し、その層の直上に降りる */
+      var curZ = (prog / I3_PRINT_N) * I3_ZMAX;
+      var travelHw = Math.max(geo.hw(clamp(curZ, 0.6, I3_ZMAX - 0.6)), hwMax * 0.45);
+      var nz = geo.cx + clamp(S.i3Nozz, -1, 1) * travelHw * 0.9;
+      var nzW = Math.max(3.2, as * 0.6);
+      var nzH = nzW * 1.2;
+      var tipY = clamp(geo.y(curZ) - Math.max(3, H * 0.022), beamY + nzH, floorY - 2);
+      inkPts([[nz, beamY], [nz, tipY - nzH]],
+        { color: C.ink, width: fw * 0.9, jitter: 0.15, seed: 744, alpha: a });
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.fillStyle = C.ink;
+      ctx.beginPath();
+      ctx.moveTo(nz - nzW, tipY - nzH);
+      ctx.lineTo(nz + nzW, tipY - nzH);
+      ctx.lineTo(nz + nzW * 0.42, tipY);
+      ctx.lineTo(nz - nzW * 0.42, tipY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      if (S.i3NoteA > 0.02) {
+        var nx2 = geo.narrow ? 6 : W * 0.055;
+        var ny2 = geo.narrow ? H * 0.40 : H * 0.44;
+        var maxW2 = Math.max(bs * 6, (geo.cx - postDx) - nx2 - 4);
+        var na = a * S.i3NoteA;
+        if (geo.narrow) {
+          text('薄い層を重ねる', nx2, ny2,
+            { size: bs, weight: 700, color: C.indigo, align: 'left', alpha: na, maxWidth: maxW2 });
+          text('＝輪切りを積む', nx2, ny2 + bs * 1.8,
+            { size: bs, weight: 700, color: C.indigo, align: 'left', alpha: na, maxWidth: maxW2 });
+        } else {
+          /* 広い画面ではフレームのすぐ左に寄せる */
+          var nRight = geo.cx - postDx - 14;
+          text('薄い層を重ねる', nRight, ny2,
+            { size: bs, weight: 700, color: C.indigo, align: 'right', alpha: na, maxWidth: nRight - 4 });
+          text('＝輪切りの積み上げ', nRight, ny2 + bs * 1.8,
+            { size: bs, weight: 700, color: C.indigo, align: 'right', alpha: na, maxWidth: nRight - 4 });
+        }
+      }
+      text('40層', geo.cx, floorY + 8 + bs * 0.5,
+        { size: bs, color: C.light, alpha: a * S.i3NumA });
+      i3Numbers(I3_PRINT_N, i3VolPartial(I3_PRINT_N, prog), a * S.i3NumA);
+      return;
+    }
+
+    /* i3-play：枚数 n をそのまま層数にする（ギザギザ→なめらか） */
+    var n3 = clamp(S.i3UserN | 0, I3_N_MIN, I3_N_MAX);
+    i3DrawSilhouette(geo, a * 0.22, 1, { fill: false });
+    i3DrawStack(geo, n3, n3, a);
+    i3Numbers(n3, i3Vol(n3), a);
+  }
+
+  /* 各ステップの enter：開始時点の見え方を即時確定する */
+  function i3Enter(step) {
+    enterInteg(3);
+    S.i3Step = step;
+    S.i3Ms = 0;
+    S.i3Reveal = 1; S.i3DimA = 1; S.i3Sweep = 1; S.i3Pull = 1;
+    S.i3NoteA = 1; S.i3Stack = 1; S.i3Print = 1; S.i3Nozz = 0; S.i3NumA = 1;
+    S.i3N = I3_PLAY_N; S.i3Sum = i3Vol(I3_PLAY_N);
+    S.i3UserN = I3_PLAY_N;
+    if (step === 0) {
+      S.i3Reveal = 0; S.i3DimA = 0; S.i3NoteA = 0; S.i3NumA = 0;
+      S.i3Sweep = 0; S.i3Pull = 0; S.i3Stack = 0;
+      S.i3N = 0; S.i3Sum = 0;
+    } else if (step === 1) {
+      S.i3Reveal = 1; S.i3DimA = 1; S.i3NoteA = 0; S.i3NumA = 0;
+      S.i3Sweep = 0; S.i3Pull = 0; S.i3Stack = 0;
+      S.i3N = 0; S.i3Sum = 0;
+    } else if (step === 2) {
+      S.i3Print = 0; S.i3NoteA = 0; S.i3NumA = 0; S.i3Nozz = 1;
+      S.i3N = 0; S.i3Sum = 0;
+    } else {
+      S.i3Stack = 1; S.i3NumA = 1; S.i3NoteA = 1;
+      S.i3N = S.i3UserN; S.i3Sum = i3Vol(S.i3UserN);
+    }
+  }
+
+  /* tick：ms（ステップ内ミリ秒）から決定論的に決める */
+  function i3Tick(step, ms) {
+    ms = ms == null ? 0 : ms;
+    S.i3Step = step;
+    S.i3Ms = ms;
+    if (step === 0) {
+      S.i3Reveal = clamp((ms - 250) / 2600, 0, 1);
+      S.i3DimA = clamp((ms - 2800) / 700, 0, 1);
+      S.i3NoteA = clamp((ms - 3900) / 800, 0, 1);
+      S.i3NumA = 0; S.i3Sweep = 0; S.i3Pull = 0; S.i3Stack = 0;
+      S.i3N = 0; S.i3Sum = 0;
+    } else if (step === 1) {
+      S.i3Reveal = 1; S.i3DimA = 1;
+      S.i3Sweep = clamp((ms - 250) / 2200, 0, 1);
+      S.i3Pull = easeInOutCubic(clamp((ms - 3000) / 1000, 0, 1));
+      S.i3NoteA = clamp((ms - 3500) / 700, 0, 1);
+      S.i3Stack = clamp((ms - 5200) / 3600, 0, 1);
+      S.i3NumA = clamp((ms - 4700) / 700, 0, 1);
+      S.i3N = Math.round(S.i3Stack * I3_PLAY_N);
+      S.i3Sum = i3VolPartial(I3_PLAY_N, S.i3Stack * I3_PLAY_N);
+    } else if (step === 2) {
+      S.i3Print = clamp((ms - 900) / 6200, 0, 1);
+      S.i3Nozz = REDUCED ? 0 : Math.sin(ms / 520);
+      S.i3NumA = clamp((ms - 1200) / 700, 0, 1);
+      S.i3NoteA = clamp((ms - 2400) / 800, 0, 1);
+      S.i3N = I3_PRINT_N;
+      S.i3Sum = i3VolPartial(I3_PRINT_N, S.i3Print * I3_PRINT_N);
+    } else {
+      S.i3UserN = clamp(S.i3UserN | 0, I3_N_MIN, I3_N_MAX);
+      S.i3N = S.i3UserN; S.i3Sum = i3Vol(S.i3UserN);
+      S.i3Reveal = 1; S.i3Stack = 1; S.i3NumA = 1; S.i3NoteA = 1;
+    }
+  }
+
+  /* ================================================================== */
+  /* 積分 Scene 4「データから『上位何％』を測る」の本描画                 */
+  /*   正規分布 μ=50, σ=10。右側の面積を「上位の割合」として読む          */
+  /* ================================================================== */
+  var I4_MU = 50, I4_SIG = 10;
+  var I4_XMIN = 15, I4_XMAX = 85;            /* 表示範囲 */
+  var I4_OPMIN = 20, I4_OPMAX = 80;          /* 操作範囲（1点刻み） */
+  var I4_PDF_PEAK = 1 / (I4_SIG * Math.sqrt(2 * Math.PI));
+
+  /* Abramowitz & Stegun 7.1.26（最大誤差 1.5e-7） */
+  function i4Erf(x) {
+    var s = x < 0 ? -1 : 1, ax = Math.abs(x);
+    var t = 1 / (1 + 0.3275911 * ax);
+    var y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t -
+      0.284496736) * t + 0.254829592) * t * Math.exp(-ax * ax);
+    return s * y;
+  }
+  function i4Pdf(x) {
+    var d = (x - I4_MU) / I4_SIG;
+    return Math.exp(-d * d / 2) / (I4_SIG * Math.sqrt(2 * Math.PI));
+  }
+  function i4Right(x) {
+    return 0.5 * (1 - i4Erf((x - I4_MU) / (I4_SIG * Math.SQRT2)));
+  }
+  function i4PctStr(x) { return (i4Right(clamp(x, I4_XMIN, I4_XMAX)) * 100).toFixed(1); }
+  function i4People(x) { return Math.round(i4Right(clamp(x, I4_XMIN, I4_XMAX)) * 100); }
+
+  function i4Geo() {
+    var narrow = W < 620;
+    var as = Math.max(10, 9.6 * fx());
+    if (narrow) {
+      return {
+        narrow: true, as: as, numY: H * 0.082,
+        /* 右下の再生ボタン（8px + 最大46px角 + 余白）に「80」が掛からないよう、
+           プロットの右端をボタン領域より左へ寄せる */
+        g: { x0: W * 0.075, x1: Math.min(W * 0.795, W - 69), yT: H * 0.30, yB: H * 0.725 }
+      };
+    }
+    return {
+      narrow: false, as: as, numY: H * 0.092,
+      g: { x0: W * 0.075, x1: W * 0.955, yT: H * 0.215, yB: H * 0.80 }
+    };
+  }
+  function i4X(g, x) {
+    return g.x0 + (clamp(x, I4_XMIN, I4_XMAX) - I4_XMIN) /
+      (I4_XMAX - I4_XMIN) * (g.x1 - g.x0);
+  }
+  function i4Y(g, p) {
+    return g.yB - clamp(p, 0, I4_PDF_PEAK) / I4_PDF_PEAK * (g.yB - g.yT);
+  }
+  /* [xa,xb] の曲線の下（x軸まで）の多角形 */
+  function i4AreaPoly(g, xa, xb) {
+    var pts = [[i4X(g, xa), g.yB]];
+    var N = 48;
+    for (var i = 0; i <= N; i++) {
+      var x = xa + (xb - xa) * i / N;
+      if (x > I4_XMAX) x = I4_XMAX;
+      pts.push([i4X(g, x), i4Y(g, i4Pdf(x))]);
+    }
+    pts.push([i4X(g, xb), g.yB]);
+    return pts;
+  }
+
+  /* 多角形を薄く塗るだけ（全体の面積用。斜線は右側だけに使う） */
+  function i4FillPoly(pts, color, alpha) {
+    if (!pts || pts.length < 3 || alpha <= 0.02) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function i4Axes(geo, a) {
+    var g = geo.g, as = geo.as;
+    var f = fx();
+    inkPts([[g.x0, g.yB], [g.x1, g.yB]],
+      { color: C.ink, width: Math.max(1.4, 1.5 * f), jitter: 0.25, seed: 801, alpha: a });
+    inkPts([[g.x0, g.yB], [g.x0, g.yT - 4]],
+      { color: C.ink, width: Math.max(1.4, 1.5 * f), jitter: 0.25, seed: 802, alpha: a });
+    for (var x = 20; x <= 80; x += 10) {
+      var px = i4X(g, x);
+      inkPts([[px, g.yB], [px, g.yB + as * 0.32]],
+        { color: C.ink, width: 1.1, jitter: 0.12, seed: 803 + x, alpha: a * 0.65 });
+      text(String(x), px, g.yB + as * 1.05,
+        { size: as, color: C.light, alpha: a, maxWidth: (g.x1 - g.x0) / 6 });
+    }
+    text('確率密度', g.x0, g.yT - as * 1.05,
+      { size: as, color: C.light, align: 'left', alpha: a, maxWidth: W * 0.24 });
+  }
+
+  /* ヒストグラム（20〜80点を10点刻み）。reveal 0→1 で左から立つ */
+  function i4Bars(geo, reveal, a) {
+    var g = geo.g;
+    for (var i = 0; i < 6; i++) {
+      var xa = 20 + i * 10, xb = xa + 10;
+      var ba = clamp((reveal - i * 0.09) / 0.38, 0, 1);
+      if (ba <= 0.02) continue;
+      var yTop = i4Y(g, i4Pdf((xa + xb) / 2));
+      var px0 = i4X(g, xa) + 1.6, px1 = i4X(g, xb) - 1.6;
+      var yt = lerp(g.yB, yTop, easeOutCubic(ba));
+      ctx.save();
+      ctx.globalAlpha = a * 0.85;
+      ctx.fillStyle = 'rgba(43,91,132,0.10)';
+      ctx.fillRect(px0, yt, Math.max(1, px1 - px0), g.yB - yt);
+      ctx.restore();
+      inkPts([[px0, yt], [px1, yt], [px1, g.yB], [px0, g.yB]],
+        { color: C.indigo, width: 1.1, jitter: 0.2, seed: 820 + i, alpha: a * 0.5 });
+    }
+  }
+
+  function i4Numbers(geo, a) {
+    if (a <= 0.02) return;
+    var as = geo.as;
+    var st = S.i4Step | 0;
+    var x = Math.round(clamp(S.i4X, I4_OPMIN, I4_OPMAX));
+    var l1, l2 = null;
+    if (st === 0) {
+      l1 = '平均 50点・ばらつき 10点';
+    } else {
+      l1 = '点数 ' + x + '点以上';
+      l2 = '上位 ' + i4PctStr(x) + '% ／ 100人中 およそ ' + i4People(x) + '人';
+    }
+    if (geo.narrow) {
+      text(l1, W * 0.5, geo.numY,
+        { size: as, weight: 700, alpha: a, maxWidth: W * 0.94 });
+      if (l2) {
+        text(l2, W * 0.5, geo.numY + as * 1.5,
+          { size: as, weight: 700, color: C.verm, alpha: a, maxWidth: W * 0.94 });
+      }
+    } else {
+      text(l2 ? (l1 + ' ／ ' + l2) : l1, W * 0.5, geo.numY,
+        { size: as, weight: 700, alpha: a, maxWidth: W * 0.94 });
+    }
+  }
+
+  function i4DrawScene(a) {
+    if (a <= 0.01) return;
+    var geo = i4Geo(), g = geo.g, as = geo.as;
+    var f = fx();
+    var i, x, pts;
+
+    i4Axes(geo, a);
+
+    /* 全体の面積（薄い藍）。ステップ2で一瞬強く光らせて「全体＝100%」 */
+    if (S.i4WholeA > 0.02) {
+      var wholePts = i4AreaPoly(g, I4_XMIN, I4_XMAX);
+      i4FillPoly(wholePts, 'rgba(43,91,132,0.085)',
+        a * S.i4WholeA * (0.55 + 0.45 * S.i4WholePulse));
+      if (S.i4WholePulse > 0.02) {
+        i4FillPoly(wholePts, 'rgba(43,91,132,0.22)', a * S.i4WholePulse * 0.8);
+      }
+    }
+
+    if (S.i4Bars > 0.02) i4Bars(geo, S.i4Bars, a);
+
+    /* 分布の曲線（墨） */
+    pts = [];
+    for (i = 0; i <= 110; i++) {
+      x = I4_XMIN + (I4_XMAX - I4_XMIN) * i / 110;
+      pts.push([i4X(g, x), i4Y(g, i4Pdf(x))]);
+    }
+    var vis = partial(pts, S.i4CurveA);
+    if (vis.length > 1) {
+      inkPts(vis, { color: C.ink, width: Math.max(1.8, 2.1 * f), jitter: 0.2, seed: 832, alpha: a });
+    }
+
+    /* 境界より右を朱のハッチで塗る */
+    var bx = clamp(S.i4X, I4_OPMIN, I4_OPMAX);
+    if (S.i4HatchA > 0.02) {
+      hatchPoly(i4AreaPoly(g, bx, I4_XMAX),
+        { verm: true, alpha: a * S.i4HatchA * 0.95, stroke: C.verm, seed: 833 });
+    }
+
+    /* 境界線（朱の縦線）と、上部のドラッグ用ハンドル */
+    if (S.i4LineA > 0.02) {
+      var hx = i4X(g, bx);
+      var yCurve = i4Y(g, i4Pdf(bx));
+      var yEnd = lerp(g.yB, yCurve, easeOutCubic(S.i4LineA));
+      inkPts([[hx, g.yB], [hx, yEnd]],
+        { color: C.verm, width: Math.max(1.9, 2.1 * f), jitter: 0.2, seed: 834, alpha: a });
+      var hA = clamp((S.i4LineA - 0.55) / 0.45, 0, 1);
+      if (hA > 0.02) {
+        var hr = Math.max(5, 5.2 * f);
+        var hpulse = (mode === 'waiting' && !REDUCED) ? 0.5 + 0.5 * Math.sin(S.now * 0.005) : 0;
+        if (hpulse > 0.02) {
+          ctx.save();
+          ctx.globalAlpha = a * hA * 0.22 * hpulse;
+          ctx.fillStyle = C.verm;
+          ctx.beginPath();
+          ctx.arc(hx, yCurve, hr * 2.0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        ctx.save();
+        ctx.globalAlpha = a * hA;
+        ctx.fillStyle = C.cream;
+        ctx.strokeStyle = C.verm;
+        ctx.lineWidth = Math.max(1.6, 1.8 * f);
+        ctx.beginPath();
+        ctx.arc(hx, yCurve, hr, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = C.verm;
+        ctx.beginPath();
+        ctx.arc(hx, yCurve, Math.max(1.8, 2.2 * f), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    /* 「全体＝100%」の注記（曲線の上の空いた左側） */
+    if (S.i4WholePulse > 0.02) {
+      pill(['全体＝100%'], i4X(g, 30), g.yT + (g.yB - g.yT) * 0.22, {
+        size: 11, color: C.indigo, border: 'rgba(43,91,132,.4)',
+        alpha: a * S.i4WholePulse, maxW: W * 0.55
+      });
+    }
+
+    i4Numbers(geo, a * S.i4NumA);
+  }
+
+  /* 各ステップの enter：開始時点の見え方を即時確定する */
+  function i4Enter(step) {
+    enterInteg(4);
+    S.i4Step = step;
+    S.i4Ms = 0;
+    S.i4Bars = 0; S.i4CurveA = 0; S.i4WholeA = 0; S.i4WholePulse = 0;
+    S.i4LineA = 0; S.i4HatchA = 0; S.i4NumA = 0;
+    S.i4X = 60; S.i4UserX = 60;
+    if (step >= 1) {
+      S.i4Bars = 0; S.i4CurveA = 1; S.i4WholeA = 1;
+    }
+    if (step === 2 || step === 3) {
+      S.i4Bars = 0;
+      S.i4LineA = 1; S.i4HatchA = 1; S.i4NumA = 1;
+    }
+  }
+
+  /* tick：ms（ステップ内ミリ秒）から決定論的に決める */
+  function i4Tick(step, ms) {
+    ms = ms == null ? 0 : ms;
+    S.i4Step = step;
+    S.i4Ms = ms;
+    if (step === 0) {
+      S.i4Bars = clamp((ms - 400) / 2600, 0, 1);
+      S.i4CurveA = clamp((ms - 3300) / 2200, 0, 1);
+      S.i4WholeA = 0; S.i4WholePulse = 0;
+      S.i4LineA = 0; S.i4HatchA = 0;
+      S.i4NumA = clamp((ms - 6200) / 900, 0, 1);
+      S.i4X = 60;
+    } else if (step === 1) {
+      S.i4Bars = 0; S.i4CurveA = 1; S.i4WholeA = 1;
+      S.i4WholePulse = clamp(1 - Math.abs(ms - 1400) / 1300, 0, 1);
+      S.i4LineA = clamp((ms - 1900) / 600, 0, 1);
+      S.i4HatchA = clamp((ms - 2500) / 900, 0, 1);
+      S.i4NumA = clamp((ms - 3000) / 800, 0, 1);
+      S.i4X = 60;
+    } else if (step === 2) {
+      S.i4Bars = 0; S.i4CurveA = 1; S.i4WholeA = 1; S.i4WholePulse = 0;
+      S.i4LineA = 1; S.i4HatchA = 1; S.i4NumA = 1;
+      if (ms < 1500) S.i4X = 60;
+      else if (ms < 3500) S.i4X = lerp(60, 45, easeInOutCubic((ms - 1500) / 2000));
+      else if (ms < 5400) S.i4X = 45;
+      else if (ms < 7000) S.i4X = lerp(45, 75, easeInOutCubic((ms - 5400) / 1600));
+      else if (ms < 7800) S.i4X = 75;
+      else S.i4X = lerp(75, 60, easeInOutCubic(clamp((ms - 7800) / 1200, 0, 1)));
+    } else {
+      S.i4Bars = 0; S.i4CurveA = 1; S.i4WholeA = 1; S.i4WholePulse = 0;
+      S.i4LineA = 1; S.i4HatchA = 1; S.i4NumA = 1;
+      S.i4X = clamp(S.i4UserX, I4_OPMIN, I4_OPMAX);
+    }
+  }
+
+  /* ================================================================== */
+  /* 積分 Scene 5「CGのリアルな光と、宇宙船の位置」の本描画               */
+  /*   光：12方向の寄与 L·cosθ の積み上げ／宇宙船：a → v → x の2段階積分   */
+  /* ================================================================== */
+
+  /* 12方向の光源。真上を0°、左（窓）を負、右（壁）を正とする。
+     窓の方向（-68°）がいちばん強い */
+  var I5_LIGHT = [
+    { a: -78, L: 0.95 },
+    { a: -68, L: 1.55 },
+    { a: -56, L: 0.90 },
+    { a: -44, L: 0.70 },
+    { a: -30, L: 1.05 },
+    { a: -14, L: 0.75 },
+    { a: 2, L: 0.85 },
+    { a: 16, L: 1.00 },
+    { a: 30, L: 0.65 },
+    { a: 44, L: 0.80 },
+    { a: 58, L: 0.55 },
+    { a: 72, L: 0.45 }
+  ];
+  var I5_N = I5_LIGHT.length;
+  var I5_FLY = 900;                         /* 1本が P に届くまでの時間（ms） */
+  var I5_AMBER = '#C08A2E';
+  /* 正規化前の合計（Σ L·cosθ）。明るさ0〜1はこれを分母にする */
+  var I5_SUM_L = (function () {
+    var s = 0;
+    for (var i = 0; i < I5_N; i++) {
+      s += I5_LIGHT[i].L * Math.cos(I5_LIGHT[i].a * Math.PI / 180);
+    }
+    return s;
+  })();
+
+  /* 後半：宇宙船の2段階積分（数値モデルの単一ソース） */
+  function i5Acc(t) { var s = Math.sin(Math.PI * t / 10); return 2 * s * s; }
+  function i5Vel(t) { return t - (5 / Math.PI) * Math.sin(Math.PI * t / 5); }
+  function i5Pos(t) { return t * t / 2 - (25 / (Math.PI * Math.PI)) * (1 - Math.cos(Math.PI * t / 5)); }
+  var I5_VMAX = [2, 10, 50];
+  function i5Val(kind, t) { return kind === 0 ? i5Acc(t) : (kind === 1 ? i5Vel(t) : i5Pos(t)); }
+
+  /* 矢印の到着時刻（ステップ内 ms）。窓から6本 → 天井・壁の6本 */
+  function i5ArriveMs(i) {
+    return 1000 + (i < 6 ? i * 1000 : (i - 6) * 1250);
+  }
+  /* 1本ごとの飛来の進み（0=出発前、1=P に到着） */
+  function i5ArrowP(step, i, ms) {
+    if (step === 0 && i >= 6) return 0;
+    if (step >= 1 && i < 6) return 1;
+    var tArr = i5ArriveMs(i);
+    return clamp((ms - (tArr - I5_FLY)) / I5_FLY, 0, 1);
+  }
+
+  /* 部屋の断面（左に窓、上に天井、右に壁、下に机）。P は机の上 */
+  function i5RoomGeo() {
+    return {
+      x0: W * 0.085, x1: W * 0.84,
+      yT: H * 0.235, yB: H * 0.875,
+      deskY: H * 0.70, desk0: W * 0.26, desk1: W * 0.64,
+      px: W * 0.45, py: H * 0.70
+    };
+  }
+  /* P から角度 deg の向きに伸ばした光線が、部屋の輪郭に当たる点 */
+  function i5RaySrc(g, deg) {
+    var th = deg * Math.PI / 180;
+    var dx = Math.sin(th), dy = -Math.cos(th);
+    var s = Infinity, t;
+    if (dx < -1e-6) { t = (g.x0 - g.px) / dx; if (t > 0 && t < s) s = t; }
+    if (dx > 1e-6) { t = (g.x1 - g.px) / dx; if (t > 0 && t < s) s = t; }
+    if (dy < -1e-6) { t = (g.yT - g.py) / dy; if (t > 0 && t < s) s = t; }
+    if (!isFinite(s)) s = 1;
+    return [g.px + dx * s, g.py + dy * s];
+  }
+
+  function i5Tick(step, ms) {
+    ms = ms == null ? 0 : ms;
+    S.i5Step = step;
+    S.i5Ms = ms;
+
+    /* 光：12方向の寄与を順に足す（到着した分だけ明るくなる） */
+    var i, p, sum = 0, cnt = 0, w;
+    for (i = 0; i < I5_N; i++) {
+      p = (step <= 1) ? i5ArrowP(step, i, ms) : 1;
+      S.i5ArrowP[i] = p;
+      if (p >= 0.999) cnt++;
+      w = clamp((p - 0.75) / 0.25, 0, 1);
+      sum += w * I5_LIGHT[i].L * Math.cos(I5_LIGHT[i].a * Math.PI / 180);
+    }
+    S.i5Arrows = cnt;
+    S.i5SumL = sum;
+    S.i5Light = clamp(sum / I5_SUM_L, 0, 1);
+
+    if (step === 0) {
+      S.i5RoomA = 1;
+      S.i5NoteA = clamp((ms - 300) / 900, 0, 1);
+      S.i5BarA = clamp((ms - 700) / 800, 0, 1);
+      S.i5CGa = 1; S.i5SpaceA = 0;
+      S.i5T = 0; S.i5Acc = 0; S.i5ShipA = 0;
+    } else if (step === 1) {
+      S.i5RoomA = 1; S.i5NoteA = 1; S.i5BarA = 1;
+      S.i5CGa = 1; S.i5SpaceA = 0;
+      S.i5T = 0; S.i5Acc = 0; S.i5ShipA = 0;
+    } else if (step === 2) {
+      /* 宇宙船へフェードで切り替え、1段目（加速度）の面積を左から塗る */
+      S.i5CGa = 1 - easeInOutCubic(clamp(ms / 700, 0, 1));
+      S.i5SpaceA = easeInOutCubic(clamp((ms - 120) / 700, 0, 1));
+      S.i5RoomA = 1; S.i5NoteA = 1; S.i5BarA = 1;
+      S.i5T = 10 * clamp((ms - 900) / 7600, 0, 1);
+      S.i5Acc = S.i5T / 10;
+      S.i5ShipA = S.i5SpaceA;
+    } else {
+      /* 1段目の面積が2段目を描き、2段目の面積が3段目を押し上げる */
+      S.i5CGa = 0; S.i5SpaceA = 1;
+      S.i5T = 10 * clamp((ms - 600) / 9200, 0, 1);
+      S.i5Acc = S.i5T / 10;
+      S.i5ShipA = 1;
+    }
+  }
+
+  /* enter は tick(step, 0) と同じ見え方を即時に作る（前ステップの残像なし） */
+  function i5Enter(step) {
+    enterInteg(5);
+    S.i5Step = step;
+    S.i5Ms = 0;
+    for (var i = 0; i < I5_N; i++) S.i5ArrowP[i] = 0;
+    S.i5Arrows = 0; S.i5Light = 0; S.i5SumL = 0;
+    S.i5RoomA = 0; S.i5NoteA = 0; S.i5BarA = 0;
+    S.i5CGa = 0; S.i5SpaceA = 0; S.i5Acc = 0; S.i5T = 0; S.i5ShipA = 0;
+    i5Tick(step, 0);
+  }
+
+  /* ---- 前半：CGの光（部屋の断面・12本の矢印・P の明るさ） ---- */
+  function i5Glow(a, g) {
+    var light = clamp(S.i5Light, 0, 1);
+    if (light <= 0.01) return;
+    var rBase = Math.min(W * 0.42, H * 0.85);
+    var R = rBase * (0.18 + 0.46 * light);
+    var nat = light;                     /* 0＝ぎこちない段階、1＝自然な柔らかい光 */
+    var awk = 1 - nat;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(g.x0, g.yT, g.x1 - g.x0, g.yB - g.yT);
+    ctx.clip();
+    /* ぎこちない：硬い縁の同心円（段が見える） */
+    if (awk > 0.02) {
+      var bR = rBase * 0.30;
+      for (var k = 0; k < 4; k++) {
+        ctx.globalAlpha = a * awk * 0.11 * (1 - k * 0.16);
+        ctx.fillStyle = '#E8B44E';
+        ctx.beginPath();
+        ctx.arc(g.px, g.py, bR * (0.6 + k * 0.48) * (0.6 + 0.4 * light), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    /* 自然：暖色の放射グラデーション */
+    var gr = ctx.createRadialGradient(g.px, g.py, 0, g.px, g.py, R);
+    gr.addColorStop(0, 'rgba(250,214,130,' + (0.55 * nat).toFixed(3) + ')');
+    gr.addColorStop(0.30, 'rgba(248,206,120,' + (0.30 * nat).toFixed(3) + ')');
+    gr.addColorStop(0.65, 'rgba(244,198,110,' + (0.12 * nat).toFixed(3) + ')');
+    gr.addColorStop(1, 'rgba(244,198,110,0)');
+    ctx.globalAlpha = a;
+    ctx.fillStyle = gr;
+    ctx.beginPath();
+    ctx.arc(g.px, g.py, R, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function i5Arrows(a, g) {
+    var step = S.i5Step | 0;
+    var maxI = (step === 0) ? 6 : I5_N;
+    var f = fx();
+    for (var i = 0; i < maxI; i++) {
+      var p = clamp(S.i5ArrowP[i] || 0, 0, 1);
+      if (p <= 0.001) continue;
+      var src = i5RaySrc(g, I5_LIGHT[i].a);
+      var dx = g.px - src[0], dy = g.py - src[1];
+      var d = Math.sqrt(dx * dx + dy * dy) || 1;
+      var rem = Math.max(3, 5 * f);        /* 矢じりは P の手前で止め、点を隠さない */
+      var run = Math.max(0, d * p - rem);
+      var ex = src[0] + dx / d * run;
+      var ey = src[1] + dy / d * run;
+      var al = a * (0.28 + 0.52 * p);
+      lineWithArrow(src[0], src[1], ex, ey, I5_AMBER, Math.max(1.1, 1.4 * f), al);
+    }
+  }
+
+  function i5DrawCG(a) {
+    if (a <= 0.01) return;
+    var g = i5RoomGeo();
+    var f = fx();
+    var roomA = a * clamp(S.i5RoomA, 0, 1);
+    var lw = Math.max(1.2, 1.4 * f);
+
+    /* 部屋の線画 */
+    inkPts([[g.x0, g.yB], [g.x0, g.yT]], { color: C.ink, width: lw, jitter: 0.3, seed: 601, alpha: roomA });
+    inkPts([[g.x0, g.yT], [g.x1, g.yT]], { color: C.ink, width: lw, jitter: 0.3, seed: 602, alpha: roomA });
+    inkPts([[g.x1, g.yT], [g.x1, g.yB]], { color: C.ink, width: lw, jitter: 0.3, seed: 603, alpha: roomA });
+    inkPts([[g.x0, g.yB], [g.x1, g.yB]], { color: C.ink, width: lw, jitter: 0.3, seed: 604, alpha: roomA });
+
+    /* 窓（左の壁の開口）。外の明るみと桟 */
+    var wIn = g.x0 + Math.max(7, W * 0.030);
+    var wy0 = H * 0.30, wy1 = H * 0.575;
+    ctx.save();
+    ctx.globalAlpha = roomA * 0.55;
+    ctx.fillStyle = 'rgba(250,236,196,0.9)';
+    ctx.fillRect(g.x0 + 1, wy0 + 1, wIn - g.x0 - 1, wy1 - wy0 - 2);
+    ctx.restore();
+    inkPts([[wIn, wy0], [wIn, wy1]], { color: C.ink, width: 1.1, jitter: 0.2, seed: 605, alpha: roomA * 0.85 });
+    inkPts([[g.x0, wy0], [wIn, wy0]], { color: C.ink, width: 1.1, jitter: 0.2, seed: 606, alpha: roomA * 0.85 });
+    inkPts([[g.x0, wy1], [wIn, wy1]], { color: C.ink, width: 1.1, jitter: 0.2, seed: 607, alpha: roomA * 0.85 });
+    inkPts([[g.x0, (wy0 + wy1) / 2], [wIn, (wy0 + wy1) / 2]],
+      { color: C.light, width: 1, jitter: 0.2, seed: 608, alpha: roomA * 0.6 });
+
+    /* 机と脚 */
+    inkPts([[g.desk0, g.deskY], [g.desk1, g.deskY]],
+      { color: C.ink, width: Math.max(1.6, 1.9 * f), jitter: 0.3, seed: 609, alpha: roomA });
+    inkPts([[g.desk0 + 6, g.deskY], [g.desk0 + 6, g.yB - 2]],
+      { color: C.ink, width: 1.1, jitter: 0.25, seed: 610, alpha: roomA * 0.75 });
+    inkPts([[g.desk1 - 6, g.deskY], [g.desk1 - 6, g.yB - 2]],
+      { color: C.ink, width: 1.1, jitter: 0.25, seed: 611, alpha: roomA * 0.75 });
+
+    /* P のまわりの明暗（矢印が増えるほど自然な柔らかい光へ） */
+    i5Glow(a, g);
+    i5Arrows(a, g);
+
+    /* 点 P（朱） */
+    var pr = Math.max(2.4, 3.2 * f);
+    ctx.save();
+    ctx.globalAlpha = a * 0.9;
+    ctx.fillStyle = C.cream;
+    ctx.beginPath();
+    ctx.arc(g.px, g.py, pr * 1.85, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    if (!REDUCED && S.i5Light > 0.03) {
+      var ph = 0.5 + 0.5 * Math.sin(S.i5Ms * 0.005);
+      ctx.save();
+      ctx.globalAlpha = a * 0.16 * S.i5Light * (0.6 + 0.4 * ph);
+      ctx.strokeStyle = I5_AMBER;
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.arc(g.px, g.py, pr * (2.4 + 0.8 * ph), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = C.verm;
+    ctx.beginPath();
+    ctx.arc(g.px, g.py, pr, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    text('P', g.px + pr * 4.2, g.py + pr * 3.2,
+      { size: Math.max(10, 10.4 * f), weight: 700, color: C.verm, align: 'left', alpha: a });
+
+    /* 注記（あらゆる向きから光が届く） */
+    var noteA = a * clamp(S.i5NoteA, 0, 1);
+    if (noteA > 0.02) {
+      text('物の表面の一点には、あらゆる向きから光が届く', W * 0.5, H * 0.072,
+        { size: Math.max(10, 11 * f), weight: 700, alpha: noteA, maxWidth: W * 0.94 });
+    }
+
+    /* 明るさ（合計 L·cosθ の積み上げと、正規化した割合） */
+    var barA = a * clamp(S.i5BarA, 0, 1);
+    if (barA > 0.02) {
+      var pct = Math.round(S.i5Light * 100);
+      var barFs = Math.max(10, 10.6 * f);
+      var barTextY = H * 0.144;
+      text('光の合計 ' + S.i5SumL.toFixed(2) + ' ／ 明るさ ' + pct + '%',
+        g.x0, barTextY,
+        { size: barFs, weight: 700, align: 'left', alpha: barA, maxWidth: W * 0.84 });
+      var bh = clamp(H * 0.022, 5, 9);
+      /* 数値の文字とバーが接しないよう、文字の下端から 4px あける */
+      var by = Math.max(H * 0.196, barTextY + barFs * 0.5 + 4 + bh / 2);
+      var bx0 = g.x0, bx1 = g.x1;
+      ctx.save();
+      ctx.globalAlpha = barA * 0.9;
+      ctx.fillStyle = 'rgba(34,34,34,.07)';
+      roundRectPath(bx0, by - bh / 2, bx1 - bx0, bh, bh / 2);
+      ctx.fill();
+      if (S.i5Light > 0.004) {
+        ctx.fillStyle = '#E0A63C';
+        roundRectPath(bx0, by - bh / 2, Math.max(bh, (bx1 - bx0) * S.i5Light), bh, bh / 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = barA;
+      ctx.strokeStyle = 'rgba(34,34,34,.22)';
+      ctx.lineWidth = 1;
+      roundRectPath(bx0, by - bh / 2, bx1 - bx0, bh, bh / 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  /* ---- 後半：宇宙船（3段のミニグラフと、軌道を進む船） ---- */
+  function i5SpaceGeo() {
+    var nw = W < 620;
+    var top = H * 0.245, bot = H * (nw ? 0.815 : 0.885);
+    var rh = (bot - top) / 3;
+    var labDy = Math.max(6.5, 7.5 * fx());
+    var rows = [];
+    for (var i = 0; i < 3; i++) {
+      var bT = top + i * rh;
+      rows.push({
+        bandT: bT,
+        yT: bT + Math.max(rh * 0.28, labDy + 8),
+        yB: bT + rh * 0.92
+      });
+    }
+    return {
+      nw: nw,
+      gx0: W * 0.09,
+      gx1: W * (nw ? 0.585 : 0.555),
+      rows: rows,
+      labDy: labDy,
+      labSize: Math.max(8.6, 9.6 * fx()),
+      numSize: Math.max(10, 10.6 * fx())
+    };
+  }
+  function i5Proj(g, r, vm) {
+    return {
+      X: function (tt) { return g.gx0 + (g.gx1 - g.gx0) * clamp(tt / 10, 0, 1); },
+      Y: function (v) { return r.yB - (r.yB - r.yT) * clamp(v / vm, 0, 1); }
+    };
+  }
+
+  /* 手描き風の宇宙船（外部画像なし）。cx,cy を中心に ang だけ傾ける */
+  function i5Ship(cx, cy, ang, L, a) {
+    var f = fx();
+    var lw = Math.max(1.3, 1.5 * f);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(ang);
+
+    /* 噴射（進行と逆向きの短い線） */
+    var flick = REDUCED ? 0.5 : (0.5 + 0.5 * Math.sin(S.i5T * 3.1));
+    var fl = L * (0.12 + 0.10 * flick);
+    inkPts([[-0.34 * L, 0], [-0.34 * L - fl, 0]],
+      { color: I5_AMBER, width: Math.max(1.2, 1.4 * f), jitter: 0.2, seed: 940, alpha: a * 0.9 });
+    inkPts([[-0.34 * L, -0.10 * L], [-0.34 * L - fl * 0.6, -0.14 * L]],
+      { color: I5_AMBER, width: 1, jitter: 0.2, seed: 941, alpha: a * 0.55 });
+    inkPts([[-0.34 * L, 0.10 * L], [-0.34 * L - fl * 0.6, 0.14 * L]],
+      { color: I5_AMBER, width: 1, jitter: 0.2, seed: 945, alpha: a * 0.55 });
+
+    /* 尾翼（上下、船体の外側の三角） */
+    inkPts([[-0.14 * L, -0.16 * L], [-0.35 * L, -0.33 * L], [-0.30 * L, -0.15 * L]],
+      { color: C.ink, width: lw, jitter: 0.2, seed: 943, alpha: a });
+    inkPts([[-0.14 * L, 0.16 * L], [-0.35 * L, 0.33 * L], [-0.30 * L, 0.15 * L]],
+      { color: C.ink, width: lw, jitter: 0.2, seed: 944, alpha: a });
+
+    /* 船体（右に尖り、後端は平らな太めの胴） */
+    inkPts([
+      [0.46 * L, 0], [0.30 * L, -0.16 * L], [-0.20 * L, -0.19 * L],
+      [-0.32 * L, -0.22 * L], [-0.32 * L, 0.22 * L], [-0.20 * L, 0.19 * L],
+      [0.30 * L, 0.16 * L], [0.46 * L, 0]
+    ], { color: C.ink, width: lw, jitter: 0.2, seed: 942, alpha: a });
+
+    /* 船体の継ぎ目と、窓（藍の丸を塗る） */
+    inkPts([[-0.02 * L, -0.185 * L], [-0.02 * L, 0.185 * L]],
+      { color: C.ink, width: 1, jitter: 0.15, seed: 946, alpha: a * 0.5 });
+    ctx.globalAlpha = a * 0.85;
+    ctx.fillStyle = C.indigo;
+    ctx.beginPath();
+    ctx.arc(0.16 * L, -0.01 * L, Math.max(1.6, 0.075 * L), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function i5ArcPt(g2, u) {
+    var v = 1 - u;
+    return [
+      v * v * g2.x0 + 2 * v * u * g2.cx + u * u * g2.x1,
+      v * v * g2.y0 + 2 * v * u * g2.cy + u * u * g2.y1
+    ];
+  }
+
+  function i5DrawSpace(a) {
+    if (a <= 0.01) return;
+    var g = i5SpaceGeo();
+    var f = fx();
+    var step = S.i5Step | 0;
+    var tNow = clamp(S.i5T, 0, 10);
+    var allRows = (step === 3);
+
+    /* 見出し */
+    text('GPSが届かない宇宙では、加速度センサーが頼り', W * 0.5, H * 0.072,
+      { size: Math.max(10, 11 * f), weight: 700, alpha: a, maxWidth: W * 0.94 });
+
+    /* 現在の t と x */
+    var tSize = Math.max(10, 11 * f);
+    text('t = ' + tNow.toFixed(1) + ' 秒', g.gx0, H * 0.152,
+      { size: tSize, weight: 700, color: C.ink, align: 'left', alpha: a });
+    var xDone = (tNow >= 9.99);
+    text('x = ' + i5Pos(tNow).toFixed(1) + ' m', W * 0.955, H * 0.152,
+      { size: Math.max(10, 11.5 * f), weight: 700, color: xDone ? C.verm : C.ink, align: 'right', alpha: a });
+
+    /* 3段のミニグラフ（加速度 → 速度 → 位置） */
+    var labels = ['加速度 a(t)', '速度 v(t)', '位置 x(t)'];
+    var i, k;
+    for (i = 0; i < 3; i++) {
+      var r = g.rows[i];
+      var P = i5Proj(g, r, I5_VMAX[i]);
+      var active = (i === 0 || allRows);
+      var axisA = a * (active ? 0.6 : 0.22);
+      inkPts([[g.gx0, r.yB], [g.gx1, r.yB]],
+        { color: C.ink, width: 1.1, jitter: 0.15, seed: 901 + i * 7, alpha: axisA });
+      inkPts([[g.gx0, r.yB], [g.gx0, r.yT]],
+        { color: C.ink, width: 1.1, jitter: 0.15, seed: 902 + i * 7, alpha: axisA });
+
+      /* 行の見出し（まだ描かない段は淡く置いて、位置を先に見せる） */
+      text(labels[i], g.gx0, r.yT - g.labDy,
+        { size: g.labSize, weight: 700, color: C.ink, align: 'left', alpha: a * (active ? 0.9 : 0.28) });
+      if (!active) continue;
+
+      /* 1段目は「全体の面積」を淡く敷いておく（2段目以降は積み上がった分だけ） */
+      if (i === 0 && allRows) {
+        var fullPoly = [[P.X(0), r.yB]];
+        for (k = 0; k <= 40; k++) {
+          var tf = 10 * k / 40;
+          fullPoly.push([P.X(tf), P.Y(i5Val(0, tf))]);
+        }
+        fullPoly.push([P.X(10), r.yB]);
+        i4FillPoly(fullPoly, 'rgba(43,91,132,0.09)', a);
+      }
+
+      if (tNow > 0.02) {
+        var pts = [], poly;
+        for (k = 0; k <= 64; k++) {
+          var tt = tNow * k / 64;
+          pts.push([P.X(tt), P.Y(i5Val(i, tt))]);
+        }
+        poly = [[P.X(0), r.yB]].concat(pts, [[P.X(tNow), r.yB]]);
+        hatchPoly(poly, { alpha: a * (i === 0 && allRows ? 0.75 : 0.6), stroke: C.indigo, seed: 910 + i });
+        inkPts(pts, { color: C.indigo, width: Math.max(1.4, 1.6 * f), jitter: 0.2, seed: 920 + i, alpha: a });
+
+        /* いまの点（朱） */
+        var cx = P.X(tNow), cy = P.Y(i5Val(i, tNow));
+        ctx.save();
+        ctx.globalAlpha = a;
+        ctx.fillStyle = C.verm;
+        ctx.beginPath();
+        ctx.arc(cx, cy, Math.max(2, 2.3 * f), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      /* いまの値 */
+      text(i5Val(i, tNow).toFixed(1), g.gx1, r.yT - g.labDy,
+        { size: g.numSize, weight: 700, color: i === 2 ? C.verm : C.ink, align: 'right', alpha: a });
+    }
+
+    /* t 軸の目盛り（3段目だけ） */
+    if (allRows) {
+      var r2 = g.rows[2];
+      text('0', g.gx0, r2.yB + g.labDy,
+        { size: Math.max(8.4, 9 * f), color: C.light, align: 'center', alpha: a * 0.9 });
+      text('10秒', g.gx1, r2.yB + g.labDy,
+        { size: Math.max(8.4, 9 * f), color: C.light, align: 'center', alpha: a * 0.9 });
+    }
+
+    /* 積み上げの縦ガイド（上の面積が下の曲線を押し上げる） */
+    if (allRows && tNow > 0.02 && tNow < 9.9) {
+      var Xg = g.gx0 + (g.gx1 - g.gx0) * clamp(tNow / 10, 0, 1);
+      inkPts([[Xg, g.rows[0].yT], [Xg, g.rows[2].yB]],
+        { color: C.light, width: 1, jitter: 0, dash: [2, 5], alpha: a * 0.55 });
+      for (i = 0; i < 2; i++) {
+        var yA = g.rows[i].yB, yB2 = g.rows[i + 1].yT;
+        var my = (yA + yB2) / 2;
+        if (yB2 - yA > 4) {
+          inkPts([[Xg, my + 3], [Xg, my - 3]],
+            { color: C.indigo, width: 1, jitter: 0, alpha: a * 0.5 });
+          inkPts([[Xg, my - 3], [Xg - 2, my - 1]],
+            { color: C.indigo, width: 0.9, jitter: 0, alpha: a * 0.5 });
+          inkPts([[Xg, my - 3], [Xg + 2, my - 1]],
+            { color: C.indigo, width: 0.9, jitter: 0, alpha: a * 0.5 });
+        }
+      }
+    }
+
+    /* 軌道と宇宙船 */
+    var nw = g.nw;
+    var arc = {
+      x0: W * (nw ? 0.625 : 0.615), y0: H * 0.565,
+      cx: W * (nw ? 0.775 : 0.775), cy: H * 0.445,
+      x1: W * 0.915, y1: H * 0.335
+    };
+    var arcPts = [], NARC = 26;
+    for (k = 0; k <= NARC; k++) arcPts.push(i5ArcPt(arc, k / NARC));
+    inkPts(arcPts, { color: C.light, width: 1.1, jitter: 0, dash: [2, 6], alpha: a * 0.7 });
+
+    var u = clamp(tNow / 10, 0, 1);
+    var shipA = a * clamp(S.i5ShipA, 0, 1);
+    if (shipA > 0.02) {
+      /* 進んだ道のり（朱の点線） */
+      if (u > 0.005) {
+        var trail = [];
+        for (k = 0; k <= Math.max(2, Math.round(NARC * u)); k++) {
+          trail.push(i5ArcPt(arc, u * k / Math.max(2, Math.round(NARC * u))));
+        }
+        inkPts(trail, { color: C.verm, width: 1.4, jitter: 0, dash: [3, 5], alpha: a * 0.55 });
+      }
+      var sp = i5ArcPt(arc, u);
+      var sp2 = i5ArcPt(arc, Math.min(1, u + 0.02));
+      var ang = Math.atan2(sp2[1] - sp[1], sp2[0] - sp[0]);
+      var L = Math.min(W * 0.10, H * 0.19);
+      i5Ship(sp[0], sp[1], ang, L, shipA);
+
+      /* 軌道上の現在位置（小さな朱の点） */
+      ctx.save();
+      ctx.globalAlpha = shipA * 0.9;
+      ctx.fillStyle = C.verm;
+      ctx.beginPath();
+      ctx.arc(sp[0], sp[1], Math.max(1.8, 2.2 * f), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  function i5DrawScene(a) {
+    if (a <= 0.01) return;
+    if (S.i5CGa > 0.005) i5DrawCG(a * clamp(S.i5CGa, 0, 1));
+    if (S.i5SpaceA > 0.005) i5DrawSpace(a * clamp(S.i5SpaceA, 0, 1));
+  }
+
+  /* ================================================================== */
+  /* 積分 Scene 6「積み上げて、全体をつくる」の本描画                     */
+  /*   i6-recap：6つの場面／i6-kinds：5つの型カード                        */
+  /*   i6-many：24の事例グリッド／i6-close：微分と積分の2つのレンズ        */
+  /*   レイアウト・点灯の作法は微分シーン6（drawS6Cards/drawS6Grid）に倣う */
+  /* ================================================================== */
+  var I6_TYPE_TITLE = ['変化の積み上げ', '面積と体積', '割合と確率', '平均と重心', '微分の逆'];
+  var I6_TYPE_SUB = ['距離・電気代', '曲線・輪切り', 'データ分析', 'ならす・つり合い', '法則から復元'];
+  var I6_EX_LABELS = [
+    '走行距離', '電気代', '水道量', 'バッテリー', '降水量', 'ダム貯水',
+    '土地の面積', '器の体積', '3D造形', '橋の重心', 'ダムの水圧', 'CGの光',
+    '偏差値', '品質管理', '保険料', '総売上', '総コスト', 'カロリー',
+    'CTスキャン', '薬の吸収', '音の波形', '地震の力', '宇宙軌道', 'CO2排出'
+  ];
+  /* 24事例の出現時刻（i6-many ステップ内ms。MP3の無音区間を実測して同期（voiceAt 0.3s を加算））。
+     最初の点灯 4980ms（「走行距離」）→ 最後 40580ms（「CO2排出」）。音声長 41.74s。 */
+  var I6_EX_T = [
+    4980, 6460, 7760, 9240, 10520, 12000, 13580, 15200, 16980, 18800, 20360, 22000,
+    23700, 24980, 26500, 27880, 29400, 30800, 32320, 33880, 35820, 37320, 38960, 40580
+  ];
+  /* ナレーションの区切り（MP3の無音区間を実測して同期（voiceAt 0.3s を加算）） */
+  var I6_RECAP_T = [300, 1900, 4080, 5680, 7300, 8980];
+  var I6_K1_T = [4500, 8700, 13080];
+  var I6_K2_T = [300, 6160];
+  var I6_CAP_LABELS = ['車の距離', '曲線の面積', '輪切りの器', 'データの割合', 'CGの光', '宇宙船'];
+  /* 狭幅ではラベルが隣と重ならないよう2行に分ける（文字は8px以上を保つ） */
+  var I6_CAP_LINES = [['車の距離'], ['曲線の', '面積'], ['輪切りの', '器'], ['データの', '割合'], ['CGの光'], ['宇宙船']];
+
+  function i6TypeSet(k, since) {
+    S.i6TypeOn[k] = clamp(since / 240, 0, 1);
+    S.i6TypeLit[k] = 1 - clamp((since - 280) / 700, 0, 1);
+  }
+  function i6TypeOff(k) { S.i6TypeOn[k] = 0; S.i6TypeLit[k] = 1; }
+  function i6TypeDone(k) { S.i6TypeOn[k] = 1; S.i6TypeLit[k] = 0; }
+  function i6ManyClear() {
+    for (var i = 0; i < 24; i++) { S.i6Ex[i] = 0; S.i6ExLit[i] = 1; }
+  }
+  function i6ManyAt(t) {
+    for (var i = 0; i < 24; i++) {
+      var since = t - I6_EX_T[i];
+      S.i6Ex[i] = clamp(since / 220, 0, 1);
+      S.i6ExLit[i] = 1 - clamp((since - 260) / 620, 0, 1);
+    }
+  }
+  function resetI6Scene() {
+    S.i6Step = 0; S.i6Ms = 0;
+    S.i6BaseA = 1; S.i6KindsA = 0; S.i6GridA = 0; S.i6CloseA = 0;
+    for (var k = 0; k < 5; k++) { S.i6TypeOn[k] = 0; S.i6TypeLit[k] = 1; }
+    i6ManyClear();
+    for (var d = 0; d < 6; d++) S.i6Dot[d] = 0;
+    S.i6Cur = -1; S.i6TanA = 0; S.i6AreaA = 0; S.i6Pulse = 0;
+  }
+
+  /* 輪郭の楕円（回転つき）。rx/ry を直接指定する簡易版 */
+  function i6EllipseStroke(cx, cy, rx, ry) {
+    ctx.beginPath();
+    for (var i = 0; i <= 26; i++) {
+      var t = i / 26 * Math.PI * 2;
+      var px = cx + Math.cos(t) * rx, py = cy + Math.sin(t) * ry;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+
+  /* recap の6つの円形アイコン（車・短冊・花瓶・釣鐘・光・宇宙船） */
+  function i6CapIcon(kind, x, y, s, color, alpha) {
+    if (alpha <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = Math.min(2.8, Math.max(1.1, s * 0.13));
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    var i, th;
+    if (kind === 0) {
+      /* 車 */
+      roundRectPath(x - s * 0.60, y - s * 0.14, s * 1.20, s * 0.34, s * 0.10);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.30, y - s * 0.14);
+      ctx.lineTo(x - s * 0.12, y - s * 0.42);
+      ctx.lineTo(x + s * 0.16, y - s * 0.42);
+      ctx.lineTo(x + s * 0.32, y - s * 0.14);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x - s * 0.30, y + s * 0.32, s * 0.13, 0, Math.PI * 2);
+      ctx.moveTo(x + s * 0.43, y + s * 0.32);
+      ctx.arc(x + s * 0.30, y + s * 0.32, s * 0.13, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (kind === 1) {
+      /* 短冊（細かく切って足す） */
+      ctx.beginPath();
+      ctx.rect(x - s * 0.56, y - s * 0.34, s * 1.12, s * 0.68);
+      ctx.stroke();
+      for (i = 1; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x - s * 0.56 + s * 0.28 * i, y - s * 0.34);
+        ctx.lineTo(x - s * 0.56 + s * 0.28 * i, y + s * 0.34);
+        ctx.stroke();
+      }
+    } else if (kind === 2) {
+      /* 花瓶（輪切りの器） */
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.32, y - s * 0.44);
+      ctx.bezierCurveTo(x - s * 0.62, y - s * 0.08, x - s * 0.48, y + s * 0.30, x - s * 0.28, y + s * 0.44);
+      ctx.lineTo(x + s * 0.28, y + s * 0.44);
+      ctx.bezierCurveTo(x + s * 0.48, y + s * 0.30, x + s * 0.62, y - s * 0.08, x + s * 0.32, y - s * 0.44);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.44, y - s * 0.14);
+      ctx.lineTo(x + s * 0.44, y - s * 0.14);
+      ctx.moveTo(x - s * 0.47, y + s * 0.16);
+      ctx.lineTo(x + s * 0.47, y + s * 0.16);
+      ctx.stroke();
+    } else if (kind === 3) {
+      /* 釣鐘（正規分布のシルエット）：裾が広がる山。底の直線は引かない
+         （直線があると三角形に見えるため） */
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.66, y + s * 0.36);
+      ctx.bezierCurveTo(x - s * 0.42, y + s * 0.34, x - s * 0.36, y + s * 0.12, x - s * 0.28, y - s * 0.08);
+      ctx.bezierCurveTo(x - s * 0.18, y - s * 0.36, x - s * 0.09, y - s * 0.48, x, y - s * 0.48);
+      ctx.bezierCurveTo(x + s * 0.09, y - s * 0.48, x + s * 0.18, y - s * 0.36, x + s * 0.28, y - s * 0.08);
+      ctx.bezierCurveTo(x + s * 0.36, y + s * 0.12, x + s * 0.42, y + s * 0.34, x + s * 0.66, y + s * 0.36);
+      ctx.stroke();
+    } else if (kind === 4) {
+      /* 光（点から放射） */
+      ctx.beginPath();
+      ctx.arc(x, y, Math.max(1.4, s * 0.15), 0, Math.PI * 2);
+      ctx.stroke();
+      for (i = 0; i < 8; i++) {
+        th = i * Math.PI / 4;
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(th) * s * 0.30, y + Math.sin(th) * s * 0.30);
+        ctx.lineTo(x + Math.cos(th) * s * 0.56, y + Math.sin(th) * s * 0.56);
+        ctx.stroke();
+      }
+    } else {
+      /* 宇宙船 */
+      ctx.beginPath();
+      ctx.moveTo(x, y - s * 0.50);
+      ctx.lineTo(x + s * 0.19, y - s * 0.16);
+      ctx.lineTo(x + s * 0.19, y + s * 0.22);
+      ctx.lineTo(x - s * 0.19, y + s * 0.22);
+      ctx.lineTo(x - s * 0.19, y - s * 0.16);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.19, y + s * 0.02);
+      ctx.lineTo(x - s * 0.42, y + s * 0.34);
+      ctx.moveTo(x + s * 0.19, y + s * 0.02);
+      ctx.lineTo(x + s * 0.42, y + s * 0.34);
+      ctx.moveTo(x - s * 0.07, y + s * 0.26);
+      ctx.lineTo(x - s * 0.04, y + s * 0.44);
+      ctx.moveTo(x + s * 0.07, y + s * 0.26);
+      ctx.lineTo(x + s * 0.04, y + s * 0.44);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /* 5つの型のアイコン（積み上げ棒／面積と輪切り／分布の割合／釣り合い／逆） */
+  function i6TypeGlyph(k, x, y, s, color, alpha) {
+    if (alpha <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = Math.min(3, Math.max(1, s * 0.10));
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    var i, bx;
+    if (k === 0) {
+      /* 棒を積み上げ、右肩上がりの折れ線で合計を示す */
+      var hs = [0.22, 0.42, 0.60, 0.80];
+      for (i = 0; i < 4; i++) {
+        bx = x - s * 0.44 + i * s * 0.23;
+        ctx.beginPath();
+        ctx.rect(bx, y + s * 0.34 - s * hs[i], s * 0.13, s * hs[i]);
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.50, y + s * 0.34);
+      ctx.lineTo(x + s * 0.48, y + s * 0.34);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.36, y + s * 0.04);
+      ctx.lineTo(x - s * 0.13, y - s * 0.14);
+      ctx.lineTo(x + s * 0.10, y - s * 0.26);
+      ctx.lineTo(x + s * 0.33, y - s * 0.42);
+      ctx.stroke();
+    } else if (k === 1) {
+      /* 左に曲線下の面積、右に輪切りの円柱（体積） */
+      var cxa = x - s * 0.14;
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.16;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(cxa - s * 0.32, y + s * 0.32);
+      ctx.quadraticCurveTo(cxa - s * 0.02, y - s * 0.26, cxa + s * 0.32, y + s * 0.06);
+      ctx.lineTo(cxa + s * 0.32, y + s * 0.32);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      ctx.beginPath();
+      ctx.moveTo(cxa - s * 0.32, y - s * 0.34);
+      ctx.lineTo(cxa - s * 0.32, y + s * 0.32);
+      ctx.lineTo(cxa + s * 0.34, y + s * 0.32);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cxa - s * 0.32, y + s * 0.32);
+      ctx.quadraticCurveTo(cxa - s * 0.02, y - s * 0.26, cxa + s * 0.32, y + s * 0.06);
+      ctx.stroke();
+      /* 円柱（上端の楕円と側面） */
+      var cyx = x + s * 0.32, cyT = y - s * 0.30, cyB = y + s * 0.22;
+      i6EllipseStroke(cyx, cyT, s * 0.15, s * 0.055);
+      ctx.beginPath();
+      ctx.moveTo(cyx - s * 0.15, cyT);
+      ctx.lineTo(cyx - s * 0.15, cyB);
+      ctx.moveTo(cyx + s * 0.15, cyT);
+      ctx.lineTo(cyx + s * 0.15, cyB);
+      ctx.stroke();
+      i6EllipseStroke(cyx, cyB, s * 0.15, s * 0.055);
+    } else if (k === 2) {
+      /* 釣鐘と、右側（上位）の割合 */
+      var bell = function (u) { return Math.exp(-((u - 0.5) * (u - 0.5)) / 0.045); };
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.18;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.46 + s * 0.92 * 0.58, y + s * 0.32);
+      for (i = 0; i <= 20; i++) {
+        var uu = 0.58 + (0.42 * i / 20);
+        ctx.lineTo(x - s * 0.46 + s * 0.92 * uu, y + s * 0.32 - s * 0.62 * bell(uu));
+      }
+      ctx.lineTo(x + s * 0.46, y + s * 0.32);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.46, y + s * 0.32);
+      for (i = 0; i <= 24; i++) {
+        var u2 = i / 24;
+        ctx.lineTo(x - s * 0.46 + s * 0.92 * u2, y + s * 0.32 - s * 0.62 * bell(u2));
+      }
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.50, y + s * 0.32);
+      ctx.lineTo(x + s * 0.50, y + s * 0.32);
+      ctx.moveTo(x - s * 0.46 + s * 0.92 * 0.58, y + s * 0.32);
+      ctx.lineTo(x - s * 0.46 + s * 0.92 * 0.58, y + s * 0.02);
+      ctx.stroke();
+    } else if (k === 3) {
+      /* 平均と重心：水平な梁と支点 */
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.46, y - s * 0.10);
+      ctx.lineTo(x + s * 0.46, y - s * 0.10);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y - s * 0.10);
+      ctx.lineTo(x + s * 0.17, y + s * 0.36);
+      ctx.lineTo(x - s * 0.17, y + s * 0.36);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x - s * 0.30, y - s * 0.10, Math.max(1.3, s * 0.07), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x + s * 0.30, y - s * 0.10, Math.max(1.3, s * 0.07), 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      /* 微分の逆：逆向きの2つの矢印が循環する */
+      ctx.beginPath();
+      ctx.arc(x, y, s * 0.34, Math.PI * 0.12, Math.PI * 0.88);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y, s * 0.34, Math.PI * 1.12, Math.PI * 1.88);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.34 * Math.cos(Math.PI * 0.88), y + s * 0.34 * Math.sin(Math.PI * 0.88));
+      ctx.lineTo(x + s * 0.16, y + s * 0.34 * Math.sin(Math.PI * 0.88));
+      ctx.lineTo(x + s * 0.30, y + s * 0.16);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.34 * Math.cos(Math.PI * 1.88), y + s * 0.34 * Math.sin(Math.PI * 1.88));
+      ctx.lineTo(x - s * 0.16, y + s * 0.34 * Math.sin(Math.PI * 1.88));
+      ctx.lineTo(x - s * 0.30, y - s * 0.16);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  /* 24事例の線画（1つ3〜6本程度の簡略な図） */
+  function i6ExGlyph(k, x, y, s, color, alpha) {
+    if (alpha <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = Math.min(3, Math.max(1, s * 0.11));
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    var i, bx;
+    if (k === 0) {
+      /* 走行距離：道の上を走る車 */
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.34, y - s * 0.02);
+      ctx.lineTo(x - s * 0.26, y - s * 0.28);
+      ctx.lineTo(x + s * 0.10, y - s * 0.28);
+      ctx.lineTo(x + s * 0.24, y - s * 0.02);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x - s * 0.18, y + s * 0.08, Math.max(1.2, s * 0.09), 0, Math.PI * 2);
+      ctx.moveTo(x + s * 0.24, y + s * 0.08);
+      ctx.arc(x + s * 0.10, y + s * 0.08, Math.max(1.2, s * 0.09), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([s * 0.14, s * 0.12]);
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.48, y + s * 0.32);
+      ctx.lineTo(x + s * 0.48, y + s * 0.32);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    } else if (k === 1) {
+      /* 電気代：コンセントとコード */
+      roundRectPath(x - s * 0.34, y - s * 0.30, s * 0.68, s * 0.44, s * 0.10);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.12, y - s * 0.30);
+      ctx.lineTo(x - s * 0.12, y - s * 0.44);
+      ctx.moveTo(x + s * 0.12, y - s * 0.30);
+      ctx.lineTo(x + s * 0.12, y - s * 0.44);
+      ctx.moveTo(x, y + s * 0.14);
+      ctx.bezierCurveTo(x + s * 0.02, y + s * 0.40, x + s * 0.34, y + s * 0.34, x + s * 0.36, y + s * 0.46);
+      ctx.stroke();
+    } else if (k === 2) {
+      /* 水道量：蛇口から落ちる水 */
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.46, y - s * 0.28);
+      ctx.lineTo(x - s * 0.22, y - s * 0.28);
+      ctx.lineTo(x - s * 0.22, y - s * 0.10);
+      ctx.lineTo(x + s * 0.02, y - s * 0.10);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.36, y - s * 0.28);
+      ctx.lineTo(x - s * 0.36, y - s * 0.42);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.02, y + s * 0.02);
+      ctx.bezierCurveTo(x + s * 0.16, y + s * 0.18, x + s * 0.12, y + s * 0.34, x, y + s * 0.34);
+      ctx.bezierCurveTo(x - s * 0.12, y + s * 0.34, x - s * 0.14, y + s * 0.18, x + s * 0.02, y + s * 0.02);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.36, y + s * 0.42);
+      ctx.lineTo(x + s * 0.36, y + s * 0.42);
+      ctx.stroke();
+    } else if (k === 3) {
+      /* バッテリー */
+      roundRectPath(x - s * 0.40, y - s * 0.26, s * 0.72, s * 0.52, s * 0.07);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.rect(x + s * 0.34, y - s * 0.10, s * 0.10, s * 0.20);
+      ctx.stroke();
+      for (i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x - s * 0.26 + s * 0.18 * i, y - s * 0.12);
+        ctx.lineTo(x - s * 0.26 + s * 0.18 * i, y + s * 0.12);
+        ctx.stroke();
+      }
+    } else if (k === 4) {
+      /* 降水量：雲と雨 */
+      ctx.beginPath();
+      ctx.arc(x - s * 0.18, y - s * 0.12, s * 0.18, Math.PI * 0.9, Math.PI * 2.1);
+      ctx.arc(x + s * 0.10, y - s * 0.16, s * 0.14, Math.PI * 1.0, Math.PI * 2.2);
+      ctx.stroke();
+      for (i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x - s * 0.24 + s * 0.18 * i, y + s * 0.14);
+        ctx.lineTo(x - s * 0.30 + s * 0.18 * i, y + s * 0.34);
+        ctx.stroke();
+      }
+    } else if (k === 5) {
+      /* ダム貯水：壁と貯まった水 */
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.08, y - s * 0.38);
+      ctx.lineTo(x + s * 0.02, y + s * 0.36);
+      ctx.lineTo(x + s * 0.34, y + s * 0.36);
+      ctx.lineTo(x + s * 0.42, y - s * 0.38);
+      ctx.stroke();
+      for (i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x - s * 0.44, y - s * 0.04 + s * 0.16 * i);
+        ctx.bezierCurveTo(x - s * 0.30, y - s * 0.12 + s * 0.16 * i, x - s * 0.18, y + s * 0.04 + s * 0.16 * i, x - s * 0.06, y - s * 0.04 + s * 0.16 * i);
+        ctx.stroke();
+      }
+    } else if (k === 6) {
+      /* 土地の面積：区画 */
+      ctx.beginPath();
+      ctx.rect(x - s * 0.40, y - s * 0.30, s * 0.80, s * 0.60);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.06, y - s * 0.30);
+      ctx.lineTo(x - s * 0.06, y + s * 0.30);
+      ctx.moveTo(x - s * 0.40, y + s * 0.02);
+      ctx.lineTo(x + s * 0.40, y + s * 0.02);
+      ctx.stroke();
+    } else if (k === 7) {
+      /* 器の体積：輪切りのある器 */
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.28, y - s * 0.38);
+      ctx.lineTo(x - s * 0.14, y + s * 0.38);
+      ctx.lineTo(x + s * 0.14, y + s * 0.38);
+      ctx.lineTo(x + s * 0.28, y - s * 0.38);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.24, y - s * 0.10);
+      ctx.lineTo(x + s * 0.24, y - s * 0.10);
+      ctx.moveTo(x - s * 0.20, y + s * 0.14);
+      ctx.lineTo(x + s * 0.20, y + s * 0.14);
+      ctx.stroke();
+    } else if (k === 8) {
+      /* 3D造形：薄い層の積み上げ */
+      for (i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x - s * 0.34 + s * 0.06 * (2 - i), y + s * 0.10 + s * 0.14 * i);
+        ctx.lineTo(x + s * 0.34 - s * 0.06 * (2 - i), y + s * 0.10 + s * 0.14 * i);
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.20, y - s * 0.06);
+      ctx.lineTo(x + s * 0.20, y - s * 0.06);
+      ctx.moveTo(x - s * 0.12, y - s * 0.24);
+      ctx.lineTo(x + s * 0.12, y - s * 0.24);
+      ctx.stroke();
+    } else if (k === 9) {
+      /* 橋の重心：吊り橋と支点 */
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.46, y + s * 0.04);
+      ctx.lineTo(x + s * 0.46, y + s * 0.04);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.34, y - s * 0.30);
+      ctx.lineTo(x - s * 0.34, y + s * 0.04);
+      ctx.moveTo(x + s * 0.34, y - s * 0.30);
+      ctx.lineTo(x + s * 0.34, y + s * 0.04);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.34, y - s * 0.28);
+      ctx.quadraticCurveTo(x, y + s * 0.02, x + s * 0.34, y - s * 0.28);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y + s * 0.04);
+      ctx.lineTo(x + s * 0.11, y + s * 0.36);
+      ctx.lineTo(x - s * 0.11, y + s * 0.36);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (k === 10) {
+      /* ダムの水圧：壁に強まる矢印 */
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.24, y - s * 0.42);
+      ctx.lineTo(x + s * 0.24, y + s * 0.42);
+      ctx.stroke();
+      for (i = 0; i < 3; i++) {
+        var ay = y - s * 0.22 + s * 0.22 * i;
+        var alen = s * (0.20 + 0.10 * i);
+        ctx.beginPath();
+        ctx.moveTo(x + s * 0.24 - alen, ay);
+        ctx.lineTo(x + s * 0.14, ay);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + s * 0.10, ay - s * 0.07);
+        ctx.lineTo(x + s * 0.21, ay);
+        ctx.lineTo(x + s * 0.10, ay + s * 0.07);
+        ctx.closePath();
+        ctx.fill();
+      }
+    } else if (k === 11) {
+      /* CGの光：電球と光線 */
+      ctx.beginPath();
+      ctx.arc(x - s * 0.04, y - s * 0.10, s * 0.20, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.10, y + s * 0.08);
+      ctx.lineTo(x - s * 0.08, y + s * 0.22);
+      ctx.lineTo(x + s * 0.02, y + s * 0.22);
+      ctx.lineTo(x + s * 0.04, y + s * 0.08);
+      ctx.stroke();
+      for (i = 0; i < 3; i++) {
+        var th = -Math.PI * 0.9 + Math.PI * 0.3 * i;
+        ctx.beginPath();
+        ctx.moveTo(x - s * 0.04 + Math.cos(th) * s * 0.28, y - s * 0.10 + Math.sin(th) * s * 0.28);
+        ctx.lineTo(x - s * 0.04 + Math.cos(th) * s * 0.44, y - s * 0.10 + Math.sin(th) * s * 0.44);
+        ctx.stroke();
+      }
+    } else if (k === 12) {
+      /* 偏差値：釣鐘 */
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.44, y + s * 0.28);
+      ctx.bezierCurveTo(x - s * 0.22, y + s * 0.28, x - s * 0.18, y - s * 0.36, x, y - s * 0.36);
+      ctx.bezierCurveTo(x + s * 0.18, y - s * 0.36, x + s * 0.22, y + s * 0.28, x + s * 0.44, y + s * 0.28);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.48, y + s * 0.28);
+      ctx.lineTo(x + s * 0.48, y + s * 0.28);
+      ctx.stroke();
+    } else if (k === 13) {
+      /* 品質管理：分布と規格の内側（破線2本） */
+      var bg = function (u) { return Math.exp(-((u - 0.5) * (u - 0.5)) / 0.06); };
+      ctx.beginPath();
+      for (i = 0; i <= 24; i++) {
+        var u3 = i / 24;
+        var px3 = x - s * 0.44 + s * 0.88 * u3;
+        var py3 = y + s * 0.28 - s * 0.56 * bg(u3);
+        if (i === 0) ctx.moveTo(px3, py3); else ctx.lineTo(px3, py3);
+      }
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.48, y + s * 0.28);
+      ctx.lineTo(x + s * 0.48, y + s * 0.28);
+      ctx.stroke();
+      ctx.setLineDash([s * 0.09, s * 0.07]);
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.24, y - s * 0.14);
+      ctx.lineTo(x - s * 0.24, y + s * 0.42);
+      ctx.moveTo(x + s * 0.24, y - s * 0.14);
+      ctx.lineTo(x + s * 0.24, y + s * 0.42);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    } else if (k === 14) {
+      /* 保険料：硬貨の積み上げ */
+      for (i = 0; i < 3; i++) {
+        i6EllipseStroke(x, y + s * 0.24 - s * 0.16 * i, s * 0.30, s * 0.10);
+      }
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.30, y - s * 0.08);
+      ctx.lineTo(x - s * 0.30, y + s * 0.24);
+      ctx.moveTo(x + s * 0.30, y - s * 0.08);
+      ctx.lineTo(x + s * 0.30, y + s * 0.24);
+      ctx.stroke();
+    } else if (k === 15) {
+      /* 総売上：伸びる棒 */
+      for (i = 0; i < 3; i++) {
+        bx = x - s * 0.38 + s * 0.26 * i;
+        ctx.beginPath();
+        ctx.rect(bx, y + s * 0.28 - s * (0.20 + 0.14 * i), s * 0.16, s * (0.20 + 0.14 * i));
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.44, y + s * 0.28);
+      ctx.lineTo(x + s * 0.44, y + s * 0.28);
+      ctx.stroke();
+    } else if (k === 16) {
+      /* 総コスト：下がる棒（費用） */
+      for (i = 0; i < 3; i++) {
+        bx = x - s * 0.38 + s * 0.26 * i;
+        ctx.beginPath();
+        ctx.moveTo(bx, y + s * 0.28);
+        ctx.lineTo(bx, y + s * 0.28 - s * (0.42 - 0.12 * i));
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.44, y + s * 0.28);
+      ctx.lineTo(x + s * 0.44, y + s * 0.28);
+      ctx.stroke();
+    } else if (k === 17) {
+      /* カロリー：炎 */
+      ctx.beginPath();
+      ctx.moveTo(x, y - s * 0.40);
+      ctx.bezierCurveTo(x + s * 0.24, y - s * 0.12, x + s * 0.26, y + s * 0.16, x, y + s * 0.34);
+      ctx.bezierCurveTo(x - s * 0.26, y + s * 0.16, x - s * 0.24, y - s * 0.12, x, y - s * 0.40);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y + s * 0.02);
+      ctx.bezierCurveTo(x + s * 0.10, y + s * 0.14, x + s * 0.08, y + s * 0.26, x, y + s * 0.28);
+      ctx.stroke();
+    } else if (k === 18) {
+      /* CTスキャン：輪と断層 */
+      i6EllipseStroke(x, y, s * 0.42, s * 0.30);
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.42, y + s * 0.02);
+      ctx.quadraticCurveTo(x, y + s * 0.12, x + s * 0.42, y + s * 0.02);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.28, y + s * 0.40);
+      ctx.lineTo(x + s * 0.28, y + s * 0.40);
+      ctx.stroke();
+    } else if (k === 19) {
+      /* 薬の吸収：カプセルと血中濃度 */
+      ctx.save();
+      ctx.translate(x - s * 0.22, y - s * 0.18);
+      ctx.rotate(-0.6);
+      roundRectPath(-s * 0.20, -s * 0.10, s * 0.40, s * 0.20, s * 0.10);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, -s * 0.10);
+      ctx.lineTo(0, s * 0.10);
+      ctx.stroke();
+      ctx.restore();
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.44, y + s * 0.38);
+      ctx.quadraticCurveTo(x + s * 0.02, y - s * 0.12, x + s * 0.44, y + s * 0.38);
+      ctx.stroke();
+    } else if (k === 20) {
+      /* 音の波形 */
+      ctx.beginPath();
+      for (i = 0; i <= 28; i++) {
+        var wx = x - s * 0.44 + s * 0.88 * i / 28;
+        var wy = y + Math.sin(i / 28 * Math.PI * 4) * s * 0.26 * Math.sin(i / 28 * Math.PI);
+        if (i === 0) ctx.moveTo(wx, wy); else ctx.lineTo(wx, wy);
+      }
+      ctx.stroke();
+    } else if (k === 21) {
+      /* 地震の力：震動の折れ線 */
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.48, y + s * 0.02);
+      ctx.lineTo(x - s * 0.28, y + s * 0.02);
+      ctx.lineTo(x - s * 0.18, y - s * 0.32);
+      ctx.lineTo(x - s * 0.06, y + s * 0.34);
+      ctx.lineTo(x + s * 0.04, y - s * 0.22);
+      ctx.lineTo(x + s * 0.16, y + s * 0.16);
+      ctx.lineTo(x + s * 0.26, y + s * 0.02);
+      ctx.lineTo(x + s * 0.48, y + s * 0.02);
+      ctx.stroke();
+    } else if (k === 22) {
+      /* 宇宙軌道：楕円軌道と船 */
+      i6EllipseStroke(x, y, s * 0.46, s * 0.24);
+      ctx.beginPath();
+      ctx.arc(x, y, Math.max(1.6, s * 0.10), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x + s * 0.30, y + s * 0.15, Math.max(1.2, s * 0.06), 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      /* CO2排出：雲と下向き矢印 */
+      ctx.beginPath();
+      ctx.arc(x - s * 0.12, y - s * 0.22, s * 0.16, Math.PI * 0.9, Math.PI * 2.1);
+      ctx.arc(x + s * 0.12, y - s * 0.26, s * 0.13, Math.PI * 1.0, Math.PI * 2.2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y - s * 0.02);
+      ctx.lineTo(x, y + s * 0.30);
+      ctx.moveTo(x - s * 0.10, y + s * 0.20);
+      ctx.lineTo(x, y + s * 0.32);
+      ctx.lineTo(x + s * 0.10, y + s * 0.20);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /* 型カード1枚の中身（朱→墨のクロスフェード用に色を変えて呼ぶ） */
+  function i6CardBody(i, x, y, w, h, color, alpha) {
+    if (alpha <= 0.01) return;
+    var f = fx();
+    var mobile = W < 560;
+    if (mobile) {
+      var si = Math.min(h * 0.56, w * 0.24);
+      i6TypeGlyph(i, x + w * 0.06 + si / 2, y + h / 2, si, color, alpha);
+      var tx = x + w * 0.06 + si + w * 0.05;
+      var tw = Math.max(20, w - (tx - x) - w * 0.03);
+      text(I6_TYPE_TITLE[i], tx, y + h * 0.37, {
+        size: 10, align: 'left', color: color, alpha: alpha, maxWidth: tw
+      });
+      text(I6_TYPE_SUB[i], tx, y + h * 0.72, {
+        size: 9.4, align: 'left', color: color, alpha: alpha * 0.88, maxWidth: tw
+      });
+    } else {
+      var si2 = Math.min(w * 0.32, h * 0.30);
+      i6TypeGlyph(i, x + w / 2, y + h * 0.29, si2, color, alpha);
+      text(I6_TYPE_TITLE[i], x + w / 2, y + h * 0.62, {
+        size: Math.max(11, 12.2 * f), color: color, alpha: alpha, maxWidth: w * 0.92
+      });
+      text(I6_TYPE_SUB[i], x + w / 2, y + h * 0.83, {
+        size: Math.max(10, 10.4 * f), color: color, alpha: alpha * 0.86, maxWidth: w * 0.92
+      });
+    }
+  }
+
+  /* 5つの型カード（PCは横1列、W<560 は2列3行。最終行は中央に寄せる） */
+  function i6DrawCards(a) {
+    if (a <= 0.01) return;
+    var f = fx();
+    var mobile = W < 560;
+    var cols = mobile ? 2 : 5, rows = mobile ? 3 : 1;
+    var gapX = W * (mobile ? 0.03 : 0.018);
+    var gapY = H * (mobile ? 0.05 : 0);
+    var areaW = W * (mobile ? 0.90 : 0.92);
+    var areaH = H * (mobile ? 0.74 : 0.56);
+    var cardW = (areaW - gapX * (cols - 1)) / cols;
+    var cardH = mobile ? (areaH - gapY * (rows - 1)) / rows : areaH;
+    var y0 = H * (mobile ? 0.12 : 0.22);
+    var i;
+
+    if (!mobile) {
+      text('積分の使い方 5つ', W / 2, H * 0.10, {
+        size: Math.max(11, 12 * f), color: C.ink, alpha: a * 0.62, weight: 700
+      });
+    }
+
+    for (i = 0; i < 5; i++) {
+      var row = Math.floor(i / cols);
+      var inRow = Math.min(cols, 5 - row * cols);
+      var rowW = cardW * inRow + gapX * (inRow - 1);
+      var cx = (W - rowW) / 2 + (i % cols) * (cardW + gapX);
+      var cy = y0 + row * (cardH + gapY);
+      var on = S.i6TypeOn[i] || 0;
+      var lit = (on > 0) ? (S.i6TypeLit[i] == null ? 0 : S.i6TypeLit[i]) : 0;
+
+      ctx.save();
+      ctx.globalAlpha = a * (0.34 + 0.66 * on);
+      ctx.fillStyle = '#FBF9F2';
+      roundRectPath(cx, cy, cardW, cardH, Math.min(8, cardH * 0.16));
+      ctx.fill();
+      ctx.strokeStyle = (on > 0 && lit > 0.25) ? 'rgba(217,78,65,.5)' : 'rgba(34,34,34,.13)';
+      ctx.lineWidth = Math.max(1, 1.05 * f);
+      ctx.stroke();
+      ctx.restore();
+
+      if (on < 0.999) i6CardBody(i, cx, cy, cardW, cardH, C.light, a * 0.40 * (1 - on));
+      if (on > 0.001) {
+        if (lit > 0.02) i6CardBody(i, cx, cy, cardW, cardH, C.verm, a * on * lit);
+        if (lit < 0.98) i6CardBody(i, cx, cy, cardW, cardH, C.ink, a * on * (1 - lit));
+      }
+    }
+  }
+
+  /* 24の事例グリッド（PCは6列4行、W<560 は4列6行） */
+  function i6GridGeo() {
+    var f = fx();
+    var mobile = W < 560;
+    var cols = mobile ? 4 : 6, rows = mobile ? 6 : 4;
+    var hfs = Math.max(10, 11 * f);
+    var lines = (W < 350)
+      ? ['小さなものを集めて、', '全体にするものなら、何でも。']
+      : ['小さなものを集めて、全体にするものなら、何でも。'];
+    var hLH = hfs * 1.45;
+    var headTop = H * 0.045;
+    var headH = hLH * lines.length;
+    var gy0 = headTop + headH + Math.max(2, H * 0.014);
+    /* 狭幅は右下の再生ボタン（8px + 最大46px角）に掛からないよう、
+       グリッドの横幅をボタンの左までに収める */
+    var gx0 = mobile ? Math.max(4, W * 0.02) : W * 0.05;
+    var gAreaW = mobile
+      ? Math.max(W * 0.55, W - gx0 - 58)
+      : W * 0.90;
+    return {
+      mobile: mobile, cols: cols, rows: rows, lines: lines,
+      hfs: hfs, hLH: hLH, headTop: headTop,
+      hcx: mobile ? (gx0 + gAreaW / 2) : W / 2,
+      gx0: gx0, gy0: gy0,
+      cw: gAreaW / cols,
+      ch: Math.max(1, (H * 0.94 - gy0) / rows)
+    };
+  }
+
+  function i6DrawGrid(a) {
+    if (a <= 0.01) return;
+    var f = fx();
+    var L = i6GridGeo();
+    var hv;
+    for (hv = 0; hv < L.lines.length; hv++) {
+      text(L.lines[hv], L.hcx, L.headTop + L.hLH * (hv + 0.5), {
+        size: L.hfs, weight: 700, color: C.ink, alpha: a, maxWidth: W * 0.92
+      });
+    }
+    for (var i = 0; i < 24; i++) {
+      var ap = S.i6Ex[i] || 0;
+      if (ap <= 0.01) continue;
+      var lit = S.i6ExLit[i] == null ? 0 : S.i6ExLit[i];
+      var cx = L.gx0 + (i % L.cols) * L.cw;
+      var cy = L.gy0 + Math.floor(i / L.cols) * L.ch;
+      var alpha = a * ap;
+      if (L.mobile) {
+        var lsz = (W < 350) ? 9 : 10;
+        var li;
+        ctx.save();
+        ctx.font = '600 ' + lsz + 'px ' + FONT;
+        var lw = Math.min(ctx.measureText(I6_EX_LABELS[i]).width, L.cw - 14);
+        ctx.restore();
+        var iconS = Math.min(L.ch * 0.52, 10.5);
+        var gw = iconS + 3.5 + lw;
+        var sx = cx + Math.max(0, (L.cw - gw) / 2);
+        var icy = cy + L.ch / 2;
+        var tx = sx + iconS + 3.5;
+        if (lit > 0.02) i6ExGlyph(i, sx + iconS / 2, icy, iconS, C.verm, alpha * lit);
+        if (lit < 0.98) i6ExGlyph(i, sx + iconS / 2, icy, iconS, C.ink, alpha * (1 - lit));
+        if (lit > 0.02) text(I6_EX_LABELS[i], tx, icy + 0.5, { size: lsz, align: 'left', color: C.verm, alpha: alpha * lit, maxWidth: lw + 1 });
+        if (lit < 0.98) text(I6_EX_LABELS[i], tx, icy + 0.5, { size: lsz, align: 'left', color: C.ink, alpha: alpha * (1 - lit), maxWidth: lw + 1 });
+      } else {
+        var iconS2 = Math.min(L.cw * 0.28, L.ch * 0.32);
+        var icy2 = cy + L.ch * 0.36;
+        var lsz2 = Math.max(11, 11.6 * f);
+        if (lit > 0.02) i6ExGlyph(i, cx + L.cw / 2, icy2, iconS2, C.verm, alpha * lit);
+        if (lit < 0.98) i6ExGlyph(i, cx + L.cw / 2, icy2, iconS2, C.ink, alpha * (1 - lit));
+        if (lit > 0.02) text(I6_EX_LABELS[i], cx + L.cw / 2, cy + L.ch * 0.72, { size: lsz2, color: C.verm, alpha: alpha * lit, maxWidth: L.cw * 0.9 });
+        if (lit < 0.98) text(I6_EX_LABELS[i], cx + L.cw / 2, cy + L.ch * 0.72, { size: lsz2, color: C.ink, alpha: alpha * (1 - lit), maxWidth: L.cw * 0.9 });
+      }
+    }
+  }
+
+  /* recap：緩やかな曲線上に6つの場面を並べる */
+  function i6RecapGeo() {
+    var narrow = W < 620;
+    return {
+      narrow: narrow,
+      x0: W * (narrow ? 0.06 : 0.08),
+      x1: W * (narrow ? 0.94 : 0.92),
+      yb: H * (narrow ? 0.64 : 0.70),
+      amp: H * (narrow ? 0.30 : 0.40)
+    };
+  }
+  function i6RecapPt(u) {
+    var g = i6RecapGeo();
+    return [lerp(g.x0, g.x1, u), g.yb - g.amp * (0.30 * u + 0.70 * u * u)];
+  }
+
+  function i6DrawRecap(a) {
+    if (a <= 0.01) return;
+    var g = i6RecapGeo();
+    var f = fx();
+    var pts = [], i;
+    for (i = 0; i <= 72; i++) pts.push(i6RecapPt(i / 72));
+    inkPts(pts, { color: C.ink, width: Math.max(1.7, 2.0 * f), jitter: 0.16, seed: 901, alpha: a });
+
+    var rad = clamp(H * (g.narrow ? 0.058 : 0.052), 8.5, 30);
+    var fs = Math.max(8, Math.min(11.5, 10.6 * f));
+    var span = (g.x1 - g.x0) * 0.158;
+    for (i = 0; i < 6; i++) {
+      var p = i6RecapPt(0.10 + i * 0.158);
+      var on = clamp(S.i6Dot[i] || 0, 0, 1);
+      var cur = (S.i6Cur === i);
+      var col = cur ? C.verm : (on > 0.02 ? C.ink : C.light);
+      var ia = on > 0.02 ? 1 : 0.5;
+
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.fillStyle = '#FBF9F2';
+      ctx.beginPath();
+      ctx.arc(p[0], p[1], rad, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = cur ? 'rgba(217,78,65,.5)' : 'rgba(34,34,34,.14)';
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+      ctx.restore();
+      if (cur) {
+        ctx.save();
+        ctx.globalAlpha = a * 0.16;
+        ctx.fillStyle = C.verm;
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], rad * 1.16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      i6CapIcon(i, p[0], p[1], rad * 0.70, col, a * ia);
+      var labLines = g.narrow ? I6_CAP_LINES[i] : [I6_CAP_LABELS[i]];
+      var lfs = g.narrow ? fs : Math.max(9, Math.min(11.5, 11 * f));
+      var lgap = lfs * 1.18;
+      for (var li = 0; li < labLines.length; li++) {
+        text(labLines[li], p[0], p[1] + rad + lfs * 0.95 + lgap * li, {
+          size: lfs, color: col, alpha: a * (on > 0.02 ? 0.95 : 0.55), maxWidth: span * 1.35
+        });
+      }
+    }
+  }
+
+  /* close：1本の曲線に、微分（接線）と積分（面積）の2つのレンズを重ねる */
+  function i6Lens(cx, cy, r, a) {
+    ctx.save();
+    ctx.globalAlpha = a * 0.94;
+    ctx.fillStyle = 'rgba(251,249,242,.86)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(217,78,65,.5)';
+    ctx.lineWidth = Math.max(1.2, 1.4 * fx());
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function i6DrawClose(a) {
+    if (a <= 0.01) return;
+    var f = fx();
+    var fs = Math.max(10, 10.6 * f);
+    var narrow = W < 620;
+    var g = {
+      x0: W * 0.09, x1: W * 0.91,
+      yb: H * (narrow ? 0.72 : 0.66), amp: H * 0.34
+    };
+    var pt = function (u) {
+      return [lerp(g.x0, g.x1, u), g.yb - g.amp * (0.30 * u + 0.70 * u * u)];
+    };
+    var pts = [], i;
+    for (i = 0; i <= 80; i++) pts.push(pt(i / 80));
+    inkPts(pts, { color: C.ink, width: Math.max(1.7, 2.0 * f), jitter: 0.16, seed: 911, alpha: a });
+
+    text('同じ曲線を、2つのレンズで見る', W / 2, H * 0.105,
+      { size: fs, weight: 700, alpha: a * 0.78, maxWidth: W * 0.92 });
+
+    var u1 = narrow ? 0.32 : 0.30, u2 = narrow ? 0.68 : 0.70;
+    var rad = clamp(Math.min(W * 0.095, H * 0.24), 15, 110);
+    var p1 = pt(u1), p2 = pt(u2);
+
+    /* レンズの乳白の下地に隠れた曲線を、レンズの中だけ描き直す */
+    var lensCurve = function (c) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(c[0], c[1], rad * 0.97, 0, Math.PI * 2);
+      ctx.clip();
+      inkPts(pts, { color: C.ink, width: Math.max(1.6, 1.9 * f), jitter: 0.12, seed: 913, alpha: a });
+      ctx.restore();
+    };
+
+    /* レンズ1：微分（接線） */
+    i6Lens(p1[0], p1[1], rad, a);
+    lensCurve(p1);
+    if (S.i6TanA > 0.02) {
+      var m = -g.amp * (0.30 + 1.40 * u1) / (g.x1 - g.x0);
+      var vn = Math.sqrt(1 + m * m) || 1;
+      var tl = rad * 1.15 * S.i6TanA;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(p1[0], p1[1], rad * 0.97, 0, Math.PI * 2);
+      ctx.clip();
+      inkPts([[p1[0] - tl / vn, p1[1] - m * tl / vn], [p1[0] + tl / vn, p1[1] + m * tl / vn]],
+        { color: C.verm, width: Math.max(1.4, 1.6 * f), jitter: 0.15, seed: 912, alpha: a });
+      ctx.restore();
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.fillStyle = C.verm;
+      ctx.beginPath();
+      ctx.arc(p1[0], p1[1], Math.max(2, 2.4 * f), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    /* レンズ2：積分（曲線下の面積） */
+    i6Lens(p2[0], p2[1], rad, a);
+    if (S.i6AreaA > 0.02) {
+      /* レンズ内の x1〜x2 で、曲線・x軸・2本の縦線に囲まれた領域を塗る。
+         浮いた帯ではなく「曲線下の面積」として読めるようにする */
+      var ua = u2 - 0.055, ub = u2 + 0.055;
+      var pa = pt(ua), pb = pt(ub);
+      var axisY = p2[1] + rad * 0.62;
+      var poly = [[pa[0], axisY]];
+      for (i = 0; i <= 16; i++) poly.push(pt(ua + (ub - ua) * i / 16));
+      poly.push([pb[0], axisY]);
+      var arA = a * clamp(S.i6AreaA, 0, 1);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(p2[0], p2[1], rad * 0.97, 0, Math.PI * 2);
+      ctx.clip();
+      hatchPoly(poly, { verm: false, alpha: arA * 0.92 });
+      /* x軸（レンズ内だけの短い軸） */
+      inkPts([[p2[0] - rad * 0.92, axisY], [p2[0] + rad * 0.92, axisY]],
+        { color: C.ink, width: Math.max(1, 1.1 * f), jitter: 0.15, seed: 916, alpha: arA * 0.5 });
+      /* 区間の両端の縦線（曲線 → x軸） */
+      inkPts([[pa[0], pa[1]], [pa[0], axisY]],
+        { color: C.indigo, width: Math.max(1.2, 1.4 * f), jitter: 0.18, seed: 917, alpha: arA * 0.9 });
+      inkPts([[pb[0], pb[1]], [pb[0], axisY]],
+        { color: C.indigo, width: Math.max(1.2, 1.4 * f), jitter: 0.18, seed: 918, alpha: arA * 0.9 });
+      ctx.restore();
+    }
+    lensCurve(p2);
+
+    /* 2つのレンズが響き合う（点線と、交互に広がる輪） */
+    if (!REDUCED) {
+      ctx.save();
+      ctx.globalAlpha = a * 0.26;
+      ctx.strokeStyle = C.verm;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 5]);
+      ctx.beginPath();
+      ctx.moveTo(p1[0] + rad, p1[1]);
+      ctx.lineTo(p2[0] - rad, p2[1]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+      for (i = 0; i < 2; i++) {
+        var pp = 0.5 + 0.5 * Math.sin(S.i6Ms / 520 + i * Math.PI);
+        var c = i === 0 ? p1 : p2;
+        ctx.save();
+        ctx.globalAlpha = a * 0.16 * pp;
+        ctx.strokeStyle = C.verm;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(c[0], c[1], rad * (1.04 + 0.13 * pp), 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    /* ラベル */
+    var labFs = narrow ? Math.max(9.5, 10.2 * f) : Math.max(11, 12.6 * f);
+    text('微分（接線）', p1[0], p1[1] + rad + labFs * 1.35, {
+      size: labFs, weight: 700, color: C.ink, alpha: a * 0.92, maxWidth: W * 0.4
+    });
+    text('積分（面積）', p2[0], p2[1] + rad + labFs * 1.35, {
+      size: labFs, weight: 700, color: C.ink, alpha: a * 0.92, maxWidth: W * 0.4
+    });
+  }
+
+  function i6DrawScene(a) {
+    if (a <= 0.01) return;
+    if (S.i6BaseA > 0.01) i6DrawRecap(a * S.i6BaseA);
+    if (S.i6KindsA > 0.01) i6DrawCards(a * S.i6KindsA);
+    if (S.i6GridA > 0.01) i6DrawGrid(a * S.i6GridA);
+    if (S.i6CloseA > 0.01) i6DrawClose(a * S.i6CloseA);
+  }
+
+  /* 各ステップの enter：開始時点の見え方を即時確定する */
+  function i6Enter(step) {
+    enterInteg(6);
+    resetI6Scene();
+    S.i6Step = step; S.i6Ms = 0;
+    if (step === 0) {
+      S.i6BaseA = 1;
+    } else if (step === 1) {
+      S.i6BaseA = 0; S.i6KindsA = 1;
+    } else if (step === 2) {
+      S.i6BaseA = 0; S.i6KindsA = 1;
+      for (var k = 0; k < 3; k++) { S.i6TypeOn[k] = 1; S.i6TypeLit[k] = 0; }
+    } else if (step === 3) {
+      S.i6BaseA = 0; S.i6KindsA = 1;
+      for (var k3 = 0; k3 < 5; k3++) { S.i6TypeOn[k3] = 1; S.i6TypeLit[k3] = 0; }
+    } else {
+      /* close：tick(0) と同じ「グリッドが満ちた」見え方から始める */
+      S.i6BaseA = 0; S.i6GridA = 1; S.i6CloseA = 0;
+      for (var e = 0; e < 24; e++) { S.i6Ex[e] = 1; S.i6ExLit[e] = 0; }
+    }
+  }
+
+  /* tick：ms（ステップ内ミリ秒）から決定論的に決める */
+  function i6Tick(step, ms) {
+    ms = ms == null ? 0 : ms;
+    S.i6Step = step;
+    S.i6Ms = ms;
+    var t = ms, i;
+    if (step === 0) {
+      S.i6BaseA = 1; S.i6KindsA = 0; S.i6GridA = 0; S.i6CloseA = 0;
+      S.i6Cur = -1;
+      for (i = 0; i < 6; i++) {
+        var since = t - I6_RECAP_T[i];
+        S.i6Dot[i] = clamp(since / 300, 0, 1);
+        if (since >= 0) S.i6Cur = i;
+      }
+    } else if (step === 1) {
+      S.i6BaseA = 0; S.i6KindsA = 1; S.i6GridA = 0; S.i6CloseA = 0;
+      i6ManyClear();
+      i6TypeOff(0); i6TypeOff(1); i6TypeOff(2); i6TypeOff(3); i6TypeOff(4);
+      for (i = 0; i < 3; i++) i6TypeSet(i, t - I6_K1_T[i]);
+    } else if (step === 2) {
+      S.i6BaseA = 0; S.i6KindsA = 1; S.i6GridA = 0; S.i6CloseA = 0;
+      i6ManyClear();
+      i6TypeDone(0); i6TypeDone(1); i6TypeDone(2);
+      for (i = 3; i < 5; i++) i6TypeSet(i, t - I6_K2_T[i - 3]);
+    } else if (step === 3) {
+      S.i6BaseA = 0; S.i6CloseA = 0;
+      S.i6KindsA = 1 - clamp((t - 3000) / 600, 0, 1);
+      S.i6GridA = clamp((t - 3300) / 600, 0, 1);
+      i6TypeDone(0); i6TypeDone(1); i6TypeDone(2); i6TypeDone(3); i6TypeDone(4);
+      i6ManyAt(t);
+    } else {
+      S.i6BaseA = 0; S.i6KindsA = 0;
+      S.i6GridA = 1 - clamp(t / 520, 0, 1);
+      S.i6CloseA = clamp((t - 480) / 720, 0, 1);
+      if (S.i6GridA > 0.001) {
+        for (i = 0; i < 24; i++) { S.i6Ex[i] = 1; S.i6ExLit[i] = 0; }
+      }
+      S.i6TanA = clamp((t - 1500) / 900, 0, 1);
+      S.i6AreaA = clamp((t - 3400) / 1000, 0, 1);
+      S.i6Pulse = REDUCED ? 0 : 0.5 + 0.5 * Math.sin(t / 640);
     }
   }
 
@@ -3439,6 +6843,13 @@ body{
     S.s5V += (S.s5VT - S.s5V) * k;
     S.s5R += (S.s5RT - S.s5R) * k;
     S.s6A += (S.s6AT - S.s6A) * k;
+    S.i1A += (S.i1AT - S.i1A) * k;
+    S.i1FineA += (S.i1FineAT - S.i1FineA) * k;
+    S.i2A += (S.i2AT - S.i2A) * k;
+    S.i3A += (S.i3AT - S.i3A) * k;
+    S.i4A += (S.i4AT - S.i4A) * k;
+    S.i5A += (S.i5AT - S.i5A) * k;
+    S.i6A += (S.i6AT - S.i6A) * k;
     var kz = 1 - Math.exp(-dt / 650);
     S.zoom = Math.exp(Math.log(S.zoom) + (Math.log(S.zoomT) - Math.log(S.zoom)) * kz);
   }
@@ -3467,7 +6878,7 @@ body{
     };
   }
 
-  var STEPS = [
+  var STEPS_DIFF = [
     {
       id: 's1-drive', scene: 1, dur: 6800,
       speech: '車が走り出しました。メーターの針が、すっと上がります。',
@@ -4052,6 +7463,226 @@ body{
     }
   ];
 
+  /* 微分の36ステップに unit を機械的に付与する */
+  for (var du = 0; du < STEPS_DIFF.length; du++) STEPS_DIFF[du].unit = 'diff';
+
+  /* ------------------------------------------------------------------ */
+  /* 積分（全27ステップ・6シーン）                                        */
+  /* ナレーション・尺は「積分編」設計書の詳細ステップ仕様に準拠。          */
+  /* 音声未生成のため subCues は空。描画は仮（次フェーズで差し替え）。     */
+  /* ------------------------------------------------------------------ */
+  var STEPS_INTEG = [
+    /* ---- Scene 1：同じ走行から、進んだ距離を読む ---- */
+    {
+      id: 'i1-const', unit: 'integ', scene: 1, dur: 8500, voiceAt: 0.3, subCues: [],
+      speech: '一定の速さで走る車を考えてみましょう。秒速十メートルで十秒走れば、進んだ距離は百メートルです。',
+      enter: function () { i1Enter(0); },
+      tick: function (p, ms) { i1Tick(0, ms); }
+    },
+    {
+      id: 'i1-accel', unit: 'integ', scene: 1, dur: 9500, voiceAt: 0.3, subCues: [],
+      speech: 'でも、実際の車は、速さがどんどん変わります。グラフはまっすぐではなく、曲がった線になります。',
+      enter: function () { i1Enter(1); },
+      tick: function (p, ms) { i1Tick(1, ms); }
+    },
+    {
+      id: 'i1-strips', unit: 'integ', scene: 1, dur: 11000, voiceAt: 0.3, subCues: [],
+      speech: 'そこで、時間を細かく区切って、短い間だけは同じ速さとみなします。細い長方形を並べて、面積を全部足すんです。',
+      enter: function () { i1Enter(2); },
+      tick: function (p, ms) { i1Tick(2, ms); }
+    },
+    {
+      id: 'i1-fine', unit: 'integ', scene: 1, dur: 10500, voiceAt: 0.3, subCues: [],
+      speech: '区切りをもっと細かくすると、長方形の合計は、曲線の下の面積にぴったり近づきます。これが、進んだ距離です。',
+      enter: function () { i1Enter(3); },
+      tick: function (p, ms) { i1Tick(3, ms); }
+    },
+    {
+      id: 'i1-reverse', unit: 'integ', scene: 1, dur: 10000, voiceAt: 0.5, subCues: [],
+      speech: '距離から今の速さを求めるのが微分。速さを積み上げて距離に戻すのが積分。二つは、ちょうど逆の関係なんです。',
+      enter: function () { i1Enter(4); },
+      tick: function (p, ms) { i1Tick(4, ms); }
+    },
+    /* ---- Scene 2：細かく切るほど、形が見える ---- */
+    {
+      id: 'i2-intro', unit: 'integ', scene: 2, dur: 8000, voiceAt: 0.4, subCues: [],
+      speech: '今度は、数学のグラフ、yイコールxの二乗で確かめてみましょう。ゼロから二までの、曲線の下の面積を求めます。',
+      enter: function () { i2Enter(0); },
+      tick: function (p, ms) { i2Tick(0, ms); }
+    },
+    {
+      id: 'i2-rough', unit: 'integ', scene: 2, dur: 9500, voiceAt: 0.3, subCues: [],
+      speech: '四本の長方形で埋めると、まだ大きなスキマが残ります。曲線とは、少しズレてしまいますね。',
+      enter: function () { i2Enter(1); },
+      tick: function (p, ms) { i2Tick(1, ms); }
+    },
+    {
+      id: 'i2-refine', unit: 'integ', scene: 2, dur: 10000, voiceAt: 0.3, subCues: [],
+      speech: 'でも、幅を半分、さらに半分と細かくしていくと、スキマはどんどん小さくなり、本当の面積に近づいていきます。',
+      enter: function () { i2Enter(2); },
+      tick: function (p, ms) { i2Tick(2, ms); }
+    },
+    {
+      id: 'i2-play', unit: 'integ', scene: 2, dur: 7000, voiceAt: 0.3, subCues: [],
+      interactive: true, interactiveKind: 'n',
+      speech: '分割の数を変えて、長方形の合計が本当の面積に近づく様子を、確かめてみましょう。',
+      enter: function () { i2Enter(3); },
+      tick: function (p, ms) { i2Tick(3, ms); }
+    },
+    {
+      id: 'i2-close', unit: 'integ', scene: 2, dur: 8000, voiceAt: 0.3, subCues: [],
+      speech: '細かく分けて、すべてを足し合わせる。この考え方が、積分の土台です。',
+      enter: function () { i2Enter(4); },
+      tick: function (p, ms) { i2Tick(4, ms); }
+    },
+    /* ---- Scene 3：輪切りを積んで、立体をつくる ---- */
+    {
+      id: 'i3-intro', unit: 'integ', scene: 3, dur: 8500, voiceAt: 0.3, subCues: [],
+      speech: '積分が測れるのは、平らな面積だけではありません。曲がった花瓶のような、立体の体積も求められます。',
+      enter: function () { i3Enter(0); },
+      tick: function (p, ms) { i3Tick(0, ms); }
+    },
+    {
+      id: 'i3-slice', unit: 'integ', scene: 3, dur: 10000, voiceAt: 0.3, subCues: [],
+      speech: '立体を、薄い円盤に輪切りにします。一枚なら、円の面積かける厚さで計算できます。それらを下から全部、積み上げるんです。',
+      enter: function () { i3Enter(1); },
+      tick: function (p, ms) { i3Tick(1, ms); }
+    },
+    {
+      id: 'i3-3dp', unit: 'integ', scene: 3, dur: 9500, voiceAt: 0.3, subCues: [],
+      speech: '3Dプリンターが、薄い層を何百枚も重ねて形をつくるのも、この輪切りの積み上げと、同じ考え方です。',
+      enter: function () { i3Enter(2); },
+      tick: function (p, ms) { i3Tick(2, ms); }
+    },
+    {
+      id: 'i3-play', unit: 'integ', scene: 3, dur: 7000, voiceAt: 0.3, subCues: [],
+      interactive: true, interactiveKind: 's',
+      speech: '輪切りの枚数を変えて、ギザギザの形が滑らかな器に変わる様子と、体積を比べてみましょう。',
+      enter: function () { i3Enter(3); },
+      tick: function (p, ms) { i3Tick(3, ms); }
+    },
+    /* ---- Scene 4：データから「上位何％」を測る ---- */
+    {
+      id: 'i4-intro', unit: 'integ', scene: 4, dur: 9000, voiceAt: 0.3, subCues: [],
+      speech: 'テストの点数や身長のデータを集めると、真ん中が多くて端が少ない、釣鐘のようなカーブになります。',
+      enter: function () { i4Enter(0); },
+      tick: function (p, ms) { i4Tick(0, ms); }
+    },
+    {
+      id: 'i4-area', unit: 'integ', scene: 4, dur: 10500, voiceAt: 0.3, subCues: [],
+      speech: '全体の面積を百パーセントとすると、ある点数から右側の面積が、そのまま上位何パーセントかを表します。',
+      enter: function () { i4Enter(1); },
+      tick: function (p, ms) { i4Tick(1, ms); }
+    },
+    {
+      id: 'i4-use', unit: 'integ', scene: 4, dur: 9000, voiceAt: 0.3, subCues: [],
+      speech: '工場の不良品の見積もりや、保険料の計算など、データから確率を読む場面では、いつもこの面積が使われています。',
+      enter: function () { i4Enter(2); },
+      tick: function (p, ms) { i4Tick(2, ms); }
+    },
+    {
+      id: 'i4-play', unit: 'integ', scene: 4, dur: 6800, voiceAt: 0.3, subCues: [],
+      interactive: true, interactiveKind: 'd',
+      speech: '赤い線を左右に動かして、点数と上位の割合がどう変わるか、試してみましょう。',
+      enter: function () { i4Enter(3); },
+      tick: function (p, ms) { i4Tick(3, ms); }
+    },
+    /* ---- Scene 5：CGのリアルな光と、宇宙船の位置 ---- */
+    {
+      id: 'i5-cg1', unit: 'integ', scene: 5, dur: 9500, voiceAt: 0.3, subCues: [],
+      speech: '映画やゲームのリアルな映像にも、積分が欠かせません。物の表面の一点には、窓や天井、壁のあらゆる向きから光が届いています。',
+      enter: function () { i5Enter(0); },
+      tick: function (p, ms) { i5Tick(0, ms); }
+    },
+    {
+      id: 'i5-cg2', unit: 'integ', scene: 5, dur: 10000, voiceAt: 0.3, subCues: [],
+      speech: 'すべての方向から来る光の強さを、細かく分けて足し合わせる。この積み上げの計算が、自然な明るさと影を生み出すんです。',
+      enter: function () { i5Enter(1); },
+      tick: function (p, ms) { i5Tick(1, ms); }
+    },
+    {
+      id: 'i5-space1', unit: 'integ', scene: 5, dur: 10000, voiceAt: 0.3, subCues: [],
+      speech: 'GPSが届かない宇宙空間で、宇宙船はどうやって自分の位置を知るのでしょうか。頼りにするのは、内部のセンサーが測る加速度です。',
+      enter: function () { i5Enter(2); },
+      tick: function (p, ms) { i5Tick(2, ms); }
+    },
+    {
+      id: 'i5-space2', unit: 'integ', scene: 5, dur: 11500, voiceAt: 0.3, subCues: [],
+      speech: '加速度を積み上げて、今の速さを出す。さらに、その速さを積み上げて、現在地を出す。二段階の積分が、宇宙船の道しるべになっています。',
+      enter: function () { i5Enter(3); },
+      tick: function (p, ms) { i5Tick(3, ms); }
+    },
+    /* ---- Scene 6：積み上げて、全体をつくる ---- */
+    {
+      id: 'i6-recap', unit: 'integ', scene: 6, dur: 14500, voiceAt: 0.3, subCues: [],
+      speech: '車の距離、曲線の下の面積、輪切りの器、データの割合、CGの光、宇宙船の現在地。どれも、小さなかけらを積み上げていました。',
+      enter: function () { i6Enter(0); },
+      tick: function (p, ms) { i6Tick(0, ms); }
+    },
+    {
+      id: 'i6-kinds-1', unit: 'integ', scene: 6, dur: 16500, voiceAt: 0.3, subCues: [],
+      speech: '積分の使い方は、大きく五つあります。一つ目は、変化を積み上げて合計を出すこと。二つ目は、曲がった面積や体積を測ること。三つ目は、データから割合や確率を読むこと。',
+      enter: function () { i6Enter(1); },
+      tick: function (p, ms) { i6Tick(1, ms); }
+    },
+    {
+      id: 'i6-kinds-2', unit: 'integ', scene: 6, dur: 13500, voiceAt: 0.3, subCues: [],
+      speech: '四つ目は、全体の平均や、つり合いの重心を見つけること。五つ目は、微分の逆として、変化の法則から元の姿を戻すことです。',
+      enter: function () { i6Enter(2); },
+      tick: function (p, ms) { i6Tick(2, ms); }
+    },
+    {
+      id: 'i6-many', unit: 'integ', scene: 6, dur: 26500, voiceAt: 0.3, subCues: [],
+      speech: '小さなものを集めて全体にする場面なら、何でも。走行距離、電気代、水道量、バッテリー、降水量、ダムの貯水、土地の面積、器の体積、3Dプリンター、橋の重心、ダムの水圧、CGの光。偏差値、品質管理、保険料、総売上、総コスト、消費カロリー、CTスキャン、薬の吸収量、音の波形、地震エネルギー、ロケット軌道、CO2排出量。',
+      enter: function () { i6Enter(3); },
+      tick: function (p, ms) { i6Tick(3, ms); }
+    },
+    {
+      id: 'i6-close', unit: 'integ', scene: 6, dur: 15500, voiceAt: 0.5, subCues: [],
+      speech: '一瞬の変化を切り取る微分と、小さな変化を積み上げる積分。二つのレンズを合わせれば、動く世界の仕組みが、ぐっと深く見えてきます。',
+      enter: function () { i6Enter(4); },
+      tick: function (p, ms) { i6Tick(4, ms); }
+    }
+  ];
+
+  /* ------------------------------------------------------------------ */
+  /* 単元レジストリ                                                       */
+  /* 既存の STEPS / SCENE_TITLES / SCENE_TOTAL は切替時にここから再代入する */
+  /* ------------------------------------------------------------------ */
+  var UNITS = {
+    diff: {
+      key: 'diff',
+      steps: STEPS_DIFF,
+      title: '微分 — 今の速さを切り取る',
+      short: '微分',
+      sceneTitles: SCENE_TITLES,
+      total: 6,
+      endTitle: '傾きを読めば、ほんの少し先が見える',
+      endText: '速さも、接線も、山の頂点も、AIの谷も、ロケットの姿勢も。その瞬間の傾きを読み取るのが微分。今の変化から、少し先の未来が見えてきます。',
+      canvasLabel: '紙に描いた手描き風のアニメーション。車とスピードメーター、時間と距離のグラフ、放物線の接線、山の頂点、AIが傾きで下る谷、ロケットの姿勢を6つのシーンで表示します。'
+    },
+    integ: {
+      key: 'integ',
+      steps: STEPS_INTEG,
+      title: '積分 — 小さな変化を積み上げる',
+      short: '積分',
+      sceneTitles: {
+        1: '同じ走行から、進んだ距離を読む',
+        2: '細かく切るほど、形が見える',
+        3: '輪切りを積んで、立体をつくる',
+        4: 'データから「上位何％」を測る',
+        5: 'CGのリアルな光と、宇宙船の位置',
+        6: '積み上げて、全体をつくる'
+      },
+      total: 6,
+      endTitle: '積み上げれば、全体の姿が見えてくる',
+      endText: '進んだ距離も、曲線の下の面積も、輪切りの器も、データの割合も、CGの光も、宇宙船の現在地も。小さなかけらを足し合わせれば、全体の姿が見えてきます。',
+      canvasLabel: '紙に描いた手描き風のアニメーション。進んだ距離、曲線の下の面積、輪切りの立体、データの割合、CGの光、宇宙船の位置を6つのシーンで表示します。'
+    }
+  };
+  var UNIT = 'diff';
+  var STEPS = UNITS[UNIT].steps;
+
   function sceneStart(scene) {
     for (var i = 0; i < STEPS.length; i++) {
       if (STEPS[i].scene === scene) return i;
@@ -4078,7 +7709,15 @@ body{
     's4-intro': 7344, 's4-hill': 9288, 's4-slope': 8064, 's4-play': 4992,
     's5-ai': 7056, 's5-ai2': 10392, 's5-ai3': 9384, 's5-rocket': 13176,
     's6-recap': 13968, 's6-kinds-1': 16848, 's6-kinds-2': 12840,
-    's6-many': 25992, 's6-close': 14592
+    's6-many': 25992, 's6-close': 14592,
+    /* 積分編（全27ステップ） */
+    'i1-const': 8388, 'i1-accel': 8868, 'i1-strips': 10692, 'i1-fine': 10212,
+    'i1-reverse': 9420, 'i2-intro': 10404, 'i2-rough': 8100, 'i2-refine': 9924,
+    'i2-play': 7380, 'i2-close': 6852, 'i3-intro': 8868, 'i3-slice': 11388,
+    'i3-3dp': 9132, 'i3-play': 7452, 'i4-intro': 7884, 'i4-area': 8580,
+    'i4-use': 9684, 'i4-play': 6612, 'i5-cg1': 11388, 'i5-cg2': 10020,
+    'i5-space1': 10428, 'i5-space2': 13020, 'i6-recap': 13788, 'i6-kinds-1': 16308,
+    'i6-kinds-2': 11868, 'i6-many': 41676, 'i6-close': 11220
   };
   function slotOf(st) {
     var slot = Math.max(st.dur, (st.voiceAt || 0) * 1000 + (AUDIO_MS[st.id] || 0) + 260);
@@ -4087,10 +7726,14 @@ body{
     return slot;
   }
 
-  /* 字幕の切り替え表は音声の実測長に依存するので、表の定義後に一度だけ作る */
-  for (var subIdx = 0; subIdx < STEPS.length; subIdx++) {
-    STEPS[subIdx].subs = buildSubs(STEPS[subIdx]);
+  /* 字幕の切り替え表は音声の実測長に依存するので、表の定義後に一度だけ作る。
+     単元を切り替えたときも、この関数で作り直す */
+  function buildAllSubs(steps) {
+    for (var i = 0; i < steps.length; i++) {
+      steps[i].subs = buildSubs(steps[i]);
+    }
   }
+  buildAllSubs(STEPS);
 
   var TL = { start: [], total: 0 };
   var seekDragging = false;
@@ -4130,6 +7773,15 @@ body{
 
   function updateSeekUI(ms, force) {
     if (!seekRange) return;
+    /* 単元の選択画面（idle）では前の単元の値を残さない */
+    if (mode === 'idle') {
+      if (seekTime && seekTime.textContent !== '0:00 / 0:00') seekTime.textContent = '0:00 / 0:00';
+      if (seekRange.value !== '0') seekRange.value = '0';
+      if (seekRange.getAttribute('aria-valuetext') !== '0:00 / 0:00') {
+        seekRange.setAttribute('aria-valuetext', '0:00 / 0:00');
+      }
+      return;
+    }
     var totalSec = TL.total / 1000;
     var sec = clamp(ms, 0, TL.total) / 1000;
     /* 0.1秒刻みでも終端へ届くよう、最大値は切り上げる */
@@ -4165,6 +7817,32 @@ body{
     resetScene4();
     resetScene5();
     resetScene6();
+    /* 積分のシーン別アルファも毎回0から */
+    S.iScene = 0; S.iPh = 0;
+    S.i1A = 0; S.i1AT = 0; S.i2A = 0; S.i2AT = 0; S.i3A = 0; S.i3AT = 0;
+    S.i4A = 0; S.i4AT = 0; S.i5A = 0; S.i5AT = 0; S.i6A = 0; S.i6AT = 0;
+    /* 積分 Scene 1（本描画）の派生値 */
+    S.i1Step = 0; S.i1T = 0; S.i1Reveal = 0; S.i1Strips = 0; S.i1Sum = 0;
+    S.i1N = 4; S.i1NPrev = 4; S.i1FineA = 1; S.i1FineAT = 1; S.i1Rev = 0; S.i1Ms = 0;
+    /* 積分 Scene 2（本描画）の派生値 */
+    S.i2Step = 0; S.i2Ms = 0; S.i2Reveal = 1; S.i2StripA = 0; S.i2GapA = 0;
+    S.i2N = 4; S.i2NPrev = 4; S.i2NFade = 1; S.i2FrameA = 0; S.i2CloseA = 0;
+    S.i2FormA = 0; S.i2NumA = 0; S.i2UserN = 8;
+    /* 積分 Scene 3（本描画）の派生値 */
+    S.i3Step = 0; S.i3Ms = 0; S.i3Reveal = 0; S.i3DimA = 0; S.i3Sweep = 0;
+    S.i3Pull = 0; S.i3NoteA = 0; S.i3Stack = 0; S.i3Print = 0; S.i3Nozz = 0;
+    S.i3NumA = 0; S.i3N = 0; S.i3Sum = 0; S.i3UserN = I3_PLAY_N;
+    /* 積分 Scene 4（本描画）の派生値 */
+    S.i4Step = 0; S.i4Ms = 0; S.i4Bars = 0; S.i4CurveA = 0;
+    S.i4WholeA = 0; S.i4WholePulse = 0; S.i4LineA = 0; S.i4HatchA = 0;
+    S.i4NumA = 0; S.i4X = 60; S.i4UserX = 60;
+    /* 積分 Scene 5（本描画）の派生値 */
+    S.i5Step = 0; S.i5Ms = 0; S.i5Arrows = 0;
+    for (var k5 = 0; k5 < 12; k5++) S.i5ArrowP[k5] = 0;
+    S.i5Light = 0; S.i5SumL = 0; S.i5RoomA = 0; S.i5NoteA = 0; S.i5BarA = 0;
+    S.i5CGa = 0; S.i5SpaceA = 0; S.i5Acc = 0; S.i5T = 0; S.i5ShipA = 0;
+    /* 積分 Scene 6（本描画）の派生値 */
+    resetI6Scene();
   }
 
   function applyStateAt(i, localMs) {
@@ -4181,7 +7859,37 @@ body{
       meterQ: S.meterQT, sec: S.secAT, limit: S.limitAT,
       p: S.pAT, q: S.qAT, tan: S.tanAT, slope: S.slopeAT,
       tri: S.triAT, card: S.cardAT, s3: S.s3AT, s4: S.s4AT,
-      s5: S.s5AT, v5: S.s5VT, r5: S.s5RT, s6: S.s6AT
+      s5: S.s5AT, v5: S.s5VT, r5: S.s5RT, s6: S.s6AT,
+      i1: S.i1AT, i2: S.i2AT, i3: S.i3AT, i4: S.i4AT, i5: S.i5AT, i6: S.i6AT,
+      /* 積分 Scene 1 の派生値（tick で確定するので前値は使わない） */
+      i1Step: S.i1Step, i1T: S.i1T, i1Reveal: S.i1Reveal,
+      i1Strips: S.i1Strips, i1Sum: S.i1Sum, i1N: S.i1N, i1NPrev: S.i1NPrev,
+      i1Fine: S.i1FineAT, i1Rev: S.i1Rev, i1Ms: S.i1Ms,
+      /* 積分 Scene 2 の派生値（同じく tick が確定する） */
+      i2Step: S.i2Step, i2Ms: S.i2Ms, i2Reveal: S.i2Reveal,
+      i2StripA: S.i2StripA, i2GapA: S.i2GapA, i2N: S.i2N, i2NPrev: S.i2NPrev,
+      i2NFade: S.i2NFade, i2FrameA: S.i2FrameA, i2CloseA: S.i2CloseA,
+      i2FormA: S.i2FormA, i2NumA: S.i2NumA, i2UserN: S.i2UserN,
+      /* 積分 Scene 3 の派生値（同じく tick が確定する） */
+      i3Step: S.i3Step, i3Ms: S.i3Ms, i3Reveal: S.i3Reveal, i3DimA: S.i3DimA,
+      i3Sweep: S.i3Sweep, i3Pull: S.i3Pull, i3NoteA: S.i3NoteA,
+      i3Stack: S.i3Stack, i3Print: S.i3Print, i3Nozz: S.i3Nozz,
+      i3NumA: S.i3NumA, i3N: S.i3N, i3Sum: S.i3Sum, i3UserN: S.i3UserN,
+      /* 積分 Scene 4 の派生値（同じく tick が確定する） */
+      i4Step: S.i4Step, i4Ms: S.i4Ms, i4Bars: S.i4Bars, i4CurveA: S.i4CurveA,
+      i4WholeA: S.i4WholeA, i4WholePulse: S.i4WholePulse, i4LineA: S.i4LineA,
+      i4HatchA: S.i4HatchA, i4NumA: S.i4NumA, i4X: S.i4X, i4UserX: S.i4UserX,
+      /* 積分 Scene 5 の派生値（同じく tick が確定する） */
+      i5Step: S.i5Step, i5Ms: S.i5Ms, i5Arrows: S.i5Arrows,
+      i5Light: S.i5Light, i5SumL: S.i5SumL, i5RoomA: S.i5RoomA,
+      i5NoteA: S.i5NoteA, i5BarA: S.i5BarA, i5CGa: S.i5CGa,
+      i5SpaceA: S.i5SpaceA, i5Acc: S.i5Acc, i5T: S.i5T, i5ShipA: S.i5ShipA,
+      /* 積分 Scene 6 の派生値（同じく tick が確定する） */
+      i6Step: S.i6Step, i6Ms: S.i6Ms, i6BaseA: S.i6BaseA, i6KindsA: S.i6KindsA,
+      i6GridA: S.i6GridA, i6CloseA: S.i6CloseA, i6Cur: S.i6Cur,
+      i6TypeOn: S.i6TypeOn.slice(), i6TypeLit: S.i6TypeLit.slice(),
+      i6Ex: S.i6Ex.slice(), i6ExLit: S.i6ExLit.slice(), i6Dot: S.i6Dot.slice(),
+      i6TanA: S.i6TanA, i6AreaA: S.i6AreaA, i6Pulse: S.i6Pulse
     };
     if (st.enter) st.enter();
     if (st.tick) st.tick(p, localMs);
@@ -4190,6 +7898,8 @@ body{
        directCam のステップは tick がカメラを時刻から直接決めるので上書きしない */
     S.needleV = speedKmh(S.driveT);
     if (!st.directCam) { S.zoom = S.zoomT; S.cx = S.cxT; S.cy = S.cyT; }
+    /* 積分 Scene 1 のフェードは tick の目標値へ即座に合わせる */
+    S.i1FineA = S.i1FineAT;
 
     /* クロスフェードは「このステップに入ってからの経過時間」から決める。
        smoothAll と同じ指数減衰なので、再生中の途中とも一致する。
@@ -4225,6 +7935,12 @@ body{
     S.s5V = S.s5VT + (prev.v5 - S.s5VT) * k;
     S.s5R = S.s5RT + (prev.r5 - S.s5RT) * k;
     S.s6A = S.s6AT + (prev.s6 - S.s6AT) * k;
+    S.i1A = S.i1AT + (prev.i1 - S.i1AT) * k;
+    S.i2A = S.i2AT + (prev.i2 - S.i2AT) * k;
+    S.i3A = S.i3AT + (prev.i3 - S.i3AT) * k;
+    S.i4A = S.i4AT + (prev.i4 - S.i4AT) * k;
+    S.i5A = S.i5AT + (prev.i5 - S.i5AT) * k;
+    S.i6A = S.i6AT + (prev.i6 - S.i6AT) * k;
     /* そのステップで残さない一時表示（前ステップの三角形・式カード等）は即時0 */
     if (st.clearA) {
       for (var ci = 0; ci < st.clearA.length; ci++) S[st.clearA[ci]] = 0;
@@ -4286,6 +8002,17 @@ body{
 
   function setMode(m) {
     mode = m;
+    /* 再生中・一時停止中・体験待ち中だけ「単元を選ぶ」を出す */
+    if (backToUnitsBtn) backToUnitsBtn.hidden = !(m === 'playing' || m === 'paused' || m === 'waiting');
+    /* 単元の選択画面（idle）では、前の単元のプレイヤーUIを残さない */
+    var showChrome = (m === 'playing' || m === 'paused' || m === 'waiting' || m === 'ended');
+    if (seekRow) seekRow.hidden = !showChrome;
+    if (prevBtn) prevBtn.hidden = !showChrome;
+    if (playBtn) playBtn.hidden = !showChrome;
+    if (nextBtn) nextBtn.hidden = !showChrome;
+    if (sceneEl) sceneEl.hidden = !showChrome;
+    if (voiceField) voiceField.hidden = !showChrome;
+    if (voiceToggle) voiceToggle.hidden = !showChrome;
     var label = '再開', aria = '再開';
     if (m === 'playing') { label = '一時停止'; aria = '一時停止'; }
     else if (m === 'waiting') { label = '続ける'; aria = '解説を続ける'; }
@@ -4331,6 +8058,19 @@ body{
   var canvasBaseLabel = canvas.getAttribute('aria-label');
   function syncCanvasA11y() {
     var kind = (mode === 'waiting' && stepAllowsDrag()) ? promptKind() : '';
+    if (kind === 'd') {
+      var bx4 = Math.round(clamp(S.i4X, I4_OPMIN, I4_OPMAX));
+      canvas.setAttribute('role', 'slider');
+      canvas.setAttribute('tabindex', '0');
+      canvas.setAttribute('aria-label',
+        '点数と上位の割合の境界線。左右の矢印キーで1点ずつ動かせます。');
+      canvas.setAttribute('aria-valuemin', String(I4_OPMIN));
+      canvas.setAttribute('aria-valuemax', String(I4_OPMAX));
+      canvas.setAttribute('aria-valuenow', String(bx4));
+      canvas.setAttribute('aria-valuetext',
+        '点数 ' + bx4 + '点以上、上位 ' + i4PctStr(bx4) + 'パーセント');
+      return;
+    }
     if (kind === 'x' || kind === 'p') {
       canvas.setAttribute('role', 'slider');
       canvas.setAttribute('tabindex', '0');
@@ -4368,6 +8108,7 @@ body{
     pLabel.hidden = true;
     pRange.hidden = true;
     stageGravity.hidden = true;
+    stageSlider.hidden = true;
     var kind = promptKind();
     if (kind === 'g') {
       promptTitleEl.textContent = '重力を変えてみよう';
@@ -4379,6 +8120,29 @@ body{
       promptTitleEl.textContent = '値段を動かしてみよう';
       promptHintEl.textContent = '山の上の点を左右にドラッグして、利益がいちばん高い場所を探してみましょう。';
       updateS4Readout();
+    } else if (kind === 'd') {
+      promptTitleEl.textContent = '境界を動かしてみよう';
+      promptHintEl.textContent = '赤い線を左右に動かすと、上位の割合が変わります。矢印キーでも動かせます。';
+      updateD4Readout();
+    } else if (kind === 'n' || kind === 's') {
+      if (kind === 's') {
+        promptTitleEl.textContent = '輪切りの枚数を変えてみよう';
+        promptHintEl.textContent = 'スライダー（または左右の矢印キー）で円板の枚数を変えると、段差が細かくなり、体積が本当の値に近づきます。';
+        if (nLabel) nLabel.textContent = '輪切りの枚数';
+        nRange.min = String(I3_N_MIN);
+        nRange.max = String(I3_N_MAX);
+        nRange.value = String(S.i3UserN);
+        updateSiReadout();
+      } else {
+        promptTitleEl.textContent = '分割の数を変えてみよう';
+        promptHintEl.textContent = 'スライダー（または左右の矢印キー）で分割数を変えると、短冊の合計が本当の面積に近づきます。';
+        if (nLabel) nLabel.textContent = '分割数';
+        nRange.min = '2';
+        nRange.max = '60';
+        nRange.value = String(S.i2UserN);
+        updateNiReadout();
+      }
+      stageSlider.hidden = false;
     } else {
       promptTitleEl.textContent = '自分で動かしてみよう';
       promptHintEl.textContent = '赤い点を左右にドラッグすると、接線と傾きが同時に変わります。';
@@ -4386,7 +8150,7 @@ body{
       updateXReadout();
     }
     syncCanvasA11y();
-    var target = (kind === 'g') ? gRange : canvas;
+    var target = (kind === 'g') ? gRange : ((kind === 'n' || kind === 's') ? nRange : canvas);
     try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
   }
 
@@ -4413,9 +8177,38 @@ body{
     if (readoutEl.textContent !== val) readoutEl.textContent = val;
   }
 
+  /* 積分 Scene 2（i2-play）：分割数と短冊の合計・差 */
+  function updateNiReadout() {
+    var n = S.i2UserN | 0;
+    var sum = i2LeftSum(n);
+    var val = '分割数 ' + n + ' ／ 短冊の合計 ' + sum.toFixed(2) +
+      ' ／ 差 ' + (I2_TRUE - sum).toFixed(2);
+    if (readoutEl.textContent !== val) readoutEl.textContent = val;
+    if (nValue && nValue.textContent !== String(n)) nValue.textContent = String(n);
+  }
+
+  /* 積分 Scene 3（i3-play）：輪切りの枚数と体積・真値との差 */
+  function updateSiReadout() {    var n = S.i3UserN | 0;
+    var vol = i3Vol(n);
+    var d = vol - I3_TRUE;
+    var val = '輪切り ' + n + '枚 ／ 体積 ' + vol.toFixed(1) + 'cm\u00B3 ／ 差 ' +
+      (d < -0.05 ? '\u2212' : (d > 0.05 ? '+' : '')) + Math.abs(d).toFixed(1);
+    if (readoutEl.textContent !== val) readoutEl.textContent = val;
+    if (nValue && nValue.textContent !== String(n)) nValue.textContent = String(n);
+  }
+
+  /* 積分 Scene 4（i4-play）：点数と上位の割合・人数 */
+  function updateD4Readout() {
+    var x = Math.round(clamp(S.i4X, I4_OPMIN, I4_OPMAX));
+    var val = '点数 ' + x + '点以上 ／ 上位 ' + i4PctStr(x) + '% ／ 100人中 およそ ' +
+      i4People(x) + '人';
+    if (readoutEl.textContent !== val) readoutEl.textContent = val;
+  }
+
   function hidePrompt() {
     if (!promptEl.hidden) promptEl.hidden = true;
     if (stageGravity && !stageGravity.hidden) stageGravity.hidden = true;
+    if (stageSlider && !stageSlider.hidden) stageSlider.hidden = true;
   }
 
   function goStep(i) {
@@ -4432,7 +8225,31 @@ body{
     endOverlay.hidden = true;
     startOverlay.hidden = true;
     /* シーンをまたぐ時に前のシーンの絵を残さない */
-    if (st.scene === 1) {
+    if (UNIT === 'integ') {
+      /* 積分は仮描画。微分の絵を落とし、該当シーンのアルファだけを立てる */
+      S.parAT = 0;
+      S.carAT = 0;
+      S.graphAT = 0;
+      S.meterAT = 0;
+      S.secAT = 0;
+      S.limitAT = 0;
+      S.pAT = 0;
+      S.qAT = 0;
+      S.s3AT = 0;
+      resetScene3();
+      resetScene4();
+      resetScene5();
+      resetScene6();
+      S.i1AT = (st.scene === 1) ? 1 : 0;
+      S.i2AT = (st.scene === 2) ? 1 : 0;
+      S.i3AT = (st.scene === 3) ? 1 : 0;
+      S.i4AT = (st.scene === 4) ? 1 : 0;
+      S.i5AT = (st.scene === 5) ? 1 : 0;
+      S.i6AT = (st.scene === 6) ? 1 : 0;
+      S.iScene = st.scene;
+      /* 体験の境界線はステップを離れたら初期値へ戻す */
+      S.i4X = 60; S.i4UserX = 60;
+    } else if (st.scene === 1) {
       S.parA = 0;
       S.parAT = 0;
       resetScene3();
@@ -4509,6 +8326,11 @@ body{
   function finish() {
     cancelSpeech();
     hidePrompt();
+    var u = UNITS[UNIT];
+    if (u) {
+      if (endTitleEl) endTitleEl.textContent = u.endTitle;
+      if (endTextEl) endTextEl.textContent = u.endText;
+    }
     endOverlay.hidden = false;
     setMode('ended');
     updateSeekUI(TL.total, true);
@@ -4528,27 +8350,99 @@ body{
     goStep(0);
   }
 
+  /* いまの単元を最初から再生する（終了画面の「もう一度見る」） */
   function restartAll() {
-    S.carA = 1; S.carAT = 1; S.graphA = 0; S.graphAT = 0;
-    S.parA = 0; S.parAT = 0; S.parReveal = 0;
-    S.driveT = 0; S.revealT = 0; S.needleV = 0;
-    S.secA = 0; S.secAT = 0; S.limitA = 0; S.limitAT = 0;
-    S.pA = 0; S.pAT = 0; S.qA = 0; S.qAT = 0; S.qT = Q_START;
-    S.meterA = 0; S.meterAT = 0; S.meterQ = 0; S.meterQT = 0;
-    S.tanA = 0; S.tanAT = 0; S.slopeA = 0; S.slopeAT = 0;
-    S.triA = 0; S.triAT = 0; S.cardA = 0; S.cardAT = 0;
-    S.triBase = 0; S.triHeight = 0; S.baseLab = 0; S.heightLab = 0;
-    S.triLeg = 0; S.cardMs = 0;
-    S.x = 1; S.zoom = 1; S.zoomT = 1;
-    S.cx = 0.2; S.cy = 2; S.cxT = 0.2; S.cyT = 2;
-    resetScene3();
-    resetScene4();
-    resetScene5();
-    resetScene6();
+    resetDrawnState();
+    if (UNIT === 'diff') {
+      /* 最初のフレームから車を出す（フェードインさせない） */
+      S.carA = 1; S.carAT = 1;
+    }
     seekDragging = false;
     seekResume = false;
     endOverlay.hidden = true;
     goStep(0);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 単元の切替                                                          */
+  /* ------------------------------------------------------------------ */
+  function selectUnit(key, withVoice) {
+    var u = UNITS[key];
+    if (!u) return;
+
+    /* 1. 音声・タイマー・ループを止める */
+    cancelSpeech();
+    stopNarrationAudio();
+    narrationArmed = false;
+    releaseAudioPending();
+    setMode('idle');
+    idx = 0;
+    elapsed = 0;
+    seekDragging = false;
+    seekResume = false;
+
+    /* 2. 単元を切り替える（既存の STEPS 参照をそのまま活かす） */
+    UNIT = key;
+    STEPS = u.steps;
+    SCENE_TITLES = u.sceneTitles;
+    SCENE_TOTAL = u.total;
+
+    /* 3. 字幕・タイムラインを作り直す（#seekRange.max も更新される） */
+    buildAllSubs(STEPS);
+    buildTimeline();
+
+    /* 4. 描画状態を初期化（微分・積分どちらのアルファも0） */
+    resetDrawnState();
+
+    /* 5. 見出し・キャンバスのラベル */
+    if (unitTitleEl) unitTitleEl.textContent = u.title;
+    if (unitShortEl) unitShortEl.textContent = u.short || '';
+    if (unitTitleBox && unitTitleBox.classList) unitTitleBox.classList.add('is-short');
+    canvasBaseLabel = u.canvasLabel;
+    canvas.setAttribute('aria-label', canvasBaseLabel);
+
+    /* 6. 終了画面のジャンプを作り直す */
+    buildSceneJumps();
+
+    /* 7. オーバーレイの表示を整える */
+    endOverlay.hidden = true;
+    promptEl.hidden = true;
+    if (stageGravity) stageGravity.hidden = true;
+    startOverlay.hidden = true;
+    if (endTitleEl) endTitleEl.textContent = u.endTitle;
+    if (endTextEl) endTextEl.textContent = u.endText;
+    sceneEl.textContent = 'Scene 1 / ' + SCENE_TOTAL + ' ・ ' + SCENE_TITLES[1];
+
+    /* 8. 頭から再生 */
+    begin(!!withVoice);
+  }
+
+  /* 再生をやめて単元の選択画面へ戻る */
+  function returnToUnits() {
+    cancelSpeech();
+    stopNarrationAudio();
+    narrationArmed = false;
+    releaseAudioPending();
+    idx = 0;
+    elapsed = 0;
+    seekDragging = false;
+    seekResume = false;
+    resetDrawnState();
+    hidePrompt();
+    setSubtitle('単元を選ぶと、解説が始まります。');
+    if (unitTitleEl) unitTitleEl.textContent = '単元を選ぶ';
+    if (unitTitleBox && unitTitleBox.classList) unitTitleBox.classList.remove('is-short');
+    if (sceneEl) sceneEl.textContent = '';
+    if (seekRange) {
+      seekRange.value = '0';
+      seekRange.setAttribute('aria-valuetext', '0:00 / 0:00');
+    }
+    if (seekTime) seekTime.textContent = '0:00 / 0:00';
+    endOverlay.hidden = true;
+    startOverlay.hidden = false;
+    setMode('idle');
+    /* 紙の背景だけを描き直す（前の単元の絵を残さない） */
+    draw();
   }
 
   function stepDone() {
@@ -4620,6 +8514,9 @@ body{
     S.s4A = S.s4AT;
     S.s5A = S.s5AT; S.s5V = S.s5VT; S.s5R = S.s5RT;
     S.s6A = S.s6AT;
+    S.i1A = S.i1AT; S.i2A = S.i2AT; S.i3A = S.i3AT;
+    S.i4A = S.i4AT; S.i5A = S.i5AT; S.i6A = S.i6AT;
+    S.i1FineA = S.i1FineAT;
   }
 
   function jumpToScene(scene) {
@@ -4664,8 +8561,16 @@ body{
   prevBtn.addEventListener('click', prevScene);
   nextBtn.addEventListener('click', nextScene);
   continueBtn.addEventListener('click', function () { hidePrompt(); goStep(idx + 1); });
-  document.getElementById('startVoice').addEventListener('click', function () { begin(true); });
-  document.getElementById('startSilent').addEventListener('click', function () { begin(false); });
+  /* 単元カード → 選択した単元を頭から再生（読み上げなしのチェックを反映） */
+  var unitCards = document.querySelectorAll('.unit-card');
+  for (var uci = 0; uci < unitCards.length; uci++) {
+    unitCards[uci].addEventListener('click', function () {
+      var noVoice = !!(startNoVoiceEl && startNoVoiceEl.checked);
+      selectUnit(this.getAttribute('data-unit'), !noVoice);
+    });
+  }
+  if (backToUnitsBtn) backToUnitsBtn.addEventListener('click', returnToUnits);
+  if (endUnitsBtn) endUnitsBtn.addEventListener('click', returnToUnits);
   document.getElementById('again').addEventListener('click', restartAll);
   buildSceneJumps();
 
@@ -4707,6 +8612,26 @@ body{
     updateS3Readout();
   });
 
+  /* i2-play / i3-play：枚数のスライダー（微分の重力スライダーとは別要素） */
+  if (nRange) {
+    nRange.addEventListener('input', function () {
+      var v = Math.round(parseFloat(nRange.value));
+      if (!isFinite(v)) return;
+      if (promptKind() === 's') {
+        S.i3UserN = clamp(v, I3_N_MIN, I3_N_MAX);
+        S.i3N = S.i3UserN;
+        S.i3Sum = i3Vol(S.i3UserN);
+        updateSiReadout();
+        return;
+      }
+      S.i2UserN = clamp(v, 2, 60);
+      S.i2N = S.i2UserN;
+      S.i2NPrev = S.i2UserN;
+      S.i2NFade = 1;
+      updateNiReadout();
+    });
+  }
+
   pRange.addEventListener('input', function () {
     var v = parseFloat(pRange.value);
     if (isNaN(v)) return;
@@ -4719,7 +8644,7 @@ body{
     var st = STEPS[idx];
     if (!st || !st.interactive) return false;
     var k = st.interactiveKind;
-    return !k || k === 'x' || k === 'p';
+    return !k || k === 'x' || k === 'p' || k === 'd';
   }
   function worldFromPointer(ev) {
     var rect = canvas.getBoundingClientRect();
@@ -4746,6 +8671,21 @@ body{
     updateS4Readout();
     syncCanvasA11y();
   }
+  /* 積分 Scene 4：グラフ矩形内のポインタ位置 → 境界の点数（20〜80点） */
+  function boundaryFromPointer(ev) {
+    var rect = canvas.getBoundingClientRect();
+    var px = ev.clientX - rect.left;
+    var g = i4Geo().g;
+    var bx = clamp(px, g.x0, g.x1);
+    var v = I4_XMIN + (bx - g.x0) / ((g.x1 - g.x0) || 1) * (I4_XMAX - I4_XMIN);
+    return clamp(Math.round(v), I4_OPMIN, I4_OPMAX);
+  }
+  function setBoundary(v) {
+    S.i4X = clamp(Math.round(v), I4_OPMIN, I4_OPMAX);
+    S.i4UserX = S.i4X;
+    updateD4Readout();
+    syncCanvasA11y();
+  }
   function setX(v) {
     S.x = clamp(Math.round(v / 0.05) * 0.05, -1.6, 1.6);
     xRange.value = S.x.toFixed(2);
@@ -4754,7 +8694,9 @@ body{
   }
   function movePoint(ev) {
     if (!canDrag()) return;
-    if (promptKind() === 'p') { setPrice(priceFromPointer(ev)); return; }
+    var kind = promptKind();
+    if (kind === 'd') { setBoundary(boundaryFromPointer(ev)); return; }
+    if (kind === 'p') { setPrice(priceFromPointer(ev)); return; }
     setX(worldFromPointer(ev));
   }
   canvas.addEventListener('pointerdown', function (ev) {
@@ -4786,6 +8728,7 @@ body{
     ev.preventDefault();
     ev.stopPropagation();
     if (kind === 'p') setPrice(S.s4X + d);
+    else if (kind === 'd') setBoundary(S.i4X + d);
     else setX(S.x + d * 0.05);
   });
 
