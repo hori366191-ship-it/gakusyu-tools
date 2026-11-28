@@ -29,6 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     # 2026-11-28 の実測では全 95 ファイルを 1 ジョブで直列実行すると 12 分 24 秒かかった。
     # scripts/tests/shard.cjs で 8 シャードへ均等配分し、matrix で別ランナー並列実行する。
+    # 8 分割が対象にするのは 93 ファイル。重い 2 本（app11-academic-stoichiometry /
+    # app11-reaction-map）は tests-app11-heavy.yml に分離しており、通常シャードには入らない。
     # テスト本体・assert・Node 版・トリガー・権限は変更しない。
     # timeout-minutes は 1 シャードあたりの保険として 20 分を維持する。
     timeout-minutes: 20

@@ -1,0 +1,50 @@
+name: Tests (app11 heavy)
+
+# app11 の重い回帰テスト（app11-academic-stoichiometry / app11-reaction-map）専用。
+# この2本は1本あたり数分かかり、通常の push では走らせない。app11 / app10 / scripts/app11 の変更時のみ実行する。
+# 分割の経緯と実測は docs/CIテスト並列化.md を参照。テスト本体（*.test.cjs）は変更していない。
+on:
+  push:
+    paths:
+      - 'site/app11/**'
+      - 'site/app10/**'
+      - 'scripts/app11/**'
+      - 'site-src/app11/**'
+      - 'scripts/tests/app11-academic-stoichiometry.test.cjs'
+      - 'scripts/tests/app11-reaction-map.test.cjs'
+      - 'scripts/tests/helpers/**'
+      - 'scripts/tests/fixtures/**'
+      - '.github/workflows/tests-app11-heavy.yml'
+  pull_request:
+    paths:
+      - 'site/app11/**'
+      - 'site/app10/**'
+      - 'scripts/app11/**'
+      - 'site-src/app11/**'
+      - 'scripts/tests/app11-academic-stoichiometry.test.cjs'
+      - 'scripts/tests/app11-reaction-map.test.cjs'
+      - 'scripts/tests/helpers/**'
+      - 'scripts/tests/fixtures/**'
+      - '.github/workflows/tests-app11-heavy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (app11 heavy)
+    runs-on: ubuntu-latest
+    # 2 本で数分かかるため通常シャード（20 分）より余裕を持たせる。
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run app11 heavy tests
+        run: node --test $(node scripts/tests/shard.cjs --heavy)

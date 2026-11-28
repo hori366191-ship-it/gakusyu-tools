@@ -4,10 +4,15 @@
 // 使い方:
 //   node scripts/tests/shard.cjs <index> <total>    # index は 0 始まり。ファイルパスを空白区切りで1行出力
 //   node scripts/tests/shard.cjs --verify <total>   # 全ファイルがちょうど1回ずつ含まれるか検証
+//   node scripts/tests/shard.cjs --heavy            # HEAVY_TESTS のファイルパスを空白区切りで1行出力
 //
 // 配分方法: ファイルサイズを実行時間の近似として、サイズの大きい順に
 // 「現在の合計サイズが最も小さいシャード」へ割り当てる（決定的）。
 // シャード番号は固定なので、ファイルを追加しても既存の割当は概ね維持される。
+//
+// 例外: HEAVY_TESTS はサイズの割に実行時間が極端に長く、通常シャードに入れると
+// 同じシャードの他のテストから CPU を奪って全体を遅くする。そのため通常の配分から除外し、
+// `--heavy` で明示的に取り出す（.github/workflows/tests-app11-heavy.yml が専用に実行する）。
 
 'use strict';
 
@@ -15,6 +20,13 @@ const fs = require('fs');
 const path = require('path');
 
 const TESTS_DIR = __dirname;
+
+// 通常の push では走らせない重いテスト（1 本あたり数分）。追加したら
+// .github/workflows/tests-app11-heavy.yml の paths も更新すること。
+const HEAVY_TESTS = [
+  'app11-academic-stoichiometry.test.cjs',
+  'app11-reaction-map.test.cjs',
+];
 
 function fail(code, message) {
   process.stderr.write(message + '\n');
@@ -42,6 +54,13 @@ function listTestFiles() {
     const size = fs.statSync(abs).size;
     return { name, abs, size };
   });
+}
+
+function partition(files) {
+  const heavyNames = new Set(HEAVY_TESTS);
+  const normal = files.filter((f) => !heavyNames.has(f.name));
+  const heavy = files.filter((f) => heavyNames.has(f.name));
+  return { normal, heavy };
 }
 
 // 決定的な貪欲配分。負荷順ソートはコピーに対して行い、元の並びは変えない。
@@ -80,11 +99,24 @@ function parseTotal(raw) {
 }
 
 function main(argv) {
+  if (argv[0] === '--heavy') {
+    if (argv.length !== 1) fail(2, '使い方: node scripts/tests/shard.cjs --heavy');
+    const all = listTestFiles();
+    const missing = HEAVY_TESTS.filter((name) => !all.some((f) => f.name === name));
+    if (missing.length) {
+      fail(3, `HEAVY_TESTS のファイルが見つかりません: ${missing.join(', ')}`);
+    }
+    const { heavy } = partition(all);
+    console.log(heavy.map(displayPath).join(' '));
+    return;
+  }
+
   if (argv[0] === '--verify') {
     if (argv.length !== 2) fail(2, '使い方: node scripts/tests/shard.cjs --verify <total>');
     const total = parseTotal(argv[1]);
-    const files = listTestFiles();
-    const buckets = assign(files, total);
+    const all = listTestFiles();
+    const { normal, heavy } = partition(all);
+    const buckets = assign(normal, total);
 
     const seen = new Map();
     for (let s = 0; s < total; s++) {
@@ -92,23 +124,30 @@ function main(argv) {
         seen.set(f.name, (seen.get(f.name) || 0) + 1);
       }
     }
-    const duplicates = [...seen.entries()].filter(([, c]) => c > 1).map(([n]) => n);
-    const missing = files.filter((f) => !seen.has(f.name)).map((f) => f.name);
-    const assigned = buckets.reduce((sum, b) => sum + b.files.length, 0);
+    // 専用ワークフロー側も含めた和集合で「全ファイル・重複0」を検証する
+    for (const f of heavy) {
+      seen.set(f.name, (seen.get(f.name) || 0) + 1);
+    }
 
-    if (duplicates.length || missing.length || assigned !== files.length) {
+    const duplicates = [...seen.entries()].filter(([, c]) => c > 1).map(([n]) => n);
+    const missing = all.filter((f) => !seen.has(f.name)).map((f) => f.name);
+    const assigned = buckets.reduce((sum, b) => sum + b.files.length, 0) + heavy.length;
+
+    if (duplicates.length || missing.length || assigned !== all.length) {
       console.log('NG');
       if (duplicates.length) console.log(`  重複: ${duplicates.join(', ')}`);
       if (missing.length) console.log(`  未割当: ${missing.join(', ')}`);
-      if (assigned !== files.length) console.log(`  割当数 ${assigned} != ファイル数 ${files.length}`);
+      if (assigned !== all.length) console.log(`  割当数 ${assigned} != ファイル数 ${all.length}`);
       process.exit(1);
     }
-    console.log(`OK (${files.length} files / ${total} shards, each exactly once)`);
+    console.log(
+      `OK (${all.length} files / ${total} shards + ${heavy.length} heavy（別ワークフロー）, each exactly once)`
+    );
     return;
   }
 
   if (argv.length !== 2) {
-    fail(2, '使い方: node scripts/tests/shard.cjs <index> <total> | --verify <total>');
+    fail(2, '使い方: node scripts/tests/shard.cjs <index> <total> | --verify <total> | --heavy');
   }
 
   const index = Number(argv[0]);
@@ -120,8 +159,8 @@ function main(argv) {
     fail(2, `index (${index}) は total (${total}) より小さくしてください`);
   }
 
-  const files = listTestFiles();
-  const buckets = assign(files, total);
+  const { normal } = partition(listTestFiles());
+  const buckets = assign(normal, total);
   console.log(buckets[index].files.map(displayPath).join(' '));
 }
 
