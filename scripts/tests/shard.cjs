@@ -21,10 +21,13 @@ const path = require('path');
 
 const TESTS_DIR = __dirname;
 
-// 通常の push では走らせない重いテスト（1 本あたり数分）。追加したら
+// 通常の push では走らせない重いテスト（1 本あたり 20 秒超〜数分）。追加したら
 // .github/workflows/tests-app11-heavy.yml の paths も更新すること。
 const HEAVY_TESTS = [
+  'app11-academic.test.cjs',
+  'app11-academic-layout.test.cjs',
   'app11-academic-stoichiometry.test.cjs',
+  'app11-proposed-layout.test.cjs',
   'app11-reaction-map.test.cjs',
 ];
 
